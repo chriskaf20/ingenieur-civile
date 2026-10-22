@@ -100,7 +100,7 @@ Parcours complet, du bac à l'ingénieur civil confirmé. Ce document sert de r�
 | PP.7 | Déontologie et responsabilité | 4 | 7 h |
 | PP.8 | Devenir ingénieur civil | 6 | 8 h |
 
-*Tableaux générés automatiquement à partir des lignes du cursus (durées arrondies à l'heure).*
+*Tableaux générés par `scripts/cursus.mjs` à partir des lignes du cursus (durées arrondies à l'heure).*
 <!-- RESUME:FIN -->
 
 ---
