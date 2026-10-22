@@ -1,0 +1,25 @@
+// Matériaux du béton armé selon l'EC2 (EN 1992-1-1:2004) et son annexe nationale française.
+
+/** EC2 §2.4.2.4, tableau 2.1N : situations durables et transitoires. */
+export const GAMMA_C = 1.5;
+export const GAMMA_S = 1.15;
+/** EC2 §3.1.6(1) : αcc = 1,0 dans l'annexe nationale française. */
+export const ALPHA_CC = 1.0;
+
+export const CLASSES_BETON = ['C20/25', 'C25/30', 'C30/37', 'C35/45', 'C40/50'] as const;
+export type ClasseBeton = (typeof CLASSES_BETON)[number];
+
+/** Résistance caractéristique fck (MPa) lue dans la désignation « Cfck/fck,cube ». */
+export function fckDeClasse(classe: ClasseBeton): number {
+  return Number(classe.slice(1, classe.indexOf('/')));
+}
+
+/** Résistance de calcul du béton en compression fcd = αcc·fck/γc (MPa), EC2 §3.1.6. */
+export function fcd(fck: number): number {
+  return (ALPHA_CC * fck) / GAMMA_C;
+}
+
+/** Limite d'élasticité de calcul de l'acier fyd = fyk/γs (MPa), EC2 §3.2.7. */
+export function fyd(fyk: number): number {
+  return fyk / GAMMA_S;
+}
