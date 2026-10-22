@@ -1,0 +1,379 @@
+@import 'tailwindcss';
+
+/* ---------- Tokens du design system ---------- */
+@theme static {
+  --color-encre: #1d3a8a;
+  --color-encre-clair: #e3e9f8;
+  --color-correction: #b3261e;
+  --color-correction-clair: #fbe4e2;
+  --color-validation: #1e6b3a;
+  --color-validation-clair: #ddf0e3;
+  --color-beton: #5b6168;
+  --color-beton-clair: #e4e6e8;
+  --color-brique: #a4472b;
+  --color-brique-clair: #f4dcd2;
+  --color-terre: #7a5a32;
+  --color-terre-clair: #ece2cf;
+  --color-acier: #3d4f63;
+  --color-acier-clair: #dfe5ec;
+  --color-papier: #fffdf7;
+  --color-bureau: #e7e2d6;
+  --color-quadrillage: #c9dcee;
+  --color-marge: #d9534f;
+  --color-trait: #1f2328;
+  --color-plan: #123e6b;
+  --color-plan-trait: #e8f1fb;
+
+  --font-texte: var(--font-source), 'Segoe UI', system-ui, sans-serif;
+  --font-technique: var(--font-barlow), 'Arial Narrow', 'Segoe UI', sans-serif;
+  --font-manuscrite: var(--font-kalam), 'Segoe Print', cursive;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--color-bureau);
+  color: var(--color-trait);
+  font-family: var(--font-texte);
+}
+:focus-visible {
+  outline: 3px solid var(--color-encre);
+  outline-offset: 2px;
+}
+
+/* ---------- Feuilles A4 ---------- */
+.lecon {
+  counter-reset: page;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 1rem 4rem;
+}
+.feuille {
+  counter-increment: page;
+  position: relative;
+  width: 210mm;
+  min-height: 297mm;
+  display: flex;
+  flex-direction: column;
+  padding: 11mm 14mm 9mm;
+  background: var(--color-papier);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 10px 28px rgb(0 0 0 / 0.14);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.feuille-entete,
+.feuille-pied {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-technique);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--color-beton);
+}
+.feuille-entete {
+  border-bottom: 1px solid var(--color-beton-clair);
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+.feuille-pied {
+  border-top: 1px solid var(--color-beton-clair);
+  padding-top: 0.35rem;
+  margin-top: 0.9rem;
+}
+.numero-page::after {
+  content: counter(page);
+}
+.feuille-corps {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Variante cahier : quadrillage 5 mm et marge rouge */
+.feuille--cahier {
+  background-color: var(--color-papier);
+  background-image:
+    linear-gradient(var(--color-quadrillage) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-quadrillage) 1px, transparent 1px);
+  background-size: 5mm 5mm;
+  background-position: -1px -1px;
+  padding-left: 28mm;
+}
+.feuille--cahier::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 22mm;
+  border-left: 2px solid var(--color-marge);
+}
+.feuille--cahier .feuille-entete,
+.feuille--cahier .feuille-pied {
+  background: var(--color-papier);
+}
+
+@media (max-width: 860px) {
+  .lecon {
+    gap: 0.75rem;
+    padding: 0 0 3rem;
+  }
+  .feuille {
+    width: 100%;
+    min-height: 0;
+    padding: 14px 16px 12px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+  .feuille--cahier {
+    padding-left: 34px;
+  }
+  .feuille--cahier::before {
+    left: 24px;
+  }
+}
+
+/* ---------- Contenu rédigé ---------- */
+.contenu {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.contenu > * + * {
+  margin-top: 0.7em;
+}
+.contenu h2 {
+  font-family: var(--font-technique);
+  font-weight: 700;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  color: var(--color-encre);
+  margin-top: 0.4em;
+}
+.contenu h3 {
+  font-family: var(--font-technique);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--color-encre);
+  margin-top: 1em;
+}
+.contenu ul,
+.contenu ol {
+  padding-left: 1.4em;
+}
+.contenu ul {
+  list-style: disc;
+}
+.contenu ol {
+  list-style: decimal;
+}
+.contenu li + li {
+  margin-top: 0.25em;
+}
+.contenu strong {
+  font-weight: 650;
+}
+.contenu a {
+  color: var(--color-encre);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.contenu code {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--color-beton-clair);
+  padding: 0.05em 0.3em;
+  border-radius: 3px;
+}
+.tableau {
+  overflow-x: auto;
+}
+.contenu table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+.contenu th,
+.contenu td {
+  border: 1px solid #b9bec4;
+  padding: 0.3em 0.5em;
+  text-align: left;
+  vertical-align: top;
+}
+.contenu th {
+  background: var(--color-beton-clair);
+  font-family: var(--font-technique);
+  font-weight: 600;
+}
+.contenu .katex-display {
+  margin: 0.6em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Écriture manuscrite (cahier) */
+.manuscrit {
+  font-family: var(--font-manuscrite);
+  color: var(--color-encre);
+}
+.titre-souligne {
+  font-family: var(--font-manuscrite);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--color-correction);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+/* ---------- Dessins techniques ---------- */
+.schema {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.schema > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+.dessin {
+  --trait: var(--color-trait);
+  --trait-doux: #4a5058;
+  --cote: #1f2328;
+  --fond-beton: #ececec;
+  --fond-ba: #dcdfe3;
+  --fond-terre: #efe6d4;
+  --fond-macon: #f3ddd3;
+  --fond-eau: #dbeaf7;
+  --armature: var(--color-correction);
+  font-family: var(--font-technique);
+}
+.dessin text {
+  fill: var(--trait);
+  font-size: 12px;
+}
+/* Les classes donnent un style par défaut ; un attribut posé sur l'élément l'emporte. */
+.dessin :is(.t-fort, .t-moyen, .t-fin, .t-axe, .t-cache, .t-armature):not([fill]) { fill: none; }
+.dessin :is(.t-fort, .t-moyen):not([stroke]) { stroke: var(--trait); }
+.dessin :is(.t-fin, .t-axe, .t-cache):not([stroke]) { stroke: var(--trait-doux); }
+.dessin .t-armature:not([stroke]) { stroke: var(--armature); }
+.dessin .t-fort:not([stroke-width]) { stroke-width: 1.8; }
+.dessin .t-moyen:not([stroke-width]) { stroke-width: 1.1; }
+.dessin .t-fin:not([stroke-width]) { stroke-width: 0.6; }
+.dessin .t-axe:not([stroke-width]) { stroke-width: 0.6; }
+.dessin .t-cache:not([stroke-width]) { stroke-width: 0.8; }
+.dessin .t-armature:not([stroke-width]) { stroke-width: 1.6; }
+.dessin .t-axe:not([stroke-dasharray]) { stroke-dasharray: 14 3 2 3; }
+.dessin .t-cache:not([stroke-dasharray]) { stroke-dasharray: 5 3; }
+.dessin .r-armature { fill: var(--armature); }
+.dessin .encre { fill: var(--color-encre); }
+.dessin .etiquette { font-size: 11px; fill: var(--trait-doux); }
+.dessin .titre-vue { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+
+/* Plan bleu (blueprint) */
+.plan-bleu {
+  background-color: var(--color-plan);
+  color: var(--color-plan-trait);
+}
+.plan-bleu .dessin {
+  --trait: var(--color-plan-trait);
+  --trait-doux: #b9d0ea;
+  --fond-beton: rgb(255 255 255 / 0.08);
+  --fond-ba: rgb(255 255 255 / 0.12);
+  --fond-terre: rgb(255 255 255 / 0.05);
+  --fond-macon: rgb(255 255 255 / 0.1);
+  --fond-eau: rgb(255 255 255 / 0.1);
+  --armature: #ffb4a8;
+  --halo: var(--color-plan);
+}
+
+/* ---------- Impression ---------- */
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+@media print {
+  html,
+  body {
+    background: #fff;
+  }
+  .ne-pas-imprimer {
+    display: none !important;
+  }
+  .lecon {
+    display: block;
+    padding: 0;
+  }
+  .feuille {
+    width: 210mm;
+    height: 297mm;
+    min-height: 0;
+    margin: 0;
+    box-shadow: none;
+    overflow: hidden;
+    break-after: page;
+  }
+  .schema > svg {
+    min-width: 0;
+  }
+}
+
+/* ---------- Bulle de résultat (fiche de calcul) ---------- */
+.bulle {
+  position: relative;
+  border: 3px solid var(--color-validation);
+  border-radius: 28px;
+  padding: 0.45rem 1.4rem;
+  background: #fff;
+  box-shadow: 4px 4px 0 var(--color-validation-clair);
+}
+.bulle::before,
+.bulle::after {
+  content: '';
+  position: absolute;
+  left: 34px;
+  border-style: solid;
+  border-color: var(--color-validation) transparent transparent transparent;
+}
+.bulle::before {
+  bottom: -18px;
+  border-width: 18px 9px 0 9px;
+}
+.bulle::after {
+  bottom: -12px;
+  left: 37px;
+  border-width: 13px 6px 0 6px;
+  border-top-color: #fff;
+}
+.bulle--alerte {
+  border-color: var(--color-correction);
+  box-shadow: 4px 4px 0 var(--color-correction-clair);
+}
+.bulle--alerte::before {
+  border-top-color: var(--color-correction);
+}
+
+/* Tableaux lisibles sur le quadrillage du cahier */
+.feuille--cahier .contenu table {
+  background: rgb(255 255 255 / 0.88);
+}
+.fiche-memo .contenu h3 {
+  font-family: var(--font-manuscrite);
+  color: var(--color-correction);
+  font-size: 1.2rem;
+}
+.feuille--planche {
+  padding: 9mm 10mm 8mm;
+}
+.feuille--planche .contenu {
+  display: flex;
+  flex-direction: column;
+}
+.plan-bleu .font-technique,
+.plan-bleu p,
+.plan-bleu li {
+  color: var(--color-plan-trait);
+}
