@@ -1,0 +1,297 @@
+---
+id: N0.1.6
+titre: Chercher et vérifier une information technique
+objectifs:
+  - Classer une source technique selon sa fiabilité
+  - Identifier la norme en vigueur et sa version
+  - Vérifier une affirmation avec cinq questions (qui, quand, d'où, cohérent, confirmé)
+  - Distinguer règle normative, règle de l'art et simple affirmation
+relecture: false
+normes:
+  - "EN 206 (NF EN 206/CN en France) : spécification du béton, classes de résistance"
+  - "EN 1992-1-1:2004 et son annexe nationale NF EN 1992-1-1/NA : calcul des structures en béton"
+  - "BAEL 91 révisé 99 : règles françaises de béton armé, remplacées par les Eurocodes en France, encore utilisées en Afrique francophone"
+glossaire:
+  - terme: Source primaire
+    definition: Document d'origine d'une information (norme, essai, texte officiel), par opposition à une reprise ou un résumé.
+  - terme: Norme
+    definition: Document de référence établi par consensus et publié par un organisme reconnu (CEN, AFNOR, ISO).
+  - terme: Annexe nationale
+    definition: Document qui fixe, pour un pays, les valeurs laissées au choix national dans un Eurocode.
+  - terme: Règle de l'art
+    definition: Pratique reconnue par la profession, sans être imposée par une norme.
+  - terme: Classe de résistance
+    definition: Désignation d'un béton par sa résistance caractéristique en compression, par exemple C25/30.
+symboles:
+  - { symbole: 'f_{ck}', signification: 'résistance caractéristique en compression du béton sur cylindre à 28 jours', unite: 'MPa' }
+formules: []
+---
+
+import { fckDeClasse } from '@/lib/calc/ba/materiaux'
+import { POIDS_VOLUMIQUE_BA as gBA, POIDS_VOLUMIQUE_BETON as gB } from '@/lib/calc/methode'
+import { PyramideSources } from '@/components/schemas/Methode'
+
+export const fck25 = fckDeClasse('C25/30')
+
+<Page etape="intuition" titre="L'intuition : la rumeur du marché">
+
+Au marché, quelqu'un affirme : « Le prix du ciment va doubler la semaine prochaine. » Tu ne vides pas ton compte pour acheter cent sacs. Tu te demandes : **qui** le dit ? **comment** le sait-il ? Est-ce que **quelqu'un d'autre** le confirme ?
+
+Sur Internet, c'est pareil, en plus rapide. Une vidéo affirme qu'« un poteau de 15 × 15 suffit pour un R+2 ». Un schéma de ferraillage circule sur les réseaux sociaux, partagé mille fois. Être partagé ne veut pas dire être juste.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment savoir si une information technique est fiable, avant de l'utiliser dans un calcul ou sur un chantier ?
+</Encadre>
+
+<Encadre type="attention">
+En génie civil, une information fausse peut faire tomber un bâtiment. Les règles de cette académie sont strictes : aucune valeur reprise d'un réseau social sans l'avoir recalculée ou retrouvée dans une source fiable.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les sources et leur fiabilité">
+
+### Les normes : la référence de base
+
+Une **norme** fixe des règles de calcul, des valeurs et des méthodes d'essai reconnues. En Europe, les **Eurocodes** (EN 1990 à EN 1999) fixent le calcul des structures. Chaque pays les complète par une **annexe nationale**. Dans cette académie, le béton suit l'EN 1992-1-1:2004 avec l'annexe nationale française.
+
+<Regle type="norme" source="EN 1992-1-1:2004 + NF EN 1992-1-1/NA">
+Une norme a une **date** et une **version**. On vérifie toujours qu'on utilise celle qui est **en vigueur** pour le projet, et celle que demande le marché ou le cahier des charges.
+</Regle>
+
+### Les anciennes règles
+
+Les règles françaises **BAEL 91** (béton armé) ont été remplacées en France par les Eurocodes, mais elles restent utilisées dans plusieurs pays d'Afrique francophone, dont la RDC, et dans de nombreux cours. Si une source cite le BAEL, ce n'est pas une erreur : c'est une autre référence, qu'il faut **nommer** et ne pas mélanger avec l'Eurocode dans un même calcul.
+
+### Les autres sources
+
+- **Guides officiels** (organismes publics, centres techniques) et **fiches ou avis techniques** de fabricants : fiables dans leur domaine, à lire avec leur date.
+- **Ouvrages de référence et cours** : fiables si l'auteur, l'éditeur et l'édition sont identifiés.
+- **Sites web, vidéos, forums, réseaux sociaux** : utiles pour comprendre une idée, **jamais** comme source d'une valeur de calcul.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : vérifier en cinq questions">
+
+Devant une information technique, pose-toi cinq questions :
+
+1. **Qui ?** Qui est l'auteur ? Est-il identifié, compétent dans ce domaine ?
+2. **Quand ?** De quelle date est l'information ? La norme citée est-elle toujours en vigueur ?
+3. **D'où ?** Cite-t-elle sa **source primaire** (norme et article, essai, texte officiel) ?
+4. **Cohérent ?** Les unités sont-elles justes ? L'ordre de grandeur est-il plausible ? Peux-tu **refaire le calcul** ?
+5. **Confirmé ?** Une **deuxième source indépendante** dit-elle la même chose ?
+
+<Encadre type="retenir">
+Une valeur de calcul doit pouvoir être **retrouvée** : norme, article, tableau. Si tu ne peux pas écrire la référence à côté, tu ne peux pas l'utiliser.
+</Encadre>
+
+### Trois natures de règles, toujours distinguées
+
+<Regle type="norme">
+**Règle normative** : écrite dans une norme ou un texte réglementaire. Exemple : le poids volumique du béton armé de l'EN 1991-1-1.
+</Regle>
+
+<Regle type="art">
+**Règle de l'art** : pratique reconnue par la profession, sans être imposée. Exemple : humidifier un béton les premiers jours en climat chaud.
+</Regle>
+
+<Regle type="simplification">
+**Simplification pédagogique** : raccourci utile pour apprendre, à ne pas confondre avec une règle de calcul.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la pyramide des sources">
+
+<PyramideSources />
+
+Plus on monte dans la pyramide, plus l'information doit être vérifiée **avant** d'être utilisée. Une information du sommet peut être juste ; mais c'est en la retrouvant plus bas qu'on le sait.
+
+<Encadre type="exemple" titre="Remonter à la source">
+Un forum affirme que le béton armé pèse {gBA} kN/m³. Tu remontes : l'EN 1991-1-1, annexe A, tableau A.1, donne bien le béton normal à {gB} kN/m³, plus {gBA - gB} kN/m³ pour l'acier. L'information est confirmée, et tu peux maintenant citer la vraie source, pas le forum.
+</Encadre>
+
+</Page>
+
+<Cahier titre="Exemple résolu : analyser un message des réseaux sociaux">
+
+**Le message.** « Béton dosé à 350 kg de ciment par m³ = béton C25/30 garanti. Partagez ! »
+
+<Etape n={1} titre="Qui ?">
+Auteur anonyme, aucune qualification indiquée.
+
+<Note>Pourquoi commencer par là ? Parce que cela fixe le niveau de méfiance pour toute la suite.</Note>
+</Etape>
+
+<Etape n={2} titre="Quand ? D'où ?">
+Pas de date, pas de norme citée. Or la classe C25/30 est définie par la norme **EN 206** : elle désigne une résistance caractéristique en compression **mesurée par essais**, $f_{ck}$ = {fck25} MPa sur cylindre à 28 jours.
+</Etape>
+
+<Etape n={3} titre="Cohérent ?">
+Non : la résistance ne dépend pas que du dosage en ciment. Elle dépend aussi de la quantité d'eau (rapport eau/ciment), des granulats, du type de ciment, du malaxage, de la mise en place et de la cure. Deux bétons à 350 kg/m³ peuvent avoir des résistances très différentes.
+
+<Note>Pourquoi est-ce important ? Un béton trop mouillé sur chantier, pour qu'il « coule mieux », perd beaucoup de résistance malgré un bon dosage.</Note>
+</Etape>
+
+<Etape n={4} titre="Confirmé ?">
+Aucune source sérieuse ne confond dosage et classe. Les cours de matériaux (L2.6) et la norme EN 206 montrent que la classe se **vérifie par des essais d'écrasement** d'éprouvettes.
+</Etape>
+
+<Etape n={5} titre="Conclusion">
+<Note couleur="vert">Affirmation fausse telle qu'écrite : un dosage est une recette, pas une garantie. Une classe de résistance se prescrit selon l'EN 206 et se contrôle par essais.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire une information parce qu'elle est très partagée.">
+Le nombre de partages mesure la popularité, pas l'exactitude. Remonte à la source.
+</Piege>
+
+<Piege erreur="utiliser une norme périmée ou la mauvaise annexe nationale.">
+Vérifie la version et l'annexe nationale demandées par le projet. Une valeur peut changer d'une édition à l'autre ou d'un pays à l'autre.
+</Piege>
+
+<Piege erreur="mélanger BAEL et Eurocode dans un même calcul.">
+Chaque référence a ses coefficients et ses méthodes. On choisit une référence pour tout le calcul et on la nomme ; on peut ensuite comparer, à part.
+</Piege>
+
+<Piege erreur="recopier une valeur sans son unité ni sa référence.">
+« γ = {gBA} » ne dit ni l'unité ni d'où vient la valeur. Écris « γ = {gBA} kN/m³ (EN 1991-1-1, tab. A.1) ».
+</Piege>
+
+<Piege erreur="prendre une règle de l'art pour une obligation normative, ou l'inverse.">
+Une habitude de chantier n'est pas une norme ; une exigence normative n'est pas une option. Nomme toujours la nature de la règle.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Sur les chantiers d'Afrique centrale**, on entend souvent des « règles » transmises oralement : sections de poteaux « standard », ferraillages « qu'on a toujours faits ». Certaines sont de bonnes règles de l'art ; d'autres expliquent des fissures et des effondrements. L'ingénieur est celui qui **vérifie**, calmement, avec des références.
+
+<Encadre type="terrain" titre="Accéder aux normes">
+Les normes sont payantes et parfois difficiles à obtenir. Les bibliothèques universitaires, les bureaux d'études et les organismes de contrôle en disposent souvent : demande à les consulter. Pour les projets financés par des bailleurs, les cahiers des charges indiquent les normes applicables.
+</Encadre>
+
+**Au bureau d'études**, chaque note de calcul commence par une liste de **références** : normes avec leur date, annexes nationales, documents du projet. Un contrôleur technique qui lit « valeur trouvée sur Internet » refuse la note.
+
+**Dans cette académie**, les valeurs incertaines portent le badge <AVerifier /> et sont listées dans un registre. Ce n'est pas un aveu de faiblesse : c'est exactement ce que fait un ingénieur honnête.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : chercher et vérifier">
+
+### La pyramide des sources (de la plus sûre à la moins sûre)
+
+Normes en vigueur et annexe nationale, textes réglementaires → guides officiels, fiches et avis techniques → cours et ouvrages de référence → sites web → réseaux sociaux, vidéos, forums.
+
+### Les cinq questions
+
+| Question | Je vérifie |
+|---|---|
+| Qui ? | Auteur identifié et compétent |
+| Quand ? | Date, version de la norme en vigueur |
+| D'où ? | Source primaire citée (norme, article, tableau) |
+| Cohérent ? | Unités, ordre de grandeur, recalcul |
+| Confirmé ? | Deuxième source indépendante |
+
+### Trois natures de règles
+
+Normative (écrite dans une norme) · règle de l'art (usage reconnu) · simplification pédagogique.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Classer des sources">
+
+Classe de la plus fiable à la moins fiable : une vidéo de chantier ; l'EN 1992-1-1 avec son annexe nationale ; un polycopié de ton université ; la fiche technique d'un ciment publiée par son fabricant.
+
+<Indice>Utilise la pyramide des sources.</Indice>
+
+<Corrige>
+EN 1992-1-1 + annexe nationale → fiche technique du fabricant → polycopié → vidéo. Le polycopié et la fiche technique sont proches : tout dépend de leur date et de ce qu'on y cherche.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Les cinq questions">
+
+Un article de blog sans auteur, daté de 2008, donne les « coefficients de sécurité du béton armé » et cite « le règlement en vigueur ». Applique les cinq questions.
+
+<Indice>Quel règlement était en vigueur en France en 2008 ? Et aujourd'hui ?</Indice>
+
+<Corrige>
+
+- Qui ? Inconnu. Quand ? 2008 : en France, l'époque du passage des règles BAEL aux Eurocodes.
+- D'où ? « Le règlement en vigueur » n'est pas une référence : lequel, quelle version, quel article ?
+- Cohérent ? Impossible à juger sans savoir s'il parle du BAEL ou de l'EC2.
+- Confirmé ? Il faut retrouver les coefficients dans l'EN 1992-1-1 et son annexe nationale.
+- Conclusion : inutilisable en l'état.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La règle du chantier">
+
+Un chef de chantier affirme : « Pour un R+1, des poteaux de 20 × 20 avec 4 barres de 10, ça passe toujours. » Comment réagir, en restant respectueux de son expérience ?
+
+<Indice>De quoi dépend l'effort dans un poteau ? Pense aux portées, aux charges, au sol, aux matériaux réellement mis en œuvre.</Indice>
+
+<Corrige>
+
+- C'est une **règle de l'art locale**, peut-être souvent juste, mais **pas une règle normative**.
+- L'effort dans un poteau dépend des portées, des charges (dalle, toiture, usage), de la hauteur, de la qualité réelle du béton : « toujours » est impossible à garantir.
+- Réaction professionnelle : remercier, puis vérifier par le calcul (méthode vue en L3.3.5) et, si besoin, le montrer. On valorise son expérience, on décide sur la base du calcul.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.1.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Quelle est la source de référence pour une valeur de calcul ?" choix={['Une vidéo très vue', 'La norme en vigueur et son annexe nationale', 'Un forum de passionnés', 'Un message d’un ami ingénieur']} bonne={1}>
+La valeur doit pouvoir être retrouvée dans une norme, avec son article.
+</QCM>
+
+<QCM n={2} question="Une annexe nationale sert à :" choix={['traduire la norme', 'fixer, pour un pays, les valeurs laissées au choix national', 'remplacer l’Eurocode', 'résumer la norme']} bonne={1}>
+Exemple : la France fixe ses valeurs pour l'EN 1992-1-1 dans la NF EN 1992-1-1/NA.
+</QCM>
+
+<QCM n={3} question="Le BAEL 91 :" choix={['est une erreur à ignorer', 'reste utilisé en Afrique francophone, mais ne se mélange pas avec l’Eurocode dans un calcul', 'est la version 2023 de l’Eurocode', 'est une norme américaine']} bonne={1}>
+On choisit une référence, on la nomme ; on compare à part.
+</QCM>
+
+<QCM n={4} question="La classe C25/30 désigne :" choix={['un dosage de 250 kg de ciment par m³', 'une résistance caractéristique en compression mesurée par essais', 'un béton de 25 à 30 cm d’épaisseur', 'un type de ciment']} bonne={1}>
+$f_{ck}$ = {fck25} MPa sur cylindre à 28 jours, selon l'EN 206.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une information est partagée des milliers de fois. Cela prouve :" choix={['qu’elle est juste', 'qu’elle est populaire, rien de plus', 'qu’elle vient d’une norme', 'qu’elle est récente']} bonne={1} colonnes={2}>
+Popularité n'est pas exactitude.
+</QCM>
+
+<QCM n={6} question="« Humidifier le béton les premiers jours en climat chaud » est :" choix={['une règle de l’art', 'une simplification pédagogique', 'une erreur', 'une valeur de calcul']} bonne={0} colonnes={2}>
+Une pratique reconnue de la profession.
+</QCM>
+
+<QCM n={7} question="Pour confirmer une information, on cherche :" choix={['la même information sur un autre réseau social', 'une deuxième source indépendante et fiable', 'l’avis de la majorité', 'la version la plus courte']} bonne={1}>
+Indépendante : qui ne recopie pas la première.
+</QCM>
+
+<QCM n={8} question="Dans une note de calcul, « valeur trouvée sur Internet » :" choix={['suffit', 'est refusée : il faut la référence normative', 'est acceptée si la valeur paraît juste', 'est conseillée']} bonne={1}>
+Le contrôleur exige une référence retrouvable.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

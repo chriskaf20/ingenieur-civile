@@ -11,6 +11,9 @@ export const ETAPES = {
   memo: '8 · Fiche mémo',
   exercices: '9 · Exercices',
   quiz: '10 · Quiz',
+  // Mini-projet et examen de fin de module
+  projet: 'Mini-projet',
+  examen: 'Examen',
 } as const;
 
 export type Etape = keyof typeof ETAPES;

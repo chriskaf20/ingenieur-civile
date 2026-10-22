@@ -1,0 +1,327 @@
+---
+id: N0.1.3
+titre: "Résoudre un problème d'ingénieur en 5 étapes"
+objectifs:
+  - Extraire les données utiles d'un énoncé, avec leurs unités
+  - Représenter le problème par un schéma coté
+  - Énoncer les hypothèses avant de calculer
+  - Mener un calcul littéral puis numérique
+  - Vérifier un résultat par les unités et l'ordre de grandeur
+relecture: false
+normes:
+  - "EN 1991-1-1, annexe A, tableau A.1 : poids volumiques du béton (24 kN/m³ non armé, 25 kN/m³ armé)"
+glossaire:
+  - terme: Hypothèse
+    definition: Choix ou simplification annoncé avant le calcul, dont dépend la validité du résultat.
+  - terme: Ordre de grandeur
+    definition: Valeur approchée obtenue avec des nombres arrondis, pour contrôler qu'un résultat est plausible.
+  - terme: Homogénéité
+    definition: Propriété d'une formule dont les deux membres ont la même unité.
+  - terme: Linteau
+    definition: Petite poutre qui franchit une ouverture (porte, fenêtre) et porte la maçonnerie au-dessus.
+  - terme: Charge linéique
+    definition: Charge répartie le long d'un élément, par mètre de longueur, en kN/m.
+symboles:
+  - { symbole: 'L', signification: 'longueur', unite: 'm' }
+  - { symbole: 'b', signification: 'largeur de la section', unite: 'm' }
+  - { symbole: 'h', signification: 'hauteur de la section', unite: 'm' }
+  - { symbole: 'γ', signification: 'poids volumique', unite: 'kN/m³' }
+  - { symbole: 'P', signification: 'poids total', unite: 'kN' }
+  - { symbole: 'g', signification: 'charge linéique de poids propre', unite: 'kN/m' }
+formules:
+  - { nom: 'Poids propre', tex: 'P = L \times b \times h \times \gamma', domaine: 'Charges permanentes' }
+  - { nom: 'Charge linéique de poids propre', tex: 'g = b \times h \times \gamma', domaine: 'Charges permanentes' }
+---
+
+import { EXEMPLE_LINTEAU, poidsElement, POIDS_VOLUMIQUE_BA } from '@/lib/calc/methode'
+import { grandeur, nombre } from '@/lib/format'
+import { poutreUniforme } from '@/lib/calc/rdm'
+import { CinqEtapes } from '@/components/schemas/Methode'
+
+export const lin = EXEMPLE_LINTEAU
+export const linr = poidsElement(lin)
+export const pot = { L: 3.0, b: 0.25, h: 0.25, gamma: POIDS_VOLUMIQUE_BA }
+export const potr = poidsElement(pot)
+export const pou = { L: 5.0, b: 0.2, h: 0.4, gamma: POIDS_VOLUMIQUE_BA }
+export const pour = poidsElement(pou)
+export const pouApp = poutreUniforme(pour.chargeLineique, pou.L).reaction
+export const faux = poidsElement({ L: lin.L * 100, b: lin.b * 100, h: lin.h * 100, gamma: lin.gamma })
+
+<Page etape="intuition" titre="L'intuition : le médecin avant l'ordonnance">
+
+Un bon médecin ne prescrit pas un médicament dès que tu entres. Il t'écoute (les **données**), il t'examine (le **schéma**), il fait des suppositions qu'il vérifiera (les **hypothèses**), il décide d'un traitement (le **calcul**), puis il contrôle que tu guéris (la **vérification**).
+
+Un ingénieur procède de la même façon. Devant un problème, le réflexe du débutant est de chercher tout de suite « la formule ». Le réflexe du professionnel est de comprendre d'abord **ce qu'on lui demande**, puis de calculer, puis de **douter** de son résultat.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelle démarche suivre pour qu'un calcul soit juste, lisible par un autre et facile à contrôler ?
+</Encadre>
+
+<CinqEtapes />
+
+<Encadre type="attention">
+En génie civil, un calcul faux ne donne pas seulement une mauvaise note : il peut faire tomber un ouvrage. C'est pour cela que la vérification fait partie du calcul, et n'est pas une option.
+</Encadre>
+
+</Page>
+
+<Infographie titre="Résoudre un problème en 5 étapes" sousTitre="La même démarche, du premier exercice de L1 à la note de calcul d'un pont">
+
+<Panneau n={1} titre="Données" icone="quantites" couleur="encre">
+Relis l'énoncé crayon en main. Souligne **chaque valeur et son unité**. Écris : ce qu'on connaît, ce qu'on cherche. Convertis tout en unités SI (m, kN, s).
+</Panneau>
+
+<Panneau n={2} titre="Schéma" icone="plan" couleur="acier">
+Dessine l'objet, même à main levée : dimensions cotées, charges, appuis. Un bon schéma montre souvent la solution, ou l'erreur d'énoncé.
+</Panneau>
+
+<Panneau n={3} titre="Hypothèses" icone="idee" couleur="brique">
+Écris ce que tu supposes : matériau, valeurs normatives et leur source, simplifications (« on néglige… »). Un résultat ne vaut que si ses hypothèses sont vraies.
+</Panneau>
+
+<Panneau n={4} titre="Calcul" icone="calcul" couleur="encre">
+D'abord la **formule littérale**, puis les nombres **avec leurs unités**, puis le résultat **arrondi à la fin**. Un calcul littéral se relit et se corrige ; une suite de nombres, non.
+</Panneau>
+
+<Panneau n={5} titre="Vérification" icone="verification" couleur="validation" large>
+Trois contrôles : **unités** (le résultat a-t-il la bonne unité ?) ; **ordre de grandeur** (refais le calcul avec des nombres ronds) ; **bon sens** (un linteau de porte plus lourd qu'un camion ?). Si un contrôle échoue, reviens à l'étape 1 ou 3.
+</Panneau>
+
+<Panneau n={6} titre="Exemple" icone="exemple" couleur="terre">
+Linteau {nombre(lin.L, 2)} × {nombre(lin.b, 2)} × {nombre(lin.h, 2)} m en béton armé : P ≈ {grandeur(linr.poids, 1, 'kN')}, soit environ {nombre(linr.masse, 0)} kg. Quelques ouvriers peuvent le porter : c'est plausible.
+</Panneau>
+
+<Panneau n={7} titre="À retenir" icone="retenir" couleur="correction">
+Comprendre → représenter → supposer → calculer → **douter**. On ne saute aucune étape, même sur un exercice « facile ».
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : chaque étape en détail">
+
+### 1. Les données
+
+Classe les valeurs de l'énoncé en deux listes : **connues** et **cherchées**. Note à côté l'unité, puis convertis : 20 cm s'écrit 0,20 m.
+
+### 2. Le schéma
+
+Un schéma utile est **coté** (les dimensions y figurent) et porte les **noms des grandeurs** ($L$, $b$, $h$). Il n'a pas besoin d'être beau ; il doit être juste.
+
+### 3. Les hypothèses
+
+Elles sont de trois natures, à toujours distinguer :
+
+<Regle type="norme" source="EN 1991-1-1, tab. A.1">
+Une **valeur normative** : par exemple le poids volumique du béton armé, $\gamma$ = {POIDS_VOLUMIQUE_BA} kN/m³.
+</Regle>
+
+<Regle type="simplification">
+Une **simplification** : par exemple « l'acier est compté dans γ, on ne le calcule pas à part ».
+</Regle>
+
+<Regle type="hypothese">
+Une **hypothèse de projet** : une donnée que l'on suppose faute de mieux, et qu'il faudra confirmer.
+</Regle>
+
+### 4. Le calcul
+
+$P = L \times b \times h \times \gamma$ avec $L$, $b$, $h$ en m et $\gamma$ en kN/m³ : $P$ sort en kN. Vérifie l'homogénéité : m × m × m × kN/m³ = kN.
+
+### 5. La vérification
+
+Arrondis chaque donnée à **un chiffre significatif** et refais le calcul de tête. Si les deux résultats ont le même ordre de grandeur, le calcul est plausible. S'ils diffèrent d'un facteur 10 ou plus, il y a une erreur.
+
+<Regle type="simplification">
+« Même ordre de grandeur » veut dire ici : écart inférieur à 50 %. C'est un seuil de contrôle pédagogique, pas une règle de calcul.
+</Regle>
+
+</Page>
+
+<FicheCalcul calcul="poids">
+
+<Cahier titre="Exemple résolu : le poids d'un linteau">
+
+**Énoncé.** Au-dessus d'une porte, on coule un linteau en béton armé de 2,40 m de long, 20 cm de large et 25 cm de haut. Quel est son poids ? Quelle charge par mètre transmet-il à la maçonnerie ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi convertir 20 cm et 25 cm en mètres tout de suite ? Parce que γ est en kN/m³ : toutes les longueurs doivent être en mètres.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="Les hypothèses">
+γ du béton armé selon l'EN 1991-1-1 (tableau A.1) ; acier compris dans γ ; section constante sur toute la longueur.
+
+<Note>Pourquoi l'écrire ? Si le linteau était en béton non armé, γ changerait et le résultat aussi.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : calcul et vérification">
+
+<Etape n={4} titre="Le calcul">
+<AN k="volume" />
+<AN k="poids" />
+<AN k="lineique" />
+<AN k="masse" />
+</Etape>
+
+<Etape n={5} titre="La vérification">
+<AN k="estimation" />
+<Resultat k="poids" libelle="Poids du linteau" />
+<Note couleur="vert">Unités : m × m × m × kN/m³ = kN ✓. Charge transmise : <Val k="lineique" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer avec des centimètres et des kN/m³.">
+Avec 240 × 20 × 25 cm et γ = 25 kN/m³, on trouve {grandeur(faux.poids, 0, 'kN')} au lieu de {grandeur(linr.poids, 2, 'kN')} : un million de fois trop, car 1 m³ = 1 000 000 cm³. Convertis tout en mètres d'abord.
+</Piege>
+
+<Piege erreur="chercher la formule avant d'avoir compris la question.">
+Lis l'énoncé jusqu'au bout et écris ce qu'on cherche. La moitié des copies fausses répondent à une autre question.
+</Piege>
+
+<Piege erreur="ne pas écrire ses hypothèses.">
+Un correcteur, ou un contrôleur technique, ne peut pas valider un calcul dont il ignore les hypothèses. Toi-même, dans un mois, tu ne sauras plus pourquoi tu as pris telle valeur.
+</Piege>
+
+<Piege erreur="écrire uniquement des nombres enchaînés.">
+« 2,4 × 0,2 × 0,25 × 25 = 3 » ne se relit pas. Écris la formule littérale, puis l'application numérique avec unités.
+</Piege>
+
+<Piege erreur="accepter un résultat sans le contrôler.">
+Un linteau de porte de {grandeur(faux.poids, 0, 'kN')}, c'est le poids de plusieurs gros navires. Le bon sens aurait arrêté l'erreur en une seconde.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Au bureau d'études**, une note de calcul suit exactement ces cinq étapes : hypothèses générales (normes, matériaux, charges), schémas, calculs, vérifications. Elle est relue par un vérificateur, puis par le bureau de contrôle. Une note sans hypothèses écrites est renvoyée.
+
+<Encadre type="terrain" titre="Le contrôle sur le chantier">
+Sur le chantier, le linteau de l'exemple est souvent préfabriqué au sol puis posé à la main. Avant de demander à une équipe de le soulever, le conducteur de travaux estime son poids : c'est la vérification par ordre de grandeur, appliquée à la sécurité des ouvriers.
+</Encadre>
+
+**Dans une petite entreprise** de Kinshasa ou de Lubumbashi, il n'y a pas toujours de vérificateur. Tes propres contrôles (unités, ordre de grandeur, bon sens) sont alors la seule barrière contre l'erreur. Prends-en l'habitude dès maintenant.
+
+**Avec un logiciel**, la démarche ne change pas : le logiciel fait l'étape 4, mais c'est toi qui fournis les données, les hypothèses et la vérification. Un logiciel mal renseigné calcule faux, très vite et avec beaucoup de décimales.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : les 5 étapes">
+
+### La démarche
+
+| Étape | Je fais | Je me demande |
+|---|---|---|
+| 1 Données | Connues / cherchées, unités SI | Qu'est-ce qu'on me demande ? |
+| 2 Schéma | Dessin coté, noms des grandeurs | Ai-je bien compris l'objet ? |
+| 3 Hypothèses | Normes et sources, simplifications | De quoi dépend mon résultat ? |
+| 4 Calcul | Littéral → numérique avec unités → arrondi final | Ma formule est-elle homogène ? |
+| 5 Vérification | Unités, ordre de grandeur, bon sens | Est-ce plausible ? |
+
+### Le poids propre
+
+$P = L \times b \times h \times \gamma$ (kN) · $g = b \times h \times \gamma$ (kN/m) · béton armé : γ = {POIDS_VOLUMIQUE_BA} kN/m³ (EN 1991-1-1, tab. A.1).
+
+### Le contrôle express
+
+Arrondis chaque donnée à un chiffre significatif, refais le calcul de tête, compare.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le poids d'un poteau">
+
+Un poteau en béton armé mesure {nombre(pot.b * 100, 0)} × {nombre(pot.h * 100, 0)} cm de section et {nombre(pot.L, 2)} m de haut. Calcule son poids en suivant les 5 étapes.
+
+<Indice>Convertis la section en mètres, puis $P = L \times b \times h \times \gamma$.</Indice>
+
+<Corrige>
+V = {nombre(pot.L, 2)} × {nombre(pot.b, 2)} × {nombre(pot.h, 2)} = {grandeur(potr.volume, 4, 'm³')} ; P = {nombre(potr.volume, 4)} × {pot.gamma} = **{grandeur(potr.poids, 2, 'kN')}**. Contrôle : {nombre(potr.estimation, 1)} kN par les nombres ronds, même ordre de grandeur ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La charge d'une poutre">
+
+Une poutre en béton armé de {nombre(pou.L, 2)} m porte sur deux murs. Sa section fait {nombre(pou.b * 100, 0)} × {nombre(pou.h * 100, 0)} cm. Quelle charge linéique de poids propre $g$ ? Quel poids total ? Quelle charge reçoit chaque mur si la poutre est symétrique ?
+
+<Indice>$g = b \times h \times \gamma$, puis $P = g \times L$. Par symétrie, chaque appui reprend la moitié.</Indice>
+
+<Corrige>
+$g$ = {nombre(pou.b, 2)} × {nombre(pou.h, 2)} × {pou.gamma} = **{grandeur(pour.chargeLineique, 2, 'kN/m')}** ; $P$ = {grandeur(pour.poids, 2, 'kN')} ; chaque mur reçoit **{grandeur(pouApp, 2, 'kN')}**. Contrôle des unités : m × m × kN/m³ = kN/m ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Trouver l'erreur">
+
+Une copie indique : « V = 240 × 20 × 25 = {nombre(faux.volume, 0)} ; P = {nombre(faux.volume, 0)} × 25 = {nombre(faux.poids, 0)} kN ». Quelles étapes de la démarche ont été oubliées ? Quel est le bon résultat ?
+
+<Indice>Regarde les unités des longueurs, puis fais le contrôle de bon sens.</Indice>
+
+<Corrige>
+
+- Étape 1 oubliée : les longueurs sont restées en cm alors que γ est en kN/m³.
+- Étape 5 oubliée : {grandeur(faux.poids, 0, 'kN')} pour un linteau de porte est absurde.
+- Bon calcul : V = {grandeur(linr.volume, 3, 'm³')}, **P = {grandeur(linr.poids, 2, 'kN')}**.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.1.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Quelle est la première étape de la démarche ?" choix={['Chercher la formule', 'Relever les données et ce qu’on cherche', 'Faire le calcul', 'Vérifier']} bonne={1} colonnes={2}>
+On comprend d'abord la question.
+</QCM>
+
+<QCM n={2} question="Pourquoi écrire les hypothèses ?" choix={['Pour remplir la copie', 'Parce que le résultat n’est valable que si elles sont vraies', 'Parce que le professeur l’exige', 'Pour éviter de faire un schéma']} bonne={1}>
+Un résultat sans ses hypothèses ne peut être ni contrôlé ni réutilisé.
+</QCM>
+
+<QCM n={3} question="20 cm s'écrit en mètres :" choix={['2 m', '0,2 m', '0,02 m', '20 m']} bonne={1} colonnes={4}>
+1 m = 100 cm, donc 20 cm = 0,20 m.
+</QCM>
+
+<QCM n={4} question="L'unité de $b \times h \times \gamma$, avec b et h en m et γ en kN/m³, est :" choix={['kN', 'kN/m', 'kN/m²', 'kN·m']} bonne={1} colonnes={4}>
+m × m × kN/m³ = kN/m : une charge linéique.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Un linteau de {nombre(lin.L, 2)} × {nombre(lin.b, 2)} × {nombre(lin.h, 2)} m en béton armé pèse :</>} choix={[grandeur(linr.poids / 10, 2, 'kN'), grandeur(linr.poids, 2, 'kN'), grandeur(linr.poids * 10, 2, 'kN'), grandeur(faux.poids, 0, 'kN')]} bonne={1} colonnes={2}>
+{nombre(linr.volume, 3)} m³ × {lin.gamma} kN/m³ = {grandeur(linr.poids, 2, 'kN')}.
+</QCM>
+
+<QCM n={6} question="Pour contrôler un ordre de grandeur, on :" choix={['refait le calcul avec plus de décimales', 'refait le calcul de tête avec des nombres arrondis', 'demande à un camarade le résultat', 'change de formule']} bonne={1}>
+Un chiffre significatif par donnée suffit.
+</QCM>
+
+<QCM n={7} question="Un logiciel de calcul :" choix={['remplace la démarche', 'fait l’étape « calcul », mais pas les données, hypothèses et vérification', 'n’a pas besoin d’être vérifié', 'choisit les hypothèses à ta place']} bonne={1}>
+Le logiciel calcule ; l'ingénieur reste responsable de tout le reste.
+</QCM>
+
+<QCM n={8} question="La vérification échoue. Que faire ?" choix={['Rendre quand même', 'Arrondir autrement', 'Revenir aux données ou aux hypothèses', 'Changer le résultat pour qu’il paraisse plausible']} bonne={2}>
+L'erreur est en amont : on reprend la démarche.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

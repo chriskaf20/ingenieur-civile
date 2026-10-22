@@ -6,20 +6,22 @@ export type VarianteFeuille = 'cours' | 'cahier' | 'planche' | 'infographie';
 interface Props {
   etape?: Etape;
   titre?: React.ReactNode;
+  /** nom de la page dans le sommaire du lecteur, quand le titre n'est pas affiché par la feuille */
+  libelle?: string;
   variante?: VarianteFeuille;
   className?: string;
   children: React.ReactNode;
 }
 
 /** Une page A4 de leçon, avec en-tête (module, leçon) et pied (étape, numéro de page). */
-export function Feuille({ etape, titre, variante = 'cours', className = '', children }: Props) {
+export function Feuille({ etape, titre, libelle, variante = 'cours', className = '', children }: Props) {
   const cahier = variante === 'cahier';
   return (
     <section
       className={`feuille feuille--${variante} ${className}`}
       aria-label={typeof titre === 'string' ? titre : undefined}
       data-etape={etape ? ETAPES[etape] : undefined}
-      data-titre={typeof titre === 'string' ? titre : undefined}
+      data-titre={libelle ?? (typeof titre === 'string' ? titre : undefined)}
     >
       <EnTete />
       <div className="feuille-corps">

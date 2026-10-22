@@ -1,0 +1,99 @@
+---
+id: N0.1.EX
+titre: "Examen du module N0.1 : méthode de travail"
+objectifs:
+  - Appliquer le rappel actif et la répétition espacée
+  - Construire une fiche de révision complète
+  - Résoudre et vérifier un calcul simple en 5 étapes
+  - Présenter un résultat avec ses unités et le bon arrondi
+  - Évaluer la fiabilité d'une source technique
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { budgetSemaine, EXEMPLE_BUDGET, HEURES_SEMAINE, joursRevision, poidsElement, POIDS_VOLUMIQUE_BA, volumeDalle } from '@/lib/calc/methode'
+import { grandeur, nombre } from '@/lib/format'
+
+export const jr = joursRevision(12)
+export const pot = { L: 2.8, b: 0.2, h: 0.3, gamma: POIDS_VOLUMIQUE_BA }
+export const potr = poidsElement(pot)
+export const dal = { L: 5.2, l: 3.8, e: 12, pas: 0.5 }
+export const dalr = volumeDalle(dal)
+export const bud = { ...EXEMPLE_BUDGET, cours: 30, transport: 1.5 }
+export const budr = budgetSemaine(bud)
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 30 minutes.
+- **Seuil de validation** : 70 % de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet. L'examen mesure ce que tu sais **sans aide** : c'est du rappel actif.
+- Pour les questions de calcul, fais le calcul complet au brouillon (formule, application numérique avec unités, vérification) avant de choisir.
+- Les explications s'affichent après chaque réponse : lis-les, même quand tu as juste.
+
+<Encadre type="retenir">
+Si tu échoues, ce n'est pas grave : note les questions ratées, refais les fiches correspondantes, et repasse l'examen dans trois jours (J+3).
+</Encadre>
+
+</Page>
+
+<Quiz id="N0.1.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="Pour mémoriser durablement un cours, la meilleure stratégie est :" choix={['le relire plusieurs fois la veille de l’examen', 'se tester de mémoire, à intervalles croissants', 'surligner les passages importants', 'le recopier au propre']} bonne={1}>
+Rappel actif et répétition espacée (N0.1.1).
+</QCM>
+
+<QCM n={2} question="Un cours a lieu le jour 12. Avec les intervalles J+1, J+3, J+7, J+14, J+30, la quatrième révision tombe le jour :" choix={[String(jr[2]), String(jr[3]), String(jr[4]), '14']} bonne={1} colonnes={4}>
+12 + 14 = {jr[3]}.
+</QCM>
+
+<QCM n={3} question="Au verso d'une fiche formule, il faut au minimum :" choix={['la formule seule', 'la formule, chaque symbole avec son unité, le domaine de validité et la source', 'un résumé du chapitre', 'la date du cours']} bonne={1}>
+Sans unités ni domaine, une formule est dangereuse (N0.1.2).
+</QCM>
+
+<QCM n={4} question="Quel est l'ordre de la démarche de résolution ?" choix={['Calcul, données, vérification, schéma, hypothèses', 'Données, schéma, hypothèses, calcul, vérification', 'Schéma, calcul, données, hypothèses, vérification', 'Hypothèses, calcul, schéma, données, vérification']} bonne={1}>
+Comprendre, représenter, supposer, calculer, douter (N0.1.3).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={5} question={<>Un poteau en béton armé de {nombre(pot.b * 100, 0)} × {nombre(pot.h * 100, 0)} cm et {nombre(pot.L, 2)} m de haut (γ = {POIDS_VOLUMIQUE_BA} kN/m³) pèse :</>} choix={[grandeur(potr.poids / 10, 2, 'kN'), grandeur(potr.poids, 2, 'kN'), grandeur(potr.poids * 100, 0, 'kN'), grandeur(potr.volume, 3, 'kN')]} bonne={1} colonnes={2}>
+V = {nombre(pot.L, 2)} × {nombre(pot.b, 2)} × {nombre(pot.h, 2)} = {grandeur(potr.volume, 3, 'm³')} ; P = {nombre(potr.volume, 3)} × {POIDS_VOLUMIQUE_BA} = {grandeur(potr.poids, 2, 'kN')}.
+</QCM>
+
+<QCM n={6} question="Le produit b × h × γ (b et h en m, γ en kN/m³) s'exprime en :" choix={['kN', 'kN/m', 'kN/m²', 'kN/m³']} bonne={1} colonnes={4}>
+m × m × kN/m³ = kN/m : une charge linéique.
+</QCM>
+
+<QCM n={7} question={<>Une dalle de {nombre(dal.L, 2)} × {nombre(dal.l, 2)} m et {dal.e} cm d'épaisseur ; la centrale livre par {grandeur(dal.pas, 1, 'm³')}. On commande :</>} choix={[grandeur(dalr.volumeAffiche, 2, 'm³'), grandeur(dalr.volumeCommande - dal.pas, 1, 'm³'), grandeur(dalr.volumeCommande, 1, 'm³'), grandeur(dalr.surface * dal.e, 1, 'm³')]} bonne={2} colonnes={2}>
+V = {grandeur(dalr.surface, 2, 'm²')} × {grandeur(dalr.epaisseur, 2, 'm')} = {grandeur(dalr.volume, 4, 'm³')} → par excès : {grandeur(dalr.volumeCommande, 1, 'm³')} (N0.1.4).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={8} question={<>Avec {bud.cours} h de cours, {nombre(bud.ratio, 0)} h de travail personnel par heure de cours, {nombre(bud.sommeil, 0)} h de sommeil, {nombre(bud.vie, 0)} h de vie quotidienne par jour et {nombre(bud.transport, 1)} h de transport sur {bud.joursTransport} jours, il reste chaque semaine :</>} choix={[grandeur(budr.libre - 7, 0, 'h'), grandeur(budr.libre, 0, 'h'), grandeur(budr.engage, 0, 'h'), grandeur(HEURES_SEMAINE - bud.cours, 0, 'h')]} bonne={1} colonnes={4}>
+Engagé : {bud.cours} + {nombre(budr.perso, 0)} + {nombre(budr.sommeil, 0)} + {nombre(budr.vie, 0)} + {nombre(budr.transport, 0)} = {grandeur(budr.engage, 0, 'h')} ; libre : {HEURES_SEMAINE} − {nombre(budr.engage, 0)} = {grandeur(budr.libre, 0, 'h')} (N0.1.5).
+</QCM>
+
+<QCM n={9} question="Pour une valeur de calcul, la source à privilégier est :" choix={['une vidéo très regardée', 'la norme en vigueur et son annexe nationale', 'un forum spécialisé', 'un message transféré par un collègue']} bonne={1}>
+Une valeur de calcul doit être retrouvable : norme, article, tableau (N0.1.6).
+</QCM>
+
+<QCM n={10} question="« Humidifier un béton frais en climat chaud » est :" choix={['une règle normative chiffrée', 'une règle de l’art', 'une simplification pédagogique', 'une information fausse']} bonne={1}>
+Une pratique reconnue de la profession ; on la nomme comme telle (N0.1.6).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

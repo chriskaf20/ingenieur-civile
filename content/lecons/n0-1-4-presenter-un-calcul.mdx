@@ -1,0 +1,314 @@
+---
+id: N0.1.4
+titre: "Présenter un calcul : unités, arrondis, résultat encadré"
+objectifs:
+  - Rédiger une application numérique avec une unité sur chaque ligne
+  - Écrire les nombres et les unités selon les conventions françaises
+  - Choisir un arrondi cohérent et arrondir seulement à la fin
+  - Arrondir dans le bon sens selon l'usage du résultat
+  - Encadrer un résultat et l'accompagner d'une phrase-réponse
+relecture: false
+normes:
+  - "Système international d'unités (SI), BIPM : écriture des unités, espace entre le nombre et l'unité"
+  - "NF X 02-003 : principes d'écriture des nombres et des unités (règle de l'art française)"
+glossaire:
+  - terme: Application numérique
+    definition: Ligne où l'on remplace les symboles d'une formule par leurs valeurs, avec leurs unités.
+  - terme: Chiffres significatifs
+    definition: Chiffres d'un nombre qui portent une information, à partir du premier chiffre non nul.
+  - terme: Arrondi par excès
+    definition: Arrondi vers la valeur supérieure, par exemple pour commander assez de matériau.
+  - terme: Phrase-réponse
+    definition: Phrase qui répond à la question posée avec le résultat et son unité.
+symboles:
+  - { symbole: 'S', signification: 'surface', unite: 'm²' }
+  - { symbole: 'V', signification: 'volume', unite: 'm³' }
+  - { symbole: 'e', signification: 'épaisseur', unite: 'cm puis m' }
+formules:
+  - { nom: 'Volume d’une dalle', tex: 'V = L \times l \times e', domaine: 'Métré' }
+---
+
+import { EXEMPLE_DALLE, volumeDalle } from '@/lib/calc/methode'
+import { arrondi, arrondiSup, grandeur, nombre } from '@/lib/format'
+import { AnatomieCalcul } from '@/components/schemas/Methode'
+
+export const d = EXEMPLE_DALLE
+export const r = volumeDalle(d)
+export const a1 = [2.346, 2]
+export const a2 = [15.25, 1]
+export const a3 = [2.31, 0.5]
+export const ex2 = { L: 5, l: 4, e: 12, pas: 0.5 }
+export const ex2r = volumeDalle(ex2)
+export const ex3 = { L: 6.35, l: 4.85, e: 16, pas: 0.5 }
+export const ex3r = volumeDalle(ex3)
+
+<Page etape="intuition" titre="L'intuition : un chèque, pas un brouillon">
+
+Quand tu remplis un chèque ou un bon de commande, tu écris le montant en chiffres **et** en lettres, avec la monnaie. Pourquoi ? Pour que personne ne puisse se tromper en le lisant.
+
+Un calcul d'ingénieur se lit comme un chèque. Il sera relu par ton professeur, par un collègue, par un contrôleur, par l'entreprise qui va construire. Chacun doit pouvoir **suivre chaque ligne** et **refaire le calcul** sans te téléphoner.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment écrire un calcul pour qu'un autre le comprenne et le vérifie en une minute ?
+</Encadre>
+
+<Encadre type="attention">
+Un résultat juste mais illisible compte peu. À l'examen, le correcteur ne peut pas donner de points à un nombre sorti de nulle part. Sur un chantier, une erreur de lecture d'unité peut coûter un camion de béton.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : écrire nombres et unités">
+
+### Les nombres
+
+- La **virgule** sépare les décimales : 2,35 et non 2.35.
+- Les milliers sont séparés par une **espace** : 12 500 kg, et non 12.500 ni 12,500.
+- On ne commence pas un nombre par une virgule : 0,15 m et non ,15 m.
+
+### Les unités
+
+- Une **espace** entre le nombre et l'unité : 25 kN/m³, 15 cm.
+- Les symboles d'unités ne prennent **pas de « s »** et pas de point : 3 m, 5 kg.
+- On écrit l'unité **sur chaque ligne** d'application numérique, pas seulement à la fin.
+
+<Regle type="norme" source="Système international d'unités (BIPM)">
+Le SI fixe les noms et symboles des unités (m, kg, s, N, Pa) et l'espace entre le nombre et l'unité. En France, la virgule décimale est l'usage officiel.
+</Regle>
+
+### La ligne de calcul en trois temps
+
+1. la **formule littérale** : $V = L \times l \times e$ ;
+2. l'**application numérique**, unités comprises ;
+3. le **résultat**, arrondi, avec son unité, **encadré**.
+
+Puis une **phrase-réponse** : « Le volume de béton de la dalle est de {grandeur(r.volumeAffiche, 2, 'm³')}. »
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : arrondir correctement">
+
+### Arrondir seulement à la fin
+
+Garde tous les chiffres dans la calculatrice pendant le calcul. N'arrondis que le **résultat final**. Arrondir trop tôt accumule les erreurs.
+
+### Combien de décimales ?
+
+Le résultat ne peut pas être plus précis que les données. Si les longueurs sont données au centimètre, un volume au millième de m³ est déjà largement suffisant. Garde la **même précision** pour toutes les valeurs d'un même tableau.
+
+<Regle type="art">
+En pratique au bureau d'études : longueurs au cm (2 décimales en m), surfaces au centième de m², volumes au centième de m³, charges au centième de kN. C'est un usage courant, pas une norme : un énoncé ou un cahier des charges peut fixer autre chose.
+</Regle>
+
+### Arrondir dans le bon sens
+
+- Pour **rendre compte** d'un résultat : arrondi **au plus proche** (2,295 → {nombre(arrondi(2.295, 2), 2)}).
+- Pour **commander** un matériau : arrondi **par excès**, au conditionnement disponible. Si le fournisseur livre par 0,5 m³, on commande {grandeur(arrondiSup(2.295, 0.5), 1, 'm³')}, pas {grandeur(arrondi(2.295, 1), 1, 'm³')}.
+
+<Regle type="simplification">
+Plus tard, en béton armé, tu verras d'autres arrondis « du côté de la sécurité » : une section d'acier se prend toujours au-dessus du minimum calculé.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'anatomie d'une ligne de calcul">
+
+<AnatomieCalcul L={grandeur(d.L, 2, 'm')} l={grandeur(d.l, 2, 'm')} e={grandeur(r.epaisseur, 2, 'm')} V={grandeur(r.volumeAffiche, 2, 'm³')} />
+
+<Encadre type="retenir">
+① Formule littérale → ② application numérique avec unités → ③ résultat arrondi, avec unité, encadré → phrase-réponse.
+</Encadre>
+
+<Encadre type="exemple" titre="Ce qu'il ne faut pas écrire">
+« 4,25 × 3,6 × 15 = {nombre(r.surface * d.e, 1)} » : pas de formule, pas d'unités, épaisseur restée en cm, résultat cent fois trop grand. Le lecteur ne peut ni comprendre ni corriger.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="dalle">
+
+<Cahier titre="Exemple résolu : le béton d'une dalle">
+
+**Énoncé.** Une dalle mesure 4,25 m × 3,60 m et 15 cm d'épaisseur. Quel volume de béton ? Combien faut-il commander si la centrale livre par multiples de 0,5 m³ ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi noter l'épaisseur en cm ici ? Parce que c'est ainsi qu'elle est donnée : on la convertira à l'étape 4, ligne par ligne, sous les yeux du lecteur.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="La formule">
+
+$V = S \times e$ avec $S = L \times l$, toutes les longueurs en mètres.
+
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'application numérique">
+
+<Etape n={4} titre="L'application numérique">
+<AN k="surface" />
+<AN k="epaisseur" />
+<AN k="volume" />
+<AN k="commande" />
+<Note>Pourquoi deux arrondis différents ? Le volume se rapporte au plus proche ; la commande s'arrondit par excès, sinon il manque du béton.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="volume" libelle="Volume de la dalle" />
+<Note couleur="vert">Phrase-réponse : la dalle demande <Val k="volume" /> de béton ; on en commande <Val k="commande" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="arrondir les résultats intermédiaires.">
+Avec la surface arrondie à {grandeur(arrondi(r.surface, 0), 0, 'm²')} trop tôt, on trouve {grandeur(r.volumeArrondiTrop, 2, 'm³')} au lieu de {grandeur(r.volumeAffiche, 2, 'm³')}. Il manquerait {grandeur(r.volume - r.volumeArrondiTrop, 3, 'm³')} de béton.
+</Piege>
+
+<Piege erreur="oublier l'unité, ou ne la mettre qu'à la fin.">
+Une ligne sans unité ne peut pas être contrôlée. Le correcteur ne sait pas si « 15 » sont des cm ou des m.
+</Piege>
+
+<Piege erreur="recopier toutes les décimales de la calculatrice.">
+« 2,29499999 m³ » donne une fausse impression de précision. Les données sont au cm : on écrit {grandeur(r.volumeAffiche, 2, 'm³')}.
+</Piege>
+
+<Piege erreur="arrondir une commande au plus proche.">
+Arrondie au plus proche, une commande peut tomber **sous** le besoin réel : il manque alors du béton en fin de coulage, et la reprise crée un joint non prévu. Une commande s'arrondit **toujours par excès**.
+</Piege>
+
+<Piege erreur="écrire 2.35 m ou 12,500 kg.">
+En français : 2,35 m et 12 500 kg. Sur un plan relu en Europe ou en Afrique francophone, « 12,500 » se lit douze virgule cinq.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le bon de commande de béton** reprend exactement ces règles : volume en m³, classe de béton, lieu et heure de livraison. Une unité oubliée ou une virgule mal placée, et la centrale livre une mauvaise quantité.
+
+<Encadre type="terrain" titre="Le métré et le devis">
+Dans un devis quantitatif (le DQE, vu en L3.7), chaque ligne indique une quantité, son unité et un prix unitaire. Le prix total est faux si l'unité est fausse : 15 m² facturés comme 15 m³ changent tout.
+</Encadre>
+
+**Avec plusieurs langues de travail.** Sur certains projets financés par des bailleurs internationaux, des documents arrivent en anglais, avec le point décimal (2.35) et la virgule des milliers (12,500). Lis toujours la convention du document avant de recopier un nombre.
+
+**Dans une note de calcul**, la dernière ligne de chaque partie est une **conclusion** écrite : « La section est suffisante » ou « Le volume à commander est de… ». C'est la phrase-réponse, version professionnelle.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : présenter un calcul">
+
+### La ligne de calcul
+
+Formule littérale → application numérique avec unités → résultat arrondi + unité, encadré → phrase-réponse.
+
+### Écrire les nombres et les unités
+
+| Règle | Juste | Faux |
+|---|---|---|
+| Virgule décimale | 2,35 m | 2.35 m |
+| Espace des milliers | 12 500 kg | 12.500 kg |
+| Espace avant l'unité | 25 kN/m³ | 25kN/m³ |
+| Pas de « s » aux symboles | 3 m | 3 ms |
+
+### Arrondir
+
+Seulement à la fin · même précision que les données · au plus proche pour rendre compte · **par excès** pour commander.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trois arrondis">
+
+Arrondis {nombre(a1[0], 3)} au centième ; {nombre(a2[0], 2)} au dixième ; puis arrondis par excès {grandeur(a3[0], 2, 'm³')} à un multiple de {grandeur(a3[1], 1, 'm³')}.
+
+<Indice>Un « 5 » au rang suivant fait monter le chiffre. Par excès : on prend toujours le multiple du dessus.</Indice>
+
+<Corrige>
+{nombre(a1[0], 3)} → **{nombre(arrondi(a1[0], a1[1]), 2)}** ; {nombre(a2[0], 2)} → **{nombre(arrondi(a2[0], a2[1]), 1)}** ; {nombre(a3[0], 2)} m³ → **{grandeur(arrondiSup(a3[0], a3[1]), 1, 'm³')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Réécrire une copie">
+
+Une copie dit : « 5 × 4 × 12 = 240, donc 240 m³ ». Réécris le calcul proprement pour une dalle de {nombre(ex2.L, 2)} m × {nombre(ex2.l, 2)} m et {ex2.e} cm d'épaisseur, puis donne la commande par {grandeur(ex2.pas, 1, 'm³')}.
+
+<Indice>Convertis l'épaisseur en mètres et écris les trois temps de la ligne de calcul.</Indice>
+
+<Corrige>
+$S = L \times l$ = {grandeur(ex2.L, 2, 'm')} × {grandeur(ex2.l, 2, 'm')} = {grandeur(ex2r.surface, 2, 'm²')} ; $e$ = {ex2.e} cm = {grandeur(ex2r.epaisseur, 2, 'm')} ; $V = S \times e$ = {grandeur(ex2r.surface, 2, 'm²')} × {grandeur(ex2r.epaisseur, 2, 'm')} = **{grandeur(ex2r.volumeAffiche, 2, 'm³')}**. Commande : **{grandeur(ex2r.volumeCommande, 1, 'm³')}**. L'erreur venait de l'épaisseur laissée en cm.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="L'arrondi trop pressé">
+
+Dalle de {nombre(ex3.L, 2)} m × {nombre(ex3.l, 2)} m, {ex3.e} cm. Un étudiant arrondit d'abord la surface à l'unité, puis calcule le volume. Compare avec le calcul sans arrondi intermédiaire. Quelle est la commande par {grandeur(ex3.pas, 1, 'm³')} dans chaque cas ?
+
+<Indice>Fais les deux calculs, puis arrondis chacun par excès au multiple de 0,5 m³.</Indice>
+
+<Corrige>
+
+- Sans arrondi intermédiaire : $S$ = {grandeur(ex3r.surface, 4, 'm²')}, $V$ = {grandeur(ex3r.volume, 4, 'm³')} ≈ **{grandeur(ex3r.volumeAffiche, 2, 'm³')}** ; commande **{grandeur(ex3r.volumeCommande, 1, 'm³')}**.
+- Avec $S$ arrondie à {grandeur(arrondi(ex3r.surface, 0), 0, 'm²')} : $V$ = {grandeur(ex3r.volumeArrondiTrop, 2, 'm³')} ; commande {grandeur(arrondiSup(ex3r.volumeArrondiTrop, ex3.pas), 1, 'm³')}.
+- Ici la commande ne change pas, mais le volume rendu est faux. Sur un ouvrage de cent dalles, ces écarts s'additionnent : on n'arrondit qu'à la fin.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.1.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Quelle écriture est correcte en français ?" choix={['2.35 m', '2,35 m', '2,35m', '2,35 ms']} bonne={1} colonnes={4}>
+Virgule décimale, espace, symbole sans « s ».
+</QCM>
+
+<QCM n={2} question="Quand faut-il arrondir ?" choix={['À chaque ligne', 'Au résultat final seulement', 'Jamais', 'Au début, sur les données']} bonne={1} colonnes={2}>
+Arrondir trop tôt accumule les erreurs.
+</QCM>
+
+<QCM n={3} question={<>Le béton nécessaire vaut {grandeur(r.volume, 3, 'm³')} ; la centrale livre par 0,5 m³. On commande :</>} choix={[grandeur(arrondi(r.volume, 0), 1, 'm³'), grandeur(r.volumeCommande, 1, 'm³'), grandeur(r.volumeAffiche, 2, 'm³'), '3,0 m³']} bonne={1} colonnes={2}>
+Une commande s'arrondit par excès au conditionnement : {grandeur(r.volumeCommande, 1, 'm³')}.
+</QCM>
+
+<QCM n={4} question="Une application numérique bien présentée comporte :" choix={['seulement le résultat', 'la formule littérale, les valeurs avec unités et le résultat encadré', 'toutes les décimales de la calculatrice', 'le résultat sans unité']} bonne={1}>
+Le lecteur doit pouvoir refaire chaque ligne.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Douze mille cinq cents kilogrammes s'écrit :" choix={['12.500 kg', '12,500 kg', '12 500 kg', '12500kg']} bonne={2} colonnes={4}>
+Espace pour séparer les milliers, espace avant l'unité.
+</QCM>
+
+<QCM n={6} question={<>{nombre(a2[0], 2)} arrondi au dixième donne :</>} choix={[nombre(a2[0] - 0.05, 1), nombre(arrondi(a2[0], 1), 1), '15', nombre(a2[0], 2)]} bonne={1} colonnes={4}>
+Le chiffre suivant est un 5 : on arrondit au-dessus, {nombre(arrondi(a2[0], 1), 1)}.
+</QCM>
+
+<QCM n={7} question="Les données sont au centimètre. Le volume calculé s'écrit raisonnablement :" choix={['2,294999 m³', `${nombre(r.volumeAffiche, 2)} m³`, '2 m³', '2 295 000 cm³']} bonne={1} colonnes={2}>
+La précision du résultat suit celle des données.
+</QCM>
+
+<QCM n={8} question="La phrase-réponse sert à :" choix={['décorer la copie', 'répondre explicitement à la question, avec le résultat et son unité', 'remplacer le calcul', 'cacher une erreur']} bonne={1}>
+C'est la conclusion qu'on lit en premier.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

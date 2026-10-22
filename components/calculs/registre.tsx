@@ -6,6 +6,7 @@ import { Escalier2D, hauteurEscalier2D } from '@/components/drawing/Elements';
 import { Etiquette, Figure } from '@/components/drawing/Figure';
 import type { DefinitionCalcul, Entrees } from '@/components/gabarits/typesCalcul';
 import { num } from '@/components/gabarits/typesCalcul';
+import { CALCULS_METHODE } from './methode';
 import { MurSchema } from '@/components/schemas/MurCloture';
 import { CoupePlateforme, PlanPlateforme } from '@/components/schemas/Remblai';
 import { EXEMPLE_POTEAU, poteauCompressionCentree, type DonneesPoteau, type ResultatPoteau } from '@/lib/calc/ba/poteau';
@@ -371,5 +372,5 @@ const mur: DefinitionCalcul<ResultatMurCloture & { d: DonneesMurCloture }> = {
   alerte: (r) => (r.messages.length ? r.messages.join(' ') : undefined),
 };
 
-export const REGISTRE = { echelle, remblai, escalier, poteau, mur } as const;
+export const REGISTRE = { echelle, remblai, escalier, poteau, mur, ...CALCULS_METHODE } as const;
 export type NomCalcul = keyof typeof REGISTRE;

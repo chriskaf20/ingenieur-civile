@@ -20,7 +20,7 @@ interface Props {
 export function PlancheTechnique({ titre, projet, numero, echelle, date, indice = 'A', theme = 'papier', etape = 'schemas', hachures, notes, children }: Props) {
   const bleu = theme === 'bleu';
   return (
-    <Feuille etape={etape} variante="planche">
+    <Feuille etape={etape} variante="planche" libelle={titre}>
       <div className={`flex flex-1 flex-col border-2 p-2 ${bleu ? 'plan-bleu border-plan-trait' : 'border-trait'}`}>
         <div className="grid flex-1 grid-cols-2 content-start gap-x-3 gap-y-2 max-sm:grid-cols-1">{children}</div>
         <div className={`mt-2 grid grid-cols-[1fr_auto] gap-2 border-t-2 pt-2 max-sm:grid-cols-1 ${bleu ? 'border-plan-trait' : 'border-trait'}`}>

@@ -15,7 +15,7 @@ export type CouleurPanneau = keyof typeof COULEURS;
 /** Gabarit C : infographie en panneaux numérotés qui suivent un flux logique. */
 export function Infographie({ titre, sousTitre, etape = 'cours', children }: { titre: string; sousTitre?: string; etape?: Etape; children: React.ReactNode }) {
   return (
-    <Feuille etape={etape} variante="infographie">
+    <Feuille etape={etape} variante="infographie" libelle={titre}>
       <div className="-mx-1 mb-2 rounded-md bg-encre px-3 py-2 text-sur-couleur">
         <p className="font-technique text-[1.45rem] font-bold uppercase leading-tight tracking-wide">{titre}</p>
         {sousTitre ? <p className="font-technique text-[0.95rem] opacity-90">{sousTitre}</p> : null}

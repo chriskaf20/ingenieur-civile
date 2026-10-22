@@ -1,0 +1,318 @@
+---
+id: N0.1.2
+titre: Prendre des notes et construire ses fiches
+objectifs:
+  - Organiser une page de notes en trois zones pendant et après le cours
+  - Transformer un paragraphe de cours en questions de révision
+  - Rédiger une fiche avec formule, symboles, unités et domaine de validité
+  - Classer ses fiches pour les réviser de façon espacée
+relecture: false
+normes:
+  - "Méthode Cornell : W. Pauk, How to Study in College (Cornell University), règle de l'art pédagogique"
+  - "EN 1991-1-1, annexe A, tableau A.1 : poids volumique du béton (exemple de fiche)"
+glossaire:
+  - terme: Méthode Cornell
+    definition: Page de notes découpée en trois zones (questions, notes, résumé), mise au point à l'université Cornell.
+  - terme: Fiche de révision
+    definition: Petite carte avec une question au recto et la réponse complète au verso, faite pour le rappel actif.
+  - terme: Domaine de validité
+    definition: Conditions dans lesquelles une formule s'applique ; en dehors, le résultat n'a pas de sens.
+  - terme: Poids volumique
+    definition: Poids d'un mètre cube de matériau, en kN/m³.
+symboles:
+  - { symbole: 'γ', signification: 'poids volumique', unite: 'kN/m³' }
+  - { symbole: 'V', signification: 'volume', unite: 'm³' }
+  - { symbole: 'P', signification: 'poids', unite: 'kN' }
+formules:
+  - { nom: 'Poids à partir du volume', tex: 'P = \gamma \times V', domaine: 'Charges permanentes' }
+---
+
+import { POIDS_VOLUMIQUE_BA, POIDS_VOLUMIQUE_BETON, INTERVALLES_REVISION } from '@/lib/calc/methode'
+import { PageCornell, FicheRectoVerso } from '@/components/schemas/Methode'
+
+export const gBA = POIDS_VOLUMIQUE_BA
+export const gB = POIDS_VOLUMIQUE_BETON
+export const intervalles = INTERVALLES_REVISION.map((n) => `J+${n}`).join(', ')
+
+<Page etape="intuition" titre="L'intuition : le carnet du chef de chantier">
+
+Regarde un chef de chantier expérimenté. Dans sa poche, un petit carnet usé. Il n'y a pas recopié les normes ni les plans : il y a noté **l'essentiel** dont il a besoin vite. Un dosage, une cote d'implantation, le téléphone du ferrailleur, une erreur à ne plus refaire.
+
+Tes notes de cours doivent ressembler à ce carnet, pas à une photocopie du tableau. Et tes fiches de révision doivent être encore plus courtes : une question, une réponse, rien de plus.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer d'un cours d'une heure à quelques fiches qui te serviront jusqu'à l'examen, et même après ?
+</Encadre>
+
+<Encadre type="attention">
+Recopier mot pour mot ce que dit le professeur occupe la main, mais pas la tête. On n'a pas le temps de comprendre. Note les idées, les formules, les schémas, et **tes questions**.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : prendre des notes en trois zones">
+
+### Pendant le cours : la zone des notes
+
+Divise ta page (voir le schéma page suivante). Pendant le cours, tu n'écris que dans la grande zone de droite :
+
+- les **définitions**, avec tes mots ;
+- les **formules** avec chaque symbole et son **unité** ;
+- les **schémas** du tableau, même rapides : en génie civil, un schéma vaut souvent un paragraphe ;
+- les **exemples** chiffrés ;
+- un **?** dans la marge quand tu ne comprends pas.
+
+Utilise des abréviations constantes : « BA » béton armé, « ⇒ » donc, « ≠ » différent, « ~ » environ.
+
+### Le soir même : questions et résumé
+
+Dans les 24 heures, sans attendre :
+
+1. Dans la colonne de gauche, écris une **question** en face de chaque bloc de notes. Exemple : « Que vaut γ du béton armé ? »
+2. En bas de page, écris un **résumé** de trois lignes : l'idée principale du cours.
+3. Résous les **?** : relis le polycopié, demande à un camarade ou au professeur.
+
+<Regle type="art" source="méthode Cornell (W. Pauk)">
+Cette organisation n'est pas une obligation. C'est une méthode éprouvée : la colonne de questions transforme directement tes notes en support de **rappel actif** (voir N0.1.1).
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : construire une bonne fiche">
+
+### Une fiche = une notion
+
+Une fiche de révision est une carte. **Au recto** : une question précise. **Au verso** : la réponse complète. Pour une formule, la réponse comporte toujours :
+
+1. la **formule** ;
+2. chaque **symbole** avec son nom et son **unité** ;
+3. le **domaine de validité** : quand on a le droit de l'utiliser ;
+4. un **petit schéma** ou un exemple chiffré ;
+5. la **source** : le cours, ou la norme et l'article.
+
+### Classer ses fiches
+
+Range les fiches par **date de révision** et non par matière. Une boîte à cinq compartiments suffit : demain, dans 3 jours, dans une semaine, dans deux semaines, dans un mois. Ce sont les intervalles {intervalles} de N0.1.1.
+
+- Réponse retrouvée sans hésiter : la fiche avance d'un compartiment.
+- Réponse fausse ou incomplète : la fiche revient au premier.
+
+<Encadre type="retenir">
+Une fiche qu'on ne peut pas lire en 30 secondes est trop longue. Coupe-la en deux fiches.
+</Encadre>
+
+<Regle type="simplification">
+La boîte à compartiments est un outil pratique. Une application de cartes mémoire fait la même chose, mais une boîte en carton ne tombe jamais en panne de batterie.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Les schémas : la page de notes et la fiche">
+
+<PageCornell />
+
+<FicheRectoVerso
+  question="Comment calculer le poids propre d'un élément en béton armé ?"
+  reponse="P = γ × V"
+  details={[
+    'P : poids (kN)',
+    'γ : poids volumique (kN/m³)',
+    `béton armé : γ = ${gBA} kN/m³`,
+    'V : volume (m³)',
+    'source : EN 1991-1-1, tab. A.1',
+  ]}
+/>
+
+Remarque la colonne de questions de la page : chaque question deviendra le recto d'une fiche.
+
+</Page>
+
+<Cahier titre="Exemple résolu : du paragraphe à la fiche">
+
+**Le paragraphe du cours.** « Le poids propre d'un élément s'obtient en multipliant son volume par le poids volumique du matériau. Pour le béton normal non armé, l'EN 1991-1-1 donne {gB} kN/m³ ; pour le béton armé, on ajoute {gBA - gB} kN/m³ pour l'acier, soit {gBA} kN/m³. Attention : le poids volumique s'exprime en kN/m³, la masse volumique en kg/m³. »
+
+<Etape n={1} titre="Repérer les notions">
+Trois notions : la formule du poids propre ; les deux valeurs de γ ; la différence poids volumique / masse volumique.
+
+<Note>Pourquoi trois ? Parce qu'il y a trois questions différentes qu'on pourrait te poser à l'examen.</Note>
+</Etape>
+
+<Etape n={2} titre="Écrire une question par notion">
+
+- Fiche 1 : « Comment calculer le poids propre d'un élément ? »
+- Fiche 2 : « Quel γ pour le béton armé ? Pour le béton non armé ? Source ? »
+- Fiche 3 : « Poids volumique ou masse volumique : quelle différence, quelles unités ? »
+
+</Etape>
+
+<Etape n={3} titre="Rédiger les versos">
+
+- Fiche 1 : $P = \gamma \times V$ ; P en kN, γ en kN/m³, V en m³.
+- Fiche 2 : béton armé {gBA} kN/m³ ; non armé {gB} kN/m³ ; EN 1991-1-1, annexe A, tableau A.1.
+- Fiche 3 : poids volumique en kN/m³ (une force par volume) ; masse volumique en kg/m³ (une masse par volume).
+
+<Note>Pourquoi la source ? Pour pouvoir revérifier la valeur un jour, sans dépendre de ta mémoire.</Note>
+</Etape>
+
+<Etape n={4} titre="Tester les fiches">
+Cache le verso et réponds à voix haute. Si une fiche demande plus de 30 secondes, elle est trop chargée : coupe-la.
+</Etape>
+
+<Etape n={5} titre="Classer">
+Les trois fiches vont dans le compartiment « demain ».
+
+<Note couleur="vert">Résultat : un paragraphe devient trois fiches courtes, prêtes pour le rappel actif.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="recopier le polycopié en plus petit et appeler ça une fiche.">
+Une fiche sans question n'est qu'un résumé. Pour réviser activement, il faut une question à laquelle répondre de mémoire.
+</Piege>
+
+<Piege erreur="noter une formule sans les unités.">
+« P = γ × V » sans unités est inutilisable : avec V en cm³ et γ en kN/m³, le résultat est faux d'un facteur un million.
+</Piege>
+
+<Piege erreur="oublier le domaine de validité.">
+Une formule vraie pour une poutre sur deux appuis ne l'est pas pour une console. Note toujours quand la formule s'applique.
+</Piege>
+
+<Piege erreur="attendre la fin du semestre pour faire ses fiches.">
+Faites tard, les fiches arrivent quand il n'y a plus le temps de les réviser. Fais-les le soir du cours.
+</Piege>
+
+<Piege erreur="emprunter les fiches d'un camarade sans les refaire.">
+Le travail de transformation du cours en questions fait déjà apprendre. Les fiches d'un autre peuvent compléter les tiennes, pas les remplacer.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Sur le chantier**, l'ingénieur tient un **carnet** ou un cahier de chantier. Il y note les décisions prises en réunion, les mesures faites, les problèmes rencontrés, avec la date. Ces notes servent à rédiger le compte rendu, et parfois à régler un litige des mois plus tard.
+
+<Encadre type="terrain" titre="Le réflexe de la date">
+Chaque page de notes porte la date, le lieu et le sujet. Au bureau d'études comme sur le chantier, une note non datée ne prouve rien.
+</Encadre>
+
+**Au bureau d'études**, les ingénieurs gardent souvent un classeur ou un dossier numérique de « fiches métier » : poids volumiques, enrobages, sections d'acier, formules usuelles, chacune avec sa **source**. C'est exactement la fiche de cette leçon, en version professionnelle.
+
+**À l'université**, en Afrique centrale comme ailleurs, les polycopiés sont parfois rares ou tardifs. Des notes bien tenues, relues le soir même, deviennent alors ton principal support.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : notes et fiches">
+
+### La page de notes en trois zones
+
+| Zone | Quand | Contenu |
+|---|---|---|
+| ② Notes (droite) | Pendant le cours | Définitions, formules + unités, schémas, exemples, « ? » |
+| ① Questions (gauche) | Le soir même | Une question par bloc de notes |
+| ③ Résumé (bas) | Le soir même | L'idée principale en trois lignes |
+
+### Le verso d'une fiche formule
+
+1. La formule. 2. Chaque symbole, son nom, son unité. 3. Le domaine de validité. 4. Un schéma ou un exemple. 5. La source.
+
+### La boîte à fiches
+
+Compartiments : {intervalles}. Juste → la fiche avance. Faux → retour au premier.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trouver les questions">
+
+Voici un bloc de notes : « Échelle 1/50 : 1 cm sur le plan = 50 cm en vrai. Longueur réelle = mesure × dénominateur. » Écris deux questions pour la colonne de gauche.
+
+<Indice>Une question sur le sens de l'échelle, une sur le calcul.</Indice>
+
+<Corrige>
+Par exemple : « Que signifie une échelle 1/50 ? » et « Comment passer d'une mesure sur le plan à une longueur réelle ? ». D'autres formulations sont justes si la réponse se trouve dans les notes.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Corriger une mauvaise fiche">
+
+Un camarade a écrit au verso : « P = γV, γ = {gBA} ». Liste ce qui manque.
+
+<Indice>Reprends les cinq éléments du verso d'une fiche formule.</Indice>
+
+<Corrige>
+Il manque : le nom et l'unité de chaque symbole (P en kN, γ en kN/m³, V en m³) ; le matériau concerné (béton **armé**) ; le domaine (poids propre d'un élément de volume connu) ; un exemple ; la source (EN 1991-1-1, tableau A.1).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une heure de cours, combien de fiches ?">
+
+Ton cours de statique d'une heure a présenté : la définition d'une force, son unité, les trois types d'appuis, et l'équilibre d'un solide (deux équations dans le plan). Propose la liste de tes fiches (questions seulement) et explique ton découpage.
+
+<Indice>Une fiche = une notion qu'on pourrait te demander seule.</Indice>
+
+<Corrige>
+
+Un découpage possible en six fiches :
+1. « Qu'est-ce qu'une force ? Quels éléments la définissent ? »
+2. « Quelle est l'unité d'une force ? Quels multiples utilise-t-on en génie civil ? »
+3. « Appui simple : quelles réactions ? Schéma ? »
+4. « Articulation : quelles réactions ? Schéma ? »
+5. « Encastrement : quelles réactions ? Schéma ? »
+6. « Quelles équations traduisent l'équilibre d'un solide dans le plan ? »
+
+Les trois appuis sont séparés : on les confond souvent, il faut pouvoir les réviser un par un.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.1.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Pendant le cours, on écrit surtout :" choix={['tout, mot pour mot', 'les idées, formules avec unités, schémas et ses questions', 'seulement les titres', 'rien : on photographie le tableau']} bonne={1}>
+Comprendre d'abord, noter l'essentiel, signaler ce qu'on ne comprend pas.
+</QCM>
+
+<QCM n={2} question="La colonne de gauche d'une page en trois zones contient :" choix={['le résumé', 'les questions et mots-clés', 'les exercices', 'la date']} bonne={1} colonnes={2}>
+Ces questions deviennent le recto des fiches.
+</QCM>
+
+<QCM n={3} question="Quand faut-il écrire les questions et le résumé ?" choix={['Pendant le cours', 'Le soir même', 'La veille de l’examen', 'À la fin du semestre']} bonne={1} colonnes={2}>
+Dans les 24 heures, tant que le cours est encore frais.
+</QCM>
+
+<QCM n={4} question="Au verso d'une fiche formule, l'élément souvent oublié qui rend la formule dangereuse est :" choix={['la couleur', 'le domaine de validité', 'le numéro de page', 'le nom du professeur']} bonne={1} colonnes={2}>
+Hors de son domaine, une formule donne un résultat sans aucun sens.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Le poids volumique du béton armé vaut :</>} choix={[`${gB} kN/m³`, `${gBA} kN/m³`, '2 500 kN/m³', '25 kg/m³']} bonne={1} colonnes={2}>
+{gBA} kN/m³ selon l'EN 1991-1-1, tableau A.1 ({gB} kN/m³ pour le béton non armé).
+</QCM>
+
+<QCM n={6} question="Dans la boîte à fiches, une réponse fausse renvoie la fiche :" choix={['au compartiment suivant', 'au premier compartiment', 'à la poubelle', 'au dernier compartiment']} bonne={1} colonnes={2}>
+Elle doit être revue dès le lendemain.
+</QCM>
+
+<QCM n={7} question="Une fiche qui demande plus de 30 secondes de réponse :" choix={['est idéale', 'doit être coupée en plusieurs fiches', 'doit être relue plus souvent', 'doit être recopiée']} bonne={1}>
+Une fiche = une notion.
+</QCM>
+
+<QCM n={8} question="Sur le chantier, une note de réunion doit toujours porter :" choix={['la date, le lieu et le sujet', 'une signature d’huissier', 'un tampon', 'une photo']} bonne={0}>
+Une note non datée ne prouve rien.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

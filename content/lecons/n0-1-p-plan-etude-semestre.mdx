@@ -1,0 +1,194 @@
+---
+id: N0.1.P
+titre: "Mini-projet : mon plan d'étude du semestre"
+objectifs:
+  - Établir son budget-temps hebdomadaire réel
+  - Répartir son travail personnel entre ses matières
+  - Planifier les révisions espacées d'une semaine de cours
+  - Construire le rétroplanning de son semestre jusqu'aux examens
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { budgetSemaine, EXEMPLE_BUDGET, HEURES_SEMAINE, INTERVALLES_REVISION, joursRevision, repartirHeures, revisionsParJour } from '@/lib/calc/methode'
+import { grandeur, nombre } from '@/lib/format'
+import { FriseSemestre } from '@/components/schemas/Methode'
+
+export const b = budgetSemaine(EXEMPLE_BUDGET)
+export const matieres = [
+  { nom: 'Mathématiques', credits: 6, jour: 1 },
+  { nom: 'Mécanique', credits: 5, jour: 2 },
+  { nom: 'Dessin technique', credits: 4, jour: 3 },
+  { nom: 'Chimie des matériaux', credits: 3, jour: 4 },
+]
+export const rep = repartirHeures(b.perso, matieres.map((m) => m.credits))
+export const charge = revisionsParJour(matieres.map((m) => m.jour))
+export const doubles = charge.filter(([, n]) => n > 1)
+export const intervalles = INTERVALLES_REVISION.map((n) => `J+${n}`).join(', ')
+export const phases = [
+  { libelle: 'Cours', debut: 1, fin: 12, couleur: 'encre' },
+  { libelle: 'Révisions espacées', debut: 1, fin: 13, couleur: 'validation' },
+  { libelle: 'Partiels', debut: 7, fin: 7, couleur: 'brique' },
+  { libelle: 'Marge', debut: 10, fin: 10, couleur: 'acier' },
+  { libelle: 'Révisions finales', debut: 11, fin: 13, couleur: 'terre' },
+  { libelle: 'Examens', debut: 14, fin: 15, couleur: 'correction' },
+]
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Tu commences un semestre. Ton objectif : arriver aux examens **prêt et reposé**, grâce à un plan réaliste construit avec les outils du module.
+
+### Ce que tu dois produire
+
+1. **Ton budget-temps** : une semaine type de {HEURES_SEMAINE} h, avec tes vraies données (N0.1.5).
+2. **Ta répartition** du travail personnel entre tes matières, en demi-heures (N0.1.5).
+3. **Ton calendrier de révisions** pour une semaine de cours, avec les intervalles {intervalles} (N0.1.1).
+4. **Ton rétroplanning** du semestre, des cours aux examens, avec une semaine de marge (N0.1.5).
+5. **Une fiche** de synthèse d'une page, au format de N0.1.2, à afficher au-dessus de ton bureau.
+
+<Encadre type="attention">
+Utilise **tes** données : tes heures de cours, ton trajet, tes matières, tes dates d'examen. L'exemple corrigé des pages suivantes ne sert qu'à vérifier ta méthode.
+</Encadre>
+
+### Matériel
+
+Ton emploi du temps, le calendrier des examens (ou une estimation si les dates ne sont pas encore connues), un cahier, des fiches en carton.
+
+<Regle type="simplification">
+Si ton université ne publie pas encore les dates d'examen, prends une hypothèse (par exemple les deux dernières semaines du semestre), écris-la, et mets le plan à jour quand les dates tombent. C'est exactement la démarche d'un ingénieur face à une donnée manquante.
+</Regle>
+
+</Page>
+
+<Infographie titre="La démarche du mini-projet" sousTitre="Cinq étapes, une heure de travail, un semestre plus serein" etape="projet">
+
+<Panneau n={1} titre="Budget-temps" icone="calcul" couleur="encre">
+Saisis tes données dans la fiche de calcul. Si les heures libres sont négatives, le plan est impossible : réduis un poste avant d'aller plus loin.
+</Panneau>
+
+<Panneau n={2} titre="Répartition" icone="quantites" couleur="acier">
+Répartis tes heures de travail personnel en proportion des crédits, par demi-heures. Puis ajuste pour tes matières difficiles.
+</Panneau>
+
+<Panneau n={3} titre="Révisions" icone="retenir" couleur="validation">
+Pour chaque cours de la semaine, calcule les jours de révision. Repère les jours chargés et lisse-les.
+</Panneau>
+
+<Panneau n={4} titre="Rétroplanning" icone="plan" couleur="brique">
+Pars des examens, place les révisions finales, le partiel, une semaine de marge. Les révisions espacées courent dès la semaine 1.
+</Panneau>
+
+<Panneau n={5} titre="Fiche de synthèse" icone="exemple" couleur="terre" large>
+Une page : ta semaine type, ta répartition, tes règles de révision. Le dimanche soir, compare le réel au plan et corrige. C'est ton point hebdomadaire.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="budget">
+
+<Cahier titre="Étape 1 : mon budget-temps" etape="projet">
+
+Remplace les valeurs par **tes** données. Le schéma et les calculs se mettent à jour.
+
+<Etape n={1} titre="Mes données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Ma semaine">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="Le calcul">
+<AN k="postes" />
+<AN k="total" />
+<AN k="libre" />
+</Etape>
+
+<Etape n={4} titre="Le résultat">
+<Resultat k="libre" libelle="Mes heures libres" />
+<Note>Moins d'une heure libre par jour ? Le plan ne tiendra pas longtemps : revois le travail personnel ou cherche un trajet plus court.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Cahier titre="Étapes 2 et 3 : exemple corrigé" etape="projet">
+
+**Données de l'exemple.** Le budget de N0.1.5 donne {grandeur(b.perso, 0, 'h')} de travail personnel par semaine. Quatre matières : {matieres.map((m) => `${m.nom} (${m.credits} crédits)`).join(', ')}. Chaque matière a un cours par semaine, les jours {matieres.map((m) => m.jour).join(', ')}.
+
+<Etape n={2} titre="La répartition">
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Matière</th><th>Crédits</th><th>Heures perso par semaine</th></tr></thead>
+    <tbody>{matieres.map((m, i) => <tr key={m.nom}><td>{m.nom}</td><td>{m.credits}</td><td>{grandeur(rep[i], 1, 'h')}</td></tr>)}</tbody>
+  </table>
+</div>
+
+<Note>Pourquoi des demi-heures ? Parce qu'en dessous, un créneau ne laisse pas le temps de se concentrer.</Note>
+<Note couleur="vert">Total : {grandeur(rep.reduce((a, x) => a + x, 0), 0, 'h')} ✓ (rien de perdu, rien d'ajouté).</Note>
+</Etape>
+
+<Etape n={3} titre="Le calendrier de révisions">
+
+<ul>{matieres.map((m) => <li key={m.nom}>{m.nom} (cours jour {m.jour}) : révisions jours {joursRevision(m.jour).join(', ')}</li>)}</ul>
+
+Jours où deux révisions se superposent : **{doubles.length ? doubles.map(([j, n]) => `jour ${j} (${n})`).join(', ') : 'aucun'}**.
+
+<Note>Pourquoi les repérer ? Deux révisions courtes le même jour restent tenables ; au-delà de trois, avance l'une d'elles d'un jour.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="projet" titre="Étape 4 : le rétroplanning, exemple corrigé">
+
+**Hypothèse de l'exemple.** Semestre de 15 semaines, partiel en semaine 7, examens en semaines 14 et 15. Ces dates sont des hypothèses : remplace-les par celles de ton université.
+
+<FriseSemestre semaines={15} phases={phases} />
+
+### La lecture du plan
+
+- **Semaines 1 à 12** : cours, fiches le soir même, révisions espacées (étape 3).
+- **Semaine 7** : partiel. Il mesure où tu en es : ajuste la répartition de l'étape 2 juste après.
+- **Semaine 10** : semaine de **marge**, sans tâche nouvelle. Elle absorbe un report, une grève, une maladie.
+- **Semaines 11 à 13** : révisions finales, en se testant (annales, exercices sans corrigé).
+- **Semaines 14 et 15** : examens, sommeil régulier, aucune nouvelle notion.
+
+<Encadre type="retenir">
+Un plan n'est jamais parfait du premier coup. Ce qui compte, c'est de le **corriger chaque semaine** plutôt que de l'abandonner.
+</Encadre>
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+Évalue ton travail honnêtement. Coche une case par ligne.
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Budget-temps | Postes oubliés (transport, sommeil) | Tous les postes, total = 168 h | Données réelles, heures libres réalistes |
+| Répartition | Même temps pour tout | Proportionnelle aux crédits | Ajustée à mes difficultés, total conservé |
+| Révisions espacées | Absentes | Calculées pour chaque cours | Jours chargés repérés et lissés |
+| Rétroplanning | Révisions la dernière semaine | Révisions finales avant les examens | Marge prévue, révisions dès la semaine 1 |
+| Fiche de synthèse | Absente ou illisible | Complète | Lisible en 30 secondes, affichée |
+| Hypothèses | Non écrites | Écrites | Écrites et datées, à mettre à jour |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Garde ton plan et compare-le, à la fin du semestre, avec ce qui s'est vraiment passé. Note trois leçons pour le semestre suivant. C'est le retour d'expérience, pratique courante en fin de chantier.
+</Encadre>
+
+<Quiz id="N0.1.P">
+
+<QCM n={1} question="J'ai terminé les cinq livrables et rempli la grille. Mon plan comporte-t-il une semaine de marge et des révisions dès la semaine 1 ?" choix={['Oui, les deux', 'Seulement la marge', 'Seulement les révisions dès la semaine 1', 'Ni l’un ni l’autre']} bonne={0}>
+Ces deux éléments distinguent un plan qui tient d'un plan qui casse à la première difficulté. S'il en manque un, complète ton rétroplanning puis réponds à nouveau.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

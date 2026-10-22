@@ -1,0 +1,324 @@
+---
+id: N0.1.1
+titre: "Apprendre efficacement : rappel actif et répétition espacée"
+objectifs:
+  - Expliquer pourquoi relire son cours donne l'illusion de savoir
+  - Pratiquer le rappel actif sur une page de cours
+  - Calculer les jours de révision d'un cours avec la répétition espacée
+  - Organiser une semaine de révisions sans surcharge
+relecture: false
+normes:
+  - "Dunlosky et al. (2013), Psychological Science in the Public Interest 14(1) : synthèse des techniques d'apprentissage"
+  - "Roediger et Karpicke (2006), Psychological Science 17(3) : effet du test sur la mémorisation"
+glossaire:
+  - terme: Rappel actif
+    definition: Technique qui consiste à retrouver une information de mémoire, sans regarder le cours, avant de vérifier.
+  - terme: Répétition espacée
+    definition: Révision d'une même notion à des intervalles de plus en plus longs (J+1, J+3, J+7…).
+  - terme: Illusion de maîtrise
+    definition: Impression de savoir parce qu'un texte relu paraît familier, alors qu'on ne saurait pas le restituer seul.
+  - terme: Courbe de l'oubli
+    definition: Allure de la perte d'un souvenir avec le temps, rapide au début puis plus lente.
+symboles:
+  - { symbole: 'j_0', signification: 'jour du cours dans le semestre', unite: 'jour' }
+  - { symbole: 'j_e', signification: "jour de l'examen", unite: 'jour' }
+  - { symbole: 'J+n', signification: 'révision n jours après le cours', unite: 'jour' }
+formules:
+  - { nom: 'Jour de révision', tex: 'j = j_0 + n', domaine: 'Méthode de travail' }
+---
+
+import { INTERVALLES_REVISION, joursRevision, planRevisions, revisionsParJour, semaineDuJour } from '@/lib/calc/methode'
+import { nombre } from '@/lib/format'
+import { CourbesOubli } from '@/components/calculs/methode'
+
+export const intervalles = INTERVALLES_REVISION.map((n) => `J+${n}`).join(', ')
+export const ex1 = 3
+export const ex1r = joursRevision(ex1).join(', ')
+export const ex2 = planRevisions(20, 40)
+export const ex3cours = [1, 3, 5]
+export const ex3 = revisionsParJour(ex3cours)
+export const ex3doubles = ex3.filter(([, n]) => n > 1).map(([j]) => j).join(', ')
+export const ex3total = ex3.reduce((a, [, n]) => a + n, 0)
+
+<Page etape="intuition" titre="L'intuition : un sentier dans la brousse">
+
+Imagine un sentier dans les hautes herbes. Si tu passes une seule fois, l'herbe se redresse en quelques jours et le chemin disparaît. Si tu repasses le lendemain, puis trois jours après, puis une semaine plus tard, le sentier devient une piste. Tu pourras l'emprunter même après un mois d'absence.
+
+Ta mémoire fonctionne de la même façon. Un cours entendu une fois s'efface vite. Un cours que tu vas **rechercher dans ta tête**, à plusieurs reprises et à intervalles croissants, devient solide.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Pourquoi relire trois fois son cours la veille de l'examen marche si mal, et comment faire mieux avec le même temps ?
+</Encadre>
+
+Deux idées simples changent tout :
+
+1. **Se tester** plutôt que relire : fermer le cahier et essayer de retrouver.
+2. **Espacer** les révisions plutôt que les entasser.
+
+<Encadre type="attention">
+Relire donne une impression agréable : « je connais ». C'est souvent une **illusion de maîtrise**. Le texte te paraît familier, mais tu ne saurais pas le refaire seul devant une feuille blanche, et c'est exactement ce que demande l'examen.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le rappel actif">
+
+### Ce que dit la recherche
+
+Les chercheurs en psychologie de l'éducation ont comparé de nombreuses méthodes de travail. Deux méthodes sortent nettement du lot : **se tester** (le rappel actif) et **répartir ses révisions dans le temps**. À l'inverse, relire et surligner apportent peu.
+
+<Regle type="art" source="Dunlosky et al., 2013 ; Roediger et Karpicke, 2006">
+Ces résultats viennent d'études expérimentales et de synthèses publiées. Ce ne sont pas des « normes » : ce sont des constats solides, à appliquer avec bon sens.
+</Regle>
+
+### Comment pratiquer le rappel actif
+
+1. Lis une page de cours **une seule fois**, attentivement.
+2. Ferme le cahier.
+3. Sur une feuille blanche, écris tout ce dont tu te souviens : définitions, formules **avec leurs unités**, schémas.
+4. Rouvre le cahier et corrige **en rouge** ce qui manque ou ce qui est faux.
+5. Le rouge, c'est ce que tu reverras en priorité la prochaine fois.
+
+### Les formes du rappel actif
+
+- refaire un exercice corrigé **sans regarder** le corrigé ;
+- répondre aux questions d'une fiche (question au recto, réponse au verso) ;
+- expliquer la notion à voix haute à un camarade, comme si tu étais le professeur ;
+- redessiner un schéma de mémoire, avec ses légendes.
+
+<Encadre type="retenir">
+Si c'est facile, ce n'est pas du rappel actif. L'effort pour retrouver est justement ce qui fait mémoriser.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la répétition espacée">
+
+### Le principe
+
+Après un cours, on oublie vite au début, puis de plus en plus lentement. Chaque fois que tu retrouves l'information de mémoire, l'oubli suivant est plus lent. On profite de cet effet en espaçant les révisions de plus en plus.
+
+### Un calendrier simple
+
+On révise un cours vu le jour $j_0$ aux jours $j = j_0 + n$, avec $n$ pris dans la suite : **{intervalles}**.
+
+- $j_0$ : jour du cours dans le semestre (jour), par exemple jour 10 ;
+- $n$ : nombre de jours après le cours (jour) ;
+- $j$ : jour de la révision (jour).
+
+<Regle type="simplification">
+Cette suite d'intervalles est un calendrier pratique, pas une valeur scientifique exacte. Ce qui compte : des intervalles **croissants**, et une révision qui reste un **rappel actif** (se tester), pas une relecture.
+</Regle>
+
+### Combien de temps par révision ?
+
+Une révision espacée est **courte** : 10 à 20 minutes par cours suffisent souvent, car tu ne refais que les questions de ta fiche et les points en rouge. C'est ce qui rend la méthode tenable sur un semestre entier.
+
+<Encadre type="exemple">
+Un cours de statique le jour 10 sera revu les jours {joursRevision(10).join(', ')}. Si l'examen est le jour 35, quatre révisions tombent avant lui. La cinquième sert à garder la notion pour l'année suivante, où la RDM en aura besoin.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Les schémas : ce que l'on retient avec le temps">
+
+<CourbesOubli />
+
+Lis les deux courbes :
+
+- **en rouge pointillé**, un cours jamais revu : le souvenir chute fortement dans les premiers jours ;
+- **en vert**, le même cours revu à {intervalles} : à chaque révision le souvenir remonte, puis il baisse **de moins en moins vite**.
+
+<Encadre type="attention">
+Ces courbes sont des **courbes de principe**. Elles montrent une allure, pas une mesure de ta mémoire. Personne ne peut te donner le pourcentage exact de ce que tu retiens après tant de jours.
+</Encadre>
+
+<Encadre type="retenir">
+Réviser tôt (J+1) coûte peu de temps, car tu te souviens encore de presque tout. Attendre l'avant-veille de l'examen coûte beaucoup plus, car il faut tout réapprendre.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="revisions">
+
+<Cahier titre="Exemple résolu : planifier les révisions d'un cours">
+
+**Énoncé.** Le cours d'introduction à la statique a lieu le jour 10 du semestre. Le partiel est le jour 35. Quels jours réviser ? Combien de révisions tombent avant le partiel ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi des numéros de jour plutôt que des dates ? Parce que les additions deviennent immédiates. Tu convertiras en dates sur ton agenda à la fin.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="La règle">
+
+On ajoute à $j_0$ chacun des intervalles {intervalles}.
+
+<Note>Pourquoi ces intervalles ? Ils sont croissants : chaque révision arrive au moment où le souvenir commence à faiblir.</Note>
+</Etape>
+
+<Etape n={4} titre="Le calcul">
+<AN k="jours" />
+<AN k="tri" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="avant" libelle="Avant l'examen" />
+<Note couleur="vert">Jours de révision : <Val k="jours" />. Délai entre cours et examen : <Val k="delai" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="relire son cours trois fois et se sentir prêt.">
+La relecture rend le texte familier, pas disponible. Ferme le cahier et teste-toi : ce que tu ne retrouves pas seul, tu ne le sais pas encore.
+</Piege>
+
+<Piege erreur="tout réviser la veille de l'examen.">
+Une nuit blanche fait entrer beaucoup d'informations pour quelques heures, puis presque tout disparaît. Or en génie civil, chaque module sert au suivant : la statique sert à la RDM, la RDM au béton armé.
+</Piege>
+
+<Piege erreur="surligner tout le polycopié.">
+Surligner donne l'impression de travailler. Transforme plutôt chaque partie en **questions** auxquelles tu répondras de mémoire.
+</Piege>
+
+<Piege erreur="regarder le corrigé dès qu'on bloque.">
+Bloque d'abord cinq minutes, cherche, note ton idée même fausse. Le corrigé lu après un vrai effort se retient bien mieux.
+</Piege>
+
+<Piege erreur="abandonner le calendrier dès qu'une révision est ratée.">
+Si tu rates J+3, révise le jour même où tu t'en rends compte, puis reprends la suite. Un calendrier imparfait vaut mieux que pas de calendrier.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**À l'université.** Les promotions sont souvent nombreuses et les polycopiés rares. Le rappel actif n'a besoin que d'un cahier, d'un stylo et de petites fiches en carton : aucune connexion, aucune électricité.
+
+<Encadre type="terrain" titre="Délestages et révisions">
+Pendant une coupure de courant, tu ne peux pas relire un PDF sur ton téléphone déchargé. Tes fiches question-réponse en papier, elles, fonctionnent à la lampe. Prépare-les tôt dans le semestre.
+</Encadre>
+
+**En groupe.** Un groupe de révision efficace ne relit pas ensemble : chacun pose des questions aux autres, à tour de rôle, cahiers fermés. Celui qui explique apprend autant que celui qui écoute.
+
+**Dans le métier.** Un ingénieur continue d'apprendre toute sa carrière : nouvelles normes, nouveaux logiciels, nouveaux matériaux. Il ne peut pas tout relire. Il garde des fiches, se teste sur les points clés et revient régulièrement aux mêmes notions. La méthode de cette leçon te servira bien après l'examen.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : apprendre efficacement">
+
+### Les deux méthodes qui marchent
+
+| Méthode | Ce que je fais | Signe que c'est bien fait |
+|---|---|---|
+| Rappel actif | Je ferme le cahier et je retrouve seul | C'est un peu difficile |
+| Répétition espacée | Je revois à {intervalles} | Chaque révision est courte |
+
+### Ma séance de rappel actif
+
+1. Lire une fois. 2. Fermer. 3. Écrire de mémoire. 4. Corriger en rouge. 5. Revoir le rouge en priorité.
+
+### Mon calendrier
+
+Révision au jour $j = j_0 + n$, avec $n$ dans {intervalles}.
+
+### À éviter
+
+Relire en boucle · surligner tout · tout réviser la veille · lire le corrigé sans avoir cherché.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Mon premier calendrier">
+
+Un cours d'algèbre a lieu le jour {ex1} du semestre. Donne les jours de révision.
+
+<Indice>Ajoute {ex1} à chaque intervalle : {INTERVALLES_REVISION.join(', ')}.</Indice>
+
+<Corrige>
+Jours de révision : **{ex1r}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un examen proche">
+
+Un cours a lieu le jour 20 et l'examen le jour 40. Quelles révisions tombent avant l'examen ? Que proposes-tu pour celle qui tombe après ?
+
+<Indice>Calcule les cinq jours, puis compare chacun à 40.</Indice>
+
+<Corrige>
+Révisions : {ex2.jours.join(', ')}. Avant l'examen : **{ex2.avant.join(', ')}** ({ex2.avant.length} révisions). Après : {ex2.apres.join(', ')}. Garde-la : elle ancre la notion pour le module suivant. Tu peux ajouter une révision courte la veille de l'examen, toujours en te testant.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Trois cours dans la semaine">
+
+Tu as trois cours les jours {ex3cours.join(', ')}. Liste les jours où deux révisions se superposent. Combien de révisions au total ? Comment éviter les journées chargées ?
+
+<Indice>Écris les cinq jours de révision de chaque cours, puis cherche les nombres qui apparaissent deux fois.</Indice>
+
+<Corrige>
+
+- Jours doublés : **{ex3doubles}**.
+- Total : **{ex3total} révisions** courtes réparties sur un mois.
+- Une révision dure 10 à 20 minutes : deux le même jour restent tenables. Si un jour est trop chargé, avance une révision d'un jour : l'ordre des intervalles compte plus que le jour exact.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.1.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Quelle méthode fait le plus mémoriser ?" choix={['Relire son cours plusieurs fois', 'Surligner les passages importants', 'Fermer le cahier et retrouver de mémoire', 'Recopier le cours au propre']} bonne={2} colonnes={2}>
+Le rappel actif oblige à retrouver l'information : c'est cet effort qui la fixe.
+</QCM>
+
+<QCM n={2} question="Pourquoi la relecture donne-t-elle une fausse confiance ?" choix={['Parce qu’on lit trop vite', 'Parce qu’un texte familier semble su, sans qu’on sache le restituer', 'Parce que le cours contient des erreurs', 'Parce qu’on se fatigue']} bonne={1}>
+C'est l'illusion de maîtrise : reconnaître n'est pas savoir refaire.
+</QCM>
+
+<QCM n={3} question={<>Un cours a lieu le jour 10. Avec la suite {intervalles}, la troisième révision tombe le jour :</>} choix={['13', String(joursRevision(10)[2]), '20', '30']} bonne={1} colonnes={2}>
+10 + 7 = {joursRevision(10)[2]}.
+</QCM>
+
+<QCM n={4} question="Que faire quand on rate une révision prévue ?" choix={['Abandonner le calendrier', 'Tout recommencer depuis J+1', 'Réviser dès qu’on s’en rend compte, puis reprendre la suite', 'Attendre l’examen']} bonne={2}>
+Un calendrier imparfait vaut mieux que pas de calendrier.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une révision espacée efficace, c'est :" choix={['relire tout le chapitre', 'une séance courte où l’on se teste sur ses fiches', 'regarder une vidéo du cours', 'recopier ses notes']} bonne={1}>
+Courte et active : on refait les questions et les points notés en rouge.
+</QCM>
+
+<QCM n={6} question="Les courbes de l'oubli de la leçon servent à :" choix={['mesurer ta mémoire en %', 'montrer l’allure de l’oubli, avec et sans révisions', 'calculer ta note', 'fixer la durée d’une révision']} bonne={1}>
+Ce sont des courbes de principe, sans valeurs mesurées.
+</QCM>
+
+<QCM n={7} question={<>Le jour 15 tombe dans quelle semaine du semestre ?</>} choix={['Semaine 1', 'Semaine 2', `Semaine ${semaineDuJour(15)}`, 'Semaine 15']} bonne={2} colonnes={2}>
+Jours 15 à 21 : semaine {semaineDuJour(15)}.
+</QCM>
+
+<QCM n={8} question="Dans un groupe de révision efficace :" choix={['on relit ensemble à voix haute', 'chacun pose des questions aux autres, cahiers fermés', 'le meilleur fait les exercices pour tous', 'on se partage les chapitres sans se les expliquer']} bonne={1}>
+Expliquer et répondre de mémoire, c'est du rappel actif à plusieurs.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,324 @@
+---
+id: N0.1.5
+titre: "Organiser son année : planning, examens, stress"
+objectifs:
+  - Calculer le budget-temps réel d'une semaine d'étudiant
+  - Répartir ses heures de travail personnel entre les matières
+  - Construire un rétroplanning à partir des dates d'examen
+  - Reconnaître les signes de surcharge et appliquer des gestes simples contre le stress
+relecture: false
+normes: []
+glossaire:
+  - terme: Budget-temps
+    definition: Répartition des 168 heures d'une semaine entre cours, travail personnel, sommeil, vie quotidienne et temps libre.
+  - terme: Rétroplanning
+    definition: Planning construit à rebours, en partant de la date limite (examen, rendu) pour placer les tâches avant elle.
+  - terme: Travail personnel
+    definition: Temps de travail hors cours (exercices, fiches, révisions, projets).
+  - terme: Semaine type
+    definition: Emploi du temps de référence qui fixe les créneaux réguliers de travail, repos et loisirs.
+symboles:
+  - { symbole: 'C', signification: 'heures de cours par semaine', unite: 'h' }
+  - { symbole: 'k', signification: 'heures de travail personnel par heure de cours', unite: 'h/h' }
+  - { symbole: 'T_{libre}', signification: 'heures libres dans la semaine', unite: 'h' }
+formules:
+  - { nom: 'Heures libres de la semaine', tex: 'T_{libre} = 168 - (C + kC + 7s + 7v + n\,t)', domaine: 'Organisation du travail' }
+---
+
+import { budgetSemaine, EXEMPLE_BUDGET, HEURES_SEMAINE, repartirHeures } from '@/lib/calc/methode'
+import { grandeur, nombre } from '@/lib/format'
+import { FriseSemestre } from '@/components/schemas/Methode'
+
+export const b0 = budgetSemaine(EXEMPLE_BUDGET)
+export const ex1 = { ...EXEMPLE_BUDGET, transport: 3 }
+export const ex1r = budgetSemaine(ex1)
+export const ex2 = { ...EXEMPLE_BUDGET, ratio: 1.5 }
+export const ex2r = budgetSemaine(ex2)
+export const matieres = [
+  { nom: 'Mathématiques', credits: 6 },
+  { nom: 'Mécanique', credits: 5 },
+  { nom: 'Dessin technique', credits: 4 },
+  { nom: 'Chimie des matériaux', credits: 3 },
+]
+export const rep = repartirHeures(b0.perso, matieres.map((m) => m.credits))
+export const phases = [
+  { libelle: 'Cours', debut: 1, fin: 12, couleur: 'encre' },
+  { libelle: 'Révisions espacées', debut: 1, fin: 13, couleur: 'validation' },
+  { libelle: 'Partiels', debut: 7, fin: 7, couleur: 'brique' },
+  { libelle: 'Révisions finales', debut: 11, fin: 13, couleur: 'terre' },
+  { libelle: 'Examens', debut: 14, fin: 15, couleur: 'correction' },
+]
+
+<Page etape="intuition" titre="L'intuition : le planning d'un chantier">
+
+Sur un chantier, personne ne coule la dalle avant d'avoir monté les poteaux. Le conducteur de travaux part de la date de livraison et remonte le temps : finitions, toiture, dalle, poteaux, fondations. C'est un **rétroplanning**. Il vérifie aussi que ses équipes ne travaillent pas 25 heures par jour.
+
+Ton année d'étude est un chantier. La date de livraison, c'est l'examen. Les tâches, ce sont les cours, les exercices et les révisions. Les équipes, c'est toi, avec un nombre d'heures **limité** : une semaine n'a que {HEURES_SEMAINE} heures.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Combien d'heures as-tu vraiment pour travailler, et comment les placer pour arriver à l'examen prêt, et pas épuisé ?
+</Encadre>
+
+<Encadre type="attention">
+Le stress avant les examens est normal : il aide même à se mobiliser. Il devient un problème quand il empêche de dormir, de manger ou de travailler. Un bon planning est le premier remède : on sait ce qu'on fait chaque jour.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le budget-temps et la semaine type">
+
+### Le budget-temps
+
+Une semaine compte $7 \times 24$ = {HEURES_SEMAINE} h. On y retire :
+
+- $C$ : les heures de cours (h) ;
+- $kC$ : le travail personnel, $k$ heures par heure de cours (h) ;
+- $7s$ : le sommeil, $s$ heures par nuit (h) ;
+- $7v$ : la vie quotidienne (repas, hygiène, tâches), $v$ heures par jour (h) ;
+- $n\,t$ : le transport, $t$ heures par jour sur $n$ jours (h).
+
+Ce qui reste est le temps **libre** : $T_{libre} = 168 - (C + kC + 7s + 7v + n\,t)$.
+
+<Regle type="hypothese">
+Le rapport $k$ entre travail personnel et heures de cours n'a pas de valeur officielle. Une heure de travail par heure de cours est un **point de départ** courant en début de licence, à ajuster selon tes résultats et la difficulté des matières.
+</Regle>
+
+### La semaine type
+
+Place d'abord ce qui est **fixe** (cours, transport, sommeil), puis tes créneaux de travail personnel, **toujours aux mêmes heures**, puis les loisirs. Un créneau fixe ne se négocie pas chaque jour : il devient une habitude.
+
+<Encadre type="retenir">
+Le sommeil n'est pas du temps perdu : c'est pendant le sommeil que la mémoire consolide ce que tu as appris. Le sacrifier pour réviser est un mauvais calcul.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : rétroplanning et gestion du stress">
+
+### Le rétroplanning
+
+1. Note les dates d'examen et de rendu de projets.
+2. Pour chaque matière, place les **révisions finales** dans les deux ou trois semaines qui précèdent.
+3. Avant, pendant tout le semestre : cours, fiches le soir même, **révisions espacées** (N0.1.1).
+4. Garde une **marge** : une semaine chargée imprévue arrive toujours.
+
+### Répartir le travail personnel
+
+Répartis tes heures de travail personnel entre les matières **en proportion de leurs crédits** (ou coefficients), puis ajuste : plus de temps pour une matière où tu es en difficulté.
+
+### Contre le stress : des gestes simples
+
+- **dormir** à heures régulières, surtout la semaine des examens ;
+- **bouger** : marche, football, danse, n'importe quelle activité physique ;
+- **respirer** lentement quelques minutes avant une épreuve ;
+- **découper** : « réviser la mécanique » fait peur, « refaire l'exercice 3 » non ;
+- **parler** : à un camarade, à un aîné, à un enseignant.
+
+<Encadre type="attention">
+Si l'angoisse, l'insomnie ou la tristesse durent plusieurs semaines, ce n'est plus un simple stress d'examen. Parles-en à un médecin ou à un professionnel de santé : c'est un vrai problème de santé, qui se soigne.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : un semestre sur une frise">
+
+<FriseSemestre semaines={15} phases={phases} />
+
+Lis la frise de haut en bas :
+
+- les **cours** occupent la plus grande partie du semestre ;
+- les **révisions espacées** commencent **dès la première semaine**, pas après les cours ;
+- le **partiel** de mi-semestre sert de répétition générale ;
+- les **révisions finales** ne sont qu'une consolidation : tout a déjà été vu plusieurs fois ;
+- les **examens** arrivent sur un travail régulier, sans nuit blanche.
+
+<Regle type="simplification">
+Ce calendrier de 15 semaines est un exemple. Le calendrier réel dépend de ton université et peut changer en cours d'année (grèves, report d'examens) : mets ton rétroplanning à jour dès qu'une date bouge.
+</Regle>
+
+</Page>
+
+<FicheCalcul calcul="budget">
+
+<Cahier titre="Exemple résolu : la semaine réelle d'un étudiant de L1">
+
+**Énoncé.** Un étudiant de L1 à Kinshasa a 28 h de cours par semaine. Il vise 1 h de travail personnel par heure de cours, dort 8 h par nuit, compte 2 h par jour pour les repas et l'hygiène, et passe 2 h par jour dans les transports, 6 jours par semaine. Combien d'heures libres lui reste-t-il ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi compter le transport ? Avec les embouteillages, il peut prendre plus de temps qu'une matière entière. L'oublier rend le planning impossible.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le calcul">
+
+<Etape n={3} titre="La formule">
+
+$T_{libre} = 168 - (C + kC + 7s + 7v + n\,t)$, tout en heures par semaine.
+
+</Etape>
+
+<Etape n={4} titre="Le calcul">
+<AN k="postes" />
+<AN k="total" />
+<AN k="libre" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="libre" libelle="Heures libres par semaine" />
+<Note couleur="vert">Soit environ <Val k="libreJour" /> par jour pour le sport, la famille, la paroisse ou les amis. Le planning est tenable.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="faire un planning sans compter le transport ni le sommeil.">
+Sur le papier tout tient ; dans la réalité, il manque des heures chaque jour, et le retard s'accumule. Fais d'abord le budget-temps.
+</Piege>
+
+<Piege erreur="commencer à réviser trois semaines avant l'examen.">
+Trois semaines suffisent à consolider, pas à tout apprendre. Les révisions espacées commencent dès la première semaine.
+</Piege>
+
+<Piege erreur="sacrifier le sommeil la semaine des examens.">
+Un cerveau fatigué fait des erreurs de calcul et oublie des unités. Dors à heures régulières, surtout la veille d'une épreuve.
+</Piege>
+
+<Piege erreur="donner le même temps à toutes les matières.">
+Répartis selon les crédits, puis ajoute du temps là où tu es en difficulté. Un planning égalitaire n'est pas un planning juste.
+</Piege>
+
+<Piege erreur="jeter le planning dès la première semaine ratée.">
+Un planning se corrige chaque dimanche soir : ce qui a été fait, ce qui reste, ce qu'on décale. C'est normal, c'est même le principe.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Au quotidien**, beaucoup d'étudiants d'Afrique centrale travaillent à côté de leurs études, aident leur famille ou font de longs trajets. Le budget-temps n'est pas le même pour tous : c'est justement pour cela qu'il faut faire **le sien**, honnêtement.
+
+<Encadre type="terrain" titre="Délestages et calendrier mouvant">
+Coupures de courant, grèves, examens reportés : le calendrier réel bouge. Garde une marge d'une semaine dans ton rétroplanning et des créneaux de travail sur papier (fiches, exercices) qui ne dépendent ni du réseau ni de l'électricité.
+</Encadre>
+
+**Dans le métier**, l'ingénieur passe une grande partie de son temps à planifier : planning de chantier, rétroplanning d'un dossier d'appel d'offres, charge de travail d'une équipe. Il utilise les mêmes outils que toi : une liste de tâches, des durées réalistes, une date butoir et une marge. Tu les retrouveras en M2.6 (management de projet).
+
+**Une habitude professionnelle** : le point hebdomadaire. Chaque semaine, on compare l'avancement réel au planning et on corrige. Fais-le pour toi, le dimanche soir, en dix minutes.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : organiser son année">
+
+### Le budget-temps
+
+$T_{libre} = 168 - (C + kC + 7s + 7v + n\,t)$ (h/semaine). Si $T_{libre}$ est négatif, le planning est impossible.
+
+### Le rétroplanning en 4 étapes
+
+1. Dates d'examen et de rendu. 2. Révisions finales juste avant. 3. Révisions espacées dès la semaine 1. 4. Une semaine de marge.
+
+### Répartir le travail personnel
+
+En proportion des crédits, puis plus de temps pour les matières difficiles.
+
+### Contre le stress
+
+Dormir régulièrement · bouger · respirer lentement · découper les tâches · en parler. Si cela dure : consulter.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Plus de transport">
+
+Reprends l'exemple résolu avec {nombre(ex1.transport, 0)} h de transport par jour au lieu de {nombre(EXEMPLE_BUDGET.transport, 0)} h. Combien d'heures libres reste-t-il ?
+
+<Indice>Seul le poste transport change : $n\,t$ = {ex1.joursTransport} × {nombre(ex1.transport, 0)}.</Indice>
+
+<Corrige>
+Transport : {grandeur(ex1r.transport, 0, 'h')} ; total engagé {grandeur(ex1r.engage, 0, 'h')} ; libre = {HEURES_SEMAINE} − {nombre(ex1r.engage, 0)} = **{grandeur(ex1r.libre, 0, 'h')}**, soit {grandeur(ex1r.libre / 7, 1, 'h')} par jour.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Augmenter le travail personnel">
+
+Après le partiel, l'étudiant décide de passer à $k$ = {nombre(ex2.ratio, 1)} h par heure de cours. Combien d'heures de travail personnel par semaine ? Combien d'heures libres ? Est-ce tenable ?
+
+<Indice>Travail personnel = $k \times C$.</Indice>
+
+<Corrige>
+Travail personnel : {nombre(ex2.ratio, 1)} × {ex2.cours} = **{grandeur(ex2r.perso, 0, 'h')}** ; libre : **{grandeur(ex2r.libre, 0, 'h')}** par semaine, environ {grandeur(ex2r.libre / 7, 1, 'h')} par jour. C'est tenable quelques semaines, mais il faut garder au moins une demi-journée de vraie coupure.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Répartir selon les crédits">
+
+Les {grandeur(b0.perso, 0, 'h')} de travail personnel de l'exemple sont à répartir entre quatre matières : {matieres.map((m) => `${m.nom} (${m.credits} crédits)`).join(', ')}. Répartis-les par demi-heures, en proportion des crédits, sans perdre ni ajouter d'heure.
+
+<Indice>Total des crédits : {matieres.reduce((a, m) => a + m.credits, 0)}. Calcule la part exacte de chaque matière, garde les demi-heures entières, puis distribue le reste aux plus grandes parties décimales.</Indice>
+
+<Corrige>
+
+{matieres.map((m, i) => `${m.nom} : ${grandeur(rep[i], 1, 'h')}`).join(' ; ')}. Total : {grandeur(rep.reduce((a, x) => a + x, 0), 0, 'h')} ✓.
+
+Ensuite, on ajuste : si la mécanique pose problème, on lui donne une heure prise sur une autre matière.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.1.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Combien d'heures compte une semaine ?" choix={['120 h', String(HEURES_SEMAINE) + ' h', '144 h', '196 h']} bonne={1} colonnes={4}>
+7 × 24 = {HEURES_SEMAINE} h.
+</QCM>
+
+<QCM n={2} question="Un rétroplanning se construit :" choix={['à partir d’aujourd’hui, vers l’avant', 'à partir de la date limite, en remontant le temps', 'au hasard', 'la veille de l’examen']} bonne={1}>
+On part de la date d'examen ou de rendu.
+</QCM>
+
+<QCM n={3} question={<>Dans l'exemple résolu, il reste chaque semaine :</>} choix={[grandeur(b0.libre - 10, 0, 'h'), grandeur(b0.libre, 0, 'h'), grandeur(b0.engage, 0, 'h'), '0 h']} bonne={1} colonnes={4}>
+{HEURES_SEMAINE} − {nombre(b0.engage, 0)} = {grandeur(b0.libre, 0, 'h')}.
+</QCM>
+
+<QCM n={4} question="Le rapport « 1 h de travail personnel par heure de cours » est :" choix={['une règle officielle de l’université', 'un point de départ à ajuster', 'une norme européenne', 'un maximum à ne pas dépasser']} bonne={1}>
+C'est une hypothèse de départ, pas une règle.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Quand commencer les révisions espacées ?" choix={['Trois semaines avant l’examen', 'Dès la première semaine de cours', 'Après le partiel', 'Pendant les examens']} bonne={1}>
+Chaque cours est revu dès le lendemain : les révisions finales ne sont qu'une consolidation.
+</QCM>
+
+<QCM n={6} question="La semaine des examens, le sommeil :" choix={['peut être réduit sans risque', 'doit rester régulier : il consolide la mémoire', 'est inutile', 'se rattrape après']} bonne={1}>
+Un cerveau reposé calcule mieux.
+</QCM>
+
+<QCM n={7} question="Pour répartir son travail personnel entre matières, on part :" choix={['du même temps pour toutes', 'des crédits ou coefficients, puis on ajuste selon ses difficultés', 'des matières préférées', 'de l’ordre alphabétique']} bonne={1}>
+Proportionnel aux crédits, puis ajusté.
+</QCM>
+
+<QCM n={8} question="Une insomnie et une angoisse qui durent plusieurs semaines :" choix={['sont normales en licence', 'doivent être signalées à un médecin ou un professionnel de santé', 'disparaissent avec plus de travail', 'se soignent avec du café']} bonne={1}>
+C'est un problème de santé qui se soigne : il faut en parler.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

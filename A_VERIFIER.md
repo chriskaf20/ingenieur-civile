@@ -22,3 +22,6 @@ Statuts :
 | 12 | Parcours LMD en RDC | PP.8.1 | `tranché` avec réserve : loi-cadre n° 14/004 du 11 février 2014. Le calendrier de la réforme LMD reste à confirmer. |
 | 13 | Méthode simplifiée des Recommandations professionnelles françaises pour les poteaux (α, kh, ks) | L3.3.5 | `à confirmer` : coefficients à contrôler sur le document des Recommandations professionnelles. |
 | 14 | Mur de clôture : espacement usuel des poteaux raidisseurs et des joints de dilatation, hauteur courante sans calcul au vent | L3.6.6 | `à confirmer` : valeurs présentées comme règles de l'art (données de l'énoncé), sans source normative. |
+| 15 | Rapport travail personnel / heures de cours (k = 1 h/h) | N0.1.5, N0.1.P | `hypothèse` : point de départ pédagogique, aucune source officielle. Présenté comme donnée ajustable par l'étudiant. |
+| 16 | NF X 02-003 (écriture des nombres et des unités) | N0.1.4 | `à confirmer` : intitulé et statut (en vigueur ou remplacée) à contrôler sur le catalogue AFNOR. |
+| 17 | Calendrier de révision J+1, J+3, J+7, J+14, J+30 | N0.1.1, N0.1.P | `tranché` comme simplification pédagogique : principe de la répétition espacée (Dunlosky et al., 2013) ; les intervalles exacts ne sont pas normatifs. |
