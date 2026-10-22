@@ -8,8 +8,8 @@
 
 ## Stack
 - Next.js (App Router, dernière stable), TypeScript strict, Tailwind CSS ; pages générées statiquement ; cible Vercel ; PWA hors ligne.
-- MDX via `@next/mdx` + remark-frontmatter + remark-mdx-frontmatter : compilé au build, et le MDX importe directement `lib/calc/` et les composants.
-- Une leçon = un fichier MDX ; frontmatter validé par Zod ; `relecture: false` par défaut.
+- MDX via `@next/mdx` (+ remark-frontmatter, remark-gfm, remark-math, rehype-katex) : compilé au build, et le MDX importe directement `lib/calc/` et les composants.
+- Une leçon = un fichier MDX ; frontmatter lu par `lib/contenu/` et validé par Zod ; `relecture: false` par défaut. CURRICULUM.md est la source unique de la structure (script → `content/cursus.json`).
 - Formules : KaTeX (remark-math + rehype-katex).
 - Schémas : composants React SVG faits main dans `components/drawing/`, paramétriques ; aucune image raster, aucun décor sans contenu technique ; texte alternatif obligatoire.
 - Calculs : fonctions pures dans `lib/calc/`, testées avec Vitest.
@@ -42,12 +42,14 @@
 - Ne jamais inventer une valeur normative : citer la référence (ex. « EC2 §4.4.1 »). En cas de doute : badge « À vérifier » + entrée dans A_VERIFIER.md.
 - Toujours distinguer règle normative, règle de l'art et simplification pédagogique.
 - Eurocodes (EC0, 1, 2, 3, 5, 7, 8) en référence principale ; signaler et comparer BAEL 91 / anciennes règles françaises quand elles restent pratiquées en Afrique francophone.
+- Béton : EN 1992-1-1:2004 + annexe nationale française (NF EN 1992-1-1/NA) ; la 2e génération (2023) seulement en encart.
+- Une valeur marquée « hypothèse » dans A_VERIFIER.md ne s'emploie que comme hypothèse de projet, avec le badge « À vérifier », jamais comme valeur normative.
 - Intégrer des cas d'Afrique centrale (RDC) : latérites, argiles gonflantes, climat tropical, drainage, routes en terre, zones minières, matériaux locaux.
 
 ## Méthode
 - Phases : 0 init · 1 cursus (STOP) · 2 socle + 5 gabarits + SVG + 5 leçons vitrines (STOP) · 3 fonctionnalités · 4 contenu module par module (STOP après chaque module, attendre « continue ») · 5 Supabase sur demande.
 - Fin de module : `npm run build 2>&1 | tail -20` et `npx vitest run --reporter=dot` au vert, puis mise à jour de PROGRESS.md et A_VERIFIER.md, résumé en 5 lignes maximum.
 - Ne jamais déclarer une tâche terminée si le build ou les tests échouent. Build et tests seulement en fin de module.
-- Commits git atomiques, messages clairs en français.
+- Commits git atomiques, messages clairs en français ; `git push` vers origin (github.com/chriskaf20/ingenieur-civile) après chaque commit.
 - Ne jamais relire un fichier entier quand une partie suffit.
 - PROGRESS.md : 20 lignes max (dernier module terminé, prochaine étape, points bloquants). CLAUDE.md : 60 lignes max, règles uniquement.

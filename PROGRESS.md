@@ -1,13 +1,13 @@
 # Avancement
 
-**Phase en cours :** 1 — Cursus rédigé (CURRICULUM.md), en attente de validation.
+**Phase en cours :** 2 — Socle technique, gabarits, bibliothèque SVG, 5 leçons vitrines.
 
 **Fait :**
-- Phase 0 : dépôt git, CLAUDE.md, PROGRESS.md.
-- Phase 1 : CURRICULUM.md (63 modules, 577 leçons, ≈ 1 170 h), A_VERIFIER.md (12 points ouverts).
+- Phase 0 : dépôt git (origin : github.com/chriskaf20/ingenieur-civile), CLAUDE.md, PROGRESS.md.
+- Phase 1 validée : CURRICULUM.md (63 modules, 577 leçons, ≈ 1 170 h), A_VERIFIER.md arbitré.
 
-**Prochaine étape :** validation du cursus, puis Phase 2 (socle technique, 5 gabarits, bibliothèque SVG, 5 leçons vitrines ★).
+**Prochaine étape :** fin de la Phase 2, puis STOP pour validation du rendu.
 
 **Points bloquants :**
-- `references/` vide : déposer les 5 images avant la Phase 2 (résumé de style de CLAUDE.md à confirmer).
-- A_VERIFIER.md n° 1 et 2 (génération de l'EC2, annexe nationale) à trancher avant les leçons de béton armé.
+- `references/` vide : le style suit les descriptions du prompt. Déposer les images pour l'affiner.
+- A_VERIFIER.md n° 3, 4, 5 (vent, séisme, pluies) : hypothèses sans source ; n° 10, 11, 13 à confirmer.
