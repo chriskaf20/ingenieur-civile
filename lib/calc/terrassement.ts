@@ -24,7 +24,10 @@ export interface ResultatPlateforme {
   volumePlateforme: number; // m³ (prisme sous la plateforme)
   volumesCotes: [number, number, number, number]; // talus des côtés 1-2, 2-3, 3-4, 4-1
   volumesCoins: [number, number, number, number];
+  volumeCotesTotal: number;
+  volumeCoinsTotal: number;
   volumeTalus: number;
+  partTalus: number; // part du volume total due aux talus (0 à 1)
   volumeTotal: number;
   /** contour du pied de talus en plan, dans le repère de la plateforme (m) */
   piedDeTalus: Array<[number, number]>;
@@ -47,7 +50,9 @@ export function remblaiPlateforme(d: DonneesPlateforme): ResultatPlateforme {
   const coin = (hc: number) => (d.m * d.m * hc ** 3) / 3;
   const volumesCotes: [number, number, number, number] = [cote(d.L, h1, h2), cote(d.l, h2, h3), cote(d.L, h3, h4), cote(d.l, h4, h1)];
   const volumesCoins: [number, number, number, number] = [coin(h1), coin(h2), coin(h3), coin(h4)];
-  const volumeTalus = volumesCotes.reduce((a, b) => a + b, 0) + volumesCoins.reduce((a, b) => a + b, 0);
+  const volumeCoinsTotal = volumesCoins.reduce((a, b) => a + b, 0);
+  const volumeCotesTotal = volumesCotes.reduce((a, b) => a + b, 0);
+  const volumeTalus = volumeCotesTotal + volumeCoinsTotal;
   const volumePlateforme = surface * hMoyenne;
   const o = h.map((x) => d.m * x);
   const [o1, o2, o3, o4] = o as [number, number, number, number];
@@ -60,8 +65,19 @@ export function remblaiPlateforme(d: DonneesPlateforme): ResultatPlateforme {
   return {
     valide,
     message: valide ? undefined : 'Un coin est en déblai (cote projet sous le TN) : la méthode du remblai seul ne s’applique pas.',
-    h, hMoyenne, surface, volumePlateforme, volumesCotes, volumesCoins, volumeTalus,
+    h, hMoyenne, surface, volumePlateforme, volumesCotes, volumesCoins, volumeCotesTotal, volumeCoinsTotal, volumeTalus,
     volumeTotal: volumePlateforme + volumeTalus,
+    partTalus: volumeTalus / (volumePlateforme + volumeTalus),
     piedDeTalus,
   };
+}
+
+/** Cote projet la plus basse pour laquelle toute la plateforme reste en remblai (h ≥ 0 partout). */
+export function coteProjetMinimale(tn: readonly number[]): number {
+  return Math.max(...tn);
+}
+
+/** Hauteur de remblai en un point : h = Zp − TN (négative = déblai). */
+export function hauteurRemblai(Zp: number, TN: number): number {
+  return Zp - TN;
 }

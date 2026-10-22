@@ -17,6 +17,7 @@ export const BLONDEL_MIN = 0.6;
 export const BLONDEL_MAX = 0.64;
 
 export interface ResultatEscalier {
+  nBrut: number; // H / h visée, avant arrondi
   n: number; // nombre total de contremarches
   h: number; // hauteur réelle d'une marche (m)
   g: number; // giron (m)
@@ -44,6 +45,7 @@ export function escalierDroit(d: DonneesEscalier): ResultatEscalier {
   if (g <= 0) messages.push('Giron nul ou négatif : marches trop hautes pour ce module.');
   if (d.palier < d.emmarchement) messages.push('Palier plus court que l’emmarchement : peu confortable (règle de l’art).');
   return {
+    nBrut: d.H / d.hVisee,
     n, h, g, n1, n2,
     hauteurPalier: n1 * h,
     reculement: (n1 - 1) * g + d.palier + (n2 - 1) * g,

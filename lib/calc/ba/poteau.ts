@@ -62,6 +62,7 @@ export interface ResultatEC2 {
   dPrime: number; // distance de l'axe des barres à la paroi (m)
   delta: number; // d'/a
   khEffectif: number;
+  NRdBetonSeul: number; // résistance sans armatures, kh = kh0 (kN)
   AsReq: number; // section théorique nécessaire (cm²) pour le diamètre retenu
   AsMin: number;
   AsMax: number;
@@ -81,6 +82,7 @@ export interface ResultatBAEL {
   alpha: number;
   Br: number; // section réduite (cm²)
   termeBeton: number; // Br·fc28/(0,9·γb) (kN)
+  NuBetonSeul: number; // α·Br·fc28/(0,9·γb), sans armatures (kN)
   Ath: number; // section théorique (cm²), éventuellement négative
   Amin: number;
   Amax: number;
@@ -138,6 +140,21 @@ function asNecessaireEC2(NEd: number, Ac: number, fcdKn: number, fydKn: number, 
   return (B - Math.sqrt(disc)) / (2 * c * q);
 }
 
+/**
+ * Cotes (m, depuis le pied) des cadres : chaque zone d'extrémité de longueur `zone` est découpée
+ * en intervalles égaux ≤ sExt, la partie courante en intervalles égaux ≤ s (métré : intervalles + 1).
+ */
+export function positionsCadres(l: number, zone: number, sExt: number, s: number): number[] {
+  const z: number[] = [];
+  const n1 = zone > 0 ? arrondiSup(zone / sExt) : 0;
+  const courant = Math.max(l - 2 * zone, 0);
+  const n2 = courant > 0 ? arrondiSup(courant / s) : 0;
+  for (let i = 0; i <= n1; i++) z.push(n1 ? (i * zone) / n1 : 0);
+  for (let i = 1; i < n2; i++) z.push(zone + (i * courant) / n2);
+  for (let i = 0; i <= n1; i++) z.push(n1 ? l - zone + (i * zone) / n1 : l);
+  return [...new Set(z.map((v) => Math.round(v * 1e6) / 1e6))].sort((a, b) => a - b);
+}
+
 export function poteauCompressionCentree(d: DonneesPoteau): ResultatPoteau {
   const a = Math.min(d.a, d.b);
   const b = Math.max(d.a, d.b);
@@ -190,6 +207,7 @@ export function poteauCompressionCentree(d: DonneesPoteau): ResultatPoteau {
     dPrime: retenu.dPrime,
     delta: retenu.delta,
     khEffectif,
+    NRdBetonSeul: kh0 * ks * alpha * Ac * fcdKn,
     AsReq: retenu.AsReq,
     AsMin, AsMax, NRd,
     taux: NEd / NRd,
@@ -217,7 +235,7 @@ export function poteauCompressionCentree(d: DonneesPoteau): ResultatPoteau {
   const bael: ResultatBAEL = {
     lambda,
     alpha: alphaB,
-    Br, termeBeton, Ath, Amin, Amax, A,
+    Br, termeBeton, NuBetonSeul: alphaB * termeBeton, Ath, Amin, Amax, A,
     barres: barresBAEL,
     phiTMin: barresBAEL.phi / 3,
     stMax: Math.min(15 * barresBAEL.phi / 1000, 0.4, a + 0.1), // A.8.1,3
@@ -230,8 +248,7 @@ export function poteauCompressionCentree(d: DonneesPoteau): ResultatPoteau {
   const phiT = ec2.phiT / 1000;
   const longueurCadre = 2 * (a - 2 * c - phiT) + 2 * (b - 2 * c - phiT) + CROCHETS_CADRE;
   const zone = Math.min(ec2.zoneExtremite, d.l / 2);
-  const nombreCadres =
-    arrondiSup((2 * zone) / ec2.sMaxExtremites) + arrondiSup(Math.max(d.l - 2 * zone, 0) / ec2.sMax) + 1;
+  const nombreCadres = positionsCadres(d.l, zone, ec2.sMaxExtremites, ec2.sMax).length;
   const masseLongitudinale = ec2.barres.n * d.l * masseLineique(ec2.barres.phi);
   const masseCadres = nombreCadres * longueurCadre * masseLineique(ec2.phiT);
   const volumeBeton = a * b * d.l;

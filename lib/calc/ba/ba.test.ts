@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { masseLineique, sectionBarre, sectionBarres } from '../acier';
 import { combinaisonELU } from '../charges';
 import { enrobageNominal } from './enrobage';
-import { fcd, fckDeClasse, fyd } from './materiaux';
-import { alphaBAEL, alphaEC2, EXEMPLE_POTEAU, poteauCompressionCentree } from './poteau';
+import { classeDeFck, fcd, fckDeClasse, fyd } from './materiaux';
+import { alphaBAEL, alphaEC2, EXEMPLE_POTEAU, poteauCompressionCentree, positionsCadres } from './poteau';
 
 describe('aciers', () => {
   it('section et masse d’une barre HA 12', () => {
@@ -18,6 +18,8 @@ describe('aciers', () => {
 describe('matériaux et enrobage', () => {
   it('résistances de calcul', () => {
     expect(fckDeClasse('C25/30')).toBe(25);
+    expect(classeDeFck(30)).toBe('C30/37');
+    expect(classeDeFck(27)).toBeUndefined();
     expect(fcd(25)).toBeCloseTo(16.6667, 4); // 1,0 × 25 / 1,5
     expect(fyd(500)).toBeCloseTo(434.783, 3); // 500 / 1,15
   });
@@ -69,9 +71,10 @@ describe('coefficients α', () => {
  *  st ≤ min(15 × 1,4 ; 40 ; 30 + 10) = 21 cm
  * Quantités : béton 0,30 × 0,30 × 3,00 = 0,27 m³
  *  aciers longitudinaux 8 × 3,00 × 0,888 = 21,31 kg
- *  cadres : 2 zones de 0,30 m à 0,14 m → 5 ; partie courante 2,40 / 0,24 → 10 ; + 1 = 16 cadres
- *  longueur d'un cadre = 4 × (0,30 − 2 × 0,025 − 0,006) + 0,20 = 1,176 m → 16 × 1,176 × 0,222 = 4,18 kg
- *  ratio = 25,48 / 0,27 = 94,4 kg/m³
+ *  cadres : chaque zone de 0,30 m en 0,30 / 0,14 = 2,14 → 3 intervalles ; partie courante 2,40 / 0,24 → 10 intervalles
+ *           intervalles 3 + 10 + 3 = 16 → 17 cadres
+ *  longueur d'un cadre = 4 × (0,30 − 2 × 0,025 − 0,006) + 0,20 = 1,176 m → 17 × 1,176 × 0,2220 = 4,44 kg
+ *  ratio = (21,31 + 4,44) / 0,27 = 95,35 kg/m³
  */
 describe('poteau en compression centrée : exemple L3.3.5', () => {
   const r = poteauCompressionCentree(EXEMPLE_POTEAU);
@@ -92,6 +95,8 @@ describe('poteau en compression centrée : exemple L3.3.5', () => {
     expect(r.ec2.AsMin).toBeCloseTo(2.8635, 3);
     expect(r.ec2.AsMax).toBeCloseTo(36, 9);
     expect(r.ec2.valide).toBe(true);
+    // béton seul : 0,90 × 0,7459 × 1 500 = 1 007,0 kN
+    expect(r.ec2.NRdBetonSeul).toBeCloseTo(1006.97, 1);
   });
 
   it('EC2 : armatures transversales', () => {
@@ -105,6 +110,8 @@ describe('poteau en compression centrée : exemple L3.3.5', () => {
     expect(r.bael.alpha).toBeCloseTo(0.77555, 5);
     expect(r.bael.Br).toBeCloseTo(784, 9);
     expect(r.bael.termeBeton).toBeCloseTo(1451.85, 2);
+    // béton seul : 0,7755 × 1 451,85 = 1 126,0 kN
+    expect(r.bael.NuBetonSeul).toBeCloseTo(1125.98, 1);
     expect(r.bael.Ath).toBeCloseTo(3.530, 3);
     expect(r.bael.Amin).toBeCloseTo(4.8, 12);
     expect(r.bael.barres).toMatchObject({ n: 4, phi: 14 });
@@ -116,11 +123,20 @@ describe('poteau en compression centrée : exemple L3.3.5', () => {
     expect(q.volumeBeton).toBeCloseTo(0.27, 12);
     expect(q.coffrage).toBeCloseTo(3.6, 12);
     expect(q.masseLongitudinale).toBeCloseTo(21.308, 3);
-    expect(q.nombreCadres).toBe(16);
+    expect(q.nombreCadres).toBe(17);
     expect(q.longueurCadre).toBeCloseTo(1.176, 12);
-    expect(q.masseCadres).toBeCloseTo(4.176, 3);
-    expect(q.masseTotale).toBeCloseTo(25.484, 3);
-    expect(q.ratio).toBeCloseTo(94.385, 3); // 25,484 / 0,27
+    expect(q.masseCadres).toBeCloseTo(4.4373, 3);
+    expect(q.masseTotale).toBeCloseTo(25.7449, 3);
+    expect(q.ratio).toBeCloseTo(95.351, 2); // 25,745 / 0,27
+  });
+
+  it('positions des cadres : zones resserrées aux extrémités', () => {
+    const z = positionsCadres(3, 0.3, 0.14, 0.24);
+    expect(z).toHaveLength(17);
+    expect(z[0]).toBe(0);
+    expect(z[3]).toBeCloseTo(0.3, 9);
+    expect(z[4]).toBeCloseTo(0.54, 9); // 0,30 + 2,40 / 10
+    expect(z[16]).toBeCloseTo(3, 9);
   });
 
   it('signale une section trop faible', () => {

@@ -27,7 +27,8 @@ describe('remblai de plateforme : exemple L3.8.7', () => {
     expect(r.volumesCotes[1]).toBeCloseTo(4.65, 6);
     expect(r.volumesCotes[2]).toBeCloseTo(8.4, 6);
     expect(r.volumesCotes[3]).toBeCloseTo(12.2, 6);
-    expect(r.volumesCoins.reduce((a, b) => a + b, 0)).toBeCloseTo(1.43925, 6);
+    expect(r.volumeCotesTotal).toBeCloseTo(41.675, 6);
+    expect(r.volumeCoinsTotal).toBeCloseTo(1.43925, 6);
     expect(r.volumeTotal).toBeCloseTo(478.11425, 5);
     expect(r.valide).toBe(true);
   });
@@ -86,7 +87,8 @@ describe('escalier droit : exemple L3.6.9', () => {
 
 /*
  * Cas vérifié à la main : exemple L3.6.6.
- * L = 24 m, poteaux tous les 3 m au plus → 8 travées de 3,00 m, 9 poteaux de 20 × 20
+ * L = 24 m hors tout, poteaux de 20 × 20 ; entraxe extrême 24 − 0,20 = 23,80 m ; 23,80 / 3 = 7,93 → 8 travées
+ * entraxe 23,80 / 8 = 2,975 m, panneau libre 2,775 m, 9 poteaux
  * longueur nette = 24 − 9 × 0,20 = 22,20 m
  * niveaux : fond de fouille −0,60 ; dessus semelle −0,35 ; dessus soubassement +0,05 ; dessus chaînage bas +0,25 ;
  *           dessous chaînage haut +1,85 → élévation 1,60 m = 8 rangs de 0,20 m
@@ -100,7 +102,8 @@ describe('mur de clôture : exemple L3.6.6', () => {
   const r = murCloture(EXEMPLE_MUR);
   it('travées et niveaux', () => {
     expect([r.travees, r.poteaux]).toEqual([8, 9]);
-    expect(r.espacement).toBeCloseTo(3, 12);
+    expect(r.espacement).toBeCloseTo(2.975, 12);
+    expect(r.panneau).toBeCloseTo(2.775, 12);
     expect(r.longueurNette).toBeCloseTo(22.2, 9);
     expect(r.zDessusSemelle).toBeCloseTo(-0.35, 9);
     expect(r.zDessusChainageBas).toBeCloseTo(0.25, 9);
@@ -117,7 +120,7 @@ describe('mur de clôture : exemple L3.6.6', () => {
     expect(r.blocsElevation).toBe(467);
   });
   it('arrondit le nombre de travées vers le haut', () => {
-    expect(murCloture({ ...EXEMPLE_MUR, L: 25 }).travees).toBe(9); // 25 / 3 = 8,33 → 9
+    expect(murCloture({ ...EXEMPLE_MUR, L: 25 }).travees).toBe(9); // 24,80 / 3 = 8,27 → 9
   });
 });
 
@@ -140,5 +143,21 @@ describe('échelles et RDM', () => {
     expect(m.s1).toBeCloseTo(100, 12);
     expect(m.s2).toBeCloseTo(0, 12);
     expect(m.angleP).toBeCloseTo(26.565, 3);
+  });
+});
+
+describe('outils de terrassement', () => {
+  it('cote projet minimale = plus haute cote du TN', async () => {
+    const { coteProjetMinimale } = await import('./terrassement');
+    expect(coteProjetMinimale([100.2, 100.5, 100.8, 100.4])).toBe(100.8);
+    const { hauteurRemblai } = await import('./terrassement');
+    expect(hauteurRemblai(246.1, 245.3)).toBeCloseTo(0.8, 12); // 246,10 − 245,30
+  });
+  it('comparaison de deux volumes', async () => {
+    const { comparer } = await import('./outils');
+    // 600 → 690 : écart 90, soit +15 %
+    const c = comparer(600, 690);
+    expect(c.ecart).toBe(90);
+    expect(c.ecartRelatif).toBeCloseTo(0.15, 12);
   });
 });

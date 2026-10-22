@@ -23,3 +23,8 @@ export function fcd(fck: number): number {
 export function fyd(fyk: number): number {
   return fyk / GAMMA_S;
 }
+
+/** Désignation « Cfck/fck,cube » d'une classe courante à partir de fck (MPa), EC2 tableau 3.1. */
+export function classeDeFck(fck: number): ClasseBeton | undefined {
+  return CLASSES_BETON.find((c) => fckDeClasse(c) === fck);
+}
