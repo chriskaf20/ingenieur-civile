@@ -1,0 +1,300 @@
+---
+id: L1.6.5
+titre: Symboles de base en génie civil
+objectifs:
+  - Reconnaître les types de traits et ce qu'ils représentent
+  - Lire les repères d'un plan (axes, niveaux, coupes, nord)
+  - Identifier les symboles courants (murs, poteaux, portes, fenêtres, armatures)
+  - Interpréter les hachures des matériaux coupés
+  - Passer d'une mesure sur le plan à une longueur réelle avec l'échelle
+relecture: false
+normes:
+  - "NF EN ISO 128 (série) : principes de représentation des dessins techniques"
+  - "ISO 3766 : représentation simplifiée des armatures de béton"
+glossaire:
+  - terme: Échelle
+    definition: Rapport entre une longueur sur le dessin et la longueur réelle (1/50 = 1 cm pour 50 cm).
+  - terme: Repère de file
+    definition: Axe d'une file de poteaux ou de murs, identifié par une lettre ou un chiffre dans une bulle.
+  - terme: Coupe
+    definition: Vue obtenue en coupant l'ouvrage par un plan et en regardant dans un sens donné.
+  - terme: Hachures
+    definition: Motif qui remplit une partie coupée et indique son matériau.
+symboles:
+  - { symbole: '1/E', signification: 'échelle du dessin', unite: '—' }
+  - { symbole: '±0,00', signification: 'niveau de référence', unite: 'm' }
+  - { symbole: 'HA', signification: 'barre à haute adhérence', unite: '—' }
+  - { symbole: 'e', signification: 'espacement des armatures', unite: 'cm' }
+formules:
+  - { nom: 'Lecture à l''échelle', tex: 'L = m \times E', domaine: 'Dessin technique' }
+  - { nom: 'Dessin à l''échelle', tex: 'm = \frac{L}{E}', domaine: 'Dessin technique' }
+---
+
+import { longueurPapier, longueurReelle } from '@/lib/calc/dessin'
+import { grandeur, nombre } from '@/lib/format'
+import { PIECE, PlanPiece, TableauSymboles } from '@/components/schemas/Symboles'
+import { TYPES_HACHURES } from '@/components/drawing/Hachures'
+
+export const ex1 = { mesure: 84, E: 50 }
+export const ex1r = longueurReelle(ex1.mesure, ex1.E)
+export const ex2 = { L: 12.6, E: 100 }
+export const ex2r = longueurPapier(ex2.L, ex2.E)
+export const ex3 = { mesure: 42, Ecru: 50, Evrai: 100 }
+export const ex3faux = longueurReelle(ex3.mesure, ex3.Ecru)
+export const ex3vrai = longueurReelle(ex3.mesure, ex3.Evrai)
+
+<Page etape="intuition" titre="L'intuition : un plan est une langue">
+
+Sur la route, un panneau rond barré de rouge dit « interdit » sans un seul mot. Tout le monde le comprend, dans tous les pays. Un plan de construction fonctionne de la même façon.
+
+Sur un chantier, l'ingénieur, l'architecte, le chef d'équipe et le ferrailleur ne se parlent pas toujours. C'est le **plan** qui transmet l'information. Pour qu'il soit compris par tous, il utilise une langue commune : des **traits**, des **symboles** et des **hachures**, chacun avec un sens précis.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que veulent dire les traits, les bulles, les triangles et les hachures qu'on trouve sur tous les plans ?
+</Encadre>
+
+Apprendre ces symboles, c'est comme apprendre l'alphabet avant de lire. Au début, tu vas lentement. Après quelques plans, tu les lis sans y penser.
+
+<Encadre type="attention">
+Les conventions varient un peu d'un bureau d'études à l'autre et d'un pays à l'autre. Une règle ne change jamais : **la légende du plan fait foi**. On la lit avant tout.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours : traits, repères et hachures">
+
+### Les traits
+
+Un dessin utilise deux épaisseurs principales. Le **trait fort** montre ce qui est important : les contours vus et surtout les parties **coupées**. Le **trait fin** sert à tout ce qui aide à lire : cotes, lignes de rappel, hachures. Le type de trait ajoute un sens : continu (vu), interrompu (caché), mixte point-tiret (axe).
+
+### Les repères
+
+- Les **axes** et **repères de file** quadrillent le bâtiment. Les poteaux sont posés sur les files A, B, C… dans un sens et 1, 2, 3… dans l'autre. Toutes les cotes partent des axes.
+- Les **niveaux** donnent les altitudes en mètres par rapport à un niveau de référence noté ±0,00, souvent le sol fini du rez-de-chaussée.
+- Le **repère de coupe** montre où l'on « tranche » le bâtiment et dans quel sens on regarde.
+
+### Les hachures
+
+Quand un plan coupe un élément, on remplit la partie coupée par un motif qui indique son matériau : béton armé, maçonnerie, terre… Ce qui n'est pas coupé (vu au loin) n'est pas hachuré.
+
+### Les armatures
+
+Sur les plans de ferraillage, « 4 HA 12 » signifie 4 barres à haute adhérence de 12 mm de diamètre. « HA 8 e = 15 » signifie des barres de 8 mm espacées de 15 cm.
+
+<Regle type="norme" source="NF EN ISO 128 ; ISO 3766">
+Ces normes fixent les principes de représentation des dessins techniques et la représentation simplifiée des armatures. Les plans de bâtiment en reprennent l'essentiel.
+</Regle>
+
+### L'échelle
+
+Une échelle 1/50 signifie que 1 cm sur le plan représente 50 cm en vrai. Pour passer de la mesure $m$ sur le plan à la longueur réelle $L$ : $L = m \times E$.
+
+</Page>
+
+<Page etape="schemas" titre="Les symboles en situation : le plan d'une pièce">
+
+Voici le plan d'une pièce de {nombre(PIECE.entraxeX - PIECE.mur, 2)} m × {nombre(PIECE.entraxeY - PIECE.mur, 2)} m de surface intérieure. Retrouve chaque symbole de la fiche mémo :
+
+<PlanPiece />
+
+- les **files** A, B (verticales) et 1, 2 (horizontales), en trait mixte, avec leurs bulles ;
+- les **murs** coupés, en trait fort et hachures de maçonnerie ;
+- les **poteaux** en béton armé aux croisements de files ;
+- la **porte** et son arc d'ouverture, la **fenêtre** et son vitrage ;
+- les **cotes** d'axe en axe (dehors) et de nu à nu (dedans) ;
+- le **niveau** du sol fini {PIECE.niveau}, le **repère de coupe** 1-1 et le **nord**.
+
+<Encadre type="retenir">
+Cotes extérieures : d'axe en axe. Cotes intérieures : de nu à nu, c'est-à-dire de face de mur à face de mur. Ne confonds pas les deux.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="echelle">
+
+<Cahier titre="Exemple résolu : lire et dessiner à l'échelle">
+
+**Énoncé.** Sur un plan au 1/50, on mesure une longueur de 54 mm. Quelle est la longueur réelle ? Puis, à la même échelle, quelle longueur faut-il dessiner pour un mur de 3,60 m ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="Les formules">
+
+$L = m \times E$ (lire) et $m = L \div E$ (dessiner), avec $m$ en mm et $L$ converti en mm.
+
+<Note>Pourquoi tout en millimètres ? Parce qu'on mesure le plan à la règle graduée en mm : on évite les conversions en cours de route.</Note>
+</Etape>
+
+<Etape n={4} titre="L'application numérique">
+<AN k="lecture" />
+<AN k="dessin" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="reel" libelle="Longueur réelle" />
+<Note couleur="vert">Et pour dessiner : <Val k="papier" /> sur le plan au <Val k="echelle" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="lire un plan sans regarder la légende ni le cartouche.">
+L'échelle, les unités et les conventions particulières sont dans le cartouche et la légende. On les lit en premier.
+</Piege>
+
+<Piege erreur="confondre trait interrompu et trait mixte.">
+Le trait interrompu (tirets) montre ce qui est **caché**. Le trait mixte (tiret-point) montre un **axe**. Une fondation sous le sol est en tirets ; l'axe d'un poteau est en trait mixte.
+</Piege>
+
+<Piege erreur="hachurer une partie vue au lieu de la partie coupée.">
+On ne hachure que ce que le plan de coupe traverse. Un mur vu au loin, derrière le plan de coupe, n'est pas hachuré.
+</Piege>
+
+<Piege erreur="mesurer à la règle sur un plan imprimé ou photocopié.">
+L'impression change souvent l'échelle. On lit les cotes écrites ; la mesure à l'échelle ne sert qu'à se faire une idée.
+</Piege>
+
+<Piege erreur="lire « HA 8 e = 15 » comme « 15 barres de 8 ».">
+« e = 15 » est un espacement : une barre tous les 15 cm. Le nombre de barres se calcule à partir de la longueur à couvrir.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Au bureau d'études**, les symboles sont dans la bibliothèque du logiciel de DAO (voir L2.10). Le projeteur ne les dessine pas à la main, mais il doit savoir lesquels utiliser.
+
+**Sur le chantier**, le chef d'équipe consulte les plans plusieurs fois par jour. Ce qu'il cherche d'abord :
+
+1. le **cartouche** et l'**indice** : a-t-il la dernière version ?
+2. les **axes** : c'est à partir d'eux qu'il implante ;
+3. les **niveaux** : c'est à partir d'eux qu'il règle ses coffrages ;
+4. les **coupes** : elles montrent ce que le plan ne peut pas montrer.
+
+<Encadre type="terrain" titre="Plans sur le chantier">
+Le soleil, la pluie et la poussière abîment vite le papier. Les plans de chantier sont rangés dans une pochette plastique, et l'on barre clairement toute version périmée pour éviter de construire avec un ancien indice.
+</Encadre>
+
+**Un réflexe à prendre** : quand un symbole n'est pas clair, on ne devine pas. On appelle le bureau d'études ou on pose la question en réunion de chantier, et l'on note la réponse dans le compte rendu.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : symboles de base (1/2)">
+
+### Les traits
+
+<TableauSymboles groupe="traits" />
+
+### Les repères
+
+<TableauSymboles groupe="reperes" />
+
+</FicheMemo>
+
+<FicheMemo titre="Fiche mémo : symboles de base (2/2)">
+
+### Les éléments courants
+
+<TableauSymboles groupe="elements" />
+
+### Les hachures des matériaux coupés
+
+<LegendeHachures types={TYPES_HACHURES} prefixe="memo" />
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Lire une longueur">
+
+Sur un plan au 1/{ex1.E}, tu mesures {ex1.mesure} mm. Quelle est la longueur réelle ?
+
+<Indice>Multiplie la mesure par le dénominateur de l'échelle, puis convertis en mètres.</Indice>
+
+<Corrige>
+$L = m \times E$ = {ex1.mesure} × {ex1.E} = {nombre(ex1r * 1000, 0)} mm = **{grandeur(ex1r, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Dessiner une façade">
+
+Une façade mesure {nombre(ex2.L, 2)} m. Quelle longueur dessiner au 1/{ex2.E} ? Tient-elle sur une feuille A4 (297 mm de long) ?
+
+<Indice>Divise la longueur réelle, en mm, par le dénominateur de l'échelle.</Indice>
+
+<Corrige>
+$m = L \div E$ = {nombre(ex2.L * 1000, 0)} ÷ {ex2.E} = **{grandeur(ex2r, 0, 'mm')}**. Cela tient sur la longueur d'une feuille A4, mais sans beaucoup de place pour les cotes et le cartouche.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le plan photocopié">
+
+Un plan indique « éch. 1/{ex3.Ecru} ». Il a été photocopié en réduction de moitié, mais personne ne l'a noté. Tu mesures {ex3.mesure} mm sur la copie. Quelle longueur réelle lis-tu si tu crois l'échelle écrite ? Quelle est la vraie longueur ? Quelle leçon en tirer ?
+
+<Indice>Une réduction de moitié transforme le 1/{ex3.Ecru} en 1/{ex3.Evrai}.</Indice>
+
+<Corrige>
+
+- En croyant l'échelle écrite : {ex3.mesure} × {ex3.Ecru} → {grandeur(ex3faux, 2, 'm')}.
+- En réalité : {ex3.mesure} × {ex3.Evrai} → **{grandeur(ex3vrai, 2, 'm')}**, soit le double.
+- Leçon : on ne mesure jamais un plan à la règle pour construire. On lit les cotes écrites, ou l'on vérifie l'échelle sur une cote connue.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Quel trait représente un axe ?" choix={['Continu fort', 'Continu fin', 'Interrompu', 'Mixte fin (tiret-point)']} bonne={3} colonnes={2}>
+Le trait mixte fin sert aux axes et aux plans de symétrie.
+</QCM>
+
+<QCM n={2} question="Une fondation cachée sous le sol, vue sur une élévation, se dessine en :" choix={['trait continu fort', 'trait interrompu', 'trait mixte', 'pointillés rouges']} bonne={1} colonnes={2}>
+Ce qui est caché se dessine en trait interrompu (tirets).
+</QCM>
+
+<QCM n={3} question="Que signifie « 4 HA 12 » ?" choix={['4 barres de 12 cm', '12 barres de 4 mm', '4 barres à haute adhérence de 12 mm de diamètre', '4 cadres espacés de 12 cm']} bonne={2}>
+HA = haute adhérence ; le nombre précède, le diamètre en mm suit.
+</QCM>
+
+<QCM n={4} question="Le repère « 1-1 » avec deux flèches indique :" choix={['un niveau', 'un plan de coupe et le sens d’observation', 'une pente', 'un axe']} bonne={1} colonnes={2}>
+La vue correspondante s'appelle « coupe 1-1 ».
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Sur un plan, quelles parties hachure-t-on ?" choix={['Toutes', 'Les parties coupées par le plan de coupe', 'Les parties vues au loin', 'Les parties cachées']} bonne={1}>
+Les hachures indiquent le matériau de ce qui est coupé.
+</QCM>
+
+<QCM n={6} question={<>Sur un plan au 1/{ex1.E}, on mesure {ex1.mesure} mm. La longueur réelle vaut :</>} choix={[grandeur(ex1r / 10, 2, 'm'), grandeur(ex1r, 2, 'm'), grandeur(ex1r * 10, 2, 'm'), grandeur(ex1.mesure / ex1.E, 2, 'm')]} bonne={1} colonnes={2}>
+{ex1.mesure} × {ex1.E} = {nombre(ex1r * 1000, 0)} mm = {grandeur(ex1r, 2, 'm')}.
+</QCM>
+
+<QCM n={7} question="Que signifie « HA 8 e = 15 » ?" choix={['15 barres de 8 mm', 'des barres de 8 mm espacées de 15 cm', 'une barre de 8 m et de 15 mm', '8 barres de 15 mm']} bonne={1} colonnes={2}>
+« e » est l'espacement entre barres, en cm.
+</QCM>
+
+<QCM n={8} question="La légende d'un plan contredit ta fiche mémo. Qui a raison ?" choix={['La fiche mémo', 'La légende du plan', 'Le plus ancien des deux', 'Personne']} bonne={1} colonnes={2}>
+Les conventions varient : la légende du plan fait foi.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

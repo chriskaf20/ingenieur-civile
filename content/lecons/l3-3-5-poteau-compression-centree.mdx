@@ -1,0 +1,441 @@
+---
+id: L3.3.5
+titre: Poteau en compression centrée
+objectifs:
+  - Calculer l'effort normal de calcul d'un poteau à l'ELU
+  - Calculer l'élancement d'un poteau et le coefficient de flambement α
+  - Dimensionner les armatures longitudinales par la méthode simplifiée de l'EC2
+  - Choisir les cadres et leur espacement selon les dispositions constructives
+  - Comparer le résultat avec le BAEL 91 et expliquer l'écart
+relecture: false
+normes:
+  - "EN 1990 (EC0) : combinaison fondamentale 6.10, tableau A1.2(B)"
+  - "EN 1992-1-1 (EC2) : §2.4.2.4, §3.1.6, §4.4.1, §9.5.2, §9.5.3 ; annexe nationale française"
+  - "Recommandations professionnelles françaises pour l'application de l'EC2 : méthode simplifiée des poteaux"
+  - "BAEL 91 révisé 99 : B.8.4 et A.8.1 (comparaison)"
+glossaire:
+  - terme: Compression centrée
+    definition: Chargement dont la résultante passe par le centre de gravité de la section.
+  - terme: Flambement
+    definition: Instabilité d'un élément comprimé élancé, qui se courbe brusquement sous la charge.
+  - terme: Élancement
+    definition: Rapport entre la longueur de flambement et le rayon de giration de la section.
+  - terme: Cadre
+    definition: Armature transversale fermée qui maintient les barres longitudinales et confine le béton.
+  - terme: Section réduite (BAEL)
+    definition: Section de béton diminuée de 1 cm sur tout le pourtour.
+symboles:
+  - { symbole: 'N_{Ed}', signification: 'effort normal de calcul à l''ELU', unite: 'kN' }
+  - { symbole: 'f_{cd}', signification: 'résistance de calcul du béton', unite: 'MPa' }
+  - { symbole: 'f_{yd}', signification: 'limite d''élasticité de calcul de l''acier', unite: 'MPa' }
+  - { symbole: 'l_0', signification: 'longueur de flambement', unite: 'm' }
+  - { symbole: '\lambda', signification: 'élancement', unite: '—' }
+  - { symbole: 'A_s', signification: 'section des armatures longitudinales', unite: 'cm²' }
+formules:
+  - { nom: 'Effort normal ELU', tex: 'N_{Ed} = 1{,}35\,N_G + 1{,}5\,N_Q', domaine: 'Béton armé' }
+  - { nom: 'Élancement (rectangle)', tex: '\lambda = \frac{l_0 \sqrt{12}}{a}', domaine: 'Béton armé' }
+  - { nom: 'Méthode simplifiée EC2', tex: 'N_{Rd} = k_h k_s \alpha \,(A_c f_{cd} + A_s f_{yd})', domaine: 'Béton armé' }
+  - { nom: 'BAEL 91', tex: 'N_u \le \alpha \left[\frac{B_r f_{c28}}{0{,}9\,\gamma_b} + \frac{A f_e}{\gamma_s}\right]', domaine: 'Béton armé' }
+---
+
+import { EXEMPLE_POTEAU, poteauCompressionCentree } from '@/lib/calc/ba/poteau'
+import { classeDeFck } from '@/lib/calc/ba/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { SectionFerraillee } from '@/components/drawing/Armatures'
+import { PoteauCadresBande, PoteauElevation, PoteauIso } from '@/components/schemas/Poteau'
+
+export const d = EXEMPLE_POTEAU
+export const r = poteauCompressionCentree(d)
+export const q = r.quantites
+export const ex1d = { ...d, NG: 450, NQ: 150, a: 0.25, b: 0.25 }
+export const ex1 = poteauCompressionCentree(ex1d)
+export const ex2d = { ...d, k: 1 }
+export const ex2 = poteauCompressionCentree(ex2d)
+export const ex3d = { ...d, NG: 1100, NQ: 350 }
+export const ex3 = poteauCompressionCentree(ex3d)
+export const ex3bd = { ...ex3d, a: 0.35, b: 0.35 }
+export const ex3b = poteauCompressionCentree(ex3bd)
+export const classe = classeDeFck(d.fck)
+
+<Page etape="intuition" titre="L'intuition : porter une charge sur la tête">
+
+Regarde une vendeuse qui porte un panier lourd sur la tête au marché. Tant qu'elle reste bien droite, la charge descend dans son corps jusqu'au sol, et elle peut porter longtemps. Si elle se penche, tout devient difficile. Un **poteau** fait le même travail : il reçoit les charges des étages et les descend jusqu'à la fondation.
+
+Prends maintenant une règle en plastique et appuie sur ses deux bouts. Au début, rien. Puis, d'un coup, elle se courbe : c'est le **flambement**. Plus la règle est longue et fine, plus elle flambe tôt. Un poteau élancé se comporte de la même façon.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Pour un poteau qui reçoit une charge connue, quelle section de béton et quelles armatures faut-il pour qu'il ne s'écrase pas et ne flambe pas ?
+</Encadre>
+
+Le béton résiste très bien à la compression : c'est lui qui porte l'essentiel. Les **barres d'acier** longitudinales ajoutent de la résistance et reprennent les petites flexions qu'on ne peut jamais éviter. Les **cadres** tiennent les barres pour qu'elles ne flambent pas vers l'extérieur et serrent le béton.
+
+<Encadre type="terrain">
+En Afrique francophone, beaucoup de bureaux d'études calculent encore les poteaux au BAEL 91. Les grands projets financés par des bailleurs internationaux exigent de plus en plus les Eurocodes. Un bon ingénieur sait faire les deux et comprend pourquoi les résultats diffèrent.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : la méthode de l'EC2">
+
+**1. L'effort de calcul.** On majore les charges (EC0, éq. 6.10) : $N_{Ed} = 1{,}35\,N_G + 1{,}5\,N_Q$, en kN. $N_G$ vient des charges permanentes, $N_Q$ des charges d'exploitation.
+
+**2. Les résistances de calcul**, en MPa : $f_{cd} = \alpha_{cc} f_{ck} / \gamma_c = f_{ck}/1{,}5$ (avec $\alpha_{cc} = 1$, annexe nationale française) et $f_{yd} = f_{yk}/\gamma_s = f_{yk}/1{,}15$.
+
+**3. L'élancement.** La longueur de flambement $l_0$ (m) dépend des liaisons aux extrémités. Pour une section rectangulaire de petit côté $a$ (m) : $\lambda = l_0\sqrt{12}/a$.
+
+**4. La résistance (méthode simplifiée).** Pour les poteaux courants de bâtiment :
+
+$$
+N_{Rd} = k_h \, k_s \, \alpha \,(A_c f_{cd} + A_s f_{yd}) \ \ge\ N_{Ed}
+$$
+
+avec $A_c$ l'aire de béton (m²), $A_s$ l'aire des barres (m²) et :
+
+- $\alpha = \dfrac{0{,}86}{1 + (\lambda/62)^2}$ si $\lambda \le 60$, et $\alpha = (32/\lambda)^{1{,}3}$ si $60 < \lambda \le 120$ ;
+- $k_h = (0{,}75 + 0{,}5\,a)(1 - 6\rho\delta)$ si $a < 0{,}50$ m, sinon $k_h = 1$, avec $\rho = A_s/A_c$ et $\delta = d'/a$ ;
+- $k_s = 1$ pour l'acier B500 courant.
+
+<Regle type="norme" source="Recommandations professionnelles (EC2)">
+Domaine : $\lambda \le 120$, $20 \le f_{ck} \le 50$ MPa, $a \ge 0{,}15$ m, armatures symétriques, chargement après 28 jours. Hors de ce domaine, on applique la méthode générale de l'EC2 (M1.1.2).<AVerifier note="Coefficients α, kh, ks à contrôler sur le document : A_VERIFIER.md n° 13" />
+</Regle>
+
+**5. Les dispositions constructives** (EC2 §9.5) : barres de 8 mm au moins, 4 barres au moins ; $A_{s,min} = \max(0{,}10\,N_{Ed}/f_{yd}\,;\ 0{,}002\,A_c)$ ; $A_{s,max} = 0{,}04\,A_c$ hors recouvrements. Cadres : $\phi_t \ge \max(6\ \text{mm}\,;\ \phi_l/4)$, espacement $\le \min(20\,\phi_l\,;\ a\,;\ 400\ \text{mm})$, réduit à 60 % près des poutres et des planchers.
+
+**6. L'enrobage** (EC2 §4.4.1) : $c_{nom} = c_{min} + \Delta c_{dev}$, avec $c_{min} = \max(c_{min,b}\,;\ c_{min,dur}\,;\ 10\ \text{mm})$.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la comparaison avec le BAEL 91">
+
+Le BAEL 91 (article B.8.4) écrit la même idée autrement :
+
+$$
+N_u \le \alpha \left[\frac{B_r\, f_{c28}}{0{,}9\,\gamma_b} + \frac{A\, f_e}{\gamma_s}\right]
+\qquad \alpha = \frac{0{,}85}{1 + 0{,}2\,(\lambda/35)^2}\ \ (\lambda \le 50)
+$$
+
+$B_r$ est la **section réduite** : on retire 1 cm sur tout le pourtour. $\gamma_b = 1{,}5$ et $\gamma_s = 1{,}15$.
+
+| | EC2 (méthode simplifiée) | BAEL 91 |
+|---|---|---|
+| Combinaison | $1{,}35\,G + 1{,}5\,Q$ | $1{,}35\,G + 1{,}5\,Q$ |
+| Béton | $A_c\,f_{ck}/1{,}5$, avec $k_h$ | $B_r\,f_{c28}/(0{,}9 \times 1{,}5)$ |
+| Flambement | $0{,}86/(1+(\lambda/62)^2)$ | $0{,}85/(1+0{,}2(\lambda/35)^2)$ |
+| Acier minimal | $\max(0{,}10\,N_{Ed}/f_{yd}\,;\ 0{,}2\,\%)$ | $\max(4\ \text{cm}^2/\text{m de périmètre}\,;\ 0{,}2\,\%)$ |
+| Acier maximal | 4 % | 5 % |
+| Cadres | $\phi_l/4$, $\min(20\phi_l\,;\ a\,;\ 40\ \text{cm})$ | $\phi_l/3$, $\min(15\phi_l\,;\ 40\ \text{cm}\,;\ a + 10\ \text{cm})$ |
+
+### Pourquoi les résultats diffèrent
+
+Pour l'exemple de la leçon, le béton seul résiste à {grandeur(r.ec2.NRdBetonSeul, 0, 'kN')} selon l'EC2 et à {grandeur(r.bael.NuBetonSeul, 0, 'kN')} selon le BAEL, pour un effort de {grandeur(r.NEd, 0, 'kN')}. L'acier ne sert qu'à combler la différence : un petit écart sur la part du béton change donc beaucoup la section d'acier. Ici, l'EC2 demande {grandeur(r.ec2.AsReq, 2, 'cm²')} et le BAEL {grandeur(r.bael.Ath, 2, 'cm²')}.
+
+<Encadre type="attention" titre="Ne jamais mélanger">
+On fait tout le calcul dans un seul règlement : combinaisons, matériaux, flambement, dispositions. Prendre le $\alpha$ du BAEL avec le $f_{cd}$ de l'EC2 donne un résultat qui n'a aucune valeur.
+</Encadre>
+
+<Regle type="norme" source="BAEL 91 B.8.4">
+Si plus de la moitié des charges est appliquée avant 90 jours, $\alpha$ est divisé par 1,10. On prend aussi $l_f = 0{,}7\,l_0$ pour un poteau encastré dans sa fondation ou relié à des poutres de raideur suffisante, et $l_f = l_0$ sinon.
+</Regle>
+
+</Page>
+
+<Infographie titre="Dimensionnement et ferraillage d'un poteau" sousTitre={`Poteau ${nombre(d.a * 100, 0)} × ${nombre(d.b * 100, 0)} cm du rez-de-chaussée d'un R+3 · ${classe} · B500 · EC2 comparé au BAEL 91`}>
+
+<Panneau n={1} titre="Charges" icone="charges" couleur="encre">
+
+$N_G$ = {grandeur(d.NG, 0, 'kN')} ; $N_Q$ = {grandeur(d.NQ, 0, 'kN')}
+
+$N_{Ed}$ = 1,35 × {nombre(d.NG, 0)} + 1,5 × {nombre(d.NQ, 0)} = **{grandeur(r.NEd, 0, 'kN')}**
+
+</Panneau>
+
+<Panneau n={2} titre="Matériaux" icone="materiaux" couleur="brique">
+
+$f_{cd}$ = {nombre(d.fck, 0)} / 1,5 = **{grandeur(r.fcd, 2, 'MPa')}** ; $f_{yd}$ = 500 / 1,15 = **{grandeur(r.fyd, 1, 'MPa')}**
+
+Classe {d.exposition} : $c_{nom}$ = {r.ec2.enrobage.cmin} + 10 = **{r.ec2.enrobage.cnom} mm**
+
+</Panneau>
+
+<Panneau n={3} titre="Élancement" icone="flambement" couleur="terre">
+
+$l_0$ = {nombre(d.k, 1)} × {nombre(d.l, 2)} = {grandeur(r.l0, 2, 'm')} ; $\lambda$ = **{nombre(r.ec2.lambda, 1)}**
+
+EC2 : $\alpha$ = **{nombre(r.ec2.alpha, 3)}** ; BAEL : $\alpha$ = **{nombre(r.bael.alpha, 3)}**
+
+</Panneau>
+
+<Panneau n={4} titre="Armatures longitudinales" icone="ferraillage" couleur="correction">
+
+EC2 : $A_{s,req}$ = {grandeur(r.ec2.AsReq, 2, 'cm²')} → **{r.ec2.barres.n} HA {r.ec2.barres.phi}** ({nombre(r.ec2.barres.section, 2)} cm²), $N_{Rd}$ = {grandeur(r.ec2.NRd, 0, 'kN')}
+
+BAEL : $A_{th}$ = {nombre(r.bael.Ath, 2)} ; $A_{min}$ = {nombre(r.bael.Amin, 2)} cm² → **{r.bael.barres.n} HA {r.bael.barres.phi}**
+
+</Panneau>
+
+<Panneau n={5} titre="Cadres" icone="cadre" couleur="acier">
+
+HA {r.ec2.phiT} ($\ge$ {r.ec2.phiTMin} mm) ; espacement $\le$ **{nombre(r.ec2.sMax * 100, 0)} cm**, et $\le$ **{nombre(r.ec2.sMaxExtremites * 100, 0)} cm** sur {grandeur(r.ec2.zoneExtremite, 2, 'm')} près des planchers.
+
+BAEL : $s_t \le$ {nombre(r.bael.stMax * 100, 0)} cm.
+
+<PoteauCadresBande d={d} r={r} largeur={320} />
+
+</Panneau>
+
+<Panneau n={6} titre="Section retenue (EC2)" icone="verification" couleur="validation">
+
+<Figure alt={`Section ${nombre(d.a * 100, 0)} × ${nombre(d.b * 100, 0)} cm avec ${r.ec2.barres.n} HA ${r.ec2.barres.phi} et cadres HA ${r.ec2.phiT}`} largeur={300} hauteur={250} largeurMin={220}>
+  <SectionFerraillee b={d.b} h={d.a} enrobage={r.ec2.enrobage.cnom} phiL={r.ec2.barres.phi} phiT={r.ec2.phiT} n={r.ec2.barres.n} echelle={560} x={46} y={40} prefixe="info-sec" />
+</Figure>
+
+</Panneau>
+
+<Panneau n={7} titre="Quantités (un poteau, EC2)" icone="quantites" couleur="validation" large>
+
+| Béton | Coffrage | Barres longitudinales | Cadres | Acier total | Ratio |
+|---|---|---|---|---|---|
+| {grandeur(q.volumeBeton, 3, 'm³')} | {grandeur(q.coffrage, 2, 'm²')} | {r.ec2.barres.n} × {nombre(d.l, 2)} m = {grandeur(q.masseLongitudinale, 2, 'kg')} | {q.nombreCadres} × {nombre(q.longueurCadre, 3)} m = {grandeur(q.masseCadres, 2, 'kg')} | **{grandeur(q.masseTotale, 2, 'kg')}** | {nombre(q.ratio, 0)} kg/m³ |
+
+<p className="text-[0.8rem] text-beton">Barres comptées sur la hauteur libre, sans attentes ni recouvrements ; crochets de cadres forfaitaires (simplification de métré).</p>
+
+</Panneau>
+
+<div className="col-span-2 max-sm:col-span-1">
+<Encadre type="retenir">
+Le béton porte l'essentiel : sans aucune barre, il résiste déjà à {grandeur(r.ec2.NRdBetonSeul, 0, 'kN')} sur les {grandeur(r.NEd, 0, 'kN')} demandés (EC2). Les barres complètent la résistance, les cadres les empêchent de flamber. Le BAEL est ici gouverné par sa section minimale.
+</Encadre>
+</div>
+
+</Infographie>
+
+<Vue3D titre="Le poteau ferraillé en perspective" calques={[{ id: 'beton', libelle: 'Béton' }, { id: 'longitudinales', libelle: 'Barres longitudinales' }, { id: 'cadres', libelle: 'Cadres' }, { id: 'cotes', libelle: 'Cotes' }]}>
+
+Masque le béton pour voir la cage d'armatures. Les cadres sont plus serrés en haut et en bas, près des planchers : c'est là que les efforts locaux sont les plus forts.
+
+<div className="grid grid-cols-[1.15fr_1fr] items-start gap-3 max-sm:grid-cols-1">
+<PoteauIso d={d} r={r} hauteurMax={640} />
+<PoteauElevation d={d} r={r} largeur={260} />
+</div>
+
+<Encadre type="retenir">
+{r.ec2.barres.n} HA {r.ec2.barres.phi}, {q.nombreCadres} cadres HA {r.ec2.phiT} : tous ces nombres sont recalculés à partir des données de l'exemple.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="poteau">
+
+<Cahier titre="Exemple résolu : poteau du rez-de-chaussée (1/2)">
+
+**Énoncé.** Le poteau de rez-de-chaussée d'un immeuble R+3 mesure {nombre(d.a * 100, 0)} × {nombre(d.b * 100, 0)} cm et {nombre(d.l, 2)} m de hauteur libre. La descente de charges donne $N_G$ = {nombre(d.NG, 0)} kN et $N_Q$ = {nombre(d.NQ, 0)} kN. Béton {classe}, acier B500, intérieur sec (XC1). Dimensionne ses armatures selon l'EC2 et compare au BAEL.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu : poteau du rez-de-chaussée (2/2)">
+
+<Etape n={3} titre="Les formules">
+
+$N_{Ed} = 1{,}35 N_G + 1{,}5 N_Q$ ; $\lambda = l_0\sqrt{12}/a$ ; $N_{Rd} = k_h k_s \alpha (A_c f_{cd} + A_s f_{yd}) \ge N_{Ed}$
+
+<Note>Pourquoi l'élancement d'abord ? Parce que α dépend de λ : sans lui, on ne connaît pas la résistance du poteau.</Note>
+</Etape>
+
+<Etape n={4} titre="L'application numérique">
+<AN k="NEd" />
+<AN k="materiaux" />
+<AN k="lambda" />
+<AN k="alpha" />
+<AN k="As" />
+<AN k="NRd" />
+<AN k="bael" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="barresEC2" libelle="EC2" />
+<Note couleur="bleu">Cadres : <Val k="cadres" />. BAEL : <Val k="barresBAEL" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="utiliser les charges non majorées pour dimensionner à l'ELU.">
+À l'ELU, on compare la résistance de calcul à $N_{Ed} = 1{,}35\,N_G + 1{,}5\,N_Q$, jamais à $N_G + N_Q$.
+</Piege>
+
+<Piege erreur="calculer l'élancement avec le grand côté de la section.">
+Le poteau flambe dans la direction où il est le plus souple : on prend le **petit** côté $a$.
+</Piege>
+
+<Piege erreur="mélanger l'EC2 et le BAEL dans le même calcul.">
+Chaque règlement est cohérent avec lui-même. Un α du BAEL avec un $f_{cd}$ de l'EC2 ne veut rien dire.
+</Piege>
+
+<Piege erreur="mettre seulement la section théorique quand elle est inférieure au minimum.">
+La section à mettre en place est le maximum entre la section calculée et la section minimale. Dans l'exemple, le BAEL est gouverné par son minimum.
+</Piege>
+
+<Piege erreur="espacer les cadres régulièrement sur toute la hauteur.">
+Près des planchers et des poutres, l'EC2 réduit l'espacement à 60 % sur une hauteur égale à la plus grande dimension du poteau.
+</Piege>
+
+<Piege erreur="oublier de vérifier que l'on reste dans le domaine de la méthode simplifiée.">
+Au-delà de λ = 120, avec une section trop petite ou un chargement très jeune, il faut la méthode générale.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les attentes.** Les barres du poteau dépassent de la semelle ou du plancher inférieur pour assurer la continuité. Le recouvrement se calcule (L3.3.4) : on ne coupe pas les attentes « parce qu'elles gênent ».
+
+**Les cales d'enrobage.** Sans cales, la cage d'armatures se colle au coffrage et l'enrobage disparaît. Les barres rouillent en quelques années, surtout en climat humide. On fixe des cales en béton ou en plastique sur les cadres.
+
+**Le coffrage** doit être d'aplomb : on vérifie au fil à plomb ou au niveau sur deux faces. Un poteau hors d'aplomb reçoit une flexion qu'on n'a pas calculée.
+
+**Le bétonnage.** On ne laisse pas tomber le béton de plus de 1,5 à 2 m sans goulotte : il se sépare (ségrégation) et forme des nids de cailloux en pied de poteau. On vibre par couches.<AVerifier note="Hauteur de chute admissible : règle de chantier courante, à confirmer selon le cahier des charges" />
+
+<Encadre type="terrain" titre="Contexte RDC">
+Les barres vendues sur les marchés n'ont pas toujours la nuance annoncée. Pour un ouvrage important, on demande les certificats du fournisseur ou on fait essayer des échantillons en laboratoire. Le calcul suppose un acier B500 : un acier plus faible fausse tout.
+</Encadre>
+
+**Le contrôle avant bétonnage** (PP.3.7) : nombre et diamètre des barres, espacement des cadres, zones resserrées en tête et en pied, enrobage, propreté des armatures.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : poteau en compression centrée">
+
+### La méthode EC2 en 6 étapes
+
+1. $N_{Ed} = 1{,}35\,N_G + 1{,}5\,N_Q$
+2. $f_{cd} = f_{ck}/1{,}5$ ; $f_{yd} = f_{yk}/1{,}15$ ; $c_{nom} = c_{min} + 10$ mm
+3. $l_0$, puis $\lambda = l_0\sqrt{12}/a$ (petit côté)
+4. $\alpha$ ($\lambda \le 60$ : $0{,}86/(1+(\lambda/62)^2)$), $k_h$, $k_s$
+5. $A_s$ tel que $k_h k_s \alpha (A_c f_{cd} + A_s f_{yd}) \ge N_{Ed}$, puis $A_{s,min} \le A_s \le A_{s,max}$
+6. Cadres : $\phi_t \ge \max(6\,;\ \phi_l/4)$ ; $s \le \min(20\phi_l\,;\ a\,;\ 400)$ ; 60 % près des planchers
+
+### Les valeurs à connaître
+
+| Grandeur | EC2 | BAEL 91 |
+|---|---|---|
+| Coefficients | $\gamma_c = 1{,}5$ ; $\gamma_s = 1{,}15$ | $\gamma_b = 1{,}5$ ; $\gamma_s = 1{,}15$ |
+| Acier minimal | $\max(0{,}10 N_{Ed}/f_{yd}\,;\ 0{,}2\,\%\,A_c)$ | $\max(4\ \text{cm}^2/\text{m}\,;\ 0{,}2\,\%\,B)$ |
+| Acier maximal | 4 % | 5 % |
+| Barres | 4 au moins, $\phi \ge 8$ mm | 4 au moins |
+
+### À retenir
+
+- Le petit côté gouverne le flambement.
+- On ne mélange jamais deux règlements.
+- Les cadres se resserrent en tête et en pied.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un poteau d'étage">
+
+Un poteau de {nombre(ex1d.a * 100, 0)} × {nombre(ex1d.b * 100, 0)} cm reçoit $N_G$ = {nombre(ex1d.NG, 0)} kN et $N_Q$ = {nombre(ex1d.NQ, 0)} kN. Les autres données sont celles de l'exemple. Calcule $N_{Ed}$, λ et les armatures EC2.
+
+<Indice>Commence par l'effort, puis l'élancement avec le petit côté.</Indice>
+
+<Corrige>
+
+- $N_{Ed}$ = **{grandeur(ex1.NEd, 1, 'kN')}** ; λ = **{nombre(ex1.ec2.lambda, 1)}** ; α = {nombre(ex1.ec2.alpha, 3)}.
+- $A_{s,req}$ = {grandeur(ex1.ec2.AsReq, 2, 'cm²')} ; $A_{s,min}$ = {grandeur(ex1.ec2.AsMin, 2, 'cm²')}.
+- Barres : **{ex1.ec2.barres.n} HA {ex1.ec2.barres.phi}** ; $N_{Rd}$ = {grandeur(ex1.ec2.NRd, 0, 'kN')}.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le poteau est articulé">
+
+Reprends l'exemple, mais le poteau est considéré comme bi-articulé : $l_0 = l$. Que deviennent λ, α et les armatures ?
+
+<Indice>Seule la longueur de flambement change. Regarde comment α réagit.</Indice>
+
+<Corrige>
+
+- $l_0$ = {grandeur(ex2.l0, 2, 'm')} ; λ = **{nombre(ex2.ec2.lambda, 1)}** ; α = **{nombre(ex2.ec2.alpha, 3)}** (contre {nombre(r.ec2.alpha, 3)}).
+- $A_{s,req}$ = {grandeur(ex2.ec2.AsReq, 2, 'cm²')} → **{ex2.ec2.barres.n} HA {ex2.ec2.barres.phi}**{ex2.ec2.valide ? '' : ' : ' + ex2.ec2.messages.join(' ')}.
+
+Les conditions aux extrémités ont un effet direct sur la quantité d'acier : il faut les justifier, pas les supposer.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Trop chargé ?">
+
+Le poteau de l'exemple reçoit finalement $N_G$ = {nombre(ex3d.NG, 0)} kN et $N_Q$ = {nombre(ex3d.NQ, 0)} kN. La section de {nombre(d.a * 100, 0)} cm suffit-elle ? Sinon, essaie {nombre(ex3bd.a * 100, 0)} × {nombre(ex3bd.b * 100, 0)} cm.
+
+<Indice>Vérifie que la section d'acier nécessaire reste sous le maximum de 4 %.</Indice>
+
+<Corrige>
+
+- $N_{Ed}$ = {grandeur(ex3.NEd, 0, 'kN')}.
+- Section de {nombre(d.a * 100, 0)} cm : {ex3.ec2.valide ? `${ex3.ec2.barres.n} HA ${ex3.ec2.barres.phi} (A_s,req = ${nombre(ex3.ec2.AsReq, 2)} cm²)` : ex3.ec2.messages.join(' ')}.
+- Section de {nombre(ex3bd.a * 100, 0)} cm : $A_{s,req}$ = {grandeur(ex3b.ec2.AsReq, 2, 'cm²')} → **{ex3b.ec2.barres.n} HA {ex3b.ec2.barres.phi}**, taux de travail {nombre(100 * ex3b.ec2.taux, 0)} %.
+
+Agrandir le béton est souvent plus économique et plus sûr qu'entasser des barres : le bétonnage reste facile et le poteau moins sensible au flambement.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L3.3.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question={<>Avec N<sub>G</sub> = {nombre(d.NG, 0)} kN et N<sub>Q</sub> = {nombre(d.NQ, 0)} kN, que vaut N<sub>Ed</sub> ?</>} choix={[grandeur(d.NG + d.NQ, 0, 'kN'), grandeur(r.NEd, 0, 'kN'), grandeur(1.5 * (d.NG + d.NQ), 0, 'kN'), grandeur(1.35 * (d.NG + d.NQ), 0, 'kN')]} bonne={1} colonnes={2}>
+$N_{Ed} = 1{,}35 N_G + 1{,}5 N_Q$ = {grandeur(r.NEd, 0, 'kN')}.
+</QCM>
+
+<QCM n={2} question="Pour calculer l'élancement d'un poteau rectangulaire, on utilise :" choix={['le grand côté', 'le petit côté', 'la diagonale', 'la moyenne des côtés']} bonne={1} colonnes={2}>
+Le poteau flambe dans la direction la plus souple, celle du petit côté.
+</QCM>
+
+<QCM n={3} question="Quand λ augmente, le coefficient α :" choix={['augmente', 'diminue', 'reste constant', 'devient négatif']} bonne={1} colonnes={2}>
+Un poteau plus élancé flambe plus facilement : sa résistance est réduite par un α plus petit.
+</QCM>
+
+<QCM n={4} question="Que représente la section réduite Br du BAEL ?" choix={['La section d’acier', 'La section de béton diminuée de 1 cm sur tout le pourtour', 'La section des cadres', 'La moitié de la section']} bonne={1}>
+Le BAEL néglige une peau de béton de 1 cm, la plus exposée aux défauts de bétonnage.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Le calcul donne une section théorique inférieure à la section minimale. Que met-on en place ?" choix={['La section théorique', 'La section minimale', 'Rien', 'La moyenne des deux']} bonne={1} colonnes={2}>
+On met le maximum des deux : la section minimale protège contre les effets non calculés (retrait, petites excentricités).
+</QCM>
+
+<QCM n={6} question="Selon l'EC2, près des planchers, l'espacement des cadres est :" choix={['inchangé', 'multiplié par 0,6', 'doublé', 'libre']} bonne={1} colonnes={2}>
+EC2 §9.5.3(4) : 60 % de l'espacement courant, sur une hauteur égale à la plus grande dimension du poteau.
+</QCM>
+
+<QCM n={7} question="On utilise le α du BAEL avec le fcd de l'EC2. Le résultat est :" choix={['plus précis', 'sans valeur : on ne mélange pas les règlements', 'identique', 'plus sûr']} bonne={1}>
+Chaque règlement calibre ses coefficients ensemble. Un mélange n'a aucune base.
+</QCM>
+
+<QCM n={8} question="Pourquoi pose-t-on des cales sur les cadres avant de bétonner ?" choix={['Pour l’esthétique', 'Pour garantir l’enrobage et protéger les armatures de la corrosion', 'Pour économiser du béton', 'Pour faciliter le décoffrage']} bonne={1}>
+Sans enrobage, l'acier rouille et gonfle, et le béton éclate.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

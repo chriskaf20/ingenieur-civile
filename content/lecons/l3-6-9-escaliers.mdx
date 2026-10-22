@@ -1,0 +1,351 @@
+---
+id: L3.6.9
+titre: "Escaliers : vocabulaire, tracé et escalier autoporteur"
+objectifs:
+  - Nommer les éléments d'un escalier (marche, contremarche, giron, volée, palier, paillasse)
+  - Calculer le nombre et la hauteur des marches pour une hauteur d'étage donnée
+  - Appliquer la relation de Blondel pour fixer le giron
+  - Calculer le reculement et l'inclinaison d'un escalier droit à deux volées
+  - Expliquer ce qu'est un escalier autoporteur et ce que cela change pour la structure
+relecture: false
+glossaire:
+  - terme: Marche
+    definition: Surface horizontale sur laquelle on pose le pied.
+  - terme: Contremarche
+    definition: Face verticale entre deux marches ; sa hauteur est la hauteur de marche h.
+  - terme: Giron
+    definition: Profondeur utile d'une marche, mesurée sur la ligne de foulée, notée g.
+  - terme: Volée
+    definition: Suite ininterrompue de marches entre deux paliers.
+  - terme: Palier
+    definition: Plateforme horizontale qui coupe l'escalier ou le termine.
+  - terme: Paillasse
+    definition: Dalle inclinée en béton armé qui porte les marches.
+  - terme: Emmarchement
+    definition: Largeur utile de l'escalier.
+  - terme: Reculement
+    definition: Longueur de l'escalier mesurée en plan.
+  - terme: Escalier autoporteur
+    definition: Escalier dont la paillasse porte d'un plancher à l'autre sans mur ni poteau intermédiaire.
+symboles:
+  - { symbole: 'H', signification: 'hauteur à franchir, de sol fini à sol fini', unite: 'm' }
+  - { symbole: 'n', signification: 'nombre de contremarches', unite: '—' }
+  - { symbole: 'h', signification: 'hauteur d''une marche', unite: 'm' }
+  - { symbole: 'g', signification: 'giron', unite: 'm' }
+  - { symbole: 'M', signification: 'module de Blondel 2h + g', unite: 'm' }
+formules:
+  - { nom: 'Hauteur de marche', tex: 'h = \frac{H}{n}', domaine: 'Construction' }
+  - { nom: 'Relation de Blondel', tex: '0{,}60 \le 2h + g \le 0{,}64\ \text{m}', domaine: 'Construction' }
+  - { nom: 'Inclinaison', tex: '\alpha = \arctan\frac{h}{g}', domaine: 'Construction' }
+---
+
+import { BLONDEL_MAX, BLONDEL_MIN, escalierDroit, EXEMPLE_ESCALIER } from '@/lib/calc/escalier'
+import { grandeur, nombre } from '@/lib/format'
+import { Escalier2D, hauteurEscalier2D } from '@/components/drawing/Elements'
+import { EscalierIso } from '@/components/schemas/EscalierIso'
+
+export const d = EXEMPLE_ESCALIER
+export const ex = escalierDroit(d)
+export const ex1d = { ...d, H: 2.72 }
+export const ex1 = escalierDroit(ex1d)
+export const ex2d = { ...d, H: 2.88, palier: 1.0 }
+export const ex2 = escalierDroit(ex2d)
+export const ex3a = escalierDroit({ ...d, H: 2.88, hVisee: 0.17, palier: 1.0 })
+export const ex3b = escalierDroit({ ...d, H: 2.88, hVisee: 0.18, palier: 1.0 })
+export const Rmax = 5.0
+
+<Page etape="intuition" titre="L'intuition : l'escalier suit le pas humain">
+
+Tu montes un escalier sans y penser… jusqu'au jour où une marche est plus haute que les autres. Tu trébuches. Un escalier doit suivre le **rythme naturel** de la marche.
+
+Quand tu marches à plat, ton pas mesure environ 60 à 65 cm. Quand tu montes, lever le pied d'un centimètre te demande à peu près deux fois plus d'effort que d'avancer d'un centimètre. Au XVIIᵉ siècle, l'architecte François Blondel en a tiré une règle simple : **deux hauteurs plus un giron doivent égaler un pas**.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Pour un étage donné, combien faut-il de marches, de quelle hauteur et de quelle profondeur ? Et quelle place l'escalier va-t-il prendre ?
+</Encadre>
+
+Un escalier, c'est aussi une **structure**. Dans un escalier **autoporteur**, aucun mur ne soutient les marches par-dessous. Une dalle inclinée en béton armé, la paillasse, part du plancher bas, porte un palier en plein vide et rejoint le plancher haut. Elle travaille comme une poutre pliée.
+
+<Encadre type="terrain">
+Sur les chantiers de Kinshasa, de Lubumbashi ou de Goma, l'escalier en béton armé coulé en place est la solution la plus courante pour les immeubles R+1 à R+4. Le coffrage de la paillasse et des marches demande un vrai savoir-faire de coffreur.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le vocabulaire">
+
+Le profil ci-dessous est celui de l'exemple de la leçon. Il est dessiné à partir du calcul, pas à main levée.
+
+<Figure alt={`Profil d'un escalier droit à deux volées : ${ex.n} contremarches de ${nombre(ex.h * 100, 1)} cm`} largeur={620} hauteur={hauteurEscalier2D(d, ex)}>
+  <Escalier2D d={d} r={ex} prefixe="cours-esc" />
+</Figure>
+
+- La **marche** est la surface où l'on pose le pied. Sa profondeur utile est le **giron** $g$, en mètres.
+- La **contremarche** est la face verticale. Sa hauteur est la **hauteur de marche** $h$, en mètres.
+- Le **nez de marche** est l'arête avant de la marche, là où le pied accroche.
+- Une **volée** est une suite de marches sans interruption. Un **palier** est une plateforme qui coupe l'escalier pour reprendre son souffle ou changer de direction.
+- L'**emmarchement** est la largeur utile de l'escalier.
+- La **paillasse** est la dalle inclinée en béton armé qui porte les marches.
+- La **ligne de foulée** est le trajet que suit habituellement le pied. C'est sur elle qu'on mesure le giron, ce qui compte surtout dans les escaliers tournants.
+- Le **reculement** est la longueur de l'escalier en plan.
+- L'**échappée** est la hauteur libre au-dessus de chaque marche. Elle doit permettre de passer sans se cogner la tête.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le tracé et l'escalier autoporteur">
+
+### Le tracé en quatre étapes
+
+1. **Nombre de contremarches.** On divise la hauteur à franchir $H$ par une hauteur visée, puis on arrondit à l'entier : $n = \text{arrondi}(H / h_{\text{visée}})$.
+2. **Hauteur réelle.** Toutes les marches doivent être identiques : $h = H / n$.
+3. **Giron.** On applique la relation de Blondel avec un module $M$ choisi : $g = M - 2h$.
+4. **Encombrement.** Une volée de $n_i$ contremarches compte $n_i - 1$ marches, car la dernière « marche » est le palier ou le plancher d'arrivée. Pour deux volées et un palier de longueur $L_p$ :
+
+$$
+R = (n_1 - 1)\,g + L_p + (n_2 - 1)\,g \qquad \alpha = \arctan\frac{h}{g}
+$$
+
+<Regle type="art" source="relation de Blondel">
+On retient $0{,}60\ \text{m} \le 2h + g \le 0{,}64\ \text{m}$. Les hauteurs, girons et largeurs minimaux imposés aux bâtiments publics et aux logements dépendent de la réglementation locale : ils sont à vérifier pour chaque projet.
+</Regle>
+
+### L'escalier autoporteur
+
+La paillasse va d'un plancher à l'autre **sans appui intermédiaire**. Le palier est porté par les volées, comme un pont porte son tablier. Conséquences :
+
+- la portée est grande : c'est toute la longueur développée de l'escalier ;
+- la paillasse est plus épaisse et plus ferraillée qu'un escalier appuyé sur des murs ;
+- les armatures doivent être **continues** au passage du palier, là où la dalle change de pente ;
+- les planchers haut et bas reçoivent des efforts importants : ils doivent être conçus pour.
+
+<Regle type="simplification">
+Ici, on trace la géométrie et on choisit une épaisseur de paillasse donnée par l'énoncé. Le calcul de la paillasse en béton armé (flexion, armatures, flèche) fait l'objet de la leçon M1.1.7.
+</Regle>
+
+</Page>
+
+<Vue3D titre="L'escalier autoporteur en perspective" calques={[{ id: 'noms', libelle: 'Noms des éléments' }, { id: 'cotes', libelle: 'Cotes' }, { id: 'ferraillage', libelle: 'Ferraillage de principe', actif: false }, { id: 'planchers', libelle: 'Planchers' }]}>
+
+Active ou masque les calques. Le calque « ferraillage » montre, en transparence, les armatures principales qui suivent la paillasse d'un plancher à l'autre.
+
+<EscalierIso d={d} />
+
+<Encadre type="retenir">
+Aucun mur ni poteau sous le palier : c'est ce qui fait de cet escalier un escalier autoporteur. Les armatures principales passent sans interruption de la volée 1 à la volée 2.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="escalier">
+
+<Cahier titre="Exemple résolu : l'escalier d'un immeuble R+2 (1/2)">
+
+**Énoncé.** Dans un immeuble, la hauteur d'étage est de {nombre(d.H, 2)} m, de sol fini à sol fini. On veut un escalier droit à deux volées avec un palier intermédiaire de {nombre(d.palier, 2)} m. On vise des marches de {nombre(d.hVisee * 100, 0)} cm et on prend un module de Blondel de {nombre(d.M, 2)} m. Trace l'escalier.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu : l'escalier d'un immeuble R+2 (2/2)">
+
+<Etape n={3} titre="Les formules">
+
+$h = \dfrac{H}{n}$ ; $g = M - 2h$ ; $R = (n_1 - 1)\,g + L_p + (n_2 - 1)\,g$ ; $\alpha = \arctan\dfrac{h}{g}$
+
+<Note>Pourquoi arrondir n d'abord ? Parce qu'une marche ne peut pas être « à moitié » : on choisit un nombre entier, puis on en déduit la hauteur exacte.</Note>
+</Etape>
+
+<Etape n={4} titre="L'application numérique">
+<AN k="n" />
+<AN k="h" />
+<AN k="g" />
+<AN k="volees" />
+<AN k="R" />
+<AN k="angle" />
+<Note couleur="vert">Vérification : 2h + g = M par construction. On contrôle quand même que h reste confortable et que le reculement tient dans la cage d'escalier.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="resume" libelle="Escalier" />
+<Note couleur="bleu">Reculement : <Val k="R" /> ; palier à <Val k="hp" /> ; inclinaison <Val k="angle" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="arrondir la hauteur de marche au lieu du nombre de marches.">
+On arrondit $n$, puis on calcule $h = H / n$ exactement. Si on arrondit $h$ à 17 cm partout, la dernière marche absorbe l'erreur : elle est plus haute ou plus basse que les autres, et on trébuche.
+</Piege>
+
+<Piege erreur="compter autant de marches que de contremarches dans une volée.">
+Une volée de $n_i$ contremarches n'a que $n_i - 1$ marches : la dernière arrivée se fait sur le palier ou le plancher. Oublier ce détail fausse le reculement de deux girons.
+</Piege>
+
+<Piege erreur="mesurer H entre dalles brutes au lieu de sols finis.">
+Le carrelage, la chape et le revêtement changent la hauteur réelle. Une différence de 5 cm entre le bas et le haut modifie la première ou la dernière marche.
+</Piege>
+
+<Piege erreur="oublier l'échappée sous la trémie du plancher haut.">
+Sous le plancher haut, la tête de l'utilisateur doit passer. On vérifie l'échappée sur la coupe avant de figer la position de la trémie.
+</Piege>
+
+<Piege erreur="couper les armatures de la paillasse au niveau du palier pour simplifier le coffrage.">
+Dans un escalier autoporteur, le palier n'a pas d'appui : la paillasse doit rester continue. Couper les barres crée une articulation, et l'escalier peut fissurer gravement ou s'effondrer.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le tracé sur le mur.** Avant de coffrer, le chef d'équipe trace l'escalier en vraie grandeur sur le mur de la cage, au cordeau et au niveau : les nez de marche, la ligne de paillasse et le palier. C'est le meilleur contrôle du calcul.
+
+**Le coffrage** de la paillasse est étayé jusqu'à ce que le béton ait atteint sa résistance. Les contremarches sont coffrées par des planches, souvent réglées avec un gabarit de marche unique pour garantir des hauteurs identiques.
+
+**Le ferraillage** est contrôlé avant le bétonnage : continuité des barres principales au palier, ancrage dans les planchers, enrobage respecté (cales). Voir PP.3.7.
+
+**Le bétonnage** se fait du bas vers le haut, en une seule fois si possible, pour éviter une reprise de bétonnage dans une zone très sollicitée.
+
+<Encadre type="terrain" titre="Climat tropical">
+Pour un escalier extérieur, on donne une très légère pente aux marches vers l'extérieur pour que l'eau de pluie ne stagne pas, et on choisit un revêtement antidérapant au nez de marche. Un escalier mouillé et glissant est une cause fréquente d'accidents.
+</Encadre>
+
+**La réception.** On vérifie au mètre les hauteurs de toutes les marches. Une différence de quelques millimètres entre deux marches successives se sent sous le pied.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : tracer un escalier">
+
+### Le vocabulaire
+
+| Terme | Définition |
+|---|---|
+| Hauteur de marche $h$ | hauteur d'une contremarche (m) |
+| Giron $g$ | profondeur utile d'une marche, sur la ligne de foulée (m) |
+| Volée | suite de marches entre deux paliers |
+| Palier | plateforme horizontale intermédiaire ou d'arrivée |
+| Paillasse | dalle inclinée en béton armé qui porte les marches |
+| Emmarchement | largeur utile |
+| Reculement $R$ | longueur en plan |
+
+### Les formules
+
+| Étape | Formule |
+|---|---|
+| Nombre de contremarches | $n = \text{arrondi}(H / h_{\text{visée}})$ |
+| Hauteur réelle | $h = H / n$ |
+| Giron (Blondel) | $g = M - 2h$, avec $M$ entre {nombre(BLONDEL_MIN, 2)} et {nombre(BLONDEL_MAX, 2)} m |
+| Marches d'une volée | $n_i - 1$ |
+| Reculement | $R = (n_1 - 1) g + L_p + (n_2 - 1) g$ |
+| Inclinaison | $\alpha = \arctan(h/g)$ |
+
+### À retenir
+
+- Toutes les marches d'une volée ont **la même hauteur**.
+- Escalier autoporteur : paillasse **continue**, aucun appui sous le palier.
+- Vérifier l'échappée et le reculement disponible avant de figer le tracé.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un étage de logement">
+
+Un étage mesure {nombre(ex1d.H, 2)} m de sol fini à sol fini. On vise des marches de {nombre(ex1d.hVisee * 100, 0)} cm et un module de {nombre(ex1d.M, 2)} m. Combien de contremarches ? Quelle hauteur et quel giron ?
+
+<Indice>Divise H par la hauteur visée et arrondis à l'entier le plus proche.</Indice>
+
+<Corrige>
+
+- $H / h_{\text{visée}}$ = {nombre(ex1.nBrut, 2)} → $n$ = **{ex1.n}** contremarches.
+- $h = H / n$ = **{grandeur(ex1.h * 100, 1, 'cm')}**.
+- $g = M - 2h$ = **{grandeur(ex1.g * 100, 1, 'cm')}**.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le reculement">
+
+Même escalier à deux volées, mais pour une hauteur d'étage de {nombre(ex2d.H, 2)} m et un palier de {nombre(ex2d.palier, 2)} m. Calcule le reculement et l'inclinaison.
+
+<Indice>Une volée de n₁ contremarches compte n₁ − 1 marches.</Indice>
+
+<Corrige>
+
+- $n$ = {ex2.n} ; $h$ = {grandeur(ex2.h * 100, 1, 'cm')} ; $g$ = {grandeur(ex2.g * 100, 1, 'cm')}.
+- Volées : {ex2.n1} et {ex2.n2} contremarches, soit {ex2.n1 - 1} et {ex2.n2 - 1} marches.
+- $R$ = **{grandeur(ex2.reculement, 2, 'm')}** ; $\alpha$ = **{nombre(ex2.angle, 1)}°**.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La cage est trop courte">
+
+La cage d'escalier ne laisse que {nombre(Rmax, 2)} m de reculement pour la même hauteur de {nombre(ex2d.H, 2)} m et un palier de {nombre(ex2d.palier, 2)} m. Compare un tracé avec des marches visées à 17 cm et un tracé à 18 cm. Lequel tient dans la cage ? À quel prix pour le confort ?
+
+<Indice>Des marches plus hautes réduisent le nombre de marches, mais Blondel réduit aussi le giron.</Indice>
+
+<Corrige>
+
+- Marches visées 17 cm : {ex3a.n} × {grandeur(ex3a.h * 100, 1, 'cm')}, giron {grandeur(ex3a.g * 100, 1, 'cm')}, reculement **{grandeur(ex3a.reculement, 2, 'm')}**.
+- Marches visées 18 cm : {ex3b.n} × {grandeur(ex3b.h * 100, 1, 'cm')}, giron {grandeur(ex3b.g * 100, 1, 'cm')}, reculement **{grandeur(ex3b.reculement, 2, 'm')}**.
+- {ex3b.reculement <= Rmax && ex3a.reculement > Rmax ? "Seul le tracé à 18 cm tient dans la cage." : "Compare chaque reculement à la place disponible."} Il donne un escalier plus raide ({nombre(ex3b.angle, 1)}° au lieu de {nombre(ex3a.angle, 1)}°), donc moins confortable. Si aucun ne convient, il faut revoir la cage ou passer à un escalier tournant.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L3.6.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Comment s'appelle la face verticale entre deux marches ?" choix={['Le giron', 'La contremarche', 'Le limon', 'La paillasse']} bonne={1} colonnes={2}>
+La contremarche est verticale ; sa hauteur est la hauteur de marche $h$.
+</QCM>
+
+<QCM n={2} question="Que dit la relation de Blondel ?" choix={['h + g est constant', '2h + g est compris entre 0,60 et 0,64 m', 'g = 2h', 'h × g = 0,05 m²']} bonne={1} colonnes={2}>
+Deux hauteurs plus un giron correspondent à un pas moyen d'adulte : c'est une règle de l'art.
+</QCM>
+
+<QCM n={3} question={<>Pour l'exemple de la leçon ({nombre(d.H, 2)} m, marches visées à {nombre(d.hVisee * 100, 0)} cm), combien de contremarches ?</>} choix={[String(ex.n - 1), String(ex.n), String(ex.n + 1), String(ex.n + 2)]} bonne={1} colonnes={2}>
+$H / h_{\text{visée}}$ = {nombre(ex.nBrut, 2)}, arrondi à **{ex.n}**. Toutes les marches font alors {grandeur(ex.h * 100, 1, 'cm')}.
+</QCM>
+
+<QCM n={4} question={<>La volée 1 de l'exemple compte {ex.n1} contremarches. Combien a-t-elle de marches (girons) ?</>} choix={[String(ex.n1 - 2), String(ex.n1 - 1), String(ex.n1), String(ex.n1 + 1)]} bonne={1} colonnes={2}>
+La dernière arrivée se fait sur le palier : {ex.n1} contremarches, {ex.n1 - 1} marches.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Qu'est-ce qui caractérise un escalier autoporteur ?" choix={['Il est en bois', 'Sa paillasse porte d’un plancher à l’autre sans appui intermédiaire', 'Il tourne autour d’un noyau', 'Il est préfabriqué']} bonne={1}>
+Le palier est porté par les volées : aucun mur ni poteau en dessous.
+</QCM>
+
+<QCM n={6} question="Pourquoi ne doit-on pas couper les armatures de la paillasse au palier d'un escalier autoporteur ?" choix={['Pour économiser de l’acier', 'Parce que la paillasse doit rester continue pour porter le palier sans appui', 'Parce que le BAEL l’interdit', 'Pour faciliter le coffrage']} bonne={1}>
+Sans continuité, le palier deviendrait une articulation sans appui : l'escalier ne tiendrait pas.
+</QCM>
+
+<QCM n={7} question="On mesure H entre dalles brutes alors que le haut recevra 6 cm de chape et de carrelage de plus que le bas. Conséquence ?" choix={['Aucune', 'La dernière marche sera différente des autres', 'Le giron change', 'L’escalier sera plus large']} bonne={1}>
+La hauteur à franchir réelle change : la dernière marche absorbera l'écart si l'on ne recalcule pas avec les sols finis.
+</QCM>
+
+<QCM n={8} question="Des marches plus hautes (à module de Blondel constant) donnent un escalier :" choix={['plus long et plus doux', 'plus court et plus raide', 'plus large', 'identique']} bonne={1} colonnes={2}>
+Moins de marches et un giron plus petit : le reculement diminue et l'inclinaison augmente.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

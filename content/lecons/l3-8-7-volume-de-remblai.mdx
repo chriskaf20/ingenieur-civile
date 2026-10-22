@@ -1,0 +1,409 @@
+---
+id: L3.8.7
+titre: Volume de remblai d'une plateforme
+objectifs:
+  - Calculer la hauteur de remblai en un point à partir de la cote du terrain et de la cote projet
+  - Calculer le volume de remblai sous une plateforme posée sur un terrain en pente
+  - Calculer le volume des talus de côté et de coin
+  - Présenter une cubature claire, avec une unité et un arrondi à chaque ligne
+  - Reconnaître le cas où la méthode ne s'applique plus (coin en déblai)
+relecture: false
+normes:
+  - "NF P 11-300 (GTR) : choix des matériaux de remblai, abordé en L3.4.6"
+glossaire:
+  - terme: Remblai
+    definition: Terre rapportée et compactée pour relever le niveau du sol.
+  - terme: Déblai
+    definition: Terre enlevée pour abaisser le niveau du sol.
+  - terme: Terrain naturel (TN)
+    definition: Surface du sol avant les travaux.
+  - terme: Cote projet
+    definition: Altitude finale visée pour une surface (plateforme, chaussée), en mètres.
+  - terme: Talus
+    definition: Surface inclinée qui raccorde la plateforme au terrain naturel.
+  - terme: Cubature
+    definition: Calcul des volumes de terre à déblayer ou à remblayer.
+symboles:
+  - { symbole: 'Z_p', signification: 'cote projet de la plateforme', unite: 'm' }
+  - { symbole: 'TN_i', signification: 'cote du terrain naturel au coin i', unite: 'm' }
+  - { symbole: 'h_i', signification: 'hauteur de remblai au coin i', unite: 'm' }
+  - { symbole: 'h_m', signification: 'hauteur moyenne de remblai', unite: 'm' }
+  - { symbole: 'S', signification: 'surface de la plateforme', unite: 'm²' }
+  - { symbole: 'm', signification: 'pente du talus : m mètres horizontaux pour 1 mètre vertical', unite: '—' }
+formules:
+  - { nom: 'Hauteur de remblai', tex: 'h_i = Z_p - TN_i', domaine: 'Terrassements' }
+  - { nom: 'Volume sous la plateforme', tex: 'V_p = S \cdot \frac{h_1 + h_2 + h_3 + h_4}{4}', domaine: 'Terrassements' }
+  - { nom: 'Talus de côté', tex: 'V_c = \frac{m \, L \, (h_a^2 + h_a h_b + h_b^2)}{6}', domaine: 'Terrassements' }
+  - { nom: 'Talus de coin', tex: 'V_k = \frac{m^2 h^3}{3}', domaine: 'Terrassements' }
+---
+
+import { coteProjetMinimale, EXEMPLE_PLATEFORME, hauteurRemblai, remblaiPlateforme } from '@/lib/calc/terrassement'
+import { comparer } from '@/lib/calc/outils'
+import { grandeur, nombre } from '@/lib/format'
+import { CoupePlateforme, DecompositionPlateforme } from '@/components/schemas/Remblai'
+
+export const d = EXEMPLE_PLATEFORME
+export const ex = remblaiPlateforme(d)
+export const ex1d = { L: 12, l: 8, Zp: 50.6, tn: [50, 50, 50, 50], m: 1 }
+export const ex1 = remblaiPlateforme(ex1d)
+export const ex2d = { ...d, Zp: 101.5 }
+export const ex2 = remblaiPlateforme(ex2d)
+export const hausse = comparer(ex.volumeTotal, ex2.volumeTotal)
+export const zMin = coteProjetMinimale(d.tn)
+export const ex3 = remblaiPlateforme({ ...d, Zp: zMin })
+export const q1 = { Zp: 246.1, TN: 245.3 }
+export const q1h = hauteurRemblai(q1.Zp, q1.TN)
+
+<Page etape="intuition" titre="L'intuition : un bac à sable posé sur une pente">
+
+Imagine un grand bac à sable posé sur un terrain qui descend. Tu veux une surface de sable bien plate. Du côté haut, il faut peu de sable. Du côté bas, il en faut beaucoup plus.
+
+Sur un chantier, c'est la même chose. On veut une **plateforme** horizontale pour un bâtiment, un parking ou un dépôt. Le terrain, lui, est en pente. On rapporte donc de la terre, le **remblai**, pour combler la différence.
+
+Mais un tas de terre ne tient pas avec des bords verticaux : il s'éboule. On lui donne des bords inclinés, les **talus**. Ces talus contiennent eux aussi de la terre, et il faut la compter.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Combien de mètres cubes de terre faut-il pour construire la plateforme, talus compris ?
+</Encadre>
+
+Le volume dépend de trois choses :
+
+1. la **surface** de la plateforme ;
+2. la **hauteur** de remblai en chaque point, qui varie à cause de la pente ;
+3. la **pente des talus**, qui fixe leur largeur.
+
+Nous allons les calculer une par une, puis les assembler. C'est exactement ce que fait un métreur ou un conducteur de travaux avant de commander des camions de terre.
+
+<Encadre type="terrain" titre="Pourquoi c'est important">
+Une erreur de 10 % sur une cubature, c'est des dizaines de camions en trop ou en moins. Sur un chantier, cela se paie en argent et en jours de retard.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : hauteurs et volume sous la plateforme">
+
+### Les mots et les symboles
+
+- Le **terrain naturel** (TN) est la surface du sol avant les travaux. Le levé topographique (voir L1.8) donne son altitude, sa **cote**, en quelques points.
+- La cote du terrain au coin $i$ s'écrit $TN_i$, en mètres (m).
+- La **cote projet** $Z_p$, en mètres, est l'altitude finale de la plateforme.
+- La **hauteur de remblai** $h_i$ au coin $i$, en mètres, est l'épaisseur de terre à apporter à cet endroit.
+
+$$
+h_i = Z_p - TN_i
+$$
+
+Si $h_i$ est positive, on remblaie. Si elle est négative, le terrain est plus haut que la plateforme : il faut déblayer. Ce cas mixte est traité en L3.8.8.
+
+### Le volume sous la plateforme : version simple
+
+La plateforme a une surface $S = L \times l$, en m². Si la hauteur était partout la même, le volume serait simplement $S \times h$. Comme la hauteur varie, on prend la **hauteur moyenne** $h_m$ des quatre coins :
+
+$$
+h_m = \frac{h_1 + h_2 + h_3 + h_4}{4} \qquad V_p = S \cdot h_m
+$$
+
+### Version rigoureuse
+
+Le volume est la somme des petites colonnes de terre $h(x, y)\,\mathrm{d}x\,\mathrm{d}y$ sur toute la surface :
+
+$$
+V_p = \iint_S h(x, y)\,\mathrm{d}x\,\mathrm{d}y
+$$
+
+Si le terrain varie **linéairement** entre les coins, la fonction $h(x, y)$ est « bilinéaire ». Sa valeur moyenne sur le rectangle est alors exactement la moyenne des quatre coins. La formule $V_p = S \cdot h_m$ n'est donc pas une approximation : elle est exacte dans cette hypothèse.
+
+<Regle type="simplification">
+Quatre points ne décrivent pas un vrai terrain. Pour une grande plateforme, on lève un quadrillage de points (L2.9.9) ou des profils en travers (L3.8.8), puis on applique la même idée maille par maille.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le volume des talus">
+
+### La pente d'un talus
+
+On note la pente d'un talus « horizontal sur vertical ». Un talus à **3/2** avance de 3 m quand il descend de 2 m, soit $m = 1{,}5$ : 1,5 m à l'horizontale pour 1 m de hauteur. Plus $m$ est grand, plus le talus est doux et large.
+
+<Regle type="art">
+La pente des talus dépend du matériau, de sa compacité, de la hauteur du remblai et de l'eau. Elle est fixée par l'étude géotechnique. Le 3/2 est fréquent pour un remblai compacté de faible hauteur, mais ce n'est pas une valeur à appliquer les yeux fermés.
+</Regle>
+
+### Un talus de côté
+
+Coupons le talus perpendiculairement au bord de la plateforme. La coupe est un triangle de hauteur $h$ et de base $m \cdot h$. Son aire vaut $\dfrac{m h^2}{2}$.
+
+Le long d'un côté de longueur $L$, la hauteur passe linéairement de $h_a$ à $h_b$. En intégrant l'aire du triangle le long du côté, on obtient :
+
+$$
+V_c = \int_0^L \frac{m\,h(s)^2}{2}\,\mathrm{d}s = \frac{m \, L \, (h_a^2 + h_a h_b + h_b^2)}{6}
+$$
+
+### Un talus de coin
+
+Au coin, les deux talus se rejoignent et forment une petite **pyramide** à base carrée de côté $m \cdot h$ et de hauteur $h$ :
+
+$$
+V_k = \frac{(m h)^2 \cdot h}{3} = \frac{m^2 h^3}{3}
+$$
+
+### Le total
+
+$$
+V = V_p + \sum_{4\ \text{côtés}} V_c + \sum_{4\ \text{coins}} V_k
+$$
+
+<Regle type="simplification">
+Sous les talus, on suppose le terrain horizontal, à la cote du bord. On néglige aussi le décapage de la terre végétale, qui augmente la hauteur à remblayer (voir « Sur le terrain »).
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Les schémas : trois familles de volumes">
+
+Le dessin ci-dessous découpe le remblai de l'exemple en trois familles. Au centre, le **prisme** sous la plateforme. Sur chaque bord, un **talus de côté**. Aux quatre angles, un **talus de coin** en forme de pyramide.
+
+<DecompositionPlateforme d={d} r={ex} />
+
+Sur une coupe de terrassement, les hauteurs sont très petites devant les longueurs : quelques décimètres pour des dizaines de mètres. On **exagère** donc l'échelle verticale pour y voir quelque chose. La légende indique toujours ce facteur.
+
+<CoupePlateforme d={d} r={ex} />
+
+<Encadre type="attention">
+Une coupe à hauteurs exagérées déforme les pentes : un talus à 3/2 y paraît presque vertical. Ne mesure jamais une pente sur un dessin exagéré.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="remblai">
+
+<Cahier titre="Exemple résolu : la plateforme du dépôt (1/2)">
+
+**Énoncé.** On construit la plateforme horizontale d'un dépôt de matériaux, de {nombre(d.L, 2)} m sur {nombre(d.l, 2)} m, à la cote projet {nombre(d.Zp, 2)}. Le levé donne les cotes du terrain aux quatre coins. Les talus sont réglés à 3/2. Calcule le volume de remblai, talus compris.
+
+<Note couleur="bleu">Change les données : tout se recalcule, schémas compris.</Note>
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+
+Toujours commencer par un dessin : il évite de mélanger les coins et les côtés.
+
+<Schema k="plan" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu : la plateforme du dépôt (2/2)">
+
+<Schema k="coupe" />
+
+<Etape n={3} titre="Les formules">
+
+$h_i = Z_p - TN_i$ ; $V_p = S \cdot h_m$ ; $V_c = \dfrac{m L (h_a^2 + h_a h_b + h_b^2)}{6}$ ; $V_k = \dfrac{m^2 h^3}{3}$
+
+<Note>Pourquoi ? On sépare la plateforme et les talus parce qu'ils n'ont pas la même forme.</Note>
+</Etape>
+
+<Etape n={4} titre="L'application numérique">
+<AN k="hauteurs" />
+<AN k="hm" />
+<AN k="S" />
+<AN k="Vp" />
+<AN k="cotes" />
+<AN k="coins" />
+<AN k="Vt" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<AN k="V" />
+<Resultat k="V" libelle="Volume de remblai" />
+<Note couleur="vert">Les talus représentent <Val k="part" /> du volume : les oublier fausse la commande de terre.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="faire la moyenne des cotes du terrain au lieu de la moyenne des hauteurs.">
+On calcule d'abord chaque hauteur $h_i = Z_p - TN_i$, puis leur moyenne. La moyenne des cotes donne une altitude, pas une épaisseur de terre.
+</Piege>
+
+<Piege erreur="oublier les talus.">
+Dans l'exemple, ils pèsent {nombre(100 * ex.partTalus, 1)} % du total. Sur une plateforme étroite ou haute, la part des talus devient bien plus grande.
+</Piege>
+
+<Piege erreur="inverser la pente : prendre m = 2/3 au lieu de 3/2.">
+« 3/2 » se lit « 3 à l'horizontale pour 2 à la verticale ». Donc $m = 1{,}5$. Avec $m = 0{,}67$, le talus serait plus raide que le terrain ne le permet.
+</Piege>
+
+<Piege erreur="appliquer la méthode alors qu'un coin est en déblai.">
+Si une hauteur est négative, une partie de la plateforme est en déblai. Les formules des talus n'ont plus de sens à cet endroit. La fiche de calcul affiche alors un avertissement.
+</Piege>
+
+<Piege erreur="commander exactement le volume calculé.">
+Le volume calculé est un volume **en place, compacté**. La terre transportée est foisonnée, puis elle se tasse au compactage. Les coefficients dépendent du sol (voir L3.8.6) : on ne commande jamais le volume géométrique brut.
+</Piege>
+
+<Piege erreur="mélanger les unités, par exemple des hauteurs en centimètres et des longueurs en mètres.">
+Tout en mètres, du début à la fin. Le résultat sort alors directement en m³.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Avant de remblayer**, le chef de chantier fait **décaper** la terre végétale. Elle est trop molle et trop riche en matière organique pour porter une plateforme. L'épaisseur décapée s'ajoute à la hauteur à remblayer.
+
+**Le matériau** doit convenir : pas de terre végétale ni d'argile très plastique. On le classe avec le GTR (L3.4.6). Dans beaucoup de régions de la RDC, on utilise des **graveleux latéritiques**, souvent de bons matériaux de remblai une fois compactés.
+
+**Le compactage** se fait par couches successives, à la teneur en eau visée par l'essai Proctor (L3.4.7). Le laboratoire contrôle la densité de chaque couche avant d'autoriser la suivante.
+
+<Encadre type="terrain" titre="Saison des pluies">
+Un remblai mouillé ne se compacte plus. On profite de la saison sèche, on donne une légère pente à chaque couche pour évacuer l'eau, et on protège les talus de l'érosion dès qu'ils sont réglés.
+</Encadre>
+
+**Au bureau d'études**, le calcul se fait avec un logiciel à partir d'un modèle numérique de terrain. La méthode de cette leçon sert alors à **vérifier l'ordre de grandeur** : si le logiciel annonce trois fois plus, il y a une erreur quelque part.
+
+**En fin de travaux**, un nouveau levé permet de mesurer le volume réellement mis en œuvre. Ce métré contradictoire sert à payer l'entreprise (voir L3.7).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : remblai d'une plateforme">
+
+### Les formules
+
+| Quantité | Formule | Unité |
+|---|---|---|
+| Hauteur au coin $i$ | $h_i = Z_p - TN_i$ | m |
+| Hauteur moyenne | $h_m = (h_1 + h_2 + h_3 + h_4)/4$ | m |
+| Volume sous la plateforme | $V_p = S \cdot h_m$ | m³ |
+| Talus d'un côté de longueur $L$ | $V_c = m L (h_a^2 + h_a h_b + h_b^2) / 6$ | m³ |
+| Talus d'un coin | $V_k = m^2 h^3 / 3$ | m³ |
+| Volume total | $V = V_p + \sum V_c + \sum V_k$ | m³ |
+
+### Les symboles
+
+| Symbole | Signification | Unité |
+|---|---|---|
+| $Z_p$ | cote projet de la plateforme | m |
+| $TN_i$ | cote du terrain naturel au coin $i$ | m |
+| $S$ | surface de la plateforme ($L \times l$) | m² |
+| $m$ | pente du talus (3/2 donne $m = 1{,}5$) | — |
+
+### La méthode en 5 étapes
+
+1. Dessiner la plateforme et numéroter les coins.
+2. Calculer les quatre hauteurs ; vérifier qu'aucune n'est négative.
+3. Calculer $V_p$.
+4. Calculer les quatre talus de côté et les quatre coins.
+5. Additionner, arrondir au centième de m³ et écrire l'unité.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Plateforme sur terrain plat">
+
+Une plateforme de {nombre(ex1d.L, 2)} m × {nombre(ex1d.l, 2)} m est construite à la cote {nombre(ex1d.Zp, 2)} sur un terrain plat à la cote {nombre(ex1d.tn[0], 2)}. Les talus sont à 1/1. Calcule le volume de remblai.
+
+<Indice>Toutes les hauteurs sont égales. Les quatre talus de côté ont la même section triangulaire.</Indice>
+
+<Corrige>
+
+- Hauteur partout : $h = $ {nombre(ex1.h[0], 2)} m.
+- Plateforme : $V_p = $ {nombre(ex1.surface, 2)} × {nombre(ex1.hMoyenne, 2)} = {grandeur(ex1.volumePlateforme, 2, 'm³')}.
+- Talus de côté : {ex1.volumesCotes.map((v) => nombre(v, 3)).join(' + ')} = {grandeur(ex1.volumeCotesTotal, 3, 'm³')}.
+- Coins : {grandeur(ex1.volumeCoinsTotal, 3, 'm³')}.
+- Total : **{grandeur(ex1.volumeTotal, 2, 'm³')}**.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="On relève la plateforme">
+
+Reprends l'exemple résolu, mais le maître d'ouvrage veut la plateforme à la cote {nombre(ex2d.Zp, 2)} au lieu de {nombre(d.Zp, 2)}. De combien augmente le volume de remblai, en m³ et en % ?
+
+<Indice>Chaque hauteur augmente de la même quantité. Les talus, eux, varient comme le carré ou le cube des hauteurs.</Indice>
+
+<Corrige>
+
+- Nouvelles hauteurs : {ex2.h.map((h) => nombre(h, 2)).join(' ; ')} m.
+- $V_p = $ {grandeur(ex2.volumePlateforme, 2, 'm³')} ; talus : {grandeur(ex2.volumeTalus, 2, 'm³')}.
+- Nouveau total : {grandeur(ex2.volumeTotal, 2, 'm³')}, contre {grandeur(ex.volumeTotal, 2, 'm³')}.
+- Hausse : **{grandeur(hausse.ecart, 2, 'm³')}**, soit **{nombre(100 * hausse.ecartRelatif, 1)} %**.
+
+Le volume augmente plus vite que la hauteur moyenne, parce que les talus grossissent comme $h^2$ et $h^3$.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La cote projet la plus basse possible">
+
+Toujours sur le terrain de l'exemple, on veut que la plateforme soit **entièrement en remblai**, sans aucun déblai, avec le moins de terre possible. Quelle cote projet faut-il choisir ? Quel est alors le volume ?
+
+<Indice>Il suffit qu'aucune hauteur ne soit négative. Quel coin impose sa loi ?</Indice>
+
+<Corrige>
+
+- Il faut $Z_p \geq TN_i$ pour les quatre coins, donc $Z_p \geq \max(TN_i)$.
+- La cote la plus basse est $Z_p = $ **{nombre(zMin, 2)}**, celle du coin le plus haut.
+- Hauteurs : {ex3.h.map((h) => nombre(h, 2)).join(' ; ')} m ; le coin 3 affleure le terrain.
+- Volume : $V_p = $ {grandeur(ex3.volumePlateforme, 2, 'm³')}, talus {grandeur(ex3.volumeTalus, 2, 'm³')}, total **{grandeur(ex3.volumeTotal, 2, 'm³')}**.
+
+En pratique, on vérifie aussi que cette cote permet d'évacuer les eaux de pluie vers un exutoire.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L3.8.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} colonnes={2} question={<>Au coin d'une plateforme, le terrain est à {nombre(q1.TN, 2)} et la cote projet à {nombre(q1.Zp, 2)}. Quelle est la hauteur de remblai ?</>} choix={[grandeur(q1h / 10, 2, 'm'), grandeur(q1h, 2, 'm'), grandeur(q1h * 10, 2, 'm'), grandeur(q1.Zp + q1.TN, 2, 'm')]} bonne={1}>
+$h = Z_p - TN$ = {nombre(q1.Zp, 2)} − {nombre(q1.TN, 2)} = {grandeur(q1h, 2, 'm')}. On soustrait des altitudes : on obtient une épaisseur.
+</QCM>
+
+<QCM n={2} question="Pourquoi la formule V = S × h_m est-elle exacte quand le terrain varie linéairement entre les coins ?" choix={['Parce que les talus compensent l’erreur', 'Parce que la moyenne d’une fonction bilinéaire sur un rectangle est la moyenne de ses quatre coins', 'Parce que la surface est rectangulaire', 'Elle n’est jamais exacte']} bonne={1}>
+Le volume est l'intégrale de la hauteur sur la surface. Pour une hauteur bilinéaire, cette intégrale vaut exactement la surface multipliée par la moyenne des coins.
+</QCM>
+
+<QCM n={3} colonnes={2} question="Un talus est réglé « à 3/2 ». Que vaut m ?" choix={['0,67', '1,5', '3', '2']} bonne={1}>
+3/2 signifie 3 à l'horizontale pour 2 à la verticale, soit 1,5 m horizontal pour 1 m vertical : $m = 1{,}5$.
+</QCM>
+
+<QCM n={4} colonnes={2} question="Le long d'un côté, la hauteur de remblai double partout. Le volume du talus de ce côté est multiplié par :" choix={['2', '3', '4', '8']} bonne={2}>
+La section du talus vaut $m h^2 / 2$ : elle varie comme le carré de la hauteur. Doubler $h$ multiplie le volume par 4.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} colonnes={2} question="Quelle forme a le remblai d'un talus de coin ?" choix={['Un cube', 'Un prisme triangulaire', 'Une pyramide à base carrée', 'Un cône']} bonne={2}>
+Les deux talus voisins se rejoignent en arête. Le volume compris entre eux est une pyramide de base $(m h)^2$ et de hauteur $h$, d'où $m^2 h^3 / 3$.
+</QCM>
+
+<QCM n={6} question="Pourquoi exagère-t-on l'échelle des hauteurs sur une coupe de terrassement ?" choix={['Pour que le dessin soit plus joli', 'Parce que les hauteurs sont très petites devant les longueurs', 'Pour mesurer les pentes directement', 'C’est imposé par la norme']} bonne={1}>
+Quelques décimètres de remblai sur des dizaines de mètres seraient invisibles à la même échelle. Attention : les pentes sont alors déformées.
+</QCM>
+
+<QCM n={7} question="Un coin a une hauteur calculée de −0,20 m. Que conclure ?" choix={['Il faut prendre la valeur absolue', 'Ce coin est en déblai : la méthode du remblai seul ne s’applique pas', 'Le levé est forcément faux', 'On peut l’ignorer']} bonne={1}>
+Une hauteur négative signifie que le terrain dépasse la plateforme. Il faut traiter séparément les zones de déblai et de remblai (L3.8.8).
+</QCM>
+
+<QCM n={8} question="Le volume de remblai calculé est de 480 m³. Combien de terre faut-il commander ?" choix={['Exactement 480 m³', 'Moins de 480 m³', 'Une quantité qui dépend des coefficients de foisonnement et de compactage du sol', 'Toujours 2 × 480 m³']} bonne={2}>
+Le calcul donne un volume compacté en place. La terre transportée est foisonnée. Les coefficients dépendent du matériau et se mesurent (L3.8.6).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

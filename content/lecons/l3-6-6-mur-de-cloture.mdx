@@ -1,0 +1,365 @@
+---
+id: L3.6.6
+titre: "Mur de clôture : conception et planche d'exécution"
+objectifs:
+  - Décrire les éléments d'un mur de clôture et le rôle de chacun
+  - Lire une planche d'exécution (plan, élévation, coupes repérées, cartouche, légende)
+  - Découper un mur en travées et placer les poteaux raidisseurs
+  - Calculer les quantités principales (fouille, béton, blocs)
+  - Repérer les erreurs de conception qui font tomber les murs de clôture
+relecture: false
+normes:
+  - "EN 1992-1-1 §4.4.1.3(4) : enrobage des bétons coulés contre le sol"
+  - "EN 1996 (EC6) : calcul des maçonneries, abordé en M1"
+glossaire:
+  - terme: Poteau raidisseur
+    definition: Poteau en béton armé noyé dans un mur pour le rigidifier et le tenir contre le vent.
+  - terme: Chaînage
+    definition: Poutre en béton armé qui ceinture la maçonnerie et la rend solidaire.
+  - terme: Soubassement
+    definition: Partie basse du mur, entre la fondation et le chaînage bas, souvent en blocs pleins.
+  - terme: Semelle filante
+    definition: Fondation continue sous un mur.
+  - terme: Béton de propreté
+    definition: Mince couche de béton maigre qui protège le fond de fouille et porte les armatures.
+  - terme: Cartouche
+    definition: Cadre d'identification d'un plan (projet, titre, échelle, numéro, indice, date).
+symboles:
+  - { symbole: 'L', signification: 'longueur hors tout du mur', unite: 'm' }
+  - { symbole: 'H', signification: 'hauteur hors sol', unite: 'm' }
+  - { symbole: 's_{max}', signification: 'entraxe maximal des poteaux', unite: 'm' }
+formules:
+  - { nom: 'Nombre de travées', tex: 'n_t = \left\lceil \frac{L - a}{s_{max}} \right\rceil', domaine: 'Construction' }
+  - { nom: 'Blocs à commander', tex: 'N = S \cdot \frac{1}{l_m h_m} \cdot (1 + p)', domaine: 'Métré' }
+---
+
+import { EXEMPLE_MUR, FERRAILLAGE_PRINCIPE_MUR as FER, murCloture } from '@/lib/calc/murCloture'
+import { grandeur, nombre } from '@/lib/format'
+import { MurCoupe, MurElevation, MurPlan } from '@/components/schemas/MurCloture'
+
+export const d = EXEMPLE_MUR
+export const r = murCloture(d)
+export const ex1d = { ...d, L: 37.5 }
+export const ex1 = murCloture(ex1d)
+export const ex2d = { ...d, L: 18, sMax: 3.5 }
+export const ex2 = murCloture(ex2d)
+export const ex3d = { ...d, H: 2.5 }
+export const ex3 = murCloture(ex3d)
+
+<Page etape="intuition" titre="L'intuition : une feuille de carton posée sur la tranche">
+
+Pose une feuille de carton debout sur la table. Souffle dessus : elle tombe. Plie-la en accordéon, ou colle des baguettes verticales tous les dix centimètres : elle tient.
+
+Un mur de clôture, c'est cette feuille. Il est long, mince et haut. Il n'est tenu par aucun plancher ni aucun mur perpendiculaire. Le **vent** pousse sur toute sa surface. Pour qu'il tienne, on lui donne :
+
+1. un **pied** solide et large : la semelle filante ;
+2. des **baguettes** verticales : les poteaux raidisseurs en béton armé ;
+3. des **ceintures** en bas et en haut : les chaînages, qui rendent les blocs solidaires.
+
+<Encadre type="attention" titre="Un ouvrage simple, mais pas anodin">
+Après chaque forte saison des pluies, on voit des murs de clôture effondrés, parfois sur des passants. Les causes sont presque toujours les mêmes : pas de poteaux, fondation trop faible, terre retenue d'un côté ou eau qui affouille le pied.
+</Encadre>
+
+Dans cette leçon, tu vas apprendre à lire et à concevoir la **planche d'exécution** d'un mur de clôture : le document que le chef de chantier a en main pour construire.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les éléments du mur">
+
+De bas en haut, le mur de l'exemple comprend :
+
+- le **béton de propreté**, {nombre(d.ePropre * 100, 0)} cm de béton maigre au fond de la fouille ;
+- la **semelle filante** en béton armé, {nombre(d.B * 100, 0)} × {nombre(d.hSemelle * 100, 0)} cm, qui répartit le poids sur le sol ;
+- le **soubassement** : {d.rangsSoubassement} rangs de blocs pleins de {nombre(d.epaisseurBlocSoubassement * 100, 0)} cm, enterrés ;
+- le **chaînage bas** en béton armé, juste au-dessus du sol ;
+- l'**élévation** en blocs creux de {nombre(d.epaisseurBlocElevation * 100, 0)} cm ;
+- le **chaînage haut**, qui ferme le mur et reçoit éventuellement un chaperon ;
+- les **poteaux raidisseurs** en béton armé, ancrés dans la semelle, qui découpent le mur en **travées**.
+
+<Regle type="art">
+L'espacement des poteaux, la hauteur courante sans étude au vent et la distance entre joints de dilatation relèvent de la pratique locale. Dans cette leçon, ce sont des **données de l'énoncé** : un entraxe de {nombre(d.sMax, 2)} m au plus. Pour un mur haut, exposé ou qui retient de la terre, on calcule.<AVerifier note="A_VERIFIER.md n° 14" />
+</Regle>
+
+<Regle type="norme" source="EN 1992-1-1 §4.4.1.3(4)">
+Un béton coulé sur un béton de propreté demande un enrobage d'au moins 40 mm ; coulé directement contre le sol, d'au moins 75 mm (valeurs recommandées k₁ et k₂). C'est l'une des raisons d'être du béton de propreté.
+</Regle>
+
+<Encadre type="attention" titre="Terre d'un seul côté ?">
+Si le terrain est plus haut d'un côté du mur, celui-ci devient un **mur de soutènement** : la poussée des terres s'ajoute au vent et change complètement le calcul (voir M1.3.6). Un simple mur de clôture n'est pas fait pour cela.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : lire une planche d'exécution">
+
+Une planche d'exécution n'est pas un dessin libre : elle suit des conventions que tout le chantier connaît (voir L1.6.5).
+
+1. **Le cartouche**, en bas à droite : projet, titre, échelle, numéro de planche, indice de révision, date. On le lit en premier. L'indice dit si on a la dernière version.
+2. **Les vues** : le plan (vue de dessus coupée), l'élévation (vue de face) et les coupes. Chaque coupe est repérée sur le plan par un trait mixte et des flèches : la coupe 1-1 se lit dans le sens des flèches.
+3. **Les axes et repères de file** : les poteaux sont sur des axes numérotés ; toutes les cotes partent des axes.
+4. **Les cotes** sont en mètres sur les plans d'ensemble et souvent en centimètres sur les détails. Les **niveaux** sont rapportés au ±0,00, ici le terrain naturel.
+5. **Les hachures** disent de quoi est fait ce qui est coupé : béton armé, maçonnerie, terre. La légende de la planche fait foi.
+6. **Les notes générales** donnent ce qu'on ne dessine pas : matériaux, enrobages, précautions.
+
+<Encadre type="retenir">
+Une cote écrite prime toujours sur une mesure prise à la règle sur le plan. On ne mesure jamais un plan imprimé : l'impression peut l'avoir réduit.
+</Encadre>
+
+Les deux pages suivantes sont la planche du mur de l'exemple. Toutes les vues sont générées à partir des mêmes données que le calcul : si l'entraxe change, le dessin change.
+
+</Page>
+
+<PlancheTechnique
+  titre="Mur de clôture : plan et élévation"
+  projet="Clôture de parcelle, exemple L3.6.6"
+  numero="MC-01"
+  echelle="1/50"
+  date="10/2026"
+  indice="A"
+  notes={[
+    `Béton de fondation et des éléments en béton armé : ${FER.beton}, à confirmer par l'étude.`,
+    `Entraxe des poteaux raidisseurs : ${nombre(r.espacement, 3)} m (au plus ${nombre(d.sMax, 2)} m, donnée de l'énoncé).`,
+    'Fond de fouille sur sol reconnu, débarrassé de la terre végétale.',
+    'Cotes en mètres sauf indication contraire ; niveaux rapportés au terrain naturel ±0,00.',
+  ]}
+>
+
+<Vue titre="Plan partiel" echelle="1/50" pleineLargeur>
+<MurPlan d={d} r={r} />
+</Vue>
+
+<Vue titre="Élévation partielle" echelle="1/50" pleineLargeur>
+<MurElevation d={d} r={r} />
+</Vue>
+
+</PlancheTechnique>
+
+<PlancheTechnique
+  titre="Mur de clôture : coupes 1-1 et 2-2"
+  projet="Clôture de parcelle, exemple L3.6.6"
+  numero="MC-02"
+  echelle="1/20"
+  date="10/2026"
+  indice="A"
+  hachures={['ba', 'beton', 'maconnerie', 'terre', 'remblai']}
+  notes={[
+    `Semelle : ${FER.semelle}. Poteaux : ${FER.poteau}, ${FER.cadresPoteau}.`,
+    `Chaînage bas : ${FER.chainageBas}. Chaînage haut : ${FER.chainageHaut}.`,
+    'Ferraillage de principe à justifier par le calcul (vent).',
+    'Enrobage sur béton de propreté : 40 mm au moins (EN 1992-1-1 §4.4.1.3).',
+  ]}
+>
+
+<Vue titre="Coupe 1-1 (panneau)" echelle="1/20">
+<MurCoupe d={d} r={r} poteau={false} />
+</Vue>
+
+<Vue titre="Coupe 2-2 (poteau)" echelle="1/20">
+<MurCoupe d={d} r={r} poteau={true} />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="mur">
+
+<Cahier titre="Exemple résolu : les quantités du mur">
+
+**Énoncé.** Le mur de la planche MC-01 mesure {nombre(d.L, 2)} m hors tout et {nombre(d.H, 2)} m de haut. Les poteaux ne doivent pas être espacés de plus de {nombre(d.sMax, 2)} m. Combien de poteaux faut-il ? Quels volumes de béton et combien de blocs commander, avec {nombre(d.pertes * 100, 0)} % de casse ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="Les formules et l'application numérique">
+<AN k="travees" />
+<AN k="nette" />
+<AN k="fondation" />
+<AN k="beton" />
+<AN k="blocs" />
+<Note>Pourquoi déduire les poteaux ? Parce que la maçonnerie et les chaînages s'arrêtent contre eux : sinon on compterait deux fois le même volume.</Note>
+</Etape>
+
+<Etape n={4} titre="Le résultat">
+<Resultat k="Vba" libelle="Béton armé" />
+<Note couleur="bleu"><Val k="travees" /> ; à commander : <Val k="blocs" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="construire le mur sans poteaux raidisseurs pour gagner du temps.">
+Un panneau de maçonnerie de 2 m de haut et de plusieurs dizaines de mètres n'a aucune raideur contre le vent. Les poteaux et les chaînages forment un cadre qui tient la maçonnerie.
+</Piege>
+
+<Piege erreur="arrêter les armatures des poteaux au niveau du sol.">
+Les poteaux doivent être ancrés dans la semelle (attentes recourbées, voir coupe 2-2). Sinon, ils basculent avec le mur.
+</Piege>
+
+<Piege erreur="remblayer un côté du mur avec la terre de la fouille.">
+Le mur devient un mur de soutènement qu'on n'a pas calculé. Il penche, puis il tombe à la première pluie.
+</Piege>
+
+<Piege erreur="lire une cote à la règle sur un plan imprimé.">
+L'impression réduit souvent le plan. On lit la cote écrite. Si elle manque, on la demande au bureau d'études.
+</Piege>
+
+<Piege erreur="commander les blocs au m² sans tenir compte des poteaux ni de la casse.">
+On déduit la surface occupée par les poteaux, puis on ajoute un pourcentage de casse adapté aux conditions de transport et de stockage.
+</Piege>
+
+<Piege erreur="laisser l'eau de pluie ruisseler au pied du mur.">
+L'eau affouille la fondation. On règle le terrain en pente pour l'éloigner du mur et, si nécessaire, on prévoit un caniveau.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**L'implantation.** On matérialise les axes des poteaux avec des chaises et des cordeaux (voir PP.2.2). L'entraxe se mesure d'axe en axe, jamais de bord à bord.
+
+**La fouille.** On la descend jusqu'au bon sol, débarrassé de la terre végétale. Si le sol change le long du mur, on prévient le bureau d'études. Sur un terrain en pente, la fondation se fait **en redans** : des paliers horizontaux successifs, jamais une semelle inclinée.
+
+**Les blocs.** En RDC, les blocs ciment sont souvent fabriqués sur place ou par de petits producteurs. Leur qualité varie beaucoup : on contrôle leurs dimensions et on en casse quelques-uns pour juger leur résistance. Un bloc qui s'effrite à la main est refusé.
+
+<Encadre type="terrain" titre="Saison des pluies">
+On ne laisse pas une fouille ouverte sous la pluie : l'eau ramollit le fond et le béton de propreté ne sert plus à rien. On coule la propreté dès la fouille terminée et contrôlée.
+</Encadre>
+
+**Le bétonnage des poteaux** se fait après la montée de la maçonnerie, en coffrant les deux faces : la maçonnerie en attente « en harpe » assure la liaison avec le poteau.
+
+**La réception.** On vérifie l'aplomb du mur, l'alignement, les hauteurs, et on s'assure que le pied du mur évacue bien l'eau.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : mur de clôture">
+
+### Les éléments, de bas en haut
+
+| Élément | Rôle |
+|---|---|
+| Béton de propreté | protège le fond de fouille, porte les cales d'armatures |
+| Semelle filante | répartit le poids sur le sol |
+| Soubassement | maçonnerie enterrée en blocs pleins |
+| Chaînage bas | solidarise la base de la maçonnerie |
+| Poteaux raidisseurs | tiennent le mur contre le vent |
+| Élévation | maçonnerie de blocs creux |
+| Chaînage haut | ferme et solidarise le haut du mur |
+
+### Lire une planche
+
+1. Cartouche : projet, échelle, numéro, **indice**.
+2. Plan, élévation, coupes repérées (1-1 se lit dans le sens des flèches).
+3. Axes, cotes, niveaux (±0,00 = référence).
+4. Légende des hachures et notes générales.
+
+### Les quantités
+
+| Quantité | Formule |
+|---|---|
+| Travées | $n_t$ = arrondi supérieur de $(L - a)/s_{max}$ |
+| Poteaux | $n_t + 1$ |
+| Longueur de maçonnerie | $L - n_p \cdot a$ |
+| Blocs | surface × blocs/m² × (1 + casse) |
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un mur plus long">
+
+Avec les mêmes dispositions que l'exemple, le mur mesure {nombre(ex1d.L, 2)} m hors tout. Combien de travées et de poteaux ? Quel est l'entraxe réel ?
+
+<Indice>Retire l'épaisseur d'un poteau avant de diviser par l'entraxe maximal.</Indice>
+
+<Corrige>
+
+- $(L - a)/s_{max}$ = {nombre(ex1.rapportTravees, 2)} → **{ex1.travees} travées**, donc **{ex1.poteaux} poteaux**.
+- Entraxe réel : {nombre(ex1.entraxeExtremes, 2)} / {ex1.travees} = **{grandeur(ex1.espacement, 3, 'm')}**.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Changer l'entraxe">
+
+Le bureau d'études autorise un entraxe de {nombre(ex2d.sMax, 2)} m pour un mur de {nombre(ex2d.L, 2)} m. Calcule le nombre de poteaux, le volume de béton armé et le nombre de blocs creux à commander.
+
+<Indice>Moins de poteaux, c'est plus de maçonnerie : la longueur nette augmente.</Indice>
+
+<Corrige>
+
+- Travées : **{ex2.travees}** ; poteaux : **{ex2.poteaux}** ; entraxe {grandeur(ex2.espacement, 3, 'm')}.
+- Longueur de maçonnerie : {grandeur(ex2.longueurNette, 2, 'm')}.
+- Béton armé : **{grandeur(ex2.volumeBetonArme, 2, 'm³')}** ; blocs creux : **{ex2.blocsElevation}**.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un mur plus haut">
+
+Le propriétaire veut un mur de {nombre(ex3d.H, 2)} m au lieu de {nombre(d.H, 2)} m. Calcule les nouvelles quantités. Que faut-il vérifier avant d'accepter ?
+
+<Indice>La hauteur d'élévation doit rester un nombre entier de rangs. Et le vent agit sur une surface plus grande, plus haut.</Indice>
+
+<Corrige>
+
+- Élévation : {grandeur(ex3.hauteurElevation, 2, 'm')}, soit {nombre(ex3.rangsElevation, 1)} rangs{ex3.messages.length ? ' : ' + ex3.messages[0] : ''}.
+- Béton armé : **{grandeur(ex3.volumeBetonArme, 2, 'm³')}** ; blocs creux : **{ex3.blocsElevation}**.
+- Avant d'accepter : le moment dû au vent au pied du mur croît comme le carré de la hauteur. Il faut **calculer** les poteaux, la semelle et la stabilité au renversement, et non reconduire le ferraillage de principe.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L3.6.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Quel est le rôle principal des poteaux raidisseurs ?" choix={['Décorer le mur', 'Tenir le mur contre le vent en le découpant en travées', 'Porter une toiture', 'Remplacer la fondation']} bonne={1}>
+Ils forment, avec les chaînages, un cadre rigide qui empêche les panneaux de maçonnerie de basculer.
+</QCM>
+
+<QCM n={2} question="Sur une planche, où lit-on l'indice de révision ?" choix={['Dans la légende', 'Dans le cartouche', 'Sur la coupe 1-1', 'Dans les notes']} bonne={1} colonnes={2}>
+Le cartouche identifie le plan : titre, échelle, numéro, indice, date. On le lit avant tout le reste.
+</QCM>
+
+<QCM n={3} question="Le repère « 1-1 » sur le plan indique :" choix={['un niveau', 'la position et le sens d’une coupe', 'un axe de poteau', 'une cote']} bonne={1} colonnes={2}>
+Le trait mixte montre où l'on coupe ; les flèches montrent le sens dans lequel on regarde.
+</QCM>
+
+<QCM n={4} question={<>Pour l'exemple, combien faut-il de poteaux ?</>} choix={[String(r.poteaux - 1), String(r.poteaux), String(r.poteaux + 1), String(r.travees * 2)]} bonne={1} colonnes={2}>
+{r.travees} travées, donc {r.poteaux} poteaux : il y a toujours un poteau de plus que de travées.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pourquoi coule-t-on un béton de propreté ?" choix={['Pour décorer', 'Pour protéger le fond de fouille et poser les armatures avec le bon enrobage', 'Pour remplacer la semelle', 'Pour économiser du ciment']} bonne={1}>
+Il évite que le béton de la semelle soit souillé par la terre et permet de caler les armatures. L'EC2 admet alors un enrobage plus faible que contre le sol brut.
+</QCM>
+
+<QCM n={6} question="Le terrain est 1 m plus haut d'un côté du mur. Que devient le mur ?" choix={['Un mur de clôture ordinaire', 'Un mur de soutènement, à calculer comme tel', 'Une cloison', 'Rien ne change']} bonne={1}>
+La poussée des terres s'ajoute au vent : c'est un autre ouvrage (M1.3.6).
+</QCM>
+
+<QCM n={7} question="Sur un terrain en pente, la semelle filante doit être :" choix={['inclinée comme le terrain', 'en redans horizontaux', 'supprimée', 'posée sur la terre végétale']} bonne={1} colonnes={2}>
+Une semelle inclinée glisse. On fait des paliers horizontaux successifs.
+</QCM>
+
+<QCM n={8} question="Pourquoi ajoute-t-on un pourcentage de casse aux blocs ?" choix={['Par habitude', 'Parce que des blocs se cassent au transport, au stockage et à la coupe', 'Pour payer plus', 'Parce que la norme l’impose']} bonne={1}>
+La valeur dépend des conditions du chantier ; c'est une donnée de l'énoncé, pas une règle normative.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
