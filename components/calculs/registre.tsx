@@ -57,7 +57,7 @@ const echelle: DefinitionCalcul<ResEchelle> = {
     const graduations = Array.from({ length: Math.floor(r.mesure / 10) + 1 }, (_, i) => i * 10);
     return (
       <Figure alt={`Segment de ${nombre(r.mesure, 0)} mm mesuré sur un plan au 1/${r.E}, soit ${n2(r.reel)} m en vraie grandeur`} largeur={620} hauteur={86}>
-        <rect x={30} y={26} width={Math.max(L, 10) + 30} height={22} fill="#f7f1dd" className="t-fin" />
+        <rect x={30} y={26} width={Math.max(L, 10) + 30} height={22} fill="var(--fond-note)" className="t-fin" />
         {graduations.map((g) => (
           <line key={g} x1={30 + g * k} y1={26} x2={30 + g * k} y2={g % 50 === 0 ? 40 : 34} className="t-fin" />
         ))}

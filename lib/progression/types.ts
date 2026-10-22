@@ -19,6 +19,8 @@ export interface DepotProgression {
   lire(id: string): EtatLecon | undefined;
   marquerVue(id: string): void;
   enregistrerQuiz(id: string, score: number, total: number): void;
+  /** Efface toute la progression (choix explicite de l'étudiant). */
+  effacer(): void;
   /** Prévient l'abonné à chaque changement ; renvoie la fonction de désabonnement. */
   abonner(rappel: () => void): () => void;
 }

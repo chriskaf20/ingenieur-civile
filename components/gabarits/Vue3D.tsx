@@ -35,7 +35,7 @@ export function Vue3D({ titre, calques, etape = 'schemas', children }: { titre: 
                 type="button"
                 aria-pressed={on}
                 onClick={() => basculer(c.id)}
-                className={`rounded-full border px-2.5 py-0.5 ${on ? 'border-encre bg-encre text-white' : 'border-beton/50 bg-white text-beton'}`}
+                className={`rounded-full border px-2.5 py-0.5 ${on ? 'border-encre bg-encre text-sur-couleur' : 'border-beton/50 bg-surface text-beton'}`}
               >
                 {on ? '● ' : '○ '}
                 {c.libelle}

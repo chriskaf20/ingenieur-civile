@@ -90,7 +90,7 @@ export function ScoreQuiz() {
       ) : null}
       <button
         type="button"
-        className="ne-pas-imprimer ml-auto rounded border border-encre bg-white px-2.5 py-0.5 text-encre hover:bg-encre hover:text-white"
+        className="ne-pas-imprimer ml-auto rounded border border-encre bg-surface px-2.5 py-0.5 text-encre hover:bg-encre hover:text-sur-couleur"
         onClick={q.recommencer}
       >
         Recommencer
@@ -124,7 +124,7 @@ export function QCM({
 
   const juste = choisi === bonne;
   return (
-    <fieldset className="my-1.5 rounded-md border border-beton-clair bg-white/80 px-3 pb-1.5 pt-0.5">
+    <fieldset className="my-1.5 rounded-md border border-beton-clair bg-surface/80 px-3 pb-1.5 pt-0.5">
       <legend className="px-1 font-technique text-[0.92rem] font-semibold text-encre">Question {n}</legend>
       <div className="mb-0.5 leading-snug">{question}</div>
       <div className={`grid gap-x-3 ${colonnes === 2 ? 'sm:grid-cols-2' : ''}`}>
@@ -144,7 +144,7 @@ export function QCM({
         <button
           type="button"
           disabled={choisi === null}
-          className="ne-pas-imprimer mt-1 rounded border border-encre px-2 py-0 font-technique text-[0.88rem] text-encre enabled:hover:bg-encre enabled:hover:text-white disabled:opacity-40"
+          className="ne-pas-imprimer mt-1 rounded border border-encre px-2 py-0 font-technique text-[0.88rem] text-encre enabled:hover:bg-encre enabled:hover:text-sur-couleur disabled:opacity-40"
           onClick={() => {
             setValide(true);
             ctx?.repondre(n, juste);

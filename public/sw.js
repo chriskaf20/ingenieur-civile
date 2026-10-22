@@ -1,6 +1,6 @@
 // Service worker de Génie Civil Académie (écrit à la main, sans dépendance).
 // Pages : réseau d'abord, puis cache, puis page hors ligne. Ressources /_next/static : cache d'abord.
-const VERSION = 'gca-v1';
+const VERSION = 'gca-v2';
 const PAGES = `${VERSION}-pages`;
 const STATIQUES = `${VERSION}-statiques`;
 const HORS_LIGNE = '/hors-ligne';
@@ -57,7 +57,12 @@ self.addEventListener('fetch', (event) => {
           cache.put(request, rep.clone());
           return rep;
         } catch {
-          return (await caches.match(request)) ?? (await caches.match(HORS_LIGNE)) ?? Response.error();
+          return (
+            (await caches.match(request)) ??
+            (await caches.match(request, { ignoreSearch: true })) ?? // ex. /recherche?q=…
+            (await caches.match(HORS_LIGNE)) ??
+            Response.error()
+          );
         }
       })(),
     );
@@ -81,7 +86,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     (async () => {
       const cache = await caches.open(STATIQUES);
-      const deja = await cache.match(request);
+      const deja = await caches.match(request); // tous les caches : /recherche.json est précachée avec les pages
       const reseau = fetch(request)
         .then((rep) => {
           if (rep.ok) cache.put(request, rep.clone());

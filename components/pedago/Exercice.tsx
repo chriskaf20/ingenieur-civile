@@ -8,7 +8,7 @@ const NIVEAUX = {
 export function Exercice({ n, niveau, titre, children }: { n: number; niveau: keyof typeof NIVEAUX; titre: string; children: React.ReactNode }) {
   const v = NIVEAUX[niveau];
   return (
-    <article className="my-3 rounded-md border border-beton-clair bg-white/70 p-3">
+    <article className="my-3 rounded-md border border-beton-clair bg-surface/70 p-3">
       <h3 className="!mt-0 flex flex-wrap items-center gap-2">
         <span>Exercice {n}</span>
         <span className={`rounded border px-1.5 font-technique text-[0.75rem] font-semibold uppercase ${v.classes}`}>{v.libelle}</span>

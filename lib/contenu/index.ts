@@ -4,6 +4,8 @@ import path from 'node:path';
 import { parse } from 'yaml';
 import type { Cursus, LeconCursus, ModuleCursus } from './cursus';
 import { schemaFrontmatter, type Frontmatter } from './schema';
+import { agregerGlossaire, type TermeGlossaire } from './glossaire';
+import type { EntreeRecherche } from '@/lib/recherche';
 
 const RACINE = process.cwd();
 const DOSSIER_LECONS = path.join(RACINE, 'content', 'lecons');
@@ -74,4 +76,75 @@ export function dureeLisible(minutes: number): string {
   const m = minutes % 60;
   if (h === 0) return `${m} min`;
   return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
+}
+
+/** Leçons rédigées qui précèdent et suivent `id` dans l'ordre du cursus. */
+export function voisines(id: string): { precedente?: Lecon; suivante?: Lecon } {
+  const liste = lecons();
+  const i = liste.findIndex((l) => l.meta.id === id);
+  return { precedente: i > 0 ? liste[i - 1] : undefined, suivante: i >= 0 ? liste[i + 1] : undefined };
+}
+
+/** Titres des pages et intertitres d'une leçon (pour la recherche). */
+function titresDePages(slug: string): string[] {
+  const source = fs.readFileSync(path.join(DOSSIER_LECONS, `${slug}.mdx`), 'utf8');
+  const attributs = [...source.matchAll(/\btitre="([^"]+)"/g)].map((m) => m[1]!);
+  const intertitres = [...source.matchAll(/^#{2,3} (.+)$/gm)].map((m) => m[1]!.trim());
+  return [...attributs, ...intertitres];
+}
+
+export function moduleParId(id: string): ModuleCursus | undefined {
+  return cursus().modules.find((m) => m.id === id);
+}
+
+/** Adresse d'une entrée du cursus : la leçon si elle est rédigée, sinon sa ligne dans la page du module. */
+export function urlCursus(id: string): string {
+  const l = leconParId(id);
+  if (l) return `/lecons/${l.slug}`;
+  const entree = cursus().lecons[id];
+  return entree ? `/modules/${entree.module}#${id}` : `/modules/${id}`;
+}
+
+export function glossaireGeneral(): TermeGlossaire[] {
+  return agregerGlossaire(
+    lecons().flatMap((l) => l.meta.glossaire.map((g) => ({ ...g, leconId: l.meta.id, leconTitre: l.meta.titre, slug: l.slug }))),
+  );
+}
+
+/** Index complet de la recherche hors ligne. */
+export function indexRecherche(): EntreeRecherche[] {
+  const c = cursus();
+  const index: EntreeRecherche[] = [];
+  for (const m of c.modules) {
+    const niveau = c.niveaux.find((n) => n.id === m.niveau);
+    index.push({ type: 'module', titre: m.titre, resume: `${m.lecons.length} séances`, contexte: `Module ${m.id} · ${niveau?.titre ?? m.niveau}`, url: `/modules/${m.id}` });
+  }
+  for (const e of Object.values(c.lecons)) {
+    const l = leconParId(e.id);
+    const m = c.modules.find((x) => x.id === e.module);
+    index.push({
+      type: 'lecon',
+      titre: e.titre,
+      resume: e.objectif,
+      motsCles: l ? [...l.meta.objectifs, ...l.meta.normes, ...titresDePages(l.slug)].join(' · ') : undefined,
+      contexte: `${e.id} · ${m?.titre ?? e.module}`,
+      url: urlCursus(e.id),
+      aVenir: !l,
+    });
+  }
+  for (const t of glossaireGeneral()) {
+    index.push({
+      type: 'terme',
+      titre: t.terme,
+      resume: t.definitions.map((d) => d.texte).join(' '),
+      contexte: `Glossaire · ${t.definitions.flatMap((d) => d.lecons.map((x) => x.id)).join(', ')}`,
+      url: `/glossaire#${t.ancre}`,
+    });
+  }
+  for (const l of lecons()) {
+    for (const f of l.meta.formules) {
+      index.push({ type: 'formule', titre: f.nom, resume: f.domaine, contexte: `${l.meta.id} · ${l.meta.titre}`, url: `/lecons/${l.slug}` });
+    }
+  }
+  return index;
 }

@@ -16,7 +16,7 @@ export type CouleurPanneau = keyof typeof COULEURS;
 export function Infographie({ titre, sousTitre, etape = 'cours', children }: { titre: string; sousTitre?: string; etape?: Etape; children: React.ReactNode }) {
   return (
     <Feuille etape={etape} variante="infographie">
-      <div className="-mx-1 mb-2 rounded-md bg-encre px-3 py-2 text-white">
+      <div className="-mx-1 mb-2 rounded-md bg-encre px-3 py-2 text-sur-couleur">
         <p className="font-technique text-[1.45rem] font-bold uppercase leading-tight tracking-wide">{titre}</p>
         {sousTitre ? <p className="font-technique text-[0.95rem] opacity-90">{sousTitre}</p> : null}
       </div>
@@ -29,9 +29,9 @@ export function Infographie({ titre, sousTitre, etape = 'cours', children }: { t
 export function Panneau({ n, titre, icone, couleur = 'encre', large = false, children }: { n: number; titre: string; icone: NomIcone; couleur?: CouleurPanneau; large?: boolean; children: React.ReactNode }) {
   const c = COULEURS[couleur];
   return (
-    <section className={`rounded-md border-2 ${c.bord} bg-white/80 ${large ? 'col-span-2 max-sm:col-span-1' : ''}`}>
-      <h3 className={`!mt-0 flex items-center gap-2 rounded-t-[4px] ${c.fond} px-2 py-1 font-technique !text-[1rem] font-bold uppercase tracking-wide !text-white`}>
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-[0.9rem]" style={{ color: 'inherit' }}>
+    <section className={`rounded-md border-2 ${c.bord} bg-surface/80 ${large ? 'col-span-2 max-sm:col-span-1' : ''}`}>
+      <h3 className={`!mt-0 flex items-center gap-2 rounded-t-[4px] ${c.fond} px-2 py-1 font-technique !text-[1rem] font-bold uppercase tracking-wide !text-sur-couleur`}>
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-surface text-[0.9rem]" style={{ color: 'inherit' }}>
           <span className={c.texte}>{n}</span>
         </span>
         <Icone nom={icone} taille={18} />

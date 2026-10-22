@@ -87,7 +87,7 @@ function ChampSaisie({ champ }: { champ: Champ }) {
             const opt = champ.options.find((o) => String(o.valeur) === ev.target.value);
             if (opt) majEntree(champ.cle, opt.valeur);
           }}
-          className="justify-self-start rounded border border-encre/40 bg-white/80 px-1.5 py-0 font-manuscrite text-encre"
+          className="justify-self-start rounded border border-encre/40 bg-surface/80 px-1.5 py-0 font-manuscrite text-encre"
         >
           {champ.options.map((o) => (
             <option key={String(o.valeur)} value={String(o.valeur)}>
@@ -117,7 +117,7 @@ function ChampSaisie({ champ }: { champ: Champ }) {
           const x = ev.target.valueAsNumber;
           if (Number.isFinite(x)) majEntree(champ.cle, x);
         }}
-        className="w-20 rounded border border-encre/40 bg-white/80 px-1.5 py-0 text-right font-manuscrite text-[1.05rem] text-encre"
+        className="w-20 rounded border border-encre/40 bg-surface/80 px-1.5 py-0 text-right font-manuscrite text-[1.05rem] text-encre"
       />
       <span className="w-8 text-beton">{champ.unite}</span>
       <input
@@ -139,7 +139,7 @@ function ChampSaisie({ champ }: { champ: Champ }) {
 export function Entrees() {
   const { def, reinitialiser } = useCalcul();
   return (
-    <div className="grid gap-x-5 gap-y-1.5 rounded border border-dashed border-encre/40 bg-white/40 p-2 sm:grid-cols-2">
+    <div className="grid gap-x-5 gap-y-1.5 rounded border border-dashed border-encre/40 bg-surface/40 p-2 sm:grid-cols-2">
       {def.champs.map((c) => (
         <ChampSaisie key={c.cle} champ={c} />
       ))}

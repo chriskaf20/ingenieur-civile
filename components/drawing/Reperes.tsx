@@ -26,7 +26,7 @@ export function Axe({
       <line x1={x1} y1={y1} x2={x2} y2={y2} className="t-axe" />
       {repere ? (
         <g>
-          <circle cx={bx} cy={by} r={r} fill="var(--halo, #fffdf7)" className="t-moyen" />
+          <circle cx={bx} cy={by} r={r} fill="var(--halo)" className="t-moyen" />
           <text x={bx} y={by + 4} textAnchor="middle" fontSize={11} fontWeight={700}>
             {repere}
           </text>
@@ -55,7 +55,7 @@ export function NiveauPlan({ x, y, texte }: { x: number; y: number; texte: strin
   return (
     <g>
       <path d={`M${x - 6} ${y}h12M${x} ${y - 6}v12`} className="t-moyen" />
-      <rect x={x + 9} y={y - 9} width={texte.length * 6.4 + 8} height={16} className="t-fin" fill="var(--halo, #fffdf7)" />
+      <rect x={x + 9} y={y - 9} width={texte.length * 6.4 + 8} height={16} className="t-fin" fill="var(--halo)" />
       <text x={x + 13} y={y + 3.5} fontSize={11}>
         {texte}
       </text>

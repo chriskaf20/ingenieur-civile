@@ -63,7 +63,7 @@ export function Etiquette({
       fontWeight={gras ? 700 : undefined}
       className={classe}
       paintOrder="stroke"
-      stroke="var(--halo, #fffdf7)"
+      stroke="var(--halo)"
       strokeWidth={3}
       strokeLinejoin="round"
       transform={rotation ? `rotate(${rotation} ${x} ${y})` : undefined}

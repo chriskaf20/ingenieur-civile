@@ -45,6 +45,9 @@ export function creerDepotLocal(stockage: Stockage | null, maintenant: () => Dat
       const meilleur = Math.max(score, precedent?.meilleur ?? 0);
       ecrire({ ...etat, [id]: { ...etat[id], quiz: { score, total, meilleur, date: maintenant().toISOString() } } });
     },
+    effacer() {
+      ecrire({});
+    },
     abonner(rappel) {
       abonnes.add(rappel);
       return () => {

@@ -15,7 +15,12 @@ interface Props {
 export function Feuille({ etape, titre, variante = 'cours', className = '', children }: Props) {
   const cahier = variante === 'cahier';
   return (
-    <section className={`feuille feuille--${variante} ${className}`} aria-label={typeof titre === 'string' ? titre : undefined}>
+    <section
+      className={`feuille feuille--${variante} ${className}`}
+      aria-label={typeof titre === 'string' ? titre : undefined}
+      data-etape={etape ? ETAPES[etape] : undefined}
+      data-titre={typeof titre === 'string' ? titre : undefined}
+    >
       <EnTete />
       <div className="feuille-corps">
         {titre ? (

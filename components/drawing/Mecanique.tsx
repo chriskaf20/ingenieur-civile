@@ -51,7 +51,7 @@ export function ChargeRepartie({ x1, x2, y, hauteur = 22, n, texte }: { x1: numb
 export function AppuiSimple({ x, y, t = 12 }: { x: number; y: number; t?: number }) {
   return (
     <g>
-      <polygon points={`${x},${y} ${x - t},${y + t * 1.3} ${x + t},${y + t * 1.3}`} fill="var(--halo, #fffdf7)" className="t-moyen" />
+      <polygon points={`${x},${y} ${x - t},${y + t * 1.3} ${x + t},${y + t * 1.3}`} fill="var(--halo)" className="t-moyen" />
       <circle cx={x - t * 0.55} cy={y + t * 1.3 + 3} r={2.6} className="t-moyen" />
       <circle cx={x + t * 0.55} cy={y + t * 1.3 + 3} r={2.6} className="t-moyen" />
       <line x1={x - t * 1.4} y1={y + t * 1.3 + 6} x2={x + t * 1.4} y2={y + t * 1.3 + 6} className="t-moyen" />
@@ -64,8 +64,8 @@ export function AppuiDouble({ x, y, t = 12, prefixe = 'app' }: { x: number; y: n
   const b = y + t * 1.3;
   return (
     <g>
-      <polygon points={`${x},${y} ${x - t},${b} ${x + t},${b}`} fill="var(--halo, #fffdf7)" className="t-moyen" />
-      <circle cx={x} cy={y} r={2.6} fill="var(--halo, #fffdf7)" className="t-moyen" />
+      <polygon points={`${x},${y} ${x - t},${b} ${x + t},${b}`} fill="var(--halo)" className="t-moyen" />
+      <circle cx={x} cy={y} r={2.6} fill="var(--halo)" className="t-moyen" />
       <rect x={x - t * 1.4} y={b} width={t * 2.8} height={6} fill={hachure(prefixe, 'terre')} />
       <line x1={x - t * 1.4} y1={b} x2={x + t * 1.4} y2={b} className="t-moyen" />
     </g>

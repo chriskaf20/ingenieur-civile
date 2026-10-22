@@ -25,7 +25,7 @@ const COULEURS = [
 
 function Carte({ titre, children }: { titre: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-black/10 bg-papier p-4">
+    <section className="rounded-lg border border-trait/10 bg-papier p-4">
       <h3 className="mb-2 font-technique text-lg font-bold text-encre">{titre}</h3>
       {children}
     </section>
@@ -47,7 +47,7 @@ export default function Design() {
           <ul className="grid gap-1.5">
             {COULEURS.map(([nom, sens]) => (
               <li key={nom} className="flex items-center gap-3">
-                <span className="h-7 w-12 rounded border border-black/10" style={{ background: `var(--color-${nom})` }} />
+                <span className="h-7 w-12 rounded border border-trait/10" style={{ background: `var(--color-${nom})` }} />
                 <span className="font-technique font-semibold">{nom}</span>
                 <span className="text-[0.92rem] text-beton">{sens}</span>
               </li>

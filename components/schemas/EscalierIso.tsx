@@ -73,9 +73,9 @@ export function EscalierIso({ d, largeur = 660 }: { d: DonneesEscalier; largeur?
       </Calque>
       {faces.map((f, i) => {
         const horizontale = Math.abs(f[0]![2] - f[1]![2]) < 1e-9;
-        return <polygon key={i} points={poly(f)} fill={horizontale ? '#f4f1ea' : '#d9d4c7'} className="t-moyen" />;
+        return <polygon key={i} points={poly(f)} fill={horizontale ? 'var(--iso-dessus)' : 'var(--iso-face)'} className="t-moyen" />;
       })}
-      <polygon points={poly(flanc)} fill="#bfb8a8" className="t-fort" />
+      <polygon points={poly(flanc)} fill="var(--iso-flanc)" className="t-fort" />
 
       <Calque id="ferraillage">
         {[0.15, E / 2, E - 0.15].map((y) => (

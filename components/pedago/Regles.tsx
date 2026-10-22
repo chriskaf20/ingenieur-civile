@@ -23,7 +23,7 @@ const TYPES_REGLE = {
 export function Regle({ type, source, children }: { type: keyof typeof TYPES_REGLE; source?: string; children: React.ReactNode }) {
   const t = TYPES_REGLE[type];
   return (
-    <aside className={`my-2 border-l-4 bg-white/60 py-1.5 pl-3 pr-2 ${t.couleur.split(' ')[0]}`}>
+    <aside className={`my-2 border-l-4 bg-surface/60 py-1.5 pl-3 pr-2 ${t.couleur.split(' ')[0]}`}>
       <div className={`flex items-center gap-1.5 font-technique text-[0.8rem] font-semibold uppercase tracking-wide ${t.couleur.split(' ')[1]}`}>
         <Icone nom={t.icone} taille={16} />
         {t.libelle}
@@ -60,7 +60,7 @@ export function Encadre({ type, titre, children }: { type: keyof typeof TYPES_EN
 /** Erreur fréquente : ce qu'on voit souvent, puis la bonne pratique. */
 export function Piege({ erreur, children }: { erreur: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="my-2 grid gap-1 rounded-md border border-beton-clair bg-white/70 p-2.5">
+    <div className="my-2 grid gap-1 rounded-md border border-beton-clair bg-surface/70 p-2.5">
       <p className="flex gap-2 text-correction">
         <Icone nom="erreur" taille={20} className="mt-0.5 shrink-0" />
         <span>

@@ -23,10 +23,43 @@
   --color-trait: #1f2328;
   --color-plan: #123e6b;
   --color-plan-trait: #e8f1fb;
+  --color-surface: #ffffff;
+  --color-sur-couleur: #ffffff;
+  --color-filet: #b9bec4;
 
   --font-texte: var(--font-source), 'Segoe UI', system-ui, sans-serif;
   --font-technique: var(--font-barlow), 'Arial Narrow', 'Segoe UI', sans-serif;
   --font-manuscrite: var(--font-kalam), 'Segoe Print', cursive;
+}
+
+/* Thème sombre : mêmes tokens, autres valeurs. Écran seulement : l'impression reste claire. */
+@media screen {
+  :root[data-theme='sombre'] {
+    color-scheme: dark;
+    --color-encre: #a9bdff;
+    --color-encre-clair: #24304d;
+    --color-correction: #ff8f86;
+    --color-correction-clair: #4a2426;
+    --color-validation: #80d49c;
+    --color-validation-clair: #1d3a29;
+    --color-beton: #aab1b9;
+    --color-beton-clair: #313740;
+    --color-brique: #f2a387;
+    --color-brique-clair: #47291f;
+    --color-terre: #dcbd8f;
+    --color-terre-clair: #3b3023;
+    --color-acier: #aec2d8;
+    --color-acier-clair: #2b3543;
+    --color-papier: #1b1f26;
+    --color-bureau: #0f1216;
+    --color-quadrillage: #283445;
+    --color-marge: #a9504d;
+    --color-trait: #e3e6ea;
+    --color-plan: #0d2a49;
+    --color-surface: #232933;
+    --color-sur-couleur: #11151b;
+    --color-filet: #4a525d;
+  }
 }
 
 html {
@@ -196,7 +229,7 @@ body {
 }
 .contenu th,
 .contenu td {
-  border: 1px solid #b9bec4;
+  border: 1px solid var(--color-filet);
   padding: 0.3em 0.5em;
   text-align: left;
   vertical-align: top;
@@ -242,12 +275,17 @@ body {
 .dessin {
   --trait: var(--color-trait);
   --trait-doux: #4a5058;
-  --cote: #1f2328;
+  --cote: var(--color-trait);
   --fond-beton: #ececec;
   --fond-ba: #dcdfe3;
   --fond-terre: #efe6d4;
   --fond-macon: #f3ddd3;
   --fond-eau: #dbeaf7;
+  --fond-note: #f7f1dd;
+  --iso-dessus: #f4f1ea;
+  --iso-face: #d9d4c7;
+  --iso-flanc: #bfb8a8;
+  --halo: var(--color-papier);
   --armature: var(--color-correction);
   font-family: var(--font-technique);
 }
@@ -272,6 +310,21 @@ body {
 .dessin .encre { fill: var(--color-encre); }
 .dessin .etiquette { font-size: 11px; fill: var(--trait-doux); }
 .dessin .titre-vue { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+
+@media screen {
+  :root[data-theme='sombre'] .dessin {
+    --trait-doux: #b4bac3;
+    --fond-beton: #2b2f35;
+    --fond-ba: #343a43;
+    --fond-terre: #3a3125;
+    --fond-macon: #4a2f27;
+    --fond-eau: #1e3348;
+    --fond-note: #3a3524;
+    --iso-dessus: #3a3d42;
+    --iso-face: #2c2f34;
+    --iso-flanc: #23262a;
+  }
+}
 
 /* Plan bleu (blueprint) */
 .plan-bleu {
@@ -327,7 +380,7 @@ body {
   border: 3px solid var(--color-validation);
   border-radius: 28px;
   padding: 0.45rem 1.4rem;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 4px 4px 0 var(--color-validation-clair);
 }
 .bulle::before,
@@ -346,7 +399,7 @@ body {
   bottom: -12px;
   left: 37px;
   border-width: 13px 6px 0 6px;
-  border-top-color: #fff;
+  border-top-color: var(--color-surface);
 }
 .bulle--alerte {
   border-color: var(--color-correction);
@@ -358,7 +411,7 @@ body {
 
 /* Tableaux lisibles sur le quadrillage du cahier */
 .feuille--cahier .contenu table {
-  background: rgb(255 255 255 / 0.88);
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
 }
 .fiche-memo .contenu h3 {
   font-family: var(--font-manuscrite);
@@ -376,4 +429,63 @@ body {
 .plan-bleu p,
 .plan-bleu li {
   color: var(--color-plan-trait);
+}
+
+/* ---------- Lecteur paginé ---------- */
+.lecteur-barre {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: min(210mm, 100%);
+  margin: 0 auto;
+  padding: 0.5rem 0.75rem;
+  background: color-mix(in srgb, var(--color-bureau) 92%, transparent);
+  backdrop-filter: blur(4px);
+  font-family: var(--font-technique);
+}
+.lecteur-barre--bas {
+  position: static;
+  justify-content: space-between;
+  margin-top: -2rem;
+  margin-bottom: 1rem;
+}
+.lecteur-bouton {
+  flex: none;
+  border: 1px solid var(--color-encre);
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  color: var(--color-encre);
+  background: var(--color-surface);
+  white-space: nowrap;
+}
+.lecteur-bouton:disabled {
+  opacity: 0.4;
+}
+.lecteur-bouton--plein {
+  background: var(--color-encre);
+  color: var(--color-sur-couleur);
+}
+.lecteur-sommaire {
+  min-width: 0;
+  flex: 1;
+  height: 2.1rem;
+  border: 1px solid color-mix(in srgb, var(--color-trait) 25%, transparent);
+  border-radius: 6px;
+  padding: 0 0.4rem;
+  background: var(--color-surface);
+  color: var(--color-trait);
+  text-overflow: ellipsis;
+}
+@media screen {
+  .lecteur--pages .feuille:not(.feuille--active) {
+    display: none;
+  }
+}
+@media (max-width: 860px) {
+  .lecteur-barre--bas {
+    margin-top: 0;
+  }
 }

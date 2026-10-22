@@ -3,6 +3,7 @@ import type { DepotProgression } from './types';
 
 export type { DepotProgression, EtatLecon, ResultatQuiz } from './types';
 export { quizValide, SEUIL_VALIDATION } from './types';
+export * from './statistiques';
 
 let depot: DepotProgression | null = null;
 

@@ -74,7 +74,7 @@ export function PageObjectifs({ lecon }: { lecon: Lecon }) {
         </>
       ) : null}
 
-      <div className="mt-auto rounded-md border border-beton-clair bg-white/70 p-3 text-[0.92rem] text-beton">
+      <div className="mt-auto rounded-md border border-beton-clair bg-surface/70 p-3 text-[0.92rem] text-beton">
         <p>
           <strong className="text-trait">Comment lire cette leçon.</strong> Les pages suivent toujours le même ordre : intuition, cours, schémas,
           exemple résolu, erreurs fréquentes, terrain, fiche mémo, exercices et quiz. Sur la fiche de calcul, modifie les données : tout se recalcule,
