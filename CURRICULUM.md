@@ -8,7 +8,7 @@ Parcours complet, du bac à l'ingénieur civil confirmé. Ce document sert de r�
 - **Gabarits** : A `FicheCalcul` · B `PlancheTechnique` · C `Infographie` · D `FicheMemo` · E `Vue3D`. Toutes les leçons contiennent une fiche mémo (D) et un quiz : D n'est indiqué que là où il domine. Dans une leçon sans calcul, l'exemple résolu (étape 5) est une étude de cas guidée au format A, sans entrée modifiable.
 - **Marqueurs** : ★ leçon vitrine (Phase 2) · `RDC` étude de cas d'Afrique centrale · `FR` comparaison Eurocodes ↔ BAEL 91 ou autres règles françaises encore pratiquées · ⚠ donnée à confirmer (voir A_VERIFIER.md).
 - **Durée** : temps d'étude estimé (cours, exemple, exercices, quiz).
-- **Déblocage** : un module devient « recommandé » quand ses modules prérequis sont validés (quiz ≥ 70 %). Pas de blocage strict par défaut.
+- **Déblocage** : un module devient « recommandé » quand ses modules prérequis sont validés (quiz ≥ 65 %). Pas de blocage strict par défaut.
 - **Ordre** : l'ordre indiqué est l'ordre conseillé ; les modules d'un même niveau peuvent se suivre en parallèle. Un module de Pratique professionnelle s'ouvre dès que ses prérequis sont validés.
 
 ## Compléments ajoutés à la base
@@ -121,7 +121,7 @@ Prérequis module : —
 | N0.1.5 | Organiser son année : planning, examens, stress | Construire un planning de semestre réaliste | — | 45 min | C |
 | N0.1.6 | Chercher et vérifier une information technique | Distinguer une source fiable (norme, ouvrage, cours) d'une source douteuse | — | 45 min | C |
 | N0.1.P | Mini-projet : mon plan d'étude du semestre | Planifier son semestre et ses révisions | ∗ | 1 h | C |
-| N0.1.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 30 min | A |
+| N0.1.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 30 min | A |
 
 ### N0.2 — Algèbre et fonctions
 Prérequis module : —
@@ -141,7 +141,7 @@ Prérequis module : —
 | N0.2.8 | Fonctions et lecture de graphiques | Lire, tracer et interpréter une courbe (pente, variations) | N0.2.5 | 1 h | A C |
 | N0.2.9 | Fonctions usuelles : affines, polynômes, puissances, exp, ln | Reconnaître et manipuler les fonctions usuelles | N0.2.8 | 1 h 30 | A |
 | N0.2.P | Mini-projet : les formules du chantier | Appliquer l'algèbre à des formules réelles (dosage, pente, échelle) | ∗ | 2 h | A |
-| N0.2.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| N0.2.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ### N0.3 — Unités, conversions et ordres de grandeur
 Prérequis module : N0.2
@@ -156,7 +156,7 @@ Prérequis module : N0.2
 | N0.3.6 | Unités anciennes et anglo-saxonnes encore rencontrées | Convertir tonne-force, kgf/cm², bar, pouce et pied | N0.3.3 | 45 min | A |
 | N0.3.7 | Ordres de grandeur du génie civil | Estimer rapidement charges, portées et dimensions courantes | N0.3.4 | 1 h | C |
 | N0.3.P | Mini-projet : poids propre d'une dalle, d'une poutre et d'un mur | Calculer et contrôler par ordre de grandeur des poids propres | ∗ | 1 h 30 | A C |
-| N0.3.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| N0.3.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ### N0.4 — Trigonométrie
 Prérequis module : N0.2
@@ -170,7 +170,7 @@ Prérequis module : N0.2
 | N0.4.5 | Triangle quelconque : loi des sinus, Al-Kashi | Résoudre un triangle quelconque issu d'une mesure de terrain | N0.4.4 | 1 h | A |
 | N0.4.6 | Application : toiture, rampe et talus | Calculer longueurs et angles d'une toiture, d'une rampe ou d'un talus | N0.4.3 | 1 h | A E |
 | N0.4.P | Mini-projet : géométrie d'une ferme de toiture | Déterminer longueurs et angles de toutes les barres d'une ferme | ∗ | 2 h | A E |
-| N0.4.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| N0.4.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ### N0.5 — Géométrie plane et dans l'espace
 Prérequis module : N0.2, N0.4
@@ -184,7 +184,7 @@ Prérequis module : N0.2, N0.4
 | N0.5.5 | Du volume aux vues : initiation aux projections | Passer d'un objet 3D à ses vues 2D et inversement | N0.5.3 | 1 h | B E |
 | N0.5.6 | Centre de gravité de surfaces simples | Localiser le centre de gravité d'une surface composée | N0.5.1 | 1 h | A |
 | N0.5.P | Mini-projet : aires et volumes d'une petite maison | Calculer surfaces, volumes de fouilles et volumes de béton | ∗ | 2 h | A B |
-| N0.5.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| N0.5.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ### N0.6 — Vecteurs
 Prérequis module : N0.4, N0.5
@@ -197,7 +197,7 @@ Prérequis module : N0.4, N0.5
 | N0.6.4 | Produit scalaire | Calculer l'angle entre deux directions et le travail d'une force | N0.6.3 | 1 h | A |
 | N0.6.5 | Produit vectoriel et moment d'une force | Calculer le moment d'une force en 2D puis en 3D | N0.6.4 | 1 h | A E |
 | N0.6.P | Mini-projet : efforts dans les haubans d'un mât | Décomposer les efforts d'un mât haubané | ∗ | 1 h 30 | A E |
-| N0.6.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| N0.6.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ### N0.7 — Physique de base
 Prérequis module : N0.3, N0.6
@@ -212,7 +212,7 @@ Prérequis module : N0.3, N0.6
 | N0.7.6 | Température et dilatation thermique | Calculer l'allongement thermique d'un élément et justifier un joint | N0.3.1 | 45 min | A |
 | N0.7.7 | Électricité utile au chantier | Calculer puissance et courant pour choisir un groupe électrogène | N0.3.1 | 45 min | A |
 | N0.7.P | Mini-projet : physique d'un château d'eau | Calculer poids, pression au pied et énergie de pompage | ∗ | 1 h 30 | A |
-| N0.7.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| N0.7.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ---
 
@@ -234,7 +234,7 @@ Prérequis module : —
 | L1.1.7 | Normes et règlements : Eurocodes, BAEL, DTU `FR` | Situer les textes de référence et leur statut | L1.1.4 | 1 h | C |
 | L1.1.8 | Construire en Afrique centrale : climat, sols, matériaux `RDC` | Identifier les contraintes propres aux chantiers en RDC | L1.1.5 | 1 h | C |
 | L1.1.P | Mini-projet : rapport de visite de chantier | Observer un chantier (réel ou virtuel) et rédiger un rapport illustré | ∗ | 2 h | C |
-| L1.1.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| L1.1.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ### L1.2 — Analyse : dérivées et intégrales
 Prérequis module : N0.2
@@ -255,7 +255,7 @@ Prérequis module : N0.2
 | L1.2.9 | Dérivées partielles | Calculer des dérivées partielles et un gradient | L1.2.3 | 1 h 30 | A |
 | L1.2.10 | Intégrales doubles | Calculer l'aire et les moments d'une surface par intégrale double | L1.2.9, L1.2.8 | 1 h 30 | A |
 | L1.2.P | Mini-projet : caractéristiques d'une section en T | Calculer aire, centre de gravité et inertie d'une section en T par intégration | ∗ | 2 h | A |
-| L1.2.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L1.2.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L1.3 — Mécanique générale et statique
 Prérequis module : N0.6, N0.7
@@ -278,7 +278,7 @@ Prérequis module : N0.6, N0.7
 | L1.3.11 | Centres de gravité et moments statiques | Calculer le centre de gravité d'une section composée | N0.5.6, L1.3.2 | 1 h 30 | A |
 | L1.3.12 | Statique dans l'espace (aperçu) | Écrire l'équilibre d'un solide en 3D | L1.3.4 | 1 h | A E |
 | L1.3.P | Mini-projet : ferme de toiture en bois | Calculer réactions et efforts dans toutes les barres d'une ferme | ∗ | 3 h | A B |
-| L1.3.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L1.3.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L1.4 — Algèbre linéaire
 Prérequis module : N0.2, N0.6
@@ -293,7 +293,7 @@ Prérequis module : N0.2, N0.6
 | L1.4.6 | Valeurs propres et vecteurs propres | Calculer valeurs et vecteurs propres d'une matrice 2×2 ou 3×3 | L1.4.5 | 1 h 30 | A |
 | L1.4.7 | Aperçu : une structure comme système K·u = F | Écrire l'équilibre d'une structure simple sous forme matricielle | L1.4.2, L1.3.8 | 1 h | A B |
 | L1.4.P | Mini-projet : un treillis résolu par matrices | Résoudre les efforts d'un treillis par un système matriciel | ∗ | 2 h | A |
-| L1.4.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L1.4.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L1.5 — Chimie des matériaux
 Prérequis module : N0.3
@@ -310,7 +310,7 @@ Prérequis module : N0.3
 | L1.5.8 | Polymères, bitumes et adjuvants | Décrire la chimie des bitumes, des résines et des adjuvants | L1.5.1 | 1 h | C |
 | L1.5.9 | Chimie de l'eau : gâchage et consommation | Juger si une eau convient au gâchage ou à la consommation | L1.5.3 | 1 h | A C |
 | L1.5.P | Mini-projet : fiche d'analyse d'une dégradation | Relier une dégradation observée à sa cause chimique | ∗ | 2 h | C |
-| L1.5.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h 30 | A |
+| L1.5.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h 30 | A |
 
 ### L1.6 — Dessin technique et lecture de plans
 Prérequis module : N0.5
@@ -333,7 +333,7 @@ Prérequis module : N0.5
 | L1.6.11 | Lire un plan de coffrage et de ferraillage (initiation) | Repérer éléments, sections et armatures sur un plan de structure | L1.6.10 | 1 h 30 | B E |
 | L1.6.12 | Cartouche, indices et nomenclatures | Lire un cartouche et suivre les révisions d'un plan | L1.6.9 | 45 min | B |
 | L1.6.P | Mini-projet : plan, façade et coupe d'un studio | Dessiner à la main le dossier simple d'un studio | ∗ | 3 h | B |
-| L1.6.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L1.6.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L1.7 — Informatique de l'ingénieur
 Prérequis module : N0.2
@@ -351,7 +351,7 @@ Prérequis module : N0.2
 | L1.7.7 | Python : NumPy et Matplotlib | Calculer sur des tableaux et tracer des courbes | L1.7.6 | 2 h | A |
 | L1.7.8 | Fiabiliser un calcul : tests et vérification | Tester une fonction de calcul sur un cas connu | L1.7.7 | 1 h 30 | A |
 | L1.7.P | Mini-projet : calculateur de réactions d'appui | Programmer le calcul des réactions d'une poutre (tableur et Python) | ∗, L1.3.6 | 3 h | A |
-| L1.7.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L1.7.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L1.8 — Topographie I
 Prérequis module : N0.4, N0.5
@@ -367,7 +367,7 @@ Prérequis module : N0.4, N0.5
 | L1.8.7 | Erreurs et tolérances | Distinguer erreurs systématiques et accidentelles, vérifier une tolérance | L1.8.5 | 1 h | A |
 | L1.8.8 | Lever simple et plan topographique | Lever une parcelle et dessiner son plan | L1.8.6 | 1 h 30 | B |
 | L1.8.P | Mini-projet : nivellement d'un terrain à bâtir | Niveler un terrain et produire un plan coté | ∗ | 3 h | A B |
-| L1.8.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L1.8.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ---
 
@@ -388,7 +388,7 @@ Prérequis module : L1.2
 | L2.1.6 | Application : la déformée d'une poutre (aperçu) | Intégrer l'équation de la déformée d'une poutre simple | L2.1.4, L1.3.6 | 1 h 30 | A |
 | L2.1.7 | Équations aux dérivées partielles (aperçu) | Reconnaître les équations de la chaleur, des ondes et de la consolidation | L2.1.4, L1.2.9 | 1 h 30 | A C |
 | L2.1.P | Mini-projet : vidange d'un château d'eau | Calculer le temps de vidange d'un réservoir | ∗ | 2 h | A |
-| L2.1.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L2.1.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L2.2 — Probabilités et statistiques
 Prérequis module : L1.2
@@ -405,7 +405,7 @@ Prérequis module : L1.2
 | L2.2.8 | Valeurs extrêmes et période de retour | Relier période de retour et probabilité de dépassement (pluies, crues) | L2.2.4 | 1 h 30 | A C |
 | L2.2.9 | Fiabilité : l'origine des coefficients partiels | Expliquer pourquoi on majore les charges et on minore les résistances | L2.2.5 | 1 h 30 | C |
 | L2.2.P | Mini-projet : résultats d'écrasement d'un chantier | Analyser une série d'essais et conclure sur la conformité du béton | ∗ | 2 h | A |
-| L2.2.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L2.2.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L2.3 — Méthodes numériques
 Prérequis module : L1.4, L1.7, L2.1
@@ -420,7 +420,7 @@ Prérequis module : L1.4, L1.7, L2.1
 | L2.3.6 | Équations différentielles : Euler et Runge-Kutta | Intégrer une équation différentielle pas à pas | L2.1.4 | 1 h 30 | A |
 | L2.3.7 | Différences finies (aperçu) | Discrétiser une équation pour la résoudre sur une grille | L2.3.6 | 1 h 30 | A |
 | L2.3.P | Mini-projet : cubatures par Simpson en Python | Programmer le calcul d'un volume de terrassement | ∗ | 2 h | A |
-| L2.3.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L2.3.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L2.4 — Résistance des matériaux I
 Prérequis module : L1.2, L1.3
@@ -441,7 +441,7 @@ Prérequis module : L1.2, L1.3
 | L2.4.10 | Cisaillement simple : boulons et assemblages | Vérifier une cheville ou un boulon au cisaillement | L2.4.5 | 1 h | A |
 | L2.4.11 | Dimensionner une section en flexion | Choisir une section qui respecte une contrainte limite | L2.4.7 | 1 h 30 | A |
 | L2.4.P | Mini-projet : solive de plancher en bois | Dimensionner une solive sous charges de plancher | ∗ | 3 h | A B |
-| L2.4.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L2.4.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L2.5 — Résistance des matériaux II
 Prérequis module : L2.4, L2.1
@@ -458,7 +458,7 @@ Prérequis module : L2.4, L2.1
 | L2.5.8 | Flambement : charge critique d'Euler | Calculer la charge critique et l'élancement d'un poteau | L2.5.1 | 2 h | A E |
 | L2.5.9 | Premières poutres hyperstatiques : théorème des trois moments | Calculer une poutre continue à deux travées | L2.5.1 | 2 h | A |
 | L2.5.P | Mini-projet : poutre console de balcon | Vérifier les contraintes et la flèche d'une console | ∗ | 3 h | A B |
-| L2.5.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L2.5.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L2.6 — Matériaux de construction
 Prérequis module : N0.3, L1.5
@@ -488,7 +488,7 @@ Prérequis module : N0.3, L1.5
 | L2.6.17 | Matériaux locaux en RDC `RDC` | Évaluer sables de rivière, latérite, granulats de carrière et bambou | L2.6.4 | 1 h | C |
 | L2.6.18 | Bitumes, géosynthétiques et autres matériaux | Situer l'usage des bitumes, verres, plastiques et géosynthétiques | L1.5.8 | 1 h | C |
 | L2.6.P | Mini-projet : formuler un C25/30 avec des matériaux locaux `RDC` | Formuler et contrôler un béton avec des granulats disponibles en RDC | ∗ | 3 h | A |
-| L2.6.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L2.6.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L2.7 — Géologie de l'ingénieur
 Prérequis module : L1.5
@@ -505,7 +505,7 @@ Prérequis module : L1.5
 | L2.7.8 | Géologie de la RDC et zones minières `RDC` | Situer les grands ensembles géologiques et miniers de la RDC | L2.7.2 | 1 h | C |
 | L2.7.9 | Reconnaître le sous-sol : sondages, puits, géophysique | Choisir une méthode de reconnaissance adaptée | L2.7.5 | 1 h 30 | C B |
 | L2.7.P | Mini-projet : coupe géologique le long d'un tracé routier | Établir une coupe et en déduire les risques du tracé | ∗ | 2 h | B |
-| L2.7.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h 30 | A |
+| L2.7.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h 30 | A |
 
 ### L2.8 — Mécanique des fluides
 Prérequis module : L1.2, N0.7
@@ -522,7 +522,7 @@ Prérequis module : L1.2, N0.7
 | L2.8.8 | Quantité de mouvement : forces sur un coude | Calculer l'effort d'un écoulement sur un coude ou une vanne | L2.8.5 | 1 h 30 | A |
 | L2.8.9 | Similitude et modèles réduits | Transposer un essai sur modèle à l'ouvrage réel | L2.8.6 | 1 h | A |
 | L2.8.P | Mini-projet : citerne et conduite d'alimentation | Vérifier la poussée sur une citerne et le débit de sa conduite | ∗ | 2 h | A B |
-| L2.8.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L2.8.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L2.9 — Topographie II
 Prérequis module : L1.8
@@ -540,7 +540,7 @@ Prérequis module : L1.8
 | L2.9.9 | Surfaces et volumes à partir d'un lever | Calculer surfaces et volumes depuis des points levés | L2.9.5, L2.3.4 | 1 h 30 | A |
 | L2.9.10 | SIG : principes et usages (aperçu) | Situer l'usage d'un SIG dans un projet | L2.9.5 | 1 h | C |
 | L2.9.P | Mini-projet : plan topographique d'une parcelle | Produire un plan coté avec courbes de niveau | ∗ | 3 h | A B |
-| L2.9.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L2.9.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L2.10 — DAO : principes d'AutoCAD
 Prérequis module : L1.6
@@ -556,7 +556,7 @@ Prérequis module : L1.6
 | L2.10.7 | Impression, PDF et livraison des plans | Produire des PDF conformes aux conventions de livraison | L2.10.6 | 1 h | B |
 | L2.10.8 | Logiciels alternatifs gratuits | Comparer les alternatives libres à AutoCAD | L2.10.2 | 45 min | C |
 | L2.10.P | Mini-projet : dossier DAO d'un studio | Redessiner en DAO le dossier du mini-projet L1.6.P | ∗ | 4 h | B |
-| L2.10.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L2.10.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ---
 
@@ -588,7 +588,7 @@ Prérequis module : L1.4, L2.4, L2.5
 | L3.1.14 | Calcul matriciel des structures | Assembler la matrice de rigidité d'un portique | L3.1.11, L1.4.7 | 2 h | A |
 | L3.1.15 | Logiciels de calcul : contrôler les résultats | Vérifier un résultat de logiciel par un calcul simple | L3.1.14 | 1 h 30 | C |
 | L3.1.P | Mini-projet : portique de hangar | Calculer un portique par Cross et comparer au calcul matriciel | ∗ | 4 h | A B |
-| L3.1.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| L3.1.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### L3.2 — Bases de calcul et actions (EC0, EC1)
 Prérequis module : L2.2, L2.4
@@ -606,7 +606,7 @@ Prérequis module : L2.2, L2.4
 | L3.2.9 | Descente de charges d'un bâtiment | Cumuler les charges de la toiture jusqu'aux fondations | L3.2.6 | 2 h | A C |
 | L3.2.10 | Eurocodes et BAEL : comparer les approches `FR` | Comparer combinaisons et coefficients de l'EC0 et du BAEL 91 | L3.2.6 | 1 h 30 | C |
 | L3.2.P | Mini-projet : descente de charges d'un R+2 | Établir la descente de charges complète d'un immeuble | ∗ | 3 h | A C |
-| L3.2.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L3.2.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L3.3 — Béton armé I
 Prérequis module : L2.4, L2.6, L3.2
@@ -631,7 +631,7 @@ Prérequis module : L2.4, L2.6, L3.2
 | L3.3.12 | Dalle portant dans un seul sens | Calculer une dalle pleine sur deux appuis | L3.3.7 | 1 h 30 | A |
 | L3.3.13 | Semelle isolée sous poteau `FR` | Dimensionner une semelle par la méthode des bielles | L3.3.5 | 2 h | A B |
 | L3.3.P | Mini-projet : poutre, poteau et semelle d'un R+1 | Rédiger la note de calcul et les plans d'un portique de R+1 | ∗ | 4 h | A B C |
-| L3.3.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| L3.3.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### L3.4 — Mécanique des sols I
 Prérequis module : L2.7, L2.8
@@ -657,7 +657,7 @@ Prérequis module : L2.7, L2.8
 | L3.4.14 | Argiles gonflantes `RDC` | Reconnaître une argile gonflante et estimer le risque | L3.4.4, L2.7.4 | 1 h 30 | C A |
 | L3.4.15 | Lire un rapport géotechnique | Extraire d'un rapport les données utiles au projet | L3.4.6 | 1 h 30 | C B |
 | L3.4.P | Mini-projet : sol de plateforme routière | Identifier, classer et juger un sol de plateforme à partir d'essais | ∗ | 3 h | A |
-| L3.4.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L3.4.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L3.5 — Hydraulique générale et hydrologie
 Prérequis module : L2.2, L2.8
@@ -681,7 +681,7 @@ Prérequis module : L2.2, L2.8
 | L3.5.12 | Hydrogrammes et crues de projet (aperçu) | Situer les méthodes d'estimation des crues | L3.5.11 | 1 h 30 | A |
 | L3.5.13 | Dimensionner un fossé et un dalot | Dimensionner un ouvrage de drainage pour une crue de projet | L3.5.6, L3.5.11 | 2 h | A B |
 | L3.5.P | Mini-projet : drainage d'une piste en saison des pluies `RDC` | Dimensionner les fossés et les dalots d'une piste | ∗ | 3 h | A B |
-| L3.5.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L3.5.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L3.6 — Technologie de construction
 Prérequis module : L1.6, L2.6
@@ -708,7 +708,7 @@ Prérequis module : L1.6, L2.6
 | L3.6.16 | Confort en climat tropical : ventilation, soleil, humidité `RDC` | Concevoir une enveloppe adaptée au climat tropical | L3.6.10 | 1 h 30 | C |
 | L3.6.17 | Sécurité incendie (principes) | Appliquer les principes de base de la sécurité incendie | L3.6.7 | 1 h | C |
 | L3.6.P | Mini-projet : carnet de détails d'une maison R+1 | Dessiner les détails constructifs clés d'une maison | ∗ | 4 h | B E |
-| L3.6.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L3.6.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L3.7 — Métré, quantitatifs et devis (DQE)
 Prérequis module : L1.6, L3.6
@@ -727,7 +727,7 @@ Prérequis module : L1.6, L3.6
 | L3.7.10 | Métré et devis au tableur | Automatiser un DQE dans un tableur | L3.7.9, L1.7.3 | 1 h 30 | A |
 | L3.7.11 | Prix en RDC : coûts locaux, importations, aléas `RDC` | Adapter un prix aux réalités du marché local | L3.7.8 | 1 h | C |
 | L3.7.P | Mini-projet : DQE du mur de clôture | Établir le DQE complet du mur de clôture de L3.6.6 | ∗ | 3 h | A B |
-| L3.7.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L3.7.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L3.8 — Routes I : tracé, terrassements, cubatures
 Prérequis module : L2.9, L3.4
@@ -750,7 +750,7 @@ Prérequis module : L2.9, L3.4
 | L3.8.11 | Drainage routier : fossés, buses, dalots, exutoires `RDC` | Concevoir le drainage d'une route | L3.5.13 | 1 h 30 | B |
 | L3.8.12 | Pistes en zone minière `RDC` | Adapter le tracé et la structure aux engins miniers | L3.8.10 | 1 h 30 | C |
 | L3.8.P | Mini-projet : avant-projet d'un kilomètre de route | Établir tracé en plan, profil en long et cubatures d'un tronçon | ∗ | 4 h | A B |
-| L3.8.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L3.8.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### L3.9 — Construction métallique I
 Prérequis module : L2.5, L2.6, L3.2
@@ -768,7 +768,7 @@ Prérequis module : L2.5, L2.6, L3.2
 | L3.9.9 | Conception d'un hangar métallique | Organiser portiques, pannes et contreventements | L3.9.4 | 1 h 30 | E B |
 | L3.9.10 | Corrosion et incendie en climat tropical `RDC` | Choisir une protection anticorrosion et une protection au feu | L1.5.6 | 1 h | C |
 | L3.9.P | Mini-projet : pannes et portique d'un hangar | Dimensionner les pannes et le portique d'un hangar | ∗ | 4 h | A B |
-| L3.9.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| L3.9.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ---
 
@@ -796,7 +796,7 @@ Prérequis module : L3.1, L3.3
 | M1.1.11 | Réservoirs en béton armé (aperçu) | Concevoir un réservoir étanche | M1.1.3 | 1 h 30 | A E |
 | M1.1.12 | Plans d'exécution : coffrage, ferraillage, nomenclatures | Produire les plans d'exécution d'un élément | L3.3.11 | 2 h | B |
 | M1.1.P | Mini-projet : dalle et escalier d'un R+2 | Rédiger la note de calcul et les plans d'une dalle et d'un escalier | ∗ | 4 h | A B E |
-| M1.1.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M1.1.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### M1.2 — Béton précontraint
 Prérequis module : M1.1
@@ -812,7 +812,7 @@ Prérequis module : M1.1
 | M1.2.7 | Zones d'about et diffusion (aperçu) | Ferrailler une zone d'ancrage | M1.2.6 | 1 h 30 | A E |
 | M1.2.8 | Applications : poutres de pont, dalles alvéolées | Situer les usages courants de la précontrainte | M1.2.6 | 1 h | C |
 | M1.2.P | Mini-projet : poutre précontrainte par pré-tension | Vérifier une poutre préfabriquée | ∗ | 3 h | A |
-| M1.2.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| M1.2.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### M1.3 — Mécanique des sols II
 Prérequis module : L2.1, L3.4
@@ -832,7 +832,7 @@ Prérequis module : L2.1, L3.4
 | M1.3.9 | Écoulements dans les sols : renard et gradient critique | Vérifier le risque de renard sous un ouvrage | L3.4.9 | 1 h 30 | A B |
 | M1.3.10 | Érosion et ravines de Kinshasa `RDC` | Analyser une ravine et proposer des parades | M1.3.8 | 1 h 30 | C B |
 | M1.3.P | Mini-projet : mur de soutènement en béton armé | Vérifier la stabilité externe et ferrailler le mur | ∗ | 4 h | A B |
-| M1.3.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M1.3.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### M1.4 — Fondations superficielles et profondes
 Prérequis module : L3.3, M1.3
@@ -852,7 +852,7 @@ Prérequis module : L3.3, M1.3
 | M1.4.9 | Semelles sur pieux | Ferrailler une semelle sur pieux par la méthode des bielles | M1.4.8, L3.3.13 | 2 h | A B |
 | M1.4.10 | Amélioration des sols (aperçu) | Situer les techniques d'amélioration des sols | M1.4.1 | 1 h | C |
 | M1.4.P | Mini-projet : fondations d'un R+3 sur argile gonflante `RDC` | Choisir et dimensionner les fondations d'un immeuble | ∗ | 4 h | A B |
-| M1.4.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M1.4.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### M1.5 — Construction métallique II
 Prérequis module : L3.9
@@ -869,7 +869,7 @@ Prérequis module : L3.9
 | M1.5.8 | Profils formés à froid (aperçu) | Situer l'usage des profils minces | L3.9.4 | 1 h | C |
 | M1.5.9 | Plans d'atelier, montage et contrôle | Lire un plan d'atelier et organiser le montage | M1.5.4 | 1 h 30 | B |
 | M1.5.P | Mini-projet : hangar métallique de 20 m de portée | Rédiger la note de calcul complète d'un hangar | ∗ | 5 h | A B |
-| M1.5.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M1.5.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### M1.6 — Construction bois
 Prérequis module : L2.6, L3.2
@@ -884,7 +884,7 @@ Prérequis module : L2.6, L3.2
 | M1.6.6 | Charpentes traditionnelles et fermettes | Concevoir la charpente d'une maison | M1.6.5 | 1 h 30 | E B |
 | M1.6.7 | Durabilité et essences tropicales `RDC` | Protéger le bois contre les termites et les champignons | M1.6.1 | 1 h | C |
 | M1.6.P | Mini-projet : charpente bois d'une maison | Dimensionner fermes, pannes et assemblages | ∗ | 4 h | A B |
-| M1.6.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| M1.6.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### M1.7 — Dynamique des structures et parasismique
 Prérequis module : L2.1, L3.1
@@ -904,7 +904,7 @@ Prérequis module : L2.1, L3.1
 | M1.7.9 | Dispositions constructives parasismiques en béton armé | Ferrailler les zones critiques et les nœuds | M1.7.8, L3.3.11 | 1 h 30 | B E |
 | M1.7.10 | Maçonnerie chaînée en zone sismique | Concevoir une maison en maçonnerie chaînée | M1.7.8 | 1 h | E B |
 | M1.7.P | Mini-projet : analyse sismique d'un R+3 à Bukavu `RDC` ⚠ | Mener une analyse simplifiée par forces latérales | ∗ | 4 h | A |
-| M1.7.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M1.7.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### M1.8 — Méthode des éléments finis
 Prérequis module : L2.3, L3.1
@@ -920,7 +920,7 @@ Prérequis module : L2.3, L3.1
 | M1.8.7 | Programmer un treillis en Python | Coder une MEF de treillis et la tester | M1.8.4, L1.7.8 | 2 h | A |
 | M1.8.8 | Utiliser un logiciel avec esprit critique | Repérer les erreurs de modélisation courantes | M1.8.6 | 1 h 30 | C |
 | M1.8.P | Mini-projet : Cross, MEF Python et logiciel | Comparer trois calculs d'un même portique | ∗ | 4 h | A |
-| M1.8.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| M1.8.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### M1.9 — Chaussées : dimensionnement
 Prérequis module : L3.4, L3.8
@@ -937,7 +937,7 @@ Prérequis module : L3.4, L3.8
 | M1.9.8 | Dégradations et entretien | Diagnostiquer une dégradation et choisir l'entretien | M1.9.7 | 1 h 30 | C |
 | M1.9.9 | Chaussées sur sols gonflants et en zone tropicale `RDC` | Adapter la structure et le drainage au climat tropical | M1.9.8, L3.4.14 | 1 h 30 | C |
 | M1.9.P | Mini-projet : chaussée d'une voie urbaine à Lubumbashi `RDC` | Dimensionner une chaussée et son drainage | ∗ | 4 h | A B |
-| M1.9.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M1.9.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### M1.10 — Hydraulique urbaine : eau potable, assainissement, drainage
 Prérequis module : L3.5
@@ -960,7 +960,7 @@ Prérequis module : L3.5
 | M1.10.11 | Lutte antiérosive en milieu urbain `RDC` | Concevoir un drainage qui protège contre le ravinement | M1.10.10, M1.3.10 | 1 h 30 | C B |
 | M1.10.12 | VRD d'un lotissement | Coordonner la voirie et les réseaux d'un lotissement | M1.10.10 | 1 h 30 | B |
 | M1.10.P | Mini-projet : réseaux d'un lotissement de 200 parcelles `RDC` | Concevoir eau potable, assainissement et drainage | ∗ | 5 h | A B |
-| M1.10.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M1.10.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ---
 
@@ -987,7 +987,7 @@ Prérequis module : M1.1, M1.2, M1.4
 | M2.1.10 | Dalots et buses | Dimensionner un dalot cadre | L3.8.11 | 2 h | A B |
 | M2.1.11 | Inspection et entretien des ponts | Organiser une inspection | M2.1.7 | 1 h | C |
 | M2.1.P | Mini-projet : pont-dalle de 15 m sur une rivière `RDC` | Établir l'avant-projet hydraulique, structurel et de fondation | ∗ | 5 h | A B |
-| M2.1.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M2.1.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### M2.2 — Barrages et ouvrages hydrauliques
 Prérequis module : L3.5, M1.3
@@ -1004,7 +1004,7 @@ Prérequis module : L3.5, M1.3
 | M2.2.8 | Protection des berges et digues fluviales | Concevoir une protection de berge | M2.2.4 | 1 h 30 | B |
 | M2.2.9 | Auscultation et sécurité des barrages | Lire un dispositif d'auscultation | M2.2.3 | 1 h | C |
 | M2.2.P | Mini-projet : petite retenue collinaire en terre | Prédimensionner la digue et l'évacuateur | ∗ | 4 h | A B |
-| M2.2.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M2.2.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### M2.3 — Géotechnique avancée
 Prérequis module : M1.3, M1.4, M1.8
@@ -1021,7 +1021,7 @@ Prérequis module : M1.3, M1.4, M1.8
 | M2.3.8 | Sols gonflants et effondrables : essais et parades `RDC` | Choisir des parades contre le gonflement et l'effondrement | L3.4.14 | 1 h 30 | A |
 | M2.3.9 | Calcul géotechnique numérique (aperçu) | Situer les apports et les limites d'un calcul numérique | M1.8.6 | 1 h 30 | A |
 | M2.3.P | Mini-projet : stabiliser un versant raviné `RDC` | Rédiger une note de stabilisation de versant | ∗ | 4 h | A B |
-| M2.3.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 3 h | A |
+| M2.3.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 3 h | A |
 
 ### M2.4 — Pathologie et réhabilitation des ouvrages
 Prérequis module : M1.1, M1.4
@@ -1038,7 +1038,7 @@ Prérequis module : M1.1, M1.4
 | M2.4.8 | Reprise en sous-œuvre | Concevoir une reprise en sous-œuvre | M2.4.4 | 1 h 30 | E B |
 | M2.4.9 | Surélever un bâtiment existant `RDC` | Vérifier la faisabilité d'une surélévation | M2.4.7 | 1 h 30 | A |
 | M2.4.P | Mini-projet : diagnostic d'un bâtiment fissuré | Rédiger un rapport de diagnostic et de confortement | ∗ | 4 h | C A |
-| M2.4.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| M2.4.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### M2.5 — BIM
 Prérequis module : L2.10, L3.7
@@ -1052,7 +1052,7 @@ Prérequis module : L2.10, L3.7
 | M2.5.5 | Quantités issues de la maquette | Extraire des quantités et les comparer au métré | M2.5.3, L3.7.9 | 1 h 30 | A |
 | M2.5.6 | Convention BIM de projet | Rédiger les règles BIM d'un projet | M2.5.4 | 1 h | C |
 | M2.5.P | Mini-projet : maquette structurelle et quantités | Modéliser une structure simple et en extraire le métré | ∗ | 4 h | E A |
-| M2.5.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h 30 | A |
+| M2.5.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h 30 | A |
 
 ### M2.6 — Management de projet
 Prérequis module : L1.1, L3.7
@@ -1068,7 +1068,7 @@ Prérequis module : L1.1, L3.7
 | M2.6.7 | Suivi d'avancement et gestion des risques | Mesurer l'avancement et gérer les risques | M2.6.6 | 1 h 30 | A C |
 | M2.6.8 | Planifier avec la saison des pluies `RDC` | Intégrer les intempéries au planning | M2.6.4 | 1 h | A C |
 | M2.6.P | Mini-projet : planning d'un R+3 | Construire le PERT et le Gantt d'un immeuble | ∗ | 3 h | A |
-| M2.6.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| M2.6.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### M2.7 — Économie de la construction
 Prérequis module : L3.7
@@ -1082,7 +1082,7 @@ Prérequis module : L3.7
 | M2.7.5 | Trésorerie de chantier et situations de travaux | Établir une situation de travaux et un plan de trésorerie | M2.7.1 | 1 h 30 | A |
 | M2.7.6 | Optimiser la conception : analyse de la valeur | Comparer des variantes par leur coût et leur valeur | M2.7.2 | 1 h | C |
 | M2.7.P | Mini-projet : bilan économique d'un immeuble de rapport | Estimer le coût et la rentabilité d'un immeuble | ∗ | 3 h | A |
-| M2.7.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| M2.7.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### M2.8 — Marchés et contrats
 Prérequis module : L1.1, L3.7
@@ -1098,7 +1098,7 @@ Prérequis module : L1.1, L3.7
 | M2.8.7 | Avenants, pénalités, garanties et cautions | Calculer des pénalités de retard et une retenue de garantie | M2.8.3 | 1 h 30 | C A |
 | M2.8.8 | Marchés publics en RDC et bailleurs de fonds `RDC` ⚠ | Situer le cadre des marchés publics en RDC | M2.8.1 | 1 h | C |
 | M2.8.P | Mini-projet : offre technique pour un appel d'offres | Analyser un dossier et rédiger une offre technique | ∗ | 3 h | C |
-| M2.8.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 2 h | A |
+| M2.8.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 2 h | A |
 
 ### M2.9 — HSE et sécurité de chantier
 Prérequis module : L3.6
@@ -1114,7 +1114,7 @@ Prérequis module : L3.6
 | M2.9.7 | Santé au travail : EPI, chaleur, paludisme `RDC` | Protéger la santé des équipes en climat tropical | M2.9.1 | 1 h | C |
 | M2.9.8 | Accident : réagir, analyser, prévenir | Analyser un accident par l'arbre des causes | M2.9.2 | 1 h | C |
 | M2.9.P | Mini-projet : plan HSE d'un chantier R+3 | Rédiger le plan HSE d'un chantier | ∗ | 3 h | C |
-| M2.9.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h 30 | A |
+| M2.9.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h 30 | A |
 
 ### M2.10 — Environnement et études d'impact
 Prérequis module : L3.5, L3.8
@@ -1129,7 +1129,7 @@ Prérequis module : L3.5, L3.8
 | M2.10.6 | Cadre environnemental en RDC et normes des bailleurs `RDC` ⚠ | Situer les exigences congolaises et internationales | M2.10.2 | 1 h | C |
 | M2.10.7 | Réinstallation et consultation des populations | Organiser une consultation publique | M2.10.4 | 1 h | C |
 | M2.10.P | Mini-projet : matrice d'impacts d'une route rurale `RDC` | Évaluer les impacts d'un projet routier | ∗ | 3 h | C |
-| M2.10.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h 30 | A |
+| M2.10.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h 30 | A |
 
 ### M2.11 — Projet de fin d'études guidé : bâtiment R+3
 Prérequis module : L3.7, M1.1, M1.4, M1.7, M2.6
@@ -1180,7 +1180,7 @@ Prérequis module : L3.6, M2.6
 | PP.1.8 | Suivre les coûts et les délais | Comparer le prévu et le réalisé, puis réagir | M2.7.5 | 1 h 30 | A |
 | PP.1.9 | Le chantier en saison des pluies `RDC` | Protéger le chantier et adapter les méthodes | PP.1.2 | 1 h | C |
 | PP.1.P | Mini-projet : démarrer un chantier | Préparer l'installation et le planning des trois premières semaines | ∗ | 3 h | B A |
-| PP.1.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h 30 | A |
+| PP.1.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h 30 | A |
 
 ### PP.2 — Implantation des ouvrages
 Prérequis module : L2.9
@@ -1194,7 +1194,7 @@ Prérequis module : L2.9
 | PP.2.5 | Implanter une route : axe, courbes, profils | Calculer les points d'implantation d'une courbe | L3.8.3 | 2 h | A B |
 | PP.2.6 | Contrôles et tolérances | Contrôler une implantation | PP.2.3 | 1 h | A |
 | PP.2.P | Mini-projet : carnet d'implantation d'un R+3 | Préparer le carnet d'implantation d'un immeuble | ∗ | 3 h | A B |
-| PP.2.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h 30 | A |
+| PP.2.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h 30 | A |
 
 ### PP.3 — Contrôle qualité et essais
 Prérequis module : L2.6, L3.4
@@ -1211,7 +1211,7 @@ Prérequis module : L2.6, L3.4
 | PP.3.8 | Contrôler les couches de chaussée | Contrôler épaisseurs, compacité et enrobés | M1.9.7 | 1 h | A |
 | PP.3.9 | Traiter les non-conformités | Traiter une non-conformité | PP.3.1 | 1 h | C |
 | PP.3.P | Mini-projet : dossier qualité d'une dalle | Constituer le dossier qualité d'un bétonnage | ∗ | 3 h | A C |
-| PP.3.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h 30 | A |
+| PP.3.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h 30 | A |
 
 ### PP.4 — Réception des ouvrages
 Prérequis module : M2.8
@@ -1224,7 +1224,7 @@ Prérequis module : M2.8
 | PP.4.4 | DOE et plans de récolement | Constituer le dossier des ouvrages exécutés | PP.4.2 | 1 h | B |
 | PP.4.5 | Réceptions provisoire et définitive : FIDIC et RDC `RDC` ⚠ | Conduire une réception dans un marché FIDIC | M2.8.5 | 1 h | C |
 | PP.4.P | Mini-projet : PV de réception avec réserves | Rédiger un PV de réception à partir d'une visite | ∗ | 2 h | C |
-| PP.4.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| PP.4.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ### PP.5 — Lire de vrais dossiers de plans
 Prérequis module : L1.6, L3.3
@@ -1238,7 +1238,7 @@ Prérequis module : L1.6, L3.3
 | PP.5.5 | Un dossier de réseaux | Lire un plan d'assainissement et d'eau potable | M1.10.7 | 1 h 30 | B |
 | PP.5.6 | Repérer les incohérences entre plans | Détecter les conflits entre plans d'architecture et de structure | PP.5.3 | 1 h 30 | B |
 | PP.5.P | Mini-projet : analyse critique d'un dossier | Rédiger la liste commentée des anomalies d'un dossier | ∗ | 3 h | B |
-| PP.5.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h 30 | A |
+| PP.5.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h 30 | A |
 
 ### PP.6 — Notes de calcul et rapports
 Prérequis module : L3.3
@@ -1252,7 +1252,7 @@ Prérequis module : L3.3
 | PP.6.5 | Écrire clair : style, figures, tableaux | Rédiger des phrases, des figures et des tableaux lisibles | — | 1 h | C |
 | PP.6.6 | Présenter oralement un projet | Préparer une présentation technique | PP.6.5 | 1 h | C |
 | PP.6.P | Mini-projet : note de calcul d'une poutre | Rédiger une note de calcul complète | ∗ | 2 h | A |
-| PP.6.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| PP.6.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ### PP.7 — Déontologie et responsabilité
 Prérequis module : L1.1
@@ -1264,7 +1264,7 @@ Prérequis module : L1.1
 | PP.7.3 | Intégrité : conflits d'intérêts et corruption `RDC` | Réagir face à une pression ou à une offre de corruption | PP.7.1 | 1 h | C |
 | PP.7.4 | Leçons des effondrements | Tirer les leçons d'effondrements documentés | PP.7.1 | 1 h 30 | C |
 | PP.7.P | Mini-projet : un dilemme éthique | Argumenter une décision face à un dilemme professionnel | ∗ | 1 h 30 | C |
-| PP.7.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 1 h | A |
+| PP.7.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 1 h | A |
 
 ### PP.8 — Devenir ingénieur civil
 Prérequis module : —
@@ -1278,4 +1278,4 @@ Prérequis module : —
 | PP.8.5 | Anglais technique du BTP | Comprendre le vocabulaire anglais d'un chantier et d'un contrat | — | 1 h 30 | C D |
 | PP.8.6 | Se spécialiser et se former toute sa vie | Bâtir son plan de formation continue | PP.8.4 | 45 min | C |
 | PP.8.P | Mini-projet : mon plan de carrière à cinq ans | Construire un plan de carrière réaliste | ∗ | 1 h | C |
-| PP.8.EX | Examen du module | Valider le module (seuil 70 %) | ∗ | 30 min | A |
+| PP.8.EX | Examen du module | Valider le module (seuil 65 %) | ∗ | 30 min | A |

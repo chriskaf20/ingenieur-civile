@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { BarreAvancement, Reprendre } from '@/components/progression/Progression';
 import { cursus, dureeLisible, lecons } from '@/lib/contenu';
+import { SEUIL_TEXTE } from '@/lib/progression/types';
 
 export default function Accueil() {
   const c = cursus();
@@ -27,7 +28,7 @@ export default function Accueil() {
           </div>
         </div>
         <p className="mt-3 text-[0.95rem] text-beton">
-          {redigees.length} leçons sont déjà rédigées ; les autres apparaissent « à venir » sur la carte. Une leçon est validée quand son quiz atteint 70 %.
+          {redigees.length} leçons sont déjà rédigées ; les autres apparaissent « à venir » sur la carte. Une leçon est validée quand son quiz atteint {SEUIL_TEXTE}.
         </p>
       </section>
 

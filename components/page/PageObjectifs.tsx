@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SEUIL_TEXTE } from '@/lib/progression/types';
 import { Feuille } from './Feuille';
 import { cursus, dureeLisible, leconParId, type Lecon } from '@/lib/contenu';
 
@@ -25,7 +26,7 @@ const MODE_EMPLOI = {
   examen: (
     <>
       <strong className="text-trait">Comment passer cet examen.</strong> Lis les consignes, réponds à toutes les questions sans regarder le cours, puis
-      lis les explications. Le module est validé à partir de 70 % de bonnes réponses ; tu peux repasser l’examen.
+      lis les explications. Le module est validé à partir de {SEUIL_TEXTE} de bonnes réponses ; tu peux repasser l’examen.
     </>
   ),
 } as const;

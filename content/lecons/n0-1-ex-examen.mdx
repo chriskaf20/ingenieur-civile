@@ -16,6 +16,7 @@ formules: []
 
 import { budgetSemaine, EXEMPLE_BUDGET, HEURES_SEMAINE, joursRevision, poidsElement, POIDS_VOLUMIQUE_BA, volumeDalle } from '@/lib/calc/methode'
 import { grandeur, nombre } from '@/lib/format'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
 
 export const jr = joursRevision(12)
 export const pot = { L: 2.8, b: 0.2, h: 0.3, gamma: POIDS_VOLUMIQUE_BA }
@@ -28,7 +29,7 @@ export const budr = budgetSemaine(bud)
 <Page etape="examen" titre="Les consignes">
 
 - **Durée** : 30 minutes.
-- **Seuil de validation** : 70 % de bonnes réponses. Tu peux repasser l'examen.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
 - **Autorisé** : une calculatrice, une feuille de brouillon.
 - **Interdit** : le cours, tes fiches, Internet. L'examen mesure ce que tu sais **sans aide** : c'est du rappel actif.
 - Pour les questions de calcul, fais le calcul complet au brouillon (formule, application numérique avec unités, vérification) avant de choisir.

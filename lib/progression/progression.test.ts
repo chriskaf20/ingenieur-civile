@@ -40,9 +40,11 @@ describe('dépôt de progression local', () => {
     expect(creerDepotLocal(corrompu).lireTout()).toEqual({});
   });
 
-  it('valide un quiz à partir de 70 %', () => {
+  it('valide un quiz à partir de 65 %', () => {
+    // 13/20 = 65 % → validé ; 12/20 = 60 % → non validé ; 7/10 = 70 % → validé.
+    expect(quizValide({ score: 13, total: 20, meilleur: 13, date: '' })).toBe(true);
+    expect(quizValide({ score: 12, total: 20, meilleur: 12, date: '' })).toBe(false);
     expect(quizValide({ score: 7, total: 10, meilleur: 7, date: '' })).toBe(true);
-    expect(quizValide({ score: 6, total: 10, meilleur: 6, date: '' })).toBe(false);
     expect(quizValide(undefined)).toBe(false);
   });
 });
@@ -51,7 +53,7 @@ describe('statistiques de progression', () => {
   const q = (meilleur: number) => ({ score: meilleur, total: 10, meilleur, date: '' });
   const etats = {
     A: { vue: '2026-10-01T10:00:00Z', quiz: q(8) }, // validée
-    B: { vue: '2026-10-03T10:00:00Z', quiz: q(5) }, // vue, quiz < 70 %
+    B: { vue: '2026-10-03T10:00:00Z', quiz: q(5) }, // vue, quiz < 65 %
     C: { vue: '2026-10-02T10:00:00Z' }, // vue
   };
   const redigees = new Set(['A', 'B', 'C', 'D']);

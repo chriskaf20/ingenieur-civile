@@ -25,8 +25,11 @@ export interface DepotProgression {
   abonner(rappel: () => void): () => void;
 }
 
-/** Seuil de validation d'un quiz (CLAUDE.md : déblocage à 70 %). */
-export const SEUIL_VALIDATION = 0.7;
+/** Seuil de validation d'un quiz ou d'un examen : 65 % (choix du projet, CURRICULUM.md). */
+export const SEUIL_VALIDATION = 0.65;
+
+/** Seuil lisible : « 65 % ». */
+export const SEUIL_TEXTE = `${Math.round(SEUIL_VALIDATION * 100)} %`;
 
 export function quizValide(q: ResultatQuiz | undefined): boolean {
   return Boolean(q && q.total > 0 && q.meilleur / q.total >= SEUIL_VALIDATION);

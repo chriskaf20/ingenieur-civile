@@ -17,7 +17,7 @@ const Ctx = createContext<ContexteQuiz | null>(null);
 
 /**
  * Quiz de fin de leçon. Il peut s'étendre sur plusieurs pages ; <ScoreQuiz /> affiche le score,
- * enregistré dans la progression (validation à 70 %).
+ * enregistré dans la progression (validation à 65 %, voir SEUIL_VALIDATION).
  */
 export function Quiz({ id, children }: { id: string; children: React.ReactNode }) {
   const [questions, setQuestions] = useState<ReadonlySet<number>>(new Set());
@@ -76,7 +76,7 @@ export function ScoreQuiz() {
       {q.termine ? (
         <span className={valide ? 'font-bold text-validation' : 'font-bold text-correction'}>
           Score : {q.score} / {q.total}
-          {valide ? ' · quiz validé' : ` · il faut ${Math.ceil(SEUIL_VALIDATION * q.total)} bonnes réponses pour valider`}
+          {valide ? ' · quiz validé' : ` · il faut ${Math.ceil(SEUIL_VALIDATION * q.total - 1e-9)} bonnes réponses pour valider`}
         </span>
       ) : (
         <span className="text-encre">

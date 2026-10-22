@@ -3,7 +3,7 @@ import { quizValide, type EtatLecon } from './types';
 
 export type Etats = Readonly<Record<string, EtatLecon>>;
 
-/** à-venir : pas encore rédigée · à-faire : jamais ouverte · vue : ouverte · validée : quiz ≥ 70 %. */
+/** à-venir : pas encore rédigée · à-faire : jamais ouverte · vue : ouverte · validée : quiz ≥ seuil (65 %). */
 export type StatutLecon = 'a-venir' | 'a-faire' | 'vue' | 'validee';
 
 export function statutLecon(etat: EtatLecon | undefined, redigee: boolean): StatutLecon {

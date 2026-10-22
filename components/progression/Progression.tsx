@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { avancement, leconAReprendre, prerequisAValider, statutLecon, type StatutLecon } from '@/lib/progression';
+import { SEUIL_TEXTE, avancement, leconAReprendre, prerequisAValider, statutLecon, type StatutLecon } from '@/lib/progression';
 import { useProgression } from '@/lib/progression/useProgression';
 
 const STATUTS: Record<StatutLecon, { texte: string; classe: string }> = {
@@ -95,7 +95,7 @@ export function ConseilPrerequis({
   const manquants = prerequisAValider(prerequis, etats, new Set(redigees), (id) => modules[id]);
   if (manquants.length === 0) return null;
   return (
-    <span className="font-technique text-[0.8rem] text-brique" title="Conseil : valide d'abord ces prérequis (quiz ≥ 70 %).">
+    <span className="font-technique text-[0.8rem] text-brique" title={`Conseil : valide d'abord ces prérequis (quiz ≥ ${SEUIL_TEXTE}).`}>
       Conseil : valide d’abord {manquants.join(', ')}
     </span>
   );
