@@ -28,3 +28,16 @@ export function fyd(fyk: number): number {
 export function classeDeFck(fck: number): ClasseBeton | undefined {
   return CLASSES_BETON.find((c) => fckDeClasse(c) === fck);
 }
+
+/** Module d'élasticité de l'acier de béton armé Es = 200 000 MPa, EC2 §3.2.7(4). */
+export const E_S = 200_000;
+
+/** Écart entre résistance moyenne et caractéristique : fcm = fck + 8 MPa, EC2 tableau 3.1. */
+export const DELTA_FCM = 8;
+
+/**
+ * Coefficient s de l'EC2 §3.1.2(6) selon la classe de ciment :
+ * R (CEM 42,5 R, 52,5 N, 52,5 R) 0,20 ; N (CEM 32,5 R, 42,5 N) 0,25 ; S (CEM 32,5 N) 0,38.
+ */
+export const S_CIMENT = { R: 0.2, N: 0.25, S: 0.38 } as const;
+export type ClasseCiment = keyof typeof S_CIMENT;

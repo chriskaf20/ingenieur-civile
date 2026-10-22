@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { arrondi, arrondiInf, arrondiSup, grandeur, nombre } from './format';
+import { arrondi, arrondiInf, arrondiSignificatif, arrondiSup, grandeur, nombre, notationScientifique, scientifique } from './format';
 
 describe('arrondi', () => {
   it('arrondit le demi à l’écart de zéro', () => {
@@ -27,5 +27,24 @@ describe('nombre', () => {
   });
   it('ajoute l’unité avec une espace insécable', () => {
     expect(grandeur(478.114, 2, 'm³')).toBe('478,11 m³');
+  });
+});
+
+describe('notation scientifique et chiffres significatifs', () => {
+  it('décompose en mantisse et exposant', () => {
+    expect(notationScientifique(210000)).toEqual({ m: 2.1, e: 5 });
+    expect(notationScientifique(0.00375)).toEqual({ m: 3.75, e: -3 });
+    expect(notationScientifique(1000)).toEqual({ m: 1, e: 3 });
+  });
+  it('arrondit à n chiffres significatifs', () => {
+    expect(arrondiSignificatif(0.0012345, 3)).toBe(0.00123);
+    expect(arrondiSignificatif(305.81, 2)).toBe(310);
+    expect(arrondiSignificatif(9.996, 3)).toBe(10);
+  });
+  it('écrit à la française avec exposant', () => {
+    expect(scientifique(0.00123456, 3)).toBe('1,23 × 10⁻³');
+    expect(scientifique(210000, 2)).toBe('2,1 × 10⁵');
+    expect(scientifique(9.996, 3)).toBe('1,00 × 10¹');
+    expect(scientifique(4.2, 2)).toBe('4,2');
   });
 });

@@ -1,0 +1,291 @@
+---
+id: N0.2.3
+titre: "Proportionnalité, pourcentages, règle de trois"
+objectifs:
+  - Reconnaître une situation de proportionnalité
+  - Appliquer la règle de trois à un dosage ou une échelle
+  - Calculer un pourcentage, une augmentation et une réduction
+  - Exprimer une pente en m/m, en % et en ‰
+relecture: false
+normes: []
+glossaire:
+  - terme: Proportionnalité
+    definition: Relation où une grandeur s'obtient en multipliant l'autre par un même coefficient.
+  - terme: Règle de trois
+    definition: Calcul de la quatrième valeur d'un tableau de proportionnalité à partir des trois autres.
+  - terme: Pente
+    definition: Rapport entre le dénivelé et la longueur horizontale, exprimé en %, en ‰ ou en m/m.
+  - terme: Pourcentage
+    definition: Fraction de dénominateur 100 ; 15 % = 0,15.
+symboles:
+  - { symbole: 'ΔH', signification: 'dénivelé', unite: 'm' }
+  - { symbole: 'L', signification: 'longueur horizontale', unite: 'm' }
+  - { symbole: 'p', signification: 'pente', unite: 'm/m, % ou ‰' }
+formules:
+  - { nom: 'Règle de trois', tex: 'x = \frac{b \times c}{a}', domaine: 'Proportionnalité' }
+  - { nom: 'Pente', tex: 'p = \frac{\Delta H}{L}', domaine: 'Terrassement, assainissement, voirie' }
+  - { nom: 'Variation en pourcentage', tex: 'v = \frac{V_{après} - V_{avant}}{V_{avant}}', domaine: 'Pourcentages' }
+---
+
+import { denivele, pente, quantitesBeton, regleDeTrois, variation } from '@/lib/calc/algebre'
+import { grandeur, nombre } from '@/lib/format'
+
+export const dos = { C: 350, V: 2.4 }
+export const dosR = regleDeTrois(1, dos.C, dos.V)
+export const prix = { avant: 12.5, apres: 14 }
+export const v = variation(prix.avant, prix.apres)
+export const p1 = pente(0.15, 25)
+export const ex1 = regleDeTrois(1, 300, 3.6)
+export const ex2 = { L: 18, p: 2.5 }
+export const ex2r = denivele(ex2.p, ex2.L)
+export const ex3 = quantitesBeton({ V: 0.75, ciment: 300, sable: 450, gravier: 800, eau: 160, sac: 50 })
+export const red = { prix: 40, taux: 15 }
+export const redR = regleDeTrois(100, red.prix, 100 - red.taux)
+
+<Page etape="intuition" titre="L'intuition : la recette multipliée">
+
+Une recette de pâte pour 4 personnes demande 500 g de farine. Pour 8 personnes, tu en mets 1 kg sans réfléchir : la quantité est **proportionnelle** au nombre de personnes. C'est exactement ainsi qu'on passe d'un dosage de béton « par m³ » à la quantité d'une gâchée réelle.
+
+Une route qui monte de 5 m sur 100 m a une pente de 5 %. Un caniveau qui descend de 15 cm sur 25 m a une pente de {nombre(p1.pourcent, 1)} %. Toujours le même raisonnement : **un rapport**, exprimé sur 100.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer sans erreur d'une proportion à une quantité, d'un prix à une augmentation, d'un dénivelé à une pente ?
+</Encadre>
+
+<Encadre type="attention">
+Toutes les situations ne sont pas proportionnelles. Le prix d'une livraison de béton comprend souvent un forfait de transport : 2 m³ ne coûtent pas forcément le double d'1 m³. Vérifie toujours avant d'appliquer une règle de trois.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours : proportions, pourcentages et pentes">
+
+### La règle de trois
+
+Si $a$ correspond à $b$, alors $c$ correspond à $x = \frac{b \times c}{a}$, **à condition que la situation soit proportionnelle**.
+
+<Encadre type="exemple">
+Dosage de l'énoncé : {dos.C} kg de ciment par m³. Pour {nombre(dos.V, 1)} m³ : $x$ = {dos.C} × {nombre(dos.V, 1)} / 1 = {grandeur(dosR, 0, 'kg')}.
+</Encadre>
+
+### Les pourcentages
+
+- Prendre $t$ % d'une valeur : multiplier par $\frac{t}{100}$.
+- Augmenter de $t$ % : multiplier par $1 + \frac{t}{100}$ ; réduire de $t$ % : multiplier par $1 - \frac{t}{100}$.
+- Variation : $v = \frac{V_{après} - V_{avant}}{V_{avant}}$. Un sac passant de {nombre(prix.avant, 2)} à {nombre(prix.apres, 2)} (unités monétaires) augmente de {nombre(v * 100, 1)} %.
+
+<Regle type="simplification">
+Deux hausses successives de 10 % ne font pas 20 %, mais $1{,}1 \times 1{,}1 = 1{,}21$, soit 21 %. Les pourcentages successifs se **multiplient**.
+</Regle>
+
+### Les pentes
+
+La pente d'un ouvrage est $p = \frac{\Delta H}{L}$, avec $\Delta H$ le dénivelé (m) et $L$ la longueur **horizontale** (m). On l'exprime :
+
+- en m/m (nombre sans unité) ;
+- en % : $p \times 100$ ; en ‰ : $p \times 1\,000$ (courant pour les réseaux d'assainissement).
+
+Inversement, le dénivelé vaut $\Delta H = p \times L$.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : une pente, trois écritures">
+
+<Figure alt="Triangle de pente : 1 m de dénivelé sur 100 m de longueur horizontale, soit 0,01 m/m, 1 % ou 10 ‰" largeur={620} hauteur={170}>
+  <polygon points="60,130 560,130 560,60" fill="var(--fond-terre)" className="t-moyen" />
+  <line x1={60} y1={130} x2={560} y2={60} className="t-fort" stroke="var(--color-encre)" />
+  <text x={310} y={152} textAnchor="middle" fontSize={12.5}>L : longueur horizontale</text>
+  <text x={570} y={100} fontSize={12.5}>ΔH</text>
+  <text x={260} y={80} fontSize={13} fontWeight={700} className="encre">p = ΔH / L</text>
+  <text x={60} y={30} fontSize={12}>{`Exemple : ΔH = 1 m pour L = 100 m → p = ${nombre(pente(1, 100).p, 2)} = ${nombre(pente(1, 100).pourcent, 0)} % = ${nombre(pente(1, 100).pourmille, 0)} ‰`}</text>
+  <text x={300} y={168} textAnchor="middle" fontSize={10.5} className="etiquette">échelle verticale exagérée</text>
+</Figure>
+
+<Encadre type="retenir">
+La pente se calcule sur la longueur **horizontale**, pas sur la longueur inclinée. Pour les faibles pentes du génie civil, la différence est minime ; pour un toit ou une rampe raide, elle ne l'est plus (voir N0.4).
+</Encadre>
+
+<Encadre type="exemple" titre="Des pentes courantes, en ordre de grandeur">
+Un caniveau ou un collecteur : quelques ‰ à quelques %. Une route : quelques %. Une rampe d'accès : quelques % à une dizaine de %. Les valeurs exigées sont fixées par le projet et les règlements : on les lira dans les modules concernés.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="penteCaniveau">
+
+<Cahier titre="Exemple résolu : la pente d'un caniveau">
+
+**Énoncé.** Un caniveau de 25 m de long doit évacuer l'eau de pluie d'une cour. Son fil d'eau descend de 15 cm entre le point haut et l'exutoire. Quelle est sa pente en m/m, en % et en ‰ ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi convertir 15 cm en 0,15 m ? Une pente est un rapport de deux longueurs : elles doivent avoir la même unité.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="La formule">
+
+$p = \frac{\Delta H}{L}$, puis × 100 pour les %, × 1 000 pour les ‰.
+
+</Etape>
+
+<Etape n={4} titre="Le calcul">
+<AN k="p" />
+<AN k="pourcent" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="pourcent" libelle="Pente du caniveau" />
+
+<Note couleur="vert">Soit <Val k="pourmille" />, ou encore <Val k="cm" /> de longueur. Le chef d'équipe règle son cordeau avec cette dernière écriture.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="appliquer une règle de trois à une situation qui n'est pas proportionnelle.">
+Un devis avec un forfait de transport, un temps de prise qui dépend de la température, une charge qui croît comme le carré d'une portée : pas de règle de trois.
+</Piege>
+
+<Piege erreur="additionner deux pourcentages successifs.">
++10 % puis +10 % font +21 %. Et −10 % puis +10 % ne ramènent pas au prix de départ : 0,9 × 1,1 = 0,99.
+</Piege>
+
+<Piege erreur="calculer une pente avec des unités différentes.">
+15 cm sur 25 m donne {nombre(p1.pourcent, 1)} %, pas {nombre(p1.pourcent * 100, 0)} % : on met ΔH et L dans la même unité avant de diviser.
+</Piege>
+
+<Piege erreur="confondre % et ‰.">
+6 ‰ = 0,6 % = 0,006. Sur un plan d'assainissement, un « 6 » lu comme 6 % au lieu de 6 ‰ donne un dénivelé dix fois trop grand.
+</Piege>
+
+<Piege erreur="calculer un pourcentage d'augmentation sur la nouvelle valeur.">
+La variation se rapporte à la valeur **de départ** : (14 − 12,5) / 12,5, pas (14 − 12,5) / 14.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le dosage** est le premier usage de la proportionnalité. Les centrales et les cahiers des charges donnent des quantités « par m³ » ; le chef de chantier les multiplie par le volume de la gâchée ou du coulage. Une bétonnière de chantier ne fait pas 1 m³ : il faut ramener le dosage à sa contenance.
+
+<Encadre type="terrain" titre="Drainage en climat tropical">
+En Afrique centrale, les averses sont violentes. Un caniveau sans pente suffisante garde l'eau, se remplit de sable et finit bouché ; l'eau ravine alors la chaussée ou les fondations. Vérifier la pente au niveau de chantier, mètre par mètre, est un geste de base.
+</Encadre>
+
+**Le contrôle des pentes** se fait au niveau optique ou laser : on lit des cotes en plusieurs points, on calcule les dénivelés et on divise par les distances. C'est la topographie (L1.8).
+
+**Les pourcentages** sont partout dans un devis : remises, révisions de prix, taxes, aléas. Un bon métreur sait toujours sur quelle base un pourcentage s'applique.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : proportions, pourcentages, pentes">
+
+### Règle de trois (situation proportionnelle seulement)
+
+$a \to b$ et $c \to x$ : $x = \frac{b \times c}{a}$
+
+### Pourcentages
+
+$t$ % de $V$ : $V \times \frac{t}{100}$ · hausse : $\times(1 + \frac{t}{100})$ · baisse : $\times(1 - \frac{t}{100})$ · successifs : on multiplie · variation : $\frac{V_{après} - V_{avant}}{V_{avant}}$
+
+### Pentes
+
+$p = \frac{\Delta H}{L}$ (même unité, L horizontale) · % = $p \times 100$ · ‰ = $p \times 1\,000$ · $\Delta H = p \times L$
+
+| m/m | % | ‰ | cm par m |
+|---|---|---|---|
+| 0,005 | 0,5 | 5 | 0,5 |
+| 0,01 | 1 | 10 | 1 |
+| 0,05 | 5 | 50 | 5 |
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un dosage">
+
+Le cahier des charges impose 300 kg de ciment par m³ pour un béton de propreté. Quelle masse de ciment pour 3,6 m³ ?
+
+<Indice>Règle de trois : 1 m³ → 300 kg ; 3,6 m³ → x.</Indice>
+
+<Corrige>
+x = 300 × 3,6 / 1 = **{grandeur(ex1, 0, 'kg')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une pente imposée">
+
+Une rampe de garage de {nombre(ex2.L, 0)} m (en projection horizontale) doit avoir une pente de {nombre(ex2.p, 1)} %. Quel dénivelé rattrape-t-elle ? Et quelle est la remise sur un sac de {red.prix} unités monétaires si le fournisseur accorde {red.taux} % ?
+
+<Indice>ΔH = p × L, avec p en m/m. Une remise de t % : × (1 − t/100).</Indice>
+
+<Corrige>
+ΔH = {nombre(ex2.p / 100, 3)} × {nombre(ex2.L, 0)} = **{grandeur(ex2r, 2, 'm')}**. Prix remisé : {red.prix} × {nombre(1 - red.taux / 100, 2)} = **{nombre(redR, 2)}** unités monétaires.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La bétonnière">
+
+Dosage de l'énoncé par m³ : 300 kg de ciment, 450 L de sable, 800 L de gravier, 160 L d'eau. Calcule les quantités pour une gâchée de 0,75 m³. Combien de sacs de 50 kg faut-il ouvrir ?
+
+<Indice>Multiplie chaque ligne du dosage par 0,75 ; les sacs s'arrondissent par excès.</Indice>
+
+<Corrige>
+Ciment : **{grandeur(ex3.cimentKg, 0, 'kg')}**, soit {nombre(ex3.cimentKg / 50, 2)} sacs → **{ex3.sacs} sacs** à ouvrir (le reste sert à la gâchée suivante) ; sable **{grandeur(ex3.sableM3 * 1000, 0, 'L')}** ; gravier **{grandeur(ex3.gravierM3 * 1000, 0, 'L')}** ; eau **{grandeur(ex3.eauL, 0, 'L')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.2.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question={<>Avec {dos.C} kg de ciment par m³, il faut pour {nombre(dos.V, 1)} m³ :</>} choix={[grandeur(dos.C / dos.V, 0, 'kg'), grandeur(dosR, 0, 'kg'), grandeur(dos.C + dos.V, 0, 'kg'), grandeur(dosR * 10, 0, 'kg')]} bonne={1} colonnes={2}>
+{dos.C} × {nombre(dos.V, 1)} = {grandeur(dosR, 0, 'kg')}.
+</QCM>
+
+<QCM n={2} question="Deux hausses successives de 10 % font au total :" choix={['20 %', '21 %', '19 %', '10 %']} bonne={1} colonnes={4}>
+1,1 × 1,1 = 1,21.
+</QCM>
+
+<QCM n={3} question="Une pente de 6 ‰ correspond à :" choix={['6 %', '0,6 %', '0,06 %', '60 %']} bonne={1} colonnes={4}>
+6 ‰ = 0,006 = 0,6 %.
+</QCM>
+
+<QCM n={4} question={<>Un caniveau descend de 15 cm sur 25 m. Sa pente vaut :</>} choix={['60 %', `${nombre(p1.pourcent, 1)} %`, '6 %', '0,06 %']} bonne={1} colonnes={4}>
+0,15 / 25 = {nombre(p1.p, 3)} = {nombre(p1.pourcent, 1)} %.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Un prix passe de 12,50 à 14,00. L'augmentation est de :" choix={[`${nombre((prix.apres - prix.avant) / prix.apres * 100, 1)} %`, `${nombre(v * 100, 1)} %`, '1,5 %', '15 %']} bonne={1} colonnes={4}>
+(14 − 12,5) / 12,5 = {nombre(v, 3)}, soit {nombre(v * 100, 1)} %.
+</QCM>
+
+<QCM n={6} question="Une livraison de béton comprend un forfait de transport. Le prix de 4 m³ est-il le double de celui de 2 m³ ?" choix={['Oui, toujours', 'Non : le forfait ne double pas, la situation n’est pas proportionnelle', 'Oui, si le béton est le même', 'Non, il est toujours triple']} bonne={1}>
+Prix = forfait + prix unitaire × volume : c'est une fonction affine, pas linéaire (voir N0.2.8).
+</QCM>
+
+<QCM n={7} question="Une pente se calcule avec :" choix={['la longueur inclinée', 'la longueur horizontale', 'la hauteur seule', 'la surface']} bonne={1} colonnes={2}>
+p = ΔH / L, avec L horizontale.
+</QCM>
+
+<QCM n={8} question="Une rampe de 20 m à 5 % rattrape un dénivelé de :" choix={['0,1 m', '1 m', '4 m', '10 m']} bonne={1} colonnes={4}>
+ΔH = 0,05 × 20 = {nombre(denivele(5, 20), 0)} m.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

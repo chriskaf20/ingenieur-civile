@@ -1,0 +1,302 @@
+---
+id: N0.2.4
+titre: Expressions littérales et identités remarquables
+objectifs:
+  - Développer et réduire une expression littérale
+  - Factoriser une expression par un facteur commun ou une identité remarquable
+  - Utiliser les trois identités remarquables dans les deux sens
+  - Transformer une formule technique pour la rendre plus simple à calculer
+relecture: false
+normes: []
+glossaire:
+  - terme: Expression littérale
+    definition: Expression qui contient des lettres représentant des nombres (b, h, L…).
+  - terme: Développer
+    definition: Transformer un produit en somme, par exemple a(b + c) = ab + ac.
+  - terme: Factoriser
+    definition: Transformer une somme en produit, par exemple ab + ac = a(b + c).
+  - terme: Identité remarquable
+    definition: Égalité toujours vraie, comme (a + b)² = a² + 2ab + b².
+symboles:
+  - { symbole: 'D', signification: 'diamètre extérieur du tube', unite: 'mm' }
+  - { symbole: 'd', signification: 'diamètre intérieur du tube', unite: 'mm' }
+  - { symbole: 't', signification: 'épaisseur de la paroi', unite: 'mm' }
+  - { symbole: 'A', signification: 'aire de la section', unite: 'mm²' }
+formules:
+  - { nom: 'Carré d’une somme', tex: '(a+b)^2 = a^2 + 2ab + b^2', domaine: 'Algèbre' }
+  - { nom: 'Carré d’une différence', tex: '(a-b)^2 = a^2 - 2ab + b^2', domaine: 'Algèbre' }
+  - { nom: 'Différence de deux carrés', tex: 'a^2 - b^2 = (a-b)(a+b)', domaine: 'Algèbre' }
+  - { nom: 'Section d’un tube', tex: 'A = \pi\,t\,(D - t)', domaine: 'Géométrie des sections' }
+---
+
+import { sectionTube, surfaceCylindre } from '@/lib/calc/algebre'
+import { grandeur, nombre } from '@/lib/format'
+
+export const t1 = sectionTube(100, 5)
+export const t2 = sectionTube(219.1, 6.3)
+export const cyl = surfaceCylindre(1.5, 3)
+
+<Page etape="intuition" titre="L'intuition : deux chemins vers le même résultat">
+
+Pour aller de chez toi à l'université, il y a souvent plusieurs chemins. Ils mènent au même endroit, mais l'un est plus court, plus sûr ou moins embouteillé. Une formule, c'est pareil : on peut l'écrire de plusieurs façons **égales**, et l'une est plus pratique que les autres.
+
+La section d'un tube s'écrit $\frac{\pi}{4}(D^2 - d^2)$ : il faut calculer deux grands carrés presque égaux, puis les soustraire. Elle s'écrit aussi $\pi\,t\,(D - t)$ : un seul produit, et l'épaisseur $t$ apparaît directement. Les deux donnent **le même nombre** : c'est une identité remarquable qui permet de passer de l'une à l'autre.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment transformer une expression sans changer sa valeur, pour la rendre plus simple, plus lisible ou plus précise ?
+</Encadre>
+
+<Encadre type="attention">
+Une transformation fausse donne une formule fausse, et tous les calculs qui suivent le sont aussi. On **vérifie** toujours une transformation en remplaçant les lettres par des nombres simples.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours : développer, factoriser, identités">
+
+### Développer
+
+On distribue : $k(a + b) = ka + kb$ et $(a + b)(c + d) = ac + ad + bc + bd$. Puis on **réduit** : on regroupe les termes semblables.
+
+### Factoriser
+
+C'est l'inverse : on repère un **facteur commun**. $2\pi r h + 2\pi r^2 = 2\pi r\,(h + r)$.
+
+### Les trois identités remarquables
+
+| Identité | Lue de gauche à droite | Lue de droite à gauche |
+|---|---|---|
+| $(a+b)^2 = a^2 + 2ab + b^2$ | développer | factoriser |
+| $(a-b)^2 = a^2 - 2ab + b^2$ | développer | factoriser |
+| $(a-b)(a+b) = a^2 - b^2$ | développer | factoriser |
+
+### Application : la section d'un tube
+
+Avec $d = D - 2t$ et $a^2 - b^2 = (a - b)(a + b)$ :
+
+$$A = \frac{\pi}{4}(D^2 - d^2) = \frac{\pi}{4}(D - d)(D + d) = \frac{\pi}{4} \times 2t \times (2D - 2t) = \pi\,t\,(D - t)$$
+
+- $D$ : diamètre extérieur (mm) ; $d$ : diamètre intérieur (mm) ; $t$ : épaisseur (mm) ; $A$ : aire (mm²).
+
+<Regle type="simplification">
+Pour un tube **mince** ($t$ petit devant $D$), on approche souvent $A \approx \pi D t$. C'est une approximation par excès : l'écart relatif vaut exactement $\frac{t}{D - t}$.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : (a + b)² en surfaces">
+
+<Figure alt="Carré de côté a + b découpé en un carré a², un carré b² et deux rectangles a × b : l'aire totale vaut a² + 2ab + b²" largeur={620} hauteur={260}>
+  <rect x={160} y={20} width={150} height={150} fill="var(--color-encre-clair)" className="t-moyen" />
+  <rect x={310} y={20} width={70} height={150} fill="var(--fond-terre)" className="t-moyen" />
+  <rect x={160} y={170} width={150} height={70} fill="var(--fond-terre)" className="t-moyen" />
+  <rect x={310} y={170} width={70} height={70} fill="var(--color-validation-clair)" className="t-moyen" />
+  <text x={235} y={100} textAnchor="middle" fontSize={20} fontWeight={700} className="encre">a²</text>
+  <text x={345} y={100} textAnchor="middle" fontSize={16}>ab</text>
+  <text x={235} y={210} textAnchor="middle" fontSize={16}>ab</text>
+  <text x={345} y={210} textAnchor="middle" fontSize={16} fontWeight={700}>b²</text>
+  <text x={235} y={14} textAnchor="middle" fontSize={13}>a</text>
+  <text x={345} y={14} textAnchor="middle" fontSize={13}>b</text>
+  <text x={150} y={100} textAnchor="end" fontSize={13}>a</text>
+  <text x={150} y={210} textAnchor="end" fontSize={13}>b</text>
+  <text x={400} y={130} fontSize={13}>(a + b)² = a² + 2ab + b²</text>
+</Figure>
+
+Le grand carré a pour côté $a + b$. Il se découpe en **quatre** morceaux : le carré $a^2$, le carré $b^2$ et **deux** rectangles $ab$. D'où le « 2ab » qu'on oublie si souvent.
+
+<Encadre type="retenir">
+$(a + b)^2 \neq a^2 + b^2$ : il manque toujours les deux rectangles $2ab$.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="tube">
+
+<Cahier titre="Exemple résolu : la section d'un tube d'acier">
+
+**Énoncé.** Un tube d'acier a un diamètre extérieur de 100 mm et une épaisseur de 5 mm. Calcule son aire de deux façons et vérifie qu'elles donnent le même résultat.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi rester en mm ? Les tubes sont désignés en mm dans les catalogues ; on convertira en cm² à la fin.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : deux calculs, un résultat">
+
+<Etape n={3} titre="Les formules">
+
+Forme développée : $A = \frac{\pi}{4}(D^2 - d^2)$ avec $d = D - 2t$. Forme factorisée : $A = \pi\,t\,(D - t)$.
+
+</Etape>
+
+<Etape n={4} titre="Le calcul">
+<AN k="d" />
+<AN k="developpee" />
+<AN k="factorisee" />
+<Note>Pourquoi préférer la forme factorisée ? Elle évite de soustraire deux grands carrés presque égaux, source d'erreurs d'arrondi, et montre directement l'effet de l'épaisseur.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="A" libelle="Aire de la section" />
+
+<Note couleur="vert">Soit <Val k="Acm" />. Les deux formes coïncident : la transformation est juste ✓.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="écrire (a + b)² = a² + b².">
+Il manque 2ab. Vérifie avec a = b = 1 : (1 + 1)² = 4, alors que 1² + 1² = 2.
+</Piege>
+
+<Piege erreur="oublier de distribuer le signe moins : −(a − b) = −a − b.">
+−(a − b) = −a + b. Le signe moins s'applique à **chaque** terme de la parenthèse.
+</Piege>
+
+<Piege erreur="simplifier une somme comme un produit : (a + b)/a = b.">
+On ne simplifie que des **facteurs**. (a + b)/a = 1 + b/a.
+</Piege>
+
+<Piege erreur="factoriser incomplètement.">
+2πrh + 2πr² = 2π(rh + r²) est juste mais pas fini : le facteur commun complet est 2πr.
+</Piege>
+
+<Piege erreur="ne pas vérifier une transformation.">
+Remplace les lettres par des valeurs simples (1, 2, 3) dans les deux formes : si les résultats diffèrent, la transformation est fausse.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Au bureau d'études**, transformer une formule n'est pas un exercice gratuit. On isole la grandeur cherchée, on factorise pour voir quel paramètre compte, on simplifie avant de programmer un tableur. Une formule bien écrite se relit et se contrôle.
+
+<Encadre type="terrain" titre="Les tubes sur les chantiers">
+Tubes d'échafaudage, poteaux métalliques de hangar, conduites d'eau : on rencontre des sections creuses partout. Les catalogues donnent les sections, mais savoir les recalculer permet de vérifier qu'on a bien reçu le tube commandé, en mesurant le diamètre et l'épaisseur au pied à coulisse.
+</Encadre>
+
+**La factorisation montre l'essentiel.** Dans $A = \pi\,t\,(D - t)$, on voit tout de suite que l'aire est presque proportionnelle à l'épaisseur. Doubler l'épaisseur double presque la masse du tube, et donc son prix.
+
+**Sur le chantier**, la surface de coffrage d'un réservoir cylindrique, $2\pi r(h + r)$, se calcule plus vite sous forme factorisée, et l'on voit que la hauteur et le rayon jouent ensemble.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : expressions littérales">
+
+### Développer et factoriser
+
+$k(a + b) = ka + kb$ · $(a + b)(c + d) = ac + ad + bc + bd$ · factoriser = repérer le facteur commun **complet**.
+
+### Les identités remarquables
+
+$(a + b)^2 = a^2 + 2ab + b^2$ · $(a - b)^2 = a^2 - 2ab + b^2$ · $a^2 - b^2 = (a - b)(a + b)$
+
+### Les pièges
+
+$-(a - b) = -a + b$ · $\frac{a + b}{a} = 1 + \frac{b}{a}$ · $(a + b)^2 \neq a^2 + b^2$
+
+### Section d'un tube
+
+$A = \frac{\pi}{4}(D^2 - d^2) = \pi\,t\,(D - t)$ · tube mince : $A \approx \pi D t$ (par excès, écart $\frac{t}{D - t}$)
+
+### Vérifier
+
+Remplacer les lettres par des nombres simples dans les deux formes.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Développer">
+
+Développe et réduis : $(x + 3)^2$ ; $(2h - 1)^2$ ; $(L - 2)(L + 2)$.
+
+<Indice>Utilise les trois identités remarquables.</Indice>
+
+<Corrige>
+$(x + 3)^2 = x^2 + 6x + 9$ ; $(2h - 1)^2 = 4h^2 - 4h + 1$ ; $(L - 2)(L + 2) = L^2 - 4$. Vérification avec x = 1 : (1 + 3)² = 16 et 1 + 6 + 9 = 16 ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le réservoir cylindrique">
+
+Un réservoir cylindrique fermé a un rayon r = 1,5 m et une hauteur h = 3 m. Factorise la surface totale $2\pi r h + 2\pi r^2$, puis calcule-la.
+
+<Indice>Le facteur commun est $2\pi r$.</Indice>
+
+<Corrige>
+$2\pi r h + 2\pi r^2 = 2\pi r\,(h + r)$ = 2π × 1,5 × (3 + 1,5) = **{grandeur(cyl.factorisee, 2, 'm²')}**. Avec la forme développée : {grandeur(cyl.developpee, 2, 'm²')} ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="L'approximation du tube mince">
+
+Pour le tube 219,1 × 6,3 mm (diamètre × épaisseur), calcule l'aire exacte $\pi t (D - t)$ et l'approximation $\pi D t$. Quel est l'écart relatif ? Démontre qu'il vaut toujours $\frac{t}{D - t}$.
+
+<Indice>Divise $\pi D t$ par $\pi t (D - t)$ et simplifie.</Indice>
+
+<Corrige>
+
+- Exacte : **{grandeur(t2.Afactorisee, 0, 'mm²')}** ; approchée : {grandeur(t2.Amince, 0, 'mm²')}.
+- Écart : {nombre((t2.Amince / t2.Afactorisee - 1) * 100, 1)} % par excès.
+- Démonstration : $\frac{\pi D t}{\pi t (D - t)} = \frac{D}{D - t} = 1 + \frac{t}{D - t}$. Pour 6,3 / (219,1 − 6,3), on retrouve {nombre((t2.Amince / t2.Afactorisee - 1) * 100, 1)} %.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.2.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="(a + b)² vaut :" choix={['a² + b²', 'a² + 2ab + b²', 'a² + ab + b²', '2a + 2b']} bonne={1} colonnes={2}>
+Le carré de côté a + b contient deux rectangles ab.
+</QCM>
+
+<QCM n={2} question="−(x − 4) vaut :" choix={['−x − 4', '−x + 4', 'x + 4', 'x − 4']} bonne={1} colonnes={4}>
+Le signe moins change le signe de chaque terme.
+</QCM>
+
+<QCM n={3} question="La forme factorisée de 2πrh + 2πr² est :" choix={['2π(rh + r²)', '2πr(h + r)', 'πr(2h + r)', '2πr²h']} bonne={1} colonnes={2}>
+Le facteur commun complet est 2πr.
+</QCM>
+
+<QCM n={4} question="D² − d² est égal à :" choix={['(D − d)²', '(D − d)(D + d)', 'D − d', '(D + d)²']} bonne={1} colonnes={2}>
+Différence de deux carrés.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>L'aire d'un tube 100 × 5 mm vaut :</>} choix={[grandeur(t1.Amince, 0, 'mm²'), grandeur(t1.Afactorisee, 0, 'mm²'), grandeur(Math.PI * 100 ** 2 / 4, 0, 'mm²'), grandeur(t1.Afactorisee / 100, 0, 'mm²')]} bonne={1} colonnes={2}>
+π × 5 × (100 − 5) = {grandeur(t1.Afactorisee, 0, 'mm²')}.
+</QCM>
+
+<QCM n={6} question="(a + b)/a se simplifie en :" choix={['b', '1 + b/a', 'a + b', 'b/a']} bonne={1} colonnes={4}>
+On ne simplifie que les facteurs : (a + b)/a = a/a + b/a.
+</QCM>
+
+<QCM n={7} question="Pour vérifier une transformation, on :" choix={['refait la même transformation', 'remplace les lettres par des nombres simples dans les deux formes', 'demande à la calculatrice de simplifier', 'regarde si elle est plus courte']} bonne={1}>
+Si les deux formes donnent des valeurs différentes, la transformation est fausse.
+</QCM>
+
+<QCM n={8} question="L'approximation πDt de la section d'un tube mince est :" choix={['par défaut', 'par excès', 'exacte', 'sans rapport']} bonne={1} colonnes={4}>
+πDt = πt(D − t) + πt² : elle est trop grande de πt².
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,309 @@
+---
+id: N0.2.5
+titre: Équations et inéquations du premier degré
+objectifs:
+  - Résoudre une équation du premier degré en justifiant chaque étape
+  - Isoler une grandeur dans une formule technique
+  - Résoudre une inéquation et l'écrire sous forme d'intervalle
+  - Choisir une valeur entière qui respecte une inégalité (nombre de marches, de sacs, de barres)
+relecture: false
+normes: []
+glossaire:
+  - terme: Équation
+    definition: Égalité qui contient une inconnue ; la résoudre, c'est trouver les valeurs qui la rendent vraie.
+  - terme: Inéquation
+    definition: Inégalité qui contient une inconnue ; ses solutions forment un intervalle.
+  - terme: Isoler
+    definition: Transformer une formule pour exprimer une grandeur seule d'un côté du signe égal.
+  - terme: Giron
+    definition: Profondeur d'une marche, mesurée horizontalement de nez à nez.
+  - terme: Relation de Blondel
+    definition: Règle de confort d'un escalier, 2h + g compris entre 0,60 et 0,64 m (règle de l'art).
+symboles:
+  - { symbole: 'H', signification: 'hauteur à franchir', unite: 'm' }
+  - { symbole: 'n', signification: 'nombre de contremarches', unite: '—' }
+  - { symbole: 'h', signification: 'hauteur d’une marche', unite: 'm' }
+  - { symbole: 'g', signification: 'giron', unite: 'm' }
+formules:
+  - { nom: 'Hauteur de marche', tex: 'h = \frac{H}{n}', domaine: 'Escaliers' }
+  - { nom: 'Relation de Blondel', tex: '0{,}60 \leq 2h + g \leq 0{,}64', domaine: 'Escaliers (règle de l’art)' }
+---
+
+import { hauteurPourPoids, marchesEscalier, premierDegre, quantitesBeton } from '@/lib/calc/algebre'
+import { POIDS_VOLUMIQUE_BA } from '@/lib/calc/methode'
+import { BLONDEL_MAX, BLONDEL_MIN } from '@/lib/calc/escalier'
+import { arrondiSup, grandeur, nombre } from '@/lib/format'
+
+export const e1 = { a: 3, b: -5, c: 10 }
+export const e1x = premierDegre(e1.a, e1.b, e1.c)
+export const ex2 = { P: 15, L: 4, b: 0.25 }
+export const ex2h = hauteurPourPoids(ex2.P, POIDS_VOLUMIQUE_BA, ex2.L, ex2.b)
+export const sacs = quantitesBeton({ V: 2.4, ciment: 350, sable: 0, gravier: 0, eau: 0, sac: 50 })
+export const esc = marchesEscalier(3.06, 0.17)
+export const exEx = marchesEscalier(2.8, 0.18)
+
+<Page etape="intuition" titre="L'intuition : la balance">
+
+Imagine une balance à deux plateaux en équilibre. Si tu ajoutes 2 kg à gauche, tu dois ajouter 2 kg à droite pour garder l'équilibre. Si tu doubles ce qu'il y a à gauche, tu doubles à droite. Une **équation** est cette balance : on peut faire la même opération des deux côtés sans rompre l'égalité.
+
+Une **inéquation**, c'est une balance qui penche : « la marche ne doit pas dépasser 18 cm ». On cherche alors toutes les valeurs qui respectent la condition. En génie civil, presque toutes les vérifications sont des inéquations : la contrainte doit rester **inférieure** à la résistance.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment isoler une grandeur dans une formule, et trouver toutes les valeurs qui respectent une condition ?
+</Encadre>
+
+<Encadre type="attention">
+Multiplier ou diviser une inéquation par un nombre **négatif** inverse le sens de l'inégalité. C'est la seule règle différente des équations, et la plus oubliée.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours : équations, formules, inéquations">
+
+### Résoudre une équation du premier degré
+
+On applique la même opération aux deux membres jusqu'à isoler l'inconnue :
+
+$$3x - 5 = 10 \;\Leftrightarrow\; 3x = 15 \;\Leftrightarrow\; x = 5$$
+
+Le calcul le confirme : $x$ = {nombre(e1x, 0)}. **Vérifie** en remplaçant : 3 × 5 − 5 = 10 ✓.
+
+### Isoler une grandeur dans une formule
+
+Même méthode, avec des lettres. Le poids d'une poutre est $P = \gamma\,L\,b\,h$. Pour trouver la hauteur qui donne un poids $P$ :
+
+$$h = \frac{P}{\gamma\,L\,b}$$
+
+On divise par tout ce qui multiplie $h$. On vérifie l'unité : kN / (kN/m³ × m × m) = m ✓.
+
+### Résoudre une inéquation
+
+Mêmes règles, sauf une : multiplier ou diviser par un nombre **négatif** inverse le sens. $-2x \leq 6 \Leftrightarrow x \geq -3$.
+
+Les solutions s'écrivent en **intervalle** : $0{,}25 \leq g \leq 0{,}29$ s'écrit $g \in [0{,}25 \,;\, 0{,}29]$.
+
+### Les inconnues entières
+
+Un nombre de marches, de sacs ou de barres est **entier**. Si l'inéquation donne $n \geq 15{,}56$, la plus petite solution entière est $n = 16$ : on arrondit **dans le sens qui respecte la condition**.
+
+<Regle type="art" source="relation de Blondel">
+Pour un escalier confortable : $h$ ≤ une valeur maximale fixée par le projet, et {nombre(BLONDEL_MIN, 2)} m ≤ $2h + g$ ≤ {nombre(BLONDEL_MAX, 2)} m. C'est une règle de l'art (voir L3.6.9), pas une norme de calcul.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : un intervalle sur une droite">
+
+<Figure alt={`Droite graduée montrant l'intervalle des girons possibles, de ${nombre(exEx.gMin * 100, 1)} à ${nombre(exEx.gMax * 100, 1)} cm, bornes comprises`} largeur={620} hauteur={120}>
+  <line x1={40} y1={60} x2={580} y2={60} className="t-moyen" />
+  {[20, 22, 24, 26, 28, 30, 32, 34].map((g, i) => (
+    <g key={g}>
+      <line x1={60 + i * 70} y1={55} x2={60 + i * 70} y2={65} className="t-moyen" />
+      <text x={60 + i * 70} y={85} textAnchor="middle" fontSize={12}>{g}</text>
+    </g>
+  ))}
+  <line x1={60 + ((exEx.gMin * 100 - 20) / 2) * 70} y1={60} x2={60 + ((exEx.gMax * 100 - 20) / 2) * 70} y2={60} stroke="var(--color-validation)" strokeWidth={6} />
+  <circle cx={60 + ((exEx.gMin * 100 - 20) / 2) * 70} cy={60} r={6} fill="var(--color-validation)" />
+  <circle cx={60 + ((exEx.gMax * 100 - 20) / 2) * 70} cy={60} r={6} fill="var(--color-validation)" />
+  <text x={60 + ((exEx.gMin * 100 + exEx.gMax * 100) / 2 - 20) / 2 * 70} y={40} textAnchor="middle" fontSize={13} fontWeight={700}>{`g ∈ [${nombre(exEx.gMin * 100, 1)} ; ${nombre(exEx.gMax * 100, 1)}] cm`}</text>
+  <text x={580} y={85} textAnchor="end" fontSize={11} className="etiquette">giron (cm)</text>
+</Figure>
+
+Les points pleins indiquent que les bornes **font partie** des solutions (≤). Toute valeur sur le trait vert convient ; on choisit ensuite celle qui arrange le chantier (place disponible, carrelage).
+
+<Encadre type="retenir">
+Une inéquation a en général une **infinité** de solutions : un intervalle. Le projeteur choisit dedans.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="marches">
+
+<Cahier titre="Exemple résolu : les marches d'un escalier">
+
+**Énoncé.** Un escalier doit franchir 2,80 m. Le projet impose des marches d'au plus 18 cm. Combien de contremarches au minimum ? Quelle hauteur réelle de marche ? Entre quelles valeurs choisir le giron pour respecter la relation de Blondel ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi « au plus 18 cm » ? C'est une donnée du projet. Elle se traduit par une inéquation : h ≤ 0,18 m.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : résoudre les inéquations">
+
+<Etape n={3} titre="La mise en équation">
+
+$h = \frac{H}{n} \leq h_{max}$, puis {nombre(BLONDEL_MIN, 2)} ≤ $2h + g$ ≤ {nombre(BLONDEL_MAX, 2)}.
+
+</Etape>
+
+<Etape n={4} titre="La résolution">
+<AN k="n" />
+<AN k="h" />
+<AN k="g" />
+<Note>Pourquoi arrondir n vers le haut ? Avec moins de contremarches, chaque marche serait plus haute que permis : l'arrondi doit respecter l'inégalité.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="n" libelle="Nombre minimal" />
+
+<Note couleur="vert">Hauteur réelle : <Val k="h" /> ; giron à choisir : <Val k="plage" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="ne faire l'opération que d'un seul côté.">
+3x − 5 = 10 : si l'on ajoute 5 à gauche, on ajoute 5 à droite. Sinon, la balance n'est plus équilibrée.
+</Piege>
+
+<Piege erreur="garder le sens de l'inégalité après une division par un négatif.">
+−2x ≤ 6 donne x ≥ −3, pas x ≤ −3. Vérifie avec x = 0 : −2 × 0 = 0 ≤ 6 ✓, et 0 ≥ −3 ✓.
+</Piege>
+
+<Piege erreur="arrondir un nombre de marches au plus proche.">
+n ≥ 15,56 donne n = 16. Arrondir à 15 donnerait des marches trop hautes : on arrondit dans le sens qui respecte la condition.
+</Piege>
+
+<Piege erreur="isoler une grandeur en oubliant un facteur.">
+De P = γ L b h, on tire h = P / (γ L b), pas h = P / γ. Contrôle par l'unité : le résultat doit être en mètres.
+</Piege>
+
+<Piege erreur="ne pas vérifier la solution.">
+Remplace la valeur trouvée dans l'équation de départ. C'est rapide et cela attrape presque toutes les erreurs de signe.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les vérifications réglementaires** sont des inéquations : contrainte ≤ résistance, flèche ≤ flèche admissible, enrobage ≥ enrobage minimal. Tu passeras ta carrière à écrire « ... ≤ ... ✓ » au bas des notes de calcul.
+
+<Encadre type="terrain" titre="L'escalier tracé sur le mur">
+Sur le chantier, le maçon trace l'escalier à la craie sur le mur avant de coffrer. Il divise la hauteur réelle mesurée (pas celle du plan !) par le nombre de contremarches. Si le plancher a été coulé un peu plus haut que prévu, il refait l'équation sur place.
+</Encadre>
+
+**Les quantités entières** reviennent sans cesse : sacs de ciment, barres d'acier de 12 m, blocs, tôles. Le besoin donne une inéquation ; la commande est le plus petit entier qui la satisfait.
+
+**Isoler une grandeur** sert à dimensionner : on connaît l'effort et la résistance, on cherche la section. C'est exactement ce que tu feras pour un poteau en L3.3.5.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : équations et inéquations">
+
+### Équation du premier degré
+
+Même opération des deux côtés · on isole l'inconnue · on **vérifie** en remplaçant.
+
+### Isoler une grandeur dans une formule
+
+On divise par tout ce qui la multiplie, on retranche tout ce qui s'y ajoute · contrôle par l'unité.
+
+### Inéquation
+
+Mêmes règles, sauf : × ou ÷ par un **négatif** ⇒ on **inverse** le sens · solutions en intervalle $[a\,;\,b]$.
+
+### Inconnue entière
+
+On arrondit **dans le sens qui respecte la condition** : $n \geq 15{,}56 \Rightarrow n = 16$.
+
+### Escalier
+
+$h = H/n \leq h_{max}$ · {nombre(BLONDEL_MIN, 2)} ≤ $2h + g$ ≤ {nombre(BLONDEL_MAX, 2)} m (règle de l'art)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Des sacs entiers">
+
+Il faut {grandeur(sacs.cimentKg, 0, 'kg')} de ciment, livré en sacs de 50 kg. Écris l'inéquation sur le nombre de sacs $n$, résous-la et donne la commande.
+
+<Indice>La masse livrée doit être au moins égale au besoin : $50\,n \geq$ {nombre(sacs.cimentKg, 0)}.</Indice>
+
+<Corrige>
+$50\,n \geq$ {nombre(sacs.cimentKg, 0)} ⇔ $n \geq$ {nombre(sacs.cimentKg / 50, 1)} ⇔ **n = {sacs.sacs} sacs**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Isoler une hauteur">
+
+Une poutre en béton armé de {nombre(ex2.L, 0)} m de long et {nombre(ex2.b, 2)} m de large doit peser {grandeur(ex2.P, 0, 'kN')}. Isole $h$ dans $P = \gamma L b h$ (γ = {POIDS_VOLUMIQUE_BA} kN/m³) et calcule-la.
+
+<Indice>Divise les deux membres par $\gamma L b$.</Indice>
+
+<Corrige>
+$h = \frac{P}{\gamma L b}$ = {nombre(ex2.P, 0)} / ({POIDS_VOLUMIQUE_BA} × {nombre(ex2.L, 0)} × {nombre(ex2.b, 2)}) = **{grandeur(ex2h, 2, 'm')}**. Unité : kN / (kN/m³ × m × m) = m ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un autre escalier">
+
+Hauteur à franchir : 3,06 m ; marches d'au plus 17 cm. Trouve le nombre minimal de contremarches, la hauteur réelle et l'intervalle des girons de Blondel. Le palier impose un giron d'au moins 27 cm : est-ce compatible ?
+
+<Indice>Résous $3{,}06 / n \leq 0{,}17$, puis encadre $g$.</Indice>
+
+<Corrige>
+
+- $n \geq$ 3,06 / 0,17 = {nombre(3.06 / 0.17, 2)} ⇒ **n = {esc.nMin}** ; h = **{grandeur(esc.h * 100, 1, 'cm')}**.
+- **g ∈ [{nombre(esc.gMin * 100, 1)} ; {nombre(esc.gMax * 100, 1)}] cm**.
+- Avec g ≥ 27 cm : {esc.gMax * 100 >= 27 ? `compatible, on choisit g entre 27 et ${nombre(esc.gMax * 100, 1)} cm` : 'incompatible : il faut revoir h ou la plage de confort'}.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.2.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La solution de 3x − 5 = 10 est :" choix={['x = 5/3', `x = ${nombre(e1x, 0)}`, 'x = 15', 'x = −5']} bonne={1} colonnes={4}>
+3x = 15 donc x = 5.
+</QCM>
+
+<QCM n={2} question="De P = γ L b h, on tire :" choix={['h = P γ L b', 'h = P / (γ L b)', 'h = P − γ L b', 'h = γ L b / P']} bonne={1} colonnes={2}>
+On divise par tout ce qui multiplie h.
+</QCM>
+
+<QCM n={3} question="−2x ≤ 6 équivaut à :" choix={['x ≤ −3', 'x ≥ −3', 'x ≤ 3', 'x ≥ 3']} bonne={1} colonnes={4}>
+Diviser par −2 inverse le sens.
+</QCM>
+
+<QCM n={4} question="Un calcul donne n ≥ 15,56 contremarches. On retient :" choix={['15', '16', '15,56', '20']} bonne={1} colonnes={4}>
+Le plus petit entier qui respecte la condition.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour franchir 2,80 m avec des marches d'au plus 18 cm, la hauteur réelle de marche vaut :</>} choix={[grandeur(18, 1, 'cm'), grandeur(exEx.h * 100, 1, 'cm'), grandeur(280 / 15, 1, 'cm'), grandeur(16, 1, 'cm')]} bonne={1} colonnes={2}>
+n = {exEx.nMin}, h = 2,80 / {exEx.nMin} = {grandeur(exEx.h * 100, 1, 'cm')}.
+</QCM>
+
+<QCM n={6} question="L'écriture g ∈ [0,25 ; 0,29] signifie :" choix={['g vaut 0,25 ou 0,29', 'g est compris entre 0,25 et 0,29, bornes comprises', 'g est hors de cet intervalle', 'g vaut la moyenne']} bonne={1}>
+Crochets tournés vers l'intérieur : bornes comprises.
+</QCM>
+
+<QCM n={7} question="La relation de Blondel est :" choix={['une norme européenne', 'une règle de l’art de confort', 'une loi physique', 'une obligation du code civil']} bonne={1} colonnes={2}>
+Elle traduit le pas moyen d'un adulte.
+</QCM>
+
+<QCM n={8} question="Une vérification « contrainte ≤ résistance » est :" choix={['une équation', 'une inéquation', 'une identité', 'une fonction']} bonne={1} colonnes={4}>
+Presque toutes les vérifications d'ingénieur sont des inéquations.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

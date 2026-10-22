@@ -1,0 +1,333 @@
+---
+id: N0.2.8
+titre: Fonctions et lecture de graphiques
+objectifs:
+  - Lire une valeur et un antécédent sur un graphique
+  - Calculer et interpréter la pente d'une droite, avec son unité
+  - Décrire les variations d'une fonction (croissante, décroissante, maximum)
+  - Modéliser un phénomène simple par une fonction affine et la tracer
+relecture: false
+normes: []
+glossaire:
+  - terme: Fonction
+    definition: Règle qui associe à chaque valeur d'entrée x une seule valeur de sortie f(x).
+  - terme: Fonction affine
+    definition: Fonction de la forme f(x) = a·x + b ; sa courbe est une droite.
+  - terme: Coefficient directeur
+    definition: Nombre a d'une fonction affine ; il mesure la pente de la droite, avec une unité.
+  - terme: Antécédent
+    definition: Valeur de x qui donne une valeur f(x) donnée.
+  - terme: Ordonnée à l'origine
+    definition: Valeur b = f(0) d'une fonction affine, là où la droite coupe l'axe vertical.
+symboles:
+  - { symbole: 'h(t)', signification: "hauteur d'eau à l'instant t", unite: 'm' }
+  - { symbole: 'h_0', signification: 'hauteur au départ', unite: 'm' }
+  - { symbole: 'Q', signification: 'débit de la pompe', unite: 'm³/h' }
+  - { symbole: 'S', signification: 'surface intérieure du réservoir en plan', unite: 'm²' }
+  - { symbole: 'a', signification: 'vitesse de montée de l’eau', unite: 'm/h' }
+formules:
+  - { nom: 'Fonction affine', tex: 'f(x) = a\,x + b', domaine: 'Fonctions' }
+  - { nom: 'Coefficient directeur', tex: 'a = \frac{f(x_2) - f(x_1)}{x_2 - x_1}', domaine: 'Fonctions' }
+  - { nom: 'Remplissage d’un réservoir', tex: 'h(t) = h_0 + \frac{Q}{S}\,t', domaine: 'Hydraulique (réservoir à parois verticales)' }
+---
+
+import { EXEMPLE_RESERVOIR, hauteurEau, reservoir } from '@/lib/calc/algebre'
+import { grandeur, nombre } from '@/lib/format'
+
+export const r0 = reservoir(EXEMPLE_RESERVOIR)
+export const h4 = hauteurEau(EXEMPLE_RESERVOIR, 4)
+export const h40 = hauteurEau(EXEMPLE_RESERVOIR, 40)
+export const ex2 = { S: 20, Q: 4, h0: 0.3, hMax: 2.3 }
+export const ex2r = reservoir(ex2)
+export const ex3 = { S: 12, Q: 3, h0: 0.5, hMax: 2.5 }
+export const ex3pompe2 = reservoir({ ...ex3, Q: 2 * ex3.Q })
+export const ex3S2 = reservoir({ ...ex3, S: 2 * ex3.S })
+
+<Page etape="intuition" titre="L'intuition : le seau sous le robinet">
+
+Mets un seau sous un robinet ouvert. Chaque minute, l'eau monte de la même hauteur : au bout de 2 minutes, deux fois plus qu'au bout d'une. Si le seau contenait déjà un fond d'eau, il suffit d'ajouter ce fond. La hauteur d'eau est une **fonction du temps**, et son graphique est une **droite**.
+
+Un ingénieur lit des graphiques toute la journée : courbes de remplissage d'un château d'eau, courbes granulométriques, diagrammes d'efforts, courbes de durcissement du béton. Savoir lire une valeur, une pente et des variations est un savoir-faire de base, aussi important que savoir calculer.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment lire un graphique, et comment traduire un phénomène simple en fonction qu'on peut tracer et calculer ?
+</Encadre>
+
+<Encadre type="attention">
+Un graphique sans unités sur ses axes ne dit rien. La première chose à lire, ce sont les **axes** : la grandeur, l'unité et l'échelle.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : lire un graphique">
+
+### Fonction, image, antécédent
+
+Une fonction $f$ associe à chaque $x$ une seule valeur $f(x)$, son **image**. Inversement, un **antécédent** de $y$ est une valeur de $x$ telle que $f(x) = y$.
+
+- **Lire une image** : on part de $x$ sur l'axe horizontal, on monte jusqu'à la courbe, on lit $f(x)$ sur l'axe vertical.
+- **Lire un antécédent** : on part de $y$ sur l'axe vertical, on va horizontalement jusqu'à la courbe, on descend lire $x$.
+
+### Variations
+
+- La fonction est **croissante** sur un intervalle si la courbe monte quand on avance vers la droite.
+- Elle est **décroissante** si la courbe descend.
+- Un **maximum** est le point le plus haut ; un **minimum**, le plus bas.
+
+### La pente, avec son unité
+
+Entre deux points $(x_1, y_1)$ et $(x_2, y_2)$, la pente moyenne est $a = \frac{y_2 - y_1}{x_2 - x_1}$. **Son unité est celle de $y$ divisée par celle de $x$** : des m/h pour une hauteur en fonction du temps, des kN/m pour une charge le long d'une poutre.
+
+<Regle type="simplification">
+Lire sur un graphique donne une valeur approchée, limitée par l'épaisseur du trait et la finesse de la graduation. Pour une valeur précise, on calcule avec l'expression de la fonction.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la fonction affine">
+
+### Définition
+
+Une fonction affine s'écrit $f(x) = a\,x + b$ :
+
+- $a$ est le **coefficient directeur** (la pente) ;
+- $b = f(0)$ est l'**ordonnée à l'origine**.
+
+Sa courbe est une droite. Si $b = 0$, la fonction est **linéaire** : c'est la proportionnalité de N0.2.3.
+
+### Le remplissage d'un réservoir
+
+Un réservoir à parois verticales de surface intérieure $S$ (m²) reçoit un débit constant $Q$ (m³/h). En une heure, il gagne $Q$ m³ d'eau, répartis sur $S$ m² : l'eau monte de $\frac{Q}{S}$ m. Avec une hauteur de départ $h_0$ (m) :
+
+$$h(t) = h_0 + \frac{Q}{S}\,t$$
+
+- $t$ : temps écoulé (h) ;
+- $a = \frac{Q}{S}$ : vitesse de montée (m/h) ;
+- $h_0$ : ordonnée à l'origine (m).
+
+<Regle type="simplification">
+Ce modèle suppose un réservoir à parois verticales, un débit constant et aucune consommation pendant le remplissage. Un vrai château d'eau se vide pendant qu'on le remplit : on ajoutera le débit sortant en hydraulique (M1.10).
+</Regle>
+
+### Résoudre graphiquement ou par le calcul
+
+« Quand le réservoir sera-t-il plein ? » revient à chercher l'antécédent de $h_{max}$ : $h_0 + a\,t = h_{max} \Leftrightarrow t = \frac{h_{max} - h_0}{a}$. C'est l'équation du premier degré de N0.2.5.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : trois allures à reconnaître">
+
+<Figure alt="Trois graphiques : une droite croissante (remplissage), une droite décroissante (vidange), une courbe en cloche avec un maximum (moment fléchissant d'une poutre)" largeur={620} hauteur={200}>
+  {[0, 1, 2].map((k) => (
+    <g key={k} transform={`translate(${20 + k * 205},10)`}>
+      <line x1={10} y1={150} x2={180} y2={150} className="t-moyen" />
+      <line x1={10} y1={150} x2={10} y2={10} className="t-moyen" />
+    </g>
+  ))}
+  <line x1={30} y1={140} x2={190} y2={40} stroke="var(--color-encre)" strokeWidth={2.4} />
+  <text x={110} y={185} textAnchor="middle" fontSize={12}>croissante : a &gt; 0</text>
+  <line x1={235} y1={40} x2={395} y2={140} stroke="var(--color-brique)" strokeWidth={2.4} />
+  <text x={315} y={185} textAnchor="middle" fontSize={12}>décroissante : a &lt; 0</text>
+  <path d="M440 160 Q520 0 600 160" fill="none" stroke="var(--color-validation)" strokeWidth={2.4} />
+  <circle cx={520} cy={80} r={4} fill="var(--color-validation)" />
+  <text x={520} y={70} textAnchor="middle" fontSize={11.5}>maximum</text>
+  <text x={520} y={185} textAnchor="middle" fontSize={12}>croît puis décroît</text>
+</Figure>
+
+- À gauche, un réservoir qui se remplit : la hauteur **croît** à vitesse constante.
+- Au milieu, un réservoir qui se vide : la pente est **négative**.
+- À droite, l'allure du moment fléchissant d'une poutre sous charge uniforme : il est maximal au milieu de la portée (L2.4).
+
+<Encadre type="retenir">
+Le signe de la pente dit si la grandeur augmente ou diminue ; sa valeur dit à quelle vitesse ; son unité dit de quoi on parle.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="reservoir">
+
+<Cahier titre="Exemple résolu : le remplissage d'un réservoir">
+
+**Énoncé.** Un réservoir à parois verticales a une surface intérieure de 12 m². Il contient 0,50 m d'eau. Une pompe le remplit à 3 m³/h jusqu'à sa hauteur utile de 2,50 m. Écris la fonction $h(t)$, trace-la et trouve la durée de remplissage.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi la surface en plan ? Parce que c'est elle qui transforme un volume d'eau en hauteur : 1 m³ réparti sur 12 m² fait monter l'eau de 1/12 m.</Note>
+</Etape>
+
+<Etape n={2} titre="Le graphique">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la fonction et la durée">
+
+<Etape n={3} titre="La pente et la fonction">
+<AN k="a" />
+<AN k="fonction" />
+<Note>Pourquoi des m/h ? La pente d'une hauteur (m) en fonction d'un temps (h) a pour unité m/h : c'est une vitesse de montée.</Note>
+</Etape>
+
+<Etape n={4} titre="La durée de remplissage">
+<AN k="t" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="t" libelle="Durée de remplissage" />
+
+<Note couleur="vert">Volume pompé : <Val k="V" />. À mi-parcours, l'eau est à <Val k="hMi" />. Lecture graphique et calcul concordent ✓.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="lire un graphique sans regarder les unités des axes.">
+Une graduation en minutes lue comme des heures fausse tout d'un facteur 60. Lis les axes avant la courbe.
+</Piege>
+
+<Piege erreur="donner une pente sans unité.">
+« a = {nombre(r0.a, 2)} » ne dit rien. « a = {grandeur(r0.a, 2, 'm/h')} » dit que l'eau monte de {nombre(r0.a * 100, 0)} cm par heure.
+</Piege>
+
+<Piege erreur="confondre image et antécédent.">
+L'image, c'est f(x) : on part de l'axe horizontal. L'antécédent, c'est x : on part de l'axe vertical.
+</Piege>
+
+<Piege erreur="prolonger un modèle au-delà de son domaine.">
+h(t) = {nombre(EXEMPLE_RESERVOIR.h0, 1)} + {nombre(r0.a, 2)} t donnerait {grandeur(h40, 1, 'm')} au bout de 40 h. Mais le réservoir déborde à {grandeur(EXEMPLE_RESERVOIR.hMax, 2, 'm')} : le modèle s'arrête là.
+</Piege>
+
+<Piege erreur="calculer la pente en inversant le numérateur et le dénominateur.">
+a = Δy / Δx, pas Δx / Δy. Contrôle par l'unité : une hauteur par unité de temps, pas l'inverse.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les réservoirs d'eau** sont fréquents en Afrique centrale : châteaux d'eau des villes, citernes de parcelle alimentées par pompe ou par l'eau de pluie, bâches de chantier. Savoir combien de temps prend un remplissage aide à dimensionner la pompe ou à organiser le travail.
+
+<Encadre type="terrain" titre="Pompe et délestages">
+Quand l'électricité ne vient que quelques heures par jour, la question devient : « la pompe a-t-elle le temps de remplir la citerne pendant le créneau d'électricité ? ». C'est exactement le calcul de cette leçon : t = (hₘₐₓ − h₀) × S / Q.
+</Encadre>
+
+**Au laboratoire**, on lit chaque jour des courbes : courbe granulométrique (L2.6), courbe effort-déformation d'un acier, courbe de compactage Proctor (L3.4). Repérer un maximum ou une pente sur ces courbes est un geste professionnel.
+
+**Dans un rapport**, un bon graphique a un titre, des axes nommés avec unités, une échelle lisible et une légende. Un graphique sans unités est refusé en relecture.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : fonctions et graphiques">
+
+### Lire
+
+Image : de x vers f(x) · antécédent : de y vers x · toujours lire d'abord les axes (grandeur, unité, échelle).
+
+### Variations
+
+Croissante : la courbe monte vers la droite · décroissante : elle descend · maximum et minimum : points extrêmes.
+
+### Pente
+
+$a = \frac{y_2 - y_1}{x_2 - x_1}$ · unité = unité de y / unité de x · signe : sens de variation.
+
+### Fonction affine
+
+$f(x) = a x + b$ · a : coefficient directeur · b = f(0) · linéaire si b = 0.
+
+### Réservoir à parois verticales, débit constant
+
+$h(t) = h_0 + \frac{Q}{S}\,t$ · durée : $t = \frac{h_{max} - h_0}{Q/S}$ · valable jusqu'à $h_{max}$ seulement.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Lire une image">
+
+Avec la fonction de l'exemple, $h(t) = 0{,}5 + 0{,}25\,t$, quelle est la hauteur d'eau au bout de 4 h ? Vérifie sur le graphique.
+
+<Indice>Remplace t par 4.</Indice>
+
+<Corrige>
+h(4) = 0,5 + 0,25 × 4 = **{grandeur(h4, 2, 'm')}**. Sur le graphique, on monte de t = 4 jusqu'à la droite et l'on lit environ {nombre(h4, 1)} m ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une citerne de parcelle">
+
+Une citerne de {nombre(ex2.S, 0)} m² contient {nombre(ex2.h0, 2)} m d'eau. La pompe débite {nombre(ex2.Q, 0)} m³/h. La hauteur utile est {nombre(ex2.hMax, 2)} m. Écris h(t) et calcule la durée de remplissage.
+
+<Indice>a = Q / S, puis t = (hₘₐₓ − h₀) / a.</Indice>
+
+<Corrige>
+a = {nombre(ex2.Q, 0)} / {nombre(ex2.S, 0)} = **{grandeur(ex2r.a, 2, 'm/h')}** ; h(t) = {nombre(ex2.h0, 2)} + {nombre(ex2r.a, 2)} t ; t = ({nombre(ex2.hMax, 2)} − {nombre(ex2.h0, 2)}) / {nombre(ex2r.a, 2)} = **{grandeur(ex2r.tPlein, 1, 'h')}**. Volume pompé : {grandeur(ex2r.volumeUtile, 0, 'm³')}.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Pompe double ou réservoir double ?">
+
+Reprends l'exemple. Que devient la durée de remplissage si l'on double le débit de la pompe ? Et si l'on double la surface du réservoir ? Explique avec la pente de la droite.
+
+<Indice>La durée vaut (hₘₐₓ − h₀) × S / Q.</Indice>
+
+<Corrige>
+
+- Débit doublé : pente {grandeur(ex3pompe2.a, 2, 'm/h')}, durée **{grandeur(ex3pompe2.tPlein, 1, 'h')}** (divisée par 2).
+- Surface doublée : pente {grandeur(ex3S2.a, 3, 'm/h')}, durée **{grandeur(ex3S2.tPlein, 1, 'h')}** (multipliée par 2), mais le réservoir stocke deux fois plus d'eau.
+- La pente Q/S est la vitesse de montée : doubler Q la double, doubler S la divise par deux.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.2.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sur un graphique, on lit d'abord :" choix={['le titre seulement', 'les axes : grandeur, unité, échelle', 'le point le plus haut', 'la couleur des courbes']} bonne={1}>
+Sans les unités, aucune valeur lue n'a de sens.
+</QCM>
+
+<QCM n={2} question="La pente d'une hauteur (m) en fonction du temps (h) s'exprime en :" choix={['m', 'h', 'm/h', 'h/m']} bonne={2} colonnes={4}>
+Unité de y divisée par unité de x.
+</QCM>
+
+<QCM n={3} question="Pour f(x) = 3x − 2, l'ordonnée à l'origine vaut :" choix={['3', '−2', '0', '2/3']} bonne={1} colonnes={4}>
+f(0) = −2.
+</QCM>
+
+<QCM n={4} question="Une fonction affine de pente négative est :" choix={['croissante', 'décroissante', 'constante', 'tantôt croissante, tantôt décroissante']} bonne={1} colonnes={2}>
+Sa droite descend quand x augmente.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Un réservoir de 12 m² reçoit 3 m³/h. L'eau monte de :</>} choix={['4 m/h', grandeur(r0.a, 2, 'm/h'), '36 m/h', '3 m/h']} bonne={1} colonnes={4}>
+Q / S = 3 / 12 = {grandeur(r0.a, 2, 'm/h')}.
+</QCM>
+
+<QCM n={6} question={<>De 0,50 m à 2,50 m à {grandeur(r0.a, 2, 'm/h')}, le remplissage dure :</>} choix={['2 h', grandeur(r0.tPlein, 0, 'h'), '10 h', '0,5 h']} bonne={1} colonnes={4}>
+(2,50 − 0,50) / 0,25 = {grandeur(r0.tPlein, 0, 'h')}.
+</QCM>
+
+<QCM n={7} question="Lire l'antécédent de 2 m sur la courbe h(t), c'est trouver :" choix={['la hauteur à t = 2 h', 'l’instant où l’eau atteint 2 m', 'la pente', 'la hauteur maximale']} bonne={1} colonnes={2}>
+On part de l'axe vertical.
+</QCM>
+
+<QCM n={8} question="Le modèle h(t) = h₀ + (Q/S) t cesse d'être valable :" choix={['jamais', 'quand l’eau atteint la hauteur utile (débordement)', 'au bout d’une heure', 'quand t = 0']} bonne={1} colonnes={2}>
+Un modèle a toujours un domaine de validité.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

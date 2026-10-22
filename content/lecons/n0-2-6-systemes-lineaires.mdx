@@ -1,0 +1,339 @@
+---
+id: N0.2.6
+titre: Systèmes linéaires à 2 et 3 inconnues
+objectifs:
+  - Mettre un problème en équations à plusieurs inconnues
+  - Résoudre un système de 2 équations par substitution et par combinaison
+  - Résoudre un système de 3 équations par élimination successive
+  - Calculer les réactions d'une poutre sur deux appuis par un système
+relecture: false
+normes: []
+glossaire:
+  - terme: Système linéaire
+    definition: Ensemble d'équations du premier degré à résoudre en même temps.
+  - terme: Substitution
+    definition: Méthode qui exprime une inconnue à partir d'une équation et la remplace dans les autres.
+  - terme: Combinaison
+    definition: Méthode qui additionne des multiples des équations pour éliminer une inconnue.
+  - terme: Réaction d'appui
+    definition: Force exercée par un appui sur une structure pour la maintenir en équilibre.
+  - terme: Déterminant
+    definition: Nombre ad − bc d'un système 2 × 2 ; s'il est nul, le système n'a pas une solution unique.
+symboles:
+  - { symbole: 'L', signification: 'portée de la poutre', unite: 'm' }
+  - { symbole: 'F', signification: 'charge ponctuelle', unite: 'kN' }
+  - { symbole: 'a', signification: 'distance de la charge à l’appui A', unite: 'm' }
+  - { symbole: 'R_A, R_B', signification: 'réactions des appuis A et B', unite: 'kN' }
+formules:
+  - { nom: 'Équilibre vertical', tex: 'R_A + R_B = F', domaine: 'Statique (poutre isostatique)' }
+  - { nom: 'Équilibre des moments en A', tex: 'L \, R_B = a \, F', domaine: 'Statique (poutre isostatique)' }
+  - { nom: 'Système 2 × 2 (Cramer)', tex: 'x = \frac{ed - bf}{ad - bc},\; y = \frac{af - ec}{ad - bc}', domaine: 'Algèbre' }
+---
+
+import { reactionsPoutre, resoudre2x2, resoudre3x3 } from '@/lib/calc/algebre'
+import { grandeur, nombre } from '@/lib/format'
+
+export const s1 = resoudre2x2(1, 1, 10, 1, -1, 2)
+export const ex2 = { L: 6, F: 18, a: 1.5 }
+export const ex2r = reactionsPoutre(ex2.L, ex2.F, ex2.a)
+export const prixVrais = [12, 9, 0.8]
+export const cmd = [
+  [10, 2, 50],
+  [5, 6, 100],
+  [20, 4, 0],
+]
+export const totaux = cmd.map((l) => l.reduce((s, q, i) => s + q * prixVrais[i], 0))
+export const prix = resoudre3x3(cmd, totaux)
+export const ex0 = reactionsPoutre(5, 10, 2)
+
+<Page etape="intuition" titre="L'intuition : deux indices pour deux inconnues">
+
+Au marché, un ami te dit : « J'ai payé 3 000 francs pour 2 kg de riz et 1 kg de haricots. » Tu ne peux pas en déduire les deux prix : une seule information pour deux inconnues. Il ajoute : « Hier, 1 kg de riz et 2 kg de haricots m'ont coûté 3 300 francs. » Avec **deux informations indépendantes**, tu trouves les deux prix.
+
+C'est la règle des systèmes : il faut **autant d'équations indépendantes que d'inconnues**. Une poutre posée sur deux appuis a deux réactions inconnues ; la statique fournit justement deux équations : l'équilibre des forces verticales et l'équilibre des moments.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment trouver plusieurs inconnues liées entre elles par plusieurs équations ?
+</Encadre>
+
+<Encadre type="attention">
+Deux équations qui disent la même chose (l'une est un multiple de l'autre) ne comptent que pour une. Le système n'a alors pas de solution unique.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : systèmes à 2 inconnues">
+
+Prenons $x + y = 10$ et $x - y = 2$.
+
+### Par substitution
+
+1. On isole une inconnue dans une équation : $x = 10 - y$.
+2. On la remplace dans l'autre : $(10 - y) - y = 2 \Rightarrow y = 4$.
+3. On revient à la première : $x = 10 - 4 = 6$.
+
+### Par combinaison
+
+On additionne les deux équations pour faire disparaître $y$ : $2x = 12 \Rightarrow x = 6$, puis $y = 4$.
+
+Le calcul confirme : $x$ = {nombre(s1.x, 0)}, $y$ = {nombre(s1.y, 0)}. **Vérification** dans les deux équations : 6 + 4 = 10 ✓ ; 6 − 4 = 2 ✓.
+
+### Le cas général
+
+Pour $ax + by = e$ et $cx + dy = f$, si le **déterminant** $ad - bc$ n'est pas nul :
+
+$$x = \frac{ed - bf}{ad - bc} \qquad y = \frac{af - ec}{ad - bc}$$
+
+Si $ad - bc = 0$, les deux équations sont proportionnelles (aucune ou une infinité de solutions).
+
+<Regle type="simplification">
+Les formules du déterminant (méthode de Cramer) sont pratiques pour un tableur. À la main, la substitution ou la combinaison sont plus sûres et plus lisibles.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : 3 inconnues et réactions d'une poutre">
+
+### Systèmes à 3 inconnues : l'élimination
+
+1. Avec deux équations, on élimine une inconnue (par exemple $x$).
+2. Avec une autre paire, on élimine la même inconnue.
+3. On obtient un système 2 × 2, qu'on résout.
+4. On remonte pour trouver la troisième inconnue.
+
+C'est la méthode de Gauss, celle qu'utilisent les logiciels de calcul de structures, sur des systèmes de milliers d'inconnues.
+
+### Les réactions d'une poutre sur deux appuis
+
+Une poutre AB de portée $L$ (m) porte une charge $F$ (kN) à la distance $a$ (m) de A. Les réactions $R_A$ et $R_B$ (kN) vérifient :
+
+- **forces verticales** : $R_A + R_B = F$ ;
+- **moments par rapport à A** : $L \times R_B = a \times F$ (la réaction en A ne crée pas de moment autour de A).
+
+<Regle type="simplification">
+Ces deux équations de la statique seront justifiées en L1.3 (principe fondamental de la statique). Ici, on les utilise comme exemple de système.
+</Regle>
+
+<Encadre type="exemple">
+L = 5 m, F = 10 kN à 2 m de A : $R_B$ = {grandeur(ex0.RB, 0, 'kN')} et $R_A$ = {grandeur(ex0.RA, 0, 'kN')}. L'appui le plus proche de la charge en reprend le plus.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : deux droites qui se coupent">
+
+<Figure alt="Graphique des droites x + y = 10 et x − y = 2 qui se coupent au point (6 ; 4), solution du système" largeur={620} hauteur={250}>
+  <line x1={60} y1={220} x2={330} y2={220} className="t-moyen" />
+  <line x1={60} y1={220} x2={60} y2={10} className="t-moyen" />
+  {[0, 2, 4, 6, 8, 10].map((v) => (
+    <g key={v}>
+      <text x={60 + v * 25} y={236} textAnchor="middle" fontSize={11}>{v}</text>
+      <text x={52} y={224 - v * 20} textAnchor="end" fontSize={11}>{v}</text>
+    </g>
+  ))}
+  <line x1={60} y1={20} x2={310} y2={220} stroke="var(--color-encre)" strokeWidth={2.2} />
+  <line x1={110} y1={220} x2={310} y2={60} stroke="var(--color-brique)" strokeWidth={2.2} />
+  <circle cx={60 + 6 * 25} cy={220 - 4 * 20} r={6} fill="var(--color-validation)" />
+  <text x={60 + 6 * 25 + 10} y={220 - 4 * 20 - 8} fontSize={13} fontWeight={700}>(6 ; 4)</text>
+  <text x={350} y={60} fontSize={12.5} className="encre">— x + y = 10</text>
+  <text x={350} y={82} fontSize={12.5}>— x − y = 2</text>
+  <text x={350} y={120} fontSize={12}>Chaque équation est une droite ;</text>
+  <text x={350} y={138} fontSize={12}>la solution est leur point commun.</text>
+  <text x={350} y={170} fontSize={12}>Droites parallèles : pas de solution.</text>
+  <text x={350} y={188} fontSize={12}>Droites confondues : une infinité.</text>
+</Figure>
+
+<Encadre type="retenir">
+Système 2 × 2 = intersection de deux droites. Déterminant nul = droites parallèles ou confondues.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="reactions">
+
+<Cahier titre="Exemple résolu : les réactions d'une poutre">
+
+**Énoncé.** Une poutre de 5,0 m repose sur deux appuis A et B. Elle porte une charge de 10 kN à 2,0 m de A. Calcule les réactions $R_A$ et $R_B$.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi deux inconnues ? Chaque appui exerce une force verticale inconnue : il faut donc deux équations.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le système">
+
+<Etape n={3} titre="La mise en équations">
+<AN k="systeme" />
+<Note>Pourquoi les moments en A ? Parce que R_A passe par A : elle disparaît de l'équation (2), qui ne contient plus qu'une inconnue. C'est une substitution toute faite.</Note>
+</Etape>
+
+<Etape n={4} titre="La résolution">
+<AN k="RB" />
+<AN k="RA" />
+<AN k="verif" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="RA" libelle="Réaction en A" />
+
+<Note couleur="vert">et R_B = <Val k="RB" />. Bon sens : la charge est plus près de A, donc A reprend plus ✓.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="avoir moins d'équations que d'inconnues.">
+Avec une équation et deux inconnues, il y a une infinité de solutions. Compte toujours les inconnues et les équations **indépendantes**.
+</Piege>
+
+<Piege erreur="oublier de remplacer partout lors d'une substitution.">
+Quand on remplace x par 10 − y, on le fait dans **toute** l'autre équation, avec des parenthèses.
+</Piege>
+
+<Piege erreur="se tromper de signe dans une combinaison.">
+Pour éliminer y entre x + y = 10 et x − y = 2, on additionne. En soustrayant, on élimine x. Écris l'opération choisie avant de la faire.
+</Piege>
+
+<Piege erreur="ne pas vérifier dans les deux équations.">
+Une solution qui vérifie une seule équation est fausse. On remplace dans **chacune**.
+</Piege>
+
+<Piege erreur="trouver une réaction plus grande que la charge.">
+Pour une charge entre les appuis, chaque réaction est comprise entre 0 et F. Si l'on trouve plus, l'équation des moments est mal écrite (bras de levier inversé).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Au bureau d'études**, un logiciel de calcul de structures assemble et résout des systèmes de milliers d'équations. Il le fait par la méthode de Gauss, celle de cette leçon. L'ingénieur, lui, vérifie les résultats sur des cas simples : la somme des réactions doit égaler la somme des charges.
+
+<Encadre type="terrain" titre="Le contrôle des descentes de charges">
+Sur un bâtiment, la somme des charges qui descendent dans toutes les fondations doit égaler le poids total du bâtiment et de ses charges. C'est l'équation « R_A + R_B = F », généralisée. Un écart signale une charge oubliée ou comptée deux fois.
+</Encadre>
+
+**Dans un devis**, des systèmes apparaissent quand on cherche des prix unitaires à partir de factures groupées, ou des proportions de mélange (granulats, bétons) pour atteindre une composition visée.
+
+**En topographie**, on résout des systèmes pour calculer les coordonnées d'un point à partir de plusieurs mesures (L1.8 et L2.9).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : systèmes linéaires">
+
+### Règle de base
+
+Autant d'équations **indépendantes** que d'inconnues.
+
+### 2 × 2
+
+Substitution : isoler, remplacer, revenir · Combinaison : additionner des multiples pour éliminer · Cramer : $x = \frac{ed - bf}{ad - bc}$, $y = \frac{af - ec}{ad - bc}$, si $ad - bc \neq 0$.
+
+### 3 × 3 (Gauss)
+
+Éliminer la même inconnue dans deux paires → système 2 × 2 → remonter.
+
+### Poutre sur deux appuis, charge F à la distance a de A
+
+$R_A + R_B = F$ · $L\,R_B = a\,F$ · donc $R_B = \frac{a F}{L}$, $R_A = F - R_B$ · contrôle : $0 \leq R_A, R_B \leq F$.
+
+### Toujours
+
+Vérifier la solution dans **chaque** équation.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un premier système">
+
+Résous par substitution puis par combinaison : $x + y = 10$ et $x - y = 2$.
+
+<Indice>Par combinaison, additionne les deux équations.</Indice>
+
+<Corrige>
+**x = {nombre(s1.x, 0)}, y = {nombre(s1.y, 0)}** par les deux méthodes. Vérification : 6 + 4 = 10 ✓, 6 − 4 = 2 ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une charge près d'un appui">
+
+Une poutre de {nombre(ex2.L, 0)} m porte {grandeur(ex2.F, 0, 'kN')} à {nombre(ex2.a, 1)} m de A. Écris le système et calcule les réactions.
+
+<Indice>Moments en A : $L\,R_B = a\,F$.</Indice>
+
+<Corrige>
+{nombre(ex2.L, 0)} $R_B$ = {nombre(ex2.a, 1)} × {nombre(ex2.F, 0)} ⇒ **$R_B$ = {grandeur(ex2r.RB, 2, 'kN')}** ; **$R_A$ = {grandeur(ex2r.RA, 2, 'kN')}**. Somme : {grandeur(ex2r.RA + ex2r.RB, 0, 'kN')} ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Retrouver les prix unitaires">
+
+Trois factures d'un quincaillier (unités monétaires) : {cmd.map((l, i) => `${l[0]} sacs, ${l[1]} barres et ${l[2]} blocs pour ${nombre(totaux[i], 0)}`).join(' ; ')}. Trouve le prix d'un sac, d'une barre et d'un bloc.
+
+<Indice>Inconnues : s, b, k. La troisième facture n'a pas de blocs : commence par elle pour exprimer s en fonction de b.</Indice>
+
+<Corrige>
+
+Système : {cmd.map((l, i) => `${l[0]}s + ${l[1]}b + ${l[2]}k = ${nombre(totaux[i], 0)}`).join(' ; ')}.
+
+Solution : **sac {nombre(prix[0], 2)}**, **barre {nombre(prix[1], 2)}**, **bloc {nombre(prix[2], 2)}**. Vérification sur la première facture : {cmd[0][0]} × {nombre(prix[0], 2)} + {cmd[0][1]} × {nombre(prix[1], 2)} + {cmd[0][2]} × {nombre(prix[2], 2)} = {nombre(cmd[0][0] * prix[0] + cmd[0][1] * prix[1] + cmd[0][2] * prix[2], 0)} ✓.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.2.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Pour trouver 3 inconnues, il faut au minimum :" choix={['1 équation', '2 équations', '3 équations indépendantes', '6 équations']} bonne={2} colonnes={2}>
+Autant d'équations indépendantes que d'inconnues.
+</QCM>
+
+<QCM n={2} question="La solution de x + y = 10 ; x − y = 2 est :" choix={['(4 ; 6)', `(${nombre(s1.x, 0)} ; ${nombre(s1.y, 0)})`, '(5 ; 5)', '(12 ; −2)']} bonne={1} colonnes={4}>
+En additionnant : 2x = 12.
+</QCM>
+
+<QCM n={3} question="Si le déterminant ad − bc est nul :" choix={['la solution est (0 ; 0)', 'il n’y a pas de solution unique', 'il y a deux solutions', 'on divise par 1']} bonne={1} colonnes={2}>
+Les deux droites sont parallèles ou confondues.
+</QCM>
+
+<QCM n={4} question="Graphiquement, la solution d'un système 2 × 2 est :" choix={['l’origine', 'le point d’intersection des deux droites', 'la pente', 'l’aire entre les droites']} bonne={1} colonnes={2}>
+Chaque équation est une droite.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Une poutre de 5 m porte 10 kN à 2 m de A. R_B vaut :</>} choix={[grandeur(ex0.RA, 0, 'kN'), grandeur(ex0.RB, 0, 'kN'), '5 kN', '10 kN']} bonne={1} colonnes={4}>
+5 R_B = 2 × 10, donc R_B = {grandeur(ex0.RB, 0, 'kN')}.
+</QCM>
+
+<QCM n={6} question="Pourquoi écrire l'équilibre des moments autour de A ?" choix={['Parce que c’est obligatoire', 'Parce que R_A n’y apparaît pas : une seule inconnue reste', 'Parce que A est à gauche', 'Pour avoir plus d’inconnues']} bonne={1}>
+C'est une substitution toute faite.
+</QCM>
+
+<QCM n={7} question="Pour une charge entre les appuis, chaque réaction est :" choix={['négative', 'comprise entre 0 et F', 'supérieure à F', 'égale à F']} bonne={1} colonnes={2}>
+Sinon l'équation des moments est mal écrite.
+</QCM>
+
+<QCM n={8} question="Les logiciels de calcul de structures résolvent leurs systèmes par :" choix={['tâtonnement', 'élimination de Gauss (ou méthodes dérivées)', 'règle de trois', 'tirage au sort']} bonne={1} colonnes={2}>
+La même méthode qu'à la main, sur des milliers d'inconnues.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

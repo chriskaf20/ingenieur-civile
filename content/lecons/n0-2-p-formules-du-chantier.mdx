@@ -1,0 +1,133 @@
+---
+id: N0.2.P
+titre: "Mini-projet : les formules du chantier"
+objectifs:
+  - Calculer les quantités d'une gâchée à partir d'un dosage
+  - Fixer les cotes d'un caniveau à partir d'une pente imposée
+  - Passer d'une mesure sur plan à une longueur réelle et inversement
+  - Isoler une grandeur dans une formule et vérifier chaque résultat
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { coteAval, denivele, EXEMPLE_SEMELLE, hauteurPourPoids, pente, quantitesBeton, volumePrisme } from '@/lib/calc/algebre'
+import { longueurPapier, longueurReelle } from '@/lib/calc/dessin'
+import { POIDS_VOLUMIQUE_BA } from '@/lib/calc/methode'
+import { arrondiInf, grandeur, nombre } from '@/lib/format'
+
+export const sem = EXEMPLE_SEMELLE
+export const Vsem = volumePrisme(sem.L, sem.B, sem.h)
+export const g = quantitesBeton({ V: Vsem, ciment: 350, sable: 400, gravier: 800, eau: 175, sac: 50 })
+export const can = { L: 32, p: 0.8, zHaut: 100.45 }
+export const dH = denivele(can.p, can.L)
+export const zBas = coteAval(can.zHaut, can.p, can.L)
+export const plan = { E: 50, mesure: 86, mur: 3.6 }
+export const lue = longueurReelle(plan.mesure, plan.E)
+export const dessin = longueurPapier(plan.mur, plan.E)
+export const lin = { P: 6, L: 3, b: 0.2 }
+export const hLin = hauteurPourPoids(lin.P, POIDS_VOLUMIQUE_BA, lin.L, lin.b)
+export const hLinCm = arrondiInf(hLin * 100, 5)
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Tu es stagiaire chez un petit entrepreneur qui construit une maison de plain-pied à Kinshasa. Ce matin, le chef de chantier te confie quatre calculs. Chacun utilise un outil du module.
+
+### Les quatre tâches
+
+1. **Le béton d'une semelle** : la semelle filante mesure {nombre(sem.L, 0)} m × {nombre(sem.B, 2)} m × {nombre(sem.h, 2)} m. Le dosage de l'énoncé est de 350 kg de ciment, 400 L de sable, 800 L de gravier et 175 L d'eau par m³. Quelles quantités, et combien de sacs de 50 kg ? (N0.2.3)
+2. **La pente d'un caniveau** : un caniveau de {nombre(can.L, 0)} m doit avoir une pente de {nombre(can.p, 1)} %. Son fil d'eau amont est à la cote {nombre(can.zHaut, 2)} m. Quelle cote à l'aval ? (N0.2.3, N0.2.5)
+3. **Lire et dessiner à l'échelle** : sur un plan au 1/{plan.E}, tu mesures {plan.mesure} mm. Quelle longueur réelle ? Quelle longueur dessiner pour un mur de {nombre(plan.mur, 2)} m ? (N0.2.3)
+4. **Isoler une grandeur** : un linteau en béton armé de {nombre(lin.L, 0)} m × {nombre(lin.b, 2)} m de section ne doit pas peser plus de {grandeur(lin.P, 0, 'kN')} pour être posé à la main. Quelle hauteur maximale ? (N0.2.5)
+
+### Ce que tu rends
+
+Une **feuille de calcul** propre : pour chaque tâche, données, formule littérale, application numérique avec unités, résultat encadré, phrase-réponse et **vérification**.
+
+<Encadre type="attention">
+Les dosages et la pente sont des **données de l'énoncé**, pas des valeurs normatives. Sur un vrai chantier, ils viennent du CCTP et des plans.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="gacheeSemelle">
+
+<Cahier titre="Tâche 1 : les quantités de la semelle" etape="projet">
+
+Le volume de la semelle vaut {nombre(sem.L, 0)} × {nombre(sem.B, 2)} × {nombre(sem.h, 2)} = {grandeur(Vsem, 2, 'm³')}. Il est déjà saisi ; modifie le dosage ou le volume pour tester d'autres cas.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les quantités">
+<AN k="ciment" />
+<AN k="granulats" />
+<AN k="eau" />
+<Note>Pourquoi arrondir les sacs par excès ? Un sac manquant arrête le coulage ; un sac en trop servira plus tard.</Note>
+</Etape>
+
+<Etape n={3} titre="Le résultat">
+<Resultat k="sacs" libelle="Ciment à prévoir" />
+
+<Note couleur="vert">Sable <Val k="sable" />, gravier <Val k="gravier" />, eau <Val k="eau" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Cahier titre="Tâches 2 à 4 : corrigé" etape="projet">
+
+<Etape n={2} titre="La cote aval du caniveau">
+
+$\Delta H = p \times L$ = {nombre(can.p / 100, 3)} × {grandeur(can.L, 0, 'm')} = **{grandeur(dH, 3, 'm')}** ; cote aval = {nombre(can.zHaut, 2)} − {nombre(dH, 3)} = **{grandeur(zBas, 3, 'm')}**.
+
+<Note>Vérification : ({nombre(can.zHaut, 2)} − {nombre(zBas, 3)}) / {nombre(can.L, 0)} = {nombre(pente(can.zHaut - zBas, can.L).pourcent, 2)} % ✓. Le caniveau descend vers l'aval : la cote diminue.</Note>
+</Etape>
+
+<Etape n={3} titre="Le plan au 1/50">
+
+Lecture : $L = m \times E$ = {plan.mesure} mm × {plan.E} = **{grandeur(lue, 2, 'm')}**. Dessin : $m = L / E$ = {nombre(plan.mur * 1000, 0)} mm / {plan.E} = **{grandeur(dessin, 0, 'mm')}**.
+
+</Etape>
+
+<Etape n={4} titre="La hauteur maximale du linteau">
+
+$P = \gamma L b h \Rightarrow h = \frac{P}{\gamma L b}$ = {nombre(lin.P, 0)} / ({POIDS_VOLUMIQUE_BA} × {nombre(lin.L, 0)} × {nombre(lin.b, 2)}) = {grandeur(hLin, 3, 'm')}.
+
+<Note>Pourquoi arrondir vers le bas ici ? C'est une limite à ne pas dépasser : on retient une hauteur de coffrage au plus égale à {nombre(hLin * 100, 1)} cm, soit **{hLinCm} cm** en arrondissant au multiple de 5 cm inférieur.</Note>
+
+<Note couleur="vert">Unité : kN / (kN/m³ × m × m) = m ✓.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Données | Recopiées sans unités | Toutes avec unités | Converties en SI avant le calcul |
+| Formules | Absentes | Écrites littéralement | Isolées proprement, unité vérifiée |
+| Application numérique | Nombres enchaînés | Une unité à chaque ligne | Arrondi seulement à la fin |
+| Arrondis | Au hasard | Cohérents | Dans le sens qui respecte la contrainte (sacs ↑, hauteur ↓) |
+| Vérifications | Aucune | Une par tâche | Unités, ordre de grandeur et bon sens |
+| Présentation | Brouillon | Résultats encadrés | Phrase-réponse pour le chef de chantier |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Refais la tâche 1 avec un tableur : une colonne par matériau, une ligne par élément (semelle, poteaux, dalle). C'est le début d'un métré (L3.7).
+</Encadre>
+
+<Quiz id="N0.2.P">
+
+<QCM n={1} question="Mes quatre résultats ont-ils chacun une unité, une phrase-réponse et une vérification ?" choix={['Oui, les quatre', 'Seulement certains', 'Aucun']} bonne={0}>
+Si un élément manque, complète ta feuille avant de valider : c'est ce qui rend un calcul utilisable par le chef de chantier.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

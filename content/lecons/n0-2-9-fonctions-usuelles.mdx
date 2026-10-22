@@ -1,0 +1,332 @@
+---
+id: N0.2.9
+titre: "Fonctions usuelles : affines, polynômes, puissances, exp, ln"
+objectifs:
+  - Reconnaître l'allure des fonctions usuelles et leur domaine de définition
+  - Utiliser les règles de calcul de l'exponentielle et du logarithme
+  - Inverser une relation exponentielle à l'aide du logarithme
+  - Calculer la résistance d'un béton jeune avec la formule de l'EC2
+relecture: false
+normes:
+  - "EN 1992-1-1:2004 §3.1.2(6), expression (3.2) : évolution de la résistance en compression avec le temps"
+  - "EN 1992-1-1:2004 tableau 3.1 : fcm = fck + 8 MPa"
+glossaire:
+  - terme: Exponentielle
+    definition: Fonction x ↦ eˣ, toujours positive, qui croît de plus en plus vite.
+  - terme: Logarithme népérien
+    definition: Fonction ln, réciproque de l'exponentielle ; ln(eˣ) = x, définie pour x > 0.
+  - terme: Fonction puissance
+    definition: Fonction x ↦ xⁿ (n réel), par exemple x², x³, √x = x^(1/2).
+  - terme: Résistance moyenne du béton
+    definition: Valeur moyenne fcm de la résistance en compression ; à 28 jours, fcm = fck + 8 MPa (EC2).
+  - terme: Classe de ciment
+    definition: Dans l'EC2, classe R, N ou S selon la rapidité de durcissement du ciment.
+symboles:
+  - { symbole: 't', signification: 'âge du béton', unite: 'jours' }
+  - { symbole: 's', signification: 'coefficient dépendant de la classe de ciment', unite: '—' }
+  - { symbole: 'β_{cc}(t)', signification: 'coefficient de durcissement à l’âge t', unite: '—' }
+  - { symbole: 'f_{ck}', signification: 'résistance caractéristique à 28 jours', unite: 'MPa' }
+  - { symbole: 'f_{cm}(t)', signification: 'résistance moyenne à l’âge t', unite: 'MPa' }
+formules:
+  - { nom: 'Coefficient de durcissement (EC2 3.2)', tex: '\beta_{cc}(t) = \exp\left\{s\left[1 - \left(\frac{28}{t}\right)^{1/2}\right]\right\}', domaine: 'Béton, EC2 §3.1.2(6)' }
+  - { nom: 'Résistance moyenne à t jours (EC2 3.1)', tex: 'f_{cm}(t) = \beta_{cc}(t)\,f_{cm}', domaine: 'Béton, EC2 §3.1.2(6)' }
+  - { nom: 'Logarithme d’un produit', tex: '\ln(ab) = \ln a + \ln b', domaine: 'Fonctions usuelles' }
+---
+
+import { ageResistance, betaCC, fcmT } from '@/lib/calc/algebre'
+import { DELTA_FCM, S_CIMENT } from '@/lib/calc/ba/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+
+export const sN = nombre(S_CIMENT.N, 2)
+export const b7 = betaCC(7, S_CIMENT.N)
+export const f7 = fcmT(7, 25, 'N')
+export const ex1 = [3, 28, 90].map((t) => betaCC(t, S_CIMENT.N))
+export const ex2 = { R: fcmT(3, 30, 'R'), N: fcmT(3, 30, 'N'), S: fcmT(3, 30, 'S') }
+export const ex3 = { R: ageResistance(0.6, 'R'), N: ageResistance(0.6, 'N'), S: ageResistance(0.6, 'S') }
+
+<Page etape="intuition" titre="L'intuition : le béton qui durcit">
+
+Un béton coulé ce matin est encore mou ce soir. Après une semaine, il a gagné une bonne partie de sa résistance. Après un mois, il est presque à sa résistance de calcul. Après un an, il gagne encore un peu, mais de moins en moins. Le durcissement est **rapide au début, puis de plus en plus lent**.
+
+Une droite ne peut pas décrire ce comportement : il faut d'autres fonctions. Les **puissances**, l'**exponentielle** et le **logarithme** sont les outils qui décrivent ces croissances qui s'emballent ou qui ralentissent. L'Eurocode 2 utilise justement une exponentielle pour la résistance du béton jeune.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelles sont les fonctions usuelles, à quoi ressemblent-elles, et comment s'en servir dans une formule réelle ?
+</Encadre>
+
+<Encadre type="attention">
+Le logarithme n'existe que pour des nombres **strictement positifs**. ln(0) et ln(−2) n'ont pas de sens : la calculatrice affiche une erreur.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : puissances et polynômes">
+
+### Les fonctions affines et polynômes
+
+- **Affine** : $f(x) = ax + b$, une droite (N0.2.8).
+- **Second degré** : $f(x) = ax^2 + bx + c$, une parabole (N0.2.7).
+- **Polynôme** de degré $n$ : somme de termes $a_k x^k$. Plus le degré est grand, plus la courbe peut onduler.
+
+### Les fonctions puissances
+
+$f(x) = x^n$ :
+
+| Fonction | Domaine | Allure | Exemple en génie civil |
+|---|---|---|---|
+| $x^2$ | tous les réels | parabole | moment d'une poutre : $q L^2 / 8$ |
+| $x^3$ | tous les réels | croît très vite | inertie : $b h^3 / 12$ |
+| $\sqrt{x} = x^{1/2}$ | $x \geq 0$ | croît de plus en plus lentement | rayon de giration $\sqrt{I/A}$ |
+| $\frac{1}{x} = x^{-1}$ | $x \neq 0$ | hyperbole | contrainte $F/A$ quand $A$ varie |
+
+Règles : $x^{a} x^{b} = x^{a+b}$, $(x^a)^b = x^{ab}$, $x^{1/2} = \sqrt{x}$ (N0.2.1).
+
+<Encadre type="retenir">
+Un exposant entier ou fractionnaire se manipule avec les mêmes règles. $(28/t)^{1/2}$ est simplement $\sqrt{28/t}$.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : exponentielle et logarithme">
+
+### L'exponentielle
+
+$\exp(x) = e^x$, avec $e \approx 2{,}718$. Elle est toujours **positive**, vaut 1 en 0, et :
+
+$$e^{a+b} = e^a e^b \qquad e^{-a} = \frac{1}{e^a} \qquad (e^a)^b = e^{ab}$$
+
+### Le logarithme népérien
+
+$\ln$ est la **réciproque** de l'exponentielle : $\ln(e^x) = x$ et $e^{\ln y} = y$ pour $y > 0$. Il vaut 0 en 1 et est négatif entre 0 et 1.
+
+$$\ln(ab) = \ln a + \ln b \qquad \ln\frac{a}{b} = \ln a - \ln b \qquad \ln(a^n) = n \ln a$$
+
+On s'en sert pour **inverser** une exponentielle : $e^x = y \Leftrightarrow x = \ln y$.
+
+### La résistance du béton jeune (EC2)
+
+<Regle type="norme" source="EN 1992-1-1 §3.1.2(6), expressions (3.1) et (3.2)">
+Pour un béton conservé à 20 °C : $f_{cm}(t) = \beta_{cc}(t)\,f_{cm}$ avec $\beta_{cc}(t) = \exp\{s[1 - (28/t)^{1/2}]\}$, $t$ en jours. Le coefficient $s$ vaut {nombre(S_CIMENT.R, 2)} (ciment classe R), {sN} (classe N) ou {nombre(S_CIMENT.S, 2)} (classe S). Et $f_{cm} = f_{ck} + {DELTA_FCM}$ MPa (tableau 3.1).
+</Regle>
+
+- À 28 jours, $(28/28)^{1/2} = 1$ : $\beta_{cc} = e^0 = 1$, on retrouve $f_{cm}$.
+- Avant 28 jours, l'exposant est négatif : $\beta_{cc} < 1$.
+
+<Regle type="simplification">
+Cette formule donne une résistance **moyenne** estimée. Pour décider d'un décoffrage ou d'une mise en charge, on s'appuie sur des **essais** d'éprouvettes, pas seulement sur la formule.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : les allures des fonctions usuelles">
+
+<Figure alt="Allures comparées de x², racine de x, exponentielle et logarithme sur un même repère" largeur={620} hauteur={240}>
+  <line x1={40} y1={200} x2={600} y2={200} className="t-moyen" />
+  <line x1={140} y1={230} x2={140} y2={10} className="t-moyen" />
+  <text x={600} y={216} textAnchor="end" fontSize={11}>x</text>
+  <polyline fill="none" stroke="var(--color-encre)" strokeWidth={2.2} points={Array.from({ length: 41 }, (_, i) => { const x = i * 0.1; return `${140 + x * 100},${200 - x * x * 40}`; }).filter((p) => Number(p.split(',')[1]) > 10).join(' ')} />
+  <polyline fill="none" stroke="var(--color-validation)" strokeWidth={2.2} points={Array.from({ length: 41 }, (_, i) => { const x = i * 0.1; return `${140 + x * 100},${200 - Math.sqrt(x) * 40}`; }).join(' ')} />
+  <polyline fill="none" stroke="var(--color-brique)" strokeWidth={2.2} points={Array.from({ length: 60 }, (_, i) => { const x = -1 + i * 0.05; return `${140 + x * 100},${200 - Math.exp(x) * 40}`; }).filter((p) => Number(p.split(',')[1]) > 10).join(' ')} />
+  <polyline fill="none" stroke="var(--color-acier)" strokeWidth={2.2} strokeDasharray="6 3" points={Array.from({ length: 80 }, (_, i) => { const x = 0.06 + i * 0.05; return `${140 + x * 100},${200 - Math.log(x) * 40}`; }).filter((p) => Number(p.split(',')[1]) < 235).join(' ')} />
+  <text x={490} y={34} fontSize={14} fontWeight={700} fill="var(--color-encre)">x²</text>
+  <text x={398} y={34} fontSize={14} fontWeight={700} fill="var(--color-brique)">eˣ</text>
+  <text x={578} y={112} fontSize={14} fontWeight={700} fill="var(--color-validation)">√x</text>
+  <text x={578} y={142} fontSize={14} fontWeight={700} fill="var(--color-acier)">ln x</text>
+  <text x={140} y={216} textAnchor="middle" fontSize={11}>0</text>
+  <text x={240} y={216} textAnchor="middle" fontSize={11}>1</text>
+</Figure>
+
+- $x^2$ et $e^x$ croissent **de plus en plus vite** ; l'exponentielle finit toujours par dépasser n'importe quelle puissance.
+- $\sqrt{x}$ et $\ln x$ croissent **de plus en plus lentement** ; $\ln x$ est négatif entre 0 et 1 et n'existe pas pour $x \leq 0$.
+- Le durcissement du béton ressemble à la deuxième famille : rapide, puis lent.
+
+<Encadre type="retenir">
+$e^x$ et $\ln x$ sont symétriques par rapport à la droite $y = x$ : chacune « défait » l'autre.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="durcissement">
+
+<Cahier titre="Exemple résolu : la résistance d'un béton à 7 jours">
+
+**Énoncé.** Un béton C25/30 est fabriqué avec un ciment de classe N (CEM 42,5 N). Quelle est sa résistance moyenne estimée à 7 jours selon l'EC2 ? À quel âge atteint-il 70 % de sa résistance moyenne à 28 jours ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi la classe de ciment ? Un ciment rapide (R) durcit plus vite qu'un ciment lent (S) : le coefficient s change tout le début de la courbe.</Note>
+</Etape>
+
+<Etape n={2} titre="Le graphique">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : exponentielle puis logarithme">
+
+<Etape n={3} titre="Le coefficient de durcissement">
+<AN k="racine" />
+<AN k="beta" />
+<Note>Pourquoi l'exposant est-il négatif ? Avant 28 jours, 28/t &gt; 1, donc 1 − √(28/t) &lt; 0 et βcc &lt; 1 : le béton n'a pas encore toute sa résistance.</Note>
+</Etape>
+
+<Etape n={4} titre="La résistance et l'âge cherché">
+<AN k="fcm" />
+<AN k="ln" />
+<Note>Pourquoi le logarithme ? Pour « défaire » l'exponentielle : βcc = 0,70 ⇔ s[1 − √(28/t)] = ln 0,70, puis on isole t (N0.2.5).</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="fcmt" libelle="Résistance moyenne estimée" />
+
+<Note couleur="vert">Soit <Val k="pourcent" /> de fcm. 70 % sont atteints vers <Val k="t70" /> (valeur estimée, à confirmer par essais).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer le logarithme d'un nombre négatif ou nul.">
+ln n'est défini que pour x &gt; 0. Si un calcul demande ln(−0,3), la mise en équation est fausse.
+</Piege>
+
+<Piege erreur="écrire ln(a + b) = ln a + ln b.">
+C'est le logarithme d'un **produit** qui se décompose : ln(ab) = ln a + ln b. Pour une somme, aucune règle simple.
+</Piege>
+
+<Piege erreur="confondre e^(−0,25) et −e^(0,25).">
+e^(−0,25) ≈ {nombre(Math.exp(-0.25), 3)} est positif. −e^(0,25) ≈ {nombre(-Math.exp(0.25), 3)} est négatif. Sur calculatrice, l'exposant se tape entre parenthèses.
+</Piege>
+
+<Piege erreur="confondre log (base 10) et ln (base e).">
+Sur la plupart des calculatrices, « log » est le logarithme décimal et « ln » le népérien. La formule de l'EC2 utilise exp, donc ln pour l'inverser.
+</Piege>
+
+<Piege erreur="utiliser fck au lieu de fcm dans la formule de durcissement.">
+L'EC2 applique βcc à la résistance **moyenne** fcm = fck + {DELTA_FCM} MPa. Le résultat est lui aussi une résistance moyenne.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le décoffrage** se décide en partie avec ce type de calcul : on vérifie que le béton a atteint une résistance suffisante pour porter son poids propre et les charges de chantier. Le CCTP ou le bureau d'études fixe la résistance exigée ; la formule de l'EC2 donne une estimation, les **essais** sur éprouvettes la confirment.
+
+<Encadre type="terrain" titre="Climat tropical">
+La formule de l'EC2 citée ici vaut pour une conservation à 20 °C. En climat chaud, le béton durcit plus vite au début, mais il sèche aussi plus vite : sans cure (arrosage, bâche), il peut perdre de la résistance finale et fissurer. L'EC2 prévoit une correction de température (annexe B), étudiée plus tard. Retiens dès maintenant : chaleur ne veut pas dire meilleur béton.
+</Encadre>
+
+**Les fonctions exponentielles et logarithmiques** reviennent ailleurs : tassement des sols argileux au cours du temps (L3.4), décroissance de la pression interstitielle, échelle logarithmique des courbes granulométriques (L2.6). Une courbe granulométrique se lit sur un axe en **log** : chaque graduation multiplie le diamètre par 10.
+
+**Les puissances** sont partout : $L^2$ dans les moments, $h^3$ dans les inerties, $L^4$ dans les flèches. Une erreur d'exposant se paie très cher.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : fonctions usuelles">
+
+### Puissances
+
+$x^a x^b = x^{a+b}$ · $(x^a)^b = x^{ab}$ · $x^{1/2} = \sqrt{x}$ · $x^{-1} = 1/x$
+
+### Exponentielle et logarithme
+
+$e^{a+b} = e^a e^b$ · $e^{-a} = 1/e^a$ · $\ln(ab) = \ln a + \ln b$ · $\ln(a/b) = \ln a - \ln b$ · $\ln(a^n) = n \ln a$ · $e^x = y \Leftrightarrow x = \ln y$ ($y > 0$) · $\ln 1 = 0$, $e^0 = 1$
+
+### Allures
+
+$x^2$, $e^x$ : de plus en plus vite · $\sqrt{x}$, $\ln x$ : de plus en plus lentement · $\ln$ : $x > 0$ seulement
+
+### Béton jeune (EC2 §3.1.2(6))
+
+$\beta_{cc}(t) = \exp\{s[1 - (28/t)^{1/2}]\}$ · $f_{cm}(t) = \beta_{cc}(t)(f_{ck} + {DELTA_FCM})$ · s = {nombre(S_CIMENT.R, 2)} (R), {sN} (N), {nombre(S_CIMENT.S, 2)} (S) · âge pour un β visé : $t = 28 / (1 - \ln\beta / s)^2$
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trois âges">
+
+Calcule $\beta_{cc}$ à 3, 28 et 90 jours pour un ciment de classe N (s = {sN}). Interprète la valeur à 90 jours.
+
+<Indice>Calcule d'abord $\sqrt{28/t}$ pour chaque âge.</Indice>
+
+<Corrige>
+β(3) = **{nombre(ex1[0], 3)}** ; β(28) = **{nombre(ex1[1], 3)}** ; β(90) = **{nombre(ex1[2], 3)}**. À 90 jours, β dépasse 1 : le béton continue de gagner un peu de résistance après 28 jours.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="L'effet du ciment">
+
+Un C30/37 est fabriqué successivement avec un ciment R, N puis S. Calcule sa résistance moyenne estimée à 3 jours dans chaque cas.
+
+<Indice>fcm = 30 + {DELTA_FCM} MPa, puis βcc(3) pour chaque valeur de s.</Indice>
+
+<Corrige>
+R : **{grandeur(ex2.R, 1, 'MPa')}** ; N : **{grandeur(ex2.N, 1, 'MPa')}** ; S : **{grandeur(ex2.S, 1, 'MPa')}**. Le ciment rapide donne une résistance jeune nettement plus élevée : utile pour décoffrer tôt.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Inverser la formule">
+
+Démontre que l'âge auquel $\beta_{cc}$ atteint une valeur $\beta$ vaut $t = \frac{28}{(1 - \ln\beta / s)^2}$. Calcule-le pour β = 0,60 avec les trois classes de ciment.
+
+<Indice>Prends le logarithme des deux membres, isole $\sqrt{28/t}$, puis élève au carré.</Indice>
+
+<Corrige>
+
+- $\ln\beta = s[1 - \sqrt{28/t}] \Rightarrow \sqrt{28/t} = 1 - \frac{\ln\beta}{s} \Rightarrow \frac{28}{t} = (1 - \frac{\ln\beta}{s})^2 \Rightarrow t = \frac{28}{(1 - \ln\beta/s)^2}$.
+- β = 0,60 : R **{grandeur(ex3.R, 1, 'j')}** ; N **{grandeur(ex3.N, 1, 'j')}** ; S **{grandeur(ex3.S, 1, 'j')}**.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.2.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="ln(e³) vaut :" choix={['e³', '3', '1', '0']} bonne={1} colonnes={4}>
+ln est la réciproque de exp.
+</QCM>
+
+<QCM n={2} question="ln(ab) est égal à :" choix={['ln a × ln b', 'ln a + ln b', 'ln(a + b)', 'a ln b']} bonne={1} colonnes={2}>
+Le logarithme transforme un produit en somme.
+</QCM>
+
+<QCM n={3} question="ln(−2) :" choix={['vaut −ln 2', 'n’existe pas', 'vaut 0', 'vaut e⁻²']} bonne={1} colonnes={2}>
+ln n'est défini que pour x &gt; 0.
+</QCM>
+
+<QCM n={4} question="(28/t)^(1/2) est égal à :" choix={['28/(2t)', '√(28/t)', '(28/t)²', '14/t']} bonne={1} colonnes={2}>
+Un exposant 1/2 est une racine carrée.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Selon l'EC2, βcc(28) vaut :" choix={['0', '1', 'e', 's']} bonne={1} colonnes={4}>
+√(28/28) = 1, donc l'exposant est nul et e⁰ = 1.
+</QCM>
+
+<QCM n={6} question={<>Un C25/30 au ciment N a, à 7 jours, une résistance moyenne estimée de :</>} choix={[grandeur(25 * b7, 1, 'MPa'), grandeur(f7, 1, 'MPa'), grandeur(25 + DELTA_FCM, 1, 'MPa'), grandeur(25, 1, 'MPa')]} bonne={1} colonnes={2}>
+βcc(7) = e^(−{sN}) = {nombre(b7, 3)} ; × ({25} + {DELTA_FCM}) = {grandeur(f7, 1, 'MPa')}.
+</QCM>
+
+<QCM n={7} question="Un ciment de classe R, par rapport à un ciment de classe S :" choix={['durcit plus lentement', 'durcit plus vite au jeune âge', 'donne toujours la même courbe', 'n’existe pas dans l’EC2']} bonne={1} colonnes={2}>
+s plus petit : βcc plus proche de 1 dès les premiers jours.
+</QCM>
+
+<QCM n={8} question="Pour décider d'un décoffrage, la formule de l'EC2 :" choix={['suffit toujours', 'donne une estimation, à confirmer par des essais', 'est interdite', 'remplace le CCTP']} bonne={1}>
+Les essais d'éprouvettes font foi.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

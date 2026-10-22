@@ -1,0 +1,336 @@
+---
+id: N0.2.1
+titre: Fractions, puissances et racines
+objectifs:
+  - Simplifier, additionner et multiplier des fractions
+  - Appliquer les règles de calcul sur les puissances, y compris les puissances de 10
+  - Calculer une racine carrée et vérifier le résultat
+  - Calculer l'inertie d'une section rectangulaire b·h³/12
+relecture: false
+normes: []
+glossaire:
+  - terme: Fraction irréductible
+    definition: Fraction dont le numérateur et le dénominateur n'ont plus de diviseur commun autre que 1.
+  - terme: Puissance
+    definition: Produit d'un nombre par lui-même plusieurs fois ; a³ = a × a × a.
+  - terme: Racine carrée
+    definition: Nombre positif dont le carré vaut le nombre de départ ; √9 = 3.
+  - terme: Moment d'inertie
+    definition: Grandeur géométrique d'une section qui mesure sa raideur en flexion, en cm⁴ ou m⁴.
+  - terme: Rayon de giration
+    definition: Longueur i = √(I/A) qui caractérise la répartition de la matière d'une section.
+symboles:
+  - { symbole: 'b', signification: 'largeur de la section', unite: 'cm' }
+  - { symbole: 'h', signification: 'hauteur de la section', unite: 'cm' }
+  - { symbole: 'I', signification: "moment d'inertie", unite: 'cm⁴' }
+  - { symbole: 'A', signification: 'aire de la section', unite: 'cm²' }
+  - { symbole: 'i', signification: 'rayon de giration', unite: 'cm' }
+formules:
+  - { nom: "Inertie d'un rectangle", tex: 'I = \frac{b\,h^3}{12}', domaine: 'Géométrie des sections' }
+  - { nom: 'Rayon de giration', tex: 'i = \sqrt{I / A}', domaine: 'Géométrie des sections' }
+  - { nom: 'Produit de puissances', tex: 'a^m \times a^n = a^{m+n}', domaine: 'Algèbre' }
+---
+
+import { additionner, inertieRectangle, multiplier, simplifier } from '@/lib/calc/algebre'
+import { grandeur, nombre, scientifique } from '@/lib/format'
+
+export const f = (x) => `${x[0]}/${x[1]}`
+export const s1 = simplifier([12, 18])
+export const a1 = additionner([1, 4], [1, 6])
+export const m1 = multiplier([2, 3], [9, 4])
+export const s2040 = inertieRectangle(20, 40)
+export const s4020 = inertieRectangle(40, 20)
+export const ex2a = inertieRectangle(25, 50)
+export const ex2b = inertieRectangle(50, 25)
+export const ex3 = inertieRectangle(30, 30)
+export const mortier = additionner([1, 1], [3, 1])
+
+<Page etape="intuition" titre="L'intuition : pourquoi une règle posée à plat plie">
+
+Prends une règle plate de 30 cm. Pose-la à plat entre deux livres et appuie au milieu : elle plie facilement. Tourne-la sur la tranche et recommence : elle ne bouge presque plus. **C'est la même règle**, la même matière, la même section. Seule son orientation a changé.
+
+L'explication tient dans une puissance : la raideur d'une poutre rectangulaire varie comme **la hauteur au cube**. Doubler la hauteur rend la poutre $2^3 = 8$ fois plus raide. C'est pour cela que les poutres sont hautes et étroites, et jamais l'inverse.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer sans erreur avec des fractions, des puissances et des racines, ces outils qu'on retrouve dans toutes les formules de l'ingénieur ?
+</Encadre>
+
+<Encadre type="attention">
+En génie civil, une erreur de puissance ne fait pas une petite erreur : elle multiplie ou divise le résultat par 10, 100 ou 10⁸. Un cm⁴ n'est pas un m⁴.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : fractions">
+
+### Simplifier
+
+On divise le numérateur et le dénominateur par leur plus grand diviseur commun : $\frac{12}{18} = \frac{6 \times 2}{6 \times 3} = \frac{2}{3}$. Le programme le confirme : {f(s1)}.
+
+### Additionner
+
+On met les fractions **au même dénominateur**, puis on additionne les numérateurs :
+
+$$\frac{1}{4} + \frac{1}{6} = \frac{3}{12} + \frac{2}{12} = \frac{5}{12}$$
+
+Résultat du calcul : {f(a1)}.
+
+### Multiplier et diviser
+
+- Multiplier : numérateur × numérateur, dénominateur × dénominateur. $\frac{2}{3} \times \frac{9}{4}$ = {f(m1)}.
+- Diviser par une fraction, c'est **multiplier par son inverse** : $\frac{a}{b} \div \frac{c}{d} = \frac{a}{b} \times \frac{d}{c}$.
+
+<Encadre type="exemple" titre="Sur le chantier">
+Un mortier « 1 pour 3 » contient 1 volume de ciment pour 3 volumes de sable, soit {mortier[0]} volumes en tout. La part de ciment est donc $\frac{1}{4}$, et non $\frac{1}{3}$.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : puissances et racines">
+
+### Les règles des puissances
+
+Pour $a$ non nul et $m$, $n$ entiers :
+
+| Règle | Exemple |
+|---|---|
+| $a^m \times a^n = a^{m+n}$ | $10^3 \times 10^2 = 10^5$ |
+| $\frac{a^m}{a^n} = a^{m-n}$ | $\frac{10^2}{10^5} = 10^{-3}$ |
+| $(a^m)^n = a^{m \times n}$ | $(10^{-2})^4 = 10^{-8}$ |
+| $(a\,b)^n = a^n\,b^n$ | $(2h)^3 = 8\,h^3$ |
+| $a^0 = 1$, $a^{-n} = \frac{1}{a^n}$ | $10^{-2} = 0{,}01$ |
+
+### Les puissances de 10 et les unités
+
+1 cm = $10^{-2}$ m, donc 1 cm² = $10^{-4}$ m², 1 cm³ = $10^{-6}$ m³ et 1 cm⁴ = $10^{-8}$ m⁴. **La puissance de l'unité suit la puissance de la longueur.**
+
+### Les racines carrées
+
+$\sqrt{a}$ est le nombre positif dont le carré vaut $a$. Règles utiles : $\sqrt{a\,b} = \sqrt{a}\,\sqrt{b}$ et $\sqrt{a^2} = a$ (pour $a \geq 0$). Une racine se **vérifie** toujours en élevant le résultat au carré.
+
+### L'inertie d'un rectangle
+
+Pour une section $b \times h$ qui fléchit autour de son axe horizontal : $I = \frac{b\,h^3}{12}$ ($I$ en cm⁴, $b$ et $h$ en cm). Tu l'utiliseras en RDM (L2.4).
+
+<Regle type="simplification">
+Ici, $I$ n'est qu'un exercice de puissances. Son sens mécanique (raideur, contraintes) sera vu en résistance des matériaux.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Les schémas : même section, deux orientations">
+
+<div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+<Figure alt={`Section 20 × 40 cm posée sur la tranche : I = ${nombre(s2040.I, 0)} cm⁴`} largeur={260} hauteur={230} largeurMin={220}>
+  <rect x={95} y={20} width={70} height={140} fill="var(--fond-ba)" className="t-fort" />
+  <line x1={70} y1={90} x2={190} y2={90} className="t-axe" />
+  <text x={130} y={190} textAnchor="middle" fontSize={13} fontWeight={700}>20 × 40 cm</text>
+  <text x={130} y={210} textAnchor="middle" fontSize={12.5} className="encre">I = {nombre(s2040.I, 0)} cm⁴</text>
+</Figure>
+<Figure alt={`Section 40 × 20 cm posée à plat : I = ${nombre(s4020.I, 0)} cm⁴`} largeur={260} hauteur={230} largeurMin={220}>
+  <rect x={60} y={55} width={140} height={70} fill="var(--fond-ba)" className="t-fort" />
+  <line x1={35} y1={90} x2={225} y2={90} className="t-axe" />
+  <text x={130} y={190} textAnchor="middle" fontSize={13} fontWeight={700}>40 × 20 cm</text>
+  <text x={130} y={210} textAnchor="middle" fontSize={12.5} className="encre">I = {nombre(s4020.I, 0)} cm⁴</text>
+</Figure>
+</div>
+
+Même aire ({grandeur(s2040.A, 0, 'cm²')}), même béton. Mais la section debout a une inertie **{nombre(s2040.I / s4020.I, 0)} fois** plus grande : le rapport des hauteurs est 2, et $2^2 = 4$ car $\frac{20 \times 40^3}{40 \times 20^3} = \frac{40^2}{20^2}$.
+
+<Encadre type="retenir">
+La hauteur compte au cube, la largeur seulement à la puissance 1. Pour rendre une poutre plus raide, on augmente sa **hauteur**.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="inertie">
+
+<Cahier titre="Exemple résolu : l'inertie d'une poutre 20 × 40">
+
+**Énoncé.** Une poutre a une section de 20 cm de large et 40 cm de haut. Calcule son inertie $I$ en cm⁴ puis en m⁴, et son rayon de giration $i$.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi rester en cm ? Les sections se donnent en cm : on calcule en cm⁴, puis on convertit une seule fois, avec les puissances de 10.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le calcul">
+
+<Etape n={3} titre="Les formules">
+
+$I = \frac{b\,h^3}{12}$ ; 1 cm⁴ = $10^{-8}$ m⁴ ; $i = \sqrt{I/A}$ avec $A = b\,h$.
+
+</Etape>
+
+<Etape n={4} titre="Le calcul">
+<AN k="puissance" />
+<AN k="I" />
+<AN k="m4" />
+<AN k="racine" />
+<Note>Pourquoi calculer h³ à part ? Pour éviter l'erreur classique b × h × 3 au lieu de b × h³.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat et la vérification">
+<Resultat k="I" libelle="Inertie" />
+
+<Note couleur="vert">En m⁴ : <Val k="Im4" />. Rayon de giration : <Val k="i" />. Contrôle de la racine : i² × A doit redonner I.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="additionner les dénominateurs : 1/4 + 1/6 = 2/10.">
+On met au même dénominateur : 1/4 + 1/6 = 3/12 + 2/12 = {f(a1)}. Vérifie avec des nombres décimaux : {nombre(1 / 4, 2)} + {nombre(1 / 6, 3)} ≈ {nombre(1 / 4 + 1 / 6, 3)}, et {f(a1)} ≈ {nombre(a1[0] / a1[1], 3)}.
+</Piege>
+
+<Piege erreur="écrire h³ = 3h.">
+$h^3 = h \times h \times h$. Pour h = 40 cm : {nombre(40 ** 3, 0)} cm³, pas {3 * 40} cm.
+</Piege>
+
+<Piege erreur="convertir des cm⁴ en m⁴ en divisant par 100.">
+1 cm = $10^{-2}$ m, donc 1 cm⁴ = $(10^{-2})^4$ = $10^{-8}$ m⁴. La puissance de 10 suit la puissance de l'unité.
+</Piege>
+
+<Piege erreur="écrire √(a + b) = √a + √b.">
+Faux : √(9 + 16) = √25 = 5, alors que √9 + √16 = 7. La racine se distribue sur un produit, pas sur une somme.
+</Piege>
+
+<Piege erreur="confondre (−3)² et −3².">
+(−3)² = 9 : le carré porte sur −3. −3² = −9 : le carré porte seulement sur 3. Sur calculatrice, mets les parenthèses.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Au bureau d'études**, les inerties des sections courantes sont dans des tableaux ou calculées par le logiciel. L'ingénieur doit pourtant savoir refaire $b\,h^3/12$ de tête pour **contrôler** un résultat : une erreur d'unité dans un logiciel donne des flèches mille fois trop grandes ou trop petites.
+
+<Encadre type="terrain" titre="La poutre posée à plat">
+Sur des petits chantiers, on voit parfois des linteaux ou des poutres coulés « à plat » parce que le coffrage est plus simple. Avec la même quantité de béton, la poutre est bien moins raide : flèches, fissures dans la maçonnerie au-dessus. Le calcul de cette leçon montre pourquoi.
+</Encadre>
+
+**Avec les fractions**, le chantier parle souvent en proportions : mortier 1:3, béton 1:2:4, pente 1/100. Savoir passer d'une proportion à une fraction de l'ensemble évite des erreurs de dosage.
+
+**Avec les racines**, tu calculeras des diagonales (Pythagore, N0.5), des diamètres à partir de sections, des longueurs de flambement. La vérification « au carré » est un réflexe à garder.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : fractions, puissances, racines">
+
+### Fractions
+
+$\frac{a}{b} + \frac{c}{d} = \frac{ad + bc}{bd}$ · $\frac{a}{b} \times \frac{c}{d} = \frac{ac}{bd}$ · $\frac{a}{b} \div \frac{c}{d} = \frac{a}{b} \times \frac{d}{c}$ · toujours simplifier.
+
+### Puissances
+
+$a^m a^n = a^{m+n}$ · $\frac{a^m}{a^n} = a^{m-n}$ · $(a^m)^n = a^{mn}$ · $(ab)^n = a^n b^n$ · $a^{-n} = \frac{1}{a^n}$
+
+### Unités et puissances de 10
+
+1 cm = $10^{-2}$ m → 1 cm² = $10^{-4}$ m² → 1 cm³ = $10^{-6}$ m³ → 1 cm⁴ = $10^{-8}$ m⁴
+
+### Racines
+
+$\sqrt{ab} = \sqrt{a}\sqrt{b}$ · $\sqrt{a+b} \neq \sqrt{a} + \sqrt{b}$ · vérifier en élevant au carré.
+
+### Section rectangulaire
+
+$I = \frac{b\,h^3}{12}$ (cm⁴) · $A = b\,h$ (cm²) · $i = \sqrt{I/A}$ (cm)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Fractions">
+
+Simplifie 12/18, puis calcule 1/4 + 1/6 et 2/3 × 9/4.
+
+<Indice>Cherche le plus grand diviseur commun ; pour l'addition, le dénominateur commun 12 suffit.</Indice>
+
+<Corrige>
+12/18 = **{f(s1)}** ; 1/4 + 1/6 = 3/12 + 2/12 = **{f(a1)}** ; 2/3 × 9/4 = 18/12 = **{f(m1)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Debout ou à plat ?">
+
+Calcule l'inertie d'une section 25 × 50 cm, posée debout (h = 50 cm) puis à plat (h = 25 cm). Quel est le rapport entre les deux ?
+
+<Indice>$I = b h^3 / 12$ ; échange b et h pour la position à plat.</Indice>
+
+<Corrige>
+Debout : I = 25 × 50³ / 12 = **{grandeur(ex2a.I, 0, 'cm⁴')}**. À plat : I = 50 × 25³ / 12 = **{grandeur(ex2b.I, 0, 'cm⁴')}**. Rapport : {nombre(ex2a.I / ex2b.I, 0)}, soit $(50/25)^2 = 2^2$.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un poteau carré">
+
+Un poteau carré mesure 30 × 30 cm. Calcule I en cm⁴ et en m⁴, puis son rayon de giration. Montre que pour un carré de côté a, $i = a / \sqrt{12}$.
+
+<Indice>Remplace b et h par a dans $I = b h^3/12$ et $A = b h$, puis simplifie $\sqrt{I/A}$.</Indice>
+
+<Corrige>
+
+- I = 30 × 30³ / 12 = **{grandeur(ex3.I, 0, 'cm⁴')}** = **{scientifique(ex3.Im4, 3)} m⁴**.
+- i = √(I/A) = **{grandeur(ex3.i, 2, 'cm')}**.
+- Démonstration : $I/A = \frac{a \cdot a^3 / 12}{a^2} = \frac{a^2}{12}$, donc $i = \frac{a}{\sqrt{12}}$ ; pour a = 30 cm, on retrouve {nombre(ex3.i, 2)} cm ✓.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.2.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="1/4 + 1/6 vaut :" choix={['2/10', f(a1), '1/10', '2/24']} bonne={1} colonnes={4}>
+Au même dénominateur : 3/12 + 2/12 = 5/12.
+</QCM>
+
+<QCM n={2} question="Un mortier « 1 pour 3 » (ciment : sable). La part de ciment dans le mélange est :" choix={['1/3', '1/4', '3/4', '1/2']} bonne={1} colonnes={4}>
+1 volume sur 1 + 3 = 4 volumes.
+</QCM>
+
+<QCM n={3} question="10³ × 10⁻⁵ vaut :" choix={['10⁻¹⁵', '10⁻²', '10⁸', '10⁻⁸']} bonne={1} colonnes={4}>
+On additionne les exposants : 3 + (−5) = −2.
+</QCM>
+
+<QCM n={4} question="1 cm⁴ vaut :" choix={['10⁻² m⁴', '10⁻⁴ m⁴', '10⁻⁸ m⁴', '10⁻⁶ m⁴']} bonne={2} colonnes={4}>
+$(10^{-2})^4 = 10^{-8}$.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Si on double la hauteur h d'une section rectangulaire, son inertie est multipliée par :" choix={['2', '4', '8', '12']} bonne={2} colonnes={4}>
+$I$ est proportionnelle à $h^3$, et $2^3 = 8$.
+</QCM>
+
+<QCM n={6} question={<>L'inertie d'une section 20 × 40 cm (h = 40 cm) vaut :</>} choix={[grandeur(s4020.I, 0, 'cm⁴'), grandeur(s2040.I, 0, 'cm⁴'), grandeur(s2040.A, 0, 'cm⁴'), grandeur(s2040.I * 12, 0, 'cm⁴')]} bonne={1} colonnes={2}>
+20 × 40³ / 12 = {grandeur(s2040.I, 0, 'cm⁴')}.
+</QCM>
+
+<QCM n={7} question="√(9 + 16) vaut :" choix={['7', '5', '25', '12']} bonne={1} colonnes={4}>
+√25 = 5. La racine ne se distribue pas sur une somme.
+</QCM>
+
+<QCM n={8} question="Diviser par 2/3 revient à :" choix={['multiplier par 2/3', 'multiplier par 3/2', 'diviser par 6', 'soustraire 2/3']} bonne={1} colonnes={2}>
+Diviser par une fraction, c'est multiplier par son inverse.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

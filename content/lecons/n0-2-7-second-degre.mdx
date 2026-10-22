@@ -1,0 +1,298 @@
+---
+id: N0.2.7
+titre: Équation du second degré
+objectifs:
+  - Reconnaître une équation du second degré et la mettre sous la forme ax² + bx + c = 0
+  - Calculer le discriminant et en déduire le nombre de solutions
+  - Calculer les racines d'un trinôme
+  - Interpréter les racines et rejeter celles qui n'ont pas de sens physique
+relecture: false
+normes: []
+glossaire:
+  - terme: Trinôme
+    definition: Expression ax² + bx + c, avec a non nul.
+  - terme: Discriminant
+    definition: Nombre Δ = b² − 4ac qui indique combien de racines réelles a un trinôme.
+  - terme: Racine
+    definition: Valeur de x qui annule le trinôme.
+  - terme: Sens physique
+    definition: Une solution mathématique n'est retenue que si elle correspond à une situation réelle (longueur positive, durée positive…).
+symboles:
+  - { symbole: 'a, b, c', signification: 'coefficients du trinôme', unite: '—' }
+  - { symbole: 'Δ', signification: 'discriminant', unite: '—' }
+  - { symbole: 'P', signification: 'périmètre de la parcelle', unite: 'm' }
+  - { symbole: 'S', signification: 'aire de la parcelle', unite: 'm²' }
+formules:
+  - { nom: 'Discriminant', tex: '\Delta = b^2 - 4ac', domaine: 'Second degré' }
+  - { nom: 'Racines', tex: 'x_{1,2} = \frac{-b \pm \sqrt{\Delta}}{2a}', domaine: 'Second degré, Δ > 0' }
+  - { nom: 'Rectangle de périmètre P et d’aire S', tex: 'x^2 - \frac{P}{2}x + S = 0', domaine: 'Géométrie' }
+---
+
+import { parcelle, trinome } from '@/lib/calc/algebre'
+import { grandeur, nombre } from '@/lib/format'
+
+export const t1 = trinome(1, -5, 6)
+export const t2 = trinome(1, 2, 1)
+export const t3 = trinome(1, 0, 1)
+export const ex2 = parcelle(60, 200)
+export const ex3 = trinome(1, 0.8, 0.16 - 10)
+export const p0 = parcelle(50, 150)
+
+<Page etape="intuition" titre="L'intuition : la clôture et le terrain">
+
+Tu disposes de 50 m de grillage pour clôturer un terrain rectangulaire, et tu veux 150 m² à l'intérieur. Quelles dimensions donner au terrain ? Le périmètre fixe la **somme** longueur + largeur (25 m) ; l'aire fixe leur **produit** (150 m²). Chercher deux nombres dont on connaît la somme et le produit, c'est résoudre une équation du **second degré**.
+
+Et si tu voulais 200 m² avec le même grillage ? Impossible : avec 50 m de clôture, le plus grand rectangle est un carré de 12,5 m de côté, soit {nombre(12.5 ** 2, 2)} m². L'équation le dira toute seule : son discriminant sera **négatif**.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment résoudre une équation où l'inconnue apparaît au carré, et que faire de ses deux solutions ?
+</Encadre>
+
+<Encadre type="attention">
+Une équation du second degré a souvent **deux** solutions. En génie civil, il faut presque toujours en rejeter une : longueur négative, temps négatif, profondeur au-dessus du sol…
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours : discriminant et racines">
+
+### La forme standard
+
+On ramène l'équation à $ax^2 + bx + c = 0$ avec $a \neq 0$, en passant tous les termes du même côté.
+
+### Le discriminant
+
+$\Delta = b^2 - 4ac$ décide de tout :
+
+| Signe de Δ | Nombre de racines réelles | Racines |
+|---|---|---|
+| Δ > 0 | deux | $x_{1,2} = \frac{-b \pm \sqrt{\Delta}}{2a}$ |
+| Δ = 0 | une (double) | $x_0 = \frac{-b}{2a}$ |
+| Δ < 0 | aucune | — |
+
+Exemples calculés : $x^2 - 5x + 6 = 0$ a Δ = {nombre(t1.delta, 0)} et pour racines {t1.racines.join(' et ')} ; $x^2 + 2x + 1 = 0$ a Δ = {nombre(t2.delta, 0)} et une racine double {t2.racines[0]} ; $x^2 + 1 = 0$ a Δ = {nombre(t3.delta, 0)} : aucune racine réelle.
+
+### La factorisation
+
+Si $x_1$ et $x_2$ sont les racines : $ax^2 + bx + c = a(x - x_1)(x - x_2)$. Et l'on a toujours $x_1 + x_2 = -\frac{b}{a}$ et $x_1 x_2 = \frac{c}{a}$ : c'est le lien avec « somme et produit ».
+
+### Le rectangle de périmètre P et d'aire S
+
+Ses côtés $x$ et $\frac{P}{2} - x$ ont pour produit $S$ : $x(\frac{P}{2} - x) = S$, soit $x^2 - \frac{P}{2}x + S = 0$.
+
+<Regle type="simplification">
+La calculatrice et le tableur résolvent un trinôme instantanément. L'intérêt de la méthode est de **comprendre** pourquoi il y a 0, 1 ou 2 solutions, et de savoir laquelle garder.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la parabole et l'axe">
+
+<Figure alt="Trois paraboles : l'une coupe l'axe en deux points (Δ > 0), l'une le touche en un point (Δ = 0), l'une ne le touche pas (Δ < 0)" largeur={620} hauteur={220}>
+  <line x1={20} y1={150} x2={600} y2={150} className="t-moyen" />
+  <path d="M40 30 Q110 270 180 30" fill="none" stroke="var(--color-validation)" strokeWidth={2.2} />
+  <circle cx={77} cy={150} r={4} fill="var(--color-validation)" />
+  <circle cx={143} cy={150} r={4} fill="var(--color-validation)" />
+  <text x={110} y={205} textAnchor="middle" fontSize={12.5}>Δ &gt; 0 : deux racines</text>
+  <path d="M240 30 Q310 270 380 30" fill="none" stroke="var(--color-encre)" strokeWidth={2.2} transform="translate(0,-30)" />
+  <circle cx={310} cy={150} r={4} fill="var(--color-encre)" />
+  <text x={310} y={205} textAnchor="middle" fontSize={12.5}>Δ = 0 : une racine double</text>
+  <path d="M440 20 Q510 200 580 20" fill="none" stroke="var(--color-correction)" strokeWidth={2.2} />
+  <text x={510} y={205} textAnchor="middle" fontSize={12.5}>Δ &lt; 0 : aucune racine</text>
+</Figure>
+
+La courbe de $y = ax^2 + bx + c$ est une **parabole**. Les racines sont les points où elle coupe l'axe horizontal. Avec $a > 0$, elle est tournée vers le haut, comme ici.
+
+<Encadre type="retenir">
+Δ > 0 : deux points de contact · Δ = 0 : la parabole touche l'axe · Δ < 0 : elle reste au-dessus (ou en dessous) de l'axe.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="parcelle">
+
+<Cahier titre="Exemple résolu : les dimensions d'une parcelle">
+
+**Énoncé.** On clôture une parcelle rectangulaire avec 50 m de grillage, et l'on veut 150 m² de surface. Quelles sont ses dimensions ? Essaie ensuite 200 m².
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi P/2 ? Le périmètre compte deux longueurs et deux largeurs : une longueur plus une largeur font la moitié du périmètre.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le trinôme">
+
+<Etape n={3} titre="L'équation">
+<AN k="equation" />
+</Etape>
+
+<Etape n={4} titre="La résolution">
+<AN k="delta" />
+<AN k="racines" />
+<Note>Pourquoi les deux racines servent-elles ? L'une est la largeur, l'autre la longueur : leur somme vaut P/2 et leur produit S.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="dims" libelle="Dimensions" />
+
+<Note couleur="vert">Contrôle : somme des côtés = P/2 et produit = S ✓. Avec 200 m², Δ devient négatif : impossible.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer Δ = b² − 4ac en oubliant le signe de b ou de c.">
+Pour $x^2 - 25x + 150$ : b = −25, et $b^2$ = 625 (un carré est toujours positif). Écris a, b, c avec leur signe avant tout calcul.
+</Piege>
+
+<Piege erreur="diviser par 2 seulement le terme √Δ.">
+$x = \frac{-b \pm \sqrt{\Delta}}{2a}$ : la barre de fraction porte sur **tout** le numérateur. Sur calculatrice, mets des parenthèses.
+</Piege>
+
+<Piege erreur="garder une racine négative pour une longueur.">
+Une longueur, une épaisseur, une durée sont positives. Une racine négative est rejetée, en le disant explicitement.
+</Piege>
+
+<Piege erreur="conclure « pas de solution » sans vérifier l'équation.">
+Un Δ négatif peut venir d'une erreur de mise en équation. Vérifie l'équation de départ avec des valeurs simples avant de conclure.
+</Piege>
+
+<Piege erreur="oublier de mettre l'équation sous forme standard.">
+$x^2 = 5x - 6$ n'est pas prête : on écrit d'abord $x^2 - 5x + 6 = 0$.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**En béton armé**, la position de l'axe neutre d'une section fléchie se calcule en résolvant un trinôme (M1.1). Le même raisonnement sert : deux racines, une seule a un sens (celle qui tombe dans la section).
+
+<Encadre type="terrain" titre="Lotissements et parcelles">
+Dans les extensions urbaines de Kinshasa ou de Lubumbashi, on découpe souvent des parcelles de surface imposée. Le géomètre combine surface, périmètre et façade sur rue : ce sont des équations du second degré, résolues aujourd'hui par le logiciel, mais dont il faut savoir contrôler le résultat.
+</Encadre>
+
+**En hydraulique**, la hauteur d'eau dans un canal se trouve parfois par un trinôme (ou une équation plus complexe) : deux hauteurs possibles pour un même débit, dont une seule correspond au régime réel (L3.5).
+
+**En mécanique**, un objet lancé suit une parabole : la durée de chute ou la portée d'un jet d'eau se calcule par un second degré. Une racine est négative : elle correspond à un instant « avant le lancer », sans sens physique.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : second degré">
+
+### Forme standard
+
+$ax^2 + bx + c = 0$, $a \neq 0$ · écrire a, b, c **avec leur signe**.
+
+### Discriminant et racines
+
+$\Delta = b^2 - 4ac$ · Δ > 0 : $x_{1,2} = \frac{-b \pm \sqrt{\Delta}}{2a}$ · Δ = 0 : $x_0 = -\frac{b}{2a}$ · Δ < 0 : pas de racine réelle.
+
+### Somme et produit
+
+$x_1 + x_2 = -\frac{b}{a}$ · $x_1 x_2 = \frac{c}{a}$ · factorisation : $a(x - x_1)(x - x_2)$
+
+### Rectangle de périmètre P et d'aire S
+
+$x^2 - \frac{P}{2}x + S = 0$ · aire maximale (carré) : $(\frac{P}{4})^2$
+
+### Toujours
+
+Garder la ou les racines qui ont un **sens physique**, et le dire.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un trinôme simple">
+
+Résous $x^2 - 5x + 6 = 0$ et factorise le trinôme.
+
+<Indice>a = 1, b = −5, c = 6.</Indice>
+
+<Corrige>
+Δ = 25 − 24 = **{nombre(t1.delta, 0)}** ; racines **{t1.racines.join(' et ')}** ; $x^2 - 5x + 6 = (x - 2)(x - 3)$. Contrôle : 2 + 3 = 5 = −b/a ✓, 2 × 3 = 6 = c/a ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une parcelle plus grande">
+
+Avec 60 m de clôture, on veut 200 m². Trouve les dimensions.
+
+<Indice>$x^2 - 30x + 200 = 0$.</Indice>
+
+<Corrige>
+Δ = 900 − 800 = **{nombre(ex2.delta, 0)}** ; côtés **{grandeur(ex2.largeur, 0, 'm')}** et **{grandeur(ex2.longueur, 0, 'm')}**. Contrôle : 10 + 20 = 30 ✓ ; 10 × 20 = 200 ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La dalle avec bordure">
+
+Une dalle carrée de côté $x$ (m) est entourée d'une bordure de 0,20 m de chaque côté. L'ensemble doit couvrir 10 m². Écris l'équation, résous-la et choisis la bonne racine.
+
+<Indice>Le côté total vaut $x + 0{,}4$ : $(x + 0{,}4)^2 = 10$. Développe et mets sous forme standard.</Indice>
+
+<Corrige>
+
+- $(x + 0{,}4)^2 = 10 \Leftrightarrow x^2 + 0{,}8x + 0{,}16 - 10 = 0 \Leftrightarrow x^2 + 0{,}8x - 9{,}84 = 0$.
+- Δ = **{nombre(ex3.delta, 2)}** ; racines {ex3.racines.map((x) => nombre(x, 3)).join(' et ')}.
+- La racine négative n'a pas de sens : **x = {grandeur(ex3.racines[1], 2, 'm')}**. Contrôle : ({nombre(ex3.racines[1], 3)} + 0,4)² ≈ {nombre((ex3.racines[1] + 0.4) ** 2, 2)} m² ✓.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.2.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le discriminant de x² − 5x + 6 vaut :" choix={['49', String(t1.delta), '−1', '11']} bonne={1} colonnes={4}>
+(−5)² − 4 × 1 × 6 = 25 − 24 = 1.
+</QCM>
+
+<QCM n={2} question="Si Δ < 0, l'équation ax² + bx + c = 0 a :" choix={['deux racines', 'une racine double', 'aucune racine réelle', 'une infinité de racines']} bonne={2} colonnes={2}>
+La parabole ne coupe pas l'axe.
+</QCM>
+
+<QCM n={3} question="Les racines de x² − 5x + 6 = 0 sont :" choix={['−2 et −3', t1.racines.join(' et '), '1 et 6', '−1 et 6']} bonne={1} colonnes={4}>
+Somme 5, produit 6.
+</QCM>
+
+<QCM n={4} question="La formule des racines est :" choix={['(b ± √Δ)/2a', '(−b ± √Δ)/2a', '−b ± √Δ/2a', '(−b ± Δ)/2a']} bonne={1} colonnes={2}>
+Attention à la barre de fraction : elle porte sur tout le numérateur.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Avec 50 m de clôture et 150 m², la parcelle mesure :</>} choix={['5 m × 30 m', `${nombre(p0.largeur, 0)} m × ${nombre(p0.longueur, 0)} m`, '12,5 m × 12,5 m', 'impossible']} bonne={1} colonnes={2}>
+x² − 25x + 150 = 0 : Δ = 25, racines 10 et 15.
+</QCM>
+
+<QCM n={6} question="Avec 50 m de clôture, la plus grande aire possible est :" choix={['150 m²', `${nombre(12.5 ** 2, 2)} m²`, '250 m²', '625 m²']} bonne={1} colonnes={2}>
+Le carré de côté 50/4 = 12,5 m.
+</QCM>
+
+<QCM n={7} question="Une équation donne une épaisseur x = −0,35 m ou x = 0,12 m. On retient :" choix={['−0,35 m', '0,12 m', 'les deux', 'leur moyenne']} bonne={1} colonnes={4}>
+Une épaisseur est positive.
+</QCM>
+
+<QCM n={8} question="Si x₁ et x₂ sont les racines de x² + bx + c, leur produit vaut :" choix={['b', 'c', '−b', '−c']} bonne={1} colonnes={4}>
+Avec a = 1 : x₁ x₂ = c/a = c.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
