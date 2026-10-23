@@ -9,6 +9,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/cursus.mjs",
     "build": "next build",
+    "postbuild": "node scripts/verifier-ids.mjs",
     "start": "next start",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

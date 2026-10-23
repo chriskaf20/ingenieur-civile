@@ -124,7 +124,7 @@ export function DecompositionPlateforme({ d, r, largeur = 640 }: { d: DonneesPla
 }
 
 /** Coupe A-A à mi-largeur : TN, plateforme, talus et remblai, hauteurs exagérées. */
-export function CoupePlateforme({ d, r, largeur = 640 }: { d: DonneesPlateforme; r: ResultatPlateforme; largeur?: number }) {
+export function CoupePlateforme({ d, r, largeur = 640, prefixe = 'rc' }: { d: DonneesPlateforme; r: ResultatPlateforme; largeur?: number; prefixe?: string }) {
   const zA = (d.tn[0] + d.tn[3]) / 2;
   const zB = (d.tn[1] + d.tn[2]) / 2;
   const hA = Math.max(d.Zp - zA, 0);
@@ -148,9 +148,9 @@ export function CoupePlateforme({ d, r, largeur = 640 }: { d: DonneesPlateforme;
       largeur={rep.largeur}
       hauteur={rep.hauteur + 10}
     >
-      <Hachures prefixe="rc" types={['remblai', 'terre']} />
-      <polygon points={points(remblai)} fill={hachure('rc', 'remblai')} className="t-moyen" />
-      <TerrainNaturel prefixe="rc" pts={tn} />
+      <Hachures prefixe={prefixe} types={['remblai', 'terre']} />
+      <polygon points={points(remblai)} fill={hachure(prefixe, 'remblai')} className="t-moyen" />
+      <TerrainNaturel prefixe={prefixe} pts={tn} />
       <line x1={rep.x(0)} y1={rep.y(d.Zp)} x2={rep.x(d.L)} y2={rep.y(d.Zp)} className="t-fort" stroke="var(--color-encre)" strokeWidth={2.4} />
       <Niveau x={rep.x(d.L * 0.42)} y={rep.y(d.Zp)} texte={`Zp = ${nombre(d.Zp, 2)}`} />
       <Cote x1={rep.x(0)} y1={rep.y(zA)} x2={rep.x(0)} y2={rep.y(d.Zp)} decalage={-18} texte={nombre(hA, 2)} />
