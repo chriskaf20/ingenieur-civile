@@ -1,0 +1,332 @@
+---
+id: N0.5.5
+titre: "Du volume aux vues : initiation aux projections"
+objectifs:
+  - Associer un objet en perspective à ses vues de face, de dessus et de gauche
+  - Disposer les vues selon la méthode européenne
+  - Représenter une arête cachée en trait interrompu
+  - Retrouver les dimensions et le volume d'un objet à partir de ses vues
+relecture: false
+normes:
+  - "NF EN ISO 5456-2 : projections orthogonales, méthode européenne (premier dièdre)"
+  - "NF EN ISO 128 (série) : types de traits, dont le trait interrompu pour les arêtes cachées"
+glossaire:
+  - terme: Projection orthogonale
+    definition: Représentation d'un objet sur un plan par des rayons perpendiculaires à ce plan ; les dimensions parallèles au plan sont en vraie grandeur.
+  - terme: Vue de face
+    definition: Vue principale d'un objet, choisie pour montrer le plus d'informations ; les autres vues se placent autour d'elle.
+  - terme: Méthode européenne
+    definition: Disposition des vues où la vue de dessus est placée sous la vue de face et la vue de gauche à sa droite.
+  - terme: Arête cachée
+    definition: Arête masquée par l'objet lui-même dans une vue ; on la dessine en trait interrompu.
+  - terme: Perspective isométrique
+    definition: Dessin en relief où les trois directions principales sont également inclinées ; les longueurs y sont réduites de la même façon.
+symboles:
+  - { symbole: 'F, D, G', signification: 'directions d’observation des vues de face, de dessus, de gauche', unite: '—' }
+formules:
+  - { nom: 'Volume d’un prisme lu sur les vues', tex: 'V = A_{vue\ de\ face} \times P', domaine: 'Prisme droit' }
+---
+
+import { EXEMPLE_MASSIF, massifL, pave } from '@/lib/calc/geometrie'
+import { grandeur, nombre } from '@/lib/format'
+import { MassifIso, MassifVueDessus, MassifVueFace, MassifVueGauche } from '@/components/schemas/Geometrie'
+
+export const d0 = EXEMPLE_MASSIF
+export const m0 = massifL(d0)
+export const ex2 = massifL({ L: 2.4, h1: 0.5, a: 1.0, h2: 0.4, P: 1.2 })
+export const k = 105
+
+<Page etape="intuition" titre="L'intuition : la boîte en carton dépliée">
+
+Prends une boîte et regarde-la bien en face : tu ne vois qu'un rectangle. Regarde-la par-dessus : un autre rectangle. Par le côté : un troisième. Aucune de ces vues ne suffit seule, mais **ensemble** elles décrivent la boîte sans ambiguïté, avec toutes ses dimensions en vraie grandeur.
+
+C'est le principe du dessin technique. La perspective est agréable à regarder, mais elle déforme les longueurs. Les **vues** sont moins parlantes au premier coup d'œil, mais on peut y **mesurer** : c'est pour cela que les plans d'exécution sont faits de vues.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer d'un objet en relief à ses vues à plat, et inversement, sans se tromper de côté ?
+</Encadre>
+
+<Encadre type="attention">
+La disposition des vues n'est pas libre. En Europe et en Afrique francophone, on utilise la **méthode européenne** : vue de dessus **sous** la vue de face, vue de gauche **à droite**. Les documents américains utilisent une autre méthode : on lit le symbole du cartouche.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les vues et leur disposition">
+
+### Les trois vues principales
+
+- **Vue de face (F)** : l'observateur regarde l'objet de face. On la choisit pour montrer le plus de détails.
+- **Vue de dessus (D)** : l'observateur regarde l'objet d'en haut.
+- **Vue de gauche (G)** : l'observateur se place à gauche de l'objet.
+
+Chaque vue montre l'objet en **vraie grandeur** dans les deux directions parallèles au plan de projection. Une dimension se lit toujours sur au moins deux vues.
+
+### La méthode européenne
+
+<Regle type="norme" source="NF EN ISO 5456-2">
+Méthode européenne : la vue de dessus est placée **sous** la vue de face, la vue de gauche **à droite** de la vue de face. Les vues sont **alignées** : la vue de dessus a la même largeur que la vue de face, la vue de gauche la même hauteur.
+</Regle>
+
+| | |
+|---|---|
+| vue de face | vue de gauche |
+| vue de dessus | |
+
+<Encadre type="retenir">
+L'alignement des vues est une aide : une arête de la vue de face se retrouve, à la même abscisse, sur la vue de dessus.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : traits et lecture des vues">
+
+### Les traits (rappel de L1.6.5)
+
+- arête **vue** : trait continu fort ;
+- arête **cachée** : trait **interrompu** (tirets) ;
+- **axe** de symétrie : trait mixte fin.
+
+### Lire des vues : la méthode
+
+1. Repérer la vue de face et les deux autres, selon la méthode européenne.
+2. Prendre un détail sur une vue et le retrouver sur les autres, grâce à l'alignement.
+3. Imaginer le volume, en partant d'un bloc qu'on « creuse » ou auquel on ajoute des parties.
+4. Contrôler : chaque arête d'une vue doit correspondre à quelque chose sur les autres.
+
+### Du plan au volume
+
+Quand l'objet est un **prisme** (une section constante sur toute sa profondeur), la vue de face donne la section et la vue de dessus la profondeur : $V = A_{face} \times P$. C'est le cas des massifs, des murs, des poutres.
+
+<Regle type="simplification">
+Les objets de cette leçon sont simples (des blocs). Les plans de bâtiment ajoutent les coupes, qui montrent l'intérieur (L1.6) ; le principe d'alignement des vues reste le même.
+</Regle>
+
+</Page>
+
+<Vue3D titre="Le massif en perspective et ses directions de vue" calques={[{ id: 'massif', libelle: 'Massif' }, { id: 'caches', libelle: 'Arêtes cachées', actif: false }, { id: 'directions', libelle: 'Directions F, D, G' }, { id: 'cotes', libelle: 'Cotes' }]}>
+
+Ce massif de béton est un prisme à section en L. Les flèches rouges montrent d'où l'on regarde pour chaque vue. Active les arêtes cachées : ce sont celles qui apparaîtront en tirets.
+
+<MassifIso d={d0} />
+
+<Encadre type="retenir">
+La flèche F regarde la face en L : la vue de face montre directement la section, en vraie grandeur.
+</Encadre>
+
+</Vue3D>
+
+<PlancheTechnique
+  titre="Massif : trois vues"
+  projet="Massif à section en L, exemple N0.5.5"
+  numero="MA-01"
+  echelle="1/20"
+  date="10/2026"
+  notes={[
+    'Méthode européenne : vue de dessus sous la vue de face, vue de gauche à droite.',
+    'Arête cachée (marche, vue de gauche) en trait interrompu.',
+    `Volume : ${nombre(m0.section, 2)} m² × ${nombre(d0.P, 2)} m = ${grandeur(m0.V, 2, 'm³')}.`,
+    'Cotes en mètres.',
+  ]}
+>
+
+<Vue titre="Vue de face">
+<MassifVueFace d={d0} k={k} />
+</Vue>
+
+<Vue titre="Vue de gauche">
+<MassifVueGauche d={d0} k={k} />
+</Vue>
+
+<Vue titre="Vue de dessus">
+<MassifVueDessus d={d0} k={k} />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="massif">
+
+<Cahier titre="Exemple résolu : des vues au volume de béton">
+
+**Énoncé.** La planche ci-dessus donne les trois vues d'un massif d'ancrage en béton. Retrouve ses dimensions, son volume de béton et la surface de coffrage verticale (le dessus est laissé libre).
+
+<Etape n={1} titre="Les dimensions lues sur les vues">
+<Entrees />
+<Note>Pourquoi deux vues pour une dimension ? La longueur L se lit sur la vue de face et sur la vue de dessus : c'est un contrôle.</Note>
+</Etape>
+
+<Etape n={2} titre="La vue de face (la section)">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : section × profondeur">
+
+<Etape n={3} titre="La section">
+<AN k="section" />
+<Note>Pourquoi découper en deux rectangles ? La section en L est une surface composée (N0.5.1).</Note>
+</Etape>
+
+<Etape n={4} titre="Volume et coffrage">
+<AN k="V" />
+<AN k="coffrage" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="V" libelle="Volume de béton" />
+
+<Note couleur="vert">Section <Val k="section" />, coffrage <Val k="coffrage" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="placer la vue de dessus au-dessus de la vue de face.">
+C'est la méthode américaine. En méthode européenne, la vue de dessus est **sous** la vue de face. Le symbole de la méthode figure dans le cartouche.
+</Piege>
+
+<Piege erreur="oublier les arêtes cachées.">
+Sans le trait interrompu, la vue de gauche du massif serait un simple rectangle : on ne saurait pas qu'il y a une marche derrière.
+</Piege>
+
+<Piege erreur="mesurer une longueur sur une perspective.">
+La perspective réduit et incline les longueurs. Les cotes se lisent sur les vues ou sur les cotes écrites, jamais sur un dessin en relief.
+</Piege>
+
+<Piege erreur="lire une vue seule.">
+Un rectangle peut représenter un pavé, un cylindre vu de côté ou un prisme triangulaire. Il faut au moins deux vues pour comprendre un objet.
+</Piege>
+
+<Piege erreur="décaler les vues les unes par rapport aux autres.">
+Des vues non alignées empêchent de reporter les détails d'une vue à l'autre et provoquent des erreurs de lecture.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les plans d'exécution** d'un bâtiment sont des vues : le plan (une vue de dessus coupée à 1 m environ du sol), les élévations (des vues de face des façades) et les coupes. Le chef de chantier passe sans cesse de l'un à l'autre pour comprendre l'ouvrage.
+
+<Encadre type="terrain" titre="Documents d'origines diverses">
+Sur les projets financés par des bailleurs ou réalisés par des entreprises étrangères, on reçoit parfois des plans en méthode américaine (troisième dièdre), où la vue de dessus est au-dessus de la vue de face. Avant de construire, on vérifie le symbole de projection dans le cartouche.
+</Encadre>
+
+**Les coffreurs et ferrailleurs** lisent des vues de détail (élévation d'une poutre, coupe transversale) pour couper le bois et façonner les aciers.
+
+**La maquette numérique** (BIM, M2.5) produit automatiquement les vues à partir du modèle 3D ; savoir les lire reste indispensable pour les contrôler.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : projections">
+
+### Les vues
+
+face (F) : vue principale · dessus (D) · gauche (G) · dimensions en vraie grandeur dans le plan de la vue
+
+### Méthode européenne
+
+dessus **sous** la face · gauche **à droite** de la face · vues alignées
+
+### Traits
+
+vu : continu fort · caché : interrompu · axe : mixte fin
+
+### Lire des vues
+
+face → retrouver chaque détail sur les autres vues (alignement) → imaginer le volume → contrôler
+
+### Prisme
+
+$V = A_{face} \times P$ (section × profondeur)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Où placer les vues ?">
+
+En méthode européenne, où places-tu la vue de dessus et la vue de gauche par rapport à la vue de face ? Comment représente-t-on la marche du massif dans la vue de gauche ?
+
+<Indice>Relis la règle normative et la planche.</Indice>
+
+<Corrige>
+Vue de dessus **sous** la vue de face, vue de gauche **à sa droite**. La marche, cachée derrière la face gauche, apparaît en **trait interrompu** à la hauteur h₁.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un autre massif">
+
+Un massif a les vues suivantes : vue de face en L, longueur 2,40 m, hauteur 0,50 m sur toute la longueur et 0,90 m sur 1,00 m à gauche ; vue de dessus : rectangle 2,40 × 1,20 m. Calcule son volume.
+
+<Indice>Section = 2,40 × 0,50 + 1,00 × 0,40.</Indice>
+
+<Corrige>
+Section : **{grandeur(ex2.section, 2, 'm²')}** ; volume : {nombre(ex2.section, 2)} × 1,20 = **{grandeur(ex2.V, 3, 'm³')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Vue de droite">
+
+Dessine à main levée la vue de **droite** du massif de l'exemple. En quoi diffère-t-elle de la vue de gauche ? Où la place-t-on en méthode européenne ?
+
+<Indice>Depuis la droite, on voit d'abord le bout bas (hauteur h₁), puis la contremarche au fond.</Indice>
+
+<Corrige>
+
+- La vue de droite est aussi un rectangle {nombre(d0.P, 2)} × {nombre(m0.H, 2)} m, mais la ligne à la hauteur h₁ = {nombre(d0.h1, 2)} m y est **visible** (trait continu) : on voit le bout bas et, derrière, la contremarche.
+- En méthode européenne, la vue de droite se place **à gauche** de la vue de face.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.5.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="En méthode européenne, la vue de dessus est placée :" choix={['au-dessus de la vue de face', 'sous la vue de face', 'à droite', 'n’importe où']} bonne={1} colonnes={2}>
+NF EN ISO 5456-2.
+</QCM>
+
+<QCM n={2} question="Une arête cachée se dessine en :" choix={['trait continu fort', 'trait interrompu', 'trait mixte', 'pointillés rouges']} bonne={1} colonnes={4}>
+Tirets.
+</QCM>
+
+<QCM n={3} question="Pourquoi les plans d'exécution utilisent-ils des vues plutôt que des perspectives ?" choix={['Elles sont plus jolies', 'On peut y mesurer les dimensions en vraie grandeur', 'Elles sont plus rapides à dessiner', 'Par tradition seulement']} bonne={1}>
+La perspective déforme les longueurs.
+</QCM>
+
+<QCM n={4} question="Combien de vues faut-il au minimum pour décrire un objet sans ambiguïté ?" choix={['une', 'souvent deux, parfois trois', 'quatre', 'six']} bonne={1} colonnes={2}>
+Une seule vue laisse toujours un doute.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Le massif de l'exemple a un volume de :</>} choix={[grandeur(pave(d0.L, d0.P, d0.h1).V, 2, 'm³'), grandeur(m0.V, 2, 'm³'), grandeur(pave(d0.L, d0.P, m0.H).V, 2, 'm³'), grandeur(m0.coffrage, 2, 'm³')]} bonne={1} colonnes={4}>
+Section {nombre(m0.section, 2)} m² × {nombre(d0.P, 2)} m.
+</QCM>
+
+<QCM n={6} question="La vue de gauche se place, en méthode européenne :" choix={['à gauche de la vue de face', 'à droite de la vue de face', 'sous la vue de dessus', 'au-dessus']} bonne={1} colonnes={2}>
+Elle « tombe » du côté opposé à l'observateur.
+</QCM>
+
+<QCM n={7} question="La longueur L du massif se lit sur :" choix={['la vue de gauche seulement', 'la vue de face et la vue de dessus', 'la perspective seulement', 'aucune vue']} bonne={1}>
+Les vues alignées partagent leurs dimensions communes.
+</QCM>
+
+<QCM n={8} question="Pour un prisme, le volume vaut :" choix={['aire de la vue de face × profondeur', 'somme des aires des trois vues', 'périmètre × hauteur', 'aire de la vue de dessus × aire de la vue de face']} bonne={0}>
+Section constante × profondeur.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

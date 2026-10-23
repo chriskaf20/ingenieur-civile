@@ -1,0 +1,308 @@
+---
+id: N0.5.2
+titre: Thalès et figures semblables
+objectifs:
+  - Énoncer le théorème de Thalès et reconnaître une configuration de Thalès
+  - Calculer une longueur inaccessible par des triangles semblables
+  - Relier une échelle de plan à un rapport de similitude
+  - Appliquer les rapports k, k² et k³ aux longueurs, aux aires et aux volumes
+relecture: false
+normes: []
+glossaire:
+  - terme: Théorème de Thalès
+    definition: Deux droites coupées par deux parallèles découpent des segments proportionnels.
+  - terme: Figures semblables
+    definition: Figures de même forme, dont toutes les longueurs sont multipliées par un même rapport k.
+  - terme: Rapport de similitude
+    definition: Nombre k par lequel on multiplie les longueurs pour passer d'une figure à une figure semblable.
+  - terme: Maquette
+    definition: Modèle réduit d'un ouvrage, semblable à l'ouvrage réel.
+symboles:
+  - { symbole: 'k', signification: 'rapport de similitude', unite: '—' }
+  - { symbole: 'h, s', signification: 'hauteur et ombre du bâton', unite: 'm' }
+  - { symbole: 'H, S', signification: 'hauteur et ombre de l’objet', unite: 'm' }
+formules:
+  - { nom: 'Théorème de Thalès', tex: '\frac{AM}{AB} = \frac{AN}{AC} = \frac{MN}{BC}', domaine: 'Géométrie, (MN) ∥ (BC)' }
+  - { nom: 'Similitude', tex: 'L'' = k\,L,\quad A'' = k^2 A,\quad V'' = k^3 V', domaine: 'Figures semblables' }
+---
+
+import { aireRectangle, hauteurParOmbre, largeurRiviere, similitude } from '@/lib/calc/geometrie'
+import { regleDeTrois } from '@/lib/calc/algebre'
+import { convertir } from '@/lib/calc/unites'
+import { grandeur, nombre } from '@/lib/format'
+import { ThalesOmbre } from '@/components/schemas/Geometrie'
+
+export const o0 = hauteurParOmbre(1.5, 1.2, 18)
+export const s2 = similitude(2)
+export const plan = { E: 100, piece: [4.2, 3.1] }
+export const sPlan = similitude(plan.E)
+export const ex1 = regleDeTrois(2, 3.5, 7)
+export const aireCm2 = aireRectangle(...plan.piece)
+export const ex2 = { aireCm2, aireM2: convertir(aireCm2 * sPlan.aires, 'cm²', 'm²').valeur }
+export const q5 = { cm2: 12 * sPlan.aires, m2: convertir(12 * sPlan.aires, 'cm²', 'm²').valeur }
+export const maq = { E: 50, litres: 20 }
+export const ex3 = { m3: convertir(maq.litres * similitude(maq.E).volumes, 'L', 'm³').valeur, k3: similitude(maq.E).volumes }
+export const riv = { AD: 6, DE: 2.4, AF: 2 }
+export const rivX = largeurRiviere(riv.AD, riv.DE, riv.AF)
+
+<Page etape="intuition" titre="L'intuition : l'ombre d'un pylône">
+
+Un matin ensoleillé, tu veux connaître la hauteur d'un pylône sans y monter. Tu plantes un bâton de 1,50 m bien vertical à côté. Son ombre mesure 1,20 m, celle du pylône 18 m. Le pylône est donc **15 fois** plus haut que le bâton : {grandeur(o0.H, 1, 'm')}.
+
+Pourquoi ? Les rayons du soleil arrivent tous **parallèles**. Le bâton, son ombre et le rayon forment un petit triangle ; le pylône, son ombre et le rayon un grand triangle. Les deux ont les mêmes angles : ils sont **semblables**, et toutes leurs longueurs sont dans le même rapport.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer une longueur inaccessible avec des triangles semblables, et que devient une aire ou un volume quand on change d'échelle ?
+</Encadre>
+
+<Encadre type="attention">
+Si les longueurs sont multipliées par 2, les aires sont multipliées par **{s2.aires}** et les volumes par **{s2.volumes}**. Oublier ce carré et ce cube est l'une des erreurs les plus courantes en lecture de plans et de maquettes.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le théorème de Thalès">
+
+### L'énoncé
+
+Deux droites se coupent en A. Une droite coupe la première en M et la seconde en N ; une autre, en B et C. Si **(MN) est parallèle à (BC)**, alors :
+
+$$\frac{AM}{AB} = \frac{AN}{AC} = \frac{MN}{BC}$$
+
+Les triangles AMN et ABC sont semblables : le petit est une réduction du grand.
+
+### La réciproque
+
+Si $\frac{AM}{AB} = \frac{AN}{AC}$ (et les points dans le même ordre), alors (MN) est parallèle à (BC). Elle sert à **vérifier** un parallélisme.
+
+### La méthode pour une mesure indirecte
+
+1. Repérer deux triangles semblables (souvent grâce à des parallèles ou à des angles égaux).
+2. Associer les côtés **homologues** (ceux qui se correspondent).
+3. Écrire l'égalité des rapports, puis la résoudre comme une règle de trois (N0.2.3).
+
+<Regle type="simplification">
+La méthode du bâton suppose un sol horizontal, un bâton bien vertical et des ombres mesurées au même instant. Sur un terrain en pente, les triangles ne sont plus semblables.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : échelles et similitude">
+
+### L'échelle d'un plan est un rapport de similitude
+
+Un plan au 1/{plan.E} est une figure semblable à l'ouvrage, de rapport $k = \frac{1}{100}$ (ou 100 pour passer du plan au réel).
+
+### Longueurs, aires, volumes
+
+Pour un rapport de similitude $k$ :
+
+- les **longueurs** sont multipliées par $k$ ;
+- les **aires** par $k^2$ ;
+- les **volumes** par $k^3$.
+
+| rapport k | longueurs | aires | volumes |
+|---|---|---|---|
+| 2 | × {s2.longueurs} | × {s2.aires} | × {s2.volumes} |
+| 100 (plan au 1/100) | × {nombre(sPlan.longueurs, 0)} | × {nombre(sPlan.aires, 0)} | × {nombre(sPlan.volumes, 0)} |
+
+<Encadre type="exemple">
+Une pièce mesure {nombre(plan.piece[0], 1)} cm × {nombre(plan.piece[1], 1)} cm sur un plan au 1/100, soit {nombre(ex2.aireCm2, 2)} cm². En vrai : {nombre(ex2.aireCm2, 2)} × {nombre(sPlan.aires, 0)} cm² = {grandeur(ex2.aireM2, 2, 'm²')}, et non {nombre(ex2.aireCm2 * 100, 0)} cm².
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : deux triangles semblables">
+
+<ThalesOmbre hBaton={1.5} ombreBaton={1.2} ombreObjet={18} H={o0.H} prefixe="th-cours" />
+
+Le bâton est planté de façon que l'extrémité de son ombre coïncide avec celle de l'ombre du pylône. Le rayon de soleil qui passe par le sommet du pylône passe aussi par le sommet du bâton : c'est exactement la figure de Thalès, avec le bâton parallèle au pylône.
+
+<Encadre type="retenir">
+Côtés homologues : la hauteur du bâton correspond à la hauteur du pylône, l'ombre du bâton à l'ombre du pylône. On ne mélange jamais une hauteur avec une ombre dans un même rapport.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="ombre">
+
+<Cahier titre="Exemple résolu : la hauteur d'un pylône">
+
+**Énoncé.** Un bâton vertical de 1,50 m a une ombre de 1,20 m. Au même moment, l'ombre d'un pylône de télécommunication mesure 18,00 m sur un sol horizontal. Quelle est la hauteur du pylône ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi au même moment ? L'angle des rayons change au cours de la journée : les deux ombres doivent être mesurées ensemble.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le rapport de similitude">
+
+<Etape n={3} titre="Thalès">
+<AN k="thales" />
+</Etape>
+
+<Etape n={4} titre="Le calcul">
+<AN k="k" />
+<AN k="H" />
+<Note>Pourquoi passer par k ? Une fois k connu, toutes les longueurs du grand triangle se déduisent du petit.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="H" libelle="Hauteur du pylône" />
+
+<Note couleur="vert">Rapport de similitude <Val k="k" />. Contrôle de bon sens : un pylône d'une vingtaine de mètres est courant.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="associer des côtés qui ne se correspondent pas.">
+On écrit H / h = S / s (hauteur sur hauteur, ombre sur ombre), jamais H / s = S / h.
+</Piege>
+
+<Piege erreur="appliquer Thalès sans parallèles.">
+Sans droites parallèles (ou sans angles égaux), les triangles ne sont pas semblables et les rapports ne sont pas égaux.
+</Piege>
+
+<Piege erreur="multiplier une aire par k au lieu de k².">
+Une surface mesurée sur un plan au 1/100 se multiplie par 10 000 pour revenir au réel, pas par 100.
+</Piege>
+
+<Piege erreur="multiplier un volume par k ou k² au lieu de k³.">
+Une maquette au 1/50 d'un réservoir contient 50³ = {nombre(similitude(50).volumes, 0)} fois moins d'eau que le réservoir réel.
+</Piege>
+
+<Piege erreur="mesurer sur un plan photocopié.">
+La photocopie peut changer l'échelle (L1.6.5). On contrôle d'abord le rapport sur une cote connue.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les mesures indirectes** : hauteur d'un arbre à abattre, d'un pylône, d'un bâtiment existant ; largeur d'une rivière (exercice 2). Aujourd'hui, on utilise souvent un télémètre ou une station totale, mais la méthode de Thalès reste un contrôle simple et sans matériel.
+
+<Encadre type="terrain" titre="Le terrain naturel et le soleil équatorial">
+Près de l'équateur, comme à Kisangani ou à Mbandaka, le soleil est presque à la verticale vers midi : les ombres deviennent très courtes, et une petite erreur de mesure fausse beaucoup le rapport. On mesure plutôt en milieu de matinée ou d'après-midi, quand les ombres sont longues.
+</Encadre>
+
+**Les plans et les maquettes** sont des figures semblables. Un métreur qui mesure une surface sur un plan applique $k^2$ ; un ingénieur qui teste une maquette hydraulique applique des règles de similitude plus complètes, vues en hydraulique (M2.2).
+
+**Le contrôle de parallélisme** sur le chantier utilise la réciproque : si deux distances mesurées sont dans le même rapport, les lignes sont parallèles.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : Thalès et similitude">
+
+### Thalès
+
+(MN) ∥ (BC) ⇒ $\frac{AM}{AB} = \frac{AN}{AC} = \frac{MN}{BC}$ · réciproque : rapports égaux ⇒ parallèles
+
+### Mesure indirecte
+
+triangles semblables → côtés homologues → égalité des rapports → règle de trois · bâton : $H = h \times \frac{S}{s}$
+
+### Similitude de rapport k
+
+longueurs × k · aires × k² · volumes × k³ · plan au 1/100 : aires × {nombre(sPlan.aires, 0)}
+
+### Pièges
+
+hauteur avec hauteur, ombre avec ombre · pas de parallèles, pas de Thalès · k² et k³
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le poteau électrique">
+
+Un piquet de 2,00 m a une ombre de 3,50 m. Au même instant, l'ombre d'un poteau électrique mesure 7,00 m. Quelle est sa hauteur ?
+
+<Indice>H / 2,00 = 7,00 / 3,50.</Indice>
+
+<Corrige>
+H = 2,00 × 7,00 / 3,50 = **{grandeur(ex1, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La largeur d'une rivière">
+
+Un arbre C se trouve sur l'autre rive. Tu te places en A, sur ta rive, juste en face de C. Tu recules de AD = {riv.AD} m en t'éloignant de la rivière, dans l'alignement C-A. En D, tu marches parallèlement à la rive jusqu'en E, avec DE = {nombre(riv.DE, 1)} m. Tu vises l'arbre C depuis E : la ligne de visée coupe ta rive en F, et tu mesures AF = {nombre(riv.AF, 1)} m. Quelle est la largeur x = AC de la rivière ?
+
+<Indice>(AF) et (DE) sont parallèles : AF / DE = CA / CD = x / (x + {riv.AD}). Résous cette équation du premier degré.</Indice>
+
+<Corrige>
+{nombre(riv.AF, 1)} / {nombre(riv.DE, 1)} = x / (x + {riv.AD}) ⇔ {nombre(riv.DE, 1)} x = {nombre(riv.AF, 1)} x + {nombre(riv.AF * riv.AD, 1)} ⇔ **x = {grandeur(rivX, 2, 'm')}**. Contrôle : {nombre(riv.AF, 1)} / {nombre(riv.DE, 1)} = {nombre(riv.AF / riv.DE, 4)} et {nombre(rivX, 0)} / {nombre(rivX + riv.AD, 0)} = {nombre(rivX / (rivX + riv.AD), 4)} ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Plan et maquette">
+
+a) Sur un plan au 1/100, une pièce mesure {nombre(plan.piece[0], 1)} cm × {nombre(plan.piece[1], 1)} cm. Quelle est sa surface réelle ? b) La maquette au 1/{maq.E} d'un château d'eau contient {maq.litres} L. Quelle est la capacité du château d'eau réel, en m³ ?
+
+<Indice>Aires : × 100² ; volumes : × 50³.</Indice>
+
+<Corrige>
+
+- a) {nombre(ex2.aireCm2, 2)} cm² × {nombre(sPlan.aires, 0)} = **{grandeur(ex2.aireM2, 2, 'm²')}**.
+- b) {maq.litres} L × {nombre(ex3.k3, 0)} = **{grandeur(ex3.m3, 0, 'm³')}**. Un facteur {nombre(ex3.k3, 0)} : sans le cube, on se trompe de plusieurs ordres de grandeur.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.5.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le théorème de Thalès s'applique quand :" choix={['deux droites sont perpendiculaires', 'deux droites sont parallèles et coupent deux sécantes', 'un triangle est rectangle', 'deux angles sont droits']} bonne={1}>
+Les parallèles rendent les triangles semblables.
+</QCM>
+
+<QCM n={2} question={<>Un bâton de 1,50 m a une ombre de 1,20 m ; l'ombre d'un pylône mesure 18 m. Le pylône mesure :</>} choix={['14,4 m', grandeur(o0.H, 1, 'm'), '21,6 m', '18,0 m']} bonne={1} colonnes={4}>
+k = 18 / 1,2 = {nombre(o0.k, 0)} ; H = 1,5 × {nombre(o0.k, 0)}.
+</QCM>
+
+<QCM n={3} question="Si l'on double toutes les longueurs d'une figure, son aire est :" choix={['doublée', `multipliée par ${s2.aires}`, `multipliée par ${s2.volumes}`, 'inchangée']} bonne={1} colonnes={2}>
+Aires × k².
+</QCM>
+
+<QCM n={4} question="Une maquette au 1/10 d'un bassin. Le bassin réel contient :" choix={['10 fois plus d’eau', '100 fois plus', `${nombre(similitude(10).volumes, 0)} fois plus`, 'autant']} bonne={2} colonnes={2}>
+Volumes × k³.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Sur un plan au 1/100, 12 cm² correspondent à :" choix={['1 200 cm²', `${nombre(q5.m2, 0)} m²`, '0,12 m²', '120 m²']} bonne={1} colonnes={4}>
+12 × {nombre(sPlan.aires, 0)} cm² = {nombre(q5.cm2, 0)} cm² = {nombre(q5.m2, 0)} m².
+</QCM>
+
+<QCM n={6} question="Dans l'égalité des rapports, on associe :" choix={['n’importe quels côtés', 'les côtés homologues (qui se correspondent)', 'les côtés les plus longs', 'les côtés horizontaux']} bonne={1}>
+Hauteur avec hauteur, ombre avec ombre.
+</QCM>
+
+<QCM n={7} question="La réciproque de Thalès sert à :" choix={['calculer une aire', 'prouver que deux droites sont parallèles', 'calculer un angle', 'trouver une hypoténuse']} bonne={1}>
+Rapports égaux ⇒ parallèles.
+</QCM>
+
+<QCM n={8} question="La méthode du bâton est fausse si :" choix={['le soleil brille', 'le sol est en pente', 'le bâton est vertical', 'les ombres sont longues']} bonne={1} colonnes={2}>
+Les triangles ne sont plus semblables.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

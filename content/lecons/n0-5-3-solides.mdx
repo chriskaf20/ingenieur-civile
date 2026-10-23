@@ -1,0 +1,316 @@
+---
+id: N0.5.3
+titre: "Solides : volumes et surfaces"
+objectifs:
+  - Calculer le volume et les surfaces d'un prisme, d'un cylindre, d'un cône et d'une pyramide
+  - Calculer le volume d'un tronc de cône et d'un tronc de pyramide
+  - Calculer le volume exact d'une fouille à parois talutées
+  - Choisir entre surface latérale et surface totale selon l'usage (coffrage, peinture, étanchéité)
+relecture: false
+normes: []
+glossaire:
+  - terme: Prisme droit
+    definition: Solide obtenu en déplaçant une base plane perpendiculairement à elle-même ; V = aire de base × hauteur.
+  - terme: Tronc de cône
+    definition: Partie d'un cône comprise entre la base et une section parallèle à la base.
+  - terme: Génératrice
+    definition: Segment qui joint le sommet d'un cône à un point du cercle de base ; g = √(r² + h²).
+  - terme: Prismatoïde
+    definition: Solide compris entre deux faces planes parallèles dont les faces latérales sont planes ; fouilles et tas en sont des exemples.
+  - terme: Surface latérale
+    definition: Surface des faces latérales d'un solide, sans les bases.
+symboles:
+  - { symbole: 'V', signification: 'volume', unite: 'm³' }
+  - { symbole: 'r, R', signification: 'rayons', unite: 'm' }
+  - { symbole: 'h, H', signification: 'hauteur, profondeur', unite: 'm' }
+  - { symbole: 'A₁, A₂, Aₘ', signification: 'aires du fond, du haut et à mi-hauteur', unite: 'm²' }
+formules:
+  - { nom: 'Prisme, cylindre', tex: 'V = A_{base} \times h', domaine: 'Solides' }
+  - { nom: 'Cône, pyramide', tex: 'V = \frac{A_{base} \times h}{3}', domaine: 'Solides' }
+  - { nom: 'Tronc de cône', tex: 'V = \frac{\pi h}{3}(R^2 + R r + r^2)', domaine: 'Solides' }
+  - { nom: 'Formule des prismatoïdes', tex: 'V = \frac{H}{6}(A_1 + A_2 + 4 A_m)', domaine: 'Fouilles, tas, troncs' }
+---
+
+import { aireDisque, cone, cylindre, EXEMPLE_FOUILLE, fouilleTalutee, sphere, troncCone } from '@/lib/calc/geometrie'
+import { convertir } from '@/lib/calc/unites'
+import { grandeur, nombre } from '@/lib/format'
+import { FouilleIso, SolidesUsuels } from '@/components/schemas/Geometrie'
+
+export const f0 = fouilleTalutee(EXEMPLE_FOUILLE)
+export const tas = cone(1.5, 1.2)
+export const cuve = cylindre(2, 3.5)
+export const cuveL = convertir(cuve.V, 'm³', 'L').valeur
+export const regard = troncCone(0.6, 0.35, 0.5)
+export const enduit = cuve.Slat + aireDisque(2)
+export const ballon = sphere(3)
+
+<Page etape="intuition" titre="L'intuition : la pile de feuilles et le tas de sable">
+
+Empile des feuilles de papier identiques : le volume de la pile vaut l'aire d'une feuille fois la hauteur de la pile. C'est le **prisme**. Remplace les feuilles par des disques : c'est le **cylindre**, un fût, une citerne, un poteau rond.
+
+Maintenant, verse du sable : il forme un **cône**. Il contient exactement **le tiers** du cylindre de même base et de même hauteur. On peut le vérifier en remplissant trois fois un cône de sable pour remplir le cylindre.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer le volume de béton, de terre ou d'eau contenu dans les solides du chantier : poteaux, citernes, tas, fouilles ?
+</Encadre>
+
+<Encadre type="attention">
+Une fouille à parois inclinées n'est ni un prisme ni une pyramide. La méthode rapide « moyenne des aires du haut et du bas » donne un volume **trop grand**. La formule des prismatoïdes donne le volume exact.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les solides usuels">
+
+| solide | volume | surface latérale |
+|---|---|---|
+| pavé L × l × h | $L\,l\,h$ | $2(L + l)\,h$ |
+| prisme droit | $A_{base} \times h$ | périmètre de base × h |
+| cylindre | $\pi r^2 h$ | $2\pi r h$ |
+| cône | $\frac{\pi r^2 h}{3}$ | $\pi r g$, avec $g = \sqrt{r^2 + h^2}$ |
+| pyramide | $\frac{A_{base}\,h}{3}$ | somme des triangles |
+| sphère | $\frac{4}{3}\pi r^3$ | $4\pi r^2$ |
+
+- Le **prisme** et le **cylindre** : aire de base × hauteur.
+- Le **cône** et la **pyramide** : le tiers du prisme ou du cylindre correspondant.
+- La **surface totale** = surface latérale + aires des bases.
+
+<Encadre type="exemple">
+Un tas de sable conique de 1,50 m de rayon et 1,20 m de haut contient {grandeur(tas.V, 2, 'm³')}. Une citerne cylindrique de 2,00 m de rayon et 3,50 m de haut contient {grandeur(cuve.V, 1, 'm³')}, soit {nombre(cuveL, 0)} L.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : les troncs et les fouilles">
+
+### Le tronc de cône
+
+Rayons $R$ (bas) et $r$ (haut), hauteur $h$ : $V = \frac{\pi h}{3}(R^2 + R r + r^2)$. C'est la forme d'un seau, d'un regard conique, d'un pied de pylône.
+
+### La formule des prismatoïdes
+
+Pour un solide limité par deux faces planes parallèles et des faces latérales planes (tronc de pyramide, fouille, tas de terre allongé) :
+
+$$V = \frac{H}{6}(A_1 + A_2 + 4\,A_m)$$
+
+- $A_1$, $A_2$ : aires du fond et du haut (m²) ;
+- $A_m$ : aire de la section **à mi-hauteur** (m²), qu'on calcule avec les dimensions moyennes, pas en faisant la moyenne des aires ;
+- $H$ : hauteur (m).
+
+<Regle type="simplification">
+La « moyenne des aires extrêmes » $\frac{A_1 + A_2}{2} H$ est souvent utilisée sur les chantiers par simplicité. Pour une fouille talutée, elle surestime toujours le volume ; l'écart est faible pour une fouille peu profonde, plus grand pour une fouille profonde à talus doux.
+</Regle>
+
+### Fouille talutée
+
+Avec un fond $a \times b$, une profondeur $H$ et des talus à $n$ pour 1, chaque côté du haut est élargi de $n\,H$ de part et d'autre : le haut mesure $(a + 2nH) \times (b + 2nH)$.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : les solides et leurs volumes">
+
+<SolidesUsuels />
+
+Le cône est au cylindre ce que la pyramide est au prisme : un tiers. Le tronc de cône est un cône dont on a retiré la pointe.
+
+<Encadre type="retenir">
+Pointe (cône, pyramide) : on divise par 3. Pas de pointe (prisme, cylindre) : on ne divise pas. Tronc : formule spéciale, ou prismatoïdes.
+</Encadre>
+
+</Page>
+
+<Vue3D titre="La fouille talutée en perspective" calques={[{ id: 'terrain', libelle: 'Terrain' }, { id: 'fouille', libelle: 'Fouille' }, { id: 'milieu', libelle: 'Section à mi-hauteur', actif: false }, { id: 'cotes', libelle: 'Cotes' }]}>
+
+La fouille est un tronc de pyramide renversé. Active le calque « section à mi-hauteur » : c'est l'aire $A_m$ de la formule des prismatoïdes, calculée avec les dimensions moyennes.
+
+<FouilleIso d={EXEMPLE_FOUILLE} r={f0} />
+
+<Encadre type="retenir">
+Fond {nombre(EXEMPLE_FOUILLE.a, 2)} × {nombre(EXEMPLE_FOUILLE.b, 2)} m, haut {nombre(f0.aSup, 2)} × {nombre(f0.bSup, 2)} m, mi-hauteur {nombre((EXEMPLE_FOUILLE.a + f0.aSup) / 2, 2)} × {nombre((EXEMPLE_FOUILLE.b + f0.bSup) / 2, 2)} m : trois sections, une formule.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="fouille">
+
+<Cahier titre="Exemple résolu : la fouille d'une semelle isolée">
+
+**Énoncé.** Pour couler une semelle isolée, on creuse une fouille dont le fond mesure 1,60 × 1,60 m, profonde de 1,20 m, avec des parois talutées à 0,5 pour 1 (donnée de l'énoncé, à confirmer par le géotechnicien). Calcule le volume exact de terre à extraire et compare avec la méthode de la moyenne des aires.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi des parois inclinées ? Une paroi verticale dans un sol meuble peut s'effondrer sur les ouvriers : on talute ou l'on blinde (L3.4, PP).</Note>
+</Etape>
+
+<Etape n={2} titre="La coupe">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : trois sections, une formule">
+
+<Etape n={3} titre="Les dimensions et les aires">
+<AN k="haut" />
+<AN k="aires" />
+<Note>Pourquoi calculer Aₘ avec les dimensions moyennes ? La moyenne des aires n'est pas l'aire de la section du milieu : c'est justement l'erreur de la méthode rapide.</Note>
+</Etape>
+
+<Etape n={4} titre="Le volume">
+<AN k="V" />
+<AN k="moyenne" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="V" libelle="Volume à extraire" />
+
+<Note couleur="vert">La méthode rapide donnerait <Val k="Vmoyenne" />, soit <Val k="ecart" /> de trop. Le volume de terre foisonnée à évacuer sera encore plus grand (L3.8).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le tiers pour un cône ou une pyramide.">
+Sans le tiers, le tas de sable de l'exemple contiendrait {grandeur(tas.V * 3, 2, 'm³')} au lieu de {grandeur(tas.V, 2, 'm³')}.
+</Piege>
+
+<Piege erreur="utiliser le diamètre à la place du rayon.">
+Un poteau rond de 40 cm de diamètre a un rayon de 0,20 m. Avec le diamètre, le volume est quatre fois trop grand.
+</Piege>
+
+<Piege erreur="calculer l'aire du milieu comme la moyenne des aires.">
+Aₘ = (dimensions moyennes) au carré, pas (A₁ + A₂) / 2. Pour la fouille : {nombre(f0.Amilieu, 2)} m² contre {nombre((f0.Afond + f0.Asup) / 2, 2)} m².
+</Piege>
+
+<Piege erreur="confondre surface latérale et surface totale.">
+Pour coffrer un poteau rond, seule la surface latérale compte ; pour peindre une cuve fermée, il faut aussi les fonds.
+</Piege>
+
+<Piege erreur="mélanger les unités dans un volume.">
+Un rayon en cm et une hauteur en m donnent un résultat faux d'un facteur 10 000. Tout en mètres avant de calculer.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les terrassements** se payent au m³ de déblai en place. Le volume exact d'une fouille talutée est donc un enjeu financier : sur un bâtiment de vingt semelles, la différence entre méthode rapide et formule exacte devient sensible.
+
+<Encadre type="terrain" titre="Parois de fouilles en saison des pluies">
+Dans les sols argileux ou sableux d'Afrique centrale, une fouille verticale peut s'effondrer après une forte pluie. On talute, on blinde, on écarte les déblais du bord et on draine. La pente des talus se fixe avec le géotechnicien et les règles de sécurité ; elle change directement le volume de terre à extraire.
+</Encadre>
+
+**Les réservoirs et citernes** sont souvent cylindriques : leur volume utile se calcule avec la hauteur d'eau, pas la hauteur totale. **Les regards** d'assainissement préfabriqués sont des cylindres ou des troncs de cône.
+
+**Les tas de matériaux** (sable, gravier) livrés sur chantier se contrôlent par un calcul de cône ou de prismatoïde, utile pour vérifier une livraison.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : solides">
+
+### Volumes
+
+pavé $Llh$ · prisme, cylindre : $A_{base} \times h$, $\pi r^2 h$ · cône, pyramide : $\frac{A_{base} h}{3}$ · tronc de cône $\frac{\pi h}{3}(R^2 + Rr + r^2)$ · sphère $\frac{4}{3}\pi r^3$
+
+### Surfaces
+
+cylindre $2\pi r h$ (latérale) · cône $\pi r g$, $g = \sqrt{r^2 + h^2}$ · totale = latérale + bases
+
+### Fouilles et tas (prismatoïdes)
+
+$V = \frac{H}{6}(A_1 + A_2 + 4A_m)$ · $A_m$ avec les dimensions moyennes · fouille talutée : haut $= a + 2nH$ · moyenne des aires : par excès
+
+### Pièges
+
+tiers des pointes · rayon ≠ diamètre · Aₘ ≠ moyenne des aires · tout en mètres
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le tas de sable">
+
+Un tas de sable conique a 1,50 m de rayon et 1,20 m de hauteur. Calcule son volume.
+
+<Indice>Cône : π r² h / 3.</Indice>
+
+<Corrige>
+V = π × 1,5² × 1,2 / 3 = **{grandeur(tas.V, 2, 'm³')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La citerne">
+
+Une citerne cylindrique a 2,00 m de rayon intérieur et 3,50 m de hauteur d'eau. Quelle capacité, en m³ et en litres ? Quelle surface faut-il enduire à l'intérieur (paroi + fond, sans couvercle) ?
+
+<Indice>Surface : latérale + un seul disque.</Indice>
+
+<Corrige>
+V = π × 2² × 3,5 = **{grandeur(cuve.V, 2, 'm³')}** = {nombre(cuveL, 0)} L ; enduit : 2π × 2 × 3,5 + π × 2² = **{grandeur(enduit, 2, 'm²')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le regard conique">
+
+Un regard d'assainissement est un tronc de cône de rayons 0,60 m (bas) et 0,35 m (haut), haut de 0,50 m. Calcule son volume intérieur et la longueur de sa génératrice. Vérifie le volume par la formule des prismatoïdes, avec les rayons moyens.
+
+<Indice>Prismatoïdes : A₁ = π R², A₂ = π r², Aₘ = π ((R + r)/2)².</Indice>
+
+<Corrige>
+
+- V = π × 0,5 / 3 × (0,36 + 0,21 + 0,1225) = **{grandeur(regard.V, 4, 'm³')}** ; génératrice **{grandeur(regard.g, 3, 'm')}**.
+- Prismatoïdes : 0,5 / 6 × (π × 0,36 + π × 0,1225 + 4 π × 0,475²) = {grandeur(regard.V, 4, 'm³')} ✓ (la formule est exacte aussi pour le tronc de cône).
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.5.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le volume d'un cône vaut, par rapport au cylindre de même base et de même hauteur :" choix={['la moitié', 'le tiers', 'le quart', 'le double']} bonne={1} colonnes={4}>
+V = π r² h / 3.
+</QCM>
+
+<QCM n={2} question="Un poteau rond de 40 cm de diamètre et 3 m de haut contient :" choix={[grandeur(cylindre(0.4, 3).V, 3, 'm³'), grandeur(cylindre(0.2, 3).V, 3, 'm³'), '1,200 m³', '0,120 m³']} bonne={1} colonnes={4}>
+Rayon 0,20 m : π × 0,2² × 3.
+</QCM>
+
+<QCM n={3} question="Pour coffrer un poteau rond, on calcule :" choix={['son volume', 'sa surface latérale', 'sa surface totale', 'l’aire de sa base']} bonne={1} colonnes={2}>
+Le coffrage entoure le poteau.
+</QCM>
+
+<QCM n={4} question="Dans la formule des prismatoïdes, Aₘ est :" choix={['la moyenne des aires du haut et du bas', 'l’aire de la section à mi-hauteur', 'l’aire du fond', 'le périmètre moyen']} bonne={1} colonnes={2}>
+Calculée avec les dimensions moyennes.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>La fouille de l'exemple (fond 1,60 × 1,60, H = 1,20, talus 0,5/1) a un volume de :</>} choix={[grandeur(f0.Vmoyenne, 2, 'm³'), grandeur(f0.V, 2, 'm³'), grandeur(f0.Afond * EXEMPLE_FOUILLE.H, 2, 'm³'), grandeur(f0.Asup * EXEMPLE_FOUILLE.H, 2, 'm³')]} bonne={1} colonnes={4}>
+Prismatoïdes : {grandeur(f0.V, 3, 'm³')}.
+</QCM>
+
+<QCM n={6} question="La méthode de la moyenne des aires, pour une fouille talutée :" choix={['est exacte', 'surestime le volume', 'sous-estime le volume', 'n’a aucun rapport']} bonne={1} colonnes={2}>
+Elle donne toujours trop.
+</QCM>
+
+<QCM n={7} question="Le volume d'une sphère de 3 m de rayon vaut :" choix={[grandeur(ballon.V / 3, 1, 'm³'), grandeur(ballon.V, 1, 'm³'), grandeur(ballon.S, 1, 'm³'), '36 m³']} bonne={1} colonnes={4}>
+4/3 × π × 27 = 36π.
+</QCM>
+
+<QCM n={8} question="La génératrice d'un cône de rayon 3 m et de hauteur 4 m mesure :" choix={['7 m', `${nombre(cone(3, 4).g, 0)} m`, '12 m', '1 m']} bonne={1} colonnes={4}>
+√(9 + 16) : Pythagore.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,306 @@
+---
+id: N0.5.4
+titre: "Repérage : coordonnées cartésiennes et polaires"
+objectifs:
+  - Placer un point par ses coordonnées cartésiennes dans un repère orthonormé
+  - Calculer la distance, la direction et le milieu entre deux points
+  - Passer des coordonnées polaires aux coordonnées cartésiennes et inversement
+  - Implanter un point par rayonnement depuis une station
+relecture: false
+normes: []
+glossaire:
+  - terme: Repère orthonormé
+    definition: Deux axes perpendiculaires gradués avec la même unité, qui se coupent à l'origine O.
+  - terme: Coordonnées cartésiennes
+    definition: Couple (x ; y) qui repère un point par ses distances aux axes.
+  - terme: Coordonnées polaires
+    definition: Couple (r ; θ) qui repère un point par sa distance à l'origine et l'angle de sa direction.
+  - terme: Rayonnement
+    definition: "Méthode d'implantation ou de levé : depuis une station, on vise chaque point par un angle et une distance."
+  - terme: Gisement
+    definition: En topographie, angle d'une direction compté depuis le nord, dans le sens des aiguilles d'une montre (souvent en grades).
+symboles:
+  - { symbole: '(x ; y)', signification: 'coordonnées cartésiennes', unite: 'm' }
+  - { symbole: '(r ; θ)', signification: 'coordonnées polaires', unite: 'm ; °' }
+  - { symbole: 'Δx, Δy', signification: 'écarts de coordonnées', unite: 'm' }
+formules:
+  - { nom: 'Distance entre deux points', tex: 'd = \sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}', domaine: 'Repère orthonormé' }
+  - { nom: 'Polaire vers cartésien', tex: 'x = r\cos\theta,\ y = r\sin\theta', domaine: 'Repérage' }
+  - { nom: 'Milieu', tex: 'M\left(\frac{x_A + x_B}{2} ; \frac{y_A + y_B}{2}\right)', domaine: 'Repérage' }
+---
+
+import { cartVersPolaire, polaireVersCart, rayonnement, segment } from '@/lib/calc/geometrie'
+import { atanD } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { RepereSegment } from '@/components/schemas/Geometrie'
+
+export const A0 = { x: 2, y: 1 }
+export const B0 = { x: 8, y: 9 }
+export const s0 = segment(A0, B0)
+export const ex1 = segment({ x: 10, y: 4 }, { x: 22, y: 9 })
+export const ex2 = polaireVersCart(25, 140)
+export const p2 = cartVersPolaire(-6, 8)
+export const S = { x: 500, y: 300 }
+export const pts = [{ nom: 'P1', d: 18.5, t: 35 }, { nom: 'P2', d: 24.2, t: 112 }, { nom: 'P3', d: 15.8, t: 250 }].map((p) => ({ ...p, ...rayonnement(S, p.d, p.t) }))
+export const brut = atanD(8 / -6)
+export const d13 = segment(pts[0], pts[2]).d
+
+<Page etape="intuition" titre="L'intuition : le plan de la ville et le guide">
+
+Pour retrouver une maison dans un quartier en damier, on peut dire « 3e avenue, 5e rue » : deux nombres, comptés sur deux directions perpendiculaires. Ce sont des **coordonnées cartésiennes**.
+
+Un guide sur une colline dirait plutôt : « regarde dans cette direction, à 300 mètres ». Une direction et une distance : ce sont des **coordonnées polaires**. Le topographe utilise les deux : il mesure en polaire (un angle, une distance) et calcule en cartésien (x, y).
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment repérer un point, calculer une distance ou une direction, et passer d'une façon de repérer à l'autre ?
+</Encadre>
+
+<Encadre type="attention">
+En mathématiques, l'angle se compte depuis l'axe x, dans le sens inverse des aiguilles d'une montre. En topographie, le gisement se compte depuis le **nord**, dans le **sens des aiguilles d'une montre**. Les formules changent : on vérifie toujours la convention (L1.8).
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : coordonnées cartésiennes">
+
+### Le repère
+
+Deux axes perpendiculaires, gradués en mètres, se coupent à l'origine O. Un point est repéré par $(x ; y)$.
+
+### Distance, direction, milieu
+
+Entre $A(x_A ; y_A)$ et $B(x_B ; y_B)$ :
+
+- écarts : $\Delta x = x_B - x_A$ et $\Delta y = y_B - y_A$ (avec leurs signes) ;
+- distance : $d = \sqrt{\Delta x^2 + \Delta y^2}$ (Pythagore, N0.4.2) ;
+- direction : $\tan\theta = \frac{\Delta y}{\Delta x}$, le **quadrant** étant donné par les signes de $\Delta x$ et $\Delta y$ ;
+- milieu : $M\left(\frac{x_A + x_B}{2} ; \frac{y_A + y_B}{2}\right)$.
+
+<Encadre type="exemple">
+A(2 ; 1) et B(8 ; 9) : Δx = {nombre(s0.dx, 0)}, Δy = {nombre(s0.dy, 0)}, d = {grandeur(s0.d, 0, 'm')}, θ = {nombre(s0.theta, 2)}°, milieu ({nombre(s0.milieu.x, 0)} ; {nombre(s0.milieu.y, 0)}).
+</Encadre>
+
+<Regle type="simplification">
+La touche tan⁻¹ de la calculatrice ne rend qu'un angle entre −90° et 90° : elle ne voit pas le quadrant. Un Δx négatif impose d'ajouter 180°. Les tableurs et la fonction ATAN2 font ce travail automatiquement.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : coordonnées polaires">
+
+### Polaire → cartésien
+
+Un point à la distance $r$ de l'origine, dans la direction θ :
+
+$$x = r\cos\theta \qquad y = r\sin\theta$$
+
+C'est exactement la décomposition d'une force en composantes (N0.4.4).
+
+### Cartésien → polaire
+
+$r = \sqrt{x^2 + y^2}$ et θ se déduit de $\tan\theta = y / x$, en tenant compte du quadrant. Exemple : (−6 ; 8) donne r = {nombre(p2.r, 0)} et θ = {nombre(p2.theta, 2)}° (deuxième quadrant).
+
+### Le rayonnement
+
+Depuis une station $S(x_S ; y_S)$, un point visé à la distance $d$ dans la direction θ a pour coordonnées :
+
+$$x = x_S + d\cos\theta \qquad y = y_S + d\sin\theta$$
+
+C'est la méthode de base du levé et de l'implantation à la station totale.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : deux bornes dans un repère">
+
+<RepereSegment A={A0} B={B0} s={s0} />
+
+Les écarts Δx (bleu) et Δy (vert) forment un triangle rectangle dont la distance AB (rouge) est l'hypoténuse. Le milieu M est à mi-chemin sur chaque axe.
+
+<Encadre type="retenir">
+Toute distance entre deux points connus en coordonnées se calcule sans la mesurer : c'est ainsi que l'on contrôle une implantation.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="coordonnees">
+
+<Cahier titre="Exemple résolu : la distance entre deux bornes">
+
+**Énoncé.** Sur le plan de bornage d'une parcelle, les bornes A et B ont pour coordonnées, dans le repère local du géomètre, A(2,40 ; 1,50) et B(14,10 ; 9,30), en mètres. Calcule la distance AB, sa direction (angle avec l'axe x) et les coordonnées du milieu, où l'on veut planter un piquet.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un repère local ? Le géomètre choisit souvent une origine proche du terrain pour garder des nombres simples ; les coordonnées officielles viendront en L1.8.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : écarts, distance, direction">
+
+<Etape n={3} titre="Les écarts">
+<AN k="deltas" />
+</Etape>
+
+<Etape n={4} titre="Distance, direction, milieu">
+<AN k="d" />
+<AN k="theta" />
+<AN k="milieu" />
+<Note>Pourquoi parler du quadrant ? Si B était à gauche de A, Δx serait négatif : la direction serait de l'autre côté, et tan⁻¹ seul se tromperait de 180°.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="d" libelle="Distance AB" />
+
+<Note couleur="vert">Direction <Val k="theta" />, milieu <Val k="milieu" />. Sur le terrain, on contrôle en mesurant AB au ruban.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le signe des écarts.">
+Δx = xB − xA, dans cet ordre. Un signe perdu place le point du mauvais côté et fausse la direction.
+</Piege>
+
+<Piege erreur="se fier à tan⁻¹ quand Δx est négatif.">
+Pour (−6 ; 8), tan⁻¹(8 / −6) donne {nombre(brut, 2)}°, alors que la direction réelle est {nombre(p2.theta, 2)}° : il faut ajouter 180°.
+</Piege>
+
+<Piege erreur="inverser x et y.">
+Les coordonnées s'écrivent (x ; y) : abscisse d'abord. En topographie, on écrit souvent (E ; N), est puis nord : vérifie l'en-tête du tableau.
+</Piege>
+
+<Piege erreur="utiliser les formules mathématiques avec un gisement topographique.">
+Avec un angle compté depuis le nord dans le sens horaire, x = d sin G et y = d cos G : sinus et cosinus sont échangés.
+</Piege>
+
+<Piege erreur="mélanger deux repères.">
+Des coordonnées relevées dans deux repères différents (local et officiel) ne se combinent pas sans transformation.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**La station totale** mesure des angles et des distances (polaires) ; son carnet ou son logiciel calcule les coordonnées (cartésiennes) de chaque point. À l'implantation, on fait l'inverse : on part des coordonnées du plan pour calculer l'angle et la distance à reporter.
+
+<Encadre type="terrain" titre="GPS et coordonnées en RDC">
+Les récepteurs GPS donnent des coordonnées géographiques (latitude, longitude) ou projetées (en mètres, par exemple en UTM, zones 33 à 36 selon la longitude pour la RDC). Pour un chantier, on travaille en coordonnées planes en mètres, dans un repère choisi et noté sur les plans. Les détails seront vus en topographie (L1.8, L2.9).
+</Encadre>
+
+**Le bornage** : les bornes d'une parcelle sont définies par leurs coordonnées ; on les replace sur le terrain par rayonnement depuis des points connus.
+
+**Le contrôle** : une fois les points implantés, on mesure quelques distances entre eux et on les compare aux distances calculées par les coordonnées.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : repérage">
+
+### Cartésien
+
+$\Delta x = x_B - x_A$ · $\Delta y = y_B - y_A$ · $d = \sqrt{\Delta x^2 + \Delta y^2}$ · milieu $\left(\frac{x_A + x_B}{2} ; \frac{y_A + y_B}{2}\right)$ · direction : tan θ = Δy/Δx **et** quadrant
+
+### Polaire
+
+$x = r\cos\theta$ · $y = r\sin\theta$ · $r = \sqrt{x^2 + y^2}$
+
+### Rayonnement depuis S
+
+$x = x_S + d\cos\theta$ · $y = y_S + d\sin\theta$
+
+### Conventions
+
+maths : θ depuis x, sens trigonométrique · topographie : gisement depuis le nord, sens horaire, souvent en gon (sin et cos échangés)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Distance et milieu">
+
+Calcule la distance et le milieu entre A(10 ; 4) et B(22 ; 9).
+
+<Indice>Δx = 12, Δy = 5.</Indice>
+
+<Corrige>
+d = √(12² + 5²) = **{grandeur(ex1.d, 0, 'm')}** ; milieu **({nombre(ex1.milieu.x, 0)} ; {nombre(ex1.milieu.y, 1)})** ; direction {nombre(ex1.theta, 2)}°.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="De polaire à cartésien">
+
+Un point est à 25 m de l'origine, dans la direction 140° (convention mathématique). Calcule ses coordonnées. Puis donne les coordonnées polaires du point (−6 ; 8).
+
+<Indice>x = r cos θ, y = r sin θ ; attention au quadrant pour (−6 ; 8).</Indice>
+
+<Corrige>
+(25 ; 140°) → **({nombre(ex2.x, 2)} ; {nombre(ex2.y, 2)})** ; (−6 ; 8) → **r = {nombre(p2.r, 0)}**, **θ = {nombre(p2.theta, 2)}°**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un levé par rayonnement">
+
+Une station S a pour coordonnées ({S.x} ; {S.y}). On vise trois points : {pts.map((p) => `${p.nom} à ${nombre(p.d, 1)} m et ${p.t}°`).join(' ; ')}. Calcule leurs coordonnées, puis la distance P1–P3.
+
+<Indice>x = xS + d cos θ, y = yS + d sin θ, puis la formule de distance.</Indice>
+
+<Corrige>
+
+{pts.map((p) => `${p.nom} (${nombre(p.x, 2)} ; ${nombre(p.y, 2)})`).join(' ; ')}. Distance P1–P3 : **{grandeur(d13, 2, 'm')}**.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.5.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La distance entre A(2 ; 1) et B(8 ; 9) vaut :" choix={['14', `${nombre(s0.d, 0)}`, '8', '100']} bonne={1} colonnes={4}>
+√(6² + 8²) = 10.
+</QCM>
+
+<QCM n={2} question="Le milieu de [AB] avec A(2 ; 1) et B(8 ; 9) est :" choix={['(6 ; 8)', `(${nombre(s0.milieu.x, 0)} ; ${nombre(s0.milieu.y, 0)})`, '(10 ; 10)', '(3 ; 4)']} bonne={1} colonnes={4}>
+Moyenne des x, moyenne des y.
+</QCM>
+
+<QCM n={3} question="Un point à 10 m dans la direction 30° a pour abscisse :" choix={['5 m', `${nombre(polaireVersCart(10, 30).x, 2)} m`, '10 m', '0,5 m']} bonne={1} colonnes={4}>
+x = 10 cos 30°.
+</QCM>
+
+<QCM n={4} question="Pour (−6 ; 8), la direction θ vaut :" choix={[`${nombre(brut, 2)}°`, `${nombre(p2.theta, 2)}°`, `${nombre(-brut, 2)}°`, `${nombre(p2.theta + 180, 2)}°`]} bonne={1} colonnes={4}>
+Deuxième quadrant : 180° − {nombre(-brut, 2)}°.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="En topographie, le gisement est compté :" choix={['depuis l’axe x, sens trigonométrique', 'depuis le nord, sens des aiguilles d’une montre', 'depuis le sud', 'depuis la verticale']} bonne={1}>
+Convention topographique, souvent en grades.
+</QCM>
+
+<QCM n={6} question="Le rayonnement consiste à repérer un point par :" choix={['deux distances', 'un angle et une distance depuis une station', 'trois angles', 'sa surface']} bonne={1}>
+Coordonnées polaires depuis la station.
+</QCM>
+
+<QCM n={7} question="Δx = xB − xA est négatif. Cela signifie :" choix={['une erreur', 'que B est à gauche de A (x plus petit)', 'que la distance est négative', 'que B est plus haut']} bonne={1}>
+Le signe donne le sens ; la distance reste positive.
+</QCM>
+
+<QCM n={8} question="La touche tan⁻¹ de la calculatrice :" choix={['donne toujours la bonne direction', 'ne tient pas compte du quadrant', 'donne un angle en grades', 'donne la distance']} bonne={1}>
+Elle renvoie un angle entre −90° et 90°.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

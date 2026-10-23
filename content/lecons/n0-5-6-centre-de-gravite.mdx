@@ -1,0 +1,303 @@
+---
+id: N0.5.6
+titre: Centre de gravité de surfaces simples
+objectifs:
+  - Situer le centre de gravité des surfaces simples (rectangle, triangle, disque)
+  - Utiliser les symétries pour trouver une coordonnée sans calcul
+  - Calculer le centre de gravité d'une surface composée, trous compris
+  - Situer le centre de gravité d'une section en T et d'un mur poids
+relecture: false
+normes: []
+glossaire:
+  - terme: Centre de gravité
+    definition: Point où l'on peut considérer qu'agit tout le poids d'un objet ; pour une surface plane homogène, c'est son centre géométrique.
+  - terme: Moment statique
+    definition: Produit d'une aire par la distance de son centre de gravité à un axe, en m³ ou cm³.
+  - terme: Axe de symétrie
+    definition: Droite qui partage une figure en deux moitiés superposables ; le centre de gravité est sur cet axe.
+  - terme: Section en T
+    definition: Section de poutre formée d'une table horizontale et d'une âme verticale, typique des planchers en béton armé.
+  - terme: Mur poids
+    definition: Mur de soutènement qui résiste à la poussée des terres par son propre poids.
+symboles:
+  - { symbole: 'G', signification: 'centre de gravité', unite: '—' }
+  - { symbole: 'xG, yG', signification: 'coordonnées du centre de gravité', unite: 'm ou cm' }
+  - { symbole: 'Aᵢ', signification: 'aire du morceau i (négative pour un trou)', unite: 'm² ou cm²' }
+  - { symbole: 'xᵢ, yᵢ', signification: 'centre de gravité du morceau i', unite: 'm ou cm' }
+formules:
+  - { nom: 'Centre de gravité d’une surface composée', tex: 'x_G = \frac{\sum A_i\,x_i}{\sum A_i},\quad y_G = \frac{\sum A_i\,y_i}{\sum A_i}', domaine: 'Surfaces planes homogènes' }
+  - { nom: 'Triangle', tex: 'G \text{ au tiers de la hauteur depuis la base}', domaine: 'Surfaces planes' }
+---
+
+import { EXEMPLE_SECTION_T, gravite, rectangle, sectionT, triangleMorceau } from '@/lib/calc/geometrie'
+import { grandeur, nombre } from '@/lib/format'
+import { SectionTSchema } from '@/components/schemas/Geometrie'
+
+export const t0 = sectionT(EXEMPLE_SECTION_T)
+export const [ame, table] = t0.morceaux
+export const moySimple = (ame.y + table.y) / 2
+export const ex1m = [rectangle('bande basse', 0, 0, 4, 1), rectangle('bande verticale', 0, 1, 1, 3)]
+export const ex1 = gravite(ex1m)
+export const ex2 = gravite([rectangle('plaque', 0, 0, 4, 2), rectangle('trou', 2.5, 0.5, 1, 1, true)])
+export const mur = [rectangle('partie rectangulaire', 1, 0, 0.5, 3), triangleMorceau('partie triangulaire', { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 3 })]
+export const ex3 = gravite(mur)
+
+<Page etape="intuition" titre="L'intuition : l'équilibre sur un doigt">
+
+Pose une règle sur ton doigt : elle tient en équilibre quand ton doigt est exactement au milieu. Avec une plaque en L découpée dans du carton, le point d'équilibre n'est plus au milieu de rien : il se rapproche de la partie la plus lourde, et peut même tomber **en dehors** de la plaque.
+
+Ce point d'équilibre est le **centre de gravité**. Pour l'ingénieur, il dit où agit le poids d'un mur, d'une semelle ou d'une poutre ; et pour une section de poutre, il fixe l'axe autour duquel elle fléchit (L2.4).
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment trouver le centre de gravité d'une surface composée de rectangles, de triangles, et même trouée ?
+</Encadre>
+
+<Encadre type="attention">
+Le centre de gravité d'une surface en L ou en U peut se trouver **hors** de la matière. Ce n'est pas une erreur de calcul.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : surfaces simples et symétries">
+
+### Les surfaces simples
+
+| surface | position du centre de gravité |
+|---|---|
+| rectangle | au croisement des diagonales (le centre) |
+| disque | au centre |
+| triangle | au croisement des médianes, au **tiers de la hauteur** depuis chaque base ; coordonnées = moyenne des trois sommets |
+| demi-disque de rayon r | sur l'axe, à $\frac{4r}{3\pi}$ du diamètre |
+
+### Les symétries
+
+Si une surface a un **axe de symétrie**, son centre de gravité est sur cet axe. Avec deux axes, il est à leur intersection. Une section en T symétrique a donc son centre de gravité sur l'axe de l'âme : il ne reste qu'une coordonnée à calculer.
+
+<Regle type="simplification">
+On parle ici de surfaces planes **homogènes** (même matériau, même épaisseur partout). Pour une section en béton armé, les aciers déplacent légèrement le centre de gravité ; on en tiendra compte en béton armé (M1.1).
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : surfaces composées">
+
+### La méthode
+
+1. Choisir un repère (souvent un coin, ou le bas de la section).
+2. Découper la surface en morceaux simples, de centres connus.
+3. Pour chaque morceau : aire $A_i$, coordonnées $x_i$, $y_i$, produits $A_i x_i$ et $A_i y_i$.
+4. Calculer :
+
+$$x_G = \frac{\sum A_i\,x_i}{\sum A_i} \qquad y_G = \frac{\sum A_i\,y_i}{\sum A_i}$$
+
+Les sommes $\sum A_i y_i$ et $\sum A_i x_i$ s'appellent les **moments statiques**.
+
+### Les trous
+
+Un trou se compte comme un morceau d'**aire négative** : on retire sa contribution.
+
+### Le tableau
+
+On présente toujours le calcul en tableau : une ligne par morceau, colonnes $A_i$, $x_i$, $y_i$, $A_i x_i$, $A_i y_i$. Le tableau se relit et se contrôle facilement.
+
+<Encadre type="retenir">
+Le centre de gravité est une **moyenne pondérée par les aires** : il se rapproche des gros morceaux.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la section en T">
+
+<SectionTSchema d={EXEMPLE_SECTION_T} r={t0} />
+
+L'âme (bleue) et la table (ocre) ont presque la même aire, mais la table est en haut : le centre de gravité G remonte bien au-dessus du milieu de la hauteur. C'est la forme des poutres coulées avec la dalle qu'elles portent.
+
+<Encadre type="retenir">
+Mi-hauteur : {nombre(EXEMPLE_SECTION_T.h / 2, 0)} cm ; centre de gravité : {nombre(t0.yG, 2)} cm. La table « tire » G vers le haut.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="gravite">
+
+<Cahier titre="Exemple résolu : le centre de gravité d'une poutre en T">
+
+**Énoncé.** Une poutre de plancher a une section en T : table de 60 cm de large et 12 cm d'épaisseur, âme de 20 cm de large, hauteur totale 50 cm. Situe son centre de gravité.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi des cm ? Les sections de poutres se donnent en cm ; les aires seront en cm² et les moments statiques en cm³.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le tableau des morceaux">
+
+<Etape n={3} titre="Les morceaux">
+<AN k="morceaux" />
+<Note>Pourquoi l'origine en bas ? Toutes les ordonnées sont positives, et l'on obtient directement la distance à la fibre inférieure, utile en résistance des matériaux.</Note>
+</Etape>
+
+<Etape n={4} titre="La moyenne pondérée">
+<AN k="yG" />
+<AN k="sup" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="yG" libelle="Centre de gravité (depuis le bas)" />
+
+<Note couleur="vert">Aire totale <Val k="A" /> ; distance à la fibre supérieure <Val k="vSup" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="faire la moyenne des centres sans pondérer par les aires.">
+({nombre(ame.y, 0)} + {nombre(table.y, 0)}) / 2 = {nombre(moySimple, 1)} cm n'est pas le résultat : chaque centre compte proportionnellement à l'aire de son morceau ({nombre(t0.yG, 2)} cm ici).
+</Piege>
+
+<Piege erreur="compter un trou en aire positive.">
+Un trou se retranche : aire négative, et son moment statique aussi.
+</Piege>
+
+<Piege erreur="placer le centre d'un triangle à mi-hauteur.">
+Il est au **tiers** de la hauteur depuis la base, aux deux tiers depuis le sommet.
+</Piege>
+
+<Piege erreur="changer de repère en cours de calcul.">
+Toutes les coordonnées xᵢ et yᵢ doivent être mesurées depuis la même origine.
+</Piege>
+
+<Piege erreur="croire que G doit être dans la matière.">
+Pour une surface en L, en U ou percée, G peut tomber dans le vide.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les poutres en T** sont partout dans les planchers en béton armé : la dalle coulée avec la poutre forme la table. La position du centre de gravité est le point de départ du calcul de leur résistance (L2.4, M1.1).
+
+<Encadre type="terrain" titre="Murs de soutènement en saison des pluies">
+Un mur poids tient la terre par son propre poids. Sa stabilité dépend de l'endroit où agit ce poids, c'est-à-dire de son centre de gravité, comparé à la poussée des terres qui augmente fortement quand le sol est gorgé d'eau. Le calcul de stabilité se fait en L3.6 et M1.4 ; il commence par le centre de gravité de la section (exercice 3).
+</Encadre>
+
+**Le levage** : on accroche une charge au-dessus de son centre de gravité pour qu'elle reste horizontale. Un linteau ou une poutre préfabriquée mal élingués basculent.
+
+**Les semelles** : une semelle dont le centre ne coïncide pas avec l'axe de la charge (semelle excentrée en limite de propriété) travaille mal ; on la compense par une longrine (M1.4).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : centre de gravité">
+
+### Surfaces simples
+
+rectangle, disque : au centre · triangle : moyenne des sommets, au tiers de la hauteur depuis la base · demi-disque : $\frac{4r}{3\pi}$ du diamètre
+
+### Symétrie
+
+G sur chaque axe de symétrie
+
+### Surface composée
+
+$x_G = \frac{\sum A_i x_i}{\sum A_i}$ · $y_G = \frac{\sum A_i y_i}{\sum A_i}$ · trou : $A_i < 0$ · un repère unique · tableau Aᵢ, xᵢ, yᵢ, Aᵢxᵢ, Aᵢyᵢ
+
+### Section en T (exemple)
+
+60 × 12 / 20 × 50 cm : $y_G$ = {nombre(t0.yG, 2)} cm depuis le bas
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une plaque en L">
+
+Une plaque en L est formée d'une bande basse de 4 × 1 m (coin en (0 ; 0)) et d'une bande verticale de 1 × 3 m posée dessus, à gauche (de (0 ; 1) à (1 ; 4)). Trouve son centre de gravité.
+
+<Indice>Deux rectangles : centres (2 ; 0,5) et (0,5 ; 2,5).</Indice>
+
+<Corrige>
+A = {nombre(ex1.A, 0)} m² ; xG = (4 × 2 + 3 × 0,5) / 7 = **{nombre(ex1.xG, 3)} m** ; yG = (4 × 0,5 + 3 × 2,5) / 7 = **{nombre(ex1.yG, 3)} m**. Le point ({nombre(ex1.xG, 2)} ; {nombre(ex1.yG, 2)}) est **hors** de la plaque : c'est normal pour un L.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une platine percée">
+
+Une platine métallique de 4 × 2 (coin en (0 ; 0)) est percée d'un trou carré de 1 × 1 centré en (3 ; 1). Trouve son centre de gravité.
+
+<Indice>Le trou est un morceau d'aire −1.</Indice>
+
+<Corrige>
+A = 8 − 1 = **{nombre(ex2.A, 0)}** ; xG = (8 × 2 − 1 × 3) / 7 = **{nombre(ex2.xG, 3)}** ; yG = **{nombre(ex2.yG, 0)}** (axe de symétrie horizontal). G s'éloigne du trou.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le mur poids">
+
+Un mur de soutènement a une section trapézoïdale : base de 1,50 m, sommet de 0,50 m, hauteur 3,00 m, face arrière verticale (côté terre, à droite) et face avant inclinée. Les sommets sont (0 ; 0), (1,5 ; 0), (1,5 ; 3) et (1 ; 3). Situe son centre de gravité.
+
+<Indice>Découpe en un rectangle (de x = 1 à 1,5) et un triangle de sommets (0 ; 0), (1 ; 0), (1 ; 3).</Indice>
+
+<Corrige>
+
+{mur.map((x) => `${x.nom} : A = ${nombre(x.A, 2)} m², centre (${nombre(x.x, 3)} ; ${nombre(x.y, 3)})`).join(' ; ')}.
+
+xG = **{grandeur(ex3.xG, 3, 'm')}** et yG = **{grandeur(ex3.yG, 3, 'm')}** depuis le coin avant bas. Le poids agit à {nombre(ex3.xG, 2)} m de l'arête avant : c'est le bras de levier qui s'opposera au basculement (L3.6).
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.5.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le centre de gravité d'un triangle est situé :" choix={['à mi-hauteur', 'au tiers de la hauteur depuis la base', 'au sommet', 'sur la base']} bonne={1} colonnes={2}>
+Au croisement des médianes.
+</QCM>
+
+<QCM n={2} question="Une surface a un axe de symétrie vertical. Son centre de gravité :" choix={['est sur cet axe', 'est à gauche', 'est à droite', 'n’existe pas']} bonne={0} colonnes={2}>
+Les deux moitiés se compensent.
+</QCM>
+
+<QCM n={3} question="Dans le calcul d'un centre de gravité, un trou se compte :" choix={['en aire positive', 'en aire négative', 'on l’ignore', 'deux fois']} bonne={1} colonnes={2}>
+On retire sa contribution.
+</QCM>
+
+<QCM n={4} question="Le centre de gravité d'une surface en L :" choix={['est toujours dans la matière', 'peut se trouver hors de la matière', 'est au coin', 'est au milieu de la grande aile']} bonne={1} colonnes={2}>
+Moyenne pondérée de deux morceaux éloignés.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour la section en T 60 × 12 / 20 × 50 cm, yG vaut environ :</>} choix={[`${nombre(EXEMPLE_SECTION_T.h / 2, 2)} cm`, `${nombre(t0.yG, 2)} cm`, `${nombre(table.y, 2)} cm`, `${nombre(moySimple, 2)} cm`]} bonne={1} colonnes={4}>
+Moyenne pondérée : {nombre(t0.Sx, 0)} / {nombre(t0.A, 0)}.
+</QCM>
+
+<QCM n={6} question="La formule xG = Σ Aᵢ xᵢ / Σ Aᵢ est :" choix={['une moyenne simple', 'une moyenne pondérée par les aires', 'une somme', 'une différence']} bonne={1} colonnes={2}>
+Les gros morceaux comptent plus.
+</QCM>
+
+<QCM n={7} question="Pour lever un linteau sans qu'il bascule, on l'accroche :" choix={['à une extrémité', 'au-dessus de son centre de gravité', 'n’importe où', 'au tiers']} bonne={1} colonnes={2}>
+Le poids passe alors par le crochet.
+</QCM>
+
+<QCM n={8} question="Les coordonnées xᵢ et yᵢ des morceaux doivent être mesurées :" choix={['chacune depuis son propre coin', 'depuis une même origine', 'depuis le centre du morceau', 'en valeur absolue']} bonne={1}>
+Un repère unique pour tout le calcul.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

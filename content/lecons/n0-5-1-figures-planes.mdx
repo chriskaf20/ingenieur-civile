@@ -1,0 +1,305 @@
+---
+id: N0.5.1
+titre: "Figures planes : périmètres et aires"
+objectifs:
+  - Calculer le périmètre et l'aire des figures usuelles
+  - Découper une surface composée en figures simples, en ajoutant ou en retranchant
+  - Calculer l'aire d'une parcelle à partir des coordonnées de ses sommets
+  - Distinguer contour, surface et volume dans un métré
+relecture: false
+normes: []
+glossaire:
+  - terme: Périmètre
+    definition: Longueur du contour d'une figure, en m.
+  - terme: Aire
+    definition: Mesure de la surface d'une figure, en m².
+  - terme: Surface composée
+    definition: Surface qu'on découpe en figures simples dont on additionne ou retranche les aires.
+  - terme: Trémie
+    definition: Ouverture réservée dans une dalle pour un escalier, une gaine ou un conduit.
+  - terme: Formule du lacet
+    definition: Formule qui donne l'aire d'un polygone à partir des coordonnées de ses sommets.
+symboles:
+  - { symbole: 'A', signification: 'aire', unite: 'm²' }
+  - { symbole: 'P', signification: 'périmètre', unite: 'm' }
+  - { symbole: 'r', signification: 'rayon', unite: 'm' }
+  - { symbole: 'θ', signification: 'angle d’un secteur', unite: '°' }
+formules:
+  - { nom: 'Trapèze', tex: 'A = \frac{(B + b)\,h}{2}', domaine: 'Figures planes' }
+  - { nom: 'Disque', tex: 'A = \pi r^2,\ P = 2\pi r', domaine: 'Figures planes' }
+  - { nom: 'Formule du lacet', tex: 'A = \tfrac{1}{2}\left|\sum (x_i\,y_{i+1} - x_{i+1}\,y_i)\right|', domaine: 'Polygone par coordonnées' }
+---
+
+import { aireDisque, aireHeron, airePolygone, aireRectangle, aireTrapeze, aireTriangle, dalleL, EXEMPLE_DALLE_L, perimetreCercle, perimetrePolygone, secteur, termesLacet } from '@/lib/calc/geometrie'
+import { grandeur, nombre } from '@/lib/format'
+import { FiguresUsuelles } from '@/components/schemas/Geometrie'
+
+export const d0 = dalleL(EXEMPLE_DALLE_L)
+export const parcelle = [{ x: 0, y: 0 }, { x: 20, y: 0 }, { x: 16, y: 15 }, { x: 0, y: 12 }]
+export const Ap = airePolygone(parcelle)
+export const Pp = perimetrePolygone(parcelle)
+export const ex1 = { trap: aireTrapeze(12, 8, 6), disque: aireDisque(1.5), cercle: perimetreCercle(1.5) }
+export const ex2 = { fenetre: aireRectangle(1.2, 1.5) + secteur(0.6, 180).aire, arc: secteur(0.6, 180).arc }
+export const dec = [aireRectangle(16, 12), aireTriangle(4, 15), aireTriangle(16, 3)]
+export const heron = aireHeron(30, 25, 40)
+
+<Page etape="intuition" titre="L'intuition : le carreleur et le géomètre">
+
+Un carreleur doit couvrir le sol d'une pièce en L. Il ne connaît pas de « formule de la pièce en L ». Il fait mieux : il **découpe** la pièce en deux rectangles, calcule chacun et additionne. S'il y a un poteau au milieu, il **retranche** sa surface.
+
+Le géomètre, lui, ne voit pas des rectangles : il a relevé les **coordonnées** des bornes d'une parcelle irrégulière. Une formule toute simple transforme ces coordonnées en surface.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer l'aire et le contour de n'importe quelle surface rencontrée sur un chantier : dalle, parcelle, façade, ouverture ?
+</Encadre>
+
+<Encadre type="attention">
+Un **périmètre** est une longueur (m), une **aire** est une surface (m²). On commande des bordures au mètre, du carrelage au mètre carré, du béton au mètre cube : confondre les trois coûte cher.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les figures usuelles">
+
+| figure | aire | périmètre |
+|---|---|---|
+| rectangle L × l | $L\,l$ | $2(L + l)$ |
+| triangle (base b, hauteur h) | $\frac{b\,h}{2}$ | somme des côtés |
+| trapèze (bases B et b, hauteur h) | $\frac{(B + b)\,h}{2}$ | somme des côtés |
+| disque de rayon r | $\pi r^2$ | $2\pi r$ |
+| secteur d'angle θ (°) | $\pi r^2 \frac{\theta}{360}$ | arc $2\pi r \frac{\theta}{360}$ + 2 r |
+
+- La **hauteur** d'un triangle ou d'un trapèze est toujours **perpendiculaire** à la base.
+- Pour un triangle dont on connaît les trois côtés, la **formule de Héron** donne l'aire : $A = \sqrt{p(p-a)(p-b)(p-c)}$ avec $p$ le demi-périmètre. Exemple : 30, 25 et 40 m donnent {grandeur(heron, 1, 'm²')}, comme ½ bc sin A en N0.4.5.
+
+<Regle type="simplification">
+On écrit π avec toutes ses décimales dans la calculatrice (touche π), pas « 3,14 » : l'erreur relative de 3,14 est d'environ 0,05 %, faible, mais inutile.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : surfaces composées et coordonnées">
+
+### Découper, ajouter, retrancher
+
+1. Dessiner la surface et la **découper** en figures simples, sans recouvrement.
+2. Calculer chaque aire.
+3. **Additionner** les morceaux, **retrancher** les vides (trémie, poteau, ouverture).
+4. Contrôler : ordre de grandeur par le rectangle qui englobe la figure.
+
+Il y a souvent plusieurs découpages possibles : ils doivent donner le **même** résultat.
+
+### La parcelle par ses coordonnées : la formule du lacet
+
+Pour un polygone de sommets $(x_1 ; y_1), \dots, (x_n ; y_n)$ pris dans l'ordre :
+
+$$A = \tfrac{1}{2}\left|\sum (x_i\,y_{i+1} - x_{i+1}\,y_i)\right|$$
+
+(après le dernier sommet, on revient au premier). Pour la parcelle (0 ; 0), (20 ; 0), (16 ; 15), (0 ; 12) en mètres : $A$ = {grandeur(Ap, 0, 'm²')} et le périmètre vaut {grandeur(Pp, 2, 'm')}.
+
+<Encadre type="retenir">
+Les sommets doivent être pris **dans l'ordre** du contour (sens horaire ou inverse). Mélangés, ils dessinent un polygone croisé et l'aire est fausse.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : les cinq figures à connaître">
+
+<FiguresUsuelles />
+
+Toutes les surfaces du chantier se ramènent à ces cinq figures : un pignon est un rectangle plus un triangle, une fenêtre cintrée un rectangle plus un demi-disque, un talus vu en coupe un triangle (N0.4.6), une parcelle un assemblage de triangles et de trapèzes.
+
+<Encadre type="retenir">
+Aire du trapèze = moyenne des deux bases × hauteur. Elle sert pour les profils en travers et les cubatures (L3.8).
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="dalleL">
+
+<Cahier titre="Exemple résolu : une dalle en L avec trémie">
+
+**Énoncé.** La dalle d'étage d'une maison est en L : une grande aile de 9,00 × 4,00 m et une petite aile de 4,00 × 3,50 m. Elle comporte une trémie d'escalier de 2,60 × 1,10 m. Calcule son aire, la longueur de son contour (pour le coffrage de rive) et le volume de béton pour 15 cm d'épaisseur.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi deux ailes ? Une forme en L n'a pas de formule : on la découpe en deux rectangles qui ne se recouvrent pas.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : découper, retrancher">
+
+<Etape n={3} titre="Le découpage">
+<AN k="decoupe" />
+</Etape>
+
+<Etape n={4} titre="L'aire, le contour, le volume">
+<AN k="A" />
+<AN k="perimetre" />
+<AN k="V" />
+<Note>Pourquoi le contour ne dépend-il pas de L2 ? Le décrochement du L ne change pas la longueur totale du contour : il « déplace » deux segments, comme on le voit sur le plan.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="A" libelle="Aire de la dalle" />
+
+<Note couleur="vert">Béton : <Val k="V" /> ; coffrage de rive : <Val k="perimetre" /> ; garde-corps autour de la trémie : <Val k="tremie" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="compter deux fois une partie commune.">
+Si l'on découpe le L en deux rectangles qui se chevauchent, la zone commune est comptée deux fois. Les morceaux doivent se toucher sans se recouvrir.
+</Piege>
+
+<Piege erreur="oublier de retrancher les vides.">
+Trémie, gaines, poteaux traversants : on les retranche de la surface de dalle, mais on ajoute leur pourtour au coffrage.
+</Piege>
+
+<Piege erreur="prendre un côté oblique pour la hauteur.">
+Dans un triangle ou un trapèze, la hauteur est perpendiculaire à la base. Un côté penché est plus long que la hauteur.
+</Piege>
+
+<Piege erreur="confondre rayon et diamètre.">
+Un regard de 1,20 m de **diamètre** a un rayon de 0,60 m : π × 0,60² = {grandeur(aireDisque(0.6), 2, 'm²')}, pas π × 1,20² = {grandeur(aireDisque(1.2), 2, 'm²')}.
+</Piege>
+
+<Piege erreur="prendre les sommets d'une parcelle dans le désordre.">
+La formule du lacet exige l'ordre du contour. Fais un croquis et numérote les bornes avant de calculer.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le métré** commence presque toujours par des aires : surfaces de dalle, d'enduit, de carrelage, de toiture, de peinture. On les rassemble dans un tableau, une ligne par élément, avec le détail du calcul (L3.7).
+
+<Encadre type="terrain" titre="Parcelles et titres fonciers">
+En RDC, la surface d'une parcelle figure sur le certificat d'enregistrement et sur le croquis cadastral. Elle se calcule à partir des coordonnées des bornes relevées par le géomètre. Une erreur de surface, ou des bornes prises dans le désordre, peut déclencher un litige : le calcul doit être refait et contrôlé.
+</Encadre>
+
+**Les façades** se calculent « vides déduits » : surface brute moins portes et fenêtres. Les règles de déduction des petits vides dans les métrés varient selon les cahiers des charges : on les lit avant de compter.
+
+**Contrôle rapide** : l'aire d'une surface composée est toujours plus petite que celle du rectangle qui l'englobe. Si ce n'est pas le cas, un morceau a été compté deux fois.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : figures planes">
+
+### Aires
+
+rectangle $L\,l$ · triangle $\frac{b\,h}{2}$ · trapèze $\frac{(B + b)\,h}{2}$ · disque $\pi r^2$ · secteur $\pi r^2 \frac{\theta}{360}$ · Héron $\sqrt{p(p-a)(p-b)(p-c)}$
+
+### Périmètres
+
+rectangle $2(L + l)$ · cercle $2\pi r$ · arc $2\pi r \frac{\theta}{360}$ · polygone : somme des côtés
+
+### Surface composée
+
+découper sans recouvrement → additionner → retrancher les vides → contrôler avec le rectangle englobant
+
+### Parcelle par coordonnées
+
+$A = \tfrac{1}{2}\left|\sum (x_i\,y_{i+1} - x_{i+1}\,y_i)\right|$ · sommets **dans l'ordre**
+
+### Unités
+
+périmètre en m · aire en m² · hauteur ⟂ base · rayon = diamètre / 2
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trois aires">
+
+Calcule l'aire d'un terrain en trapèze de bases 12 m et 8 m, de hauteur 6 m ; puis l'aire et le périmètre d'un regard circulaire de 1,50 m de rayon.
+
+<Indice>Trapèze : moyenne des bases × hauteur.</Indice>
+
+<Corrige>
+Trapèze : (12 + 8) × 6 / 2 = **{grandeur(ex1.trap, 0, 'm²')}** ; regard : π × 1,5² = **{grandeur(ex1.disque, 2, 'm²')}**, périmètre 2π × 1,5 = **{grandeur(ex1.cercle, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une fenêtre cintrée">
+
+Une fenêtre est un rectangle de 1,20 m de large et 1,50 m de haut, surmonté d'un demi-cercle de 1,20 m de diamètre. Quelle surface de vitrage ? Quelle longueur d'arc pour le cintre ?
+
+<Indice>Le demi-cercle a un rayon de 0,60 m ; c'est un secteur de 180°.</Indice>
+
+<Corrige>
+Surface : 1,20 × 1,50 + π × 0,6² / 2 = **{grandeur(ex2.fenetre, 2, 'm²')}** ; arc : π × 0,60 = **{grandeur(ex2.arc, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La parcelle du géomètre">
+
+Les bornes d'une parcelle ont pour coordonnées, dans l'ordre : (0 ; 0), (20 ; 0), (16 ; 15) et (0 ; 12), en mètres. Calcule son aire par la formule du lacet, puis vérifie en la découpant en un rectangle et deux triangles.
+
+<Indice>Découpage : rectangle 16 × 12, triangle à droite entre x = 16 et x = 20, triangle en haut entre y = 12 et y = 15.</Indice>
+
+<Corrige>
+
+- Lacet : ½ × |{termesLacet(parcelle).map((t) => nombre(t, 0)).join(' + ')}| = **{grandeur(Ap, 0, 'm²')}**.
+- Découpage : 16 × 12 = {nombre(dec[0], 0)} ; triangle (16 ; 0), (20 ; 0), (16 ; 15) : 4 × 15 / 2 = {nombre(dec[1], 0)} ; triangle (0 ; 12), (16 ; 12), (16 ; 15) : 16 × 3 / 2 = {nombre(dec[2], 0)} ; total **{grandeur(dec[0] + dec[1] + dec[2], 0, 'm²')}** ✓.
+- Périmètre : {grandeur(Pp, 2, 'm')}.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.5.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'aire d'un trapèze de bases 10 m et 6 m et de hauteur 4 m vaut :" choix={['64 m²', `${nombre(aireTrapeze(10, 6, 4), 0)} m²`, '40 m²', '24 m²']} bonne={1} colonnes={4}>
+(10 + 6) × 4 / 2.
+</QCM>
+
+<QCM n={2} question="Un regard de 1,20 m de diamètre a une aire de :" choix={[grandeur(aireDisque(1.2), 2, 'm²'), grandeur(aireDisque(0.6), 2, 'm²'), grandeur(perimetreCercle(0.6), 2, 'm²'), '1,44 m²']} bonne={1} colonnes={4}>
+Rayon 0,60 m : π × 0,6².
+</QCM>
+
+<QCM n={3} question="Une trémie dans une dalle :" choix={['s’ajoute à l’aire de la dalle', 'se retranche de l’aire de la dalle', 'ne compte pas', 'se compte deux fois']} bonne={1} colonnes={2}>
+C'est un vide.
+</QCM>
+
+<QCM n={4} question="Dans un trapèze, la hauteur est :" choix={['un côté oblique', 'perpendiculaire aux bases', 'la moyenne des bases', 'la diagonale']} bonne={1} colonnes={2}>
+Elle mesure l'écart entre les bases.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>La dalle en L de l'exemple (9 × 4 + 4 × 3,5 − trémie 2,6 × 1,1) a une aire de :</>} choix={[grandeur(d0.A1 + d0.A2, 2, 'm²'), grandeur(d0.A, 2, 'm²'), grandeur(d0.perimetre, 2, 'm²'), '36,00 m²']} bonne={1} colonnes={4}>
+50 − 2,86 = {grandeur(d0.A, 2, 'm²')}.
+</QCM>
+
+<QCM n={6} question="Pour appliquer la formule du lacet, les sommets doivent être :" choix={['dans n’importe quel ordre', 'dans l’ordre du contour', 'triés par x croissant', 'au nombre de 4']} bonne={1} colonnes={2}>
+Sinon le polygone se croise.
+</QCM>
+
+<QCM n={7} question="On commande des bordures de trottoir :" choix={['au m²', 'au mètre linéaire', 'au m³', 'à la tonne']} bonne={1} colonnes={4}>
+C'est une longueur.
+</QCM>
+
+<QCM n={8} question="Une surface composée a une aire plus grande que son rectangle englobant. Cela signifie :" choix={['que tout va bien', 'qu’un morceau a été compté deux fois', 'que la figure est concave', 'qu’il faut un autre rectangle']} bonne={1}>
+Une surface ne peut pas dépasser le rectangle qui la contient.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,174 @@
+---
+id: N0.5.P
+titre: "Mini-projet : aires et volumes d'une petite maison"
+objectifs:
+  - Lire un plan et une coupe pour en extraire les dimensions utiles
+  - Calculer les surfaces de la maison (emprise, intérieur, murs)
+  - Calculer les volumes de fouilles, de béton et de maçonnerie
+  - Présenter un récapitulatif des quantités contrôlé par ordre de grandeur
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { EXEMPLE_MAISON, maison } from '@/lib/calc/geometrie'
+import { unChiffre } from '@/lib/calc/methode'
+import { grandeur, nombre } from '@/lib/format'
+import { CoupeSemelleFilante, MaisonPlan } from '@/components/schemas/Geometrie'
+
+export const d = EXEMPLE_MAISON
+export const r = maison(d)
+export const est = { sem: unChiffre(r.longueurAxe) * unChiffre(d.Bsem) * unChiffre(d.hsem), dal: unChiffre(r.Sint) * unChiffre(d.edalle) }
+export const lignes = [
+  ['Fouille en tranchée', 'm³', r.Vfouille],
+  ['Béton de semelles', 'm³', r.Vsemelle],
+  ['Dallage', 'm³', r.Vdalle],
+  ['Maçonnerie de murs', 'm²', r.SmurNet],
+  ['Maçonnerie de murs', 'm³', r.Vmaconnerie],
+]
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Une famille de Mbuji-Mayi fait construire une maison de plain-pied, rectangulaire, de {nombre(d.Lext, 2)} m × {nombre(d.lext, 2)} m hors tout. Avant de demander des devis, elle veut connaître les **quantités principales**. On te confie le calcul.
+
+### Les données (plan et coupe ci-après)
+
+- murs en blocs de {nombre(d.e * 100, 0)} cm, hauteur {nombre(d.Hmur, 2)} m ;
+- semelles filantes de {nombre(d.Bsem, 2)} × {nombre(d.hsem, 2)} m sous tous les murs, dans des tranchées de {nombre(d.Bfouille, 2)} m de large et {nombre(d.Dfouille, 2)} m de profondeur ;
+- dallage de {nombre(d.edalle * 100, 0)} cm sur toute la surface intérieure ;
+- baies : 2 portes de 0,90 × 2,10 m et 5 fenêtres de 1,20 × 1,20 m, soit {grandeur(d.ouvertures, 2, 'm²')}.
+
+Toutes ces dimensions sont des **données de l'énoncé** : sur un vrai projet, elles viennent des plans et du calcul des fondations.
+
+### Ce que tu rends
+
+1. Les surfaces : emprise, surface intérieure, surface de murs nette.
+2. Les volumes : fouilles, béton des semelles, dallage, maçonnerie.
+3. Un **récapitulatif** des quantités, avec un contrôle par ordre de grandeur.
+
+<Encadre type="attention">
+Une maison sans mur intérieur porteur est une simplification : les vraies maisons ont des refends et des cloisons, qui s'ajoutent au calcul de la même façon.
+</Encadre>
+
+</Page>
+
+<PlancheTechnique
+  titre="Maison : plan et coupe sur fondation"
+  projet="Petite maison de plain-pied, exemple N0.5.P"
+  numero="MS-01"
+  echelle="1/100 et 1/20"
+  date="10/2026"
+  hachures={['maconnerie', 'ba', 'beton', 'terre', 'remblai']}
+  notes={[
+    `Murs en blocs de ${nombre(d.e * 100, 0)} cm, hauteur ${nombre(d.Hmur, 2)} m.`,
+    `Semelles filantes ${nombre(d.Bsem, 2)} × ${nombre(d.hsem, 2)} m, centrées sur l'axe des murs.`,
+    `Tranchées ${nombre(d.Bfouille, 2)} × ${nombre(d.Dfouille, 2)} m.`,
+    'Cotes en mètres. Dimensions de l’énoncé, non issues d’un calcul de fondation.',
+  ]}
+>
+
+<Vue titre="Plan" echelle="1/100" pleineLargeur>
+<MaisonPlan d={d} r={r} />
+</Vue>
+
+<Vue titre="Coupe sur fondation" echelle="1/20" pleineLargeur>
+<CoupeSemelleFilante d={d} />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="maison">
+
+<Cahier titre="Étape 1 : les données et les surfaces" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi raisonner à l'axe des murs ? Une bande de largeur constante centrée sur l'axe d'un rectangle a pour aire exactement « longueur à l'axe × largeur » : les angles se compensent.</Note>
+</Etape>
+
+<Etape n={2} titre="Les surfaces">
+<AN k="axe" />
+<AN k="surfaces" />
+<AN k="murs" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : les volumes" etape="projet">
+
+<Etape n={3} titre="Fondations et dallage">
+<AN k="fouille" />
+<AN k="semelle" />
+<AN k="dalle" />
+<Note>Pourquoi le volume de fouille dépasse-t-il celui des semelles ? La tranchée est plus large et plus profonde que la semelle : le reste est remblayé autour du mur.</Note>
+</Etape>
+
+<Etape n={4} titre="Le béton à commander">
+<AN k="beton" />
+<Resultat k="Vbeton" libelle="Béton coulé en place" />
+</Etape>
+
+<Etape n={5} titre="La coupe">
+<Schema k="coupe" />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Cahier titre="Le récapitulatif : exemple corrigé" etape="projet">
+
+<Etape n={1} titre="Le tableau des quantités">
+
+<div className="tableau">
+  <table>
+    <thead>
+      <tr><th>ouvrage</th><th>unité</th><th>quantité</th></tr>
+    </thead>
+    <tbody>
+      {lignes.map(([nom, u, q]) => (
+        <tr key={nom + u}><td>{nom}</td><td>{u}</td><td>{nombre(q, 2)}</td></tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<Note>Pourquoi la maçonnerie en m² et en m³ ? Les devis comptent souvent les murs en m² (épaisseur précisée) ; le volume sert à estimer le mortier et le poids.</Note>
+</Etape>
+
+<Etape n={2} titre="Le contrôle par ordre de grandeur">
+
+Emprise {grandeur(r.emprise, 0, 'm²')} ; périmètre extérieur {grandeur(r.perimetreExt, 0, 'm')}, proche de la longueur à l'axe ({grandeur(r.longueurAxe, 1, 'm')}) ✓. De tête, avec des nombres arrondis à un chiffre : {nombre(unChiffre(r.longueurAxe), 0)} m × {nombre(unChiffre(d.Bsem), 1)} × {nombre(unChiffre(d.hsem), 1)} ≈ {nombre(est.sem, 1)} m³ de semelles (calcul : {nombre(r.Vsemelle, 2)}), et {nombre(unChiffre(r.Sint), 0)} m² × {nombre(unChiffre(d.edalle), 1)} ≈ {nombre(est.dal, 0)} m³ de dallage (calcul : {nombre(r.Vdalle, 2)}) : même ordre de grandeur ✓.
+
+<Note couleur="vert">Conclusion pour la famille : environ {nombre(r.Vbeton, 1)} m³ de béton coulé en place ({r.toupies} toupies de 8 m³ si le béton est livré en une seule fois), {nombre(r.SmurNet, 0)} m² de murs et {nombre(r.Vfouille, 1)} m³ de terre à creuser. Quantités à majorer des pertes avant commande (L3.7).</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Lecture du plan | Dimensions hors tout et à l'axe confondues | Bonne longueur à l'axe | Distinction hors tout / axe / intérieur justifiée |
+| Surfaces | Une surface oubliée | Emprise, intérieur, murs | Baies déduites, détail écrit |
+| Volumes | Unités mélangées | Tous les volumes en m³ | Formule littérale à chaque ligne |
+| Récapitulatif | Absent | Tableau complet | Unités cohérentes et pertes signalées |
+| Contrôle | Aucun | Un contrôle global | Contrôle de tête pour chaque grande quantité |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Ajoute un mur de refend de {nombre(d.lext - 2 * d.e, 2)} m au milieu de la maison, avec la même semelle : de combien augmentent la fouille, le béton et la maçonnerie ?
+</Encadre>
+
+<Quiz id="N0.5.P">
+
+<QCM n={1} question="Mon récapitulatif donne-t-il chaque quantité avec son unité, et l'ai-je contrôlé par un calcul de tête ?" choix={['Oui, tout est contrôlé', 'Il manque des unités ou des contrôles', 'Je n’ai pas fait le récapitulatif']} bonne={0}>
+Sinon, complète-le : c'est le document que la famille montrera aux entreprises.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

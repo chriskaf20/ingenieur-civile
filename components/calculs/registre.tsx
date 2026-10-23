@@ -8,6 +8,7 @@ import type { DefinitionCalcul, Entrees } from '@/components/gabarits/typesCalcu
 import { num } from '@/components/gabarits/typesCalcul';
 import { CALCULS_ALGEBRE } from './algebre';
 import { CALCULS_METHODE } from './methode';
+import { CALCULS_GEOMETRIE } from './geometrie';
 import { CALCULS_TRIGO } from './trigo';
 import { CALCULS_UNITES } from './unites';
 import { MurSchema } from '@/components/schemas/MurCloture';
@@ -375,5 +376,5 @@ const mur: DefinitionCalcul<ResultatMurCloture & { d: DonneesMurCloture }> = {
   alerte: (r) => (r.messages.length ? r.messages.join(' ') : undefined),
 };
 
-export const REGISTRE = { echelle, remblai, escalier, poteau, mur, ...CALCULS_METHODE, ...CALCULS_ALGEBRE, ...CALCULS_UNITES, ...CALCULS_TRIGO } as const;
+export const REGISTRE = { echelle, remblai, escalier, poteau, mur, ...CALCULS_METHODE, ...CALCULS_ALGEBRE, ...CALCULS_UNITES, ...CALCULS_TRIGO, ...CALCULS_GEOMETRIE } as const;
 export type NomCalcul = keyof typeof REGISTRE;
