@@ -1,0 +1,320 @@
+---
+id: N0.4.6
+titre: "Application : toiture, rampe et talus"
+objectifs:
+  - Calculer la hauteur, l'angle et la longueur rampante d'une toiture à deux versants
+  - Calculer la surface de couverture, débords compris
+  - Dimensionner la longueur d'une rampe pour une pente donnée
+  - Calculer l'emprise, l'angle et la section d'un talus
+relecture: false
+normes: []
+glossaire:
+  - terme: Versant
+    definition: Chacune des surfaces inclinées d'une toiture ; une toiture à deux versants a un faîtage au sommet.
+  - terme: Faîtage
+    definition: Ligne la plus haute d'une toiture, où se rejoignent les versants.
+  - terme: Rampant
+    definition: Longueur d'un versant mesurée suivant la pente, de l'égout au faîtage.
+  - terme: Débord
+    definition: Partie de la toiture qui dépasse au-delà du mur pour l'abriter de la pluie.
+  - terme: Appentis
+    definition: Toiture à un seul versant, appuyée d'un côté sur un mur plus haut.
+  - terme: Emprise
+    definition: Largeur occupée au sol par un ouvrage, talus compris.
+symboles:
+  - { symbole: 'L', signification: 'portée de la toiture (d’un mur à l’autre)', unite: 'm' }
+  - { symbole: 'p', signification: 'pente', unite: '%' }
+  - { symbole: 'h', signification: 'hauteur du faîtage au-dessus des murs', unite: 'm' }
+  - { symbole: 'r', signification: 'longueur rampante d’un versant', unite: 'm' }
+  - { symbole: 'd', signification: 'débord horizontal', unite: 'm' }
+formules:
+  - { nom: 'Hauteur de faîtage', tex: 'h = \frac{L}{2}\,p', domaine: 'Toiture à deux versants' }
+  - { nom: 'Rampant', tex: 'r = \frac{L/2}{\cos\alpha} = \frac{L}{2}\sqrt{1 + p^2}', domaine: 'Toiture' }
+  - { nom: 'Section d’un talus', tex: 'S = \tfrac{1}{2}\,n\,H^2', domaine: 'Terrassement' }
+---
+
+import { ecrituresPente, EXEMPLE_TOITURE, penteDepuis, rampe, rectAdjacentAngle, talus, toiture } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { ToitureIso } from '@/components/schemas/Trigo'
+
+export const t0 = toiture(EXEMPLE_TOITURE)
+export const sansDebord = toiture({ ...EXEMPLE_TOITURE, debord: 0 })
+export const app = { L: 4, pente: 15 }
+export const appT = rectAdjacentAngle(app.L, ecrituresPente(app.pente / 100).deg)
+export const ex2 = rampe(1.2, 8)
+export const ex3 = { H: 3, n: 2, longueur: 25 }
+export const ex3t = talus(ex3.H, ex3.n, ex3.longueur)
+
+<Page etape="intuition" titre="L'intuition : une maison, trois triangles">
+
+Regarde une maison sur un terrain en pente : son **toit** forme deux triangles, la **rampe** du garage en forme un autre, le **talus** qui tient la terre au bord de la parcelle aussi. Partout, un triangle rectangle : une hauteur, une longueur horizontale, une longueur inclinée et un angle.
+
+Avec les outils de ce module, tu peux répondre aux questions que pose le chantier : combien de tôles commander ? Quelle longueur donner à la rampe ? Quelle largeur de terrain le talus va-t-il occuper ?
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer d'une pente imposée aux longueurs, aux surfaces et aux angles d'une toiture, d'une rampe ou d'un talus ?
+</Encadre>
+
+<Encadre type="attention">
+Les pentes minimales des couvertures, des rampes accessibles ou des talus ne se devinent pas : elles viennent du fabricant, du règlement ou de l'étude géotechnique. Ici, elles sont des **données de l'énoncé**.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : la toiture à deux versants">
+
+### La géométrie
+
+Une toiture symétrique de portée $L$ (m) et de pente $p$ forme deux triangles rectangles de base $L/2$ :
+
+- hauteur du faîtage : $h = \frac{L}{2}\,p$ (m) ;
+- angle des versants : $\alpha = \tan^{-1} p$ ;
+- rampant : $r = \frac{L/2}{\cos\alpha} = \frac{L}{2}\sqrt{1 + p^2}$ (m).
+
+### Le débord et la surface de couverture
+
+Avec un débord horizontal $d$ (m), le rampant devient $r_{tot} = \frac{L/2 + d}{\cos\alpha}$. Pour un bâtiment de longueur $L_b$ (m), la couverture vaut :
+
+$$S = 2 \times r_{tot} \times L_b$$
+
+<Encadre type="exemple">
+Pour la toiture de l'exemple résolu, sans débord on trouverait {grandeur(sansDebord.surface, 1, 'm²')} de couverture ; avec 0,50 m de débord, {grandeur(t0.surface, 1, 'm²')}. Le débord compte !
+</Encadre>
+
+### L'appentis
+
+Un seul versant, de portée $L$ : $h = L\,p$ et $r = L\sqrt{1 + p^2}$.
+
+<Regle type="simplification">
+La surface calculée est la surface **à couvrir**. La quantité de tôles à commander est plus grande : les tôles se recouvrent, et leurs dimensions sont imposées par le fabricant.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : rampes et talus">
+
+### La rampe
+
+Pour franchir un dénivelé $H$ (m) avec une pente $p$ :
+
+- longueur horizontale $L = H / p$ ;
+- longueur inclinée $\sqrt{L^2 + H^2}$ ;
+- angle $\alpha = \tan^{-1} p$.
+
+Plus la pente est douce, plus la rampe est longue : diviser la pente par deux double la longueur.
+
+### Le talus
+
+Un talus de hauteur $H$ réglé à $n$ pour 1 (n de base pour 1 de hauteur) :
+
+- emprise au sol : $n\,H$ ;
+- longueur rampante : $H\sqrt{1 + n^2}$ ;
+- angle : $\alpha = \tan^{-1}(1/n)$ ;
+- section : un triangle de base $nH$ et de hauteur $H$, soit $S = \frac{1}{2}\,n\,H^2$ (m² par mètre de talus).
+
+<Encadre type="retenir">
+La section du talus, multipliée par sa longueur, donne le volume de terre du talus : c'est le lien avec les cubatures (L3.8).
+</Encadre>
+
+</Page>
+
+<Vue3D titre="La toiture en perspective" calques={[{ id: 'murs', libelle: 'Murs' }, { id: 'charpente', libelle: 'Charpente' }, { id: 'couverture', libelle: 'Couverture' }, { id: 'cotes', libelle: 'Cotes' }]}>
+
+Masque la couverture pour voir la charpente : des fermes triangulaires, et des pannes qui courent d'une ferme à l'autre. Chaque ferme reprend exactement les triangles du cours.
+
+<ToitureIso d={EXEMPLE_TOITURE} />
+
+<Encadre type="retenir">
+Les deux versants sont des rectangles inclinés de dimensions $r_{tot} \times L_b$ : {nombre(t0.rampantTotal, 2)} m × {nombre(EXEMPLE_TOITURE.longueur, 2)} m chacun.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="toiture">
+
+<Cahier titre="Exemple résolu : la couverture d'une maison">
+
+**Énoncé.** Une maison de 8,00 m de portée et 12,00 m de longueur reçoit une toiture en tôles à deux versants, de pente 30 % (donnée de l'énoncé), avec un débord horizontal de 0,50 m. Calcule l'angle des versants, la hauteur du faîtage, le rampant et la surface de couverture.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi le débord ? Il protège les murs des pluies battantes : sous un climat tropical, il fait partie de la toiture.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : un triangle rectangle par versant">
+
+<Etape n={3} titre="L'angle et la hauteur">
+<AN k="alpha" />
+<AN k="h" />
+</Etape>
+
+<Etape n={4} titre="Les longueurs et la surface">
+<AN k="rampant" />
+<AN k="total" />
+<AN k="surface" />
+<Note>Pourquoi diviser par cos α ? La longueur horizontale est le côté adjacent ; le rampant est l'hypoténuse.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="surface" libelle="Surface de couverture" />
+
+<Note couleur="vert">Angle <Val k="alpha" />, faîtage à <Val k="h" /> au-dessus des murs, rampant <Val k="rampantTotal" /> avec le débord.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer la couverture avec la longueur horizontale.">
+La tôle suit la pente : c'est le **rampant** qui compte. Avec la projection horizontale, on oublie {nombre((t0.k - 1) * 100, 0)} % de surface à 30 % de pente.
+</Piege>
+
+<Piege erreur="confondre une pente de 30 % et un angle de 30°.">
+30 % = {nombre(t0.alpha, 1)}°, alors que 30° = {nombre(penteDepuis(30, 'deg') * 100, 1)} %. Lis l'unité sur le plan ou la fiche du fabricant.
+</Piege>
+
+<Piege erreur="oublier un des deux versants, ou les débords.">
+Surface = **2** versants × rampant **débord compris** × longueur. Et l'on ajoute les recouvrements des tôles.
+</Piege>
+
+<Piege erreur="prendre la hauteur H pour l'emprise d'un talus.">
+L'emprise vaut n × H : un talus de 3 m à 2 pour 1 occupe {grandeur(ex3t.emprise, 0, 'm')} au sol, pas 3 m.
+</Piege>
+
+<Piege erreur="raidir une rampe pour gagner de la place.">
+Une rampe trop raide devient dangereuse pour les piétons et les véhicules. On allonge la rampe, on ajoute un palier ou l'on revoit l'implantation.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les toitures en tôles** sont de loin les plus courantes en Afrique centrale. Le charpentier part du rampant pour couper les chevrons et commander les tôles, en ajoutant les recouvrements indiqués par le fabricant et les faîtières.
+
+<Encadre type="terrain" titre="Ravines et talus">
+À Kinshasa, des ravines d'érosion menacent des quartiers entiers : l'eau de pluie concentrée creuse des talus trop raides et non protégés. Un talus bien conçu a une pente adaptée au sol, une protection (végétation, perré) et une évacuation des eaux en crête et en pied. La géométrie de cette leçon est le point de départ ; la stabilité se vérifie en géotechnique (M2.3).
+</Encadre>
+
+**Les rampes d'accès** des parcelles en pente se dessinent avec la même formule $L = H/p$ : sur une parcelle étroite, on découpe la rampe en volées avec des paliers.
+
+**La vérification en place** : on mesure la hauteur du faîtage et la longueur d'un chevron ; leur rapport redonne la pente réelle. Un écart signale une erreur de taille ou de pose.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : toiture, rampe, talus">
+
+### Toiture à deux versants
+
+$h = \frac{L}{2}\,p$ · $\alpha = \tan^{-1} p$ · $r = \frac{L/2}{\cos\alpha}$ · avec débord : $r_{tot} = \frac{L/2 + d}{\cos\alpha}$ · couverture $S = 2\,r_{tot}\,L_b$ (+ recouvrements)
+
+### Appentis
+
+$h = L\,p$ · $r = L\sqrt{1 + p^2}$
+
+### Rampe
+
+$L = H/p$ · longueur inclinée $\sqrt{L^2 + H^2}$ · pente divisée par 2 → rampe 2 fois plus longue
+
+### Talus à n pour 1
+
+emprise $nH$ · rampant $H\sqrt{1 + n^2}$ · angle $\tan^{-1}(1/n)$ · section $\frac{1}{2}\,n\,H^2$
+
+### Pièges
+
+30 % ≠ 30° · couverture sur le rampant · débords et deux versants
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un appentis">
+
+Un abri a une toiture à un seul versant de {app.L} m de portée, pente {app.pente} %. Calcule la hauteur du point haut au-dessus du point bas et le rampant.
+
+<Indice>Un seul triangle : h = L × p, r = L / cos α.</Indice>
+
+<Corrige>
+h = {app.L} × 0,15 = **{grandeur(appT.a, 2, 'm')}** ; r = **{grandeur(appT.c, 2, 'm')}** ; angle **{nombre(appT.alpha, 2)}°**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une rampe de garage">
+
+Le garage est 1,20 m plus bas que la rue. La pente de la rampe ne doit pas dépasser 8 % (donnée de l'énoncé). Quelle longueur horizontale minimale ? Quelle longueur de dalle inclinée ? Quel angle ?
+
+<Indice>L = H / p.</Indice>
+
+<Corrige>
+L = 1,20 / 0,08 = **{grandeur(ex2.L, 2, 'm')}** ; dalle inclinée **{grandeur(ex2.rampant, 2, 'm')}** ; angle **{nombre(ex2.alpha, 2)}°**. Si la parcelle n'a pas cette place, on prévoit un palier et un retour.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le talus de la parcelle">
+
+Une plateforme est remblayée de {ex3.H} m au-dessus du terrain, sur {ex3.longueur} m de long. Le talus est réglé à {ex3.n} pour 1. Calcule son emprise, son angle, sa section et le volume de terre du talus.
+
+<Indice>Section = ½ × n × H² ; volume = section × longueur.</Indice>
+
+<Corrige>
+
+- emprise = {ex3.n} × {ex3.H} = **{grandeur(ex3t.emprise, 2, 'm')}** ; angle **{nombre(ex3t.alpha, 2)}°** ({nombre(ex3t.pourcent, 0)} %).
+- section = ½ × {ex3.n} × {ex3.H}² = **{grandeur(ex3t.section, 2, 'm²')}** ; volume = {nombre(ex3t.section, 2)} × {ex3.longueur} = **{grandeur(ex3t.volume, 1, 'm³')}** (avant foisonnement et compactage, L3.8).
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.4.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Pour une toiture de 8 m de portée à 30 %, le faîtage est à :" choix={['2,40 m', `${nombre(t0.h, 2)} m`, '0,60 m', '4,00 m']} bonne={1} colonnes={4}>
+h = 4 × 0,30 = {nombre(t0.h, 2)} m.
+</QCM>
+
+<QCM n={2} question="La surface de couverture se calcule avec :" choix={['la longueur horizontale', 'le rampant (longueur suivant la pente)', 'la hauteur du faîtage', 'la portée seule']} bonne={1} colonnes={2}>
+La tôle suit la pente.
+</QCM>
+
+<QCM n={3} question="Une pente de 30 % correspond à un angle de :" choix={['30°', `${nombre(t0.alpha, 1)}°`, '45°', '60°']} bonne={1} colonnes={4}>
+tan⁻¹ 0,30 = {nombre(t0.alpha, 1)}°.
+</QCM>
+
+<QCM n={4} question={<>Avec 0,50 m de débord, la couverture de l'exemple vaut :</>} choix={[grandeur(sansDebord.surface, 1, 'm²'), grandeur(t0.surface, 1, 'm²'), '96,0 m²', grandeur(t0.surface / 2, 1, 'm²')]} bonne={1} colonnes={2}>
+2 × {nombre(t0.rampantTotal, 2)} × 12 = {grandeur(t0.surface, 1, 'm²')}.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour franchir 1,20 m avec une pente de 8 %, la rampe mesure à l'horizontale :" choix={['9,6 m', `${nombre(ex2.L, 1)} m`, '1,2 m', '8 m']} bonne={1} colonnes={4}>
+1,20 / 0,08 = {nombre(ex2.L, 1)} m.
+</QCM>
+
+<QCM n={6} question="Si l'on divise la pente d'une rampe par 2, sa longueur est :" choix={['divisée par 2', 'multipliée par 2', 'inchangée', 'multipliée par 4']} bonne={1} colonnes={2}>
+L = H / p.
+</QCM>
+
+<QCM n={7} question="Un talus de 3 m de haut réglé à 2 pour 1 a une emprise de :" choix={['1,5 m', '3 m', `${nombre(ex3t.emprise, 0)} m`, '9 m']} bonne={2} colonnes={4}>
+n × H = 2 × 3.
+</QCM>
+
+<QCM n={8} question="La section d'un talus de hauteur H réglé à n pour 1 vaut :" choix={['n × H', '½ × n × H²', 'H²', 'n² × H']} bonne={1} colonnes={4}>
+Triangle de base n H et de hauteur H.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

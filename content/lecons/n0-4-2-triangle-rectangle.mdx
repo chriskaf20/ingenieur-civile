@@ -1,0 +1,316 @@
+---
+id: N0.4.2
+titre: "Triangle rectangle : Pythagore, sinus, cosinus, tangente"
+objectifs:
+  - Calculer un côté d'un triangle rectangle avec le théorème de Pythagore
+  - Vérifier qu'un angle est droit avec la réciproque de Pythagore (méthode du 3-4-5)
+  - Choisir le bon rapport (sinus, cosinus ou tangente) selon les côtés connus
+  - Calculer un angle avec les fonctions réciproques de la calculatrice
+relecture: false
+normes: []
+glossaire:
+  - terme: Hypoténuse
+    definition: Côté opposé à l'angle droit d'un triangle rectangle ; c'est toujours le plus long.
+  - terme: Théorème de Pythagore
+    definition: Dans un triangle rectangle, le carré de l'hypoténuse est égal à la somme des carrés des deux autres côtés.
+  - terme: Sinus, cosinus, tangente
+    definition: Rapports de longueurs d'un triangle rectangle liés à un angle aigu (opposé/hypoténuse, adjacent/hypoténuse, opposé/adjacent).
+  - terme: Hauban
+    definition: Câble tendu qui maintient un mât ou un pylône en le reliant à un ancrage au sol.
+  - terme: Équerrage
+    definition: Contrôle qu'un angle implanté sur le terrain est bien droit.
+symboles:
+  - { symbole: 'a', signification: 'côté opposé à l’angle α', unite: 'm' }
+  - { symbole: 'b', signification: 'côté adjacent à l’angle α', unite: 'm' }
+  - { symbole: 'c', signification: 'hypoténuse', unite: 'm' }
+  - { symbole: 'α, β', signification: 'angles aigus, α + β = 90°', unite: '°' }
+formules:
+  - { nom: 'Théorème de Pythagore', tex: 'c^2 = a^2 + b^2', domaine: 'Triangle rectangle' }
+  - { nom: 'Sinus', tex: '\sin\alpha = \frac{a}{c}', domaine: 'Triangle rectangle' }
+  - { nom: 'Cosinus', tex: '\cos\alpha = \frac{b}{c}', domaine: 'Triangle rectangle' }
+  - { nom: 'Tangente', tex: '\tan\alpha = \frac{a}{b}', domaine: 'Triangle rectangle' }
+---
+
+import { convertirAngle, rectDeuxCotes, rectHypotenuseAngle } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { PieceIso } from '@/components/schemas/Trigo'
+
+export const t345 = rectDeuxCotes(3, 4)
+export const piece = { L: 4, l: 3, h: 2.4 }
+export const dSol = rectDeuxCotes(piece.L, piece.l).c
+export const D = rectDeuxCotes(dSol, piece.h).c
+export const ex1 = rectDeuxCotes(12, 8)
+export const ex2 = rectHypotenuseAngle(6, 75)
+export const ex3 = { theo: rectDeuxCotes(6, 8).c, mesure: 10.05 }
+export const pylone = rectHypotenuseAngle(25, 60)
+
+<Page etape="intuition" titre="L'intuition : le maçon et sa corde">
+
+Pour implanter l'angle d'une maison, le maçon n'a pas besoin d'équerre géante. Il prend un cordeau, mesure **3 m** le long d'un côté, **4 m** le long de l'autre, et ajuste jusqu'à ce que la distance entre les deux repères fasse exactement **5 m**. L'angle est alors droit.
+
+Pourquoi ça marche ? Parce que 3² + 4² = {nombre(t345.a ** 2, 0)} + {nombre(t345.b ** 2, 0)} = {nombre(t345.c ** 2, 0)} = 5². C'est le **théorème de Pythagore**, utilisé à l'envers. Une méthode très ancienne, et toujours la plus utilisée sur les petits chantiers.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Dans un triangle rectangle, comment calculer un côté ou un angle à partir de deux données seulement ?
+</Encadre>
+
+<Encadre type="attention">
+Tout ce qui suit ne vaut que pour un triangle **rectangle**. Pour un triangle quelconque, il faudra d'autres outils (N0.4.5).
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : Pythagore">
+
+### Le théorème
+
+Dans un triangle rectangle, l'**hypoténuse** $c$ est le côté opposé à l'angle droit. On a :
+
+$$c^2 = a^2 + b^2$$
+
+- $a$, $b$ : côtés de l'angle droit (m) ;
+- $c$ : hypoténuse (m), toujours le plus grand côté.
+
+Pour trouver un côté de l'angle droit : $a = \sqrt{c^2 - b^2}$.
+
+### La réciproque : contrôler un angle droit
+
+Si trois longueurs vérifient $c^2 = a^2 + b^2$, le triangle est rectangle. C'est la méthode du **3-4-5** : {nombre(t345.a, 0)}² + {nombre(t345.b, 0)}² = {nombre(t345.c ** 2, 0)} = {nombre(t345.c, 0)}². On peut aussi utiliser ses multiples : 6-8-10, 9-12-15.
+
+<Regle type="art">
+Sur le chantier, plus les longueurs sont grandes, plus le contrôle est précis : on préfère 6-8-10 ou 9-12-15 à 3-4-5 pour un grand bâtiment.
+</Regle>
+
+<Encadre type="exemple">
+Un rectangle de 12 m × 8 m a ses deux diagonales égales à {grandeur(ex1.c, 2, 'm')}. Mesurer les deux diagonales est le contrôle d'équerrage le plus courant.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : sinus, cosinus, tangente">
+
+### Nommer les côtés par rapport à l'angle
+
+On choisit un angle aigu $\alpha$. Le côté **opposé** $a$ lui fait face, le côté **adjacent** $b$ le touche (ce n'est pas l'hypoténuse), l'**hypoténuse** $c$ fait face à l'angle droit.
+
+### Les trois rapports
+
+$$\sin\alpha = \frac{a}{c} \qquad \cos\alpha = \frac{b}{c} \qquad \tan\alpha = \frac{a}{b}$$
+
+Moyen mnémotechnique : **CAH-SOH-TOA** (Cosinus = Adjacent / Hypoténuse ; Sinus = Opposé / Hypoténuse ; Tangente = Opposé / Adjacent).
+
+### Retrouver un angle
+
+Les touches $\sin^{-1}$, $\cos^{-1}$, $\tan^{-1}$ (arc sinus, arc cosinus, arc tangente) donnent l'angle à partir du rapport. Exemple : $\tan\alpha = 3/4$ donne $\alpha$ = {nombre(t345.alpha, 2)}°. Les deux angles aigus sont complémentaires : $\alpha + \beta = 90°$.
+
+### La méthode
+
+1. Repérer l'angle droit et l'hypoténuse.
+2. Nommer les côtés par rapport à l'angle étudié.
+3. Choisir le rapport qui contient les deux grandeurs connues et l'inconnue.
+4. Calculer, puis contrôler (Pythagore, ou $\alpha + \beta = 90°$).
+
+</Page>
+
+<Vue3D titre="La diagonale d'une pièce, en trois dimensions" calques={[{ id: 'piece', libelle: 'Pièce' }, { id: 'sol', libelle: 'Diagonale du sol' }, { id: 'espace', libelle: 'Diagonale de l’espace' }, { id: 'cotes', libelle: 'Cotes' }]}>
+
+Active les calques un par un. La diagonale du sol est l'hypoténuse d'un premier triangle rectangle (bleu). Elle devient un côté de l'angle droit d'un second triangle, vertical (rouge), dont l'hypoténuse est la diagonale de la pièce.
+
+<PieceIso L={piece.L} l={piece.l} h={piece.h} />
+
+<Encadre type="retenir">
+Pythagore deux fois : $d = \sqrt{L^2 + l^2}$ = {grandeur(dSol, 2, 'm')}, puis $D = \sqrt{d^2 + h^2}$ = {grandeur(D, 2, 'm')}. C'est la plus longue barre qu'on peut faire entrer dans la pièce.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="hauban">
+
+<Cahier titre="Exemple résolu : le hauban d'un mât">
+
+**Énoncé.** Un mât d'antenne est tenu par un hauban fixé à 8,00 m de hauteur et ancré au sol à 6,00 m du pied du mât. Quelle longueur de câble faut-il (hors attaches) ? Quel angle le hauban fait-il avec le sol et avec le mât ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un triangle rectangle ? Le mât est vertical et le sol horizontal : ils forment un angle droit au pied du mât.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : Pythagore puis tangente">
+
+<Etape n={3} titre="La longueur du hauban">
+<AN k="pythagore" />
+<Note>Pourquoi Pythagore ? On connaît les deux côtés de l'angle droit et l'on cherche l'hypoténuse.</Note>
+</Etape>
+
+<Etape n={4} titre="Les angles">
+<AN k="tan" />
+<AN k="beta" />
+<AN k="verif" />
+<Note>Pourquoi la tangente ? Vu depuis l'ancrage, h est le côté opposé et d le côté adjacent : ce sont nos deux données.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="L" libelle="Longueur du hauban" />
+
+<Note couleur="vert">Angle avec le sol : <Val k="alpha" /> ; avec le mât : <Val k="beta" />. On ajoute ensuite les longueurs d'attache et de réglage.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre pour hypoténuse un autre côté que celui opposé à l'angle droit.">
+L'hypoténuse fait face à l'angle droit et c'est le plus grand côté. Si ton « hypoténuse » est plus courte qu'un autre côté, tu t'es trompé de côté.
+</Piege>
+
+<Piege erreur="appliquer Pythagore à un triangle qui n'est pas rectangle.">
+c² = a² + b² est faux si l'angle n'est pas droit. Pour un triangle quelconque, on utilise Al-Kashi (N0.4.5).
+</Piege>
+
+<Piege erreur="confondre côté opposé et côté adjacent.">
+Ils dépendent de l'angle choisi. Le côté opposé à α est le côté adjacent à β. Nomme toujours les côtés **par rapport à l'angle étudié**.
+</Piege>
+
+<Piege erreur="oublier la racine carrée.">
+c² = 100 ne donne pas c = 100 mais c = √100 = 10. Contrôle : c doit être plus grand que a et b, mais plus petit que a + b.
+</Piege>
+
+<Piege erreur="calculer un angle avec la calculatrice en radians ou en grades.">
+tan⁻¹(1,333 3) donne {nombre(rectDeuxCotes(8, 6).alpha, 2)} en degrés, mais {nombre(convertirAngle(rectDeuxCotes(8, 6).alpha, 'deg', 'rad'), 3)} en radians. Vérifie le mode (N0.4.1).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**L'implantation.** Pour piqueter les angles d'un bâtiment, on trace un axe, puis on construit l'angle droit au 3-4-5 (ou 6-8-10). On contrôle enfin les deux diagonales du rectangle : elles doivent être égales.
+
+<Encadre type="terrain" titre="Pylônes haubanés">
+Les pylônes de télécommunication et les mâts de mesure sont souvent haubanés, en ville comme en brousse. Les longueurs de câble et les distances d'ancrage se calculent avec Pythagore et la tangente ; les efforts dans les haubans seront calculés en N0.6.
+</Encadre>
+
+**Les escaliers, rampes et toitures** sont faits de triangles rectangles : hauteur et longueur horizontale donnent la longueur inclinée et l'angle (N0.4.3 et N0.4.6).
+
+**Le contrôle des cotes.** Sur un plan, la diagonale d'une pièce ou d'une dalle se calcule et se mesure : un écart signale une erreur de dessin ou d'implantation.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : triangle rectangle">
+
+### Pythagore
+
+$c^2 = a^2 + b^2$ (c : hypoténuse, face à l'angle droit) · $a = \sqrt{c^2 - b^2}$ · réciproque : 3-4-5, 6-8-10 → angle droit
+
+### Les rapports (CAH-SOH-TOA)
+
+$\sin\alpha = \frac{\text{opposé}}{\text{hypoténuse}}$ · $\cos\alpha = \frac{\text{adjacent}}{\text{hypoténuse}}$ · $\tan\alpha = \frac{\text{opposé}}{\text{adjacent}}$
+
+### Retrouver un angle
+
+$\alpha = \tan^{-1}(a/b)$, $\sin^{-1}(a/c)$ ou $\cos^{-1}(b/c)$ · $\alpha + \beta = 90°$
+
+### La méthode
+
+Angle droit et hypoténuse → côtés nommés par rapport à l'angle → rapport qui contient les deux données → calcul → contrôle
+
+### En 3D
+
+Diagonale d'une pièce : $D = \sqrt{L^2 + l^2 + h^2}$
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La diagonale d'un bâtiment">
+
+Un bâtiment rectangulaire mesure 12,00 m × 8,00 m. Quelle longueur doivent mesurer ses diagonales ?
+
+<Indice>Chaque diagonale est l'hypoténuse d'un triangle rectangle de côtés 12 et 8.</Indice>
+
+<Corrige>
+d = √(12² + 8²) = √{nombre(ex1.c ** 2, 0)} = **{grandeur(ex1.c, 2, 'm')}**. Les deux diagonales doivent être égales.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="L'échelle">
+
+Une échelle de 6,00 m est appuyée contre un mur et fait un angle de 75° avec le sol. À quelle hauteur arrive-t-elle ? À quelle distance du mur est son pied ?
+
+<Indice>L'échelle est l'hypoténuse ; la hauteur est le côté opposé à l'angle de 75°.</Indice>
+
+<Corrige>
+hauteur = 6,00 × sin 75° = **{grandeur(ex2.a, 2, 'm')}** ; distance = 6,00 × cos 75° = **{grandeur(ex2.b, 2, 'm')}**. Contrôle : {nombre(ex2.a, 2)}² + {nombre(ex2.b, 2)}² ≈ {nombre(ex2.a ** 2 + ex2.b ** 2, 1)} ≈ 6² ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Équerrage et pylône">
+
+a) Un angle de fondation est implanté avec des côtés de 6,00 m et 8,00 m ; la diagonale mesurée vaut {nombre(ex3.mesure, 2)} m. L'angle est-il droit ? Plus grand ou plus petit que 90° ?
+
+b) Un câble de 25,00 m relie le haut d'un pylône à son ancrage et fait 60° avec le sol. Hauteur du point d'attache et distance de l'ancrage ?
+
+<Indice>a) Compare la diagonale mesurée à celle d'un angle droit. b) Le câble est l'hypoténuse.</Indice>
+
+<Corrige>
+
+- a) Pour un angle droit, la diagonale vaudrait **{grandeur(ex3.theo, 2, 'm')}**. Elle mesure plus : l'angle est un peu **plus ouvert** que 90°, il faut corriger l'implantation.
+- b) hauteur = 25 × sin 60° = **{grandeur(pylone.a, 2, 'm')}** ; distance = 25 × cos 60° = **{grandeur(pylone.b, 2, 'm')}**.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.4.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'hypoténuse d'un triangle rectangle est :" choix={['le plus petit côté', 'le côté opposé à l’angle droit', 'le côté horizontal', 'le côté adjacent à l’angle étudié']} bonne={1}>
+C'est aussi toujours le plus grand côté.
+</QCM>
+
+<QCM n={2} question="Un triangle de côtés 6, 8 et 10 m est :" choix={['quelconque', 'rectangle', 'équilatéral', 'impossible']} bonne={1} colonnes={4}>
+36 + 64 = 100 = 10² : réciproque de Pythagore.
+</QCM>
+
+<QCM n={3} question="Le cosinus d'un angle aigu vaut :" choix={['opposé / hypoténuse', 'adjacent / hypoténuse', 'opposé / adjacent', 'hypoténuse / adjacent']} bonne={1} colonnes={2}>
+CAH : Cosinus = Adjacent / Hypoténuse.
+</QCM>
+
+<QCM n={4} question={<>Un hauban fixé à 8 m de haut et ancré à 6 m du pied du mât mesure :</>} choix={['14 m', `${nombre(rectDeuxCotes(8, 6).c, 0)} m`, '12 m', '48 m']} bonne={1} colonnes={4}>
+√(64 + 36) = √100 = {nombre(rectDeuxCotes(8, 6).c, 0)} m.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour trouver un angle à partir du côté opposé et du côté adjacent, on utilise :" choix={['sin⁻¹', 'cos⁻¹', 'tan⁻¹', 'Pythagore']} bonne={2} colonnes={4}>
+tan α = opposé / adjacent.
+</QCM>
+
+<QCM n={6} question="Si α = 35° dans un triangle rectangle, l'autre angle aigu vaut :" choix={['35°', '55°', '145°', '90°']} bonne={1} colonnes={4}>
+α + β = 90°.
+</QCM>
+
+<QCM n={7} question="La diagonale d'une pièce de 4 × 3 × 2,4 m vaut :" choix={[grandeur(dSol, 2, 'm'), grandeur(D, 2, 'm'), '9,40 m', '7 m']} bonne={1} colonnes={4}>
+d = {nombre(dSol, 0)} m au sol, puis √({nombre(dSol ** 2, 0)} + {nombre(piece.h ** 2, 2)}) = {grandeur(D, 2, 'm')}.
+</QCM>
+
+<QCM n={8} question={<>Les deux diagonales d'une implantation rectangulaire mesurent {nombre(ex1.c, 2)} m et {nombre(ex1.c + 0.09, 2)} m. Que conclure ?</>} choix={['Tout va bien', 'Les angles ne sont pas droits : on corrige', 'Il faut changer la longueur', 'Pythagore ne s’applique pas']} bonne={1}>
+Dans un rectangle, les diagonales sont égales.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

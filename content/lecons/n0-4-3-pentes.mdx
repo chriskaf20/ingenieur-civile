@@ -1,0 +1,344 @@
+---
+id: N0.4.3
+titre: "Pentes : %, ‰, angle et rapport 1/n"
+objectifs:
+  - Définir une pente comme le rapport du dénivelé à la longueur horizontale
+  - Passer d'une écriture à l'autre (%, ‰, degrés, grades, rapport n pour 1)
+  - Calculer la base et la longueur rampante d'un talus ou d'une rampe
+  - Lire les pentes d'un profil en travers et en repérer les conventions
+relecture: false
+normes: []
+glossaire:
+  - terme: Pente
+    definition: Rapport du dénivelé à la longueur horizontale, p = V/H ; c'est aussi la tangente de l'angle avec l'horizontale.
+  - terme: Talus
+    definition: Surface inclinée qui borde un remblai ou un déblai ; sa pente s'écrit souvent « n pour 1 » (base pour hauteur).
+  - terme: Profil en travers
+    definition: Coupe d'une route ou d'un ouvrage perpendiculaire à son axe, avec ses pentes et ses cotes.
+  - terme: Bombement
+    definition: Pente transversale donnée à une chaussée de part et d'autre de l'axe pour évacuer l'eau de pluie.
+  - terme: Longueur rampante
+    definition: Longueur mesurée le long de la pente, plus grande que la longueur horizontale.
+symboles:
+  - { symbole: 'p', signification: 'pente (dénivelé / longueur horizontale)', unite: 'm/m, % ou ‰' }
+  - { symbole: 'α', signification: 'angle avec l’horizontale', unite: '° ou gon' }
+  - { symbole: 'n', signification: 'base horizontale pour 1 de hauteur', unite: '—' }
+formules:
+  - { nom: 'Pente et angle', tex: 'p = \frac{V}{H} = \tan\alpha', domaine: 'Pentes' }
+  - { nom: 'Rapport n pour 1', tex: 'n = \frac{1}{p}', domaine: 'Talus' }
+  - { nom: 'Longueur rampante', tex: 'L_r = H\sqrt{1 + p^2}', domaine: 'Pentes' }
+---
+
+import { ecrituresPente, EXEMPLE_PROFIL, penteDepuis, profilTravers, rampe, talus } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { EchellePentes, ProfilTravers, TalusPente } from '@/components/schemas/Trigo'
+
+export const exemples = [
+  { pourcent: 0.5, emploi: 'fil d’eau d’un caniveau' },
+  { pourcent: 4, emploi: 'bombement d’une route en terre' },
+  { pourcent: 10, emploi: 'rampe d’accès' },
+  { pourcent: 30, emploi: 'toiture en tôles' },
+  { pourcent: 100 * penteDepuis(1.5, 'n'), emploi: 'talus de remblai à 3/2' },
+  { pourcent: 100, emploi: 'talus à 1/1' },
+]
+export const pr = profilTravers(EXEMPLE_PROFIL)
+export const t32 = ecrituresPente(penteDepuis(1.5, 'n'))
+export const p100 = ecrituresPente(1)
+export const p50 = ecrituresPente(0.5)
+export const k5 = ecrituresPente(0.05).k
+export const ex1 = { a: ecrituresPente(0.02), b: ecrituresPente(penteDepuis(1, 'n')) }
+export const ex2 = rampe(0.6, 12)
+export const ex3 = { hv: talus(3, 2), vh: talus(3, 0.5) }
+
+<Page etape="intuition" titre="L'intuition : un même talus, quatre façons de le dire">
+
+Sur un chantier de route, quatre personnes parlent du même talus :
+
+- le **plan** indique « talus à 3/2 » ;
+- le **topographe** annonce une pente de {nombre(t32.pourcent, 1)} % ;
+- le **conducteur d'engin** règle sa lame à environ {nombre(t32.deg, 0)}° ;
+- le **géotechnicien** parle d'un talus « à 1,5 pour 1 ».
+
+Ils disent tous la même chose. Une pente, c'est toujours un **rapport** : de combien on monte pour une longueur horizontale donnée. Ce qui change, c'est la façon de l'écrire.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer sans erreur des pourcentages aux angles, et des angles aux rapports « n pour 1 » ?
+</Encadre>
+
+<Encadre type="attention">
+Une pente de 100 % ne fait pas 90° mais **45°** : on monte de 1 m pour 1 m horizontal. Un mur vertical aurait une pente « infinie ».
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : définition et écritures">
+
+### La pente est une tangente
+
+Pour un dénivelé $V$ sur une longueur **horizontale** $H$ :
+
+$$p = \frac{V}{H} = \tan\alpha$$
+
+- $p$ : pente (m/m, sans unité) ;
+- $\alpha$ : angle avec l'horizontale (° ou gon).
+
+### Les cinq écritures
+
+- en **%** : $100\,p$ ; en **‰** : $1\,000\,p$ ;
+- en **angle** : $\alpha = \tan^{-1} p$, en degrés ou en grades ;
+- en **rapport n pour 1** : $n = 1/p$, la base horizontale pour 1 de hauteur. Un talus « à 3/2 » avance de 3 m pour 2 m de hauteur : $n$ = 1,5 (c'est le $m$ de L3.8.7).
+
+<div className="tableau">
+  <table>
+    <thead>
+      <tr><th>exemple d'emploi (ordre de grandeur)</th><th>%</th><th>‰</th><th>degrés</th><th>n pour 1</th></tr>
+    </thead>
+    <tbody>
+      {exemples.map((x) => {
+        const e = ecrituresPente(x.pourcent / 100)
+        return (
+          <tr key={x.emploi}>
+            <td>{x.emploi}</td>
+            <td>{nombre(e.pourcent, 1)}</td>
+            <td>{nombre(e.pourmille, 0)}</td>
+            <td>{nombre(e.deg, 2)}°</td>
+            <td>{nombre(e.n, 2)}</td>
+          </tr>
+        )
+      })}
+    </tbody>
+  </table>
+</div>
+
+<Regle type="simplification">
+Les emplois du tableau sont des ordres de grandeur pour fixer les idées. Les pentes à respecter sont fixées par le projet, les règlements et les fabricants.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : pièges et longueur rampante">
+
+### Le pourcentage n'est pas proportionnel à l'angle
+
+100 % = {nombre(p100.deg, 0)}°, mais 50 % = {nombre(p50.deg, 2)}°, pas la moitié. Seules les petites pentes sont presque proportionnelles à l'angle.
+
+<EchellePentes reperes={exemples.slice(1).map((x) => ({ nom: x.emploi, pourcent: x.pourcent }))} />
+
+### La longueur rampante
+
+Le long de la pente, la longueur est plus grande qu'à l'horizontale : $L_r = H\sqrt{1 + p^2} = H / \cos\alpha$. Pour 5 %, l'écart n'est que de {nombre((k5 - 1) * 100, 2)} % ; pour un talus à 3/2, il atteint {nombre((t32.k - 1) * 100, 0)} %.
+
+<Encadre type="attention">
+La convention du rapport varie : certains documents écrivent « 1:2 » pour 1 de hauteur pour 2 de base, d'autres l'inverse. On lit **toujours la légende** du plan, et l'on écrit soi-même « base / hauteur » en toutes lettres.
+</Encadre>
+
+</Page>
+
+<PlancheTechnique
+  titre="Profil en travers type"
+  projet="Route en terre en remblai, exemple N0.4.3"
+  numero="RT-01"
+  echelle="sans échelle"
+  date="10/2026"
+  hachures={['remblai', 'terre']}
+  notes={[
+    `Pente transversale de la plateforme : ${nombre(EXEMPLE_PROFIL.bombement, 0)} % de part et d'autre de l'axe (donnée de l'énoncé).`,
+    `Talus de remblai à ${nombre(EXEMPLE_PROFIL.n, 1)} pour 1, soit ${nombre(pr.talus.pourcent, 1)} % ou ${nombre(pr.talus.alpha, 1)}°.`,
+    `Surélévation de l'axe : ${grandeur(pr.fleche, 2, 'm')} ; emprise au pied des talus : ${grandeur(pr.emprise, 2, 'm')}.`,
+    'Cotes en mètres.',
+  ]}
+>
+
+<Vue titre="Profil en travers" pleineLargeur>
+<ProfilTravers d={EXEMPLE_PROFIL} r={pr} />
+</Vue>
+
+<Vue titre="Détail du talus" pleineLargeur>
+<TalusPente H={EXEMPLE_PROFIL.H} n={EXEMPLE_PROFIL.n} prefixe="tal-pl" />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="pente">
+
+<Cahier titre="Exemple résolu : un talus à 3/2">
+
+**Énoncé.** Le profil en travers d'une route indique des talus de remblai « à 3/2 ». Exprime cette pente en %, en ‰, en degrés et en grades. Le remblai fait 2,40 m de haut : quelle est la largeur du talus au sol, et sa longueur rampante ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi n = 1,5 ? « 3/2 » se lit 3 de base pour 2 de hauteur, soit 1,5 de base pour 1 de hauteur.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : de l'écriture à la longueur">
+
+<Etape n={3} titre="La pente en m/m">
+<AN k="p" />
+</Etape>
+
+<Etape n={4} titre="Les autres écritures et la géométrie">
+<AN k="ecritures" />
+<AN k="application" />
+<Note>Pourquoi tant d'écritures ? Le plan parle en rapport, le topographe en %, le conducteur d'engin en degrés : il faut savoir passer de l'une à l'autre.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="pourcent" libelle="Pente du talus" />
+
+<Note couleur="vert">Soit <Val k="deg" /> ou <Val k="gon" /> ; base au sol <Val k="L" />, longueur rampante <Val k="rampant" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire que 100 % = 90°.">
+100 % signifie 1 m de montée pour 1 m horizontal : l'angle vaut {nombre(p100.deg, 0)}°.
+</Piege>
+
+<Piege erreur="penser que doubler la pente en % double l'angle.">
+50 % = {nombre(p50.deg, 2)}° et 100 % = {nombre(p100.deg, 0)}° : la relation passe par la tangente, elle n'est pas proportionnelle.
+</Piege>
+
+<Piege erreur="lire « 3/2 » à l'envers.">
+« 3/2 » (3 de base pour 2 de hauteur) et « 2/3 » ne donnent pas le même talus : {nombre(t32.deg, 1)}° d'un côté, {nombre(ecrituresPente(1.5).deg, 1)}° de l'autre. La légende du plan tranche.
+</Piege>
+
+<Piege erreur="confondre % et ‰.">
+Une pente de 5 ‰ vaut 0,5 %. Sur un réseau d'eaux usées ou un caniveau, l'erreur fait couler l'eau dix fois trop vite… ou pas du tout.
+</Piege>
+
+<Piege erreur="mesurer la pente sur la longueur inclinée.">
+La pente se rapporte à la longueur **horizontale**. Pour les faibles pentes, la différence est négligeable ; pour un talus ou une toiture, non.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le réglage des pentes.** Le topographe implante des repères (piquets, chaises) à des cotes calculées ; l'équipe tend un cordeau ou utilise un niveau laser pour régler la plateforme, le fond d'un caniveau ou le talus.
+
+<Encadre type="terrain" titre="Talus en latérite et pluies tropicales">
+En Afrique centrale, les averses sont violentes. Un talus trop raide, nu, se fait creuser de ravines dès la première saison des pluies. On adoucit la pente, on végétalise ou l'on protège le talus (perrés, enrochements), et l'on évacue l'eau en crête par des fossés. Le choix de la pente relève de l'étude géotechnique et du projet routier (L3.8, M1.9).
+</Encadre>
+
+**La plateforme bombée** évacue l'eau vers les accotements : une route en terre plate se transforme vite en bourbier. **Les toitures** s'expriment en % ou en degrés selon les fabricants de couverture ; **les réseaux d'assainissement** en ‰.
+
+**Un réflexe** : quand une pente est donnée par un rapport, écris immédiatement « … de base pour 1 de hauteur » à côté. Les erreurs de lecture coûtent des mètres d'emprise et des centaines de mètres cubes de terre.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : pentes">
+
+### Définition
+
+$p = V/H = \tan\alpha$ (H horizontal) · % = 100 p · ‰ = 1 000 p · $\alpha = \tan^{-1} p$ · n pour 1 : $n = 1/p$
+
+### Repères
+
+100 % = 45° (talus 1/1) · talus 3/2 : {nombre(t32.pourcent, 1)} % = {nombre(t32.deg, 1)}° · 50 % ≠ 22,5° ({nombre(p50.deg, 2)}°)
+
+### Longueurs
+
+base = H / p = n × H · rampant $= H\sqrt{1 + p^2}$ (écart faible pour les petites pentes)
+
+### Pièges
+
+« 3/2 » = base / hauteur : lire la légende · % ≠ ‰ · pente sur l'horizontale, pas sur l'inclinée
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Des écritures">
+
+Écris une pente de 2 % en ‰ et en degrés. Écris un talus « 1/1 » en % et en degrés.
+
+<Indice>2 % = 0,02 m/m ; un talus 1/1 monte de 1 pour 1.</Indice>
+
+<Corrige>
+2 % = **{nombre(ex1.a.pourmille, 0)} ‰** = **{nombre(ex1.a.deg, 2)}°** ; talus 1/1 = **{nombre(ex1.b.pourcent, 0)} %** = **{nombre(ex1.b.deg, 0)}°**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une rampe de garage">
+
+Une rampe doit rattraper 0,60 m avec une pente de 12 % (donnée de l'énoncé). Quelle longueur horizontale prévoir ? Quelle longueur de béton le long de la pente ? Quel angle ?
+
+<Indice>H = V / p, puis Pythagore.</Indice>
+
+<Corrige>
+H = 0,60 / 0,12 = **{grandeur(ex2.L, 2, 'm')}** ; rampant = √({nombre(ex2.L, 2)}² + 0,60²) = **{grandeur(ex2.rampant, 2, 'm')}** ; α = **{nombre(ex2.alpha, 2)}°**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une légende manquante">
+
+Un vieux plan indique « talus 1:2 » sans légende, pour un remblai de 3,00 m. Compare les deux lectures possibles : 2 de base pour 1 de hauteur, ou 1 de base pour 2 de hauteur. Que fais-tu ?
+
+<Indice>Calcule l'emprise et l'angle dans chaque cas.</Indice>
+
+<Corrige>
+
+- 2 de base pour 1 : emprise **{grandeur(ex3.hv.emprise, 2, 'm')}**, angle **{nombre(ex3.hv.alpha, 1)}°**.
+- 1 de base pour 2 : emprise **{grandeur(ex3.vh.emprise, 2, 'm')}**, angle **{nombre(ex3.vh.alpha, 1)}°**, un talus très raide.
+- Un facteur 4 sur l'emprise : on ne devine pas, on demande au bureau d'études et l'on note la réponse.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.4.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une pente de 100 % correspond à un angle de :" choix={['90°', '45°', '100°', '60°']} bonne={1} colonnes={4}>
+1 m de montée pour 1 m horizontal : tan α = 1.
+</QCM>
+
+<QCM n={2} question="Un talus « à 3/2 » (base / hauteur) a une pente de :" choix={['150 %', `${nombre(t32.pourcent, 1)} %`, '32 %', '23 %']} bonne={1} colonnes={4}>
+p = 2/3, soit {nombre(t32.pourcent, 1)} %.
+</QCM>
+
+<QCM n={3} question="Une pente de 5 ‰ vaut :" choix={['5 %', '0,5 %', '0,05 %', '50 %']} bonne={1} colonnes={4}>
+5 / 1 000 = 0,005 = 0,5 %.
+</QCM>
+
+<QCM n={4} question="Une pente de 50 % fait un angle de :" choix={['22,5°', `${nombre(p50.deg, 2)}°`, '45°', '30°']} bonne={1} colonnes={4}>
+tan⁻¹ 0,5 = {nombre(p50.deg, 2)}°.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="La pente se calcule avec :" choix={['la longueur inclinée', 'la longueur horizontale', 'la hauteur seule', 'l’angle en radians seulement']} bonne={1} colonnes={2}>
+p = V / H, H horizontal.
+</QCM>
+
+<QCM n={6} question={<>Un remblai de 2,40 m avec des talus à 3/2 a un talus large au sol de :</>} choix={['1,60 m', `${nombre(talus(2.4, EXEMPLE_PROFIL.n).emprise, 2)} m`, '7,20 m', '2,40 m']} bonne={1} colonnes={4}>
+base = n × H = 1,5 × 2,40.
+</QCM>
+
+<QCM n={7} question="Une chaussée en terre est bombée pour :" choix={['être plus belle', 'évacuer l’eau de pluie vers les accotements', 'réduire la poussière', 'augmenter la vitesse']} bonne={1}>
+Une route plate retient l'eau et se dégrade vite.
+</QCM>
+
+<QCM n={8} question="Un plan indique « 1:2 » sans légende. On :" choix={['choisit la lecture la plus simple', 'demande la convention au bureau d’études', 'prend la moyenne', 'ignore la pente']} bonne={1}>
+Les deux lectures donnent des emprises très différentes.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

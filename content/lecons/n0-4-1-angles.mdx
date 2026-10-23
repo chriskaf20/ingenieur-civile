@@ -1,0 +1,307 @@
+---
+id: N0.4.1
+titre: "Angles : degrés, radians, grades"
+objectifs:
+  - Définir le degré, le radian et le grade à partir du tour complet
+  - Convertir un angle d'une unité à l'autre
+  - Passer des degrés décimaux aux degrés, minutes, secondes et inversement
+  - Régler sa calculatrice dans la bonne unité et en mesurer l'enjeu sur le terrain
+relecture: false
+normes:
+  - "Le Système international d'unités (SI), BIPM, 9e édition (2019) : le radian, unité SI d'angle ; le degré, admis avec le SI"
+glossaire:
+  - terme: Degré
+    definition: Unité d'angle valant 1/360 de tour ; il se divise en 60 minutes (′), elles-mêmes divisées en 60 secondes (″).
+  - terme: Radian
+    definition: Angle qui intercepte, sur un cercle, un arc de même longueur que le rayon ; un tour vaut 2π rad.
+  - terme: Grade (gon)
+    definition: Unité d'angle valant 1/400 de tour ; l'angle droit vaut 100 gon. C'est l'unité habituelle des topographes francophones.
+  - terme: Station totale
+    definition: Appareil de topographie qui mesure des angles et des distances, souvent réglé en grades.
+symboles:
+  - { symbole: 'θ', signification: 'angle', unite: '°, rad ou gon' }
+  - { symbole: '′, ″', signification: 'minute et seconde d’angle', unite: '1/60 et 1/3 600 de degré' }
+formules:
+  - { nom: 'Conversion par le tour', tex: '\theta_{arrivée} = \theta_{départ} \times \frac{T_{arrivée}}{T_{départ}}', domaine: 'Unités d’angle' }
+  - { nom: 'Un tour', tex: '360° = 2\pi\ \text{rad} = 400\ \text{gon}', domaine: 'Unités d’angle' }
+---
+
+import { convertirAngle, depuisDMS, ecartLateral, sinD } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { Rapporteur, UnRadian } from '@/components/schemas/Trigo'
+import { ecrireDMS } from '@/components/calculs/trigo'
+
+export const tab = [30, 45, 60, 90, 180, 360]
+export const ex1 = { rad: convertirAngle(45, 'deg', 'rad'), gon: convertirAngle(45, 'deg', 'gon'), deg: convertirAngle(150, 'gon', 'deg') }
+export const ex2 = { dms: ecrireDMS(23.4567), dec: depuisDMS(12, 30, 36) }
+export const ex3 = [ecartLateral(100, 0.001, 'gon'), ecartLateral(100, 1, 'gon'), ecartLateral(250, 0.01, 'gon')]
+export const sin30rad = sinD(convertirAngle(30, 'rad', 'deg'))
+
+<Page etape="intuition" titre="L'intuition : un tour, trois façons de le découper">
+
+Pense à une pizza. Tu peux la couper en 8 parts, en 12 ou en 6 : c'est toujours **une** pizza. Un angle mesure une portion de tour, et l'on peut découper le tour de plusieurs façons :
+
+- en **360 degrés**, une tradition très ancienne, pratique parce que 360 se divise par 2, 3, 4, 5, 6, 8, 9, 10, 12… ;
+- en **400 grades**, l'unité des topographes : l'angle droit vaut alors 100, ce qui simplifie les calculs ;
+- en **2π radians**, l'unité des mathématiciens et des calculatrices, liée à la longueur des arcs.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Le topographe lit 127,435 0 gon sur sa station totale, l'architecte dessine une toiture à 30°, la calculatrice travaille en radians. Comment passer de l'un à l'autre sans erreur ?
+</Encadre>
+
+<Encadre type="attention">
+Sur une calculatrice réglée en radians, « sin 30 » ne donne pas 0,5 mais {nombre(sin30rad, 3)} : la machine a calculé le sinus de 30 radians. Avant tout calcul d'angle, on vérifie le mode : DEG, RAD ou GRAD.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : trois unités d'angle">
+
+### Le degré
+
+Un tour vaut 360°. Le degré se divise en 60 **minutes** (′), et la minute en 60 **secondes** (″). On écrit par exemple 23° 27′ 24″. Les calculatrices et les tableurs travaillent en **degrés décimaux** : 23,456 7°.
+
+### Le grade (gon)
+
+Un tour vaut 400 gon : l'angle droit vaut **100 gon**, le demi-tour 200 gon. Le grade se divise de façon décimale (0,001 gon = 1 milligrade). C'est l'unité des stations totales réglées « à la française ».
+
+### Le radian
+
+Un angle vaut **1 radian** quand l'arc qu'il intercepte a la même longueur que le rayon. La circonférence vaut $2\pi r$, donc un tour vaut $2\pi$ rad, et 1 rad vaut environ {nombre(convertirAngle(1, 'rad', 'deg'), 2)}°.
+
+<Regle type="norme" source="brochure du SI, BIPM">
+Le radian est l'unité d'angle du SI ; le degré, la minute et la seconde sont admis avec le SI. Le grade n'en fait pas partie, mais reste l'unité traditionnelle des topographes francophones.
+</Regle>
+
+<Encadre type="retenir">
+Les formules de longueur d'arc ($s = r\,\theta$) et toutes les formules d'analyse (dérivées de sin et cos) supposent θ **en radians**.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : convertir">
+
+### La règle du tour
+
+Toutes les conversions viennent de l'égalité $360° = 2\pi\ \text{rad} = 400\ \text{gon}$ :
+
+$$\theta_{arrivée} = \theta_{départ} \times \frac{T_{arrivée}}{T_{départ}}$$
+
+avec $T$ le tour complet dans chaque unité (360, $2\pi$ ou 400).
+
+<div className="tableau">
+  <table>
+    <tbody>
+      <tr><th>degrés</th>{tab.map((x) => <td key={x}>{x}°</td>)}</tr>
+      <tr><th>radians</th>{tab.map((x) => <td key={x}>{nombre(convertirAngle(x, 'deg', 'rad'), 4)}</td>)}</tr>
+      <tr><th>grades</th>{tab.map((x) => <td key={x}>{nombre(convertirAngle(x, 'deg', 'gon'), 2)}</td>)}</tr>
+    </tbody>
+  </table>
+</div>
+
+### Degrés décimaux et degrés, minutes, secondes
+
+- **DMS → décimal** : $\theta = d + \frac{m}{60} + \frac{s}{3\,600}$.
+- **Décimal → DMS** : la partie entière donne les degrés ; on multiplie la partie décimale par 60 pour les minutes, puis la nouvelle partie décimale par 60 pour les secondes.
+
+<Encadre type="exemple">
+45,5° = 45° + 0,5 × 60′ = **{ecrireDMS(45.5, 0)}**, et non 45° 50′.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Les schémas : le cadran gradué et le radian">
+
+<Rapporteur deg={60} />
+
+<UnRadian />
+
+Sur le cadran, chaque graduation extérieure vaut 30°, chaque graduation intérieure 50 gon : le quart de tour se lit 90° dehors et 100 gon dedans. Le second schéma montre le radian : l'arc rouge a exactement la longueur du rayon.
+
+</Page>
+
+<FicheCalcul calcul="angles">
+
+<Cahier titre="Exemple résolu : un angle lu sur une station totale">
+
+**Énoncé.** Pour implanter un bâtiment, le topographe mesure un angle horizontal de 127,435 0 gon. L'architecte veut cette valeur en degrés (décimaux puis en degrés, minutes, secondes), et le tableur de calcul en radians.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi garder les 4 décimales ? En topographie, 0,001 gon décale déjà un point de plus d'un millimètre à 100 m.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la règle du tour">
+
+<Etape n={3} titre="La règle">
+<AN k="tour" />
+</Etape>
+
+<Etape n={4} titre="Les conversions">
+<AN k="deg" />
+<AN k="rad" />
+<AN k="gon" />
+<AN k="dms" />
+<Note>Pourquoi passer par les degrés décimaux pour les DMS ? On ne peut découper en minutes et en secondes que des degrés.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="deg" libelle="En degrés" />
+
+<Note couleur="vert">Soit <Val k="dms" /> et <Val k="rad" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer avec la calculatrice dans le mauvais mode.">
+En mode RAD, sin 30 vaut {nombre(sin30rad, 3)}. Vérifie toujours l'indicateur DEG, RAD ou GRAD avant de calculer.
+</Piege>
+
+<Piege erreur="lire 30,5° comme 30° 50′.">
+0,5° = 30′. Donc 30,5° = 30° 30′. Les minutes sont des soixantièmes, pas des centièmes.
+</Piege>
+
+<Piege erreur="croire que 100 gon = 100°.">
+100 gon = 90° : c'est l'angle droit. Un angle en grades est toujours plus grand, en nombre, que le même angle en degrés.
+</Piege>
+
+<Piege erreur="arrondir trop tôt un angle de topographie.">
+Une erreur de 1 gon sur un point situé à 100 m le décale de {grandeur(ex3[1], 2, 'm')}. On garde toutes les décimales lues sur l'appareil.
+</Piege>
+
+<Piege erreur="mélanger deux unités dans le même calcul.">
+Une somme d'angles « 30° + 50 gon » n'a pas de sens tant qu'on n'a pas converti l'un des deux.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les topographes** francophones travaillent en grades : les stations totales affichent souvent les angles horizontaux et verticaux en gon, avec trois ou quatre décimales. Le carnet de terrain précise toujours l'unité.
+
+<Encadre type="terrain" titre="Implantation et cadastre">
+Pour borner une parcelle ou implanter un bâtiment, l'angle mesuré sert à placer des points parfois éloignés de plusieurs dizaines de mètres. Une confusion entre degrés et grades décale les bornes de plusieurs mètres : c'est une source classique de litiges fonciers, en RDC comme ailleurs.
+</Encadre>
+
+**Les plans d'architecte** donnent les angles en degrés (pente de toiture à 30°, mur à 45°). **Les boussoles** et les orientations (nord) sont en degrés. **Les calculs** de mécanique et les tableurs utilisent les radians : dans un tableur, la fonction SIN attend des radians, d'où la fonction RADIANS().
+
+**Un bon réflexe** : écrire l'unité de chaque angle sur la feuille de calcul, comme pour une longueur.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : unités d'angle">
+
+### Le tour complet
+
+360° = 2π rad = 400 gon · angle droit : 90° = π/2 rad = 100 gon
+
+### Convertir
+
+$\theta_{arrivée} = \theta_{départ} \times \frac{T_{arrivée}}{T_{départ}}$ · 1 gon = {nombre(convertirAngle(1, 'gon', 'deg'), 1)}° · 1 rad ≈ {nombre(convertirAngle(1, 'rad', 'deg'), 4)}°
+
+### Degrés, minutes, secondes
+
+1° = 60′ · 1′ = 60″ · $\theta = d + m/60 + s/3\,600$ · 45,5° = {ecrireDMS(45.5, 0)}
+
+### Réflexes
+
+Mode de la calculatrice (DEG / RAD / GRAD) · unité écrite à côté de chaque angle · toutes les décimales en topographie · tableur : SIN(RADIANS(angle))
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trois conversions">
+
+Convertis 45° en radians et en grades, puis 150 gon en degrés.
+
+<Indice>Utilise la règle du tour : 360° = 2π rad = 400 gon.</Indice>
+
+<Corrige>
+45° = 45 × 2π / 360 = **{nombre(ex1.rad, 4)} rad** = 45 × 400 / 360 = **{nombre(ex1.gon, 0)} gon** ; 150 gon = 150 × 360 / 400 = **{nombre(ex1.deg, 0)}°**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Degrés, minutes, secondes">
+
+Écris 23,456 7° en degrés, minutes, secondes. Puis écris 12° 30′ 36″ en degrés décimaux.
+
+<Indice>0,456 7 × 60 donne les minutes ; la partie décimale restante × 60 donne les secondes.</Indice>
+
+<Corrige>
+23,456 7° = **{ex2.dms}** ; 12° 30′ 36″ = 12 + 30/60 + 36/3 600 = **{nombre(ex2.dec, 4)}°**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le prix d'une erreur d'angle">
+
+Un point est implanté à 100 m de la station. De combien est-il décalé si l'angle est faux de 1 milligrade (0,001 gon) ? Et de 1 gon ? Et un point à 250 m avec une erreur de 0,01 gon ?
+
+<Indice>Le décalage vaut D × tan(erreur), avec l'erreur convertie en radians.</Indice>
+
+<Corrige>
+
+- 1 mgon à 100 m : **{grandeur(ex3[0] * 1000, 1, 'mm')}**.
+- 1 gon à 100 m : **{grandeur(ex3[1], 2, 'm')}**, inacceptable pour une implantation.
+- 0,01 gon à 250 m : **{grandeur(ex3[2] * 1000, 0, 'mm')}**.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.4.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un tour complet vaut :" choix={['360 gon', '400 gon', '100 gon', '200 gon']} bonne={1} colonnes={4}>
+360° = 2π rad = 400 gon.
+</QCM>
+
+<QCM n={2} question="L'angle droit vaut :" choix={['100°', '100 gon', 'π rad', '400 gon']} bonne={1} colonnes={4}>
+90° = π/2 rad = 100 gon.
+</QCM>
+
+<QCM n={3} question="Un radian, c'est l'angle qui intercepte un arc de longueur égale :" choix={['au diamètre', 'au rayon', 'à la circonférence', 'à 1 m']} bonne={1} colonnes={4}>
+D'où 2π rad pour un tour.
+</QCM>
+
+<QCM n={4} question="30,5° s'écrit :" choix={['30° 50′', '30° 30′', '30° 05′', '30° 5″']} bonne={1} colonnes={4}>
+0,5° × 60 = 30′.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="150 gon valent :" choix={['150°', `${nombre(ex1.deg, 0)}°`, '166,7°', '1,5°']} bonne={1} colonnes={4}>
+150 × 360 / 400 = {nombre(ex1.deg, 0)}°.
+</QCM>
+
+<QCM n={6} question={<>Ta calculatrice affiche sin 30 = {nombre(sin30rad, 3)}. Que se passe-t-il ?</>} choix={['Elle est cassée', 'Elle est en mode radians', 'Elle est en mode grades', `sin 30° vaut bien ${nombre(sin30rad, 3)}`]} bonne={1}>
+En radians, 30 rad n'est pas 30° : il faut passer en mode DEG.
+</QCM>
+
+<QCM n={7} question="Dans un tableur, pour calculer le sinus de 30°, on écrit :" choix={['=SIN(30)', '=SIN(RADIANS(30))', '=SIN(DEGRES(30))', '=SIN(30°)']} bonne={1}>
+La fonction SIN attend des radians.
+</QCM>
+
+<QCM n={8} question="Une erreur de 1 gon sur un point situé à 100 m le décale d'environ :" choix={['1,6 mm', '1,6 cm', `${nombre(ex3[1], 1)} m`, '16 m']} bonne={2} colonnes={4}>
+100 × tan(1 gon) = {grandeur(ex3[1], 2, 'm')}.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

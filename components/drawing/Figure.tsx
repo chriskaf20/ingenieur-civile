@@ -44,6 +44,7 @@ export function Etiquette({
   gras = false,
   classe = '',
   rotation,
+  couleur,
 }: {
   x: number;
   y: number;
@@ -53,6 +54,8 @@ export function Etiquette({
   gras?: boolean;
   classe?: string;
   rotation?: number;
+  /** couleur du texte (attribut fill) ; sinon couleur par défaut du dessin ou de la classe */
+  couleur?: string;
 }) {
   return (
     <text
@@ -62,6 +65,7 @@ export function Etiquette({
       fontSize={taille}
       fontWeight={gras ? 700 : undefined}
       className={classe}
+      fill={couleur}
       paintOrder="stroke"
       stroke="var(--halo)"
       strokeWidth={3}

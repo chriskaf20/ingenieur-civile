@@ -1,0 +1,186 @@
+---
+id: N0.4.P
+titre: "Mini-projet : géométrie d'une ferme de toiture"
+objectifs:
+  - Calculer la hauteur d'une ferme à partir de sa portée et de sa pente
+  - Calculer la longueur de toutes les barres d'une ferme en W
+  - Calculer les angles aux nœuds et les contrôler
+  - Établir la liste de débit de toutes les fermes d'un bâtiment
+relecture: false
+normes: []
+glossaire:
+  - terme: Ferme
+    definition: Assemblage triangulé de barres qui porte la toiture d'un mur à l'autre.
+  - terme: Arbalétrier
+    definition: Barre inclinée d'une ferme, qui suit la pente du toit.
+  - terme: Entrait
+    definition: Barre horizontale basse d'une ferme, qui relie les pieds des arbalétriers.
+  - terme: Nœud
+    definition: Point où se rejoignent plusieurs barres d'une ferme.
+  - terme: Liste de débit
+    definition: Tableau des pièces à couper (nombre et longueur), établi avant la fabrication.
+symboles:
+  - { symbole: 'L', signification: 'portée de la ferme (longueur de l’entrait)', unite: 'm' }
+  - { symbole: 'α', signification: 'pente des arbalétriers', unite: '°' }
+  - { symbole: 'γ', signification: 'inclinaison des diagonales sur l’entrait', unite: '°' }
+formules:
+  - { nom: 'Hauteur de la ferme', tex: 'h = \frac{L}{2}\tan\alpha', domaine: 'Ferme symétrique' }
+  - { nom: 'Inclinaison des diagonales', tex: '\tan\gamma = 3\tan\alpha', domaine: 'Ferme en W (nœuds aux tiers et aux milieux)' }
+---
+
+import { EXEMPLE_FERME, ferme, nomenclature, penteDepuis } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { ToitureIso } from '@/components/schemas/Trigo'
+
+export const f0 = ferme(EXEMPLE_FERME)
+export const nom = nomenclature(f0)
+export const toit = { L: EXEMPLE_FERME.L, longueur: EXEMPLE_FERME.longueurBatiment, pente: 100 * penteDepuis(EXEMPLE_FERME.alpha, 'deg'), debord: EXEMPLE_FERME.debord }
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Un atelier de {nombre(EXEMPLE_FERME.L, 0)} m de portée et {nombre(EXEMPLE_FERME.longueurBatiment, 0)} m de longueur va être construit à Kisangani. Sa toiture en tôles repose sur des **fermes en W**, en bois ou en tubes d'acier, espacées de {nombre(EXEMPLE_FERME.entraxe, 0)} m (donnée de l'énoncé). La pente des versants est de {EXEMPLE_FERME.alpha}° et le débord de {nombre(EXEMPLE_FERME.debord, 2)} m.
+
+Le charpentier te demande la **géométrie complète** des fermes pour préparer la fabrication.
+
+### La ferme en W
+
+Les nœuds sont : les appuis **A** et **B**, le faîtage **S**, les points **D1** et **D2** aux tiers de l'entrait, les points **M1** et **M2** au milieu des arbalétriers. Les diagonales relient D1 à M1 et à S, D2 à S et à M2 : elles dessinent un W.
+
+### Ce que tu rends
+
+1. La hauteur de la ferme.
+2. La longueur de chaque barre (sur les axes).
+3. Les angles à chaque nœud, avec un contrôle.
+4. La liste de débit de toutes les fermes du bâtiment.
+
+<Encadre type="attention">
+Les longueurs calculées sont **théoriques**, sur les axes des barres. Le charpentier ajoute les coupes et les assemblages ; la vérification des efforts dans les barres viendra en mécanique (L1.3) et en construction bois ou métallique (M1).
+</Encadre>
+
+</Page>
+
+<Vue3D titre="La charpente en perspective" calques={[{ id: 'murs', libelle: 'Murs' }, { id: 'charpente', libelle: 'Fermes et pannes' }, { id: 'couverture', libelle: 'Couverture', actif: false }, { id: 'cotes', libelle: 'Cotes' }]}>
+
+Les {f0.nbFermes} fermes en W sont posées tous les {nombre(EXEMPLE_FERME.entraxe, 0)} m ; les pannes, en rouge brique, courent de l'une à l'autre et portent les tôles. Active la couverture pour voir le toit fini.
+
+<ToitureIso d={toit} f={f0} />
+
+</Vue3D>
+
+<FicheCalcul calcul="ferme">
+
+<Cahier titre="Étape 1 : les données et le schéma" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi la pente en degrés ? Les fermes se tracent au rapporteur ou à la fausse équerre : le charpentier préfère les angles.</Note>
+</Etape>
+
+<Etape n={2} titre="La ferme">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : les longueurs" etape="projet">
+
+<Etape n={3} titre="La hauteur et les arbalétriers">
+<AN k="h" />
+<AN k="arbaletrier" />
+</Etape>
+
+<Etape n={4} titre="Les diagonales">
+<AN k="courte" />
+<AN k="longue" />
+<AN k="gamma" />
+<Note>Pourquoi Pythagore partout ? Chaque barre est l'hypoténuse d'un triangle rectangle formé par ses écarts horizontal et vertical.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="arbaletrierDebord" libelle="Arbalétrier, débord compris" />
+
+<Note couleur="vert">Diagonales : <Val k="diagCourte" /> et <Val k="diagLongue" />, inclinées de <Val k="gamma" />.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 : les angles et le débit" etape="projet">
+
+<Etape n={6} titre="Les angles aux nœuds">
+<AN k="angles" />
+<Note>Pourquoi tous ces angles ? Ce sont les angles de coupe et d'assemblage : une erreur de quelques degrés et les barres ne se rejoignent plus.</Note>
+</Etape>
+
+<Etape n={7} titre="Les contrôles">
+<AN k="controle" />
+</Etape>
+
+<Etape n={8} titre="Le débit">
+<AN k="debit" />
+<Resultat k="total" libelle="Longueur totale de barres" />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Cahier titre="La liste de débit : exemple corrigé" etape="projet">
+
+<Etape n={1} titre="Le tableau des pièces">
+
+<div className="tableau">
+  <table>
+    <thead>
+      <tr><th>barre</th><th>par ferme</th><th>longueur (m)</th><th>quantité ({f0.nbFermes} fermes)</th><th>total (m)</th></tr>
+    </thead>
+    <tbody>
+      {nom.lignes.map((l) => (
+        <tr key={l.barre}>
+          <td>{l.barre}</td>
+          <td>{l.parFerme}</td>
+          <td>{nombre(l.longueur, 2)}</td>
+          <td>{l.quantite}</td>
+          <td>{nombre(l.total, 2)}</td>
+        </tr>
+      ))}
+      <tr><th colSpan={4}>total</th><th>{nombre(nom.total, 2)}</th></tr>
+    </tbody>
+  </table>
+</div>
+
+<Note>Pourquoi des longueurs « théoriques » ? Sur les axes, les barres se croisent en un point ; en réalité, elles ont une épaisseur et s'assemblent avec des recouvrements.</Note>
+</Etape>
+
+<Etape n={2} titre="Les angles remarquables à 30°">
+À cette pente, les diagonales sont inclinées de {nombre(f0.gamma, 0)}° et la diagonale courte est **perpendiculaire** à l'arbalétrier (angle de {nombre(f0.angles[1].valeur, 0)}° en M1). Change la pente dans la fiche : ces valeurs rondes disparaissent.
+
+<Note couleur="vert">Conclusion pour le charpentier : {f0.nbFermes} fermes identiques, {nom.pieces} pièces, environ {nombre(nom.total, 0)} m de barres avant chutes.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Schéma | Absent | Nœuds nommés | Cotes et angles reportés sur le schéma |
+| Longueurs | Une barre oubliée | Toutes les barres | Avec le débord, et méthode écrite (Δx, Δy) |
+| Angles | Quelques-uns | Tous les nœuds | Contrôlés par les sommes (180° en D1 et M1) |
+| Unités | Mélangées | m et ° partout | Arrondis cohérents (cm, dixième de degré) |
+| Liste de débit | Absente | Quantités justes | Totaux, et rappel « longueurs théoriques sur axes » |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Refais le calcul pour une pente de 20° : la hauteur baisse, les diagonales se couchent, et la diagonale courte n'est plus perpendiculaire à l'arbalétrier. Quelle est la nouvelle longueur totale de barres ?
+</Encadre>
+
+<Quiz id="N0.4.P">
+
+<QCM n={1} question="Ma liste de débit donne-t-elle, pour chaque barre, le nombre de pièces et la longueur sur les axes, avec les angles aux nœuds contrôlés ?" choix={['Oui, tout est contrôlé', 'Il manque des angles ou des contrôles', 'Je n’ai pas fait la liste']} bonne={0}>
+Sinon, reprends la fiche : une ferme mal tracée ne se rattrape pas sur le chantier.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

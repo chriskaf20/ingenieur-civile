@@ -1,0 +1,324 @@
+---
+id: N0.4.4
+titre: Cercle trigonométrique et formules usuelles
+objectifs:
+  - Lire le cosinus et le sinus d'un angle quelconque sur le cercle trigonométrique
+  - Donner le signe de cos, sin et tan selon le quadrant
+  - Utiliser les relations fondamentales et les formules d'angles associés
+  - Décomposer une force inclinée en composantes horizontale et verticale
+relecture: false
+normes: []
+glossaire:
+  - terme: Cercle trigonométrique
+    definition: Cercle de rayon 1 centré à l'origine, parcouru dans le sens inverse des aiguilles d'une montre à partir de l'axe horizontal.
+  - terme: Quadrant
+    definition: Chacun des quatre quarts du plan délimités par les axes ; il fixe les signes de cos et sin.
+  - terme: Composante
+    definition: Projection d'une force sur un axe ; Fx = F cos θ et Fy = F sin θ.
+  - terme: Angles associés
+    definition: Angles liés à θ (−θ, 180° − θ, 90° − θ…) dont les sinus et cosinus se déduisent de ceux de θ.
+symboles:
+  - { symbole: 'θ', signification: 'angle depuis l’axe horizontal, sens trigonométrique', unite: '°' }
+  - { symbole: 'F', signification: 'intensité d’une force', unite: 'kN' }
+  - { symbole: 'Fx, Fy', signification: 'composantes horizontale et verticale', unite: 'kN' }
+formules:
+  - { nom: 'Relation fondamentale', tex: '\cos^2\theta + \sin^2\theta = 1', domaine: 'Trigonométrie' }
+  - { nom: 'Tangente', tex: '\tan\theta = \frac{\sin\theta}{\cos\theta}', domaine: 'Trigonométrie' }
+  - { nom: 'Somme', tex: '\sin(a+b) = \sin a\cos b + \cos a \sin b', domaine: 'Trigonométrie' }
+  - { nom: 'Composantes d’une force', tex: 'F_x = F\cos\theta,\ F_y = F\sin\theta', domaine: 'Mécanique' }
+---
+
+import { composantes, cosD, decomposerSurVersant, rectDeuxCotes, resultante, sinD, tanD, VALEURS_REMARQUABLES } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { CercleTrigo } from '@/components/schemas/Trigo'
+
+export const theta0 = rectDeuxCotes(8, 6).alpha
+export const c0 = composantes(12, theta0)
+export const ex1 = { c120: cosD(120), s210: sinD(210), t135: tanD(135) }
+export const panne = { g: 0.8, alpha: 30 }
+export const ex2 = decomposerSurVersant(panne.g, panne.alpha)
+export const ex3 = resultante([{ F: 12, theta: theta0 }, { F: 8, theta: 120 }])
+export const verifSomme = { gauche: sinD(30 + 45), droite: sinD(30) * cosD(45) + cosD(30) * sinD(45), faux: sinD(30) + sinD(45) }
+
+<Page etape="intuition" titre="L'intuition : la manivelle et la grande roue">
+
+Regarde un point peint sur une roue qui tourne. Quand la roue tourne, le point monte, redescend, passe à gauche puis à droite. Sa **hauteur** et sa **position horizontale** dépendent de l'angle dont la roue a tourné, et ce, pour **n'importe quel angle**, même au-delà de 90°.
+
+Dans le triangle rectangle, sinus et cosinus n'existaient que pour des angles aigus. Le **cercle trigonométrique** les étend à tous les angles. C'est indispensable en mécanique : une force peut être inclinée dans n'importe quelle direction, vers le haut, vers le bas, vers la gauche.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que valent cos θ et sin θ quand θ dépasse 90°, et comment s'en servir pour décomposer une force inclinée ?
+</Encadre>
+
+<Encadre type="attention">
+Les signes comptent : cos 120° est **négatif**. Une composante négative n'est pas une erreur : elle indique simplement le sens (vers la gauche ou vers le bas).
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le cercle et ses quadrants">
+
+### Définition
+
+Sur un cercle de rayon 1, on part de l'axe horizontal et l'on tourne dans le sens inverse des aiguilles d'une montre d'un angle θ. Le point atteint a pour coordonnées :
+
+$$(\cos\theta\ ;\ \sin\theta)$$
+
+et $\tan\theta = \frac{\sin\theta}{\cos\theta}$ (pas définie quand $\cos\theta = 0$, à 90° et 270°).
+
+### Les signes par quadrant
+
+| quadrant | angles | cos | sin | tan |
+|---|---|---|---|---|
+| I | 0° à 90° | + | + | + |
+| II | 90° à 180° | − | + | − |
+| III | 180° à 270° | − | − | + |
+| IV | 270° à 360° | + | − | − |
+
+### Les valeurs remarquables
+
+<div className="tableau">
+  <table>
+    <thead>
+      <tr><th>θ</th>{VALEURS_REMARQUABLES.map((v) => <th key={v.deg}>{v.deg}°</th>)}</tr>
+    </thead>
+    <tbody>
+      <tr><th>sin θ</th>{VALEURS_REMARQUABLES.map((v) => <td key={v.deg}>{v.sin} ≈ {nombre(sinD(v.deg), 3)}</td>)}</tr>
+      <tr><th>cos θ</th>{VALEURS_REMARQUABLES.map((v) => <td key={v.deg}>{v.cos} ≈ {nombre(cosD(v.deg), 3)}</td>)}</tr>
+      <tr><th>tan θ</th>{VALEURS_REMARQUABLES.map((v) => <td key={v.deg}>{v.tan === '—' ? '—' : `${v.tan} ≈ ${nombre(tanD(v.deg), 3)}`}</td>)}</tr>
+    </tbody>
+  </table>
+</div>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : formules usuelles et composantes">
+
+### Les relations fondamentales
+
+$$\cos^2\theta + \sin^2\theta = 1 \qquad 1 + \tan^2\theta = \frac{1}{\cos^2\theta}$$
+
+La première vient de Pythagore dans le triangle formé par le point et ses projections.
+
+### Les angles associés
+
+- $\cos(-\theta) = \cos\theta$ et $\sin(-\theta) = -\sin\theta$ ;
+- $\sin(180° - \theta) = \sin\theta$ et $\cos(180° - \theta) = -\cos\theta$ ;
+- $\sin(90° - \theta) = \cos\theta$ et $\cos(90° - \theta) = \sin\theta$.
+
+### Les formules de somme
+
+$$\sin(a + b) = \sin a\cos b + \cos a\sin b \qquad \cos(a + b) = \cos a\cos b - \sin a\sin b$$
+
+D'où $\sin 2a = 2\sin a\cos a$ et $\cos 2a = \cos^2 a - \sin^2 a$.
+
+### Les composantes d'une force
+
+Une force $F$ (kN) inclinée d'un angle θ sur l'horizontale se décompose en $F_x = F\cos\theta$ (horizontale) et $F_y = F\sin\theta$ (verticale), avec leurs signes.
+
+<Regle type="simplification">
+Ici θ est mesuré depuis l'**horizontale**. Si l'angle est donné depuis la verticale, sinus et cosinus s'échangent. On fait toujours un schéma avant d'écrire la formule.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le cercle trigonométrique">
+
+<CercleTrigo theta={30} />
+
+Le point rouge est à 30° : sa projection sur l'axe horizontal est cos 30° (bleu), sa projection sur l'axe vertical est sin 30° (vert). Dans chaque quadrant, les signes de cos et sin sont rappelés.
+
+<Encadre type="retenir">
+cos se lit sur l'axe horizontal, sin sur l'axe vertical. Les signes viennent du quadrant : on n'a pas besoin de les apprendre par cœur, il suffit de dessiner le cercle.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="composantes">
+
+<Cahier titre="Exemple résolu : la traction d'un hauban sur son ancrage">
+
+**Énoncé.** Le hauban de N0.4.2 (8 m de haut, ancré à 6 m) tire sur son massif d'ancrage avec une force de 12 kN, dirigée vers le haut du mât, inclinée de {nombre(theta0, 2)}° sur l'horizontale. On oriente l'axe x de l'ancrage vers le pied du mât, et l'axe y vers le haut. Quelles sont la composante horizontale (qui tend à faire glisser le massif) et la composante verticale (qui tend à le soulever) ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi cet angle ? C'est l'angle α du hauban avec le sol, calculé en N0.4.2 : tan α = 8/6.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : cosinus et sinus">
+
+<Etape n={3} titre="Les composantes">
+<AN k="Fx" />
+<AN k="Fy" />
+<Note>Pourquoi des nombres si ronds ? Le triangle 6-8-10 donne cos α = 0,6 et sin α = 0,8.</Note>
+</Etape>
+
+<Etape n={4} titre="Le contrôle et les signes">
+<AN k="verif" />
+<AN k="signes" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="Fy" libelle="Effort de soulèvement" />
+
+<Note couleur="vert">Et un effort horizontal de <Val k="Fx" />. Le massif d'ancrage doit résister aux deux (son poids, le frottement et la butée du sol, vus en N0.6 et L3.4).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le signe d'une composante.">
+cos 120° = {nombre(ex1.c120, 2)} : la composante horizontale d'une force à 120° est dirigée vers la gauche. Le signe fait partie du résultat.
+</Piege>
+
+<Piege erreur="écrire sin(a + b) = sin a + sin b.">
+sin 75° = {nombre(verifSomme.gauche, 4)}, alors que sin 30° + sin 45° = {nombre(verifSomme.faux, 4)}. On utilise la formule de somme : {nombre(verifSomme.droite, 4)} ✓.
+</Piege>
+
+<Piege erreur="échanger sinus et cosinus quand l'angle est mesuré depuis la verticale.">
+Avec un angle φ depuis la verticale, la composante verticale vaut F cos φ. Le schéma tranche, pas l'habitude.
+</Piege>
+
+<Piege erreur="calculer tan 90°.">
+cos 90° = 0 : la tangente n'est pas définie. La calculatrice affiche une erreur ou un nombre énorme.
+</Piege>
+
+<Piege erreur="utiliser la convention des topographes sans le savoir.">
+En topographie, l'angle (le gisement) part du **nord** et tourne dans le sens des aiguilles d'une montre : les rôles de sin et cos s'échangent. On le verra en L1.8.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les ancrages et les massifs.** Un hauban, une élingue de levage, un tirant tirent obliquement. On décompose leur effort pour vérifier le massif ou la pièce d'ancrage : la partie verticale tend à arracher, la partie horizontale à faire glisser.
+
+<Encadre type="terrain" titre="Les pannes d'une toiture">
+Une panne posée sur un versant incliné reçoit des charges verticales (poids de la couverture, par exemple). Pour la dimensionner, on décompose ces charges : une partie perpendiculaire au versant, qui la fait fléchir « vers le bas du toit », et une partie parallèle, qui la fait glisser ou se déverser. Les toitures en tôles des bâtiments courants d'Afrique centrale posent exactement ce problème (exercice 2).
+</Encadre>
+
+**La topographie** convertit sans cesse des mesures polaires (un angle, une distance) en coordonnées rectangulaires (des écarts horizontaux), avec des sinus et des cosinus (L1.8).
+
+**La mécanique** (L1.3) généralise : toute force du plan se décompose en Fx et Fy, et l'équilibre s'écrit composante par composante.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : cercle trigonométrique">
+
+### Définitions
+
+Point du cercle de rayon 1 à l'angle θ : $(\cos\theta ; \sin\theta)$ · $\tan\theta = \sin\theta / \cos\theta$ · θ depuis l'horizontale, sens trigonométrique
+
+### Signes
+
+I : cos +, sin + · II : cos −, sin + · III : cos −, sin − · IV : cos +, sin −
+
+### Formules
+
+$\cos^2\theta + \sin^2\theta = 1$ · $\sin(180° - \theta) = \sin\theta$ · $\cos(180° - \theta) = -\cos\theta$ · $\sin(90° - \theta) = \cos\theta$ · $\sin(a + b) = \sin a\cos b + \cos a\sin b$ · $\cos(a + b) = \cos a\cos b - \sin a\sin b$
+
+### Composantes d'une force
+
+$F_x = F\cos\theta$ · $F_y = F\sin\theta$ · contrôle : $\sqrt{F_x^2 + F_y^2} = F$
+
+### Valeurs à connaître
+
+sin 30° = 1/2 · cos 60° = 1/2 · sin 45° = cos 45° = √2/2 ≈ {nombre(sinD(45), 3)} · cos 30° = sin 60° = √3/2 ≈ {nombre(cosD(30), 3)}
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Valeurs et signes">
+
+Sans calculatrice, donne le signe de cos 120°, sin 210° et tan 135°. Vérifie ensuite leurs valeurs.
+
+<Indice>Repère le quadrant de chaque angle sur le cercle.</Indice>
+
+<Corrige>
+cos 120° (quadrant II) : **{nombre(ex1.c120, 3)}** ; sin 210° (quadrant III) : **{nombre(ex1.s210, 3)}** ; tan 135° (quadrant II) : **{nombre(ex1.t135, 3)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La panne d'une toiture">
+
+Une panne d'une toiture inclinée à {panne.alpha}° reçoit une charge verticale de {nombre(panne.g, 1)} kN/m (donnée de l'énoncé). Calcule la part perpendiculaire au versant et la part parallèle au versant.
+
+<Indice>L'angle entre la verticale et la perpendiculaire au versant vaut lui aussi {panne.alpha}°.</Indice>
+
+<Corrige>
+perpendiculaire : {nombre(panne.g, 1)} × cos {panne.alpha}° = **{grandeur(ex2.perp, 3, 'kN/m')}** ; parallèle : {nombre(panne.g, 1)} × sin {panne.alpha}° = **{grandeur(ex2.para, 3, 'kN/m')}**. Contrôle : √({nombre(ex2.perp, 3)}² + {nombre(ex2.para, 3)}²) = {nombre(rectDeuxCotes(ex2.perp, ex2.para).c, 3)} ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Deux haubans sur un même ancrage">
+
+Un massif reçoit deux haubans : 12 kN à {nombre(theta0, 2)}° et 8 kN à 120° (angles depuis l'horizontale). Calcule la force totale qu'il subit (sa résultante) : composantes, intensité et direction.
+
+<Indice>Additionne les composantes horizontales entre elles, et les verticales entre elles.</Indice>
+
+<Corrige>
+
+- Rx = 12 cos {nombre(theta0, 2)}° + 8 cos 120° = **{grandeur(ex3.Rx, 2, 'kN')}** ; Ry = 12 sin {nombre(theta0, 2)}° + 8 sin 120° = **{grandeur(ex3.Ry, 2, 'kN')}**.
+- R = √(Rx² + Ry²) = **{grandeur(ex3.R, 2, 'kN')}**, inclinée de **{nombre(ex3.theta, 2)}°** sur l'horizontale.
+- Les composantes horizontales se compensent en partie : le massif est surtout soulevé.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.4.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sur le cercle trigonométrique, cos θ se lit :" choix={['sur l’axe vertical', 'sur l’axe horizontal', 'sur la tangente', 'sur le rayon']} bonne={1} colonnes={2}>
+Le point a pour coordonnées (cos θ ; sin θ).
+</QCM>
+
+<QCM n={2} question="Le signe de cos 150° est :" choix={['positif', 'négatif', 'nul', 'indéfini']} bonne={1} colonnes={4}>
+150° est dans le quadrant II : cos négatif, sin positif.
+</QCM>
+
+<QCM n={3} question="cos² θ + sin² θ vaut :" choix={['0', '1', 'tan θ', '2']} bonne={1} colonnes={4}>
+C'est Pythagore sur le cercle de rayon 1.
+</QCM>
+
+<QCM n={4} question="sin(180° − θ) est égal à :" choix={['−sin θ', 'sin θ', 'cos θ', '−cos θ']} bonne={1} colonnes={4}>
+Les deux points sont symétriques par rapport à l'axe vertical.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Une force de 12 kN inclinée de {nombre(theta0, 2)}° sur l'horizontale a une composante verticale de :</>} choix={[grandeur(c0.Fx, 1, 'kN'), grandeur(c0.Fy, 1, 'kN'), '12 kN', '20 kN']} bonne={1} colonnes={4}>
+Fy = 12 × sin {nombre(theta0, 2)}° = {grandeur(c0.Fy, 1, 'kN')}.
+</QCM>
+
+<QCM n={6} question="sin(a + b) vaut :" choix={['sin a + sin b', 'sin a cos b + cos a sin b', 'sin a sin b − cos a cos b', '2 sin a']} bonne={1}>
+Formule de somme.
+</QCM>
+
+<QCM n={7} question="La tangente de 90° :" choix={['vaut 1', 'vaut 0', 'n’est pas définie', 'vaut l’infini exactement']} bonne={2} colonnes={2}>
+cos 90° = 0 : on ne peut pas diviser par 0.
+</QCM>
+
+<QCM n={8} question="Une composante négative signifie :" choix={['une erreur de calcul', 'que la force agit dans le sens opposé à l’axe', 'que la force est nulle', 'qu’il faut prendre la valeur absolue']} bonne={1}>
+Le signe donne le sens.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

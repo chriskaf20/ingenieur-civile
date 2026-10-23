@@ -1,0 +1,319 @@
+---
+id: N0.4.5
+titre: "Triangle quelconque : loi des sinus, Al-Kashi"
+objectifs:
+  - Nommer les côtés et les angles d'un triangle quelconque
+  - Calculer un côté ou un angle avec la formule d'Al-Kashi
+  - Calculer des côtés avec la loi des sinus
+  - Choisir la bonne formule selon les mesures disponibles et repérer le cas ambigu
+relecture: false
+normes: []
+glossaire:
+  - terme: Formule d'Al-Kashi
+    definition: Relation a² = b² + c² − 2bc cos A, valable dans tout triangle ; elle généralise le théorème de Pythagore.
+  - terme: Loi des sinus
+    definition: Dans tout triangle, a / sin A = b / sin B = c / sin C.
+  - terme: Triangulation
+    definition: Méthode de mesure qui calcule des distances inaccessibles à partir d'une base mesurée et d'angles.
+  - terme: Cas ambigu
+    definition: Situation où deux côtés et un angle non compris entre eux peuvent donner deux triangles différents.
+symboles:
+  - { symbole: 'a, b, c', signification: 'côtés opposés aux angles A, B, C', unite: 'm' }
+  - { symbole: 'A, B, C', signification: 'angles du triangle, A + B + C = 180°', unite: '° ou gon' }
+formules:
+  - { nom: 'Al-Kashi', tex: 'a^2 = b^2 + c^2 - 2bc\cos A', domaine: 'Triangle quelconque' }
+  - { nom: 'Loi des sinus', tex: '\frac{a}{\sin A} = \frac{b}{\sin B} = \frac{c}{\sin C}', domaine: 'Triangle quelconque' }
+  - { nom: 'Aire', tex: 'S = \tfrac{1}{2}\,b\,c\,\sin A', domaine: 'Triangle quelconque' }
+---
+
+import { convertirAngle, rectDeuxCotes, rectHypotenuseAngle, sinD, triangleACA, triangleCAC, triangleCCA, triangleCCC } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { TriangulationRiviere } from '@/components/schemas/Trigo'
+
+export const st = triangleCAC(42.3, 35.8, convertirAngle(58.4, 'gon', 'deg'))
+export const riv = { base: 50, A: 62, B: 71 }
+export const rivT = triangleACA(riv.A, riv.B, riv.base)
+export const rivLargeur = rectHypotenuseAngle(rivT.b, riv.A).a
+export const ex1 = triangleCCC(30, 25, 40)
+export const ex3 = triangleCCA(20, 30, 30)
+export const pyth = triangleCAC(3, 4, 90)
+
+<Page etape="intuition" titre="L'intuition : mesurer à travers un obstacle">
+
+Deux bornes A et B d'une parcelle sont séparées par une maison : impossible de tendre le ruban de l'une à l'autre. Le géomètre se place en un point S d'où il voit les deux bornes. Il mesure SA, SB et l'angle entre les deux directions. Le triangle SAB est alors **entièrement déterminé** : la distance AB se calcule.
+
+Même idée pour la largeur d'une rivière qu'on ne peut pas traverser : on mesure une base sur une rive et deux angles vers un arbre de l'autre rive. C'est la **triangulation**, la méthode qui a servi à cartographier des pays entiers.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Le triangle n'a pas d'angle droit : Pythagore et les rapports SOH-CAH-TOA ne suffisent plus. Quelles formules utiliser ?
+</Encadre>
+
+<Encadre type="attention">
+Un triangle a 6 éléments (3 côtés, 3 angles). Il faut en connaître **3**, dont au moins un côté, pour le résoudre. Trois angles seuls donnent la forme, pas la taille.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : la formule d'Al-Kashi">
+
+### Les notations
+
+Le côté $a$ fait face à l'angle $A$, $b$ à $B$, $c$ à $C$. Dans tout triangle : $A + B + C = 180°$.
+
+### La formule
+
+$$a^2 = b^2 + c^2 - 2\,b\,c\,\cos A$$
+
+- $b$, $c$ : deux côtés (m) ;
+- $A$ : l'angle **compris entre eux** (°) ;
+- $a$ : le côté opposé à $A$ (m).
+
+Si $A$ = 90°, $\cos A = 0$ et l'on retrouve Pythagore : avec b = 3 et c = 4, a = {nombre(pyth.a, 0)}.
+
+### Les deux usages
+
+1. **Deux côtés et l'angle compris** → le troisième côté.
+2. **Trois côtés** → chaque angle : $\cos A = \frac{b^2 + c^2 - a^2}{2\,b\,c}$.
+
+<Regle type="simplification">
+On calcule les angles avec Al-Kashi plutôt qu'avec la loi des sinus quand c'est possible : l'arc cosinus ne laisse pas de doute entre un angle aigu et un angle obtus.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la loi des sinus">
+
+### La formule
+
+$$\frac{a}{\sin A} = \frac{b}{\sin B} = \frac{c}{\sin C}$$
+
+Le rapport commun vaut le diamètre du cercle qui passe par les trois sommets.
+
+### Quand l'utiliser
+
+**Deux angles et un côté** : on trouve le troisième angle ($C = 180° - A - B$), puis les deux autres côtés.
+
+### Quelle formule choisir ?
+
+| je connais | je calcule | formule |
+|---|---|---|
+| 2 côtés + angle compris | 3e côté | Al-Kashi |
+| 3 côtés | les angles | Al-Kashi |
+| 2 angles + 1 côté | les côtés | loi des sinus |
+| 2 côtés + angle non compris | prudence | loi des sinus, **cas ambigu** |
+
+### Le cas ambigu
+
+Avec deux côtés et un angle **non compris**, $\sin B$ se calcule, mais deux angles ont le même sinus ($B$ et $180° - B$) : il peut exister deux triangles. On tranche avec une mesure supplémentaire ou avec le schéma.
+
+### L'aire
+
+$S = \frac{1}{2}\,b\,c\,\sin A$ : la moitié du produit de deux côtés par le sinus de l'angle compris.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la largeur d'une rivière">
+
+<TriangulationRiviere base={riv.base} angleA={riv.A} angleB={riv.B} t={rivT} />
+
+Depuis A et B, sur la même rive, on vise un arbre C de l'autre rive. On connaît la base AB = {riv.base} m et les angles {riv.A}° et {riv.B}° : la loi des sinus donne AC = {grandeur(rivT.b, 2, 'm')}, puis la largeur AC × sin {riv.A}° = {grandeur(rivLargeur, 2, 'm')}.
+
+<Encadre type="retenir">
+On ne mesure jamais ce qui est inaccessible : on mesure une base et des angles, puis on calcule. C'est le principe de toute la topographie.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="station">
+
+<Cahier titre="Exemple résolu : deux bornes séparées par une maison">
+
+**Énoncé.** Les bornes A et B d'une parcelle sont séparées par une maison. Depuis une station S, le géomètre mesure SA = 42,30 m, SB = 35,80 m et, avec sa station totale réglée en grades, l'angle ASB = 58,400 0 gon. Calcule la distance AB, les angles en A et en B, et l'aire du triangle.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi Al-Kashi ? On connaît deux côtés et l'angle compris entre eux : c'est exactement son domaine.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : Al-Kashi puis les angles">
+
+<Etape n={3} titre="La conversion et la distance">
+<AN k="conversion" />
+<AN k="kashi" />
+<Note>Pourquoi convertir en degrés ? La calculatrice est en mode DEG ; sinon, il faut la passer en mode GRAD.</Note>
+</Etape>
+
+<Etape n={4} titre="Les angles et les contrôles">
+<AN k="angles" />
+<AN k="sinus" />
+<AN k="aire" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="AB" libelle="Distance AB" />
+
+<Note couleur="vert">Angles : <Val k="angleA" /> en A, <Val k="angleB" /> en B. Sur le terrain, une quatrième mesure contrôle le tout.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="appliquer Pythagore à un triangle qui n'a pas d'angle droit.">
+On oublie le terme $-2bc\cos A$ : l'erreur est d'autant plus grande que A s'éloigne de 90°.
+</Piege>
+
+<Piege erreur="mettre dans Al-Kashi un angle qui n'est pas compris entre les deux côtés.">
+L'angle de la formule est celui **entre** b et c, face au côté a cherché. Le schéma permet de le vérifier.
+</Piege>
+
+<Piege erreur="oublier le mode de la calculatrice avec un angle en grades.">
+Une station totale donne souvent des grades. cos(58,4) en mode DEG n'est pas cos(58,4 gon) : convertis d'abord, ou change de mode.
+</Piege>
+
+<Piege erreur="ignorer le cas ambigu.">
+Avec deux côtés et un angle non compris, la loi des sinus peut donner deux triangles. Prendre le premier au hasard place une borne au mauvais endroit.
+</Piege>
+
+<Piege erreur="arrondir les angles avant de calculer le troisième.">
+A + B + C doit faire 180° : on garde les décimales jusqu'au bout, et l'on contrôle la somme.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le géomètre** résout des triangles toute la journée : rattacher un point à un repère, contourner un obstacle, vérifier une implantation. Il mesure toujours **plus que le strict nécessaire** pour contrôler ses calculs.
+
+<Encadre type="terrain" titre="Parcelles irrégulières">
+Dans les quartiers anciens et les extensions spontanées, beaucoup de parcelles sont des quadrilatères irréguliers. On les découpe en triangles : on mesure les côtés et une diagonale, puis Al-Kashi donne les angles et ½ bc sin A les surfaces. C'est la base d'un plan de bornage ou d'un relevé pour un permis de construire.
+</Encadre>
+
+**Attention aux terrains en pente** : le ruban posé sur le sol mesure une longueur inclinée. Les calculs de plan utilisent des distances **horizontales** : on corrige avec l'angle de pente (N0.4.3) ou l'on mesure avec un appareil qui réduit à l'horizontale.
+
+**Les structures** aussi sont des triangles : une ferme triangulée, une diagonale de contreventement. Leurs longueurs et leurs angles se calculent avec les mêmes formules (N0.4.P).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : triangle quelconque">
+
+### Notations
+
+Côté a face à l'angle A, etc. · A + B + C = 180°
+
+### Al-Kashi
+
+$a^2 = b^2 + c^2 - 2bc\cos A$ · angle : $\cos A = \frac{b^2 + c^2 - a^2}{2bc}$ · A = 90° → Pythagore
+
+### Loi des sinus
+
+$\frac{a}{\sin A} = \frac{b}{\sin B} = \frac{c}{\sin C}$
+
+### Quelle formule ?
+
+2 côtés + angle compris → Al-Kashi · 3 côtés → Al-Kashi · 2 angles + 1 côté → sinus · 2 côtés + angle non compris → cas ambigu, prudence
+
+### Aire
+
+$S = \tfrac{1}{2}\,b\,c\,\sin A$
+
+### Réflexes
+
+Mode de la calculatrice (gon !) · distances horizontales · une mesure de plus pour contrôler
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une parcelle triangulaire">
+
+Une parcelle triangulaire a des côtés de 30 m, 25 m et 40 m. Calcule ses trois angles et sa surface.
+
+<Indice>Trois côtés : Al-Kashi pour chaque angle, puis ½ bc sin A.</Indice>
+
+<Corrige>
+Angles (face à 30, 25 et 40 m) : **{nombre(ex1.A, 2)}°**, **{nombre(ex1.B, 2)}°**, **{nombre(ex1.C, 2)}°** (somme {nombre(ex1.A + ex1.B + ex1.C, 0)}° ✓) ; surface **{grandeur(ex1.aire, 1, 'm²')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La rivière">
+
+Reprends le schéma : base AB = {riv.base} m, angles {riv.A}° en A et {riv.B}° en B. Calcule AC, BC et la largeur de la rivière.
+
+<Indice>Commence par C = 180° − A − B, puis la loi des sinus.</Indice>
+
+<Corrige>
+C = **{nombre(rivT.C, 0)}°** ; AC = {riv.base} × sin {riv.B}° / sin {nombre(rivT.C, 0)}° = **{grandeur(rivT.b, 2, 'm')}** ; BC = {riv.base} × sin {riv.A}° / sin {nombre(rivT.C, 0)}° = **{grandeur(rivT.a, 2, 'm')}** ; largeur = AC × sin {riv.A}° = **{grandeur(rivLargeur, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le cas ambigu">
+
+On sait que BC = 20 m, AC = 30 m et que l'angle en A vaut 30°. Combien de triangles sont possibles ? Calcule AB dans chaque cas.
+
+<Indice>Loi des sinus : sin B = AC × sin A / BC. Deux angles ont ce sinus.</Indice>
+
+<Corrige>
+
+- sin B = 30 × sin 30° / 20 = {nombre(sinD(ex3[0].B), 2)} : **{ex3.length} triangles** possibles.
+- B = **{nombre(ex3[0].B, 2)}°** → AB = **{grandeur(ex3[0].c, 2, 'm')}** ; ou B = **{nombre(ex3[1].B, 2)}°** → AB = **{grandeur(ex3[1].c, 2, 'm')}**.
+- Sur le terrain, une mesure supplémentaire (un angle, une distance) lève l'ambiguïté.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.4.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Dans un triangle, le côté a est :" choix={['adjacent à l’angle A', 'opposé à l’angle A', 'le plus grand côté', 'toujours horizontal']} bonne={1} colonnes={2}>
+Convention : chaque côté porte le nom de l'angle qui lui fait face.
+</QCM>
+
+<QCM n={2} question="La formule d'Al-Kashi s'écrit :" choix={['a² = b² + c²', 'a² = b² + c² − 2bc cos A', 'a = b sin A', 'a² = b² − c²']} bonne={1} colonnes={2}>
+Elle redonne Pythagore quand A = 90°.
+</QCM>
+
+<QCM n={3} question="On connaît deux angles et un côté. On utilise :" choix={['Pythagore', 'Al-Kashi', 'la loi des sinus', 'la tangente seule']} bonne={2} colonnes={4}>
+Après C = 180° − A − B, la loi des sinus donne les côtés.
+</QCM>
+
+<QCM n={4} question="Dans Al-Kashi, l'angle A est :" choix={['n’importe quel angle', 'l’angle compris entre b et c', 'l’angle opposé à b', 'un angle droit']} bonne={1} colonnes={2}>
+Il fait face au côté a cherché.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>SA = 42,30 m, SB = 35,80 m, angle ASB = 58,400 0 gon : la distance AB vaut :</>} choix={[grandeur(st.a - 5, 2, 'm'), grandeur(st.a, 2, 'm'), grandeur(rectDeuxCotes(42.3, 35.8).c, 2, 'm'), '78,10 m']} bonne={1} colonnes={4}>
+Al-Kashi avec l'angle converti en degrés : {grandeur(st.a, 2, 'm')}.
+</QCM>
+
+<QCM n={6} question="Deux côtés et un angle non compris peuvent donner :" choix={['toujours un seul triangle', 'zéro, un ou deux triangles', 'toujours deux triangles', 'un triangle rectangle']} bonne={1}>
+C'est le cas ambigu.
+</QCM>
+
+<QCM n={7} question="L'aire d'un triangle de côtés b et c faisant un angle A vaut :" choix={['b × c', '½ b c sin A', '½ b c cos A', 'b c tan A']} bonne={1} colonnes={4}>
+La hauteur vaut c sin A.
+</QCM>
+
+<QCM n={8} question="Sur un terrain en pente, une distance mesurée au ruban posé sur le sol est :" choix={['horizontale', 'inclinée, à réduire à l’horizontale', 'toujours fausse', 'verticale']} bonne={1} colonnes={2}>
+Les plans utilisent des distances horizontales.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
