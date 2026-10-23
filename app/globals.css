@@ -289,8 +289,12 @@ body {
   --armature: var(--color-correction);
   font-family: var(--font-technique);
 }
-.dessin text {
+/* Valeurs par défaut des textes : un attribut fill ou font-size posé sur l'élément l'emporte
+   (un attribut de présentation SVG perd contre toute règle CSS, d'où les :not([…])). */
+.dessin text:not([fill]) {
   fill: var(--trait);
+}
+.dessin text:not([font-size]) {
   font-size: 12px;
 }
 /* Les classes donnent un style par défaut ; un attribut posé sur l'élément l'emporte. */
@@ -307,9 +311,13 @@ body {
 .dessin .t-axe:not([stroke-dasharray]) { stroke-dasharray: 14 3 2 3; }
 .dessin .t-cache:not([stroke-dasharray]) { stroke-dasharray: 5 3; }
 .dessin .r-armature { fill: var(--armature); }
-.dessin .encre { fill: var(--color-encre); }
-.dessin .etiquette { font-size: 11px; fill: var(--trait-doux); }
-.dessin .titre-vue { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+.dessin .encre,
+.dessin text.encre { fill: var(--color-encre); }
+.dessin .etiquette,
+.dessin text.etiquette { fill: var(--trait-doux); }
+.dessin text.etiquette:not([font-size]) { font-size: 11px; }
+.dessin text.titre-vue { font-weight: 700; letter-spacing: 0.04em; }
+.dessin text.titre-vue:not([font-size]) { font-size: 13px; }
 
 @media screen {
   :root[data-theme='sombre'] .dessin {
