@@ -1,0 +1,348 @@
+---
+id: N0.3.1
+titre: "Le Système international : unités et préfixes"
+objectifs:
+  - Citer les unités de base du SI utiles en génie civil
+  - Exprimer une unité dérivée (newton, pascal) à partir des unités de base
+  - Utiliser les préfixes du SI et les écrire correctement
+  - Changer de préfixe en comptant les puissances de dix
+relecture: false
+normes:
+  - "Le Système international d'unités (SI), brochure du BIPM, 9e édition (2019)"
+  - "EN 1992-1-1 §3.2.7(4) : module d'élasticité de l'acier Es = 200 GPa (exemple)"
+glossaire:
+  - terme: Système international (SI)
+    definition: Système d'unités commun au monde entier, fondé sur sept unités de base (m, kg, s, A, K, mol, cd).
+  - terme: Unité de base
+    definition: Unité du SI définie pour elle-même, comme le mètre, le kilogramme ou la seconde.
+  - terme: Unité dérivée
+    definition: Unité obtenue en combinant des unités de base, comme le newton (kg·m/s²) ou le pascal (N/m²).
+  - terme: Préfixe
+    definition: Mot placé devant une unité pour la multiplier par une puissance de dix (kilo = 10³, milli = 10⁻³).
+  - terme: Newton
+    definition: Unité de force du SI ; 1 N est la force qui donne à 1 kg une accélération de 1 m/s².
+  - terme: Pascal
+    definition: Unité de pression et de contrainte du SI ; 1 Pa = 1 N/m².
+symboles:
+  - { symbole: 'N', signification: 'newton, unité de force', unite: 'kg·m/s²' }
+  - { symbole: 'Pa', signification: 'pascal, unité de pression', unite: 'N/m²' }
+  - { symbole: 'n', signification: 'nombre de rangs entre deux préfixes', unite: '—' }
+formules:
+  - { nom: 'Newton', tex: '1\ \text{N} = 1\ \text{kg} \cdot \text{m/s}^2', domaine: 'Unités SI' }
+  - { nom: 'Pascal', tex: '1\ \text{Pa} = 1\ \text{N/m}^2', domaine: 'Unités SI' }
+  - { nom: 'Changement de préfixe', tex: 'x_{arrivée} = x_{départ} \times 10^{\,e_{départ} - e_{arrivée}}', domaine: 'Unités SI' }
+---
+
+import { E_S } from '@/lib/calc/ba/materiaux'
+import { changerPrefixe, convertir, poidsDeMasse } from '@/lib/calc/unites'
+import { nombre, nombreCourt, puissanceDix } from '@/lib/format'
+import { EchellePrefixes } from '@/components/schemas/Unites'
+import { ecrire } from '@/components/calculs/unites'
+
+export const esG = changerPrefixe(E_S, 'M', 'G').valeur
+export const ex1 = [changerPrefixe(2.5, 'k', ''), changerPrefixe(350, 'm', ''), changerPrefixe(0.15, 'M', 'k')]
+export const esPa = changerPrefixe(esG, 'G', '')
+export const nmm2 = convertir(1, 'N/mm²', 'MPa').valeur
+export const kNm2 = convertir(1, 'kN/m²', 'kPa').valeur
+
+<Page etape="intuition" titre="L'intuition : une langue commune pour les nombres">
+
+Sur un grand marché, des commerçants venus de régions différentes s'entendent grâce à une langue commune. Sans elle, chacun parle sa langue, et les affaires tournent mal.
+
+Les mesures, c'est pareil. Sur un même chantier, tu peux rencontrer un ciment chinois dont la fiche donne la résistance en MPa, un vieux plan belge en kg/cm², un tuyau désigné en pouces, et un ingénieur qui calcule en kN. Si personne ne parle la même « langue des unités », les erreurs arrivent vite.
+
+Le **Système international d'unités**, le SI, est cette langue commune. Il est utilisé dans le monde entier, et c'est la langue des Eurocodes.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelles sont les unités du SI dont l'ingénieur se sert tous les jours, et comment passer d'un kilonewton à un newton, ou d'un gigapascal à un mégapascal, sans se tromper ?
+</Encadre>
+
+<Encadre type="attention">
+Une unité n'est pas un détail qu'on ajoute à la fin. Un nombre sans unité ne veut rien dire : « 25 », c'est 25 quoi ? 25 kN ? 25 MPa ? 25 tonnes ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : unités de base et unités dérivées">
+
+### Les unités de base
+
+Le SI repose sur sept unités de base. Trois servent presque tout le temps en génie civil :
+
+| Grandeur | Unité | Symbole |
+|---|---|---|
+| longueur | mètre | m |
+| masse | kilogramme | kg |
+| temps | seconde | s |
+| température | kelvin | K |
+| intensité électrique | ampère | A |
+| quantité de matière | mole | mol |
+| intensité lumineuse | candela | cd |
+
+### Les unités dérivées
+
+Toutes les autres unités se construisent avec les unités de base :
+
+| Grandeur | Unité | Symbole | En unités de base |
+|---|---|---|---|
+| force | newton | N | kg·m/s² |
+| pression, contrainte | pascal | Pa | N/m² = kg/(m·s²) |
+| énergie, travail | joule | J | N·m |
+| puissance | watt | W | J/s |
+
+<Regle type="norme" source="brochure du SI, BIPM, 9e édition (2019)">
+Le newton est la force qui donne à une masse de 1 kg une accélération de 1 m/s² : $1\ \text{N} = 1\ \text{kg} \cdot \text{m/s}^2$. Le pascal est une force de 1 N répartie sur 1 m² : $1\ \text{Pa} = 1\ \text{N/m}^2$.
+</Regle>
+
+<Encadre type="exemple">
+Le pascal est une très petite unité : une feuille de papier ordinaire (80 g/m²) posée à plat exerce une pression de {nombre(poidsDeMasse(0.08), 2)} Pa, moins d'un pascal. C'est pourquoi on parle en kPa pour les sols et en MPa pour le béton et l'acier.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : les préfixes">
+
+### Le tableau des préfixes
+
+Un préfixe multiplie l'unité par une puissance de dix :
+
+| Préfixe | Symbole | Facteur | Exemple en génie civil |
+|---|---|---|---|
+| giga | G | $10^9$ | module de l'acier : {nombreCourt(esG)} GPa |
+| méga | M | $10^6$ | résistance du béton en MPa |
+| kilo | k | $10^3$ | charges en kN, distances en km |
+| hecto, déca | h, da | $10^2$, $10^1$ | hectare, décanewton |
+| déci, centi | d, c | $10^{-1}$, $10^{-2}$ | décimètre, centimètre |
+| milli | m | $10^{-3}$ | diamètres de barres en mm |
+| micro | µ | $10^{-6}$ | déformations, épaisseurs de peinture |
+
+### Changer de préfixe
+
+On repère les exposants des deux préfixes, puis on multiplie par $10^{n}$ avec $n = e_{départ} - e_{arrivée}$ :
+
+- $e_{départ}$ : exposant du préfixe de départ (sans unité) ;
+- $e_{arrivée}$ : exposant du préfixe d'arrivée (sans unité) ;
+- $n$ : nombre de rangs (sans unité), positif si l'on va vers un préfixe plus petit.
+
+### Les règles d'écriture
+
+<Regle type="norme" source="brochure du SI">
+Le symbole du préfixe se colle à l'unité (kN, et non k N). On n'empile jamais deux préfixes. Les majuscules comptent : **M** (méga) et **m** (milli) n'ont rien à voir. Le kilo s'écrit avec un **k minuscule**.
+</Regle>
+
+<Encadre type="attention">
+Le kilogramme est la seule unité de base qui contient déjà un préfixe. On écrit donc mg (milligramme) et non µkg.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : les préfixes sur l'échelle des puissances de dix">
+
+<EchellePrefixes />
+
+Lis l'échelle de gauche à droite : chaque graduation divise par 10.
+
+- Entre **k** et l'unité, il y a **3** graduations : 1 kN = $10^3$ N.
+- Entre **M** et **k**, il y a aussi 3 graduations : 1 MPa = $10^3$ kPa.
+- Entre l'unité et **m**, encore 3 : 1 m = $10^3$ mm.
+- Les préfixes h, da, d et c sont serrés au milieu : un rang chacun.
+
+<Encadre type="retenir">
+Pour changer de préfixe, on compte les graduations entre les deux cases. Vers la droite (préfixe plus petit), le nombre **grandit** ; vers la gauche, il **diminue**.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="prefixes">
+
+<Cahier titre="Exemple résolu : le module de l'acier en MPa">
+
+**Énoncé.** L'Eurocode 2 donne le module d'élasticité de l'acier des armatures : $E_s$ = 200 GPa. Les calculs de béton armé se font en MPa. Exprime $E_s$ en MPa.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi convertir ? Dans une même formule, toutes les contraintes doivent avoir la même unité : on ne mélange pas des GPa et des MPa.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : compter les rangs">
+
+<Etape n={3} titre="Les exposants">
+<AN k="exposants" />
+</Etape>
+
+<Etape n={4} titre="Le calcul">
+<AN k="n" />
+<AN k="calcul" />
+<Note>Pourquoi le nombre grandit-il ? On passe à une unité mille fois plus petite : il en faut mille fois plus.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="resultat" libelle="Résultat" />
+
+<Note couleur="vert">Contrôle : un MPa est plus petit qu'un GPa, donc le nombre de MPa est plus grand ✓.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre M (méga) et m (milli).">
+1 MN = $10^6$ N et 1 mN = $10^{-3}$ N : un facteur d'un milliard entre les deux. Écris toujours les majuscules avec soin.
+</Piege>
+
+<Piege erreur="écrire KN, Kg ou KM avec un K majuscule.">
+Le symbole du kilo est **k** minuscule : kN, kg, km. « K » est le symbole du kelvin.
+</Piege>
+
+<Piege erreur="ajouter un « s » au pluriel : 3 kgs, 5 ms.">
+Les symboles d'unités sont invariables : 3 kg, 5 m. « ms » se lit milliseconde.
+</Piege>
+
+<Piege erreur="décaler la virgule dans le mauvais sens.">
+Passer de kN à N, c'est aller vers une unité plus petite : le nombre augmente. 2,5 kN = 2 500 N, et non 0,002 5 N.
+</Piege>
+
+<Piege erreur="empiler deux préfixes, comme « kMPa » ou « mkm ».">
+Un seul préfixe à la fois. Si le nombre devient trop grand, on change de préfixe ou l'on passe en notation scientifique (N0.2.2).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Sur les plans**, l'unité des cotes est indiquée dans le cartouche. En pratique française, les plans d'architecture sont souvent cotés en centimètres, les diamètres des armatures sont donnés en millimètres et les niveaux en mètres. Lis toujours le cartouche avant de lire une cote.
+
+<Encadre type="terrain" titre="Matériaux importés">
+En Afrique centrale, les matériaux viennent de nombreux pays. Les fiches techniques donnent la résistance d'un ciment ou d'un acier en MPa, parfois en N/mm², parfois en kg/cm² ou en psi. Avant de comparer deux produits, ramène toutes les valeurs à la même unité du SI.
+</Encadre>
+
+**Dans les notes de calcul**, l'usage est le suivant : forces en kN, moments en kN·m, charges réparties en kN/m ou kN/m², contraintes en MPa, longueurs en m (ou mm pour les sections d'acier). Tu retrouveras ces unités dans tous les modules de structure.
+
+**Une égalité à connaître par cœur** : 1 MPa = 1 N/mm². Elle vient des préfixes : 1 N/mm² = 1 N / $10^{-6}$ m² = $10^6$ N/m² = 1 MPa. Le calcul confirme : 1 N/mm² = {nombreCourt(nmm2)} MPa.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : unités et préfixes du SI">
+
+### Les unités de base utiles
+
+m (longueur) · kg (masse) · s (temps) · K (température)
+
+### Les unités dérivées
+
+N = kg·m/s² (force) · Pa = N/m² (pression, contrainte) · J = N·m (énergie) · W = J/s (puissance)
+
+### Les préfixes
+
+| G | M | k | h | da | — | d | c | m | µ |
+|---|---|---|---|---|---|---|---|---|---|
+| $10^9$ | $10^6$ | $10^3$ | $10^2$ | $10^1$ | $10^0$ | $10^{-1}$ | $10^{-2}$ | $10^{-3}$ | $10^{-6}$ |
+
+### Changer de préfixe
+
+$x_{arrivée} = x_{départ} \times 10^{\,e_{départ} - e_{arrivée}}$ · vers un préfixe plus petit, le nombre grandit.
+
+### À écrire juste
+
+k minuscule · M ≠ m · pas de « s » au pluriel · un seul préfixe · 1 MPa = 1 N/mm² · 1 kPa = 1 kN/m²
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trois conversions">
+
+Convertis : 2,5 km en m ; 350 mm en m ; 0,15 MPa en kPa.
+
+<Indice>Compte les rangs entre les deux préfixes : km → m, 3 rangs ; mm → m, 3 rangs dans l'autre sens ; MPa → kPa, 3 rangs.</Indice>
+
+<Corrige>
+2,5 km = 2,5 × {puissanceDix(ex1[0].n)} m = **{ecrire(ex1[0].valeur)} m** ; 350 mm = 350 × {puissanceDix(ex1[1].n)} m = **{ecrire(ex1[1].valeur)} m** ; 0,15 MPa = 0,15 × {puissanceDix(ex1[2].n)} kPa = **{ecrire(ex1[2].valeur)} kPa**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Corriger une copie">
+
+Une copie contient : « 25 KN », « 3 Mm d'épaisseur », « 12 kgs », « 2,5 m N ». Corrige chaque écriture et dis ce qui était faux.
+
+<Indice>Relis les règles d'écriture : minuscules et majuscules, pluriel, espace.</Indice>
+
+<Corrige>
+
+- « 25 KN » → **25 kN** : le kilo s'écrit avec un k minuscule.
+- « 3 Mm » signifie 3 mégamètres (3 000 km) ! Il fallait **3 mm**.
+- « 12 kgs » → **12 kg** : pas de « s ».
+- « 2,5 m N » est ambigu : millinewton (**2,5 mN**) ou newton-mètre ? Pour un moment, on écrit **2,5 N·m** (ou kN·m), avec le point du produit.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le module de l'acier en pascals">
+
+Exprime $E_s$ = {nombreCourt(esG)} GPa en pascals, en notation scientifique. Montre ensuite que 1 kN/m² = 1 kPa.
+
+<Indice>De G à l'unité, il y a 9 rangs. Pour la seconde question, remplace k par $10^3$.</Indice>
+
+<Corrige>
+
+- {nombreCourt(esG)} GPa = {nombreCourt(esG)} × {puissanceDix(esPa.n)} Pa = **{ecrire(esPa.valeur)} Pa**.
+- 1 kN/m² = $10^3$ N/m² = $10^3$ Pa = 1 kPa ; le calcul donne bien {nombreCourt(kNm2)} kPa.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.3.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'unité SI de force est :" choix={['le kilogramme', 'le newton', 'le pascal', 'le joule']} bonne={1} colonnes={4}>
+1 N = 1 kg·m/s².
+</QCM>
+
+<QCM n={2} question="Le pascal vaut :" choix={['1 N·m', '1 N/m²', '1 kg/m³', '1 N/m']} bonne={1} colonnes={4}>
+Une force de 1 N répartie sur 1 m².
+</QCM>
+
+<QCM n={3} question="Le préfixe « méga » (M) vaut :" choix={['10³', '10⁶', '10⁹', '10⁻³']} bonne={1} colonnes={4}>
+k = 10³, M = 10⁶, G = 10⁹.
+</QCM>
+
+<QCM n={4} question={<>{nombreCourt(esG)} GPa valent :</>} choix={[`${nombreCourt(esG / 1000)} MPa`, `${ecrire(E_S)} MPa`, `${ecrire(esG * 1e6)} MPa`, `${nombreCourt(esG)} MPa`]} bonne={1} colonnes={2}>
+De G à M : 3 rangs, × 10³.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Quelle écriture est correcte ?" choix={['25 KN', '25 kN', '25 Kn', '25 k N']} bonne={1} colonnes={4}>
+Préfixe k minuscule, collé à N majuscule.
+</QCM>
+
+<QCM n={6} question="1 MPa est égal à :" choix={['1 N/m²', '1 N/mm²', '1 kN/m²', '1 kg/cm²']} bonne={1} colonnes={2}>
+1 N/mm² = 1 N / 10⁻⁶ m² = 10⁶ Pa = 1 MPa.
+</QCM>
+
+<QCM n={7} question="2,5 kN valent :" choix={['0,0025 N', '25 N', '2 500 N', '250 N']} bonne={2} colonnes={4}>
+De k à l'unité : × 10³. Unité plus petite, nombre plus grand.
+</QCM>
+
+<QCM n={8} question="« mm » signifie :" choix={['mégamètre', 'millimètre', 'micromètre', 'mètre-mètre']} bonne={1} colonnes={4}>
+m minuscule devant m : milli-mètre, 10⁻³ m.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

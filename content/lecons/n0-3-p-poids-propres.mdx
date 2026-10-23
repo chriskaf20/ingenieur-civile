@@ -1,0 +1,213 @@
+---
+id: N0.3.P
+titre: "Mini-projet : poids propre d'une dalle, d'une poutre et d'un mur"
+objectifs:
+  - Calculer le poids propre d'une dalle, d'une poutre et d'un mur
+  - Exprimer chaque poids propre en charge surfacique ou linéique
+  - Contrôler chaque résultat par un calcul de tête
+  - Comparer le total à une règle de l'art et conclure
+relecture: false
+normes:
+  - "EN 1991-1-1, annexe A, tableau A.1 : béton armé 25 kN/m³"
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { bilanPoidsPropres, CHARGE_GLOBALE_NIVEAU, EXEMPLE_POIDS_PROPRES, memeOrdre, poidsDalle, poidsLineaire } from '@/lib/calc/ordres'
+import { POIDS_VOLUMIQUE_BA } from '@/lib/calc/methode'
+import { surfaceRectangle } from '@/lib/calc/unites'
+import { grandeur, nombre, nombreCourt } from '@/lib/format'
+
+export const { dalle, poutre, mur } = EXEMPLE_POIDS_PROPRES
+export const rd = poidsDalle(dalle.Lx, dalle.Ly, dalle.e)
+export const rp = poidsLineaire(poutre.L, poutre.b, poutre.h, POIDS_VOLUMIQUE_BA)
+export const rm = poidsLineaire(mur.L, mur.e, mur.H, mur.gamma)
+export const Sdalle = surfaceRectangle(dalle.Lx, dalle.Ly)
+export const bilan = bilanPoidsPropres([rd.P, rp.P, rm.P], Sdalle)
+export const pct = (x) => `${x >= 0 ? '+' : '−'}${nombre(Math.abs(x) * 100, 0)} %`
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Un client de Lubumbashi veut construire un petit bureau accolé à sa maison. Avant tout calcul de structure, le bureau d'études te demande les **poids propres** des trois éléments principaux :
+
+- une **dalle** en béton armé de {nombre(dalle.Lx, 2)} m × {nombre(dalle.Ly, 2)} m et {nombre(dalle.e * 100, 0)} cm d'épaisseur ;
+- une **poutre** en béton armé de {nombre(poutre.L, 2)} m, de section {nombre(poutre.b * 100, 0)} × {nombre(poutre.h * 100, 0)} cm ;
+- un **mur** en blocs pleins de béton de {nombre(mur.L, 2)} m de long, {nombre(mur.H, 2)} m de haut et {nombre(mur.e * 100, 0)} cm d'épaisseur.
+
+### Données
+
+- Béton armé : γ = {POIDS_VOLUMIQUE_BA} kN/m³ (EN 1991-1-1, tableau A.1).
+- Maçonnerie de blocs pleins : γ = {nombre(mur.gamma, 0)} kN/m³ (hypothèse de l'énoncé) <AVerifier note="Le poids d'une maçonnerie dépend des blocs et du mortier : il se lit sur la fiche du fabricant." />.
+
+### Ce que tu rends
+
+1. Pour chaque élément : volume, poids total, charge (kN/m² ou kN/m), avec la formule et les unités.
+2. Pour chaque élément : un **contrôle de tête** avec des données arrondies.
+3. Le **total** des trois poids propres, comparé à la règle de l'art de {nombre(CHARGE_GLOBALE_NIVEAU, 0)} kN/m² par niveau.
+4. Une conclusion de deux lignes pour le bureau d'études.
+
+<Encadre type="attention">
+Ne mélange pas les cm et les m : les épaisseurs sont données en cm, les calculs se font en m (N0.3.2).
+</Encadre>
+
+</Page>
+
+<Infographie titre="La démarche du mini-projet" sousTitre="Calculer, contrôler, conclure" etape="projet">
+
+<Panneau n={1} titre="Volume" icone="quantites" couleur="encre">
+Toutes les cotes en mètres, puis $V = L \times b \times h$ (m³).
+</Panneau>
+
+<Panneau n={2} titre="Poids" icone="charges" couleur="brique">
+$P = \gamma \times V$ (kN), avec γ et sa source.
+</Panneau>
+
+<Panneau n={3} titre="Charge répartie" icone="calcul" couleur="acier">
+Dalle : $g = \gamma e$ (kN/m²). Poutre et mur : $g = \gamma b h$ (kN/m).
+</Panneau>
+
+<Panneau n={4} titre="Contrôle de tête" icone="verification" couleur="validation">
+Données arrondies à un chiffre significatif, calcul de tête, écart : moins de 50 % = même ordre de grandeur.
+</Panneau>
+
+<Panneau n={5} titre="Bilan et conclusion" icone="retenir" couleur="terre" large>
+Additionne les trois poids, compare à la règle de l'art, puis écris deux lignes claires : valeurs retenues, hypothèses à confirmer.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="ppDalle">
+
+<Cahier titre="Élément 1 : la dalle" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le plan">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="Le calcul">
+<AN k="V" />
+<AN k="P" />
+<AN k="charge" />
+</Etape>
+
+<Etape n={4} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="charge" libelle="Poids propre de la dalle" />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<FicheCalcul calcul="ppPoutre">
+
+<Cahier titre="Élément 2 : la poutre" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="L'élévation">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="Le calcul">
+<AN k="V" />
+<AN k="P" />
+<AN k="charge" />
+</Etape>
+
+<Etape n={4} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="charge" libelle="Poids propre de la poutre" />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<FicheCalcul calcul="ppMur">
+
+<Cahier titre="Élément 3 : le mur" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi « à vérifier » ? Le poids volumique de la maçonnerie est une hypothèse de l'énoncé : sur un vrai projet, on le lit sur la fiche des blocs.</Note>
+</Etape>
+
+<Etape n={2} titre="L'élévation">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="Le calcul">
+<AN k="V" />
+<AN k="P" />
+<AN k="charge" />
+</Etape>
+
+<Etape n={4} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="charge" libelle="Poids propre du mur" />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Cahier titre="Le bilan : exemple corrigé" etape="projet">
+
+<Etape n={1} titre="Les trois poids propres">
+
+| Élément | Poids total | Charge répartie | Contrôle de tête |
+|---|---|---|---|
+| dalle | {grandeur(rd.P, 1, 'kN')} | {grandeur(rd.charge, 2, 'kN/m²')} | {pct(rd.ecart)} {memeOrdre(rd.ecart) ? '✓' : '✗'} |
+| poutre | {grandeur(rp.P, 1, 'kN')} | {grandeur(rp.charge, 2, 'kN/m')} | {pct(rp.ecart)} {memeOrdre(rp.ecart) ? '✓' : '✗'} |
+| mur | {grandeur(rm.P, 1, 'kN')} | {grandeur(rm.charge, 2, 'kN/m')} | {pct(rm.ecart)} {memeOrdre(rm.ecart) ? '✓' : '✗'} |
+
+<Note>Pourquoi l'écart de la dalle est-il le plus grand ? L'épaisseur {nombreCourt(dalle.e)} m arrondie à un chiffre devient {nombreCourt(rd.arrondies[2])} m : l'arrondi a beaucoup pesé. L'ordre de grandeur reste bon.</Note>
+</Etape>
+
+<Etape n={2} titre="Le total et la règle de l'art">
+
+Total : **{grandeur(bilan.total, 0, 'kN')}**. Règle de l'art : {nombreCourt(Sdalle)} m² × {nombre(CHARGE_GLOBALE_NIVEAU, 0)} kN/m² = {grandeur(bilan.estimationRegle, 0, 'kN')}. Écart : **{pct(bilan.ecart)}** {memeOrdre(bilan.ecart) ? '→ même ordre de grandeur ✓' : '→ à revoir ✗'}.
+
+<Note>Pourquoi un total plus faible que la règle ? La règle de l'art compte aussi les charges d'exploitation, les revêtements et les autres murs : un poids propre seul un peu inférieur est normal.</Note>
+</Etape>
+
+<Etape n={3} titre="La conclusion pour le bureau d'études">
+<Note couleur="vert">Poids propres retenus : dalle {grandeur(rd.charge, 2, 'kN/m²')}, poutre {grandeur(rp.charge, 1, 'kN/m')}, mur {grandeur(rm.charge, 1, 'kN/m')}. Hypothèse à confirmer : poids volumique des blocs ({nombre(mur.gamma, 0)} kN/m³), à lire sur la fiche du fabricant.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Unités | cm et m mélangés | Tout en m et kN | Une unité à chaque ligne |
+| Sources | γ sans origine | γ avec sa source | Hypothèses signalées « à vérifier » |
+| Charges réparties | Absentes | Calculées | Bonne unité (kN/m² ou kN/m) selon l'élément |
+| Contrôle de tête | Absent | Fait pour chaque élément | Écart calculé et commenté |
+| Bilan | Absent | Total calculé | Comparé à la règle de l'art, écart expliqué |
+| Conclusion | Absente | Valeurs listées | Claire, avec les hypothèses à confirmer |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Refais le calcul avec une dalle de 20 cm : de combien augmente son poids propre par m² ? Cette question reviendra en descente de charges (L3.2).
+</Encadre>
+
+<Quiz id="N0.3.P">
+
+<QCM n={1} question="Mes trois éléments ont-ils un poids total, une charge répartie, un contrôle de tête et une source pour γ ?" choix={['Oui, pour les trois', 'Pour certains seulement', 'Non']} bonne={0}>
+Sinon, complète ta feuille avant de valider : un poids propre sans source ni contrôle ne peut pas être transmis au bureau d'études.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

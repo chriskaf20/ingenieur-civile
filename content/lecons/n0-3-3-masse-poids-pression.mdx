@@ -1,0 +1,335 @@
+---
+id: N0.3.3
+titre: "Masse, poids, force, pression : kg, N, kN, Pa, MPa"
+objectifs:
+  - Distinguer la masse d'un objet et son poids
+  - Calculer un poids à partir d'une masse avec P = m·g
+  - Convertir des forces entre N, daN, kN et MN
+  - Calculer une pression moyenne et l'exprimer en kPa, en MPa et en bar
+relecture: false
+normes:
+  - "Le Système international d'unités (SI), BIPM : newton et pascal ; g_n = 9,806 65 m/s² (3e CGPM, 1901)"
+glossaire:
+  - terme: Masse
+    definition: Quantité de matière d'un objet, en kg ; elle ne dépend pas du lieu.
+  - terme: Poids
+    definition: Force exercée par la pesanteur sur un objet, P = m·g, en N ; elle dépend du lieu.
+  - terme: Pesanteur
+    definition: Accélération g due à l'attraction terrestre ; on prend g = 9,81 m/s².
+  - terme: Pression
+    definition: Force répartie sur une surface, σ = F/A, en Pa (N/m²).
+  - terme: Contrainte
+    definition: Force par unité de surface à l'intérieur d'un matériau ; même unité que la pression (Pa, MPa).
+  - terme: Semelle
+    definition: Partie élargie d'une fondation qui répartit la charge d'un poteau ou d'un mur sur le sol.
+symboles:
+  - { symbole: 'm', signification: 'masse', unite: 'kg' }
+  - { symbole: 'g', signification: 'accélération de la pesanteur', unite: 'm/s²' }
+  - { symbole: 'P', signification: 'poids', unite: 'N' }
+  - { symbole: 'N', signification: 'charge transmise par le poteau', unite: 'kN' }
+  - { symbole: 'A', signification: 'surface d’appui', unite: 'm²' }
+  - { symbole: 'σ', signification: 'pression moyenne', unite: 'kPa' }
+formules:
+  - { nom: 'Poids', tex: 'P = m \times g', domaine: 'Mécanique' }
+  - { nom: 'Pression moyenne', tex: '\sigma = \frac{N}{A}', domaine: 'Répartition uniforme supposée' }
+---
+
+import { masseLineique } from '@/lib/calc/acier'
+import { PESANTEUR } from '@/lib/calc/methode'
+import { convertir, coteSemelleCarree, G_LUNE, G_NORMALE, pesanteurLocale, poidsDeMasse, pressionMoyenne } from '@/lib/calc/unites'
+import { grandeur, nombre, nombreCourt } from '@/lib/format'
+import { MassePoids, PressionDeuxSurfaces } from '@/components/schemas/Unites'
+import { ecrire } from '@/components/calculs/unites'
+
+export const sac = poidsDeMasse(50)
+export const sacLune = poidsDeMasse(50, G_LUNE)
+export const tonne = poidsDeMasse(1000) / 1000
+export const gEq = pesanteurLocale(0)
+export const gPole = pesanteurLocale(90)
+export const p0 = pressionMoyenne(300, 1.2, 1.2)
+export const pPot = pressionMoyenne(300, 0.2, 0.2)
+export const barre = { phi: 12, L: 12 }
+export const barreM = masseLineique(barre.phi) * barre.L
+export const barreP = poidsDeMasse(barreM)
+export const ex2 = [convertir(25, 'MPa', 'N/mm²').valeur, convertir(25, 'MPa', 'kPa').valeur, convertir(25, 'MPa', 'Pa').valeur, convertir(1.5, 'kN/m²', 'Pa').valeur, convertir(1.5, 'kN/m²', 'daN/m²').valeur]
+export const ex3 = { N: 500, s: 200 }
+export const ex3r = coteSemelleCarree(ex3.N, ex3.s)
+export const ex3p = pressionMoyenne(ex3.N, ex3r.B, ex3r.B)
+export const trente = convertir(30, 'tf', 'kN').valeur
+
+<Page etape="intuition" titre="L'intuition : le sac de ciment et la semelle">
+
+Un sac de ciment de 50 kg contient la même quantité de matière à Kinshasa, à Lubumbashi ou sur la Lune : c'est sa **masse**. Mais sur la Lune, tu le soulèverais d'une main, car la Lune l'attire beaucoup moins que la Terre. Ce qui change, c'est la force qui le tire vers le bas : son **poids**.
+
+Autre expérience : marche pieds nus sur du sable mouillé, tu t'enfonces. Pose une planche et marche dessus : tu ne t'enfonces presque plus. Ton poids n'a pas changé ; il est simplement **réparti sur une plus grande surface**. La **pression** a diminué. C'est exactement le rôle d'une semelle sous un poteau.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelle est la différence entre kg et N, entre une force et une pression ? Et pourquoi calcule-t-on des kPa pour les sols mais des MPa pour le béton ?
+</Encadre>
+
+<Encadre type="attention">
+Sur les chantiers, on dit souvent « ce poteau porte 30 tonnes ». C'est un raccourci : une tonne est une masse. La force correspondante vaut {nombreCourt(trente, 1)} kN. En calcul, on écrit toujours des forces en N ou en kN.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : masse, poids, forces">
+
+### Masse et poids
+
+- La **masse** $m$ (kg) mesure la quantité de matière. Elle est la même partout.
+- Le **poids** $P$ (N) est la force exercée par la pesanteur : $P = m \times g$, avec $g$ l'accélération de la pesanteur (m/s²).
+
+<Regle type="norme" source="3e CGPM (1901)">
+La valeur normale de la pesanteur est $g_n$ = {nombreCourt(G_NORMALE, 5)} m/s². En génie civil, on prend $g$ = {nombre(PESANTEUR, 2)} m/s².
+</Regle>
+
+<Encadre type="idee" titre="Pour comprendre">
+La pesanteur varie un peu à la surface de la Terre : {nombre(gEq, 2)} m/s² à l'équateur, {nombre(gPole, 2)} m/s² aux pôles (formule internationale de la pesanteur). Moins de 1 % d'écart : la valeur {nombre(PESANTEUR, 2)} convient partout.
+</Encadre>
+
+### Les unités de force
+
+1 kN = 1 000 N ; 1 MN = 1 000 kN ; 1 daN = 10 N. Le décanewton est encore très utilisé en France pour les charges (daN/m²).
+
+<Regle type="simplification">
+Pour une estimation rapide, on prend $g \approx 10$ m/s² : une masse d'une tonne pèse environ 10 kN (exactement {nombre(tonne, 2)} kN avec g = {nombre(PESANTEUR, 2)}).
+</Regle>
+
+<Encadre type="exemple">
+Un sac de ciment de 50 kg pèse $P$ = 50 kg × {nombre(PESANTEUR, 2)} m/s² = {grandeur(sac, 1, 'N')}, soit {nombre(sac / 1000, 2)} kN.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : pression et contrainte">
+
+### La pression moyenne
+
+Une force $N$ (kN) répartie sur une surface $A$ (m²) exerce une pression moyenne :
+
+$$\sigma = \frac{N}{A}$$
+
+- $N$ : charge (kN) ;
+- $A$ : surface d'appui (m²) ;
+- $\sigma$ : pression moyenne (kN/m², c'est-à-dire kPa).
+
+À l'intérieur d'un matériau, on parle de **contrainte**, avec la même unité.
+
+### Les bonnes unités selon l'usage
+
+| Usage | Unité habituelle | Équivalence |
+|---|---|---|
+| charges sur un plancher | kN/m² | 1 kN/m² = 1 kPa |
+| pression sur un sol | kPa | 1 kPa = 1 kN/m² |
+| contraintes dans le béton, l'acier | MPa | 1 MPa = 1 N/mm² = 1 000 kPa |
+| ancienne unité de chantier | bar | 1 bar = 100 kPa = 0,1 MPa |
+
+<Regle type="simplification">
+La formule σ = N/A suppose que la charge se répartit **uniformément**. Sous une vraie semelle, la répartition dépend du sol et de la raideur de la semelle : elle sera étudiée en mécanique des sols (L3.4) et en fondations (M1.4).
+</Regle>
+
+<Encadre type="retenir">
+Même force, surface 10 fois plus grande : pression 10 fois plus petite. C'est tout le principe d'une fondation.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Les schémas : la masse ne change pas, la pression si">
+
+<MassePoids />
+
+<PressionDeuxSurfaces />
+
+Avec la même charge de 300 kN, la pression passe de {nombre(pPot.kPa, 0)} kPa sous le poteau seul à {nombre(p0.kPa, 0)} kPa sous la semelle : {nombre(pPot.kPa / p0.kPa, 0)} fois moins.
+
+</Page>
+
+<FicheCalcul calcul="semelle">
+
+<Cahier titre="Exemple résolu : la pression sous une semelle">
+
+**Énoncé.** Un poteau transmet une charge de 300 kN à une semelle carrée de 1,20 m de côté. Quelle pression moyenne exerce-t-elle sur le sol ? Exprime-la en kPa, en MPa et en bar.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi garder la charge en kN et la surface en m² ? Leur quotient sort directement en kN/m², c'est-à-dire en kPa.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : surface, pression, conversions">
+
+<Etape n={3} titre="La surface d'appui">
+<AN k="A" />
+</Etape>
+
+<Etape n={4} titre="La pression et ses conversions">
+<AN k="sigma" />
+<AN k="MPa" />
+<AN k="bar" />
+<Note>Pourquoi trois unités ? Le géotechnicien parle en kPa, le béton se calcule en MPa, et le chef de chantier dit encore « bar ».</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="kPa" libelle="Pression moyenne" />
+
+<Note couleur="vert">Soit <Val k="MPa" /> ou <Val k="bar" />. On a négligé le poids propre de la semelle : simplification à lever en fondations.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre kg et N.">
+Un kilogramme est une masse, un newton est une force. Une masse de 50 kg a un poids de {grandeur(sac, 1, 'N')}, pas de 50 N.
+</Piege>
+
+<Piege erreur="oublier g quand on passe d'une masse à une force.">
+« La dalle fait 12 tonnes, donc 12 kN » : faux d'un facteur 10. Il faut multiplier par g : 12 t donnent environ {nombre(poidsDeMasse(12000) / 1000, 0)} kN.
+</Piege>
+
+<Piege erreur="confondre kPa et MPa.">
+Un facteur 1 000 les sépare. Une pression de sol de {nombre(p0.kPa, 0)} kPa vaut {nombre(p0.MPa, 3)} MPa, pas {nombre(p0.kPa, 0)} MPa.
+</Piege>
+
+<Piege erreur="mélanger mm² et m² dans σ = N/A.">
+N/mm² et N/m² diffèrent d'un facteur un million. Avec N en kN et A en m², le résultat est en kPa ; avec N en N et A en mm², il est en MPa.
+</Piege>
+
+<Piege erreur="croire qu'une plus grande semelle porte « plus de poids ».">
+La charge reste la même ; c'est la **pression** sur le sol qui diminue. Le sol accepte une pression limite, que l'étude géotechnique fixe.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le langage du chantier.** On parle de « tonnes » pour les charges, de « bars » pour la pression d'un sol ou d'une conduite d'eau, de « kilos » pour l'acier. L'ingénieur traduit tout en kN, kPa et MPa avant de calculer, puis retraduit si besoin pour l'équipe.
+
+<Encadre type="terrain" titre="Sols mous après la pluie">
+En saison des pluies, beaucoup de pistes latéritiques et de terrains de chantier se ramollissent. Les engins lourds s'enfoncent : la pression sous leurs roues dépasse ce que le sol mouillé supporte. On répartit la charge avec des tôles, des madriers ou une couche de graveleux : c'est la même idée que la semelle.
+</Encadre>
+
+**Les fondations.** L'étude géotechnique donne la pression que le sol peut supporter. L'ingénieur choisit alors la taille de la semelle pour que la pression calculée reste en dessous. Tu feras ce calcul complet en M1.4 ; l'exercice 3 en donne une première idée.
+
+**Les grues et les engins** affichent leur capacité en tonnes (une masse). Pour vérifier une élingue, un crochet ou un appui, on convertit en kN.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : masse, poids, pression">
+
+### Masse et poids
+
+$m$ en kg (ne change pas) · $P = m \times g$ en N · $g$ = {nombre(PESANTEUR, 2)} m/s² · estimation : 1 t ≈ 10 kN
+
+### Forces
+
+1 daN = 10 N · 1 kN = 1 000 N · 1 MN = 1 000 kN
+
+### Pressions et contraintes
+
+$\sigma = N/A$ · kN/m² = kPa · N/mm² = MPa · 1 MPa = 1 000 kPa · 1 bar = 100 kPa
+
+### Quelle unité pour quoi ?
+
+Charges de plancher : kN/m² · sols : kPa · béton, acier : MPa
+
+### Pièges
+
+kg ≠ N · ne pas oublier g · kPa ≠ MPa (× 1 000) · mm² ≠ m² (× 10⁶)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le poids d'une barre d'acier">
+
+Une barre HA {barre.phi} de {barre.L} m a une masse linéique de {nombre(masseLineique(barre.phi), 3)} kg/m. Calcule sa masse puis son poids en N et en kN.
+
+<Indice>Masse = masse linéique × longueur ; poids = masse × g.</Indice>
+
+<Corrige>
+m = {nombre(masseLineique(barre.phi), 3)} × {barre.L} = **{grandeur(barreM, 2, 'kg')}** ; P = {nombre(barreM, 2)} × {nombre(PESANTEUR, 2)} = **{grandeur(barreP, 1, 'N')}** = {grandeur(barreP / 1000, 3, 'kN')}.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Changer d'unité de contrainte">
+
+a) La résistance d'un béton C25/30 vaut $f_{ck}$ = 25 MPa. Exprime-la en N/mm², en kPa et en Pa. b) Une charge de plancher vaut 1,5 kN/m². Exprime-la en Pa et en daN/m².
+
+<Indice>1 MPa = 1 N/mm² = 1 000 kPa = 10⁶ Pa ; 1 kN = 100 daN.</Indice>
+
+<Corrige>
+a) **{ecrire(ex2[0])} N/mm²** = **{ecrire(ex2[1])} kPa** = **{ecrire(ex2[2])} Pa**. b) **{ecrire(ex2[3])} Pa** = **{ecrire(ex2[4])} daN/m²**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Dimensionner une semelle carrée">
+
+Un poteau transmet {ex3.N} kN. L'étude de sol (donnée de l'énoncé) limite la pression moyenne à {ex3.s} kPa. Quel côté minimal pour une semelle carrée ? Arrondis au multiple de 5 cm supérieur et vérifie.
+
+<Indice>Écris l'inéquation $N / B^2 \leq \sigma$, puis isole $B$ (N0.2.5) : $B \geq \sqrt{N/\sigma}$.</Indice>
+
+<Corrige>
+
+- $B \geq$ √({ex3.N} / {ex3.s}) = {grandeur(ex3r.Bmin, 3, 'm')} → **B = {grandeur(ex3r.B, 2, 'm')}**.
+- Vérification : σ = {ex3.N} / {nombre(ex3r.B, 2)}² = **{grandeur(ex3p.kPa, 1, 'kPa')}** ≤ {ex3.s} kPa ✓.
+- On a négligé le poids de la semelle et de la terre au-dessus : en fondations (M1.4), on les ajoute.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.3.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La masse d'un objet :" choix={['change avec le lieu', 'est la même partout', 'se mesure en newtons', 'vaut son poids']} bonne={1} colonnes={2}>
+Seul le poids change avec la pesanteur.
+</QCM>
+
+<QCM n={2} question="Un sac de ciment de 50 kg pèse :" choix={['50 N', grandeur(sac, 1, 'N'), '5 N', '50 kN']} bonne={1} colonnes={4}>
+50 × {nombre(PESANTEUR, 2)} = {grandeur(sac, 1, 'N')}.
+</QCM>
+
+<QCM n={3} question="Sur la Lune, le même sac :" choix={['a une masse plus petite', `pèse environ ${nombre(sacLune, 0)} N`, 'pèse toujours 490 N', 'ne pèse rien']} bonne={1} colonnes={2}>
+50 × {nombre(G_LUNE, 2)} = {grandeur(sacLune, 0, 'N')} ; la masse reste 50 kg.
+</QCM>
+
+<QCM n={4} question="1 kN/m² est égal à :" choix={['1 Pa', '1 kPa', '1 MPa', '1 bar']} bonne={1} colonnes={4}>
+1 kN/m² = 1 000 N/m² = 1 000 Pa = 1 kPa.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>300 kN sur une semelle de 1,20 × 1,20 m donnent une pression moyenne de :</>} choix={[`${nombre(p0.kPa / 1000, 3)} kPa`, `${nombre(p0.kPa, 0)} kPa`, `${nombre(p0.kPa, 0)} MPa`, '360 kPa']} bonne={1} colonnes={4}>
+300 / 1,44 = {nombre(p0.kPa, 0)} kPa.
+</QCM>
+
+<QCM n={6} question="1 MPa est égal à :" choix={['1 kPa', '100 kPa', '1 000 kPa', '1 bar']} bonne={2} colonnes={4}>
+M = 10⁶, k = 10³ : 3 rangs.
+</QCM>
+
+<QCM n={7} question="Si l'on double le côté d'une semelle carrée, la pression moyenne est :" choix={['doublée', 'divisée par 2', 'divisée par 4', 'inchangée']} bonne={2} colonnes={2}>
+La surface est multipliée par 2² = 4.
+</QCM>
+
+<QCM n={8} question="« Ce poteau porte 30 tonnes » signifie une force d'environ :" choix={['30 N', '30 kN', `${nombre(trente, 0)} kN`, '3 000 kN']} bonne={2} colonnes={4}>
+30 tonnes-force = {nombreCourt(trente, 1)} kN.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

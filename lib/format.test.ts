@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { arrondi, arrondiInf, arrondiSignificatif, arrondiSup, grandeur, nombre, notationScientifique, scientifique } from './format';
+import { arrondi, arrondiInf, arrondiSignificatif, arrondiSup, exposantTexte, grandeur, nombre, nombreCourt, notationScientifique, puissanceDix, scientifique } from './format';
 
 describe('arrondi', () => {
   it('arrondit le demi à l’écart de zéro', () => {
@@ -46,5 +46,19 @@ describe('notation scientifique et chiffres significatifs', () => {
     expect(scientifique(210000, 2)).toBe('2,1 × 10⁵');
     expect(scientifique(9.996, 3)).toBe('1,00 × 10¹');
     expect(scientifique(4.2, 2)).toBe('4,2');
+  });
+});
+
+describe('exposants et nombres courts', () => {
+  it('écrit les exposants et les puissances de dix', () => {
+    expect(exposantTexte(-2)).toBe('⁻²');
+    expect(puissanceDix(9)).toBe('10⁹');
+    expect(puissanceDix(-3)).toBe('10⁻³');
+  });
+  it('supprime les zéros inutiles', () => {
+    expect(nombreCourt(2.5)).toBe('2,5');
+    expect(nombreCourt(150)).toBe('150');
+    expect(nombreCourt(200000).replace(/\s/g, ' ')).toBe('200 000');
+    expect(nombreCourt(0.0980665, 4)).toBe('0,0981');
   });
 });

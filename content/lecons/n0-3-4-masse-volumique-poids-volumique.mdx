@@ -1,0 +1,372 @@
+---
+id: N0.3.4
+titre: Masse volumique et poids volumique des matériaux
+objectifs:
+  - Distinguer masse volumique ρ et poids volumique γ, et passer de l'une à l'autre
+  - Retrouver le poids volumique des matériaux courants avec sa source
+  - Calculer la masse et le poids propre d'un élément en béton, en acier ou en terre
+  - Exprimer un poids propre en charge linéique ou surfacique
+relecture: false
+normes:
+  - "EN 1991-1-1, annexe A, tableau A.1 : béton normal 24 kN/m³, + 1 kN/m³ armé, + 1 kN/m³ frais"
+  - "EN 1991-1-1, annexe A, tableau A.4 : acier 77,0 à 78,5 kN/m³"
+  - "EN 1992-1-1 §3.2.7(3) : masse volumique de l'acier 7 850 kg/m³"
+glossaire:
+  - terme: Masse volumique
+    definition: Masse d'un mètre cube de matériau, ρ, en kg/m³.
+  - terme: Poids volumique
+    definition: Poids d'un mètre cube de matériau, γ = ρ·g, en kN/m³.
+  - terme: Poids propre
+    definition: Poids de l'élément lui-même, sans les charges qu'il porte ; c'est une charge permanente.
+  - terme: Charge linéique
+    definition: Charge par mètre de longueur d'un élément (poutre, mur), en kN/m.
+  - terme: Charge surfacique
+    definition: Charge par mètre carré d'un élément (dalle, toiture), en kN/m².
+symboles:
+  - { symbole: 'ρ', signification: 'masse volumique', unite: 'kg/m³' }
+  - { symbole: 'γ', signification: 'poids volumique', unite: 'kN/m³' }
+  - { symbole: 'V', signification: 'volume', unite: 'm³' }
+  - { symbole: 'm', signification: 'masse', unite: 'kg' }
+  - { symbole: 'P', signification: 'poids propre', unite: 'kN' }
+formules:
+  - { nom: 'Poids volumique', tex: '\gamma = \rho \times g', domaine: 'Matériaux' }
+  - { nom: 'Masse', tex: 'm = \rho \times V', domaine: 'Matériaux' }
+  - { nom: 'Poids propre', tex: 'P = \gamma \times V', domaine: 'Charges permanentes' }
+---
+
+import { MATERIAUX, poidsPrismeMateriau, proprietesMateriau, volumePourMasse } from '@/lib/calc/materiauxCourants'
+import { PESANTEUR } from '@/lib/calc/methode'
+import { poidsDalle, poidsLineaire } from '@/lib/calc/ordres'
+import { poidsDeMasse } from '@/lib/calc/unites'
+import { grandeur, nombre, nombreCourt } from '@/lib/format'
+import { TroisCubes } from '@/components/schemas/Unites'
+
+export const ids = Object.keys(MATERIAUX)
+export const ba = proprietesMateriau('ba')
+export const ac = proprietesMateriau('acier')
+export const ex0 = poidsPrismeMateriau('ba', 5, 0.2, 0.4)
+export const ex0a = poidsPrismeMateriau('acier', 5, 0.2, 0.4)
+export const dalle20 = poidsDalle(1, 1, 0.2)
+export const ex1 = poidsDalle(5, 4, 0.15)
+export const ex2 = poidsLineaire(1, 0.4, 2, MATERIAUX.beton.gamma)
+export const camion = { m: 15000 }
+export const camionTerre = volumePourMasse(camion.m, 'terre')
+export const camionBeton = volumePourMasse(camion.m, 'baFrais')
+
+<Page etape="intuition" titre="L'intuition : trois seaux identiques">
+
+Prends trois seaux identiques de 10 litres. Remplis le premier d'eau, le deuxième de sable, le troisième de clous en acier. Même volume, mais tu sens tout de suite la différence en les soulevant : le seau de clous est de loin le plus lourd.
+
+Chaque matériau a sa propre « densité de poids ». Pour l'ingénieur, c'est une donnée essentielle : le béton armé d'une dalle, l'acier d'une charpente, la terre derrière un mur pèsent, et ce poids propre est souvent **la plus grande charge** d'un bâtiment.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer le poids d'un élément à partir de ses dimensions et de son matériau, et où trouver des valeurs fiables ?
+</Encadre>
+
+<Encadre type="attention">
+On ne prend pas un poids volumique « de mémoire » ou sur un forum. Chaque valeur utilisée en calcul a une **source** : une norme, une fiche de fabricant ou un essai.
+</Encadre>
+
+</Page>
+
+<Infographie titre="Du volume au poids propre" sousTitre="La chaîne de calcul, de la géométrie à la charge" etape="cours">
+
+<Panneau n={1} titre="Volume" icone="quantites" couleur="encre">
+On calcule le volume $V$ de l'élément en m³, avec toutes les cotes en mètres (N0.3.2).
+</Panneau>
+
+<Panneau n={2} titre="Masse volumique" icone="materiaux" couleur="brique">
+$\rho$ en kg/m³ : la masse d'un mètre cube. Acier : {nombre(ac.rho, 0)} kg/m³ (EC2).
+</Panneau>
+
+<Panneau n={3} titre="Masse" icone="calcul" couleur="acier">
+$m = \rho \times V$, en kg. Utile pour la manutention et le transport.
+</Panneau>
+
+<Panneau n={4} titre="Poids volumique" icone="charges" couleur="terre">
+$\gamma = \rho \times g$, en kN/m³. Béton armé : {nombre(ba.gamma, 0)} kN/m³ (EC1). Acier : {nombre(ac.gamma, 1)} kN/m³.
+</Panneau>
+
+<Panneau n={5} titre="Poids propre" icone="charges" couleur="encre" large>
+$P = \gamma \times V$, en kN. Pour une poutre ou un mur, on préfère la charge par mètre $g = \gamma \times b \times h$ (kN/m) ; pour une dalle, la charge par m² $g = \gamma \times e$ (kN/m²).
+</Panneau>
+
+<Panneau n={6} titre="Exemple" icone="exemple" couleur="validation">
+Dalle en béton armé de 20 cm : $g$ = 0,20 × {nombre(ba.gamma, 0)} = {grandeur(dalle20.charge, 1, 'kN/m²')}.
+</Panneau>
+
+<Panneau n={7} titre="Attention" icone="attention" couleur="correction">
+ρ en kg/m³ et γ en kN/m³ ne se mélangent pas : le béton armé, c'est environ {nombre(ba.rho, 0)} kg/m³ **ou** {nombre(ba.gamma, 0)} kN/m³.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : ρ, γ et leurs sources">
+
+### Deux grandeurs liées par g
+
+- La **masse volumique** $\rho$ (kg/m³) est la masse d'un mètre cube.
+- Le **poids volumique** $\gamma$ (kN/m³) est son poids : $\gamma = \rho \times g$, divisé par 1 000 pour passer des N aux kN.
+
+### Les valeurs à utiliser
+
+<div className="tableau">
+  <table>
+    <thead>
+      <tr><th>Matériau</th><th>ρ (kg/m³)</th><th>γ (kN/m³)</th><th>Source</th></tr>
+    </thead>
+    <tbody>
+      {ids.map((id) => {
+        const p = proprietesMateriau(id)
+        return (
+          <tr key={id}>
+            <td>{MATERIAUX[id].nom}</td>
+            <td>{nombre(p.rho, 0)}</td>
+            <td>{nombre(p.gamma, p.gamma < 10 ? 2 : 1)}</td>
+            <td>{MATERIAUX[id].source}{MATERIAUX[id].nature === 'hypothese' ? <AVerifier /> : null}</td>
+          </tr>
+        )
+      })}
+    </tbody>
+  </table>
+</div>
+
+<Regle type="norme" source="EN 1991-1-1, annexe A">
+Pour le béton, l'Eurocode 1 donne directement le **poids volumique** ; la masse volumique s'en déduit. Pour l'acier, l'Eurocode 2 donne la **masse volumique**, et le poids volumique s'en déduit.
+</Regle>
+
+<Regle type="hypothese">
+Le poids volumique d'un sol varie avec sa nature et sa teneur en eau. La valeur du tableau n'est qu'une hypothèse d'exercice : sur un projet, il se **mesure** au laboratoire (L3.4).
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : poids propre et charges réparties">
+
+### Le poids propre
+
+$P = \gamma \times V$, avec $\gamma$ en kN/m³ et $V$ en m³ : $P$ sort en kN. La masse vaut $m = \rho \times V$ en kg.
+
+### Les charges réparties
+
+Un calcul de structure utilise rarement le poids total. On répartit le poids propre :
+
+- **par mètre** de poutre ou de mur : $g = \gamma \times b \times h$ (kN/m), avec $b$ et $h$ en m ;
+- **par mètre carré** de dalle : $g = \gamma \times e$ (kN/m²), avec $e$ l'épaisseur en m.
+
+<Encadre type="exemple">
+Une poutre en béton armé de 20 × 40 cm pèse $g$ = 0,20 × 0,40 × {nombre(ba.gamma, 0)} = {grandeur(poidsLineaire(1, 0.2, 0.4, ba.gamma).charge, 1, 'kN/m')}, quelle que soit sa longueur.
+</Encadre>
+
+### Béton frais et coffrages
+
+<Regle type="norme" source="EN 1991-1-1, tableau A.1">
+Un béton non durci pèse 1 kN/m³ de plus que le même béton durci. On en tient compte pour les coffrages et les étais : béton armé frais, {nombre(MATERIAUX.baFrais.gamma, 0)} kN/m³.
+</Regle>
+
+<Encadre type="retenir">
+Dalle pleine en béton armé : environ **{nombre(dalle20.charge, 0)} kN/m² pour 20 cm**. Ce repère permet de vérifier un calcul de tête.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : trois mètres cubes">
+
+<TroisCubes />
+
+Les trois cubes ont le même volume, 1 m³. Leurs poids sont dans le rapport des poids volumiques : l'acier pèse environ {nombre(ac.gamma / ba.gamma, 1)} fois plus que le béton armé, et le béton armé environ {nombre(ba.gamma / proprietesMateriau('eau').gamma, 1)} fois plus que l'eau.
+
+<Encadre type="retenir">
+Pour un même volume, l'acier est environ trois fois plus lourd que le béton armé. C'est pourquoi une charpente métallique utilise des profils minces et creux, et non des pièces pleines.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="materiau">
+
+<Cahier titre="Exemple résolu : le poids d'une poutre">
+
+**Énoncé.** Une poutre de 5,00 m de long a une section de 0,20 m × 0,40 m. Calcule sa masse et son poids si elle est en béton armé. Refais ensuite le calcul en choisissant l'acier dans la fiche.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi choisir le matériau d'abord ? Toute la suite en dépend : la même géométrie peut peser trois fois plus.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : de V à P">
+
+<Etape n={3} titre="Le volume et le poids volumique">
+<AN k="V" />
+<AN k="gamma" />
+<Note>Pourquoi une seule valeur vient de la source ? L'autre s'en déduit avec g : on ne mélange pas deux sources différentes.</Note>
+</Etape>
+
+<Etape n={4} titre="Le poids et la masse">
+<AN k="P" />
+<AN k="m" />
+<Note>Pourquoi la masse dépasse-t-elle un peu V × 2 500 kg/m³ ? Ce « 2 500 » souvent cité vient d'un arrondi avec g ≈ 10 ; l'Eurocode donne γ, et l'on en déduit ρ avec g = 9,81.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="P" libelle="Poids propre" />
+
+<Note couleur="vert">Masse : <Val k="m" />. Source : <Val k="source" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre 2 500 et 25.">
+Le béton armé fait environ {nombre(ba.rho, 0)} kg/m³ **ou** {nombre(ba.gamma, 0)} kN/m³. Multiplier un volume par 2 500 en croyant obtenir des kN donne un poids mille fois trop grand.
+</Piege>
+
+<Piege erreur="prendre 24 kN/m³ pour un béton armé, ou 25 pour un béton non armé.">
+L'EN 1991-1-1 donne {nombre(MATERIAUX.beton.gamma, 0)} kN/m³ pour le béton non armé et ajoute 1 kN/m³ pour les armatures : {nombre(MATERIAUX.ba.gamma, 0)} kN/m³.
+</Piege>
+
+<Piege erreur="oublier que le béton frais est plus lourd.">
+Pour un coffrage ou un étaiement, on prend le béton frais : {nombre(MATERIAUX.baFrais.gamma, 0)} kN/m³ pour du béton armé.
+</Piege>
+
+<Piege erreur="utiliser une valeur « standard » pour un sol.">
+Une latérite sèche et la même latérite gorgée d'eau n'ont pas le même poids volumique. Sans essai, la valeur reste une hypothèse, à signaler comme telle.
+</Piege>
+
+<Piege erreur="multiplier ρ par g sans diviser par 1 000.">
+ρ × g donne des N/m³. Pour des kN/m³, on divise par 1 000 : 7 850 × 9,81 = {nombre(ac.rho * PESANTEUR, 0)} N/m³ = {nombre(ac.gamma, 1)} kN/m³.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le transport.** Un camion est limité en masse (sa charge utile) et en volume (sa benne). Pour un camion de 15 t de charge utile (donnée de l'énoncé), le volume transportable dépend du matériau : environ {nombre(camionTerre, 1)} m³ de terre compactée (hypothèse γ = {nombre(MATERIAUX.terre.gamma, 0)} kN/m³), mais seulement {nombre(camionBeton, 1)} m³ de béton armé frais.
+
+<Encadre type="terrain" titre="Terrassements en terre latéritique">
+Les latérites d'Afrique centrale sont souvent riches en oxydes de fer : elles peuvent être plus lourdes qu'une terre ordinaire. Sur un chantier de route, le poids volumique de la latérite mise en œuvre se mesure par des essais en place (L3.4, L3.8) ; c'est lui qui sert à vérifier le compactage.
+</Encadre>
+
+**Les coffrages.** Le béton frais pousse sur les banches comme de l'eau très lourde. Les étais d'une dalle doivent porter son poids frais, plus les ouvriers et le matériel : on l'estime avec γ du béton frais.
+
+**Les catalogues** de profilés métalliques donnent directement la masse par mètre (kg/m) : elle se calcule avec ρ = {nombre(ac.rho, 0)} kg/m³. Pour les blocs, les tuiles ou les panneaux, c'est la **fiche du fabricant** qui donne le poids.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : masse volumique, poids volumique">
+
+### Les formules
+
+$\gamma = \rho \times g$ (÷ 1 000 pour des kN/m³) · $m = \rho V$ (kg) · $P = \gamma V$ (kN) · poutre, mur : $g = \gamma b h$ (kN/m) · dalle : $g = \gamma e$ (kN/m²)
+
+### Les valeurs et leurs sources
+
+| Matériau | γ (kN/m³) | Source |
+|---|---|---|
+| béton non armé | {nombre(MATERIAUX.beton.gamma, 0)} | EN 1991-1-1, tab. A.1 |
+| béton armé | {nombre(MATERIAUX.ba.gamma, 0)} | EN 1991-1-1, tab. A.1 |
+| béton armé frais | {nombre(MATERIAUX.baFrais.gamma, 0)} | EN 1991-1-1, tab. A.1 |
+| acier | {nombre(ac.gamma, 1)} (ρ = {nombre(ac.rho, 0)} kg/m³) | EC2 §3.2.7(3) |
+| eau | {nombre(proprietesMateriau('eau').gamma, 2)} | valeur physique |
+| sol | à mesurer | essai (L3.4) |
+
+### Repère de tête
+
+Dalle BA de 20 cm ≈ {nombre(dalle20.charge, 0)} kN/m² · acier ≈ 3 × béton armé
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une dalle">
+
+Une dalle en béton armé mesure 5,00 m × 4,00 m × 0,15 m. Calcule son poids total et sa charge surfacique.
+
+<Indice>$P = \gamma V$ ; $g = \gamma e$.</Indice>
+
+<Corrige>
+V = **{nombre(ex1.V, 2)} m³** ; P = {nombre(ba.gamma, 0)} × {nombre(ex1.V, 2)} = **{grandeur(ex1.P, 0, 'kN')}** ; g = 0,15 × {nombre(ba.gamma, 0)} = **{grandeur(ex1.charge, 2, 'kN/m²')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un mur poids">
+
+Un mur de soutènement en béton non armé a une section rectangulaire de 0,40 m d'épaisseur et 2,00 m de hauteur. Calcule son poids par mètre de longueur.
+
+<Indice>Pour 1 m de mur : $g = \gamma \times e \times H$, avec γ du béton **non armé**.</Indice>
+
+<Corrige>
+g = {nombre(MATERIAUX.beton.gamma, 0)} × 0,40 × 2,00 = **{grandeur(ex2.charge, 1, 'kN/m')}**. C'est ce poids qui permet au mur de résister à la poussée des terres (L3.6).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le camion">
+
+Un camion a une charge utile de 15 t (donnée de l'énoncé). Combien de m³ de terre compactée peut-il transporter (hypothèse γ = {nombre(MATERIAUX.terre.gamma, 0)} kN/m³) ? Et de béton armé frais ?
+
+<Indice>Passe de γ à ρ, puis $V = m / \rho$.</Indice>
+
+<Corrige>
+
+- Terre : ρ = {nombre(MATERIAUX.terre.gamma * 1000, 0)} / {nombre(PESANTEUR, 2)} = {nombre(proprietesMateriau('terre').rho, 0)} kg/m³ → V = 15 000 / {nombre(proprietesMateriau('terre').rho, 0)} = **{grandeur(camionTerre, 2, 'm³')}**.
+- Béton armé frais : ρ = {nombre(proprietesMateriau('baFrais').rho, 0)} kg/m³ → **{grandeur(camionBeton, 2, 'm³')}**.
+- La benne peut contenir plus : c'est la masse qui limite, pas le volume.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.3.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le poids volumique γ s'obtient à partir de la masse volumique ρ par :" choix={['γ = ρ / g', 'γ = ρ × g', 'γ = ρ + g', 'γ = ρ × V']} bonne={1} colonnes={4}>
+Poids = masse × g, pour un mètre cube.
+</QCM>
+
+<QCM n={2} question="Le poids volumique du béton armé selon l'EN 1991-1-1 vaut :" choix={['24 kN/m³', `${nombre(ba.gamma, 0)} kN/m³`, '2 500 kN/m³', '78,5 kN/m³']} bonne={1} colonnes={4}>
+24 kN/m³ pour le béton normal, + 1 kN/m³ pour les armatures.
+</QCM>
+
+<QCM n={3} question="La masse volumique de l'acier selon l'EC2 vaut :" choix={['785 kg/m³', '2 500 kg/m³', `${nombre(ac.rho, 0)} kg/m³`, '78,5 kg/m³']} bonne={2} colonnes={4}>
+EN 1992-1-1 §3.2.7(3).
+</QCM>
+
+<QCM n={4} question={<>Une poutre en béton armé de 5,00 × 0,20 × 0,40 m pèse :</>} choix={[grandeur(ex0.P / 10, 1, 'kN'), grandeur(ex0.P, 1, 'kN'), grandeur(ex0.m, 0, 'kN'), grandeur(ex0a.P, 1, 'kN')]} bonne={1} colonnes={4}>
+0,4 m³ × {nombre(ba.gamma, 0)} kN/m³ = {grandeur(ex0.P, 1, 'kN')}.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une dalle pleine en béton armé de 20 cm pèse environ :" choix={['0,5 kN/m²', `${nombre(dalle20.charge, 0)} kN/m²`, '20 kN/m²', '50 kN/m²']} bonne={1} colonnes={4}>
+0,20 × {nombre(ba.gamma, 0)} = {grandeur(dalle20.charge, 1, 'kN/m²')}.
+</QCM>
+
+<QCM n={6} question="Pour un coffrage, on prend le poids volumique :" choix={['du béton sec', 'du béton frais (1 kN/m³ de plus)', 'de l’eau', 'de l’acier']} bonne={1} colonnes={2}>
+EN 1991-1-1, tableau A.1.
+</QCM>
+
+<QCM n={7} question="Le poids volumique d'un sol :" choix={['vaut toujours 18 kN/m³', 'se mesure par essai, il dépend du sol et de son eau', 'est donné par l’EC2', 'est celui du béton']} bonne={1}>
+Toute valeur sans essai reste une hypothèse.
+</QCM>
+
+<QCM n={8} question="À volume égal, l'acier pèse par rapport au béton armé environ :" choix={['la moitié', 'autant', `${nombre(ac.gamma / ba.gamma, 0)} fois plus`, '10 fois plus']} bonne={2} colonnes={4}>
+{nombre(ac.gamma, 1)} / {nombre(ba.gamma, 0)} ≈ {nombre(ac.gamma / ba.gamma, 1)}.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

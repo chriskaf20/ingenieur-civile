@@ -1,0 +1,117 @@
+---
+id: N0.3.EX
+titre: "Examen du module N0.3 : unités, conversions et ordres de grandeur"
+objectifs:
+  - Convertir avec les préfixes du SI, y compris pour les surfaces et les volumes
+  - Distinguer masse, poids, force et pression
+  - Calculer un poids propre à partir du poids volumique
+  - Vérifier l'homogénéité d'une formule
+  - Convertir les unités anciennes et contrôler un résultat par ordre de grandeur
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { E_S } from '@/lib/calc/ba/materiaux'
+import { analyser, ecrireDim, formule, DIM } from '@/lib/calc/dimensions'
+import { MATERIAUX, poidsPrismeMateriau } from '@/lib/calc/materiauxCourants'
+import { poidsDalle } from '@/lib/calc/ordres'
+import { changerPrefixe, convertir, poidsDeMasse, pressionMoyenne } from '@/lib/calc/unites'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre, nombreCourt } from '@/lib/format'
+
+export const es = changerPrefixe(E_S, 'M', 'G').valeur
+export const cm2 = convertir(1.5, 'm²', 'cm²').valeur
+export const litres = convertir(2.4, 'm³', 'L').valeur
+export const hect = convertir(3500, 'm²', 'ha').valeur
+export const sac = poidsDeMasse(25)
+export const sem = pressionMoyenne(450, 1.5, 1.5)
+export const pou = poidsPrismeMateriau('ba', 6, 0.25, 0.5)
+export const dal = poidsDalle(1, 1, 0.18).charge
+export const faux = analyser(formule('faux-poids'))
+export const bar = convertir(1.8, 'bar', 'kPa').valeur
+export const tf = convertir(20, 'tf', 'kN').valeur
+export const pouce = convertir(1.5, 'in', 'mm').valeur
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 1 heure.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Pour chaque calcul : formule, application numérique **avec unités**, puis contrôle par ordre de grandeur avant de choisir.
+- Lis les explications après chaque réponse : elles renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées dans les explications, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="N0.3.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question={<>Le module de l'acier vaut {nombreCourt(E_S)} MPa. En GPa :</>} choix={[`${nombreCourt(es / 1000)} GPa`, `${nombreCourt(es)} GPa`, `${nombreCourt(es * 1000)} GPa`, `${nombreCourt(E_S)} GPa`]} bonne={1} colonnes={4}>
+De M à G : 3 rangs vers un préfixe plus grand, ÷ 10³ (N0.3.1).
+</QCM>
+
+<QCM n={2} question="1,5 m² valent :" choix={['150 cm²', '1 500 cm²', `${nombreCourt(cm2)} cm²`, '150 000 cm²']} bonne={2} colonnes={4}>
+1 m² = 10 000 cm² : un rang de surface vaut × 100 (N0.3.2).
+</QCM>
+
+<QCM n={3} question="2,4 m³ d'eau représentent :" choix={['24 L', '240 L', `${nombreCourt(litres)} L`, '24 000 L']} bonne={2} colonnes={4}>
+1 m³ = 1 000 L (N0.3.2).
+</QCM>
+
+<QCM n={4} question="Une parcelle de 3 500 m² mesure :" choix={['35 ha', '3,5 ha', `${nombreCourt(hect)} ha`, '0,035 ha']} bonne={2} colonnes={4}>
+1 ha = 10 000 m² (N0.3.2).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={5} question="Un sac de 25 kg de ciment pèse :" choix={['25 N', grandeur(sac, 1, 'N'), '2,5 kN', '25 kN']} bonne={1} colonnes={4}>
+P = m × g = 25 × 9,81 = {grandeur(sac, 1, 'N')} (N0.3.3).
+</QCM>
+
+<QCM n={6} question={<>450 kN sur une semelle de 1,50 × 1,50 m donnent une pression moyenne de :</>} choix={[`${nombre(sem.kPa, 0)} kPa`, `${nombre(sem.kPa, 0)} MPa`, `${nombre(sem.MPa * 10, 0)} kPa`, '675 kPa']} bonne={0} colonnes={4}>
+σ = 450 / 2,25 = {nombre(sem.kPa, 0)} kPa = {nombre(sem.bar, 0)} bar (N0.3.3).
+</QCM>
+
+<QCM n={7} question={<>Une poutre en béton armé de 6,00 × 0,25 × 0,50 m pèse :</>} choix={[grandeur(pou.P / 10, 2, 'kN'), grandeur(pou.P, 2, 'kN'), grandeur(pou.m, 0, 'kN'), grandeur(pou.P * 3, 1, 'kN')]} bonne={1} colonnes={4}>
+V = {nombre(pou.V, 2)} m³ ; P = {nombre(MATERIAUX.ba.gamma, 0)} × {nombre(pou.V, 2)} = {grandeur(pou.P, 2, 'kN')} (N0.3.4).
+</QCM>
+
+<QCM n={8} question="Le poids volumique d'un béton non armé selon l'EN 1991-1-1 vaut :" choix={[`${nombre(MATERIAUX.beton.gamma, 0)} kN/m³`, `${nombre(MATERIAUX.ba.gamma, 0)} kN/m³`, '2 400 kN/m³', '78,5 kN/m³']} bonne={0} colonnes={4}>
+24 kN/m³ ; on ajoute 1 kN/m³ pour le béton armé (N0.3.4).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={9} question="La dimension d'une pression est :" choix={[ecrireDim(DIM.force), ecrireDim(DIM.pression), ecrireDim(DIM.moment), ecrireDim(DIM.chargeLineique)]} bonne={1} colonnes={4}>
+Force / surface (N0.3.5).
+</QCM>
+
+<QCM n={10} question="La formule P = γ L b (poids d'une poutre) est :" choix={['homogène', `non homogène : le membre de droite vaut ${ecrireDim(faux.termes[0])}, une charge par mètre`, 'homogène si γ est en kN/m³', 'sans dimension']} bonne={1}>
+Il manque la hauteur h (N0.3.5).
+</QCM>
+
+<QCM n={11} question="Un vieux rapport indique « 1,8 bar ». En kPa :" choix={['18 kPa', `${nombreCourt(bar)} kPa`, '1 800 kPa', '0,18 kPa']} bonne={1} colonnes={4}>
+1 bar = 100 kPa (N0.3.6). Et « 20 tonnes » sur un poteau font {nombreCourt(tf, 0)} kN ; 1,5 pouce = {nombreCourt(pouce, 1)} mm.
+</QCM>
+
+<QCM n={12} question={<>Un logiciel annonce pour une dalle pleine de 18 cm un poids propre de 450 kN/m². Que conclure ?</>} choix={['C’est plausible', `C’est aberrant : de tête, 0,18 × 25 ≈ ${nombre(dal, 1)} kN/m²`, 'Il faut une dalle plus épaisse', 'Le béton est trop lourd']} bonne={1}>
+Facteur 100 : une erreur d'unité ou de saisie (N0.3.7).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

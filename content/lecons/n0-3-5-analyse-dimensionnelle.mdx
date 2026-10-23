@@ -1,0 +1,302 @@
+---
+id: N0.3.5
+titre: Analyse dimensionnelle
+objectifs:
+  - Écrire la dimension d'une grandeur mécanique en fonction de M, L et T
+  - Vérifier qu'une formule est homogène
+  - Repérer une formule fausse ou mal recopiée grâce aux dimensions
+  - Trouver la dimension d'un coefficient inconnu
+relecture: false
+normes:
+  - "Le Système international d'unités (SI), BIPM : grandeurs de base et dimensions"
+glossaire:
+  - terme: Dimension
+    definition: Nature physique d'une grandeur, écrite avec les grandeurs de base M (masse), L (longueur), T (temps).
+  - terme: Homogène
+    definition: Se dit d'une formule dont les deux membres, et chaque terme d'une somme, ont la même dimension.
+  - terme: Sans dimension
+    definition: Grandeur dont la dimension vaut 1, comme une déformation, un rapport ou un coefficient numérique.
+  - terme: Formule empirique
+    definition: Formule tirée d'essais, souvent valable seulement avec les unités qu'elle impose.
+symboles:
+  - { symbole: 'M, L, T', signification: 'dimensions de masse, de longueur et de temps', unite: '—' }
+  - { symbole: '[X]', signification: 'dimension de la grandeur X', unite: '—' }
+formules:
+  - { nom: 'Dimension d’une force', tex: '[F] = M \cdot L \cdot T^{-2}', domaine: 'Analyse dimensionnelle' }
+  - { nom: 'Dimension d’une pression', tex: '[\sigma] = M \cdot L^{-1} \cdot T^{-2}', domaine: 'Analyse dimensionnelle' }
+---
+
+import { analyser, DIM, ecrireDim, formule, produit, puissance } from '@/lib/calc/dimensions'
+import { FormuleAnnotee } from '@/components/schemas/Unites'
+
+export const d = Object.fromEntries(Object.entries(DIM).map(([k, v]) => [k, ecrireDim(v)]))
+export const ressort = ecrireDim(produit(DIM.force, puissance(DIM.longueur, -1)))
+export const momentF = ecrireDim(produit(DIM.force, DIM.longueur))
+export const E = ecrireDim(produit(DIM.pression, puissance(DIM.sans, -1)))
+export const hydro = analyser(formule('hydrostatique'))
+export const faux = analyser(formule('faux-fleche'))
+export const fauxPoids = analyser(formule('faux-poids'))
+
+<Page etape="intuition" titre="L'intuition : on n'additionne pas des mangues et des bananes">
+
+Au marché, « 3 mangues + 2 bananes » ne font pas « 5 mangues ». On ne peut additionner que des choses de même nature. En physique, c'est pareil : on n'additionne pas des mètres et des kilogrammes, et une longueur ne peut pas être égale à une force.
+
+Une formule est une phrase : ses deux membres doivent parler **de la même chose**. Si, à gauche, tu calcules une flèche (une longueur), alors, à droite, tout doit se combiner pour donner une longueur. C'est un moyen très simple de repérer une formule mal recopiée, avant même de faire un calcul.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment vérifier en une minute qu'une formule trouvée dans un cours, un livre ou un tableur n'est pas fausse ?
+</Encadre>
+
+<Encadre type="attention">
+Une formule homogène n'est pas forcément juste : l'analyse dimensionnelle ne voit pas les coefficients (1/2, 5/384, π). Mais une formule **non homogène** est forcément **fausse**.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les dimensions des grandeurs">
+
+### Trois grandeurs de base suffisent en mécanique
+
+Toute grandeur mécanique s'écrit $M^a \cdot L^b \cdot T^c$, avec M la masse, L la longueur et T le temps. On note $[X]$ la dimension de $X$.
+
+| Grandeur | Unité SI | Dimension |
+|---|---|---|
+| longueur, flèche | m | {d.longueur} |
+| surface | m² | {d.surface} |
+| volume | m³ | {d.volume} |
+| inertie d'une section | m⁴ | {d.inertie} |
+| accélération | m/s² | {d.acceleration} |
+| force, poids | N = kg·m/s² | {d.force} |
+| charge linéique | N/m | {d.chargeLineique} |
+| pression, contrainte, module E | Pa = N/m² | {d.pression} |
+| moment | N·m | {d.moment} |
+| masse volumique | kg/m³ | {d.masseVolumique} |
+| poids volumique | N/m³ | {d.poidsVolumique} |
+| déformation, rapport, angle | — | {d.sans} |
+
+<Encadre type="retenir">
+Il suffit de connaître la dimension d'une force, M·L·T⁻², pour retrouver toutes les autres : pression = force / surface, moment = force × longueur, charge linéique = force / longueur.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : les règles d'homogénéité">
+
+### Les quatre règles
+
+1. Les deux membres d'une égalité ont **la même dimension**.
+2. On n'additionne ou on ne soustrait que des termes de **même dimension**.
+3. Dans un produit ou un quotient, les **exposants s'additionnent** ou se soustraient.
+4. Ce qui est dans une exponentielle, un logarithme, un sinus est **sans dimension**.
+
+### La méthode
+
+1. Écris la dimension de chaque symbole.
+2. Calcule la dimension de chaque terme du membre de droite.
+3. Compare avec la dimension du membre de gauche.
+
+<Regle type="simplification">
+Les coefficients numériques (1/2, 5/384, π) sont sans dimension : l'analyse ne peut pas vérifier leur valeur. Elle détecte les erreurs d'exposant, de symbole oublié ou mal placé, pas les erreurs de coefficient.
+</Regle>
+
+<Encadre type="exemple">
+En N0.2.9, la formule de l'EC2 contient $\exp\{s[1 - (28/t)^{1/2}]\}$. Le temps $t$ (en jours) est divisé par 28 jours : le rapport $28/t$ est sans dimension, comme l'exige la règle 4.
+</Encadre>
+
+### Homogène ne veut pas dire « bonnes unités »
+
+kN et N ont la même dimension, mais pas la même unité. Après la vérification des dimensions, l'application numérique exige encore des **unités cohérentes** (N0.3.1 à N0.3.3).
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : une formule annotée">
+
+<FormuleAnnotee />
+
+Sous chaque symbole, on écrit sa dimension. On combine ensuite le membre de droite avec les règles des puissances (N0.2.1) : $\frac{M \cdot L \cdot T^{-2}}{L^2} = M \cdot L^{1-2} \cdot T^{-2} = M \cdot L^{-1} \cdot T^{-2}$.
+
+<Encadre type="retenir">
+Les exposants se manipulent exactement comme ceux des puissances : on les additionne dans un produit, on les soustrait dans un quotient.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="homogeneite">
+
+<Cahier titre="Exemple résolu : la flèche d'une poutre">
+
+**Énoncé.** Un aide-mémoire donne la flèche d'une poutre sur deux appuis sous charge uniforme : $f = \frac{5\,q\,L^4}{384\,E\,I}$, avec $q$ en N/m, $L$ en m, $E$ en Pa et $I$ en m⁴. Vérifie que la formule est homogène. Choisis ensuite les deux « copies à vérifier » dans la liste.
+
+<Etape n={1} titre="La formule">
+<Entrees />
+<Note>Pourquoi vérifier une formule de livre ? Une erreur de recopie (un exposant 3 au lieu de 4) arrive vite, dans un cahier comme dans un tableur.</Note>
+</Etape>
+
+<Etape n={2} titre="Le tableau des exposants">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : symbole par symbole">
+
+<Etape n={3} titre="Les dimensions des symboles">
+<AN k="symboles" />
+<Note>Pourquoi ignorer 5 et 384 ? Ce sont des nombres purs : ils n'ont pas de dimension.</Note>
+</Etape>
+
+<Etape n={4} titre="Les deux membres">
+<AN k="droite" />
+<AN k="gauche" />
+</Etape>
+
+<Etape n={5} titre="La conclusion">
+<AN k="verdict" />
+<Resultat k="verdict" libelle="Formule" />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire qu'une formule homogène est forcément juste.">
+$f = \frac{q L^4}{E I}$ est homogène, mais il manque 5/384 : la flèche serait 384/5 fois trop grande. L'analyse ne voit pas les coefficients.
+</Piege>
+
+<Piege erreur="oublier qu'une déformation est sans dimension.">
+ε = ΔL/L est un rapport de deux longueurs : sa dimension vaut 1. Donc $\sigma = E \varepsilon$ impose que E ait la dimension d'une pression : {E}.
+</Piege>
+
+<Piege erreur="additionner deux termes de dimensions différentes.">
+« h + S » (une longueur plus une surface) n'a aucun sens. Si une formule le fait, il manque un facteur ou un symbole.
+</Piege>
+
+<Piege erreur="confondre dimension et unité.">
+kN et N ont la même dimension. Une formule peut être homogène et donner un résultat faux si l'on mélange les kN et les N dans l'application numérique.
+</Piege>
+
+<Piege erreur="mettre une grandeur avec dimension dans une exponentielle.">
+exp(t), avec t en jours, n'a pas de sens : on écrit exp(t/t₀), avec t₀ un temps de référence.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Au bureau d'études**, l'analyse dimensionnelle est le premier contrôle d'une formule recopiée d'un livre, d'une note ancienne ou d'un forum, et le premier contrôle d'une formule de tableur. Elle prend une minute et évite des heures de calculs faux.
+
+<Encadre type="terrain" titre="Les formules empiriques">
+Certaines formules viennent d'essais et ne sont pas homogènes : elles ne sont valables qu'avec les unités qu'elles imposent. On en rencontre en hydraulique et en géotechnique (L3.5, L3.4), et dans d'anciens règlements. Quand une formule annonce « h en cm, Q en L/s », respecte exactement ces unités, et note-le dans ta fiche.
+</Encadre>
+
+**Pour retrouver une formule oubliée**, l'analyse dimensionnelle aide aussi : une pression hydrostatique doit avoir la dimension M·L⁻¹·T⁻². Avec ρ (M·L⁻³), g (L·T⁻²) et une profondeur z (L), le seul produit possible est ρ·g·z : {hydro.homogene ? 'la formule p = ρ g z est bien homogène' : ''}.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : analyse dimensionnelle">
+
+### Les dimensions à connaître
+
+force {d.force} · pression {d.pression} · moment {d.moment} · charge linéique {d.chargeLineique} · masse volumique {d.masseVolumique} · inertie {d.inertie}
+
+### Les quatre règles
+
+1. Deux membres de même dimension. 2. On n'additionne que des termes de même dimension. 3. Produit : exposants additionnés ; quotient : soustraits. 4. exp, ln, sin : argument sans dimension.
+
+### La méthode
+
+Dimension de chaque symbole → dimension de chaque terme → comparaison avec le membre de gauche.
+
+### Les limites
+
+Non homogène ⇒ fausse. Homogène ⇏ juste (coefficients non vérifiés). Dimension ≠ unité.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Deux dimensions">
+
+Donne la dimension d'un moment $M = F \times d$ (force × distance) et celle d'une contrainte $\sigma = F/A$.
+
+<Indice>Part de [F] = M·L·T⁻², puis multiplie par L ou divise par L².</Indice>
+
+<Corrige>
+[M] = **{momentF}** ; [σ] = **{d.pression}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La raideur d'un ressort">
+
+Un ressort (ou un appui élastique) suit $F = k\,x$, avec $F$ une force et $x$ un déplacement. Quelle est la dimension de $k$ ? Quelle unité SI lui donner ?
+
+<Indice>$k = F / x$.</Indice>
+
+<Corrige>
+[k] = [F] / [x] = **{ressort}**. Unité : N/m (ou kN/m), comme une charge linéique, mais avec un sens différent.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Deux copies à corriger">
+
+Deux copies donnent : (a) $f = \frac{5 q L^3}{384 E I}$ ; (b) $P = \gamma\,L\,b$. Montre qu'elles sont fausses et propose une correction.
+
+<Indice>Fais le tableau des exposants de chaque membre, comme dans la fiche.</Indice>
+
+<Corrige>
+
+- (a) Droite : **{ecrireDim(faux.termes[0])}** (sans dimension), gauche : L. Il manque un L : l'exposant de la portée est **4**.
+- (b) Droite : **{ecrireDim(fauxPoids.termes[0])}**, c'est-à-dire des N/m, alors qu'un poids est en N. Il manque une longueur : $P = \gamma\,L\,b\,h$.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.3.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La dimension d'une force est :" choix={['M·L', d.force, 'M·L⁻¹·T⁻²', 'L·T⁻²']} bonne={1} colonnes={4}>
+1 N = 1 kg·m/s².
+</QCM>
+
+<QCM n={2} question="La dimension d'une pression est :" choix={[d.force, d.pression, d.moment, d.masseVolumique]} bonne={1} colonnes={4}>
+Force / surface : M·L·T⁻² / L².
+</QCM>
+
+<QCM n={3} question="Une déformation ε = ΔL / L est :" choix={['une longueur', 'sans dimension', 'une pression', 'une surface']} bonne={1} colonnes={4}>
+Rapport de deux longueurs.
+</QCM>
+
+<QCM n={4} question="Une formule non homogène est :" choix={['parfois juste', 'forcément fausse', 'juste si les unités sont en SI', 'juste si le coefficient est bon']} bonne={1} colonnes={2}>
+Ses deux membres ne parlent pas de la même grandeur.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une formule homogène est :" choix={['forcément juste', 'peut-être juste : les coefficients ne sont pas vérifiés', 'forcément fausse', 'sans unité']} bonne={1}>
+5/384 ou 1/2 échappent à l'analyse.
+</QCM>
+
+<QCM n={6} question="La formule f = 5 q L³ / (384 E I) est :" choix={['homogène', 'non homogène : il manque une longueur', 'non homogène : il y a trop de longueurs', 'sans dimension, donc juste']} bonne={1}>
+Le membre de droite est sans dimension ({ecrireDim(faux.termes[0])}), le gauche est une longueur.
+</QCM>
+
+<QCM n={7} question="Dans exp(x), x doit être :" choix={['une longueur', 'un temps', 'sans dimension', 'une force']} bonne={2} colonnes={4}>
+Règle 4.
+</QCM>
+
+<QCM n={8} question="kN et N ont :" choix={['la même dimension et la même unité', 'la même dimension, mais pas la même unité', 'des dimensions différentes', 'aucune dimension']} bonne={1}>
+Il faut encore des unités cohérentes dans l'application numérique.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

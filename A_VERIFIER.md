@@ -25,3 +25,8 @@ Statuts :
 | 15 | Rapport travail personnel / heures de cours (k = 1 h/h) | N0.1.5, N0.1.P | `hypothèse` : point de départ pédagogique, aucune source officielle. Présenté comme donnée ajustable par l'étudiant. |
 | 16 | NF X 02-003 (écriture des nombres et des unités) | N0.1.4 | `à confirmer` : intitulé et statut (en vigueur ou remplacée) à contrôler sur le catalogue AFNOR. |
 | 17 | Calendrier de révision J+1, J+3, J+7, J+14, J+30 | N0.1.1, N0.1.P | `tranché` comme simplification pédagogique : principe de la répétition espacée (Dunlosky et al., 2013) ; les intervalles exacts ne sont pas normatifs. |
+| 18 | Poids volumique d'une terre compactée : 18 kN/m³ (ordre de grandeur 16 à 22 kN/m³) | N0.3.4, N0.3.7 | `hypothèse` : valeur d'exercice ; sur un projet, il se mesure par essai (L3.4). |
+| 19 | Charge globale d'un bâtiment courant : environ 10 kN/m² par niveau | N0.3.7, N0.3.P | `à confirmer` : règle de l'art de prédimensionnement, sans source normative ; à confronter à des descentes de charges (L3.2). |
+| 20 | Prédimensionnement : poutre h = L/15 à L/10, dalle e = L/30 à L/20 | N0.3.7 | `à confirmer` : règles de l'art ; cohérence à vérifier avec les rapports portée/hauteur utile de l'EN 1992-1-1 §7.4.2 (tableau 7.4N). |
+| 21 | Charges d'exploitation des logements : 1,5 à 2,0 kN/m² | N0.3.7 | `à confirmer` : fourchette de l'EN 1991-1-1, tableau 6.2, catégorie A, à contrôler sur le texte, ainsi que la valeur retenue par l'annexe nationale française. |
+| 22 | Poids volumique d'une maçonnerie de blocs pleins de béton : 20 kN/m³ | N0.3.P | `hypothèse` : donnée d'énoncé ; sur un projet, à lire sur la fiche du fabricant (EN 771-3). |

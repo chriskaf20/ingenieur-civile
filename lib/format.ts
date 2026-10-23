@@ -82,3 +82,29 @@ export function scientifique(x: number, cs = 3): string {
     .join('');
   return e === 0 ? nombre(m, cs - 1) : `${nombre(m, cs - 1)} × 10${exp}`;
 }
+
+/** Exposant écrit en caractères suscrits : exposantTexte(-2) → « ⁻² ». */
+export function exposantTexte(n: number): string {
+  return String(n)
+    .split('')
+    .map((c) => EXPOSANTS[c] ?? c)
+    .join('');
+}
+
+/** Puissance de dix lisible : puissanceDix(-3) → « 10⁻³ ». */
+export function puissanceDix(n: number): string {
+  return `10${exposantTexte(n)}`;
+}
+
+const formatsCourts = new Map<number, Intl.NumberFormat>();
+
+/** Nombre sans zéros inutiles, au plus `maxDecimales` décimales : nombreCourt(2.50) → « 2,5 ». */
+export function nombreCourt(x: number, maxDecimales = 6): string {
+  if (!Number.isFinite(x)) return '—';
+  let f = formatsCourts.get(maxDecimales);
+  if (!f) {
+    f = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: maxDecimales });
+    formatsCourts.set(maxDecimales, f);
+  }
+  return f.format(arrondi(x, maxDecimales));
+}

@@ -1,0 +1,349 @@
+---
+id: N0.3.7
+titre: Ordres de grandeur du génie civil
+objectifs:
+  - Citer les ordres de grandeur des forces, charges et contraintes courantes
+  - Estimer de tête le poids d'un élément ou d'un bâtiment
+  - Prédimensionner une poutre ou une dalle avec une règle de l'art
+  - Repérer un résultat aberrant avant qu'il ne soit construit
+relecture: false
+normes:
+  - "EN 1991-1-1, annexe A, tableau A.1 : béton armé 25 kN/m³"
+  - "EN 1991-1-1, tableau 6.2 : charges d'exploitation des planchers (catégorie A : logements)"
+  - "EN 1992-1-1, tableau 3.1 (fck) et §3.2.7(4) (Es) ; EN 10080 : acier B500"
+glossaire:
+  - terme: Ordre de grandeur
+    definition: Valeur approchée, à un facteur près, qui permet de savoir si un résultat est plausible.
+  - terme: Estimation
+    definition: Calcul rapide avec des données arrondies, fait de tête pour contrôler un calcul précis.
+  - terme: Prédimensionnement
+    definition: Choix de dimensions de départ (hauteur de poutre, épaisseur de dalle) avant le calcul de vérification.
+  - terme: Charge d'exploitation
+    definition: Charge due à l'usage du bâtiment (personnes, mobilier), fixée par l'Eurocode 1 selon la catégorie.
+  - terme: Descente de charges
+    definition: Calcul qui suit les charges de la toiture jusqu'aux fondations, niveau par niveau (L3.2).
+symboles:
+  - { symbole: 'W', signification: 'poids estimé du bâtiment', unite: 'kN' }
+  - { symbole: 'S', signification: 'surface d’un niveau', unite: 'm²' }
+  - { symbole: 'n', signification: 'nombre de niveaux', unite: '—' }
+  - { symbole: 'q', signification: 'charge globale par niveau (hypothèse)', unite: 'kN/m²' }
+formules:
+  - { nom: 'Poids estimé d’un bâtiment', tex: 'W \approx S \times n \times q', domaine: 'Estimation (règle de l’art)' }
+  - { nom: 'Hauteur de poutre (prédimensionnement)', tex: '\frac{L}{15} \leq h \leq \frac{L}{10}', domaine: 'Règle de l’art' }
+  - { nom: 'Épaisseur de dalle (prédimensionnement)', tex: '\frac{L}{30} \leq e \leq \frac{L}{20}', domaine: 'Règle de l’art' }
+---
+
+import { E_S, fckDeClasse, FYK_B500 } from '@/lib/calc/ba/materiaux'
+import { variation, volumePrisme } from '@/lib/calc/algebre'
+import { MATERIAUX } from '@/lib/calc/materiauxCourants'
+import { CHARGE_GLOBALE_NIVEAU, estimationBatiment, EXEMPLE_BATIMENT, EXPLOITATION_LOGEMENT, fourchetteDalle, fourchettePoutre, poidsDalle, poidsLineaire } from '@/lib/calc/ordres'
+import { combienDe, convertir, masseDePoids, poidsDeMasse, pressionMoyenne } from '@/lib/calc/unites'
+import { arrondiSignificatif, grandeur, nombre, nombreCourt } from '@/lib/format'
+import { EchelleForces } from '@/components/schemas/Unites'
+
+export const kN = (m) => convertir(poidsDeMasse(m), 'N', 'kN').valeur
+export const bat = estimationBatiment(EXEMPLE_BATIMENT)
+export const bat3 = estimationBatiment({ ...EXEMPLE_BATIMENT, niveaux: 3 })
+export const dalle20 = poidsDalle(1, 1, 0.2).charge
+export const fck = fckDeClasse('C25/30')
+export const sem = pressionMoyenne(300, 1.2, 1.2)
+export const pou5 = fourchettePoutre(5)
+export const dal4 = fourchetteDalle(4)
+export const ex1 = { p: fourchettePoutre(6), d: fourchetteDalle(4.5) }
+export const dalleT = { V: volumePrisme(12, 10, 0.16), P: poidsDalle(12, 10, 0.16).P }
+export const toupies = combienDe(dalleT.V, 8)
+export const dalleEst = poidsDalle(12, 10, 0.16)
+export const dalleVEst = volumePrisme(...dalleEst.arrondies)
+export const dalleTonnes = masseDePoids(convertir(dalleT.P, 'kN', 'N').valeur) / 1000
+export const hausse = variation(bat.parPoteau, bat3.parPoteau)
+export const masseRonde = arrondiSignificatif(bat.masse, 2)
+export const poutre2040 = poidsLineaire(1, 0.2, 0.4, MATERIAUX.ba.gamma).charge
+export const reperes = [
+  { nom: 'sac de ciment', kN: kN(50) },
+  { nom: 'personne', kN: kN(75) },
+  { nom: 'voiture', kN: kN(1500) },
+  { nom: '1 m³ de béton armé', kN: MATERIAUX.ba.gamma },
+  { nom: 'un poteau de la maison', kN: bat.parPoteau },
+  { nom: 'maison R+1', kN: bat.W },
+]
+
+<Page etape="intuition" titre="L'intuition : le maçon qui « voit » l'erreur">
+
+Un vieux chef de chantier regarde un plan et dit : « Cette poutre de 6 m avec 20 cm de haut, elle va plier. » Il n'a pas fait de calcul. Il a dans la tête des **ordres de grandeur** : il sait à peu près ce que pèse une dalle, ce que porte un poteau, quelle hauteur il faut pour franchir 6 m.
+
+Ces repères ne remplacent jamais le calcul. Mais ils permettent de repérer en quelques secondes un résultat **aberrant** : une virgule décalée, une unité oubliée, une charge comptée deux fois. Un ingénieur qui n'a pas ces repères croit tout ce que sort sa calculatrice ou son logiciel.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quels nombres faut-il avoir en tête, et comment estimer de tête le poids d'un élément ou d'un bâtiment ?
+</Encadre>
+
+<Encadre type="attention">
+Un ordre de grandeur sert à **contrôler**, jamais à **justifier**. Une règle de l'art ne remplace ni une norme ni une note de calcul.
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les ordres de grandeur à connaître" sousTitre="Des repères pour contrôler un calcul de tête" etape="cours">
+
+<Panneau n={1} titre="Forces du quotidien" icone="charges" couleur="encre">
+Sac de ciment de 50 kg : {nombre(kN(50), 2)} kN. Personne de 75 kg : {nombre(kN(75), 2)} kN. Voiture de 1,5 t : {nombre(kN(1500), 0)} kN. Retiens : **1 t ≈ 10 kN**.
+</Panneau>
+
+<Panneau n={2} titre="Poids propres" icone="materiaux" couleur="brique">
+Béton armé : {nombre(MATERIAUX.ba.gamma, 0)} kN/m³ (EC1). Dalle pleine de 20 cm : {nombre(dalle20, 0)} kN/m². Poutre de 20 × 40 cm : {nombre(poutre2040, 0)} kN/m.
+</Panneau>
+
+<Panneau n={3} titre="Charges d'exploitation" icone="charges" couleur="terre">
+Logements : de l'ordre de {nombreCourt(EXPLOITATION_LOGEMENT[0])} à {nombreCourt(EXPLOITATION_LOGEMENT[1])} kN/m² (EC1, tableau 6.2, valeurs exactes en L3.2) <AVerifier />.
+</Panneau>
+
+<Panneau n={4} titre="Un bâtiment entier" icone="quantites" couleur="acier">
+Règle de l'art : environ {nombre(CHARGE_GLOBALE_NIVEAU, 0)} kN/m² par niveau, tout compris <AVerifier />. Maison R+1 de {EXEMPLE_BATIMENT.S} m² : environ {nombre(bat.W, 0)} kN.
+</Panneau>
+
+<Panneau n={5} titre="Dimensions de départ" icone="regle" couleur="validation">
+Règles de l'art : poutre $h \approx L/15$ à $L/10$ ; dalle $e \approx L/30$ à $L/20$ <AVerifier />. Poutre de 5 m : {nombre(pou5.min * 100, 0)} à {nombre(pou5.max * 100, 0)} cm.
+</Panneau>
+
+<Panneau n={6} titre="Contraintes" icone="verification" couleur="correction">
+Béton C25/30 : $f_{ck}$ = {fck} MPa. Acier B500 : $f_{yk}$ = {FYK_B500} MPa. Module de l'acier : {nombreCourt(E_S)} MPa. Sous une semelle : quelques centaines de kPa.
+</Panneau>
+
+<Panneau n={7} titre="La méthode" icone="idee" couleur="encre" large>
+Décomposer · arrondir chaque donnée à un chiffre significatif · calculer de tête · comparer au calcul précis. Écart de moins de 50 % : même ordre de grandeur. Facteur 10 : il y a une erreur.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : estimer, contrôler, prédimensionner">
+
+### Trois natures de repères
+
+<Regle type="norme" source="EN 1991-1-1, EN 1992-1-1">
+Poids volumiques, résistances caractéristiques, modules : ce sont des **valeurs normatives**. On peut les utiliser dans un calcul, avec leur référence.
+</Regle>
+
+<Regle type="art">
+« 10 kN/m² par niveau », « $h = L/15$ à $L/10$ » : ce sont des **règles de l'art**. Elles servent à estimer et à choisir des dimensions de départ, jamais à justifier un ouvrage.
+</Regle>
+
+<Regle type="simplification">
+« 1 t ≈ 10 kN », « g ≈ 10 m/s² » : ce sont des **arrondis** pour le calcul de tête. Écart d'environ 2 %, sans importance pour une estimation.
+</Regle>
+
+### La méthode d'estimation
+
+1. **Décomposer** : un bâtiment = des niveaux × une surface × une charge par m².
+2. **Arrondir** chaque donnée à un chiffre significatif.
+3. **Calculer de tête**.
+4. **Comparer** au calcul précis : même ordre de grandeur, ou erreur à chercher.
+
+### Le poids d'un bâtiment
+
+$W \approx S \times n \times q$, avec $S$ la surface d'un niveau (m²), $n$ le nombre de niveaux et $q$ la charge globale par niveau (kN/m², hypothèse). En divisant par le nombre de poteaux, on obtient la charge moyenne par poteau.
+
+<Encadre type="attention">
+La répartition « égale » entre poteaux est une simplification : un poteau central porte plus qu'un poteau d'angle. La vraie répartition vient de la descente de charges (L3.2).
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'échelle des forces">
+
+<EchelleForces reperes={reperes} />
+
+Sur cette échelle, chaque graduation multiplie par 10. Du sac de ciment à la maison entière, on couvre plus de trois puissances de dix. Une erreur d'unité (N au lieu de kN, ou kN au lieu de MN) fait sauter un résultat de trois graduations : elle se voit tout de suite si l'on a ces repères en tête.
+
+<Encadre type="retenir">
+Personne ≈ 1 kN · voiture ≈ 15 kN · m³ de béton armé = 25 kN · poteau de maison : quelques centaines de kN · maison : quelques milliers de kN.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="batiment">
+
+<Cahier titre="Exemple résolu : le poids d'une maison R+1">
+
+**Énoncé.** Une maison R+1 a un plancher haut de rez-de-chaussée et une toiture-terrasse, soit 2 niveaux de {EXEMPLE_BATIMENT.S} m² chacun, portés par {EXEMPLE_BATIMENT.poteaux} poteaux. Estime son poids total et la charge moyenne par poteau, avec la règle de l'art de {nombre(CHARGE_GLOBALE_NIVEAU, 0)} kN/m² par niveau.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi une charge « globale » ? Elle regroupe poids propre (dalles, poutres, murs) et exploitation : c'est une hypothèse d'estimation, pas une valeur de calcul.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : de tête, puis en clair">
+
+<Etape n={3} titre="Le poids total">
+<AN k="W" />
+<AN k="masse" />
+<Note>Pourquoi la masse en tonnes ? Pour parler avec le chantier : « la maison pèse environ {nombreCourt(masseRonde)} tonnes » se comprend tout de suite.</Note>
+</Etape>
+
+<Etape n={4} titre="La charge par poteau">
+<AN k="poteau" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="poteau" libelle="Charge moyenne par poteau" />
+
+<Note couleur="vert">Poids total : <Val k="W" />, soit <Val k="MN" />. Si un calcul détaillé donne 10 fois plus ou 10 fois moins, il faut chercher l'erreur.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="utiliser une règle de l'art comme une justification.">
+« h = L/12, donc la poutre passe » ne prouve rien. La règle donne un point de départ ; la vérification se fait par le calcul (L3.3, M1.1).
+</Piege>
+
+<Piege erreur="oublier le poids propre.">
+Dans un bâtiment en béton armé, le poids propre est souvent la plus grande charge : une dalle de 20 cm pèse déjà {nombre(dalle20, 0)} kN/m², plus que les charges d'exploitation d'un logement.
+</Piege>
+
+<Piege erreur="faire une estimation avec trop de chiffres.">
+Une estimation se fait avec des nombres ronds. « 2 437,6 kN » n'est pas une estimation, c'est une fausse précision.
+</Piege>
+
+<Piege erreur="accepter un résultat sans le comparer à un ordre de grandeur.">
+Un poteau de maison qui porterait 30 000 kN, c'est le poids de plusieurs immeubles : l'unité ou la virgule est fausse.
+</Piege>
+
+<Piege erreur="appliquer une règle hors de son domaine.">
+Les fourchettes L/15 à L/10 concernent des poutres courantes sur deux appuis ou continues. Une console, une poutre très chargée ou une grande portée demandent un calcul spécifique.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le contrôle d'un plan reçu.** Avant de lancer un chantier, l'ingénieur parcourt les plans avec ses ordres de grandeur en tête : hauteurs de poutres, épaisseurs de dalles, sections de poteaux. Ce qui sort franchement des fourchettes est vérifié en priorité.
+
+<Encadre type="terrain" titre="Les étages ajoutés">
+À Kinshasa comme dans beaucoup de villes, on voit souvent une maison R+1 recevoir un, puis deux étages de plus, sur les mêmes poteaux et les mêmes fondations. L'estimation le montre tout de suite : passer de R+1 à R+2 fait passer la charge moyenne par poteau de {nombre(bat.parPoteau, 0)} à {nombre(bat3.parPoteau, 0)} kN, soit {nombre(hausse * 100, 0)} % de plus. Sans vérification, c'est la cause de nombreux effondrements.
+</Encadre>
+
+**Sur le chantier**, les ordres de grandeur servent à organiser : nombre de camions de terre, de toupies de béton, de sacs de ciment ; poids d'une pièce à lever ; nombre d'ouvriers pour porter un linteau.
+
+**En réunion**, savoir dire « c'est environ {nombre(bat.W, 0)} kN, donc de l'ordre de {nombreCourt(masseRonde)} tonnes » permet d'être compris de tout le monde, du maître d'ouvrage au chef d'équipe.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : ordres de grandeur">
+
+### Forces
+
+1 t ≈ 10 kN · personne ≈ {nombre(kN(75), 1)} kN · voiture ≈ {nombre(kN(1500), 0)} kN · 1 m³ de béton armé = {nombre(MATERIAUX.ba.gamma, 0)} kN
+
+### Charges sur un plancher
+
+Dalle BA de 20 cm ≈ {nombre(dalle20, 0)} kN/m² · logement : {nombreCourt(EXPLOITATION_LOGEMENT[0])} à {nombreCourt(EXPLOITATION_LOGEMENT[1])} kN/m² (EC1, à confirmer) · bâtiment courant ≈ {nombre(CHARGE_GLOBALE_NIVEAU, 0)} kN/m² par niveau (règle de l'art)
+
+### Dimensions de départ (règles de l'art)
+
+Poutre : $L/15 \leq h \leq L/10$ · dalle : $L/30 \leq e \leq L/20$
+
+### Contraintes
+
+C25/30 : $f_{ck}$ = {fck} MPa · B500 : $f_{yk}$ = {FYK_B500} MPa · $E_s$ = {nombreCourt(E_S)} MPa · sol sous semelle : quelques centaines de kPa
+
+### Méthode
+
+Décomposer · arrondir · calculer de tête · comparer (écart &lt; 50 % : même ordre ; facteur 10 : erreur)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Prédimensionner">
+
+Donne la fourchette de hauteur d'une poutre de 6 m et celle de l'épaisseur d'une dalle de 4,50 m de portée, avec les règles de l'art de la leçon.
+
+<Indice>Poutre : L/15 à L/10 ; dalle : L/30 à L/20.</Indice>
+
+<Corrige>
+Poutre : **{nombre(ex1.p.min * 100, 0)} à {nombre(ex1.p.max * 100, 0)} cm** ; dalle : **{nombre(ex1.d.min * 100, 1)} à {nombre(ex1.d.max * 100, 1)} cm**. Ce sont des points de départ, à vérifier par le calcul.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un étage de plus">
+
+La maison de l'exemple reçoit un deuxième étage (3 niveaux, mêmes {EXEMPLE_BATIMENT.poteaux} poteaux). Estime le nouveau poids et la nouvelle charge moyenne par poteau. De combien augmente-t-elle ?
+
+<Indice>Change seulement n dans $W \approx S \times n \times q$.</Indice>
+
+<Corrige>
+W ≈ {EXEMPLE_BATIMENT.S} × 3 × {nombre(CHARGE_GLOBALE_NIVEAU, 0)} = **{grandeur(bat3.W, 0, 'kN')}** ; par poteau ≈ **{grandeur(bat3.parPoteau, 0, 'kN')}**, contre {grandeur(bat.parPoteau, 0, 'kN')} : **+{nombre(hausse * 100, 0)} %**. Les poteaux et les fondations doivent être vérifiés avant de construire.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Les toupies de béton">
+
+Une dalle de 12 m × 10 m et 16 cm d'épaisseur doit être coulée. Les camions malaxeurs (toupies) livrent 8 m³ chacun (donnée de l'énoncé). Estime de tête le volume, puis calcule-le. Combien de toupies faut-il commander ? Quel est le poids de la dalle ?
+
+<Indice>De tête : 10 × 10 × 0,2. Puis le calcul exact ; les toupies s'arrondissent par excès.</Indice>
+
+<Corrige>
+
+- De tête : {dalleEst.arrondies.map((x) => nombreCourt(x)).join(' × ')} = {nombreCourt(dalleVEst)} m³. Calcul : 12 × 10 × 0,16 = **{grandeur(dalleT.V, 1, 'm³')}** : même ordre de grandeur ✓.
+- {nombre(dalleT.V, 1)} / 8 = {nombre(toupies.exact, 2)} → **{toupies.necessaire} toupies** (la dernière partiellement remplie).
+- Poids : {nombre(dalleT.V, 1)} × {nombre(MATERIAUX.ba.gamma, 0)} = **{grandeur(dalleT.P, 0, 'kN')}**, soit environ {nombre(dalleTonnes, 0)} tonnes.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.3.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une masse d'une tonne pèse environ :" choix={['1 kN', '10 kN', '100 kN', '1 000 kN']} bonne={1} colonnes={4}>
+1 000 kg × 9,81 m/s² = {nombre(kN(1000), 2)} kN.
+</QCM>
+
+<QCM n={2} question="Une dalle pleine en béton armé de 20 cm pèse environ :" choix={['0,5 kN/m²', `${nombre(dalle20, 0)} kN/m²`, '50 kN/m²', '500 kN/m²']} bonne={1} colonnes={4}>
+0,20 × {nombre(MATERIAUX.ba.gamma, 0)} = {nombre(dalle20, 0)} kN/m².
+</QCM>
+
+<QCM n={3} question="La règle « h ≈ L/15 à L/10 » pour une poutre est :" choix={['une règle normative', 'une règle de l’art de prédimensionnement', 'une loi physique', 'une simplification d’unité']} bonne={1}>
+Elle donne un point de départ, le calcul vérifie.
+</QCM>
+
+<QCM n={4} question={<>Pour une poutre de 5 m, cette règle donne une hauteur de :</>} choix={['5 à 10 cm', `${nombre(pou5.min * 100, 0)} à ${nombre(pou5.max * 100, 0)} cm`, '1 à 1,5 m', '15 à 20 cm']} bonne={1} colonnes={2}>
+500 / 15 ≈ {nombre(pou5.min * 100, 0)} cm et 500 / 10 = {nombre(pou5.max * 100, 0)} cm.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Une maison R+1 de {EXEMPLE_BATIMENT.S} m² par niveau pèse de l'ordre de :</>} choix={['24 kN', `${nombre(bat.W, 0)} kN`, '240 000 kN', '2,4 kN']} bonne={1} colonnes={4}>
+{EXEMPLE_BATIMENT.S} × 2 × {nombre(CHARGE_GLOBALE_NIVEAU, 0)} = {nombre(bat.W, 0)} kN (règle de l'art).
+</QCM>
+
+<QCM n={6} question="Un calcul donne 30 000 kN pour un poteau de maison. Que penser ?" choix={['C’est normal', 'Il y a sûrement une erreur d’unité ou de virgule', 'Il faut un poteau plus gros', 'C’est le poids du sol']} bonne={1}>
+Un poteau de maison porte quelques centaines de kN.
+</QCM>
+
+<QCM n={7} question="La résistance caractéristique d'un béton C25/30 vaut :" choix={['2,5 MPa', `${fck} MPa`, '250 MPa', '30 kPa']} bonne={1} colonnes={4}>
+EN 1992-1-1, tableau 3.1.
+</QCM>
+
+<QCM n={8} question="Passer d'une maison R+1 à R+2 sur les mêmes poteaux augmente la charge par poteau d'environ :" choix={['5 %', '20 %', `${nombre(hausse * 100, 0)} %`, '200 %']} bonne={2} colonnes={4}>
+3 niveaux au lieu de 2 : × 1,5.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

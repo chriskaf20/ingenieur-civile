@@ -1,0 +1,338 @@
+---
+id: N0.3.6
+titre: Unités anciennes et anglo-saxonnes encore rencontrées
+objectifs:
+  - Reconnaître les unités du système technique (kgf, tf, kgf/cm², t/m²) et le bar
+  - Convertir ces unités en kN, kPa et MPa
+  - Convertir pouces, pieds, livres et psi en unités SI
+  - Repérer les pièges des désignations nominales et des arrondis rapides
+relecture: false
+normes:
+  - "3e CGPM (1901) : g_n = 9,806 65 m/s², base du kilogramme-force"
+  - "Accord international de 1959 : 1 in = 25,4 mm, 1 ft = 0,304 8 m, 1 lb = 0,453 592 37 kg"
+  - "Le Système international d'unités (SI), BIPM, 9e édition (2019)"
+glossaire:
+  - terme: Kilogramme-force
+    definition: Ancienne unité de force, poids d'une masse de 1 kg ; 1 kgf = 9,806 65 N.
+  - terme: Tonne-force
+    definition: Ancienne unité de force valant 1 000 kgf, environ 9,81 kN.
+  - terme: Bar
+    definition: Unité de pression hors SI encore courante ; 1 bar = 100 kPa = 0,1 MPa.
+  - terme: Pouce
+    definition: Unité anglo-saxonne de longueur ; 1 in = 25,4 mm exactement.
+  - terme: Pied
+    definition: Unité anglo-saxonne de longueur ; 1 ft = 12 in = 0,304 8 m.
+  - terme: psi
+    definition: Livre-force par pouce carré, unité anglo-saxonne de pression ; 1 psi ≈ 6,895 kPa.
+  - terme: Taux de travail
+    definition: Ancienne expression pour la contrainte admissible d'un matériau ou d'un sol.
+symboles:
+  - { symbole: 'kgf', signification: 'kilogramme-force', unite: '9,806 65 N' }
+  - { symbole: 'tf', signification: 'tonne-force', unite: '9,806 65 kN' }
+  - { symbole: 'in', signification: 'pouce', unite: '25,4 mm' }
+  - { symbole: 'ft', signification: 'pied', unite: '0,304 8 m' }
+formules:
+  - { nom: 'Kilogramme-force', tex: '1\ \text{kgf} = 9{,}806\,65\ \text{N}', domaine: 'Conversions' }
+  - { nom: 'Bar', tex: '1\ \text{bar} = 10^5\ \text{Pa} = 0{,}1\ \text{MPa}', domaine: 'Conversions' }
+  - { nom: 'Pouce', tex: '1\ \text{in} = 25{,}4\ \text{mm}', domaine: 'Conversions' }
+---
+
+import { unChiffre } from '@/lib/calc/methode'
+import { convertir, surfaceRectangle } from '@/lib/calc/unites'
+import { grandeur, nombre, nombreCourt } from '@/lib/format'
+import { ChaineConversion, RegleDouble } from '@/components/schemas/Unites'
+import { ecrire } from '@/components/calculs/unites'
+
+export const c = (v, de, vers) => convertir(v, de, vers).valeur
+export const tab1 = [['kgf', 'N', 5], ['tf', 'kN', 3], ['kgf/cm²', 'MPa', 5], ['t/m²', 'kPa', 3], ['bar', 'kPa', 0], ['bar', 'kgf/cm²', 3], ['daN', 'kgf', 3]]
+export const tab2 = [['in', 'mm', 1], ['ft', 'm', 4], ['lb', 'kg', 4], ['lbf', 'N', 3], ['psi', 'kPa', 3], ['ksi', 'MPa', 3], ['ft²', 'm²', 4]]
+export const ecart = c(1, 'bar', 'kgf/cm²') - 1
+export const plaque = { L: c(8, 'ft', 'm'), l: c(4, 'ft', 'm') }
+
+<Page etape="intuition" titre="L'intuition : de vieilles monnaies encore en circulation">
+
+Imagine qu'on te paie avec des billets de plusieurs pays et de plusieurs époques. Pour savoir ce que tu as vraiment, tu convertis tout dans une seule monnaie. Les unités, c'est pareil.
+
+Le SI est la monnaie officielle de l'ingénieur. Mais d'anciennes unités circulent encore : les **bars** et les **tonnes** du langage de chantier, les **kgf/cm²** des vieux plans et des anciens rapports de sol, les **pouces** des tuyaux, les **psi** des catalogues américains. Avant tout calcul, on les convertit.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que valent un bar, une tonne-force, un kgf/cm², un pouce ou un psi en unités SI, et comment éviter les pièges ?
+</Encadre>
+
+<Encadre type="attention">
+Les arrondis de tête (« 1 tf ≈ 10 kN », « 1 bar ≈ 1 kgf/cm² ») sont pratiques pour estimer, mais faux de quelques pourcents. Dans un calcul, on utilise les facteurs exacts.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le système technique et le bar">
+
+### Le kilogramme-force et ses dérivés
+
+Avant le SI, on mesurait les forces en **kilogrammes-force** : le poids d'une masse de 1 kg avec la pesanteur normale. D'où les unités suivantes, encore lues dans les documents anciens :
+
+<div className="tableau">
+  <table>
+    <thead>
+      <tr><th>Unité ancienne</th><th>Vaut exactement</th><th>Arrondi de tête</th></tr>
+    </thead>
+    <tbody>
+      {tab1.map(([de, vers, dec]) => (
+        <tr key={de + vers}>
+          <td>1 {de}</td>
+          <td>{nombreCourt(c(1, de, vers), dec)} {vers}</td>
+          <td>≈ {nombreCourt(unChiffre(c(1, de, vers)), 3)} {vers}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<Regle type="norme" source="3e CGPM (1901) ; brochure du SI">
+1 kgf = {nombreCourt(c(1, 'kgf', 'N'), 5)} N exactement (valeur normale de g). Le bar vaut exactement $10^5$ Pa ; c'est une unité hors SI, encore admise dans l'usage courant.
+</Regle>
+
+### Le bar et le kgf/cm² : presque égaux
+
+1 bar = {nombreCourt(c(1, 'bar', 'kgf/cm²'), 4)} kgf/cm². L'écart est d'environ {nombre(ecart * 100, 0)} % : négligeable pour une estimation, à éviter dans un calcul.
+
+<Encadre type="exemple">
+Un vieux rapport de sol annonce un « taux de travail du sol de 2 bars ». En unités SI : {nombreCourt(c(2, 'bar', 'kPa'))} kPa, soit {nombreCourt(c(2, 'bar', 'MPa'))} MPa.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : les unités anglo-saxonnes">
+
+### Longueurs, masses, pressions
+
+<div className="tableau">
+  <table>
+    <thead>
+      <tr><th>Unité</th><th>Nom</th><th>Vaut</th></tr>
+    </thead>
+    <tbody>
+      {tab2.map(([de, vers, dec]) => (
+        <tr key={de}>
+          <td>1 {de}</td>
+          <td>{['pouce', 'pied (12 pouces)', 'livre', 'livre-force', 'livre-force par pouce carré', 'kilo-psi', 'pied carré'][tab2.findIndex((t) => t[0] === de)]}</td>
+          <td>{nombreCourt(c(1, de, vers), dec)} {vers}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<Regle type="norme" source="accord international de 1959">
+Le pouce, le pied et la livre ont des valeurs **exactes** : 1 in = 25,4 mm, 1 ft = 0,304 8 m, 1 lb = 0,453 592 37 kg. Le psi s'en déduit.
+</Regle>
+
+### Les désignations nominales
+
+<Encadre type="attention">
+Un tube « 2 pouces » n'a pas forcément 50,8 mm de diamètre : la désignation en pouces d'un tube ou d'un raccord est **nominale**. Le diamètre réel se lit dans le catalogue ou la norme du produit.
+</Encadre>
+
+### Les résistances des matériaux étrangers
+
+Les documents américains donnent les résistances en psi ou en ksi. Pour comparer, on convertit en MPa. Mais attention : une résistance de béton américaine n'est pas définie exactement comme le $f_{ck}$ de l'Eurocode. La conversion d'unité ne suffit pas à trouver la classe européenne équivalente.
+
+</Page>
+
+<Page etape="schemas" titre="Les schémas : une règle double et une chaîne de conversion">
+
+<RegleDouble />
+
+<ChaineConversion etapes={['1,5 bar', `${nombreCourt(c(1.5, 'bar', 'kPa'))} kPa`, `${nombreCourt(c(1.5, 'bar', 'MPa'))} MPa`]} operations={['× 100', '÷ 1 000']} alt={`Conversion : 1,5 bar = ${nombreCourt(c(1.5, 'bar', 'kPa'))} kPa = ${nombreCourt(c(1.5, 'bar', 'MPa'))} MPa`} />
+
+La règle montre qu'un pouce mesure un peu plus de 2,5 cm. La chaîne montre la méthode : on passe d'abord par une unité SI connue (le kPa), puis on change de préfixe.
+
+<Encadre type="retenir">
+Méthode : unité ancienne → unité SI de base ou kPa → préfixe adapté (kN, MPa). Une conversion à la fois, avec le facteur écrit.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="anciennes">
+
+<Cahier titre="Exemple résolu : le taux de travail d'un vieux rapport de sol">
+
+**Énoncé.** Pour agrandir une maison ancienne, tu retrouves le rapport de sol d'origine. Il indique : « taux de travail admissible du sol : 1,5 bar ». Exprime cette valeur en kPa et en MPa. Essaie ensuite les autres unités de la liste.
+
+<Etape n={1} titre="La donnée">
+<Entrees />
+<Note>Pourquoi convertir ? Les calculs de fondations se font en kPa ; une valeur en bar ne peut pas entrer telle quelle dans une formule.</Note>
+</Etape>
+
+<Etape n={2} titre="La chaîne de conversion">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : facteur exact puis préfixes">
+
+<Etape n={3} titre="La définition de l'unité">
+<AN k="definition" />
+</Etape>
+
+<Etape n={4} titre="La conversion">
+<AN k="si" />
+<AN k="pratiques" />
+<Note>Pourquoi passer par le pascal ? C'est l'unité SI de base : les autres s'en déduisent par simples préfixes.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="pratique" libelle="En unité pratique" />
+
+<Note couleur="vert">Toutes les écritures : <Val k="tout" />. Une valeur ancienne doit aussi être confirmée par une étude récente avant d'être réutilisée.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre une « tonne » de chantier pour une masse dans un calcul de force.">
+« 45 tonnes » sur un poteau signifie 45 tf, soit {nombreCourt(c(45, 'tf', 'kN'), 0)} kN. Dans un calcul, on écrit la force en kN.
+</Piege>
+
+<Piege erreur="écrire 1 bar = 1 kgf/cm² dans un calcul.">
+L'écart est d'environ {nombre(ecart * 100, 0)} %. Pour une estimation, c'est acceptable ; pour une note de calcul, on prend le facteur exact.
+</Piege>
+
+<Piege erreur="arrondir le pied à 30 cm.">
+1 ft = 30,48 cm. Sur une longueur de 100 ft, l'erreur atteint {nombreCourt(c(100, 'ft', 'cm') - 100 * 30, 0)} cm.
+</Piege>
+
+<Piege erreur="convertir des ft² avec le facteur des ft.">
+1 ft² = 0,304 8² m² = {nombreCourt(c(1, 'ft²', 'm²'), 4)} m², et non 0,304 8 m² : le carré s'applique aussi au facteur (N0.3.2).
+</Piege>
+
+<Piege erreur="lire la désignation d'un tube comme son diamètre réel.">
+« 2 pouces » est un nom de produit, pas une cote. Le diamètre extérieur et l'épaisseur se lisent dans le catalogue.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le langage du chantier** garde les anciennes unités : « une semelle à 2 bars », « un camion de 20 tonnes », « des barres de 12 » (pour 12 mm). L'ingénieur les comprend, les traduit en SI pour calculer, et écrit ses documents en SI.
+
+<Encadre type="terrain" titre="Archives et équipements importés">
+À Kinshasa comme dans les autres villes anciennes, les archives de bâtiments construits avant la généralisation du SI utilisent souvent les kgf/cm² et les t/m². Dans les zones minières, on rencontre aussi des équipements et des plans anglo-saxons, en pouces et en psi. Une conversion soigneuse est la première étape de toute vérification.
+</Encadre>
+
+**La plomberie et la quincaillerie** utilisent beaucoup les pouces : tuyaux galvanisés, robinets, raccords, boulons. Les panneaux de contreplaqué de format « 4 × 8 pieds » mesurent {nombreCourt(plaque.l, 3)} m × {nombreCourt(plaque.L, 3)} m.
+
+**Les rapports en anglais** donnent souvent les contraintes en psi ou ksi et les longueurs en ft. Recopie toujours la valeur d'origine **et** sa conversion dans tes notes : on peut ainsi vérifier.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : unités anciennes et anglo-saxonnes">
+
+### Système technique et bar
+
+1 kgf = {nombreCourt(c(1, 'kgf', 'N'), 5)} N · 1 tf = {nombreCourt(c(1, 'tf', 'kN'), 5)} kN (≈ 10 kN) · 1 kgf/cm² = {nombreCourt(c(1, 'kgf/cm²', 'MPa'), 5)} MPa (≈ 0,1 MPa) · 1 t/m² = {nombreCourt(c(1, 't/m²', 'kPa'), 3)} kPa · 1 bar = 100 kPa = 0,1 MPa
+
+### Unités anglo-saxonnes
+
+1 in = 25,4 mm · 1 ft = 0,304 8 m · 1 lb = {nombreCourt(c(1, 'lb', 'kg'), 4)} kg · 1 psi = {nombreCourt(c(1, 'psi', 'kPa'), 3)} kPa · 1 ksi = {nombreCourt(c(1, 'ksi', 'MPa'), 3)} MPa · 1 ft² = {nombreCourt(c(1, 'ft²', 'm²'), 4)} m²
+
+### Méthode
+
+Unité ancienne → facteur exact → unité SI → préfixe adapté. Garder la valeur d'origine dans les notes.
+
+### Pièges
+
+« tonne » de chantier = force · 1 bar ≠ 1 kgf/cm² (≈ {nombre(ecart * 100, 0)} %) · ft² ≠ ft · désignation nominale ≠ cote réelle
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Conversions directes">
+
+Convertis : 2 bars en kPa ; un raccord de 3/4 de pouce en mm ; 45 tf en kN.
+
+<Indice>1 bar = 100 kPa ; 1 in = 25,4 mm ; 1 tf = 9,806 65 kN.</Indice>
+
+<Corrige>
+2 bars = **{nombreCourt(c(2, 'bar', 'kPa'))} kPa** ; 3/4 in = 0,75 × 25,4 = **{nombreCourt(c(0.75, 'in', 'mm'), 2)} mm** ; 45 tf = **{nombreCourt(c(45, 'tf', 'kN'), 1)} kN**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une vieille note de calcul">
+
+Une note ancienne indique pour l'acier un taux de travail de 4 200 kgf/cm² et une charge de plancher de 0,25 t/m². Convertis en MPa et en kN/m².
+
+<Indice>1 kgf/cm² = 0,098 066 5 MPa ; 1 t/m² = 9,806 65 kN/m².</Indice>
+
+<Corrige>
+4 200 kgf/cm² = **{grandeur(c(4200, 'kgf/cm²', 'MPa'), 1, 'MPa')}** ; 0,25 t/m² = **{grandeur(c(0.25, 't/m²', 'kN/m²'), 2, 'kN/m²')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un cahier des charges américain">
+
+Un document américain demande un béton de 3 000 psi et un acier de 60 ksi. Une plaque de contreplaqué mesure 4 × 8 ft. Convertis ces trois valeurs (surface en m²). Peut-on dire que ce béton est un C20/25 ?
+
+<Indice>1 psi = 6,894 76 kPa ; calcule les deux côtés de la plaque en m avant la surface.</Indice>
+
+<Corrige>
+
+- Béton : 3 000 psi = **{grandeur(c(3000, 'psi', 'MPa'), 1, 'MPa')}** ; acier : 60 ksi = **{grandeur(c(60, 'ksi', 'MPa'), 0, 'MPa')}**.
+- Plaque : {nombreCourt(plaque.l, 4)} m × {nombreCourt(plaque.L, 4)} m = **{grandeur(surfaceRectangle(plaque.l, plaque.L), 3, 'm²')}**.
+- Non : la résistance américaine n'est pas définie comme le $f_{ck}$ de l'Eurocode. La conversion donne l'ordre de grandeur, pas la classe.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.3.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="1 bar vaut :" choix={['10 kPa', '100 kPa', '1 MPa', '1 000 kPa']} bonne={1} colonnes={4}>
+1 bar = 10⁵ Pa = 100 kPa = 0,1 MPa.
+</QCM>
+
+<QCM n={2} question="1 tonne-force vaut environ :" choix={['1 kN', `${nombreCourt(c(1, 'tf', 'kN'), 2)} kN`, '100 kN', '1 000 kN']} bonne={1} colonnes={4}>
+1 000 kgf × 9,806 65 N.
+</QCM>
+
+<QCM n={3} question="1 kgf/cm² vaut environ :" choix={['1 MPa', `${nombreCourt(c(1, 'kgf/cm²', 'MPa'), 3)} MPa`, '10 MPa', '0,01 MPa']} bonne={1} colonnes={4}>
+9,806 65 N sur 10⁻⁴ m² = 98 066,5 Pa.
+</QCM>
+
+<QCM n={4} question="1 pouce vaut exactement :" choix={['2,5 cm', '25,4 mm', '30,48 cm', '2,54 mm']} bonne={1} colonnes={4}>
+Accord international de 1959.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="« Le sol fait 2 bars » signifie une pression de :" choix={['2 kPa', `${nombreCourt(c(2, 'bar', 'kPa'))} kPa`, '2 MPa', '20 MPa']} bonne={1} colonnes={4}>
+2 × 100 kPa.
+</QCM>
+
+<QCM n={6} question="1 ft² vaut :" choix={['0,304 8 m²', `${nombreCourt(c(1, 'ft²', 'm²'), 4)} m²`, '0,3 m²', '3,28 m²']} bonne={1} colonnes={4}>
+0,304 8² m².
+</QCM>
+
+<QCM n={7} question="Un tube « 2 pouces » a un diamètre extérieur :" choix={['de 50,8 mm exactement', 'à lire dans le catalogue : la désignation est nominale', 'de 2 cm', 'de 5 cm']} bonne={1}>
+Désignation nominale ≠ cote réelle.
+</QCM>
+
+<QCM n={8} question="Dans une note de calcul, « 1 bar ≈ 1 kgf/cm² » est :" choix={['exact', `acceptable pour estimer, faux d’environ ${nombre(ecart * 100, 0)} %`, 'faux d’un facteur 10', 'interdit par le SI']} bonne={1}>
+On utilise le facteur exact dans un calcul.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

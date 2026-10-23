@@ -41,3 +41,6 @@ export const DELTA_FCM = 8;
  */
 export const S_CIMENT = { R: 0.2, N: 0.25, S: 0.38 } as const;
 export type ClasseCiment = keyof typeof S_CIMENT;
+
+/** Limite d'élasticité caractéristique de l'acier B500 (EN 10080 ; EN 1992-1-1 annexe C) : fyk = 500 MPa. */
+export const FYK_B500 = 500;

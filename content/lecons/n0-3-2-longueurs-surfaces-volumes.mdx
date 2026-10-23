@@ -1,0 +1,330 @@
+---
+id: N0.3.2
+titre: "Longueurs, surfaces, volumes : conversions"
+objectifs:
+  - Convertir des longueurs, des surfaces et des volumes d'un préfixe à l'autre
+  - Expliquer pourquoi un rang vaut × 100 pour les surfaces et × 1 000 pour les volumes
+  - Passer des m³ aux litres et des m² aux ares et aux hectares
+  - Calculer le volume d'une citerne et son autonomie
+relecture: false
+normes:
+  - "Le Système international d'unités (SI), brochure du BIPM, 9e édition (2019) : litre et hectare admis avec le SI"
+glossaire:
+  - terme: Litre
+    definition: Unité de volume admise avec le SI ; 1 L = 1 dm³, et 1 m³ = 1 000 L.
+  - terme: Are
+    definition: Ancienne unité de surface agraire ; 1 a = 100 m², un carré de 10 m de côté.
+  - terme: Hectare
+    definition: Unité de surface admise avec le SI ; 1 ha = 10 000 m², un carré de 100 m de côté.
+  - terme: Citerne
+    definition: Réservoir qui stocke l'eau (de pluie ou du réseau) pour une maison ou un chantier.
+symboles:
+  - { symbole: 'S', signification: 'surface', unite: 'm²' }
+  - { symbole: 'V', signification: 'volume', unite: 'm³ ou L' }
+  - { symbole: 'L, l, h', signification: 'longueur, largeur et hauteur d’eau de la citerne', unite: 'm' }
+formules:
+  - { nom: 'Préfixe d’une unité au carré', tex: '1\ \text{km}^2 = (10^3\ \text{m})^2 = 10^6\ \text{m}^2', domaine: 'Unités SI' }
+  - { nom: 'Litre', tex: '1\ \text{L} = 1\ \text{dm}^3 = 10^{-3}\ \text{m}^3', domaine: 'Unités admises' }
+  - { nom: 'Volume d’un prisme droit', tex: 'V = L \times l \times h', domaine: 'Géométrie' }
+---
+
+import { changerPrefixe, citerne, combienDe, convertir, EXEMPLE_CITERNE, surfaceRectangle } from '@/lib/calc/unites'
+import { grandeur, nombre, nombreCourt, puissanceDix } from '@/lib/format'
+import { CarreCube } from '@/components/schemas/Unites'
+import { ecrire } from '@/components/calculs/unites'
+
+export const m2 = ['d', 'c', 'm'].map((p) => changerPrefixe(1, '', p, 2))
+export const m3 = ['d', 'c', 'm'].map((p) => changerPrefixe(1, '', p, 3))
+export const carreau = changerPrefixe(1, '', 'd', 2).valeur
+export const ha = convertir(1, 'ha', 'm²').valeur
+export const are = convertir(1, 'a', 'm²').valeur
+export const km2ha = convertir(1, 'km²', 'ha').valeur
+export const c0 = citerne(EXEMPLE_CITERNE)
+export const ex1 = [convertir(2.4, 'm²', 'cm²').valeur, convertir(3.5, 'm³', 'L').valeur, convertir(750, 'mL', 'L').valeur]
+export const parc = { L: 20, l: 25 }
+export const parcS = surfaceRectangle(parc.L, parc.l)
+export const faux = citerne({ ...EXEMPLE_CITERNE, l: 200 }).V
+export const fut = convertir(200, 'L', 'm³').valeur
+export const p500 = { a: convertir(500, 'm²', 'a').valeur, ha: convertir(500, 'm²', 'ha').valeur }
+export const betonniere = convertir(350, 'L', 'm³').valeur
+export const ex2 = { a: convertir(parcS, 'm²', 'a').valeur, ha: convertir(parcS, 'm²', 'ha').valeur }
+export const lots = combienDe(convertir(1.5, 'ha', 'm²').valeur, 400)
+export const bidons = combienDe(c0.litres, 20)
+
+<Page etape="intuition" titre="L'intuition : le carrelage et la citerne">
+
+Tu dois carreler 1 m² avec des carreaux de 10 cm × 10 cm. Combien en faut-il ? Pas 10 : sur une longueur de 1 m, on aligne 10 carreaux, mais il faut **10 rangées** de 10. Il en faut donc {ecrire(carreau)}.
+
+Même piège avec les volumes : un cube de 1 m de côté contient 10 couches de 10 rangées de 10 petits cubes de 1 dm. Soit {ecrire(m3[0].valeur)} petits cubes, c'est-à-dire **{ecrire(convertir(1, 'm³', 'L').valeur)} litres**.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Pourquoi 1 m = 100 cm, mais 1 m² = 10 000 cm² et 1 m³ = 1 000 000 cm³ ? Et comment convertir sans se tromper ?
+</Encadre>
+
+<Encadre type="attention">
+L'erreur « 1 m² = 100 cm² » est l'une des plus fréquentes chez les débutants. Elle donne des quantités de carrelage, d'enduit ou de peinture fausses d'un facteur 100.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les carrés et les cubes changent tout">
+
+### Les longueurs : un rang = × 10
+
+Entre deux préfixes voisins (m, dm, cm), on multiplie ou on divise par 10.
+
+### Les surfaces : un rang = × 100
+
+Une surface est une longueur **au carré**. Le préfixe est donc élevé au carré : 1 dm² = $(10^{-1}\ \text{m})^2 = 10^{-2}$ m². Chaque rang compte **deux fois**.
+
+| 1 m² en… | dm² | cm² | mm² |
+|---|---|---|---|
+| valeur | {ecrire(m2[0].valeur)} | {ecrire(m2[1].valeur)} | {ecrire(m2[2].valeur)} |
+| puissance | {puissanceDix(m2[0].n)} | {puissanceDix(m2[1].n)} | {puissanceDix(m2[2].n)} |
+
+### Les volumes : un rang = × 1 000
+
+Un volume est une longueur **au cube**. Chaque rang compte **trois fois** :
+
+| 1 m³ en… | dm³ | cm³ | mm³ |
+|---|---|---|---|
+| valeur | {ecrire(m3[0].valeur)} | {ecrire(m3[1].valeur)} | {ecrire(m3[2].valeur)} |
+| puissance | {puissanceDix(m3[0].n)} | {puissanceDix(m3[1].n)} | {puissanceDix(m3[2].n)} |
+
+<Encadre type="retenir">
+Pour une unité au carré, on **double** le nombre de rangs ; pour une unité au cube, on le **triple**.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : litres, ares et hectares">
+
+### Le litre
+
+Le litre est un décimètre cube : $1\ \text{L} = 1\ \text{dm}^3$. Donc :
+
+- 1 m³ = 1 000 dm³ = **1 000 L** ;
+- 1 mL = 1 cm³ ;
+- 1 hL (hectolitre) = 100 L.
+
+### L'are et l'hectare
+
+- 1 **are** (a) = un carré de 10 m de côté = {nombreCourt(are)} m².
+- 1 **hectare** (ha) = un carré de 100 m de côté = {nombreCourt(ha)} m².
+- 1 km² = {nombreCourt(km2ha)} ha.
+
+<Regle type="norme" source="brochure du SI, BIPM">
+Le litre et l'hectare ne sont pas des unités SI, mais ils sont **admis** avec le SI. L'are n'est plus admis ; on le rencontre encore dans le cadastre et dans certains actes de vente de terrains.
+</Regle>
+
+### Calculer, puis convertir
+
+Pour un calcul de volume, on met **toutes les longueurs dans la même unité** (en général le mètre), on calcule, puis on convertit le résultat. On ne multiplie jamais des mètres par des centimètres.
+
+<Encadre type="exemple">
+Une citerne de 2,50 m × 2,00 m remplie sur 1,60 m contient V = 2,50 × 2,00 × 1,60 = {nombre(c0.V, 2)} m³, soit {nombre(c0.litres, 0)} L.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : un carré et un cube découpés">
+
+<CarreCube />
+
+- À gauche, le mètre carré découpé en carrés de 1 dm de côté : 10 rangées de 10, soit **100 dm²**.
+- À droite, le mètre cube découpé en cubes de 1 dm d'arête : 10 couches de 10 rangées de 10, soit **1 000 dm³**. Chaque petit cube contient exactement **un litre**.
+
+<Encadre type="retenir">
+Dessiner le carré ou le cube découpé est le meilleur moyen de retrouver une conversion oubliée.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="citerne">
+
+<Cahier titre="Exemple résolu : la citerne d'une parcelle">
+
+**Énoncé.** Une famille installe une citerne enterrée de 2,50 m × 2,00 m (dimensions intérieures). L'eau utile y monte jusqu'à 1,60 m. La famille consomme 150 L par jour (donnée de l'énoncé). Quel volume d'eau en m³ et en litres ? Combien de jours d'autonomie ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi les dimensions intérieures ? Les parois en béton occupent de la place : seul l'intérieur contient de l'eau.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : calculer puis convertir">
+
+<Etape n={3} titre="Le volume en m³">
+<AN k="S" />
+<AN k="V" />
+<Note>Pourquoi tout en mètres ? Les trois longueurs ont la même unité : le produit sort directement en m³.</Note>
+</Etape>
+
+<Etape n={4} titre="La conversion et l'autonomie">
+<AN k="litres" />
+<AN k="jours" />
+<Note>Pourquoi arrondir vers le bas ? Le 54e jour, la citerne ne suffit plus pour une journée entière.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="litres" libelle="Volume d'eau" />
+
+<Note couleur="vert">Soit <Val k="V" /> et une autonomie de <Val k="jours" /> sans pluie ni réseau.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="écrire 1 m² = 100 cm².">
+1 m² = 100 cm × 100 cm = {ecrire(m2[1].valeur)} cm². Le rang compte deux fois pour une surface.
+</Piege>
+
+<Piege erreur="écrire 1 m³ = 100 L.">
+1 m³ = 1 000 dm³ = 1 000 L. Un fût de 200 L ne contient que {nombreCourt(fut)} m³.
+</Piege>
+
+<Piege erreur="multiplier des mètres par des centimètres.">
+2,50 m × 200 cm × 1,60 m donne « {nombreCourt(faux)} », qui ne veut rien dire. On convertit **avant** de multiplier.
+</Piege>
+
+<Piege erreur="confondre are et hectare.">
+1 ha = 100 a. Une parcelle de 500 m² fait {nombreCourt(p500.a)} ares, mais seulement {nombreCourt(p500.ha)} hectare.
+</Piege>
+
+<Piege erreur="oublier qu'un volume de béton se commande en m³, alors que la bétonnière se mesure en litres.">
+Une bétonnière de 350 L produit au plus {nombreCourt(betonniere)} m³ par gâchée, pas 350 m³ ! Il faut convertir avant de compter les gâchées.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**L'eau sur le chantier.** On compte souvent en bidons de 20 L ou en fûts de 200 L. Pour estimer l'eau d'un coulage ou d'une cure, l'ingénieur convertit les besoins (en m³) en nombre de bidons ou de fûts.
+
+<Encadre type="terrain" titre="Citernes et eau de pluie">
+Dans beaucoup de quartiers d'Afrique centrale, le réseau d'eau est irrégulier. Les citernes, enterrées ou sur tour, stockent l'eau de pluie ou l'eau du réseau. Bien calculer leur volume, c'est savoir combien de jours une famille ou un chantier peut tenir.
+</Encadre>
+
+**Les terrains.** Les plans de lotissement et les actes de vente donnent la surface en m², parfois en ares ou en hectares. Une parcelle de 20 m × 25 m fait {nombreCourt(parcS)} m², soit {nombreCourt(ex2.a)} ares.
+
+**Le métré.** Les quantités d'un devis se comptent en m (bordures, câbles), en m² (enduits, carrelage, coffrages) et en m³ (béton, terrassements). Chaque ligne a une seule unité ; une erreur de conversion se paie directement en argent (L3.7).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : longueurs, surfaces, volumes">
+
+### Un rang de préfixe, c'est…
+
+| Grandeur | Un rang | Exemple |
+|---|---|---|
+| longueur (m) | × 10 | 1 m = 100 cm |
+| surface (m²) | × 100 | 1 m² = {ecrire(m2[1].valeur)} cm² |
+| volume (m³) | × 1 000 | 1 m³ = {ecrire(m3[0].valeur)} dm³ |
+
+### Litres
+
+1 L = 1 dm³ · 1 m³ = 1 000 L · 1 mL = 1 cm³ · 1 hL = 100 L
+
+### Surfaces agraires
+
+1 a = {nombreCourt(are)} m² (10 m × 10 m) · 1 ha = {nombreCourt(ha)} m² (100 m × 100 m) · 1 km² = {nombreCourt(km2ha)} ha
+
+### Méthode
+
+Toutes les longueurs dans la même unité → calcul → conversion du résultat.
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trois conversions">
+
+Convertis : 2,4 m² en cm² ; 3,5 m³ en litres ; 750 mL en litres.
+
+<Indice>Surface : deux fois le rang ; 1 m³ = 1 000 L ; 1 000 mL = 1 L.</Indice>
+
+<Corrige>
+2,4 m² = **{ecrire(ex1[0])} cm²** ; 3,5 m³ = **{ecrire(ex1[1])} L** ; 750 mL = **{ecrire(ex1[2])} L**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une parcelle">
+
+Une parcelle mesure {parc.L} m × {parc.l} m. Donne sa surface en m², en ares et en hectares.
+
+<Indice>Calcule en m², puis divise par 100 (ares) et par 10 000 (hectares).</Indice>
+
+<Corrige>
+S = {parc.L} × {parc.l} = **{grandeur(parcS, 0, 'm²')}** = **{nombreCourt(ex2.a)} a** = **{nombreCourt(ex2.ha)} ha**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Lots et bidons">
+
+a) Un terrain de 1,5 ha est découpé en lots de 400 m² (on néglige les voies). Combien de lots complets ? b) Combien de bidons de 20 L faut-il pour remplir la citerne de l'exemple ?
+
+<Indice>Convertis 1,5 ha en m² avant de diviser. Pour les bidons, pars du volume en litres.</Indice>
+
+<Corrige>
+
+- a) 1,5 ha = {nombreCourt(convertir(1.5, 'ha', 'm²').valeur)} m² ; {nombreCourt(convertir(1.5, 'ha', 'm²').valeur)} / 400 = {nombreCourt(lots.exact)} → **{lots.entier} lots** complets (sans compter les voies, en réalité moins).
+- b) {nombre(c0.litres, 0)} L / 20 L = **{bidons.entier} bidons**.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.3.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="1 m² vaut :" choix={['100 cm²', `${ecrire(m2[1].valeur)} cm²`, '1 000 cm²', '10 cm²']} bonne={1} colonnes={4}>
+100 cm × 100 cm.
+</QCM>
+
+<QCM n={2} question="1 m³ vaut :" choix={['100 L', '1 000 L', '10 000 L', '10 L']} bonne={1} colonnes={4}>
+1 m³ = 1 000 dm³ et 1 dm³ = 1 L.
+</QCM>
+
+<QCM n={3} question="Pour une unité de surface, un rang de préfixe vaut :" choix={['× 10', '× 100', '× 1 000', '× 2']} bonne={1} colonnes={4}>
+Le préfixe est élevé au carré.
+</QCM>
+
+<QCM n={4} question="1 hectare vaut :" choix={['100 m²', '1 000 m²', `${nombreCourt(ha)} m²`, '1 km²']} bonne={2} colonnes={4}>
+Un carré de 100 m de côté.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Une citerne de 2,50 × 2,00 m remplie sur 1,60 m contient :</>} choix={[`${nombre(c0.V, 0)} L`, `${nombre(c0.litres, 0)} L`, `${nombre(c0.litres * 10, 0)} L`, `${nombre(c0.V, 0)} m²`]} bonne={1} colonnes={2}>
+V = {nombre(c0.V, 2)} m³ = {nombre(c0.litres, 0)} L.
+</QCM>
+
+<QCM n={6} question="1 mL est égal à :" choix={['1 cm³', '1 dm³', '1 mm³', '1 m³']} bonne={0} colonnes={4}>
+1 L = 1 dm³ = 1 000 cm³, donc 1 mL = 1 cm³.
+</QCM>
+
+<QCM n={7} question="Avant de calculer un volume avec des cotes en m et en cm, on :" choix={['multiplie directement', 'met toutes les longueurs dans la même unité', 'divise par 100', 'arrondit chaque cote']} bonne={1}>
+On convertit avant de multiplier.
+</QCM>
+
+<QCM n={8} question="Une parcelle de 500 m² fait :" choix={['5 ha', '0,5 ha', `${nombreCourt(p500.a)} a`, '50 a']} bonne={2} colonnes={4}>
+500 / 100 = {nombreCourt(p500.a)} ares, soit {nombreCourt(p500.ha)} ha.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
