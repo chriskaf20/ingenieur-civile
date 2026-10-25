@@ -7,9 +7,22 @@ export type Point2 = readonly [number, number];
 
 const COS30 = Math.sqrt(3) / 2;
 
-/** Projette un point 3D (z vers le haut) en coordonnées SVG (y vers le bas), unité = 1 m. */
+/**
+ * Projette un point 3D (z vers le haut) en coordonnées SVG (y vers le bas), unité = 1 m.
+ * L'axe x part vers la droite et l'axe y vers la gauche : le trièdre dessiné est le miroir d'un trièdre direct.
+ * Sans importance pour représenter un ouvrage ; pour un produit vectoriel ou un moment, utiliser projeterIsoDirect.
+ */
 export function projeterIso([x, y, z]: Point3): Point2 {
   return [(x - y) * COS30, (x + y) * 0.5 - z];
+}
+
+/**
+ * Projection isométrique qui conserve l'orientation : x part vers la gauche, y vers la droite, z vers le haut,
+ * comme dans les manuels. La règle de la main droite se lit alors directement sur le dessin.
+ * Mêmes faces visibles que projeterIso (la permutation de x et y ne change pas la direction de vue).
+ */
+export function projeterIsoDirect([x, y, z]: Point3): Point2 {
+  return projeterIso([y, x, z]);
 }
 
 /** Profondeur vers l'observateur : plus grand = plus proche (ordre du peintre). */

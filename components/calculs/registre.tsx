@@ -376,5 +376,16 @@ const mur: DefinitionCalcul<ResultatMurCloture & { d: DonneesMurCloture }> = {
   alerte: (r) => (r.messages.length ? r.messages.join(' ') : undefined),
 };
 
-export const REGISTRE = { echelle, remblai, escalier, poteau, mur, ...CALCULS_METHODE, ...CALCULS_ALGEBRE, ...CALCULS_UNITES, ...CALCULS_TRIGO, ...CALCULS_GEOMETRIE } as const;
+/** Le second registre, si ses clés sont disjointes du premier ; sinon un type d'erreur qui nomme la clé en double. */
+type Disjoint<A, B> = [Extract<keyof A, keyof B>] extends [never] ? B : { cleEnDouble: Extract<keyof A, keyof B> };
+
+/** Fusionne deux registres de fiches. Une clé en double est une erreur de compilation (avec « ... », elle écraserait l'autre sans bruit). */
+function fusion<A extends object, B extends object>(a: A, b: Disjoint<A, B>): A & B {
+  return { ...a, ...(b as B) };
+}
+
+export const REGISTRE = fusion(
+  fusion(fusion(fusion(fusion({ echelle, remblai, escalier, poteau, mur } as const, CALCULS_METHODE), CALCULS_ALGEBRE), CALCULS_UNITES), CALCULS_TRIGO),
+  CALCULS_GEOMETRIE,
+);
 export type NomCalcul = keyof typeof REGISTRE;
