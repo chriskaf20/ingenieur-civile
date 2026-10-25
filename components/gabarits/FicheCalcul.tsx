@@ -119,7 +119,7 @@ function ChampSaisie({ champ }: { champ: Champ }) {
         }}
         className="w-20 rounded border border-encre/40 bg-surface/80 px-1.5 py-0 text-right font-manuscrite text-[1.05rem] text-encre"
       />
-      <span className="w-8 text-beton">{champ.unite}</span>
+      <span className="min-w-8 shrink-0 whitespace-nowrap text-beton">{champ.unite}</span>
       <input
         type="range"
         aria-label={`${champ.libelle} (curseur)`}

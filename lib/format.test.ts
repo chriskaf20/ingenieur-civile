@@ -11,6 +11,15 @@ describe('arrondi', () => {
   it('ne renvoie jamais −0', () => {
     expect(Object.is(arrondi(-0.0001, 2), 0)).toBe(true);
   });
+  it('accepte les nombres écrits avec un exposant', () => {
+    // Résidu d'un polygone des forces fermé : 1,78 × 10⁻¹⁵ kN. À 2 décimales : 0,00 (et non NaN).
+    expect(arrondi(1.7763568394002505e-15, 2)).toBe(0);
+    expect(Object.is(arrondi(-3e-7, 2), 0)).toBe(true);
+    // 2,5 × 10⁻⁷ à 7 décimales : 0,0000003 (demi arrondi à l'écart de zéro).
+    expect(arrondi(2.5e-7, 7)).toBe(3e-7);
+    expect(arrondi(1e21, 2)).toBe(1e21);
+    expect(nombre(1.7763568394002505e-15, 2)).toBe('0,00');
+  });
   it('arrondit au pas supérieur ou inférieur', () => {
     expect(arrondiSup(116.55)).toBe(117);
     expect(arrondiSup(3, 1)).toBe(3);

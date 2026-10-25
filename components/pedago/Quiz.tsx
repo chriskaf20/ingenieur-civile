@@ -112,7 +112,8 @@ export function QCM({
   question: React.ReactNode;
   choix: React.ReactNode[];
   bonne: number;
-  colonnes?: 1 | 2;
+  /** Choix courts : 2 ou 4 colonnes à partir de la largeur sm ; une seule sur mobile. */
+  colonnes?: 1 | 2 | 4;
   children: React.ReactNode;
 }) {
   const ctx = useContext(Ctx);
@@ -127,7 +128,7 @@ export function QCM({
     <fieldset className="my-1.5 rounded-md border border-beton-clair bg-surface/80 px-3 pb-1.5 pt-0.5">
       <legend className="px-1 font-technique text-[0.92rem] font-semibold text-encre">Question {n}</legend>
       <div className="mb-0.5 leading-snug">{question}</div>
-      <div className={`grid gap-x-3 ${colonnes === 2 ? 'sm:grid-cols-2' : ''}`}>
+      <div className={`grid gap-x-3 ${colonnes === 4 ? 'sm:grid-cols-4' : colonnes === 2 ? 'sm:grid-cols-2' : ''}`}>
         {choix.map((c, i) => {
           const etat = valide ? (i === bonne ? 'border-validation bg-validation-clair' : i === choisi ? 'border-correction bg-correction-clair' : 'border-transparent') : 'border-transparent';
           return (

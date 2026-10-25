@@ -19,7 +19,12 @@ function formateur(decimales: number): Intl.NumberFormat {
 export function arrondi(x: number, decimales = 0): number {
   if (!Number.isFinite(x)) return x;
   const signe = x < 0 ? -1 : 1;
-  const r = Number(`${Math.round(Number(`${Math.abs(x)}e${decimales}`))}e-${decimales}`);
+  // décalage décimal par l'exposant, valable aussi quand le nombre s'écrit déjà « 1.7e-15 » ou « 1e+21 »
+  const decaler = (v: number, n: number) => {
+    const [m, e = '0'] = String(v).split('e');
+    return Number(`${m}e${Number(e) + n}`);
+  };
+  const r = decaler(Math.round(decaler(Math.abs(x), decimales)), -decimales);
   return r === 0 ? 0 : signe * r;
 }
 
