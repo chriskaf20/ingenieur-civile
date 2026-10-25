@@ -1,0 +1,322 @@
+---
+id: N0.7.7
+titre: Électricité utile au chantier
+objectifs:
+  - Relier tension, courant, résistance et puissance
+  - Distinguer puissance active (kW) et puissance apparente (kVA)
+  - Calculer le courant absorbé en monophasé et en triphasé
+  - Choisir un groupe électrogène à partir du bilan de puissance du chantier
+relecture: false
+normes:
+  - "CEI 60038 : tensions normalisées 230/400 V"
+  - "CEI 60364-4-41 : protection contre les chocs électriques (dispositif différentiel)"
+glossaire:
+  - terme: Tension
+    definition: « Pression » électrique entre deux points, en volts (V).
+  - terme: Courant
+    definition: Débit d'électricité dans un conducteur, en ampères (A).
+  - terme: Puissance apparente
+    definition: Produit de la tension par le courant, en voltampères (VA) ; elle dimensionne les groupes, les câbles et les protections.
+  - terme: Facteur de puissance
+    definition: cos φ, rapport de la puissance active à la puissance apparente ; inférieur à 1 pour les moteurs.
+  - terme: Triphasé
+    definition: Alimentation à trois phases, utilisée pour les moteurs et les fortes puissances ; 400 V entre phases.
+  - terme: Dispositif différentiel
+    definition: Appareil qui coupe le courant dès qu'une fuite vers la terre apparaît, pour protéger les personnes.
+symboles:
+  - { symbole: 'U', signification: 'tension', unite: 'V' }
+  - { symbole: 'I', signification: 'courant', unite: 'A' }
+  - { symbole: 'R', signification: 'résistance', unite: 'Ω' }
+  - { symbole: 'P', signification: 'puissance active', unite: 'W ou kW' }
+  - { symbole: 'S', signification: 'puissance apparente', unite: 'VA ou kVA' }
+  - { symbole: 'cos φ', signification: 'facteur de puissance', unite: '—' }
+formules:
+  - { nom: 'Loi d’Ohm', tex: 'U = R\,I', domaine: 'Conducteur ohmique' }
+  - { nom: 'Monophasé', tex: 'P = U\,I\cos\varphi, \quad S = U\,I', domaine: 'U entre phase et neutre' }
+  - { nom: 'Triphasé équilibré', tex: 'P = \sqrt{3}\,U\,I\cos\varphi', domaine: 'U entre phases' }
+  - { nom: 'Énergie', tex: 'E = P\,t', domaine: 'kW × h = kWh' }
+---
+
+import { bilanGroupe, consommationGroupe, courantMono, courantTri, EXEMPLE_GROUPE, TENSION_MONO, TENSION_TRI } from '@/lib/calc/physique'
+import { grandeur, nombre } from '@/lib/format'
+import { CircuitChantier } from '@/components/schemas/Physique'
+
+export const g0 = bilanGroupe(EXEMPLE_GROUPE)
+export const lampe = courantMono(500, 1)
+export const pompeTri = courantTri(4000, 0.85)
+export const g3 = bilanGroupe({ ...EXEMPLE_GROUPE, pompe: 3 })
+export const carbu = consommationGroupe(g3.P, 6, 0.3)
+export const bouilloire = courantMono(2300, 1)
+export const sansDem = bilanGroupe({ ...EXEMPLE_GROUPE, k: 1 })
+export const q4 = bilanGroupe({ ...EXEMPLE_GROUPE, betonniere: 5, vibreur: 0, pompe: 0, eclairage: 0, k: 1 })
+
+<Page etape="intuition" titre="L'intuition : le groupe qui cale">
+
+Sur un chantier loin du réseau, tout dépend du groupe électrogène : la bétonnière, le vibreur, la pompe qui vide les fouilles, les projecteurs du soir. On loue un groupe « qui devrait suffire »... et il cale à chaque démarrage de la bétonnière.
+
+Pourquoi ? Parce qu'un moteur électrique, au démarrage, appelle bien plus que sa puissance normale, et parce qu'un groupe se choisit en **kVA**, pas en kW. Trop petit, il cale ; trop gros, il coûte cher et consomme pour rien.
+
+Pour choisir juste, il faut quelques notions d'électricité : tension, courant, puissance.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelle puissance et quel courant faut-il pour alimenter un chantier, et quel groupe électrogène choisir ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : tension, courant, puissance">
+
+### Trois grandeurs
+
+- la **tension** $U$ (V) : la « pression » qui pousse l'électricité ;
+- le **courant** $I$ (A) : le débit d'électricité dans le câble ;
+- la **résistance** $R$ (Ω) : ce qui freine le courant. Loi d'Ohm : $U = R\,I$.
+
+L'image hydraulique aide : la tension est la pression d'un réseau d'eau, le courant son débit, la résistance l'étroitesse du tuyau.
+
+### La puissance
+
+Pour un appareil simple (lampe à filament, chauffage), $P = U\,I$. Une bouilloire de 2 300 W sous {nombre(TENSION_MONO, 0)} V absorbe {grandeur(bouilloire, 0, 'A')}.
+
+### Le courant alternatif
+
+Le réseau et les groupes fournissent du courant alternatif à 50 Hz, sous les tensions normalisées {nombre(TENSION_MONO, 0)} V (monophasé) et {nombre(TENSION_TRI, 0)} V entre phases (triphasé, CEI 60038). Pour un moteur, le courant et la tension sont décalés : seule une partie de $U\,I$ fait un travail utile.
+
+- puissance **apparente** : $S = U\,I$, en VA ;
+- puissance **active** : $P = U\,I\cos\varphi$, en W ;
+- en triphasé : $P = \sqrt{3}\,U\,I\cos\varphi$.
+
+<AVerifier note="A_VERIFIER.md n° 25 : tensions du réseau en RDC (220/380 V ou 230/400 V)" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le bilan de puissance">
+
+### Pourquoi des kVA ?
+
+Les câbles, les protections et l'alternateur d'un groupe chauffent avec le **courant**, donc avec la puissance apparente $S = P / \cos\varphi$. C'est pourquoi les groupes et les transformateurs sont donnés en kVA.
+
+### La méthode
+
+1. Lister les récepteurs et leur puissance (plaque signalétique).
+2. Additionner les puissances actives : $P$.
+3. Passer en puissance apparente : $S = P / \cos\varphi$.
+4. Ajouter l'**appel au démarrage** du plus gros moteur, qui demande plusieurs fois sa puissance pendant quelques secondes.
+5. Choisir la plus petite taille de groupe qui couvre ce démarrage, puis calculer le courant.
+
+<Regle type="art" source="pratique des chantiers">
+On estime l'appel au démarrage d'un moteur à quelques fois sa puissance nominale (ici, k = {nombre(EXEMPLE_GROUPE.k, 0)}). La valeur réelle dépend du moteur et de son mode de démarrage : on la lit sur la notice, ou on interroge le loueur du groupe.
+</Regle>
+
+<AVerifier note="A_VERIFIER.md n° 26 et 27 : appel au démarrage et gamme de groupes, hypothèses de l’exemple" />
+
+<Regle type="simplification">
+On suppose que tout fonctionne en même temps, avec un seul cos φ pour l'ensemble. Un bilan plus fin applique des coefficients de simultanéité et traite chaque récepteur à part.
+</Regle>
+
+<Regle type="norme" source="CEI 60364-4-41">
+Les prises de courant sont protégées par un dispositif différentiel de 30 mA au plus, qui coupe dès qu'un courant fuit vers la terre, par exemple à travers une personne. Les masses métalliques sont reliées à une prise de terre.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : du groupe aux récepteurs">
+
+<CircuitChantier d={EXEMPLE_GROUPE} />
+
+Le groupe alimente un coffret de chantier, qui porte les protections : disjoncteurs contre les surcharges, différentiel 30 mA pour les personnes. Le coffret est relié à une prise de terre. Chaque récepteur a son propre départ.
+
+<Encadre type="retenir">
+Groupe → coffret protégé et mis à la terre → récepteurs. On ne branche jamais un outil directement sur le groupe, sans protection.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="groupeElectrogene">
+
+<Cahier titre="Exemple résolu : le groupe pour couler les poteaux d'une école">
+
+**Énoncé.** Pour couler les poteaux d'une école à Kikwit, on loue un groupe électrogène triphasé 400 V. Il alimentera une bétonnière de 2,2 kW, un vibreur de 1,5 kW, une pompe d'épuisement de 0,75 kW et 1 kW d'éclairage (plaques signalétiques, données de l'énoncé). On prend cos φ = 0,8 pour l'ensemble, et un appel de 3 fois sa puissance au démarrage de la bétonnière. Quel groupe choisir ? Quel courant circule en marche ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi la bétonnière ? C'est le plus gros moteur : son démarrage est le moment le plus exigeant pour le groupe.</Note>
+</Etape>
+
+<Etape n={2} titre="Le bilan">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : puissances, démarrage, courant">
+
+<Etape n={3} titre="Les puissances en marche">
+<AN k="somme" />
+<AN k="apparente" />
+</Etape>
+
+<Etape n={4} titre="Le démarrage de la bétonnière">
+<AN k="demarrage" />
+<Note>Pourquoi ajouter (k − 1) fois le moteur ? Sa puissance normale est déjà dans le total ; au démarrage, il appelle en plus (k − 1) fois cette puissance.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<AN k="choix" />
+<AN k="courant" />
+<Resultat k="groupe" libelle="Groupe électrogène à louer" />
+
+<Note couleur="vert">En marche, il suffirait de <Val k="S" /> ; c'est le démarrage (<Val k="Sdem" />) qui fixe la taille. Courant en marche : <Val k="I" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="choisir le groupe en kW.">
+Le total actif vaut {grandeur(g0.P, 2, 'kW')}, mais le groupe doit fournir {grandeur(g0.S, 2, 'kVA')} en marche : on divise par cos φ.
+</Piege>
+
+<Piege erreur="oublier le démarrage des moteurs.">
+Sans le démarrage, un groupe de {nombre(sansDem.groupe ?? 0, 0)} kVA semblerait suffire ; au démarrage de la bétonnière, il faut {grandeur(g0.Sdem, 2, 'kVA')}. Le groupe trop petit cale.
+</Piege>
+
+<Piege erreur="utiliser la formule monophasée en triphasé.">
+En triphasé, I = P / (√3 U cos φ) avec U = 400 V entre phases. Oublier √3 donne un courant 1,73 fois trop grand.
+</Piege>
+
+<Piege erreur="confondre kW et kWh.">
+Le groupe fournit des kW ; il consomme du carburant en proportion des kWh produits, c'est-à-dire de la puissance multipliée par la durée.
+</Piege>
+
+<Piege erreur="négliger la terre et le différentiel.">
+Un outil dont la carcasse touche un fil abîmé devient mortel sans prise de terre ni différentiel. Ce n'est pas un détail de calcul, c'est une question de vie.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le groupe électrogène.** On le pose à l'air libre, loin des fouilles et des postes de travail : ses gaz d'échappement contiennent du monoxyde de carbone, mortel dans un local fermé. On le ravitaille moteur arrêté.
+
+<Encadre type="terrain" titre="Réseau instable et délestages">
+Dans beaucoup de villes de RDC, le réseau de la SNEL connaît des coupures et des délestages. Les chantiers et les bâtiments sensibles (hôpitaux, forages) s'équipent de groupes de secours, parfois couplés à des panneaux solaires. Le bilan de puissance de cette leçon sert à les dimensionner.
+</Encadre>
+
+**Les câbles.** Le courant fixe la section des câbles et le calibre des protections : un câble trop fin chauffe. Sur un chantier, les câbles sont protégés des engins et de l'eau, jamais posés dans une flaque.
+
+**Les intervenants.** Seule une personne formée et habilitée intervient sur une installation électrique. L'ouvrier utilise ; l'électricien câble et dépanne.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : électricité de chantier">
+
+### Grandeurs
+
+U (V) · I (A) · R (Ω) · $U = R\,I$ · tensions {nombre(TENSION_MONO, 0)} V / {nombre(TENSION_TRI, 0)} V (CEI 60038)
+
+### Puissances
+
+active $P = U\,I\cos\varphi$ (W) · apparente $S = U\,I = P/\cos\varphi$ (VA) · triphasé : $P = \sqrt{3}\,U\,I\cos\varphi$
+
+### Choisir un groupe
+
+ΣP → S = ΣP / cos φ → + (k − 1) × plus gros moteur → plus petite taille ≥ S au démarrage
+
+### Énergie
+
+E = P × t (kWh) · carburant ∝ kWh
+
+### Sécurité
+
+coffret de chantier · différentiel 30 mA (CEI 60364-4-41) · prise de terre · groupe à l'air libre
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le projecteur">
+
+Un projecteur de 500 W fonctionne sous {nombre(TENSION_MONO, 0)} V, avec cos φ = 1. Quel courant absorbe-t-il ?
+
+<Indice>I = P / (U cos φ).</Indice>
+
+<Corrige>
+I = 500 / ({nombre(TENSION_MONO, 0)} × 1) = **{grandeur(lampe, 2, 'A')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La pompe triphasée">
+
+Une pompe de 4 kW, avec cos φ = 0,85, est alimentée en triphasé {nombre(TENSION_TRI, 0)} V. Quel courant circule dans chaque phase ?
+
+<Indice>I = P / (√3 U cos φ).</Indice>
+
+<Corrige>
+I = 4 000 / (1,732 × {nombre(TENSION_TRI, 0)} × 0,85) = **{grandeur(pompeTri, 2, 'A')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une pompe de plus">
+
+Sur le chantier de l'exemple, on remplace la pompe d'épuisement par une pompe de 3 kW pour vider une fouille inondée. Refais le choix du groupe. Le chantier tourne 6 h par jour à pleine puissance : quelle énergie produit le groupe, et combien de carburant consomme-t-il, à raison de 0,3 L par kWh (donnée de l'énoncé) ?
+
+<Indice>La pompe devient le plus gros moteur : c'est son démarrage qui compte.</Indice>
+
+<Corrige>
+
+- P = 2,2 + 1,5 + 3 + 1 = {grandeur(g3.P, 2, 'kW')} ; démarrage de la pompe : ({nombre(g3.P, 2)} + 2 × 3) / 0,8 = {grandeur(g3.Sdem, 2, 'kVA')} : **groupe de {g3.groupe} kVA**.
+- Énergie : {nombre(g3.P, 2)} × 6 = **{grandeur(carbu.E, 1, 'kWh')}** par jour ; carburant : × 0,3 = **{grandeur(carbu.litres, 1, 'L')}** par jour.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.7.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La loi d'Ohm s'écrit :" choix={['U = R I', 'P = U I', 'I = U R', 'R = U I']} bonne={0} colonnes={4}>
+Tension = résistance × courant.
+</QCM>
+
+<QCM n={2} question="Les groupes électrogènes sont donnés en kVA parce que :" choix={['c’est plus joli', 'leur échauffement dépend du courant, donc de la puissance apparente', 'les kW n’existent pas en alternatif', 'les moteurs ont un cos φ de 1']} bonne={1}>
+S = U I : c'est le courant qui chauffe l'alternateur et les câbles.
+</QCM>
+
+<QCM n={3} question={<>Une bouilloire de 2 300 W sous {nombre(TENSION_MONO, 0)} V (cos φ = 1) absorbe :</>} choix={['0,1 A', grandeur(bouilloire, 0, 'A'), '230 A', '2,3 A']} bonne={1} colonnes={4}>
+I = P / U = 2 300 / {nombre(TENSION_MONO, 0)}.
+</QCM>
+
+<QCM n={4} question="5 kW de récepteurs avec cos φ = 0,8 demandent une puissance apparente de :" choix={['4 kVA', grandeur(q4.S, 2, 'kVA'), '5 kVA', '0,16 kVA']} bonne={1} colonnes={4}>
+S = P / cos φ = 5 / 0,8 = {grandeur(q4.S, 2, 'kVA')}.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Le moment le plus exigeant pour un groupe électrogène est :" choix={['l’arrêt des moteurs', 'le démarrage du plus gros moteur', 'l’éclairage du soir', 'le ravitaillement']} bonne={1} colonnes={2}>
+Un moteur appelle plusieurs fois sa puissance au démarrage.
+</QCM>
+
+<QCM n={6} question="En triphasé 400 V, la puissance active vaut :" choix={['U I', '√3 U I cos φ', '3 U I', 'U I / cos φ']} bonne={1} colonnes={4}>
+U est la tension entre phases.
+</QCM>
+
+<QCM n={7} question="Un dispositif différentiel de 30 mA sert à :" choix={['protéger le groupe des surcharges', 'protéger les personnes contre les fuites de courant', 'augmenter la tension', 'économiser du carburant']} bonne={1} colonnes={2}>
+Il coupe dès qu'un courant fuit vers la terre.
+</QCM>
+
+<QCM n={8} question="Où installer le groupe électrogène ?" choix={['dans le local du gardien', 'à l’air libre, loin des postes de travail', 'au fond de la fouille', 'sous une bâche fermée']} bonne={1} colonnes={2}>
+Ses gaz contiennent du monoxyde de carbone, mortel en espace clos.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

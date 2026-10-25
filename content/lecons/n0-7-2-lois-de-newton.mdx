@@ -1,0 +1,311 @@
+---
+id: N0.7.2
+titre: Les lois de Newton
+objectifs:
+  - Énoncer les trois lois de Newton et les reconnaître sur un chantier
+  - Faire le bilan des forces d'un corps isolé
+  - Appliquer ΣF = m a pour calculer une force ou une accélération
+  - Calculer la tension d'un câble de levage qui accélère
+relecture: false
+normes:
+  - "EN 1991-3 : actions induites par les appareils de levage (coefficients dynamiques)"
+glossaire:
+  - terme: Inertie
+    definition: Tendance d'un corps à garder sa vitesse (ou à rester immobile) tant qu'aucune force ne le pousse à changer.
+  - terme: Newton
+    definition: "Unité SI de force : 1 N est la force qui donne à 1 kg une accélération de 1 m/s²."
+  - terme: Corps isolé
+    definition: Objet que l'on « découpe » par la pensée pour faire la liste de toutes les forces qui s'exercent sur lui.
+  - terme: Actions réciproques
+    definition: Deux corps en contact exercent l'un sur l'autre des forces égales et opposées, sur la même ligne d'action.
+  - terme: Coefficient dynamique
+    definition: Majoration d'une charge qui tient compte des accélérations (démarrage, freinage, chocs).
+symboles:
+  - { symbole: 'm', signification: 'masse', unite: 'kg' }
+  - { symbole: 'a', signification: 'accélération', unite: 'm/s²' }
+  - { symbole: 'ΣF', signification: 'somme des forces (résultante)', unite: 'N' }
+  - { symbole: 'P', signification: 'poids', unite: 'N ou kN' }
+  - { symbole: 'T', signification: 'tension d’un câble', unite: 'N ou kN' }
+formules:
+  - { nom: 'Première loi', tex: '\sum \vec{F} = \vec{0} \iff \vec{v} \text{ constante}', domaine: 'Repère lié au sol' }
+  - { nom: 'Deuxième loi', tex: '\sum \vec{F} = m\,\vec{a}', domaine: 'Masse constante' }
+  - { nom: 'Troisième loi', tex: '\vec{F}_{A \to B} = -\vec{F}_{B \to A}', domaine: 'Deux corps en interaction' }
+  - { nom: 'Câble de levage', tex: 'T = m\,(g + a)', domaine: 'a positive vers le haut' }
+---
+
+import { accelerationMoyenne, arrimage, EXEMPLE_LEVAGE, forceNewton, kmhVersMs, levage } from '@/lib/calc/physique'
+import { PESANTEUR } from '@/lib/calc/methode'
+import { grandeur, nombre } from '@/lib/format'
+import { LoisNewton } from '@/components/schemas/Physique'
+
+export const l0 = levage(EXEMPLE_LEVAGE)
+export const ex1 = forceNewton(120, 0.5)
+export const ex2 = levage({ m: 300, a: 1.2 })
+export const aCamion = accelerationMoyenne(0, kmhVersMs(36), 25)
+export const fCamion = forceNewton(12000, aCamion)
+export const palette = arrimage({ m: 1500, a: aCamion, mu: 0.3 })
+export const q4 = levage({ m: 1000, a: 0 })
+export const q5 = levage({ m: 1000, a: 1 })
+
+<Page etape="intuition" titre="L'intuition : dans le bus qui freine">
+
+Dans un bus qui freine brusquement, tu es projeté vers l'avant. Personne ne t'a poussé : ton corps **continue** simplement d'avancer, alors que le bus ralentit. Une palette de ciment non arrimée sur un camion fait exactement la même chose : au premier coup de frein, elle glisse vers la cabine.
+
+Autre scène : une grue soulève un coffrage. Au moment où la charge décolle et prend de la vitesse vers le haut, le câble tire **plus fort** que le poids du coffrage. Il faut en effet non seulement porter la charge, mais aussi la faire accélérer.
+
+Ces deux scènes obéissent aux lois de Newton. Elles relient les **forces** (N0.6) au **mouvement** (N0.7.1). Toute la statique des ouvrages en découle.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelle force faut-il pour changer le mouvement d'un objet, et que se passe-t-il quand les forces s'équilibrent ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les trois lois">
+
+### Première loi : le principe d'inertie
+
+Si la somme des forces qui s'exercent sur un corps est **nulle**, ce corps reste immobile, ou continue en ligne droite à vitesse constante. Une force ne sert pas à entretenir un mouvement : elle sert à le **changer**.
+
+Un bâtiment est immobile : la somme des forces sur chacune de ses parties est donc nulle. C'est le point de départ de toute la statique (L1.3).
+
+### Deuxième loi : force et accélération
+
+La résultante des forces donne au corps une accélération dans sa direction et son sens :
+
+$$\sum \vec{F} = m\,\vec{a}$$
+
+avec $m$ en kg, $a$ en m/s² et $F$ en newtons : 1 N = 1 kg·m/s². Le poids en est un cas particulier : $P = m\,g$ (N0.3.3).
+
+### Troisième loi : les actions réciproques
+
+Si un corps A exerce une force sur un corps B, alors B exerce sur A une force **égale et opposée**, sur la même ligne d'action. Ces deux forces s'appliquent à **deux corps différents** : elles ne s'annulent pas entre elles.
+
+<Encadre type="exemple">
+Un poteau appuie sur sa semelle avec une force N vers le bas ; la semelle repousse le poteau avec −N vers le haut. Pour étudier la semelle, on garde N ; pour étudier le poteau, on garde −N.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la méthode, appliquée au levage">
+
+### Toujours la même méthode
+
+1. **Isoler** le corps étudié (le dessiner seul).
+2. Faire le **bilan des forces** : poids, câbles, appuis, frottements. Aucune ne doit manquer.
+3. Choisir un **axe** et son sens positif.
+4. Écrire $\sum F = m\,a$ sur cet axe, puis résoudre.
+
+### Le câble de levage
+
+La charge suspendue reçoit deux forces : son poids $P = m\,g$ vers le bas et la tension $T$ du câble vers le haut. Sur un axe vertical orienté vers le haut :
+
+$$T - P = m\,a \quad\Longrightarrow\quad T = m\,(g + a)$$
+
+- au démarrage vers le haut ($a > 0$) : $T > P$ ;
+- à vitesse constante ou à l'arrêt ($a = 0$) : $T = P$ ;
+- au freinage d'une montée ($a < 0$) : $T < P$.
+
+Le freinage d'une **descente** donne aussi $a > 0$ : la vitesse vers le bas diminue, l'accélération est donc dirigée vers le haut, et le câble tire plus que le poids.
+
+<Regle type="norme" source="EN 1991-3">
+Pour dimensionner les ponts roulants et leurs chemins de roulement, l'Eurocode 1 partie 3 majore les charges levées par des coefficients dynamiques, qui traduisent ces accélérations. Les accessoires de levage, eux, ont une charge maximale d'utilisation fixée par leur fabricant.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : trois lois, trois scènes de chantier">
+
+<LoisNewton />
+
+À gauche, la charge non arrimée continue vers l'avant quand le camion freine : c'est l'inertie. Au centre, la force F donne à la masse m une accélération dans son sens. À droite, le poteau et sa semelle séparés par la pensée : chacun reçoit la force exercée par l'autre.
+
+<Encadre type="retenir">
+Inertie : pas de force, pas de changement de vitesse. ΣF = m a : la force change la vitesse. Actions réciproques : deux forces opposées, sur deux corps différents.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="levage">
+
+<Cahier titre="Exemple résolu : la tension du câble au démarrage">
+
+**Énoncé.** Une grue lève un module de coffrage de 2 000 kg. Au démarrage, la charge prend de la vitesse vers le haut avec une accélération de 0,5 m/s² (donnée de l'énoncé). Quelle est la tension du câble ? De combien dépasse-t-elle le poids ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un signe à l'accélération ? On a choisi l'axe vers le haut : une accélération positive est dirigée vers le haut.</Note>
+</Etape>
+
+<Etape n={2} titre="Le corps isolé">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : poids, Newton, tension">
+
+<Etape n={3} titre="Le poids">
+<AN k="poids" />
+</Etape>
+
+<Etape n={4} titre="La deuxième loi">
+<AN k="newton" />
+<AN k="tension" />
+<Note>Pourquoi ajouter a à g ? Le câble doit à la fois compenser le poids (m g) et fournir la force qui accélère la charge (m a).</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="T" libelle="Tension du câble au démarrage" />
+<AN k="rapport" />
+
+<Note couleur="vert">Contrôle : avec une accélération nulle, la tension redevient égale au poids, <Val k="P" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre masse et poids.">
+La masse est en kg et ne change pas ; le poids est une force, en N : P = m g. Un coffrage de 2 000 kg pèse {grandeur(l0.P, 2, 'kN')}, pas « 2 000 N ».
+</Piege>
+
+<Piege erreur="croire qu'il faut une force pour garder une vitesse constante.">
+Sans frottement, aucune force n'est nécessaire. Si un engin doit pousser pour rouler à vitesse constante, c'est pour vaincre les frottements et la pente, pas pour « entretenir » le mouvement.
+</Piege>
+
+<Piege erreur="annuler l'action par la réaction.">
+Elles s'appliquent à deux corps différents. Dans un bilan des forces, on ne garde que les forces qui s'exercent sur le corps isolé.
+</Piege>
+
+<Piege erreur="écrire T = m a.">
+On oublie alors le poids. La bonne équation est T − P = m a, donc T = m (g + a).
+</Piege>
+
+<Piege erreur="oublier une force dans le bilan.">
+Le poids, la réaction d'un appui, un frottement, un câble : on dessine le corps isolé et l'on fait le tour de tout ce qui le touche, plus son poids.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le levage.** Les démarrages et arrêts brusques augmentent la tension dans les câbles et les élingues. Le grutier manœuvre en douceur : moins d'accélération, moins de surtension, moins de balancement de la charge.
+
+<Encadre type="terrain" titre="Transport sur les routes de RDC">
+Sur les longues routes en terre, les camions chargés de ciment, de fers à béton ou de tôles freinent souvent brusquement : nids-de-poule, bétail, ponts étroits. Une charge non arrimée continue sa course (première loi) et peut traverser la cabine. On arrime les charges avant de partir (N0.7.3).
+</Encadre>
+
+**La statique des ouvrages.** Un bâtiment immobile vérifie ΣF = 0 pour chaque poutre, chaque poteau, chaque nœud. Toutes les descentes de charges reposent sur cette première loi.
+
+**Les fondations.** Le bâtiment appuie sur le sol, le sol repousse le bâtiment : c'est la troisième loi. La pression du sol sous les semelles, vue en N0.3.3, est la réaction du terrain.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : lois de Newton">
+
+### Les trois lois
+
+inertie : ΣF = 0 ⟺ vitesse constante (ou repos) · $\sum \vec{F} = m\,\vec{a}$ · actions réciproques : égales, opposées, sur deux corps
+
+### Unités
+
+1 N = 1 kg·m/s² · P = m g, g ≈ {nombre(PESANTEUR, 2)} m/s²
+
+### Méthode
+
+isoler · bilan des forces · axe · ΣF = m a · résoudre
+
+### Levage
+
+$T = m\,(g + a)$, a positive vers le haut · démarrage en montée ou freinage en descente : T &gt; P
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Pousser une brouette">
+
+Quelle force résultante faut-il pour donner à une brouette chargée de 120 kg une accélération de 0,5 m/s² ?
+
+<Indice>ΣF = m a.</Indice>
+
+<Corrige>
+F = 120 × 0,5 = **{grandeur(ex1, 0, 'N')}** (frottements non compris).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le monte-charge qui freine en descente">
+
+Un monte-charge de chantier et son chargement ont une masse de 300 kg. En descente, il freine avec une décélération de 1,2 m/s². Quelle est la tension du câble pendant ce freinage ?
+
+<Indice>La vitesse vers le bas diminue : l'accélération est dirigée vers le haut.</Indice>
+
+<Corrige>
+Axe vers le haut : a = +1,2 m/s². T = 300 × ({nombre(PESANTEUR, 2)} + 1,2) = **{grandeur(ex2.T, 2, 'kN')}**, contre {grandeur(ex2.P, 2, 'kN')} à l'arrêt : le freinage d'une descente charge le câble.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le camion qui démarre">
+
+Un camion de 12 t passe de 0 à 36 km/h en 25 s. Quelle est son accélération moyenne ? Quelle force résultante cela représente-t-il ? Une palette de ciment de 1 500 kg, non arrimée, est posée sur le plateau, avec un coefficient de frottement de 0,3 (donnée de l'énoncé). Glisse-t-elle au démarrage ?
+
+<Indice>Pour suivre le camion, la palette doit recevoir m a ; le plateau peut lui donner au plus μ m g par frottement.</Indice>
+
+<Corrige>
+
+- 36 km/h = {grandeur(kmhVersMs(36), 0, 'm/s')} ; a = ({nombre(kmhVersMs(36), 0)} − 0) / 25 = **{grandeur(aCamion, 2, 'm/s²')}** ; F = 12 000 × {nombre(aCamion, 2)} = **{grandeur(fCamion / 1000, 1, 'kN')}**.
+- La palette doit recevoir {grandeur(palette.Fnec, 2, 'kN')} ; le frottement peut en donner {grandeur(palette.Ffrot, 2, 'kN')} : **{palette.glisse ? 'elle glisse' : 'elle ne glisse pas'}** au démarrage. Mais un freinage brusque demande une décélération bien plus forte : l'arrimage reste obligatoire (N0.7.3).
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.7.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un camion roule en ligne droite à vitesse constante. La somme des forces qui s'exercent sur lui est :" choix={['dirigée vers l’avant', 'nulle', 'égale à son poids', 'dirigée vers l’arrière']} bonne={1} colonnes={2}>
+Première loi : vitesse constante ⟺ somme des forces nulle.
+</QCM>
+
+<QCM n={2} question="1 newton, c'est :" choix={['1 kg × 1 m/s²', '1 kg × 1 m/s', '1 kg', '9,81 kg']} bonne={0} colonnes={4}>
+F = m a.
+</QCM>
+
+<QCM n={3} question="Un poteau appuie sur sa semelle avec 200 kN. La semelle exerce sur le poteau :" choix={['200 kN vers le bas', '200 kN vers le haut', 'rien', '400 kN']} bonne={1} colonnes={4}>
+Actions réciproques : force égale et opposée.
+</QCM>
+
+<QCM n={4} question={<>Une charge de 1 000 kg est tenue immobile au crochet. La tension du câble vaut :</>} choix={['0 kN', grandeur(q4.T, 2, 'kN'), '1 kN', grandeur(q5.T, 2, 'kN')]} bonne={1} colonnes={4}>
+À l'arrêt, T = P = m g = {grandeur(q4.T, 2, 'kN')}.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="La même charge de 1 000 kg démarre vers le haut avec a = 1 m/s². La tension devient :" choix={[grandeur(q4.T, 2, 'kN'), grandeur(q5.T, 2, 'kN'), '1,00 kN', '8,81 kN']} bonne={1} colonnes={4}>
+T = m (g + a) = 1 000 × ({nombre(PESANTEUR, 2)} + 1) N = {grandeur(q5.T, 2, 'kN')}.
+</QCM>
+
+<QCM n={6} question="Une charge descend en freinant. La tension du câble est :" choix={['plus petite que le poids', 'égale au poids', 'plus grande que le poids', 'nulle']} bonne={2} colonnes={2}>
+Freiner une descente, c'est accélérer vers le haut : T &gt; P.
+</QCM>
+
+<QCM n={7} question="Pourquoi une palette non arrimée glisse-t-elle vers l'avant quand le camion freine ?" choix={['une force la pousse vers l’avant', 'elle continue sur sa lancée : c’est l’inertie', 'son poids augmente', 'le plateau la repousse']} bonne={1}>
+Aucune force ne la pousse : elle garde sa vitesse pendant que le camion ralentit.
+</QCM>
+
+<QCM n={8} question="La première étape pour appliquer les lois de Newton est :" choix={['écrire F = m a', 'isoler le corps et faire le bilan des forces', 'calculer la vitesse', 'choisir les unités']} bonne={1} colonnes={2}>
+Sans bilan complet des forces, l'équation est fausse.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

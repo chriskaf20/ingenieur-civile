@@ -1,0 +1,319 @@
+---
+id: N0.7.6
+titre: Température et dilatation thermique
+objectifs:
+  - Calculer l'allongement thermique d'un élément en béton ou en acier
+  - Expliquer pourquoi le béton et l'acier travaillent bien ensemble
+  - Estimer la contrainte d'un élément dont la dilatation est empêchée
+  - Justifier la présence et l'ouverture d'un joint de dilatation
+relecture: false
+normes:
+  - "EN 1992-1-1 §3.1.3(5) : coefficient de dilatation du béton ; tableau 3.1 : Ecm et fctm"
+  - "EN 1993-1-1 §3.2.6 : coefficient de dilatation et module de l'acier ; tableau 3.1 : fy"
+  - "EN 1992-1-1 §2.3.3(3) : distance entre joints de dilatation"
+  - "EN 1991-1-5 : actions thermiques"
+glossaire:
+  - terme: Dilatation thermique
+    definition: Allongement d'un matériau qui se réchauffe (raccourcissement s'il se refroidit).
+  - terme: Coefficient de dilatation
+    definition: Allongement relatif par degré, α, en K⁻¹ ; ΔL = α L ΔT.
+  - terme: Kelvin
+    definition: Unité SI de température ; une différence de 1 K est égale à une différence de 1 °C.
+  - terme: Joint de dilatation
+    definition: Coupure qui sépare un ouvrage en blocs indépendants, pour que chacun se dilate librement.
+  - terme: Retrait
+    definition: Raccourcissement du béton qui sèche ; il s'ajoute aux effets de la température.
+symboles:
+  - { symbole: 'α', signification: 'coefficient de dilatation thermique', unite: 'K⁻¹' }
+  - { symbole: 'L', signification: 'longueur de l’élément', unite: 'm' }
+  - { symbole: 'ΔT', signification: 'variation de température', unite: 'K' }
+  - { symbole: 'ΔL', signification: 'allongement', unite: 'mm' }
+  - { symbole: 'E', signification: 'module d’élasticité', unite: 'MPa' }
+  - { symbole: 'σ', signification: 'contrainte', unite: 'MPa' }
+formules:
+  - { nom: 'Allongement libre', tex: '\Delta L = \alpha\,L\,\Delta T', domaine: 'Élément libre de se dilater' }
+  - { nom: 'Élément bloqué', tex: '\sigma = E\,\alpha\,\Delta T', domaine: 'Dilatation totalement empêchée, élasticité' }
+  - { nom: 'Effort sur les appuis', tex: 'N = \sigma\,A', domaine: 'Section A' }
+---
+
+import { ALPHA_ACIER, ALPHA_BETON, allongementThermique, D_JOINT_RECOMMANDE, decoupageJoints, dilatation, effortThermique, EXEMPLE_DILATATION, MATERIAUX_THERMIQUES } from '@/lib/calc/physique'
+import { grandeur, nombre } from '@/lib/format'
+import { JointDilatation } from '@/components/schemas/Physique'
+
+export const d0 = dilatation(EXEMPLE_DILATATION)
+export const rail = allongementThermique(12, ALPHA_ACIER, 30) * 1000
+export const poutre = { L: 40, dT: 30, materiau: 'acier' }
+export const p40 = dilatation(poutre)
+export const N40 = effortThermique(poutre, 5400)
+export const bat = decoupageJoints(60, D_JOINT_RECOMMANDE)
+export const blocBat = dilatation({ L: bat.Lbloc, dT: 25, materiau: 'beton' })
+export const ecartAcierBeton = (allongementThermique(30, ALPHA_ACIER, 25) - allongementThermique(30, ALPHA_BETON, 25)) * 1000
+export const B = MATERIAUX_THERMIQUES.beton
+export const A = MATERIAUX_THERMIQUES.acier
+
+<Page etape="intuition" titre="L'intuition : la dalle qui respire au soleil">
+
+Regarde une voie ferrée ancienne, comme celle de Matadi à Kinshasa : entre deux rails, on laisse un petit espace. Au soleil, l'acier chauffe et s'allonge ; sans cet espace, les rails se pousseraient l'un l'autre et la voie se déformerait.
+
+Un bâtiment fait la même chose. Une dalle de toiture-terrasse exposée au soleil de l'après-midi chauffe, s'allonge de quelques millimètres, puis se raccourcit la nuit. Si rien ne la laisse bouger, elle pousse sur les murs ou se fissure. C'est pour cela que les longs bâtiments sont coupés par des **joints de dilatation**.
+
+Quelques millimètres paraissent peu. Mais empêcher ces millimètres demande des forces énormes, capables de fissurer le béton.
+
+<Encadre type="idee" titre="La question de cette leçon">
+De combien un élément s'allonge-t-il quand il chauffe, et que se passe-t-il si on l'en empêche ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : l'allongement thermique">
+
+### Température et kelvin
+
+On mesure la température en °C ; l'unité SI est le kelvin (K). Pour une **différence** de température, les deux sont identiques : passer de 20 °C à 45 °C, c'est ΔT = 25 K.
+
+### La loi de dilatation
+
+Un élément de longueur $L$ qui se réchauffe de $\Delta T$ s'allonge de
+
+$$\Delta L = \alpha\,L\,\Delta T$$
+
+où $\alpha$ (K⁻¹) dépend du matériau. ΔL a l'unité de L : avec L en mm, on obtient des mm.
+
+<Regle type="norme" source="EN 1992-1-1 §3.1.3(5) ; EN 1993-1-1 §3.2.6">
+Béton : α = {nombre(ALPHA_BETON * 1e6, 0)} × 10⁻⁶ K⁻¹. Acier de construction : α = {nombre(ALPHA_ACIER * 1e6, 0)} × 10⁻⁶ K⁻¹.
+</Regle>
+
+<Encadre type="exemple">
+Une dalle de béton de 30 m qui se réchauffe de 25 K s'allonge de {nombre(ALPHA_BETON * 1e6, 0)} × 10⁻⁶ × 30 000 mm × 25 = {grandeur(d0.dL, 1, 'mm')}.
+</Encadre>
+
+### Béton et acier : presque le même α
+
+Les deux coefficients sont très proches. Dans une poutre en béton armé de 30 m qui chauffe de 25 K, l'acier voudrait s'allonger de {grandeur(ecartAcierBeton, 1, 'mm')} de plus que le béton seulement : les deux matériaux se dilatent ensemble, sans se décoller. Sans cette coïncidence, le béton armé ne fonctionnerait pas.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : l'élément bloqué et les joints">
+
+### Empêcher la dilatation crée une contrainte
+
+Si l'élément est tenu à ses deux extrémités, il ne peut pas s'allonger : il se met en compression (ou en traction s'il se refroidit). Dans le cas extrême d'un blocage total, en élasticité :
+
+$$\sigma = E\,\alpha\,\Delta T$$
+
+Pour le béton C25/30 (Ecm = {nombre(B.E / 1000, 0)} GPa, fctm = {nombre(B.limite, 1)} MPa, EN 1992-1-1 tableau 3.1) et ΔT = 25 K : σ = {grandeur(d0.sigma, 2, 'MPa')}. Au refroidissement, ce serait une traction, bien supérieure à la résistance à la traction du béton : il fissure.
+
+<Regle type="simplification">
+Blocage total, fluage et retrait négligés : le fluage du béton réduit la contrainte réelle, mais le retrait s'ajoute au refroidissement. L'ordre de grandeur suffit à montrer pourquoi on ne bloque pas un long élément.
+</Regle>
+
+### Les joints de dilatation
+
+On coupe l'ouvrage en **blocs** assez courts pour que leurs mouvements restent faibles. Chaque joint est rempli d'un matériau compressible et fermé par un mastic, jamais par du mortier rigide.
+
+<Regle type="norme" source="EN 1992-1-1 §2.3.3(3)">
+Si les joints de dilatation sont espacés d'au plus d_joint, on peut ne pas calculer les effets de la température et du retrait dans l'analyse globale d'un bâtiment. La valeur recommandée de d_joint est {nombre(D_JOINT_RECOMMANDE, 0)} m ; l'annexe nationale peut la modifier.
+</Regle>
+
+<AVerifier note="A_VERIFIER.md n° 24 : valeur de d_joint de l'annexe nationale française, et son emploi en RDC" />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le joint de dilatation">
+
+<JointDilatation />
+
+À gauche, la coupe sur un joint : un vide entre deux dalles, rempli d'un fond de joint compressible et fermé par un mastic. À droite, un long bâtiment découpé en blocs indépendants : chacun se dilate et se rétracte sans pousser sur ses voisins.
+
+<Encadre type="retenir">
+Un joint doit pouvoir se fermer de l'allongement des blocs voisins. Rempli de mortier, il ne joue plus son rôle.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="dilatation">
+
+<Cahier titre="Exemple résolu : la dalle de toiture-terrasse">
+
+**Énoncé.** Une dalle de toiture-terrasse en béton armé C25/30 mesure 30 m de long. Exposée au soleil, elle subit une variation de température de 25 K entre la fraîcheur de la nuit et l'après-midi (donnée de l'énoncé). De combien s'allonge-t-elle si elle est libre ? Quelle contrainte apparaîtrait si elle était totalement bloquée ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi ΔT est-il une donnée ? Il dépend du climat, de l'exposition et de l'isolation ; l'EN 1991-1-5 donne la méthode pour le calculer.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : libre, puis bloquée">
+
+<Etape n={3} titre="L'allongement libre">
+<AN k="allongement" />
+<Note>Pourquoi L en mm ? Pour obtenir directement ΔL en mm, l'unité qui parle sur un chantier.</Note>
+</Etape>
+
+<Etape n={4} titre="La contrainte si l'allongement est empêché">
+<AN k="contrainte" />
+<AN k="comparaison" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="dL" libelle="Allongement libre de la dalle" />
+
+<Note couleur="vert">Bloquée, la dalle subirait <Val k="sigma" />, soit <Val k="rapport" /> fois la limite du matériau. On la laisse bouger : appuis glissants, joints, protection thermique de la toiture.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="mélanger les unités de longueur.">
+α L ΔT donne ΔL dans l'unité de L. Avec L = 30 (m), on obtient {nombre(d0.dL / 1000, 4)} m, c'est-à-dire {grandeur(d0.dL, 1, 'mm')} : pas {nombre(d0.dL / 1000, 4)} mm.
+</Piege>
+
+<Piege erreur="croire qu'il faut convertir ΔT en kelvins.">
+Une différence de 25 °C est une différence de 25 K. Seules les températures elles-mêmes diffèrent (0 °C = 273,15 K).
+</Piege>
+
+<Piege erreur="penser que quelques millimètres sont sans danger.">
+Empêcher {grandeur(p40.dL, 1, 'mm')} sur une poutre en acier de 40 m demande {grandeur(N40, 0, 'kN')} pour une section de 5 400 mm² (exercice 2) : de quoi pousser un mur.
+</Piege>
+
+<Piege erreur="remplir un joint de mortier.">
+Un joint rigide transmet les efforts : la fissure apparaît à côté. On utilise un fond de joint compressible et un mastic souple.
+</Piege>
+
+<Piege erreur="oublier le refroidissement.">
+La nuit, la dalle se raccourcit : un élément bloqué passe alors en traction, et c'est là que le béton fissure.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les toitures-terrasses.** Sous le soleil d'Afrique centrale, une dalle de toiture nue chauffe beaucoup plus que l'air. Une protection (gravillons, isolant, ombrage) réduit ΔT et donc les mouvements. Les fissures en haut des murs du dernier étage viennent souvent d'une dalle de toiture qui travaille.
+
+<Encadre type="terrain" titre="Hangars et charpentes métalliques">
+Les longs hangars en acier des zones minières du Katanga et des ports subissent de grands écarts entre la nuit et le plein soleil. Une extrémité de la charpente est fixe, l'autre repose sur des appuis glissants ou des trous oblongs, pour que la structure se dilate sans pousser sur les poteaux.
+</Encadre>
+
+**Les ponts.** Les tabliers reposent sur des appareils d'appui qui autorisent les déplacements, et les chaussées franchissent les extrémités par des joints de dilatation.
+
+**Les canalisations.** Les tuyaux en PVC se dilatent beaucoup plus que l'acier : on prévoit des manchons de dilatation ou des lyres sur les longues conduites exposées.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : dilatation thermique">
+
+### Allongement
+
+$\Delta L = \alpha\,L\,\Delta T$ (unité de L) · ΔT en K = ΔT en °C
+
+### Coefficients
+
+béton : {nombre(ALPHA_BETON * 1e6, 0)} × 10⁻⁶ K⁻¹ (EN 1992-1-1 §3.1.3) · acier : {nombre(ALPHA_ACIER * 1e6, 0)} × 10⁻⁶ K⁻¹ (EN 1993-1-1 §3.2.6) · presque égaux : le béton armé fonctionne
+
+### Élément bloqué
+
+$\sigma = E\,\alpha\,\Delta T$ · effort $N = \sigma\,A$ · refroidissement : traction, fissures
+
+### Joints
+
+blocs ≤ d_joint (EN 1992-1-1 §2.3.3, valeur recommandée {nombre(D_JOINT_RECOMMANDE, 0)} m, à vérifier) · joint compressible + mastic · jamais de mortier
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La barre d'acier">
+
+Une barre d'acier de 12 m chauffe de 30 K au soleil. De combien s'allonge-t-elle ?
+
+<Indice>ΔL = α L ΔT, avec L en mm.</Indice>
+
+<Corrige>
+ΔL = {nombre(ALPHA_ACIER * 1e6, 0)} × 10⁻⁶ × 12 000 × 30 = **{grandeur(rail, 2, 'mm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La poutre de hangar bloquée">
+
+Une poutre en acier S235 de 40 m, de section 5 400 mm² (donnée de l'énoncé), est fixée à ses deux extrémités. Elle chauffe de 30 K. Calcule son allongement libre, la contrainte si elle est totalement bloquée, et l'effort transmis aux appuis.
+
+<Indice>σ = E α ΔT avec E = {nombre(A.E, 0)} MPa ; N = σ A.</Indice>
+
+<Corrige>
+
+- Allongement libre : **{grandeur(p40.dL, 1, 'mm')}**.
+- Bloquée : σ = {nombre(A.E, 0)} × {nombre(ALPHA_ACIER * 1e6, 0)} × 10⁻⁶ × 30 = **{grandeur(p40.sigma, 1, 'MPa')}**, sous fy = {nombre(A.limite, 0)} MPa : l'acier tient.
+- Effort : {nombre(p40.sigma, 1)} × 5 400 = **{grandeur(N40, 0, 'kN')}** sur chaque appui : il faut un appui glissant à une extrémité.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Placer les joints">
+
+Un bâtiment en béton armé mesure 60 m de long. On veut des blocs d'au plus {nombre(D_JOINT_RECOMMANDE, 0)} m. Combien de joints faut-il ? Pour ΔT = 25 K, de combien chaque joint doit-il pouvoir se refermer ?
+
+<Indice>Chaque bloc s'allonge à partir de son milieu : chacune de ses extrémités avance de ΔL / 2. Un joint reçoit la moitié de l'allongement de chacun de ses deux voisins.</Indice>
+
+<Corrige>
+
+- {nombre(bat.blocs, 0)} blocs de {grandeur(bat.Lbloc, 0, 'm')}, donc **{nombre(bat.joints, 0)} joint**.
+- Un bloc s'allonge de {grandeur(blocBat.dL, 1, 'mm')} ; chaque voisin avance de la moitié vers le joint : le joint doit pouvoir se refermer de **{grandeur(blocBat.dL, 1, 'mm')}**, plus une marge pour le retrait et les tolérances d'exécution.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.7.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une dalle de béton de 30 m chauffe de 25 K. Libre, elle s'allonge de :" choix={['0,75 mm', grandeur(d0.dL, 1, 'mm'), '75 mm', '750 mm']} bonne={1} colonnes={4}>
+{nombre(ALPHA_BETON * 1e6, 0)} × 10⁻⁶ × 30 000 mm × 25.
+</QCM>
+
+<QCM n={2} question="Une différence de 25 °C correspond à :" choix={['25 K', '298 K', '−248 K', '77 K']} bonne={0} colonnes={4}>
+Le kelvin et le degré Celsius ont la même taille.
+</QCM>
+
+<QCM n={3} question="Le béton armé fonctionne parce que l'acier et le béton ont :" choix={['la même résistance', 'presque le même coefficient de dilatation', 'le même module d’élasticité', 'la même masse volumique']} bonne={1} colonnes={2}>
+{nombre(ALPHA_ACIER * 1e6, 0)} et {nombre(ALPHA_BETON * 1e6, 0)} × 10⁻⁶ K⁻¹ : ils se dilatent ensemble.
+</QCM>
+
+<QCM n={4} question="Un élément dont on empêche totalement la dilatation :" choix={['ne subit rien', 'se met en contrainte, σ = E α ΔT', 's’allonge quand même', 'perd sa résistance']} bonne={1} colonnes={2}>
+La déformation empêchée devient une contrainte.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Un joint de dilatation se remplit :" choix={['de mortier de ciment', 'd’un matériau compressible fermé par un mastic', 'de béton armé', 'de rien du tout']} bonne={1} colonnes={2}>
+Il doit pouvoir se refermer.
+</QCM>
+
+<QCM n={6} question="La valeur recommandée de d_joint dans l'EN 1992-1-1 (§2.3.3) est :" choix={['10 m', grandeur(D_JOINT_RECOMMANDE, 0, 'm'), '100 m', 'il n’y en a pas']} bonne={1} colonnes={4}>
+{grandeur(D_JOINT_RECOMMANDE, 0, 'm')}, que l'annexe nationale peut modifier.
+</QCM>
+
+<QCM n={7} question="Pour une même ΔT, une poutre de 40 m s'allonge, par rapport à une poutre de 20 m du même matériau :" choix={['autant', 'deux fois plus', 'quatre fois plus', 'deux fois moins']} bonne={1} colonnes={4}>
+ΔL est proportionnel à L.
+</QCM>
+
+<QCM n={8} question="La nuit, une dalle bloquée qui se refroidit est :" choix={['comprimée', 'tendue', 'sans contrainte', 'plus longue']} bonne={1} colonnes={4}>
+Elle voudrait se raccourcir : si on l'en empêche, elle est tendue, et le béton fissure en traction.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,157 @@
+---
+id: N0.7.P
+titre: "Mini-projet : physique d'un château d'eau"
+objectifs:
+  - Calculer le volume et le poids de l'eau d'un réservoir surélevé
+  - Calculer la charge totale et la pression moyenne sous le radier
+  - Calculer les pressions de l'eau au fond de la cuve et au pied du château d'eau
+  - Calculer l'énergie et la puissance de pompage d'un remplissage
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { chateauEau, EXEMPLE_CHATEAU } from '@/lib/calc/physique'
+import { grandeur, nombre } from '@/lib/format'
+
+export const d = EXEMPLE_CHATEAU
+export const r = chateauEau(d)
+export const plusHaut = chateauEau({ ...d, H: d.H + 3 })
+export const lignes = [
+  ['Volume d’eau, cuve pleine', grandeur(r.V, 2, 'm³')],
+  ['Poids de l’eau', grandeur(r.Geau, 2, 'kN')],
+  ['Charge totale sur le sol', grandeur(r.N, 2, 'kN')],
+  ['Pression moyenne sous le radier', grandeur(r.sigma, 2, 'kPa')],
+  ['Pression sur le fond de cuve', `${grandeur(r.pFond, 2, 'kPa')} (${grandeur(r.pFond / 100, 2, 'bar')})`],
+  ['Pression statique au robinet du pied', `${grandeur(r.pSol, 2, 'kPa')} (${grandeur(r.pSol / 100, 2, 'bar')})`],
+  ['Énergie consommée par remplissage', grandeur(r.Ea, 2, 'kWh')],
+  ['Puissance absorbée par la pompe', grandeur(r.Pabs / 1000, 2, 'kW')],
+]
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Un village du Kongo-Central construit un château d'eau pour son centre de santé et ses bornes-fontaines. L'eau vient d'un forage équipé d'une pompe immergée ; elle est stockée en hauteur, puis distribuée par gravité. Le comité de l'eau te demande quelques chiffres clés.
+
+### Les données
+
+- cuve cylindrique de {grandeur(d.D, 1, 'm')} de diamètre intérieur, {grandeur(d.h, 1, 'm')} d'eau quand elle est pleine ;
+- fond de cuve à {grandeur(d.H, 1, 'm')} au-dessus du sol ;
+- poids de la structure vide, radier compris : {grandeur(d.Gs, 0, 'kN')} ; radier carré de {grandeur(d.B, 1, 'm')} de côté ;
+- niveau de l'eau dans le forage, pompe en marche : {grandeur(d.zf, 1, 'm')} sous le sol ; l'eau arrive en haut de la cuve ;
+- rendement de la motopompe : {nombre(d.eta, 2)} ; remplissage complet en {grandeur(d.t, 1, 'h')}.
+
+Le poids de la structure, le rendement et le niveau du forage sont des **données de l'énoncé** : sur un vrai projet, ils viennent du calcul de la structure, de la fiche de la pompe et de l'essai de pompage.
+
+### Ce que tu rends
+
+1. Le volume et le poids de l'eau, cuve pleine.
+2. La charge totale sur le sol et la pression moyenne sous le radier.
+3. La pression de l'eau sur le fond de la cuve et à un robinet au pied du château d'eau.
+4. L'énergie consommée par un remplissage et la puissance de la pompe.
+
+<Regle type="simplification">
+Pertes de charge dans les tuyaux négligées ; pression uniforme sous un radier supposé rigide ; vent et séisme non étudiés. Ces points sont repris en hydraulique (L3.5), en géotechnique et en structure.
+</Regle>
+
+</Page>
+
+<FicheCalcul calcul="chateauEau">
+
+<Cahier titre="Étape 1 : l'eau stockée et le château d'eau" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi la cuve pleine ? C'est le cas le plus lourd pour le sol, et celui où la pression de l'eau est la plus forte.</Note>
+</Etape>
+
+<Etape n={2} titre="Le volume et le poids de l'eau">
+<AN k="volume" />
+<AN k="poids" />
+</Etape>
+
+<Etape n={3} titre="L'élévation">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : le sol et les pressions de l'eau" etape="projet">
+
+<Etape n={4} titre="La charge sur le sol">
+<AN k="sol" />
+<Note>Pourquoi diviser par B² ? La charge se répartit sur toute la surface du radier : c'est une pression, comme sous une semelle (N0.3.3).</Note>
+</Etape>
+
+<Etape n={5} titre="Les pressions de l'eau">
+<AN k="pressions" />
+<Note>Pourquoi H + h au robinet ? Vases communicants : la pression au robinet fermé est celle de toute la hauteur d'eau au-dessus de lui (N0.7.5).</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 : l'énergie de pompage" etape="projet">
+
+<Etape n={6} titre="La hauteur d'élévation">
+<AN k="elevation" />
+</Etape>
+
+<Etape n={7} titre="L'énergie et la puissance">
+<AN k="energie" />
+<AN k="puissance" />
+<Resultat k="Ea" libelle="Énergie consommée par remplissage" />
+
+<Note couleur="vert">Pompe : <Val k="Pabs" /> absorbés pendant le remplissage. Contrôle : diviser par le rendement fait toujours augmenter l'énergie et la puissance.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le récapitulatif : exemple corrigé">
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Grandeur</th><th>Valeur</th></tr></thead>
+    <tbody>{lignes.map(([nom, valeur]) => <tr key={nom}><td>{nom}</td><td>{valeur}</td></tr>)}</tbody>
+  </table>
+</div>
+
+### Ce qu'il faut en retenir
+
+- L'eau pèse lourd : {grandeur(r.Geau, 0, 'kN')}, soit {grandeur((r.Geau / r.N) * 100, 0, '%')} de la charge sur le sol. Le château d'eau vide et plein n'imposent pas du tout la même charge au terrain.
+- La pression au robinet du pied, {grandeur(r.pSol / 100, 2, 'bar')}, est une pression **statique**, robinet fermé. En service, les pertes de charge dans les conduites la diminuent.
+- Pomper coûte : {grandeur(r.Ea, 2, 'kWh')} par remplissage, dont {grandeur((1 - d.eta) * 100, 0, '%')} se perdent dans la motopompe (rendement {nombre(d.eta, 2)}).
+
+<Encadre type="attention">
+La pression moyenne sous le radier ({grandeur(r.sigma, 1, 'kPa')}) devra être comparée à ce que le sol peut porter : seule une étude géotechnique le dira. Ce n'est pas un résultat de ce mini-projet.
+</Encadre>
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Volume et poids | Unités mélangées (L, kg, kN) | Volume en m³, poids en kN | Conversions écrites à chaque ligne |
+| Charge sur le sol | Eau oubliée | Eau + structure | Cas cuve vide et cuve pleine comparés |
+| Pressions | Hauteur fausse | Fond de cuve et pied justes | Valeurs en kPa et en bar, statique distinguée du service |
+| Énergie | Rendement oublié | Énergie et puissance justes | Énergie utile et consommée distinguées |
+| Présentation | Pas de schéma | Schéma coté | Récapitulatif et simplifications signalées |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+On monte la cuve 3 m plus haut. La pression au robinet passe à {grandeur(plusHaut.pSol / 100, 2, 'bar')} et l'énergie par remplissage à {grandeur(plusHaut.Ea, 2, 'kWh')}. Que gagne-t-on, que perd-on ? Et que change un remplissage en 3 h au lieu de 6 h, pour l'énergie et pour la puissance de la pompe ?
+</Encadre>
+
+<Quiz id="N0.7.P">
+
+<QCM n={1} question="Mon rendu donne-t-il chaque résultat avec son unité, distingue-t-il pression statique et pression en service, et signale-t-il les simplifications ?" choix={['Oui, tout y est', 'Il manque des unités ou des précisions', 'Je n’ai fait qu’une partie des calculs']} bonne={0}>
+Sinon, complète-le : c'est le document que le comité de l'eau présentera au bailleur.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

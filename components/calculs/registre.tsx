@@ -10,6 +10,7 @@ import { CALCULS_ALGEBRE } from './algebre';
 import { CALCULS_METHODE } from './methode';
 import { CALCULS_GEOMETRIE } from './geometrie';
 import { CALCULS_TRIGO } from './trigo';
+import { CALCULS_PHYSIQUE } from './physique';
 import { CALCULS_UNITES } from './unites';
 import { CALCULS_VECTEURS } from './vecteurs';
 import { MurSchema } from '@/components/schemas/MurCloture';
@@ -387,9 +388,12 @@ function fusion<A extends object, B extends object>(a: A, b: Disjoint<A, B>): A 
 
 export const REGISTRE = fusion(
   fusion(
-    fusion(fusion(fusion(fusion({ echelle, remblai, escalier, poteau, mur } as const, CALCULS_METHODE), CALCULS_ALGEBRE), CALCULS_UNITES), CALCULS_TRIGO),
-    CALCULS_GEOMETRIE,
+    fusion(
+      fusion(fusion(fusion(fusion({ echelle, remblai, escalier, poteau, mur } as const, CALCULS_METHODE), CALCULS_ALGEBRE), CALCULS_UNITES), CALCULS_TRIGO),
+      CALCULS_GEOMETRIE,
+    ),
+    CALCULS_VECTEURS,
   ),
-  CALCULS_VECTEURS,
+  CALCULS_PHYSIQUE,
 );
 export type NomCalcul = keyof typeof REGISTRE;

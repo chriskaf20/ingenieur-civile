@@ -1,0 +1,320 @@
+---
+id: N0.7.3
+titre: Poids, frottement et plan incliné
+objectifs:
+  - Distinguer poids, réaction normale et force de frottement
+  - Calculer le frottement maximal μ N et reconnaître le frottement mobilisé
+  - Écrire la condition de glissement sur un plan incliné
+  - Calculer la force pour retenir ou monter une charge, et l'effort d'arrimage
+relecture: false
+normes:
+  - "EN 1997-1 (EC7) §6.5.3 : résistance au glissement des fondations"
+  - "EN 12195-1 : calcul des forces d'arrimage des charges sur les véhicules routiers"
+glossaire:
+  - terme: Réaction normale
+    definition: Force exercée par un support, perpendiculaire à la surface de contact.
+  - terme: Frottement
+    definition: Force de contact parallèle à la surface, qui s'oppose au glissement ; elle ne dépasse pas μ N.
+  - terme: Coefficient de frottement
+    definition: Nombre μ, sans unité, propre aux deux surfaces en contact et à leur état (sec, mouillé, poussiéreux).
+  - terme: Angle de frottement
+    definition: Pente à partir de laquelle une charge glisse seule sur un plan ; sa tangente vaut μ.
+  - terme: Arrimage
+    definition: Fixation d'une charge sur un véhicule (sangles, cales, chaînes) pour l'empêcher de glisser ou de basculer.
+symboles:
+  - { symbole: 'P', signification: 'poids', unite: 'kN' }
+  - { symbole: 'N', signification: 'réaction normale', unite: 'kN' }
+  - { symbole: 'F', signification: 'force de frottement', unite: 'kN' }
+  - { symbole: 'μ', signification: 'coefficient de frottement', unite: '—' }
+  - { symbole: 'α', signification: 'pente du plan', unite: '°' }
+formules:
+  - { nom: 'Frottement de Coulomb', tex: 'F \le \mu\,N', domaine: 'Contact sec, un seul coefficient' }
+  - { nom: 'Plan incliné', tex: 'N = P\cos\alpha, \quad P_\parallel = P\sin\alpha', domaine: 'Pente α' }
+  - { nom: 'Condition de glissement', tex: '\tan\alpha > \mu', domaine: 'Charge seule sur le plan' }
+  - { nom: 'Forces pour retenir et pour monter', tex: 'P(\sin\alpha - \mu\cos\alpha), \quad P(\sin\alpha + \mu\cos\alpha)', domaine: 'Vitesse constante' }
+---
+
+import { arrimage, EXEMPLE_PLAN, planIncline } from '@/lib/calc/physique'
+import { tanD } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { PlanIncline3D } from '@/components/schemas/Physique'
+
+export const p0 = planIncline(EXEMPLE_PLAN)
+export const p30 = planIncline({ ...EXEMPLE_PLAN, alpha: 30 })
+export const sac = planIncline({ m: 50, alpha: 0, mu: 0.5 })
+export const gravier = planIncline({ m: 1, alpha: 0, mu: 0.7 })
+export const ar1 = arrimage({ m: 1500, a: 5, mu: 0.3 })
+export const ar2 = arrimage({ m: 1500, a: 5, mu: 0.6 })
+export const mouille = planIncline({ ...EXEMPLE_PLAN, mu: 0.2 })
+
+<Page etape="intuition" titre="L'intuition : le sac qui résiste, puis glisse">
+
+Pousse un sac de ciment posé sur une dalle. Au début, il ne bouge pas : quelque chose le retient, et ce quelque chose grandit à mesure que tu pousses plus fort. Puis, d'un coup, il cède et glisse. Ce « quelque chose » est le **frottement** entre le sac et la dalle.
+
+Pose maintenant le sac sur une planche que tu inclines peu à peu. Tant que la pente est douce, il reste en place ; au-delà d'une certaine pente, il part tout seul. Cette pente limite ne dépend pas du poids du sac, mais seulement des surfaces en contact.
+
+Le frottement est partout sur un chantier : il retient une charge sur un camion, il permet aux roues d'un engin d'avancer, il empêche un mur de glisser sous la poussée des terres.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Jusqu'à quelle force, ou jusqu'à quelle pente, une charge tient-elle en place ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : poids, réaction, frottement">
+
+### Trois forces de contact
+
+Une charge posée sur un support reçoit :
+
+- son **poids** $P = m\,g$, vertical, vers le bas ;
+- la **réaction normale** $N$, perpendiculaire à la surface de contact ;
+- le **frottement** $F$, parallèle à la surface, qui s'oppose au glissement (ou à la tendance au glissement).
+
+### La loi de Coulomb
+
+Tant que la charge ne glisse pas, le frottement vaut **exactement ce qu'il faut** pour la retenir, sans dépasser un maximum :
+
+$$F \le \mu\,N$$
+
+Quand la force qui pousse dépasse $\mu\,N$, la charge glisse. Le coefficient $\mu$, sans unité, dépend des deux matériaux en contact et de leur état : sec, mouillé, poussiéreux, graissé.
+
+<Regle type="simplification">
+On utilise un seul coefficient μ. En réalité, il faut un peu plus de force pour décoller une charge que pour la faire glisser ensuite (frottement statique supérieur au frottement de glissement), et μ varie avec l'humidité et la propreté des surfaces. Les valeurs de μ de cette leçon sont des données d'énoncé.
+</Regle>
+
+<Encadre type="attention">
+μ N est un **maximum**, pas la valeur du frottement. Un sac posé sur une dalle horizontale, que personne ne pousse, ne subit aucun frottement.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le plan incliné">
+
+### Décomposer le poids
+
+Sur un plan de pente $\alpha$, on prend les axes du plan (N0.6.3) :
+
+$$N = P\cos\alpha \qquad P_\parallel = P\sin\alpha$$
+
+La composante $P_\parallel$ tire la charge vers le bas de la pente ; le frottement s'y oppose, jusqu'à $\mu\,N = \mu\,P\cos\alpha$.
+
+### La condition de glissement
+
+La charge glisse seule si $P\sin\alpha > \mu\,P\cos\alpha$, c'est-à-dire si :
+
+$$\tan\alpha > \mu$$
+
+Le poids s'élimine : la pente limite, $\varphi = \arctan\mu$, ne dépend que des surfaces. On l'appelle **angle de frottement**.
+
+### Retenir ou monter
+
+- Pour **retenir** la charge, il faut fournir ce qui manque : $P(\sin\alpha - \mu\cos\alpha)$ si c'est positif, rien sinon.
+- Pour la **monter** à vitesse constante, il faut vaincre la pente **et** le frottement, qui s'oppose maintenant à la montée : $P(\sin\alpha + \mu\cos\alpha)$.
+
+<Regle type="norme" source="EN 1997-1 §6.5.3">
+La résistance au glissement d'une fondation se calcule à partir de l'angle de frottement du sol, avec les coefficients partiels de l'Eurocode 7. Le principe est celui de cette leçon ; la vérification complète d'un mur poids vient en L1.3.10.
+</Regle>
+
+</Page>
+
+<Vue3D titre="La rampe en perspective" calques={[{ id: 'rampe', libelle: 'Rampe' }, { id: 'charge', libelle: 'Charge' }, { id: 'forces', libelle: 'Forces' }, { id: 'decomposition', libelle: 'Décomposition du poids', actif: false }, { id: 'cotes', libelle: 'Angle' }]}>
+
+La palette de l'exemple résolu sur sa rampe. Active le calque « décomposition » : le poids se partage en une part le long de la rampe et une part perpendiculaire, que la réaction normale équilibre.
+
+<PlanIncline3D d={EXEMPLE_PLAN} r={p0} />
+
+<Encadre type="retenir">
+Le frottement mobilisé (bleu) vaut ici {grandeur(p0.Ppara, 2, 'kN')}, exactement la part du poids le long de la rampe. Il pourrait aller jusqu'à μ N = {grandeur(p0.Fmax, 2, 'kN')} : la palette tient avec une marge.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="planIncline">
+
+<Cahier titre="Exemple résolu : la palette sur la rampe de chargement">
+
+**Énoncé.** Une palette de blocs de 800 kg est posée sur une rampe de chargement en béton, inclinée à 15°. Le coefficient de frottement entre la palette et la rampe vaut 0,4 (donnée de l'énoncé). La palette glisse-t-elle ? Quelle force un treuil doit-il fournir pour la monter à vitesse constante ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi μ est-il une donnée ? Il dépend du bois de la palette, de l'état du béton et de l'humidité : on le prend dans un essai ou une référence, on ne l'invente pas.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : décomposer, comparer, conclure">
+
+<Etape n={3} titre="Le poids et ses composantes">
+<AN k="poids" />
+<AN k="composantes" />
+</Etape>
+
+<Etape n={4} titre="Le frottement disponible">
+<AN k="frottement" />
+<AN k="comparaison" />
+<Note>Pourquoi comparer ces deux forces ? La palette glisse seulement si la part du poids le long de la rampe dépasse le frottement maximal.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<AN k="forces" />
+<Resultat k="Fmonter" libelle="Force du treuil pour monter la palette" />
+
+<Note couleur="vert">Verdict : <Val k="verdict" /> (pente limite <Val k="angleLimite" />). Contrôle : pour monter, il faut plus que la seule part du poids le long de la rampe, puisque le frottement s'oppose à la montée.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre N = P sur un plan incliné.">
+N = P cos α. Pour la palette, N vaut {grandeur(p0.N, 2, 'kN')}, pas {grandeur(p0.P, 2, 'kN')}.
+</Piege>
+
+<Piege erreur="croire que le frottement vaut toujours μ N.">
+μ N est un plafond. Au repos, le frottement vaut juste ce qu'il faut : {grandeur(p0.Ppara, 2, 'kN')} pour la palette, sur {grandeur(p0.Fmax, 2, 'kN')} possibles.
+</Piege>
+
+<Piege erreur="oublier que le frottement change de sens.">
+Il s'oppose toujours au mouvement (ou à sa tendance). Pour retenir, il aide ; pour monter, il gêne : {grandeur(p0.Fmonter, 2, 'kN')} pour monter la palette, alors que rien n'est nécessaire pour la retenir.
+</Piege>
+
+<Piege erreur="confondre μ et l'angle de frottement.">
+μ = tan φ. Avec μ = 0,4, l'angle de frottement vaut {nombre(p0.angleLimite, 1)}°, pas 0,4° ni 40°.
+</Piege>
+
+<Piege erreur="garder le même μ par tous les temps.">
+Mouillée, la rampe peut devenir glissante : avec μ = 0,2, la même palette {mouille.glisse ? 'glisse' : 'tient encore'} ({grandeur(mouille.Ppara, 2, 'kN')} contre {grandeur(mouille.Fmax, 2, 'kN')} de frottement possible).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**L'arrimage.** Une charge posée sur un plateau ne tient que par frottement. Au freinage, il faut lui donner une décélération m a ; si μ m g ne suffit pas, les sangles doivent fournir le reste (exercice 3). La méthode de calcul des arrimages est normalisée (EN 12195-1), avec des accélérations de calcul dans chaque direction.
+
+<Encadre type="terrain" titre="Latérite mouillée et engins">
+Le frottement ne fait pas que retenir : il fait **avancer**. Une roue motrice pousse le sol vers l'arrière ; le sol, par frottement, pousse l'engin vers l'avant (actions réciproques, N0.7.2). Sur une piste en latérite détrempée, μ chute : les roues patinent, les camions s'embourbent dans les montées. On empierre les rampes et l'on limite leur pente.
+</Encadre>
+
+**Les talus et les tas.** Un tas de sable ou de gravier sec prend de lui-même une pente voisine de son angle de frottement : c'est l'angle de talus naturel. Les sols avec de l'argile tiennent davantage grâce à la cohésion, mais la perdent souvent quand ils sont gorgés d'eau.
+
+**Les murs de soutènement.** La poussée des terres tend à faire glisser un mur poids ; le frottement sous sa base le retient (EN 1997-1 §6.5.3, L1.3.10).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : frottement et plan incliné">
+
+### Forces
+
+poids P = m g · réaction normale N ⟂ surface · frottement F ∥ surface, opposé au glissement
+
+### Coulomb
+
+$F \le \mu\,N$ · μ sans unité, selon les surfaces et leur état · au repos, F = juste ce qu'il faut
+
+### Plan incliné
+
+$N = P\cos\alpha$ · $P_\parallel = P\sin\alpha$ · glisse si $\tan\alpha > \mu$ · angle de frottement $\varphi = \arctan\mu$
+
+### Forces à fournir
+
+retenir : $P(\sin\alpha - \mu\cos\alpha)$ si positif · monter : $P(\sin\alpha + \mu\cos\alpha)$
+
+### Arrimage
+
+nécessaire : m a · frottement : μ m g · les sangles reprennent la différence
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le sac sur la dalle">
+
+Un sac de ciment de 50 kg est posé sur une dalle horizontale, avec μ = 0,5. Calcule son poids, la réaction normale et la force horizontale à partir de laquelle il glisse.
+
+<Indice>Sur un plan horizontal, N = P.</Indice>
+
+<Corrige>
+P = 50 × 9,81 = **{grandeur(sac.P * 1000, 1, 'N')}** ; N = P = {grandeur(sac.N * 1000, 1, 'N')} ; il glisse au-delà de μ N = **{grandeur(sac.Fmax * 1000, 1, 'N')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le tas de gravier">
+
+Le coefficient de frottement d'un gravier sec sur lui-même vaut 0,7 (donnée de l'énoncé). Quelle pente maximale peut prendre un tas de ce gravier ?
+
+<Indice>Un grain en surface glisse si tan α &gt; μ.</Indice>
+
+<Corrige>
+α max = arctan 0,7 = **{nombre(gravier.angleLimite, 1)}°**. Un tas versé par un camion prend de lui-même cette pente : c'est l'angle de talus naturel.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="L'arrimage d'une palette de ciment">
+
+Une palette de ciment de 1 500 kg est posée sur le plateau d'un camion, avec μ = 0,3 (donnée de l'énoncé). Au freinage brusque, le camion décélère de 5 m/s². Quelle force les sangles doivent-elles reprendre ? Et si l'on intercale un tapis antiglisse qui porte μ à 0,6 ?
+
+<Indice>Force nécessaire m a ; frottement disponible μ m g ; les sangles fournissent la différence.</Indice>
+
+<Corrige>
+
+- Nécessaire : 1 500 × 5 = {grandeur(ar1.Fnec, 2, 'kN')} ; frottement : 0,3 × 1 500 × 9,81 = {grandeur(ar1.Ffrot, 2, 'kN')} ; les sangles doivent reprendre **{grandeur(ar1.manque, 2, 'kN')}**.
+- Avec le tapis : frottement {grandeur(ar2.Ffrot, 2, 'kN')} ; manque **{grandeur(ar2.manque, 2, 'kN')}**. On arrime quand même : les secousses de la route allègent un instant la charge (N diminue, donc le frottement aussi).
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.7.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sur un plan incliné de pente α, la réaction normale vaut :" choix={['P', 'P cos α', 'P sin α', 'P tan α']} bonne={1} colonnes={4}>
+Elle équilibre la part du poids perpendiculaire au plan.
+</QCM>
+
+<QCM n={2} question="Une charge glisse seule sur un plan incliné si :" choix={['tan α > μ', 'sin α > μ', 'μ > 1', 'P > N']} bonne={0} colonnes={4}>
+P sin α &gt; μ P cos α, donc tan α &gt; μ.
+</QCM>
+
+<QCM n={3} question="Avec μ = 0,4, la pente limite de glissement vaut environ :" choix={['0,4°', `${nombre(p0.angleLimite, 1)}°`, '40°', '66,4°']} bonne={1} colonnes={4}>
+arctan 0,4 = {nombre(p0.angleLimite, 1)}°.
+</QCM>
+
+<QCM n={4} question="Un sac posé sur une dalle horizontale, que personne ne pousse, subit un frottement :" choix={['égal à μ N', 'nul', 'égal à son poids', 'dirigé vers le haut']} bonne={1} colonnes={2}>
+Rien ne tend à le faire glisser : le frottement est nul.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>La palette de {nombre(EXEMPLE_PLAN.m, 0)} kg sur la rampe à {nombre(EXEMPLE_PLAN.alpha, 0)}°, avec μ = {nombre(EXEMPLE_PLAN.mu, 1)}, est inclinée à 30°. Elle :</>} choix={['tient encore', 'glisse', 'se soulève', 'bascule forcément']} bonne={p30.glisse ? 1 : 0} colonnes={4}>
+tan 30° = {nombre(tanD(30), 2)} &gt; {nombre(EXEMPLE_PLAN.mu, 1)} : P sin α = {grandeur(p30.Ppara, 2, 'kN')} dépasse μ N = {grandeur(p30.Fmax, 2, 'kN')}.
+</QCM>
+
+<QCM n={6} question="Pour monter une charge à vitesse constante sur une rampe, le frottement :" choix={['aide la montée', 's’oppose à la montée', 'est nul', 'dépend de la vitesse']} bonne={1} colonnes={2}>
+Il s'oppose toujours au mouvement.
+</QCM>
+
+<QCM n={7} question="Le coefficient de frottement μ :" choix={['a l’unité du newton', 'dépend des surfaces et de leur état', 'dépend de la surface de contact', 'vaut toujours 0,5']} bonne={1} colonnes={2}>
+Sec, mouillé, poussiéreux : μ change.
+</QCM>
+
+<QCM n={8} question="Sur une piste en latérite détrempée, un camion patine dans une montée parce que :" choix={['son poids augmente', 'le frottement entre pneus et sol diminue', 'la pente diminue', 'le moteur perd de la puissance']} bonne={1} colonnes={2}>
+La traction vient du frottement des roues sur le sol.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

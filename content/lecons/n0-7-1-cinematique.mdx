@@ -1,0 +1,326 @@
+---
+id: N0.7.1
+titre: "Cinématique : position, vitesse, accélération"
+objectifs:
+  - Calculer une vitesse moyenne et convertir les km/h en m/s
+  - Calculer une accélération à partir de deux vitesses
+  - Utiliser les équations du mouvement uniformément accéléré
+  - Calculer une distance d'arrêt et une vitesse de chute
+relecture: false
+normes: []
+glossaire:
+  - terme: Cinématique
+    definition: Partie de la physique qui décrit les mouvements (positions, vitesses, accélérations) sans s'occuper de leurs causes.
+  - terme: Vitesse moyenne
+    definition: Distance parcourue divisée par la durée du parcours, en m/s ou en km/h.
+  - terme: Accélération
+    definition: Variation de la vitesse par seconde, en m/s² ; négative quand on freine.
+  - terme: Mouvement uniformément accéléré
+    definition: Mouvement en ligne droite dont l'accélération reste constante (freinage régulier, chute libre).
+  - terme: Distance d'arrêt
+    definition: Distance parcourue pendant le temps de réaction du conducteur, plus la distance de freinage.
+symboles:
+  - { symbole: 'x', signification: 'position sur la trajectoire', unite: 'm' }
+  - { symbole: 't', signification: 'temps', unite: 's' }
+  - { symbole: 'v', signification: 'vitesse', unite: 'm/s' }
+  - { symbole: 'a', signification: 'accélération', unite: 'm/s²' }
+  - { symbole: 'g', signification: 'accélération de la pesanteur', unite: 'm/s²' }
+formules:
+  - { nom: 'Vitesse moyenne', tex: 'v = \frac{\Delta x}{\Delta t}', domaine: 'Tout mouvement' }
+  - { nom: 'Accélération moyenne', tex: 'a = \frac{\Delta v}{\Delta t}', domaine: 'Tout mouvement rectiligne' }
+  - { nom: 'Mouvement uniformément accéléré', tex: 'v = v_0 + a\,t, \quad x = x_0 + v_0\,t + \tfrac{1}{2}\,a\,t^2', domaine: 'a constante' }
+  - { nom: 'Vitesse et distance', tex: 'v^2 = v_0^2 + 2\,a\,d', domaine: 'a constante' }
+  - { nom: 'Chute libre', tex: 'v = \sqrt{2\,g\,h}, \quad t = \sqrt{2h/g}', domaine: 'Résistance de l’air négligée' }
+---
+
+import { accelerationMoyenne, chuteLibre, cycleCamion, distanceArret, EXEMPLE_ARRET, kmhVersMs, mrua, msVersKmh } from '@/lib/calc/physique'
+import { PESANTEUR } from '@/lib/calc/methode'
+import { G_NORMALE } from '@/lib/calc/unites'
+import { grandeur, nombre } from '@/lib/format'
+import { TroisGraphes } from '@/components/schemas/Physique'
+
+export const a0 = distanceArret(EXEMPLE_ARRET)
+export const v50 = kmhVersMs(50)
+export const toupie = cycleCamion({ distance: 6, vCharge: 30, vVide: 40, tFixe: 15, journee: 8 })
+export const piste = cycleCamion({ distance: 6, vCharge: 40, vVide: 40, tFixe: 15, journee: 8 })
+export const acc = mrua(0, 0, 0.5, 20)
+export const ch = chuteLibre(10)
+export const ch5 = chuteLibre(5)
+export const arret = (v) => distanceArret({ ...EXEMPLE_ARRET, v })
+export const faux = distanceArret({ ...EXEMPLE_ARRET, v: msVersKmh(EXEMPLE_ARRET.v) }).dFreinage
+export const a20 = accelerationMoyenne(0, 10, 20)
+
+<Page etape="intuition" titre="L'intuition : une seconde, c'est long">
+
+Le compteur d'un camion-benne indique 50 km/h. En **une seconde**, le camion avance de {grandeur(v50, 1, 'm')}, la longueur d'une petite maison. Un enfant traverse la piste du chantier : avant même que le pied du chauffeur touche la pédale de frein, le camion a déjà parcouru cette distance. Ensuite seulement, il commence à ralentir.
+
+Autre scène : un marteau glisse d'un échafaudage, à 10 m de haut. Il ne « tombe » pas doucement : il arrive au sol à plus de {grandeur(Math.floor(ch.vKmh), 0, 'km/h')}, la vitesse d'une voiture en ville.
+
+Pour prévoir ces situations, il faut décrire le mouvement avec des nombres : **où** est l'objet (position), **à quelle vitesse** il va, et **comment cette vitesse change** (accélération). C'est la cinématique.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer la distance dont un camion a besoin pour s'arrêter, ou la vitesse d'un objet qui tombe ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : position et vitesse">
+
+### Position et déplacement
+
+Sur une trajectoire en ligne droite, on repère l'objet par sa **position** $x$ (m), mesurée depuis une origine choisie. Entre deux instants, son déplacement vaut $\Delta x = x_2 - x_1$.
+
+### La vitesse
+
+La **vitesse moyenne** est le déplacement divisé par la durée :
+
+$$v = \frac{\Delta x}{\Delta t}$$
+
+L'unité SI est le m/s. Sur la route, on parle en km/h : 1 km/h = 1 000 m / 3 600 s, donc on **divise par 3,6** pour passer en m/s et on multiplie par 3,6 pour revenir en km/h (N0.3.2).
+
+<Encadre type="exemple">
+Un camion-toupie parcourt 6 km chargé à 30 km/h de moyenne : il met 6 / 30 = {nombre(toupie.tAller / 60, 1)} h, soit {grandeur(toupie.tAller, 0, 'min')}. Au retour, à vide, à 40 km/h : {grandeur(toupie.tRetour, 0, 'min')}.
+</Encadre>
+
+### Le mouvement uniforme
+
+Si la vitesse reste constante, la position augmente régulièrement : $x = x_0 + v\,t$. Sur un graphique $x(t)$, c'est une droite dont la **pente** est la vitesse.
+
+<Encadre type="attention">
+Une vitesse moyenne cache les arrêts et les accélérations. Un camion qui roule à 40 km/h puis attend 10 minutes au chargement n'a plus une moyenne de 40 km/h sur l'ensemble du trajet.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : l'accélération">
+
+### Définition
+
+L'**accélération** dit de combien la vitesse change chaque seconde :
+
+$$a = \frac{\Delta v}{\Delta t} \quad \text{(m/s par seconde, soit m/s²)}$$
+
+Elle est positive si l'on accélère, négative si l'on freine. Un camion qui passe de 0 à 10 m/s en 20 s a une accélération de {grandeur(a20, 1, 'm/s²')}.
+
+### Le mouvement uniformément accéléré
+
+Si l'accélération reste constante :
+
+$$v = v_0 + a\,t \qquad x = x_0 + v_0\,t + \tfrac{1}{2}\,a\,t^2 \qquad v^2 = v_0^2 + 2\,a\,d$$
+
+Avec $a$ = 0,5 m/s² pendant 20 s, départ arrêté : $v$ = {grandeur(acc.v, 0, 'm/s')} et $x$ = {grandeur(acc.x, 0, 'm')}. La dernière formule, sans le temps, sert pour le freinage : pour s'arrêter ($v = 0$) depuis $v_0$ avec une décélération $a$, il faut $d = v_0^2 / (2a)$.
+
+### La chute libre
+
+Un objet qui tombe accélère de $g$ ≈ {nombre(PESANTEUR, 2)} m/s² (la valeur normale vaut {nombre(G_NORMALE, 5)} m/s²). Lâché sans vitesse d'une hauteur $h$, il arrive au sol après $t = \sqrt{2h/g}$, à la vitesse $v = \sqrt{2gh}$.
+
+<Regle type="simplification">
+On néglige la résistance de l'air et l'on suppose l'accélération constante. Pour un outil qui tombe de quelques mètres ou un camion qui freine régulièrement, l'erreur est faible ; pour une feuille de tôle qui plane, elle ne l'est pas.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : trois graphiques, un mouvement">
+
+<TroisGraphes v0={2} a={0.5} tmax={10} />
+
+Un engin part à 2 m/s et accélère de 0,5 m/s² pendant 10 s. La position suit une parabole, la vitesse une droite, l'accélération reste constante. Chaque graphique est la **pente** du précédent ; l'**aire** sous la courbe de vitesse est la distance parcourue.
+
+<Encadre type="retenir">
+Pente de x(t) = vitesse. Pente de v(t) = accélération. Aire sous v(t) = distance. C'est ainsi qu'on lit le diagramme de freinage de l'exemple résolu.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="distanceArret">
+
+<Cahier titre="Exemple résolu : la distance d'arrêt d'un camion-benne">
+
+**Énoncé.** Un camion-benne chargé roule à 50 km/h sur une piste en latérite sèche. Un obstacle apparaît. Le chauffeur réagit en 1 s, puis le camion freine avec une décélération de 4 m/s² (données de l'énoncé). Quelle distance lui faut-il pour s'arrêter ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi convertir en m/s ? Les décélérations sont en m/s² : pour que les unités se simplifient, la vitesse doit être en m/s.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : réaction, freinage, arrêt">
+
+<Etape n={3} titre="La vitesse en m/s">
+<AN k="conversion" />
+</Etape>
+
+<Etape n={4} titre="Les deux distances">
+<AN k="reaction" />
+<AN k="freinage" />
+<Note>Pourquoi deux phases ? Pendant la réaction, le camion ne ralentit pas encore : il roule à vitesse constante. Le freinage commence ensuite.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<AN k="arret" />
+<AN k="duree" />
+<Resultat k="dArret" libelle="Distance d'arrêt" />
+
+<Note couleur="vert">Contrôle : sur le diagramme, l'aire du rectangle (réaction) plus celle du triangle (freinage) redonne <Val k="dArret" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer avec des km/h et des m/s² ensemble.">
+v0² / (2a) avec v0 = 50 donnerait {grandeur(faux, 1, 'm')} au lieu de {grandeur(a0.dFreinage, 2, 'm')}. On convertit d'abord : 50 km/h = {grandeur(a0.v0, 2, 'm/s')}.
+</Piege>
+
+<Piege erreur="oublier la distance de réaction.">
+Le camion de l'exemple parcourt {grandeur(a0.dReaction, 2, 'm')} avant même de freiner, soit plus du tiers de la distance d'arrêt.
+</Piege>
+
+<Piege erreur="croire que la distance de freinage double quand la vitesse double.">
+Elle est proportionnelle au **carré** de la vitesse : à 100 km/h, le freinage demande {grandeur(arret(100).dFreinage, 1, 'm')} au lieu de {grandeur(a0.dFreinage, 1, 'm')}, quatre fois plus.
+</Piege>
+
+<Piege erreur="confondre vitesse et accélération.">
+Un camion peut aller vite avec une accélération nulle (vitesse constante), ou être arrêté avec une accélération non nulle (à l'instant où il démarre).
+</Piege>
+
+<Piege erreur="oublier le signe au freinage.">
+Avec l'axe dans le sens du mouvement, la décélération est une accélération négative : v = v0 − a t. On peut aussi raisonner en valeur positive, mais on l'écrit.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le plan de circulation.** Sur un chantier, les engins et les piétons se croisent. Le plan de circulation fixe les vitesses, les sens et les zones interdites aux piétons. Une vitesse limitée réduit la distance de réaction et, surtout, la distance de freinage, qui dépend du carré de la vitesse.
+
+<Encadre type="terrain" titre="Pistes en latérite">
+Sur les pistes en latérite de RDC, le freinage dépend de l'état du sol. Sèche, la latérite tient bien ; mouillée, elle devient glissante et la décélération possible chute : la distance de freinage augmente d'autant. La tôle ondulée et la poussière réduisent aussi la visibilité et l'adhérence. On adapte la vitesse à la saison.
+</Encadre>
+
+**Les rotations de camions.** Le rendement d'un terrassement se calcule en rotations par jour : temps de trajet chargé, à vide, plus les temps fixes de chargement et de déchargement (exercice 3). Améliorer la piste fait gagner des rotations.
+
+**Les chutes d'objets.** Un objet qui tombe de 5 m arrive à {grandeur(ch5.vKmh, 0, 'km/h')}. D'où le casque obligatoire, les plinthes sur les échafaudages et les zones balisées sous les postes de travail en hauteur.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : cinématique">
+
+### Vitesse
+
+$v = \Delta x / \Delta t$ · km/h ÷ 3,6 = m/s · mouvement uniforme : $x = x_0 + v\,t$
+
+### Accélération
+
+$a = \Delta v / \Delta t$ (m/s²) · négative au freinage
+
+### Accélération constante
+
+$v = v_0 + a\,t$ · $x = x_0 + v_0\,t + \tfrac{1}{2}a\,t^2$ · $v^2 = v_0^2 + 2\,a\,d$
+
+### Arrêt
+
+réaction : $v_0\,t_r$ · freinage : $v_0^2 / (2a)$ · proportionnel au carré de la vitesse
+
+### Chute libre
+
+$t = \sqrt{2h/g}$ · $v = \sqrt{2gh}$ · g ≈ {nombre(PESANTEUR, 2)} m/s²
+
+### Graphiques
+
+pente de x(t) = v · pente de v(t) = a · aire sous v(t) = distance
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Conversions">
+
+Convertis 72 km/h en m/s, puis 15 m/s en km/h.
+
+<Indice>Divise par 3,6, ou multiplie par 3,6.</Indice>
+
+<Corrige>
+72 ÷ 3,6 = **{grandeur(kmhVersMs(72), 0, 'm/s')}** ; 15 × 3,6 = **{grandeur(msVersKmh(15), 0, 'km/h')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le marteau qui tombe">
+
+Un marteau tombe d'un échafaudage, à 10 m du sol. Combien de temps met-il pour arriver au sol ? À quelle vitesse, en m/s et en km/h ?
+
+<Indice>Chute libre : t = √(2h/g), v = g t.</Indice>
+
+<Corrige>
+t = √(2 × 10 / {nombre(PESANTEUR, 2)}) = **{grandeur(ch.t, 2, 's')}** ; v = {nombre(PESANTEUR, 2)} × {nombre(ch.t, 2)} = **{grandeur(ch.v, 1, 'm/s')}**, soit **{grandeur(ch.vKmh, 0, 'km/h')}**. Moins d'une seconde et demie pour s'écarter : impossible. Le casque et le balisage sont la seule protection.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Les rotations d'un camion">
+
+Un camion fait l'aller (6 km) chargé à 30 km/h de moyenne et le retour à vide à 40 km/h. Chargement, déchargement et manœuvres prennent 15 min par rotation. Combien de rotations complètes fait-il en 8 h ? Si l'on reprofile la piste pour rouler à 40 km/h chargé, combien en gagne-t-on par jour ?
+
+<Indice>Durée d'une rotation = aller + retour + temps fixes ; nombre de rotations = arrondi inférieur de (480 min / durée).</Indice>
+
+<Corrige>
+
+- Aller {grandeur(toupie.tAller, 0, 'min')}, retour {grandeur(toupie.tRetour, 0, 'min')}, plus 15 min : **{grandeur(toupie.tCycle, 0, 'min')}** par rotation, soit **{nombre(toupie.rotations, 0)} rotations** complètes en 8 h.
+- Piste reprofilée : {grandeur(piste.tCycle, 0, 'min')} par rotation, **{nombre(piste.rotations, 0)} rotations** : on gagne {nombre(piste.rotations - toupie.rotations, 0)} rotation par jour et par camion.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.7.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="36 km/h correspondent à :" choix={['129,6 m/s', grandeur(kmhVersMs(36), 0, 'm/s'), '3,6 m/s', '36 m/s']} bonne={1} colonnes={4}>
+36 ÷ 3,6 = {grandeur(kmhVersMs(36), 0, 'm/s')}.
+</QCM>
+
+<QCM n={2} question="Un camion passe de 0 à 10 m/s en 20 s. Son accélération moyenne vaut :" choix={['2 m/s²', grandeur(a20, 1, 'm/s²'), '200 m/s²', '10 m/s²']} bonne={1} colonnes={4}>
+a = Δv / Δt = 10 / 20 = {grandeur(a20, 1, 'm/s²')}.
+</QCM>
+
+<QCM n={3} question="La distance de freinage d'un véhicule, à décélération égale, est proportionnelle :" choix={['à la vitesse', 'au carré de la vitesse', 'à la racine de la vitesse', 'au temps de réaction']} bonne={1} colonnes={2}>
+d = v0² / (2a).
+</QCM>
+
+<QCM n={4} question="Pendant le temps de réaction du chauffeur, le camion :" choix={['commence à ralentir', 'roule à vitesse constante', 'est arrêté', 'accélère']} bonne={1} colonnes={2}>
+Le freinage ne commence qu'après la réaction.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Distance d'arrêt depuis {nombre(EXEMPLE_ARRET.v, 0)} km/h, réaction {nombre(EXEMPLE_ARRET.tr, 0)} s, décélération {nombre(EXEMPLE_ARRET.a, 0)} m/s² :</>} choix={[grandeur(a0.dFreinage, 2, 'm'), grandeur(a0.dArret, 2, 'm'), grandeur(a0.dReaction, 2, 'm'), grandeur(faux, 2, 'm')]} bonne={1} colonnes={4}>
+{grandeur(a0.dReaction, 2, 'm')} de réaction + {grandeur(a0.dFreinage, 2, 'm')} de freinage.
+</QCM>
+
+<QCM n={6} question="Sur un graphique v(t), la distance parcourue se lit :" choix={['à la pente de la courbe', 'à l’aire sous la courbe', 'à la valeur finale', 'à l’ordonnée à l’origine']} bonne={1} colonnes={2}>
+Distance = vitesse × durée, donc une aire.
+</QCM>
+
+<QCM n={7} question="Un objet lâché de 5 m arrive au sol (air négligé) à environ :" choix={[grandeur(ch5.v, 1, 'm/s'), '49 m/s', '5 m/s', '2,2 m/s']} bonne={0} colonnes={4}>
+v = √(2 g h) = {grandeur(ch5.v, 1, 'm/s')}, soit {grandeur(ch5.vKmh, 0, 'km/h')}.
+</QCM>
+
+<QCM n={8} question="L'accélération d'un camion qui roule à vitesse constante est :" choix={['nulle', 'égale à sa vitesse', 'égale à g', 'négative']} bonne={0} colonnes={4}>
+Sa vitesse ne change pas.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

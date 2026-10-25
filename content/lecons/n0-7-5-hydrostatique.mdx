@@ -1,0 +1,346 @@
+---
+id: N0.7.5
+titre: "Pression, hydrostatique, poussée d'Archimède"
+objectifs:
+  - Calculer la pression de l'eau à une profondeur donnée
+  - Calculer la poussée de l'eau sur une paroi verticale et son point d'application
+  - Calculer la poussée d'Archimède sur un volume immergé
+  - Vérifier qu'une cuve enterrée vide ne se soulève pas dans la nappe
+relecture: false
+normes:
+  - "EN 1997-1 (EC7) §2.4.7.4 : vérification du soulèvement (UPL)"
+glossaire:
+  - terme: Pression
+    definition: Force exercée par unité de surface, en pascals (1 Pa = 1 N/m²) ; 1 bar = 100 kPa.
+  - terme: Pression hydrostatique
+    definition: Pression due au poids de l'eau au-dessus d'un point ; elle vaut ρ g h et ne dépend que de la profondeur.
+  - terme: Vases communicants
+    definition: Récipients reliés entre eux, dans lesquels l'eau au repos s'établit au même niveau.
+  - terme: Poussée d'Archimède
+    definition: Force verticale vers le haut exercée par un fluide sur un corps immergé ; elle vaut le poids du fluide déplacé.
+  - terme: Nappe phréatique
+    definition: Eau qui remplit les vides du sol en dessous d'un certain niveau ; ce niveau monte en saison des pluies.
+  - terme: Soulèvement
+    definition: Remontée d'un ouvrage enterré quand la poussée de l'eau dépasse son poids (état limite UPL de l'Eurocode 7).
+symboles:
+  - { symbole: 'p', signification: 'pression', unite: 'kPa' }
+  - { symbole: 'ρ', signification: 'masse volumique de l’eau', unite: 'kg/m³' }
+  - { symbole: 'h', signification: 'profondeur sous la surface libre', unite: 'm' }
+  - { symbole: 'Π', signification: 'poussée d’Archimède', unite: 'kN' }
+  - { symbole: 'G', signification: 'poids propre de l’ouvrage', unite: 'kN' }
+formules:
+  - { nom: 'Pression hydrostatique', tex: 'p = \rho\,g\,h', domaine: 'Pression relative, eau au repos' }
+  - { nom: 'Poussée sur une paroi', tex: 'F = \tfrac{1}{2}\,\rho\,g\,h^2 \text{ par mètre, à } h/3 \text{ du fond}', domaine: 'Paroi verticale' }
+  - { nom: 'Archimède', tex: '\Pi = \rho\,g\,V_{immergé}', domaine: 'Corps immergé, vers le haut' }
+  - { nom: 'Non-soulèvement', tex: 'G \ge \Pi', domaine: 'Sans coefficients partiels (simplification)' }
+---
+
+import { archimede, cuveEnterree, EXEMPLE_CUVE, lestCuve, P_ATM, pousseeParoi, pressionEau, pressionFluide } from '@/lib/calc/physique'
+import { MATERIAUX } from '@/lib/calc/materiauxCourants'
+import { grandeur, nombre } from '@/lib/format'
+import { CuveCoupe, CuvePlan, PressionProfondeur } from '@/components/schemas/Physique'
+
+export const c0 = cuveEnterree(EXEMPLE_CUVE)
+export const cInonde = cuveEnterree({ ...EXEMPLE_CUVE, hw: 2 })
+export const cPleine = { ...c0, G: c0.G + archimede(c0.Vint) }
+export const lest = lestCuve({ ...EXEMPLE_CUVE, hw: 2 })
+export const p10 = pressionEau(10)
+export const paroi3 = pousseeParoi(3)
+export const puits = pressionEau(8)
+export const bassin = pousseeParoi(2.5)
+export const frais = pressionFluide(MATERIAUX.baFrais.gamma, 3)
+export const bloc = archimede(1)
+
+<Page etape="intuition" titre="L'intuition : l'eau appuie, et pousse vers le haut">
+
+Plonge dans le fleuve : à trois mètres de profondeur, tes oreilles te font mal. L'eau au-dessus de toi pèse, et ce poids appuie sur ton corps de tous les côtés. Plus tu descends, plus il y a d'eau au-dessus, plus la **pression** est forte.
+
+Pourtant, dans l'eau, tu te sens plus léger : l'eau te pousse aussi **vers le haut**. Une pirogue chargée flotte, un ballon remonte. Cette poussée vers le haut peut devenir dangereuse : à Kinshasa, en saison des pluies, il arrive qu'une fosse ou une citerne enterrée, vidée pour l'entretien, sorte de terre comme un bouchon.
+
+La pression de l'eau dimensionne les réservoirs, les barrages, les canalisations ; la poussée d'Archimède, tous les ouvrages enterrés dans une nappe.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelle pression l'eau exerce-t-elle en profondeur, et une cuve enterrée vide peut-elle se soulever ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : la pression de l'eau">
+
+### Pression et force
+
+La pression est une force par unité de surface : $p = F / S$, en pascals (N0.3.3). Pour l'eau, on utilise le kPa et le bar (1 bar = 100 kPa).
+
+### La pression croît avec la profondeur
+
+À la profondeur $h$ sous la surface libre, l'eau au repos exerce la pression
+
+$$p = \rho\,g\,h$$
+
+avec $\rho$ = {nombre(MATERIAUX.eau.rho, 0)} kg/m³. Sous 10 m d'eau : {grandeur(p10, 1, 'kPa')}, soit environ 1 bar. Cette pression s'ajoute à celle de l'atmosphère ({nombre(P_ATM, 0)} Pa), qui agit aussi de l'autre côté des parois : en génie civil, on calcule donc avec la pression **relative** $\rho g h$.
+
+### Trois propriétés à retenir
+
+- en un point, la pression est la même dans **toutes les directions** ;
+- sur une paroi, elle agit **perpendiculairement** à la paroi ;
+- elle ne dépend que de la **profondeur**, pas de la forme ni du volume du réservoir.
+
+### Vases communicants et poussée sur une paroi
+
+Deux récipients reliés s'équilibrent au même niveau : c'est ainsi qu'un château d'eau alimente les robinets, avec une pression $\rho\,g\,\Delta z$ au robinet. Sur une paroi verticale, la pression croît de 0 à $\rho g h$ : sa résultante vaut $\tfrac{1}{2}\rho g h^2$ par mètre de paroi, appliquée à $h/3$ du fond. Pour 3 m d'eau : {grandeur(paroi3.F, 2, 'kN/m')}.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la poussée d'Archimède">
+
+### Le principe
+
+Un corps immergé dans un fluide reçoit une force **verticale, vers le haut**, égale au poids du fluide qu'il déplace :
+
+$$\Pi = \rho\,g\,V_{immergé}$$
+
+Elle vient de la pression : plus forte sous le corps que sur le dessus, elle pousse vers le haut. Un bloc de 1 m³ entièrement immergé reçoit {grandeur(bloc, 2, 'kN')}.
+
+### Flotte, coule ou se soulève
+
+- Si le poids $G$ dépasse $\Pi$ : le corps reste au fond.
+- Si $\Pi$ dépasse $G$ : le corps remonte (une pirogue flotte, une cuve vide se soulève).
+
+Une cuve enterrée **vide**, dans une nappe haute, reçoit sous son fond la pression $\rho g h_w$ : la poussée vaut $\Pi = \rho\,g\,L\,l\,h_w$. Elle se soulève si $\Pi > G$.
+
+<Regle type="norme" source="EN 1997-1 §2.4.7.4">
+L'Eurocode 7 traite ce risque comme un état limite de soulèvement (UPL) : on compare les actions déstabilisantes (la poussée de l'eau) et stabilisantes (poids propre, remblai, frottements), chacune affectée d'un coefficient partiel.
+</Regle>
+
+<Regle type="simplification">
+Dans cette leçon, on compare G et Π sans coefficients partiels, et l'on néglige le frottement des terres sur les parois et le poids du remblai éventuel sur la dalle : c'est une vérification d'ordre de grandeur, pas une justification réglementaire.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la pression croît avec la profondeur">
+
+<PressionProfondeur h={3} dz={15} />
+
+À gauche, la pression de l'eau sur la paroi d'un réservoir : nulle à la surface, maximale au fond, toujours perpendiculaire à la paroi. À droite, un robinet situé 15 m sous le niveau de l'eau du château d'eau reçoit la pression de ces 15 m d'eau.
+
+<Encadre type="retenir">
+p = ρ g h : seule la profondeur compte. 10 m d'eau ≈ 1 bar.
+</Encadre>
+
+</Page>
+
+<PlancheTechnique
+  titre="Cuve enterrée : plan et coupe 1-1"
+  projet="Citerne enterrée, exemple N0.7.5"
+  numero="CU-01"
+  echelle="1/50"
+  date="10/2026"
+  hachures={['ba', 'terre']}
+  notes={[
+    `Dimensions hors tout ${nombre(EXEMPLE_CUVE.L, 2)} × ${nombre(EXEMPLE_CUVE.l, 2)} × ${nombre(EXEMPLE_CUVE.H, 2)} m ; béton armé de ${nombre(EXEMPLE_CUVE.e * 100, 0)} cm.`,
+    `Nappe à ${nombre(EXEMPLE_CUVE.hw, 2)} m au-dessus de la sous-face du fond (saison des pluies, donnée de l'énoncé).`,
+    'Pressions de l’eau perpendiculaires aux parois ; poussée sous le fond uniforme.',
+    'Frottement des terres sur les parois négligé (simplification).',
+  ]}
+>
+
+<Vue titre="Plan" echelle="1/50" pleineLargeur>
+<CuvePlan d={EXEMPLE_CUVE} prefixe="cp-planche" />
+</Vue>
+
+<Vue titre="Coupe 1-1, cuve vide" echelle="1/50" pleineLargeur>
+<CuveCoupe d={EXEMPLE_CUVE} r={c0} prefixe="cu-planche" />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="cuveEnterree">
+
+<Cahier titre="Exemple résolu : la citerne vidée en saison des pluies">
+
+**Énoncé.** Une citerne en béton armé est enterrée dans une parcelle de Kinshasa, sa dalle au niveau du terrain. Dimensions hors tout : 3,00 × 2,00 × 2,00 m ; parois, fond et dalle de 15 cm. En saison des pluies, la nappe monte à 1,50 m au-dessus de la sous-face du fond. On vide la citerne pour la nettoyer : se soulève-t-elle ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi la citerne vide ? Pleine, l'eau qu'elle contient l'alourdit : c'est vide qu'elle est la plus légère face à la poussée.</Note>
+</Etape>
+
+<Etape n={2} titre="La coupe">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : poids contre poussée">
+
+<Etape n={3} titre="Le poids de la cuve vide">
+<AN k="volumes" />
+<AN k="poids" />
+</Etape>
+
+<Etape n={4} titre="La poussée de l'eau">
+<AN k="pression" />
+<AN k="poussee" />
+<Note>Pourquoi seulement sous le fond ? Les pressions sur les parois verticales sont horizontales et s'équilibrent deux à deux ; seule la pression sous le fond pousse vers le haut.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<AN k="comparaison" />
+<AN k="limite" />
+<Resultat k="hLimite" libelle="Nappe qui soulèverait la cuve vide" />
+
+<Note couleur="vert">Verdict : <Val k="verdict" /> (G / Π = <Val k="rapport" />). Mais la marge est faible : si la nappe dépasse <Val k="hLimite" />, la cuve vide remonte.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire que la pression dépend de la forme du réservoir.">
+Au fond d'un tuyau de 10 m de haut ou d'un lac de 10 m de profondeur, la pression est la même : {grandeur(p10, 1, 'kPa')}. Seule la profondeur compte.
+</Piege>
+
+<Piege erreur="confondre pression et force.">
+La pression sous la citerne vaut {grandeur(c0.pFond, 2, 'kPa')} ; la force est cette pression multipliée par la surface du fond : {grandeur(c0.Pi, 2, 'kN')}.
+</Piege>
+
+<Piege erreur="prendre tout le volume de la cuve au lieu du volume immergé.">
+Seule la partie sous la nappe déplace de l'eau. Avec 1,50 m de nappe sur 2,00 m de hauteur, la poussée vaut {grandeur(c0.Pi, 2, 'kN')}, pas {grandeur(cInonde.Pi, 2, 'kN')}.
+</Piege>
+
+<Piege erreur="vérifier la cuve pleine.">
+Pleine, elle pèse {grandeur(cPleine.G, 1, 'kN')} et ne bouge pas. Le cas dangereux est la cuve **vide**, pendant un entretien ou juste après la construction.
+</Piege>
+
+<Piege erreur="oublier que la nappe monte.">
+On vérifie avec le niveau de nappe le plus haut possible (saison des pluies, inondation), pas avec celui mesuré un jour de saison sèche.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les ouvrages enterrés.** Citernes, fosses septiques, regards, stations de pompage, piscines : tous doivent rester en place nappe haute et ouvrage vide. Solutions : un fond plus épais (lest, exercice 3), un radier débordant chargé par le remblai, des tirants d'ancrage, ou un drainage qui rabat la nappe.
+
+<Encadre type="terrain" titre="Nappes hautes à Kinshasa">
+Dans les quartiers bas de Kinshasa et le long des rivières, la nappe est proche de la surface en saison des pluies, et les inondations la portent parfois au niveau du terrain. Une citerne enterrée construite en saison sèche peut se soulever des mois plus tard. On relève le niveau des plus hautes eaux auprès des riverains et l'on dimensionne pour lui.
+</Encadre>
+
+**Les barrages et les digues.** La poussée de l'eau croît comme le carré de la hauteur : doubler la hauteur d'eau quadruple la poussée. C'est le problème des barrages, comme ceux d'Inga sur le fleuve Congo, et des digues de protection.
+
+**Les coffrages.** Le béton frais pousse sur les coffrages comme un liquide lourd : avec un poids volumique de {nombre(MATERIAUX.baFrais.gamma, 0)} kN/m³ (EN 1991-1-1, béton armé frais), 3 m de béton frais exercent environ {grandeur(frais, 0, 'kPa')} en pied de coffrage. D'où les banches renforcées et les vitesses de bétonnage limitées.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : hydrostatique">
+
+### Pression
+
+$p = \rho\,g\,h$ (relative) · ρ = {nombre(MATERIAUX.eau.rho, 0)} kg/m³ · 10 m d'eau ≈ 1 bar = 100 kPa · ⟂ aux parois · même valeur dans toutes les directions
+
+### Paroi verticale
+
+$F = \tfrac{1}{2}\rho g h^2$ par mètre, à h/3 du fond
+
+### Vases communicants
+
+même niveau au repos · pression au robinet $\rho\,g\,\Delta z$
+
+### Archimède
+
+$\Pi = \rho\,g\,V_{immergé}$, vers le haut · flotte si Π &gt; G
+
+### Cuve enterrée
+
+vérifier **vide**, nappe **haute** : $G \ge \rho\,g\,L\,l\,h_w$ · EC7 : état limite UPL avec coefficients partiels
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Au fond du puits">
+
+Un puits contient 8 m d'eau. Quelle pression l'eau exerce-t-elle au fond ? Exprime-la en kPa et en bar.
+
+<Indice>p = ρ g h.</Indice>
+
+<Corrige>
+p = 1 000 × 9,81 × 8 = **{grandeur(puits, 2, 'kPa')}**, soit **{grandeur(puits / 100, 2, 'bar')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La paroi du bassin">
+
+Un bassin de décantation contient 2,50 m d'eau. Quelle poussée l'eau exerce-t-elle sur chaque mètre de paroi ? À quelle hauteur s'applique-t-elle ?
+
+<Indice>Diagramme triangulaire : résultante ½ ρ g h², au tiers de la hauteur.</Indice>
+
+<Corrige>
+F = ½ × 9,81 × 2,5² = **{grandeur(bassin.F, 2, 'kN/m')}**, appliquée à **{grandeur(bassin.z, 2, 'm')}** du fond.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Lester la citerne">
+
+Reprends la citerne de l'exemple. Une inondation porte la nappe au niveau du terrain (2,00 m au-dessus de la sous-face du fond). Se soulève-t-elle, vide ? Quelle épaisseur de béton de lestage faut-il couler sur son fond intérieur pour qu'elle reste en place (sans coefficient de sécurité) ?
+
+<Indice>Le lest doit apporter la différence Π − G ; son volume est ce poids divisé par 25 kN/m³, étalé sur la surface intérieure du fond.</Indice>
+
+<Corrige>
+
+- Π = 9,81 × 3 × 2 × 2 = {grandeur(cInonde.Pi, 2, 'kN')} &gt; G = {grandeur(cInonde.G, 2, 'kN')} : **la citerne vide se soulève**.
+- Manque : {grandeur(lest.manque, 2, 'kN')} ; volume de lest : {grandeur(lest.volume, 3, 'm³')} ; sur {nombre(EXEMPLE_CUVE.L - 2 * EXEMPLE_CUVE.e, 2)} × {nombre(EXEMPLE_CUVE.l - 2 * EXEMPLE_CUVE.e, 2)} m, une épaisseur de **{grandeur(lest.epaisseur * 100, 1, 'cm')}**. Avec les coefficients partiels de l'EC7, il en faudrait davantage.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.7.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sous 10 m d'eau, la pression relative vaut environ :" choix={['10 kPa', grandeur(p10, 1, 'kPa'), '1 000 kPa', '1 kPa']} bonne={1} colonnes={4}>
+ρ g h = 1 000 × 9,81 × 10 Pa, soit environ 1 bar.
+</QCM>
+
+<QCM n={2} question="La pression de l'eau au fond d'un réservoir dépend :" choix={['du volume d’eau', 'de la profondeur', 'de la forme du réservoir', 'de la surface du fond']} bonne={1} colonnes={2}>
+p = ρ g h.
+</QCM>
+
+<QCM n={3} question="Sur une paroi, la pression de l'eau agit :" choix={['verticalement', 'perpendiculairement à la paroi', 'parallèlement à la paroi', 'seulement au fond']} bonne={1} colonnes={2}>
+Toujours perpendiculaire à la surface.
+</QCM>
+
+<QCM n={4} question="Si la hauteur d'eau contre une paroi double, la poussée totale :" choix={['double', 'quadruple', 'ne change pas', 'est divisée par deux']} bonne={1} colonnes={4}>
+F = ½ ρ g h² : proportionnelle au carré de h.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="La poussée d'Archimède sur un bloc de 1 m³ entièrement immergé dans l'eau vaut :" choix={['1 kN', grandeur(bloc, 2, 'kN'), '25 kN', '0 kN']} bonne={1} colonnes={4}>
+Le poids de 1 m³ d'eau : {grandeur(bloc, 2, 'kN')}.
+</QCM>
+
+<QCM n={6} question="Une cuve enterrée est la plus exposée au soulèvement quand elle est :" choix={['pleine, nappe basse', 'vide, nappe haute', 'pleine, nappe haute', 'vide, nappe basse']} bonne={1} colonnes={2}>
+Poids minimal, poussée maximale.
+</QCM>
+
+<QCM n={7} question={<>La citerne de l'exemple (G = {grandeur(c0.G, 1, 'kN')}) reçoit Π = {grandeur(c0.Pi, 1, 'kN')}. Elle :</>} choix={['se soulève', 'reste en place', 'flotte à mi-hauteur', 'coule plus profond']} bonne={c0.flotte ? 0 : 1} colonnes={2}>
+G &gt; Π : elle reste en place, avec une marge faible.
+</QCM>
+
+<QCM n={8} question="Un robinet est 15 m sous le niveau de l'eau d'un château d'eau. La pression au robinet fermé vaut environ :" choix={['15 kPa', grandeur(pressionEau(15), 0, 'kPa'), '1,5 kPa', '15 bar']} bonne={1} colonnes={4}>
+Vases communicants : ρ g Δz = {grandeur(pressionEau(15), 0, 'kPa')}, environ 1,5 bar.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

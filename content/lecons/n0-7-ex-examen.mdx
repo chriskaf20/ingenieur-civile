@@ -1,0 +1,114 @@
+---
+id: N0.7.EX
+titre: "Examen du module N0.7 : physique de base"
+objectifs:
+  - Calculer vitesses, accélérations et distances d'arrêt
+  - Appliquer les lois de Newton et le frottement de Coulomb
+  - Calculer énergies et puissances d'une pompe ou d'un treuil
+  - Calculer pressions et poussées de l'eau
+  - Calculer une dilatation thermique et un courant électrique
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { chuteLibre, consommationGroupe, courantTri, dilatation, distanceArret, forceNewton, kmhVersMs, levage, msVersKmh, planIncline, pompe, pressionEau } from '@/lib/calc/physique'
+import { tanD } from '@/lib/calc/trigo'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+
+export const v90 = kmhVersMs(90)
+export const fr = distanceArret({ v: msVersKmh(20), tr: 0, a: 5 })
+export const ch20 = chuteLibre(20)
+export const lv = levage({ m: 500, a: 2 })
+export const fc = forceNewton(10000, 0.5)
+export const pl = planIncline({ m: 100, alpha: 25, mu: 0.5 })
+export const rp = planIncline({ m: 200, alpha: 10, mu: 0.3 })
+export const pp = pompe({ Q: 18, H: 40, eta: 0.6, V: 18 })
+export const en = consommationGroupe(2, 3, 0)
+export const p4 = pressionEau(4)
+export const dl = dilatation({ L: 20, dT: 40, materiau: 'acier' })
+export const it = courantTri(10000, 0.8)
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 1 heure.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Pour chaque calcul : **schéma** au brouillon avec les forces ou les hauteurs, formule, application numérique avec unités, puis contrôle (unités, ordre de grandeur).
+- Prends g = 9,81 m/s² et ρ = 1 000 kg/m³ pour l'eau. Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="N0.7.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="Un camion roule à 90 km/h. Sa vitesse en m/s vaut :" choix={['324 m/s', grandeur(v90, 0, 'm/s'), '9 m/s', '1,5 m/s']} bonne={1} colonnes={4}>
+90 ÷ 3,6 = {grandeur(v90, 0, 'm/s')} (N0.7.1).
+</QCM>
+
+<QCM n={2} question="Un engin roulant à 20 m/s freine avec une décélération constante de 5 m/s². Sa distance de freinage vaut :" choix={['4 m', grandeur(fr.dFreinage, 0, 'm'), '100 m', '20 m']} bonne={1} colonnes={4}>
+v0² / (2a) = 400 / 10 = {grandeur(fr.dFreinage, 0, 'm')} (N0.7.1).
+</QCM>
+
+<QCM n={3} question="Un objet tombe de 20 m (air négligé). Il arrive au sol à :" choix={[grandeur(ch20.v, 1, 'm/s'), '196,2 m/s', '9,8 m/s', '40 m/s']} bonne={0} colonnes={4}>
+v = √(2 g h) = √(2 × 9,81 × 20) = {grandeur(ch20.v, 1, 'm/s')} (N0.7.1).
+</QCM>
+
+<QCM n={4} question="Une grue lève 500 kg en accélérant vers le haut à 2 m/s². La tension du câble vaut :" choix={[grandeur(lv.P, 2, 'kN'), grandeur(lv.T, 2, 'kN'), '1,00 kN', '3,91 kN']} bonne={1} colonnes={4}>
+T = m (g + a) = 500 × 11,81 N = {grandeur(lv.T, 2, 'kN')} (N0.7.2).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={5} question="Quelle force résultante faut-il pour donner à un camion de 10 t une accélération de 0,5 m/s² ?" choix={['50 kN', grandeur(fc / 1000, 0, 'kN'), '20 kN', '0,5 kN']} bonne={1} colonnes={4}>
+F = m a = 10 000 × 0,5 = {grandeur(fc, 0, 'N')} (N0.7.2).
+</QCM>
+
+<QCM n={6} question="Une caisse est posée sur un plan incliné à 25°, avec μ = 0,5. Elle :" choix={['glisse', 'reste en place', 'se soulève', 'bascule forcément']} bonne={pl.glisse ? 0 : 1} colonnes={4}>
+tan 25° = {nombre(tanD(25), 2)} &lt; 0,5 : P sin α = {grandeur(pl.Ppara, 3, 'kN')} reste sous μ N = {grandeur(pl.Fmax, 3, 'kN')} (N0.7.3).
+</QCM>
+
+<QCM n={7} question="Pour monter une charge de 200 kg à vitesse constante sur une rampe de 10°, avec μ = 0,3, il faut une force de :" choix={[grandeur(rp.Ppara, 2, 'kN'), grandeur(rp.Fmonter, 2, 'kN'), grandeur(rp.P, 2, 'kN'), grandeur(rp.Fmax, 2, 'kN')]} bonne={1} colonnes={4}>
+P (sin α + μ cos α) = {grandeur(rp.Ppara, 2, 'kN')} + {grandeur(rp.Fmax, 2, 'kN')} = {grandeur(rp.Fmonter, 2, 'kN')} (N0.7.3).
+</QCM>
+
+<QCM n={8} question="Une pompe débite 18 m³/h sous une hauteur manométrique de 40 m, avec un rendement de 0,6. Elle absorbe :" choix={[grandeur(pp.Ph, 0, 'W'), grandeur(pp.Pabs, 0, 'W'), grandeur(pp.Ph * 0.6, 0, 'W'), '720 W']} bonne={1} colonnes={4}>
+Ph = 1 000 × 9,81 × (18 / 3 600) × 40 = {grandeur(pp.Ph, 0, 'W')} ; Pabs = Ph / 0,6 = {grandeur(pp.Pabs, 0, 'W')} (N0.7.4).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={9} question="Un groupe fournit 2 kW pendant 3 h. Il a produit :" choix={['6 kW', grandeur(en.E, 0, 'kWh'), '1,5 kWh', '0,67 kWh']} bonne={1} colonnes={4}>
+E = P t = 2 × 3 = {grandeur(en.E, 0, 'kWh')} : une énergie, pas une puissance (N0.7.4).
+</QCM>
+
+<QCM n={10} question="La pression relative de l'eau à 4 m de profondeur vaut :" choix={['4 kPa', grandeur(p4, 2, 'kPa'), '400 kPa', '0,39 kPa']} bonne={1} colonnes={4}>
+ρ g h = 1 000 × 9,81 × 4 Pa = {grandeur(p4, 2, 'kPa')} (N0.7.5).
+</QCM>
+
+<QCM n={11} question="Une poutre en acier de 20 m chauffe de 40 K (α = 12 × 10⁻⁶ K⁻¹). Libre, elle s'allonge de :" choix={['0,96 mm', grandeur(dl.dL, 1, 'mm'), '96 mm', '48 mm']} bonne={1} colonnes={4}>
+ΔL = α L ΔT = 12 × 10⁻⁶ × 20 000 × 40 = {grandeur(dl.dL, 1, 'mm')} (N0.7.6).
+</QCM>
+
+<QCM n={12} question="Un moteur triphasé de 10 kW, cos φ = 0,8, sous 400 V entre phases, absorbe par phase :" choix={['25,0 A', grandeur(it, 1, 'A'), '31,3 A', '14,4 A']} bonne={1} colonnes={4}>
+I = P / (√3 U cos φ) = 10 000 / (1,732 × 400 × 0,8) = {grandeur(it, 1, 'A')} (N0.7.7).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

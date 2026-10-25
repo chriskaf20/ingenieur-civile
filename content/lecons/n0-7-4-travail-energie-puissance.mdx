@@ -1,0 +1,324 @@
+---
+id: N0.7.4
+titre: Travail, énergie, puissance
+objectifs:
+  - Calculer une énergie potentielle et une énergie cinétique
+  - Distinguer énergie (J, kWh) et puissance (W, kW)
+  - Calculer la puissance hydraulique et la puissance absorbée d'une pompe
+  - Calculer la puissance d'un treuil et l'énergie consommée par un pompage
+relecture: false
+normes: []
+glossaire:
+  - terme: Énergie potentielle
+    definition: Énergie stockée par une masse élevée ; elle vaut m g h et se libère si la masse redescend.
+  - terme: Énergie cinétique
+    definition: Énergie d'une masse en mouvement ; elle vaut ½ m v².
+  - terme: Puissance
+    definition: Énergie fournie par seconde ; 1 W = 1 J/s.
+  - terme: Kilowattheure
+    definition: Énergie fournie en une heure par une puissance de 1 kW, soit 3,6 millions de joules.
+  - terme: Rendement
+    definition: Part de la puissance absorbée qui devient puissance utile ; toujours inférieur à 1.
+  - terme: Hauteur manométrique
+    definition: Hauteur à laquelle une pompe doit élever l'eau, pertes de charge des tuyaux comprises.
+symboles:
+  - { symbole: 'W', signification: 'travail, énergie', unite: 'J ou kWh' }
+  - { symbole: 'Ep, Ec', signification: 'énergies potentielle et cinétique', unite: 'J' }
+  - { symbole: 'P', signification: 'puissance', unite: 'W' }
+  - { symbole: 'η', signification: 'rendement', unite: '—' }
+  - { symbole: 'Q', signification: 'débit', unite: 'm³/s ou m³/h' }
+  - { symbole: 'H', signification: 'hauteur manométrique', unite: 'm' }
+formules:
+  - { nom: 'Énergie potentielle', tex: 'E_p = m\,g\,h', domaine: 'Près du sol, g constante' }
+  - { nom: 'Énergie cinétique', tex: 'E_c = \tfrac{1}{2}\,m\,v^2', domaine: 'Translation' }
+  - { nom: 'Puissance', tex: 'P = \frac{W}{t} = F\,v', domaine: 'Puissance moyenne ; force et vitesse de même direction' }
+  - { nom: 'Pompe', tex: 'P_h = \rho\,g\,Q\,H, \quad P_{abs} = \frac{P_h}{\eta}', domaine: 'Q en m³/s, H en m' }
+---
+
+import { chuteLibre, energieCinetique, kmhVersMs, energiePotentielle, EXEMPLE_POMPE, KWH, pompe, puissance, treuil } from '@/lib/calc/physique'
+import { PESANTEUR } from '@/lib/calc/methode'
+import { grandeur, nombre } from '@/lib/format'
+import { ChaineEnergie } from '@/components/schemas/Physique'
+
+export const p0 = pompe(EXEMPLE_POMPE)
+export const sacs = energiePotentielle(20 * 50, 3)
+export const tr = treuil(500, 0.2, 0.8)
+export const mouton = energiePotentielle(2000, 1.5)
+export const vMouton = chuteLibre(1.5).v
+export const ecMouton = energieCinetique(2000, vMouton)
+export const pMouton = puissance(20 * mouton, 60)
+export const camion = energieCinetique(12000, kmhVersMs(50))
+
+<Page etape="intuition" titre="L'intuition : vingt sacs, dix minutes ou une heure">
+
+Il faut monter vingt sacs de ciment au premier étage. Que tu les montes en dix minutes ou en une heure, tu soulèves la même masse à la même hauteur : tu fournis la même **énergie**. Mais en dix minutes, tu es épuisé, parce que tu as fourni cette énergie beaucoup plus vite : ta **puissance** était plus grande.
+
+Une pompe de forage fait la même chose avec l'eau : elle la soulève du fond du forage jusqu'au réservoir. Plus le réservoir est haut et plus il y a d'eau, plus il faut d'énergie ; plus on veut aller vite, plus la pompe doit être puissante.
+
+Choisir une pompe, un treuil ou un groupe électrogène, c'est d'abord distinguer ces deux grandeurs.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelle énergie faut-il pour élever de l'eau ou une charge, et quelle puissance pour le faire dans un temps donné ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : travail et énergie">
+
+### Le travail d'une force
+
+Une force constante $F$ dont le point d'application se déplace de $d$ fournit un travail $W = F\,d\cos\theta$ (N0.6.4), en joules : 1 J = 1 N × 1 m.
+
+### L'énergie potentielle
+
+Pour élever une masse $m$ d'une hauteur $h$ à vitesse constante, il faut vaincre son poids : le travail fourni vaut
+
+$$E_p = m\,g\,h$$
+
+Cette énergie est **stockée** : si la masse redescend, elle la rend (une pierre qui tombe, un mouton de battage de pieux).
+
+### L'énergie cinétique
+
+Une masse $m$ qui se déplace à la vitesse $v$ possède l'énergie $E_c = \tfrac{1}{2}\,m\,v^2$. Un camion de 12 t à 50 km/h en porte {grandeur(camion / 1000, 0, 'kJ')} : c'est ce que ses freins doivent transformer en chaleur pour l'arrêter.
+
+### Le kilowattheure
+
+Pour les grandes énergies, on utilise le kWh : 1 kWh = 1 000 W × 3 600 s = {nombre(KWH / 1e6, 1)} MJ. C'est l'unité des factures d'électricité.
+
+<Regle type="simplification">
+Sans frottement, l'énergie se conserve : en tombant, une masse transforme son énergie potentielle en énergie cinétique. On retrouve ainsi la vitesse de chute $v = \sqrt{2gh}$ de N0.7.1. Avec frottements, une partie part en chaleur.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : puissance et rendement">
+
+### La puissance
+
+La puissance est l'énergie fournie par seconde :
+
+$$P = \frac{W}{t} \quad \text{(W = J/s)}$$
+
+Pour une force qui avance à vitesse constante, $P = F\,v$ : un treuil qui tire {grandeur(tr.F, 1, 'kN')} à 0,2 m/s fournit {grandeur(tr.Pu, 0, 'W')}.
+
+### Le rendement
+
+Aucune machine ne transmet toute la puissance qu'elle reçoit : une partie se perd en chaleur et en frottements. Le **rendement** vaut
+
+$$\eta = \frac{P_{utile}}{P_{absorbée}} < 1 \qquad\text{donc}\qquad P_{absorbée} = \frac{P_{utile}}{\eta}$$
+
+### La pompe
+
+Une pompe qui débite $Q$ (m³/s) sous une hauteur manométrique $H$ (m) transmet à l'eau la puissance hydraulique
+
+$$P_h = \rho\,g\,Q\,H$$
+
+avec $\rho$ = 1 000 kg/m³. La hauteur manométrique comprend la hauteur à franchir et les pertes de charge dans les tuyaux (hydraulique, L3.5) : ici, c'est une donnée.
+
+<Encadre type="attention">
+Une puissance (W, kW) n'est pas une énergie (J, kWh). La pompe de l'exemple absorbe {grandeur(p0.Pabs / 1000, 2, 'kW')} ; si elle tourne {grandeur(p0.duree, 0, 'h')}, elle consomme {grandeur(p0.energie, 1, 'kWh')} : c'est l'énergie qu'on paie.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la chaîne d'énergie d'une pompe">
+
+<ChaineEnergie d={EXEMPLE_POMPE} r={p0} />
+
+L'électricité arrive au moteur ; la pompe transmet à l'eau une partie seulement de cette puissance, le reste chauffe le moteur et les paliers. Le rendement est le rapport des deux flèches de droite et de gauche.
+
+<Encadre type="retenir">
+Puissance utile = rendement × puissance absorbée. Pour choisir un moteur ou un groupe, on part de la puissance utile et l'on divise par le rendement.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="pompe">
+
+<Cahier titre="Exemple résolu : la pompe du centre de santé">
+
+**Énoncé.** Un centre de santé du Kwango remplit chaque jour un réservoir de 15 m³ avec une pompe immergée dans un forage. Le débit est de 3 m³/h et la hauteur manométrique de 25 m (niveau de l'eau dans le forage, hauteur du réservoir et pertes de charge). Le rendement de la motopompe vaut 0,55 (données de l'énoncé). Quelle puissance faut-il ? Combien de temps et quelle énergie par jour ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi une hauteur « manométrique » ? L'eau doit monter du niveau du forage jusqu'au réservoir, et vaincre en plus le frottement dans les tuyaux.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : puissances, durée, énergie">
+
+<Etape n={3} titre="La puissance transmise à l'eau">
+<AN k="debit" />
+<AN k="hydraulique" />
+<Note>Pourquoi des m³/s ? Avec ρ en kg/m³, g en m/s² et H en m, il faut Q en m³/s pour obtenir des watts.</Note>
+</Etape>
+
+<Etape n={4} titre="La puissance absorbée">
+<AN k="absorbee" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<AN k="duree" />
+<AN k="energie" />
+<Resultat k="Pabs" libelle="Puissance absorbée par la motopompe" />
+
+<Note couleur="vert">Énergie par jour : <Val k="energie" />. Contrôle : l'énergie transmise à l'eau, ρ g V H, redonne <Val k="energieUtile" />.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre puissance et énergie.">
+La pompe absorbe {grandeur(p0.Pabs, 0, 'W')} (puissance) ; en {grandeur(p0.duree, 0, 'h')}, elle consomme {grandeur(p0.energie, 2, 'kWh')} (énergie). Les deux ne s'additionnent pas et ne se comparent pas.
+</Piege>
+
+<Piege erreur="garder le débit en m³/h dans ρ g Q H.">
+Avec Q = 3 au lieu de {nombre(p0.Qs, 6)} m³/s, la puissance serait 3 600 fois trop grande.
+</Piege>
+
+<Piege erreur="multiplier par le rendement au lieu de diviser.">
+La puissance absorbée est **plus grande** que la puissance utile : Pabs = Ph / η = {grandeur(p0.Pabs, 0, 'W')}, et non Ph × η.
+</Piege>
+
+<Piege erreur="confondre kW et kWh.">
+Le kW mesure une puissance, le kWh une énergie. Un « groupe de 10 kWh » ne veut rien dire ; un groupe de 10 kW peut fournir 10 kWh en une heure.
+</Piege>
+
+<Piege erreur="prendre la seule hauteur géométrique.">
+Les pertes de charge dans les tuyaux s'ajoutent à la hauteur à franchir. Les oublier sous-dimensionne la pompe.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le pompage solaire.** Dans les villages de RDC, de plus en plus de forages sont équipés de pompes solaires. On dimensionne les panneaux sur l'**énergie** quotidienne (kWh par jour), calculée comme dans l'exemple, et non sur la seule puissance de la pompe : il faut tenir compte des heures d'ensoleillement.
+
+<Encadre type="terrain" titre="Le battage des pieux">
+Un mouton de battage est une lourde masse que l'on élève puis qu'on laisse tomber sur la tête d'un pieu. Son énergie potentielle m g h devient énergie cinétique, puis travail d'enfoncement du pieu (exercice 3). Le nombre de coups par minute fixe la puissance de la sonnette.
+</Encadre>
+
+**Les treuils et monte-charges.** La puissance du moteur se déduit de P = F v : charge × vitesse de levage, divisé par le rendement.
+
+**Le groupe électrogène.** Il fournit une puissance (kW) et consomme du carburant en proportion de l'énergie produite (kWh). Le bilan des puissances du chantier fait l'objet de N0.7.7.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : travail, énergie, puissance">
+
+### Énergie
+
+$W = F\,d\cos\theta$ · $E_p = m\,g\,h$ · $E_c = \tfrac{1}{2}m\,v^2$ · 1 kWh = {nombre(KWH / 1e6, 1)} MJ
+
+### Puissance
+
+$P = W / t = F\,v$ (W = J/s) · énergie = puissance × durée
+
+### Rendement
+
+$\eta = P_{utile} / P_{absorbée} < 1$ · $P_{absorbée} = P_{utile} / \eta$
+
+### Pompe
+
+$P_h = \rho\,g\,Q\,H$, Q en m³/s · H manométrique = hauteur + pertes de charge
+
+### Pièges
+
+kW ≠ kWh · m³/h ÷ 3 600 · diviser par η
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Monter vingt sacs">
+
+Calcule l'énergie nécessaire pour monter vingt sacs de ciment de 50 kg à 3 m de hauteur. Exprime-la en kJ et en kWh.
+
+<Indice>Ep = m g h, avec m = 20 × 50 kg.</Indice>
+
+<Corrige>
+Ep = 1 000 × {nombre(PESANTEUR, 2)} × 3 = **{grandeur(sacs / 1000, 2, 'kJ')}**, soit **{grandeur(sacs / KWH, 4, 'kWh')}** : une très petite énergie électrique, mais un vrai effort pour un ouvrier.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le treuil">
+
+Un treuil lève une charge de 500 kg à la vitesse constante de 0,2 m/s. Son rendement vaut 0,8. Quelle puissance utile fournit-il ? Quelle puissance absorbe son moteur ?
+
+<Indice>P = F v, avec F = m g ; puis Pabs = Pu / η.</Indice>
+
+<Corrige>
+F = {grandeur(tr.F, 3, 'kN')} ; Pu = {nombre(tr.F * 1000, 0)} × 0,2 = **{grandeur(tr.Pu, 0, 'W')}** ; Pabs = {nombre(tr.Pu, 0)} / 0,8 = **{grandeur(tr.Pabs, 0, 'W')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le mouton de battage">
+
+Un mouton de 2 000 kg tombe de 1,5 m sur la tête d'un pieu, à raison de 20 coups par minute. Calcule l'énergie d'un coup, la vitesse du mouton à l'impact et la puissance moyenne fournie au pieu (pertes négligées).
+
+<Indice>Énergie potentielle, puis conservation de l'énergie (ou chute libre), puis P = W / t sur une minute.</Indice>
+
+<Corrige>
+
+- Énergie d'un coup : 2 000 × {nombre(PESANTEUR, 2)} × 1,5 = **{grandeur(mouton / 1000, 2, 'kJ')}**.
+- Vitesse à l'impact : √(2 g h) = **{grandeur(vMouton, 2, 'm/s')}** ; contrôle : ½ × 2 000 × {nombre(vMouton, 2)}² = {grandeur(ecMouton / 1000, 2, 'kJ')} ✓.
+- Puissance moyenne : 20 × {nombre(mouton / 1000, 2)} kJ / 60 s = **{grandeur(pMouton / 1000, 2, 'kW')}**.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.7.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'énergie potentielle d'une masse de 100 kg élevée de 10 m vaut :" choix={['1 000 J', grandeur(energiePotentielle(100, 10), 0, 'J'), '981 W', '10 kJ']} bonne={1} colonnes={4}>
+m g h = 100 × {nombre(PESANTEUR, 2)} × 10 = {grandeur(energiePotentielle(100, 10), 0, 'J')}.
+</QCM>
+
+<QCM n={2} question="1 kWh vaut :" choix={['1 000 J', `${nombre(KWH, 0)} J`, '3 600 J', '1 kW']} bonne={1} colonnes={4}>
+1 000 W pendant 3 600 s.
+</QCM>
+
+<QCM n={3} question={<>Un treuil fournit {grandeur(tr.Pu, 0, 'W')} utiles avec un rendement de 0,8. Il absorbe :</>} choix={[grandeur(tr.Pu * 0.8, 0, 'W'), grandeur(tr.Pabs, 0, 'W'), grandeur(tr.Pu, 0, 'W'), '1 000 W']} bonne={1} colonnes={4}>
+Pabs = Pu / η = {nombre(tr.Pu, 0)} / 0,8 = {grandeur(tr.Pabs, 0, 'W')} : on divise par le rendement.
+</QCM>
+
+<QCM n={4} question="La puissance se mesure en :" choix={['joules', 'watts', 'kilowattheures', 'newtons']} bonne={1} colonnes={4}>
+1 W = 1 J/s.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>La pompe de l'exemple ({nombre(EXEMPLE_POMPE.Q, 0)} m³/h sous {nombre(EXEMPLE_POMPE.H, 0)} m, η = {nombre(EXEMPLE_POMPE.eta, 2)}) absorbe :</>} choix={[grandeur(p0.Ph, 0, 'W'), grandeur(p0.Pabs, 0, 'W'), grandeur(p0.Ph * 3600, 0, 'W'), grandeur(p0.Ph * EXEMPLE_POMPE.eta, 0, 'W')]} bonne={1} colonnes={4}>
+Ph = ρ g Q H = {grandeur(p0.Ph, 0, 'W')}, puis Pabs = Ph / η = {grandeur(p0.Pabs, 0, 'W')}.
+</QCM>
+
+<QCM n={6} question="Si l'on double la hauteur manométrique, à débit égal, la puissance hydraulique :" choix={['ne change pas', 'double', 'est divisée par deux', 'quadruple']} bonne={1} colonnes={4}>
+Ph = ρ g Q H est proportionnelle à H.
+</QCM>
+
+<QCM n={7} question="Monter les mêmes sacs deux fois plus vite demande :" choix={['deux fois plus d’énergie', 'la même énergie et deux fois plus de puissance', 'deux fois moins de puissance', 'la même puissance']} bonne={1} colonnes={2}>
+L'énergie dépend de la masse et de la hauteur ; la puissance, de la vitesse à laquelle on la fournit.
+</QCM>
+
+<QCM n={8} question="Un rendement de 1,2 est :" choix={['excellent', 'impossible', 'normal pour une pompe', 'celui d’un moteur électrique']} bonne={1} colonnes={4}>
+Une machine ne peut pas rendre plus d'énergie qu'elle n'en reçoit : η &lt; 1.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
