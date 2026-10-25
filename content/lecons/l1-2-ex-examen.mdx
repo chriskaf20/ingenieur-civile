@@ -1,0 +1,109 @@
+---
+id: L1.2.EX
+titre: "Examen du module L1.2 : dérivées et intégrales"
+objectifs:
+  - Calculer des limites et des dérivées, et les interpréter comme des pentes
+  - Trouver le maximum d'une fonction, dont le moment fléchissant d'une poutre
+  - Utiliser les approximations des petits angles et du binôme
+  - Calculer des intégrales, des résultantes de charges et des inerties
+  - Utiliser les dérivées partielles et les intégrales doubles sur un terrain
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { chargeVariable, cubature, inertieParBandes, momentMax, petitAngle, raccordement, rationnelle, terrain } from '@/lib/calc/analyse'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+
+export const q1 = rationnelle([-4, 0, 1], [-2, 1], 2 + 1e-9)
+export const rc = raccordement({ p1: 3, p2: -1, L: 100, z0: 200, x: 50, h: 1 })
+export const mq = momentMax({ L: 5, q: 16, P: 0, a: 0 })
+export const a4 = petitAngle(4)
+export const tri = chargeVariable({ c0: 0, c1: 2.25, c2: 0, L: 4, n: 4 })
+export const rect = inertieParBandes({ b: 30, h: 60, n: 1 })
+export const pente = terrain({ z0: 0, a: 6, b: 8, c: 0, x: 0, y: 0 })
+export const cb = cubature({ L: 20, l: 15, z00: 101.2, z10: 100.8, z01: 101.1, z11: 100.9, zp: 100.6 })
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 2 heures.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Pour chaque question : écris la formule, fais l'application numérique avec les unités, puis contrôle (signe, unité, ordre de grandeur). Les angles des fonctions trigonométriques sont en radians, sauf indication contraire.
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="L1.2.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="La limite de (x² − 4)/(x − 2) quand x tend vers 2 vaut :" choix={['0', '2', nombre(q1, 0), 'elle n’existe pas']} bonne={2} colonnes={4}>
+x² − 4 = (x − 2)(x + 2) : la fraction vaut x + 2, qui tend vers {nombre(q1, 0)} (L1.2.1).
+</QCM>
+
+<QCM n={2} question="Un raccordement parabolique de 100 m relie une rampe de 3 % à une pente de −1 %. La pente au milieu du raccordement vaut :" choix={['3 %', '2 %', `${nombre(rc.pente * 100, 0)} %`, '−1 %']} bonne={2} colonnes={4}>
+z′(x) = p₁ + (p₂ − p₁) x / L = 0,03 − 0,04 × 50 / 100 = {nombre(rc.pente, 2)} m/m (L1.2.2).
+</QCM>
+
+<QCM n={3} question="La dérivée de (4x + 1)³ est :" choix={['3(4x + 1)²', '12(4x + 1)²', '12x²', '(4x + 1)⁴ / 16']} bonne={1} colonnes={4}>
+Règle de la chaîne : 3(4x + 1)² × 4 (L1.2.3).
+</QCM>
+
+<QCM n={4} question="Une poutre de 5 m sur deux appuis porte une charge uniforme de 16 kN/m. Son moment fléchissant maximal vaut :" choix={[grandeur(mq.Mmax, 0, 'kN·m'), grandeur(mq.RA, 0, 'kN·m'), grandeur(mq.Mmax * 2, 0, 'kN·m'), grandeur(mq.Mmax / 2, 0, 'kN·m')]} bonne={0} colonnes={4}>
+V = 0 au milieu, M<sub>max</sub> = qL²/8 = 16 × 25 / 8 = {grandeur(mq.Mmax, 0, 'kN·m')} (L1.2.4).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={5} question="Sous une charge ponctuelle seule, le moment maximal d'une poutre sur deux appuis se trouve :" choix={['au milieu de la poutre', 'au droit de la charge', 'sur un appui', 'là où la flèche est nulle']} bonne={1} colonnes={2}>
+L'effort tranchant y change de signe en sautant, sans s'annuler (L1.2.4).
+</QCM>
+
+<QCM n={6} question="sin 4° vaut environ :" choix={['4', nombre(a4.rad, 4), '0,4', '0,0040']} bonne={1} colonnes={4}>
+4° = {nombre(a4.rad, 4)} rad et sin α ≈ α pour un petit angle en radians ; l'erreur n'est que de {nombre(a4.erreurSin * 100, 2)} % (L1.2.5).
+</QCM>
+
+<QCM n={7} question="Une charge croît linéairement de 0 à 9 kN/m sur 4 m. Sa résultante vaut :" choix={[grandeur(tri.R * 2, 0, 'kN'), grandeur(tri.R, 0, 'kN'), grandeur(tri.R * 1.5, 0, 'kN'), grandeur(tri.R / 2, 0, 'kN')]} bonne={1} colonnes={4}>
+Aire du triangle : 9 × 4 / 2 = {grandeur(tri.R, 0, 'kN')}, appliquée à {grandeur(tri.xBarre, 2, 'm')} de la pointe (L1.2.6).
+</QCM>
+
+<QCM n={8} question="Une primitive de x eˣ est :" choix={['x eˣ', '(x − 1) eˣ', '(x + 1) eˣ', 'x² eˣ / 2']} bonne={1} colonnes={4}>
+Par parties avec u = x, v′ = eˣ : x eˣ − ∫ eˣ dx (L1.2.7).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={9} question="L'inertie d'une section rectangulaire de 30 cm de large et 60 cm de haut, par rapport à l'axe horizontal passant par G, vaut :" choix={[grandeur(rect.Iexact, 0, 'cm⁴'), grandeur(rect.Ibase, 0, 'cm⁴'), grandeur(inertieParBandes({ b: 60, h: 30, n: 1 }).Iexact, 0, 'cm⁴'), grandeur(30 * 60, 0, 'cm⁴')]} bonne={0} colonnes={2}>
+b h³ / 12 = 30 × 60³ / 12 = {grandeur(rect.Iexact, 0, 'cm⁴')} (L1.2.8).
+</QCM>
+
+<QCM n={10} question="Pour la même section 30 × 60 cm, l'inertie par rapport à sa base vaut, par le théorème de Huygens :" choix={[grandeur(rect.Iexact, 0, 'cm⁴'), grandeur(rect.IbaseHuygens, 0, 'cm⁴'), grandeur(rect.Iexact * 2, 0, 'cm⁴'), grandeur(rect.Iexact / 4, 0, 'cm⁴')]} bonne={1} colonnes={2}>
+I<sub>G</sub> + A d² = {nombre(rect.Iexact, 0)} + {nombre(rect.A, 0)} × 30² = {grandeur(rect.IbaseHuygens, 0, 'cm⁴')} = b h³ / 3 (L1.2.8).
+</QCM>
+
+<QCM n={11} question="En un point d'un terrain, ∂z/∂x = 6 % et ∂z/∂y = 8 %. La plus forte pente vaut :" choix={['14 %', `${nombre(pente.pente * 100, 0)} %`, '2 %', '48 %']} bonne={1} colonnes={4}>
+Norme du gradient : √(6² + 8²) = {nombre(pente.pente * 100, 0)} % (L1.2.9).
+</QCM>
+
+<QCM n={12} question="Une plate-forme de 20 m × 15 m est réglée à 100,60 m sur un terrain bilinéaire dont les quatre coins sont à 101,20 ; 100,80 ; 101,10 et 100,90 m. Le volume net de déblai vaut :" choix={[grandeur(cb.Vnet, 0, 'm³'), grandeur(cb.Vnet / 2, 0, 'm³'), grandeur(cb.zMoyen * 300, 0, 'm³'), grandeur(cb.Vnet * 4, 0, 'm³')]} bonne={0} colonnes={4}>
+A (z̄ − z<sub>p</sub>) = 300 × ({nombre(cb.zMoyen, 2)} − 100,60) = {grandeur(cb.Vnet, 0, 'm³')} (L1.2.10).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,342 @@
+---
+id: L1.2.1
+titre: Limites et continuité
+objectifs:
+  - Calculer la limite d'une fonction simple en un point ou à l'infini
+  - Lever une forme indéterminée par factorisation ou par le terme dominant
+  - Approcher une limite par un tableau de valeurs
+  - Reconnaître une fonction continue et repérer une discontinuité
+relecture: false
+normes:
+  - "EN 1992-1-1 (EC2) §3.1.2(6), expression (3.2) : résistance du béton en fonction de l'âge"
+glossaire:
+  - terme: Limite
+    definition: Valeur dont f(x) s'approche autant qu'on veut quand x s'approche d'un nombre a, ou quand x devient très grand.
+  - terme: Forme indéterminée
+    definition: Écriture comme 0/0 ou ∞/∞ qui ne permet pas de conclure directement ; il faut d'abord transformer l'expression.
+  - terme: Asymptote horizontale
+    definition: Droite y = ℓ dont la courbe s'approche indéfiniment quand x tend vers l'infini.
+  - terme: Fonction continue
+    definition: Fonction dont la courbe se trace sans lever le crayon ; en chaque point a, la limite de f en a est égale à f(a).
+  - terme: Discontinuité
+    definition: Point où la fonction fait un saut ; les limites à gauche et à droite y sont différentes.
+symboles:
+  - { symbole: 'a', signification: 'valeur vers laquelle x s’approche', unite: 'selon le problème' }
+  - { symbole: 'h', signification: 'petit écart entre x et a (x = a + h)', unite: 'selon le problème' }
+  - { symbole: 'ℓ', signification: 'valeur de la limite', unite: 'celle de f' }
+  - { symbole: 'n', signification: 'nombre de côtés d’un polygone', unite: '—' }
+  - { symbole: 'D', signification: 'diamètre d’un cercle', unite: 'm' }
+formules:
+  - { nom: 'Limite en un point', tex: '\lim_{x \to a} f(x) = \ell', domaine: 'f(x) aussi proche de ℓ qu’on veut pour x assez proche de a' }
+  - { nom: 'Continuité en a', tex: '\lim_{x \to a} f(x) = f(a)', domaine: 'Polynômes, racines, exp, ln, sin, cos sur leur domaine' }
+  - { nom: 'Terme dominant', tex: '\lim_{x \to +\infty} \frac{a_n x^n + \dots}{b_n x^n + \dots} = \frac{a_n}{b_n}', domaine: 'Fractions rationnelles de même degré' }
+  - { nom: 'Limite remarquable', tex: '\lim_{x \to 0} \frac{\sin x}{x} = 1', domaine: 'x en radians' }
+  - { nom: 'Exponentielle', tex: '\lim_{x \to +\infty} e^{-x} = 0', domaine: 'Décroissance vers une asymptote' }
+---
+
+import { betaCCInfini, coutMoyen, EXEMPLE_MOMENT_MAX, evaluerPolynome, momentMax, polygoneInscrit, rationnelle, sinusSurX, tableLimite } from '@/lib/calc/analyse'
+import { ageResistance, betaCC } from '@/lib/calc/algebre'
+import { S_CIMENT } from '@/lib/calc/ba/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { LimiteSinc } from '@/components/schemas/Analyse'
+
+export const p6 = polygoneInscrit(6)
+export const p24 = polygoneInscrit(24)
+export const p96 = polygoneInscrit(96)
+export const quotient = (x) => rationnelle([-4, 0, 1], [-2, 1], x)
+export const tQuot = tableLimite(quotient, 2, [1, 2, 3])
+export const tSinc = tableLimite(sinusSurX, 0, [1, 2, 3])
+export const dominant = (x) => rationnelle([0, 5, 3], [1, 0, 1], x)
+export const s = S_CIMENT.N
+export const bInf = betaCCInfini(s)
+export const b90 = betaCC(90, s)
+export const b365 = betaCC(365, s)
+export const cm = [50, 500, 5000].map((n) => coutMoyen(6000, 120, n))
+export const mm = momentMax(EXEMPLE_MOMENT_MAX)
+export const aP = EXEMPLE_MOMENT_MAX.a
+export const vGauche = mm.V(aP)
+export const vDroite = mm.V(aP + 1e-9)
+export const ex2a = evaluerPolynome([3, 1], 1)
+export const ex2b = rationnelle([3, 0, 2], [0, -1, 5], 1e9)
+export const ex3 = ageResistance(0.95 * bInf, 'N')
+
+<Page etape="intuition" titre="L'intuition : piqueter un cercle">
+
+Un géomètre doit tracer au sol le contour d'un réservoir circulaire. Il plante des piquets régulièrement espacés sur le cercle et tend un cordeau de l'un à l'autre.
+
+Avec 6 piquets, le cordeau dessine un hexagone : pour un cercle de 1 m de diamètre, il mesure {grandeur(p6.inscrit, 2, 'm')}, alors que le cercle mesure {grandeur(Math.PI, 2, 'm')}. Avec 24 piquets, on passe à {grandeur(p24.inscrit, 3, 'm')} ; avec 96, à {grandeur(p96.inscrit, 4, 'm')}. Plus on plante de piquets, plus la longueur du cordeau **s'approche** de celle du cercle, sans jamais la dépasser.
+
+On dit que la longueur du polygone **tend vers** π × 1 m quand le nombre de piquets devient très grand : π est sa **limite**. C'est exactement ainsi qu'Archimède, il y a plus de deux mille ans, a encadré π avec des polygones de 96 côtés.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment savoir de quelle valeur une grandeur s'approche, quand on ne peut pas la calculer directement ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : limite en un point">
+
+### L'idée
+
+Dire que **f(x) tend vers ℓ quand x tend vers a**, c'est dire qu'on peut rendre f(x) aussi proche de ℓ qu'on veut, en prenant x assez proche de a (mais différent de a). On écrit :
+
+$$\lim_{x \to a} f(x) = \ell$$
+
+Pour les fonctions usuelles (polynômes, racines, exponentielle, sinus…), il suffit le plus souvent de **remplacer x par a** : la limite de 2x² − 1 en 3 vaut {nombre(evaluerPolynome([-1, 0, 2], 3), 0)}.
+
+### Les formes indéterminées
+
+Parfois, le remplacement donne 0/0 : on ne peut pas conclure. Il faut **transformer l'écriture**. Exemple : $f(x) = \dfrac{x^2 - 4}{x - 2}$ n'est pas définie en 2. Mais $x^2 - 4 = (x - 2)(x + 2)$, donc pour x ≠ 2 :
+
+$$f(x) = x + 2 \quad\Rightarrow\quad \lim_{x \to 2} f(x) = 4$$
+
+Le tableau le confirme : f(2,1) = {nombre(tQuot[0].droite, 4)} ; f(2,01) = {nombre(tQuot[1].droite, 4)} ; f(1,999) = {nombre(tQuot[2].gauche, 4)}.
+
+### Une limite remarquable
+
+$\dfrac{\sin x}{x}$ n'est pas définie en 0, mais ses valeurs s'approchent de 1 : pour x = 0,1, on trouve {nombre(tSinc[0].droite, 6)} ; pour x = 0,01, {nombre(tSinc[1].droite, 6)}. Cette limite vaut 1 **à condition que x soit en radians**. Elle est à l'origine de l'approximation des petits angles (L1.2.5).
+
+### Limite à gauche, limite à droite
+
+On peut approcher a par valeurs plus petites (x → a⁻, à gauche) ou plus grandes (x → a⁺, à droite). La limite existe quand les deux coïncident.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : limite à l'infini et continuité">
+
+### Limite à l'infini
+
+Quand x devient très grand, $1/x$ tend vers 0 et $e^{-x}$ aussi. Pour une fraction de deux polynômes, seuls comptent les **termes de plus haut degré** :
+
+$$\lim_{x \to +\infty} \frac{3x^2 + 5x}{x^2 + 1} = \lim_{x \to +\infty} \frac{3x^2}{x^2} = 3$$
+
+Pour x = 1 000, la fraction vaut déjà {nombre(dominant(1000), 4)}. La droite y = 3 est une **asymptote horizontale** de la courbe.
+
+<Encadre type="exemple" titre="Le coût moyen d'un mètre cube">
+Une centrale à béton de chantier coûte 6 000 USD à installer, puis 120 USD par mètre cube produit (données de l'énoncé). Le coût moyen d'un m³ vaut c(n) = 6 000 / n + 120 : {grandeur(cm[0], 0, 'USD/m³')} pour 50 m³, {grandeur(cm[1], 0, 'USD/m³')} pour 500 m³, {grandeur(cm[2], 1, 'USD/m³')} pour 5 000 m³. Il tend vers 120 USD/m³ : les frais fixes se diluent, mais on ne descend jamais sous le coût variable.
+</Encadre>
+
+### La continuité
+
+Une fonction est **continue en a** si $\lim_{x \to a} f(x) = f(a)$ : sa courbe se trace sans lever le crayon. Polynômes, racines, exponentielle, logarithme, sinus et cosinus sont continus là où ils sont définis.
+
+Une **discontinuité** est un saut. Sur une poutre, l'effort tranchant V fait un saut au droit d'une charge ponctuelle. Pour la poutre de L1.2.4 (charge de {grandeur(EXEMPLE_MOMENT_MAX.P, 0, 'kN')} à {grandeur(aP, 0, 'm')} de l'appui), V vaut {grandeur(vGauche, 1, 'kN')} juste à gauche et {grandeur(vDroite, 1, 'kN')} juste à droite : le saut est égal à la charge. Le moment fléchissant, lui, reste continu ({grandeur(mm.M(aP), 1, 'kN·m')} des deux côtés).
+
+<Regle type="simplification">
+Une charge « ponctuelle » est une idéalisation : un poteau ou une roue s'appuie toujours sur une petite longueur. Le saut de V est la limite d'une variation très rapide sur cette longueur. On garde le modèle parce qu'il simplifie le calcul sans changer le résultat utile.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : s'approcher d'un point creux">
+
+<LimiteSinc />
+
+La courbe de sin x / x oscille et s'amortit. En 0, la fonction n'est pas définie : le cercle creux marque ce trou. Pourtant, des deux côtés, les valeurs montent vers 1. La limite décrit **ce qui se passe autour** du point, pas au point lui-même.
+
+<Encadre type="retenir">
+Une fonction peut avoir une limite en a sans être définie en a (sin x / x en 0), ou avoir une valeur en a différente de sa limite. Elle est continue quand les deux sont égales.
+</Encadre>
+
+| Méthode | Quand l'utiliser | Exemple |
+|---|---|---|
+| Remplacer x par a | fonction usuelle définie en a | 2x² − 1 en 3 |
+| Factoriser et simplifier | forme 0/0 avec des polynômes | (x² − 4)/(x − 2) en 2 |
+| Terme dominant | fraction rationnelle à l'infini | (3x² + 5x)/(x² + 1) |
+| Tableau de valeurs | contrôle, ou expression compliquée | sin x / x en 0 |
+
+</Page>
+
+<FicheCalcul calcul="polygonePi">
+
+<Cahier titre="Exemple résolu : la longueur du cordeau autour d'un cercle">
+
+**Énoncé.** Le géomètre plante n piquets régulièrement espacés sur un cercle de 1 m de diamètre. Quelle longueur de cordeau faut-il pour relier les piquets (polygone inscrit) ? Et pour un polygone circonscrit, dont les côtés touchent le cercle ? Montre que ces deux longueurs encadrent le périmètre du cercle, et qu'elles s'en approchent quand n augmente.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un diamètre de 1 m ? Les longueurs sont proportionnelles au diamètre : pour un réservoir de 8 m, on multiplie par 8.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+<Note>Pourquoi deux polygones ? L'inscrit est plus court que le cercle, le circonscrit plus long : ensemble, ils coincent la valeur cherchée.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'encadrement et la limite">
+
+<Etape n={3} titre="Le polygone inscrit">
+<AN k="inscrit" />
+<Note>Pourquoi sin(π/n) ? Chaque côté est vu du centre sous l'angle 2π/n ; la moitié du côté vaut le rayon fois sin(π/n), soit D sin(π/n) pour le côté entier.</Note>
+</Etape>
+
+<Etape n={4} titre="Le polygone circonscrit">
+<AN k="circonscrit" />
+</Etape>
+
+<Etape n={5} titre="L'encadrement">
+<AN k="encadrement" />
+<Resultat k="encadrement" libelle="Encadrement" />
+<Note couleur="vert">Contrôle : augmente n dans les données. Les deux longueurs se resserrent autour de π × 1 m ; l'écart est divisé par environ 4 quand n double.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="conclure « 0/0 = 0 » ou « 0/0 = 1 ».">
+0/0 n'est pas un nombre : c'est un signal. On transforme l'expression (factorisation, simplification) avant de conclure. Pour (x² − 4)/(x − 2), la limite en 2 vaut 4, ni 0 ni 1.
+</Piege>
+
+<Piege erreur="calculer sin x / x avec x en degrés.">
+La limite 1 n'est vraie qu'en radians. En degrés, sin x / x tend vers π/180 : toute la suite des calculs serait fausse.
+</Piege>
+
+<Piege erreur="ne garder que le terme dominant du numérateur.">
+À l'infini, on garde le terme de plus haut degré **en haut et en bas** : (3x² + 5x)/(x² + 1) tend vers 3x²/x² = 3, pas vers 3x².
+</Piege>
+
+<Piege erreur="confondre la limite et la valeur.">
+La limite décrit ce qui se passe près de a. Une fonction peut ne pas être définie en a, ou y valoir autre chose : c'est justement ce qui distingue une fonction continue d'une fonction qui ne l'est pas.
+</Piege>
+
+<Piege erreur="croire qu'une courbe continue est forcément « lisse ».">
+Le moment fléchissant reste continu au droit d'une charge ponctuelle, mais sa courbe y fait un angle. Continuité veut dire « pas de saut », pas « pas de pointe ».
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Implanter une courbe par cordes.** Pour piqueter un réservoir, un rond-point ou un virage, le géomètre ne trace pas un arc : il reporte des **cordes** de même longueur. Plus les piquets sont rapprochés, plus le polygone colle à la courbe. C'est le calcul de l'exemple, utilisé à l'envers : on choisit l'écart acceptable, et l'on en déduit le nombre de piquets.
+
+<Encadre type="terrain" titre="Le béton continue de durcir">
+Le modèle de l'EC2 (§3.1.2(6), expression (3.2)) donne la résistance à l'âge t sous la forme βcc(t) × résistance à 28 jours, avec βcc(t) = exp(s [1 − (28/t)^½]). Pour un ciment de classe N (s = {nombre(s, 2)}), βcc vaut 1 à 28 jours, {nombre(b90, 3)} à 90 jours, {nombre(b365, 3)} à un an, et tend vers e^s = {nombre(bInf, 3)} : une asymptote horizontale. En pratique, on dimensionne avec la résistance à 28 jours ; le gain ultérieur est une réserve, pas une donnée de calcul (règle de l'art).
+</Encadre>
+
+**Les frais fixes en province.** À Kananga ou à Mbuji-Mayi, amener une centrale à béton et ses granulats coûte cher. Le coût moyen d'un m³ baisse avec le volume produit, mais il tend vers le coût variable : au-delà d'un certain volume, produire plus ne fait presque plus rien gagner.
+
+**Les sauts d'effort tranchant.** Au droit d'un poteau qui s'appuie sur une poutre, l'effort tranchant change brusquement. Le calcul vérifie donc la section **juste à gauche** et **juste à droite** de la charge.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : limites et continuité">
+
+### Limite en a
+
+$\lim_{x \to a} f(x) = \ell$ · fonction usuelle définie en a : on remplace x par a
+
+### Formes indéterminées
+
+0/0 ou ∞/∞ : on transforme (factoriser, simplifier, terme dominant) avant de conclure
+
+### Limites à retenir
+
+$\lim_{x \to 0} \frac{\sin x}{x} = 1$ (radians) · $\lim_{x \to +\infty} \frac{1}{x} = 0$ · $\lim_{x \to +\infty} e^{-x} = 0$
+
+### Terme dominant
+
+fraction rationnelle à l'infini : quotient des termes de plus haut degré
+
+### Continuité
+
+continue en a si $\lim_{x \to a} f(x) = f(a)$ · discontinuité = saut (effort tranchant sous une charge ponctuelle)
+
+### Encadrement
+
+si g ≤ f ≤ h et si g et h tendent vers ℓ, alors f tend vers ℓ (polygones et π)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Limites directes">
+
+Calcule $\lim_{x \to 3} (2x^2 - 1)$, puis $\lim_{x \to 2} \dfrac{x^2 - 4}{x - 2}$.
+
+<Indice>La première est une fonction usuelle définie en 3. La seconde est une forme 0/0 : factorise le numérateur.</Indice>
+
+<Corrige>
+2 × 3² − 1 = **{nombre(evaluerPolynome([-1, 0, 2], 3), 0)}**. Puis x² − 4 = (x − 2)(x + 2) : pour x ≠ 2, la fraction vaut x + 2, qui tend vers **{nombre(evaluerPolynome([2, 1], 2), 0)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Lever les indéterminations">
+
+Calcule $\lim_{x \to 1} \dfrac{x^2 + 2x - 3}{x - 1}$ et $\lim_{x \to +\infty} \dfrac{2x^2 + 3}{5x^2 - x}$.
+
+<Indice>1 est racine de x² + 2x − 3 : factorise par (x − 1). À l'infini, garde les termes de plus haut degré en haut et en bas.</Indice>
+
+<Corrige>
+
+- x² + 2x − 3 = (x − 1)(x + 3) : la fraction vaut x + 3 pour x ≠ 1, et tend vers **{nombre(ex2a, 0)}**.
+- À l'infini : 2x² / 5x² = 2/5, soit **{nombre(ex2b, 1)}**.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le béton à long terme">
+
+Avec le modèle βcc(t) = exp(s [1 − (28/t)^½]) et s = {nombre(s, 2)} (ciment de classe N) : quelle est la limite de βcc quand t tend vers l'infini ? À quel âge le béton atteint-il 95 % de cette limite ?
+
+<Indice>Quand t devient grand, 28/t tend vers 0. Pour l'âge, écris βcc(t) = 0,95 e^s, prends le logarithme, puis isole t.</Indice>
+
+<Corrige>
+
+- (28/t)^½ tend vers 0, donc βcc tend vers **e^s = {nombre(bInf, 3)}**.
+- s [1 − (28/t)^½] = s + ln 0,95, donc (28/t)^½ = −ln 0,95 / s et t = 28 / (ln 0,95 / s)², soit **{nombre(ex3, 0)} jours** (près de deux ans). La limite est approchée lentement : c'est typique d'une asymptote.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La limite de 3x + 1 quand x tend vers 2 vaut :" choix={['6', nombre(evaluerPolynome([1, 3], 2), 0), '0', 'elle n’existe pas']} bonne={1} colonnes={4}>
+Fonction usuelle définie en 2 : 3 × 2 + 1 = {nombre(evaluerPolynome([1, 3], 2), 0)}.
+</QCM>
+
+<QCM n={2} question="La limite de (x² − 9)/(x − 3) quand x tend vers 3 vaut :" choix={['0', '1', nombre(evaluerPolynome([3, 1], 3), 0), 'elle n’existe pas']} bonne={2} colonnes={4}>
+x² − 9 = (x − 3)(x + 3) : la fraction vaut x + 3, qui tend vers {nombre(evaluerPolynome([3, 1], 3), 0)}.
+</QCM>
+
+<QCM n={3} question="Avec x en radians, sin x / x tend, quand x tend vers 0, vers :" choix={['0', '1', 'π/180', 'l’infini']} bonne={1} colonnes={4}>
+C'est la limite remarquable ; π/180 serait la limite avec x en degrés.
+</QCM>
+
+<QCM n={4} question="La limite de (4x² + x)/(2x² − 3) quand x tend vers +∞ vaut :" choix={['4', nombre(rationnelle([0, 1, 4], [-3, 0, 2], 1e9), 0), '0', '+∞']} bonne={1} colonnes={4}>
+Termes dominants : 4x² / 2x² = 2.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Au droit d'une charge ponctuelle P sur une poutre, l'effort tranchant :" choix={['reste continu', 'fait un saut égal à P', 'devient infini', 's’annule toujours']} bonne={1} colonnes={2}>
+C'est une discontinuité : V passe de {grandeur(vGauche, 1, 'kN')} à {grandeur(vDroite, 1, 'kN')} dans l'exemple, avec P = {grandeur(EXEMPLE_MOMENT_MAX.P, 0, 'kN')}.
+</QCM>
+
+<QCM n={6} question="Quand le nombre de côtés n augmente, le périmètre du polygone inscrit dans un cercle de diamètre D :" choix={['diminue', 'augmente et tend vers π D', 'dépasse π D', 'reste constant']} bonne={1} colonnes={2}>
+Il reste sous le périmètre du cercle et s'en approche : π D est sa limite.
+</QCM>
+
+<QCM n={7} question="Le coût moyen c(n) = F/n + c d'un mètre cube, quand n devient très grand, tend vers :" choix={['0', 'F', 'c', 'F + c']} bonne={2} colonnes={4}>
+F/n tend vers 0 : seul reste le coût variable c.
+</QCM>
+
+<QCM n={8} question="Une fonction est continue en a lorsque :" choix={['elle est définie en a', 'sa limite en a est égale à f(a)', 'sa courbe n’a pas d’angle en a', 'f(a) = 0']} bonne={1} colonnes={2}>
+Être défini ne suffit pas, et un angle n'empêche pas la continuité.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

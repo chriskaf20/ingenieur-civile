@@ -1,0 +1,162 @@
+---
+id: L1.2.P
+titre: "Mini-projet : caractéristiques d'une section en T"
+objectifs:
+  - Calculer l'aire et le centre de gravité d'une section en T
+  - Calculer son moment d'inertie par le théorème de Huygens
+  - Contrôler l'inertie par l'intégration de la largeur b(y)
+  - Calculer et interpréter les modules de résistance des deux fibres extrêmes
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { contrainteFlexion, EXEMPLE_SECTION_T, inertieParBandes, sectionTInertie } from '@/lib/calc/analyse'
+import { grandeur, nombre } from '@/lib/format'
+
+export const d = EXEMPLE_SECTION_T
+export const r = sectionTInertie(d)
+export const nervure = inertieParBandes({ b: d.bw, h: d.h, n: 1 })
+export const sInf = contrainteFlexion(50, r.Winf)
+export const sSup = contrainteFlexion(50, r.Wsup)
+export const large = sectionTInertie({ ...d, b: 100 })
+export const lignes = [
+  ['Aire de la section', grandeur(r.A, 0, 'cm²')],
+  ['Centre de gravité, depuis la fibre inférieure', grandeur(r.yG, 2, 'cm')],
+  ['Distance de G à la fibre supérieure', grandeur(r.vSup, 2, 'cm')],
+  ['Inertie par Huygens', grandeur(r.IG, 0, 'cm⁴')],
+  ['Inertie par intégration de b(y)', grandeur(r.Iintegre, 0, 'cm⁴')],
+  ['Module de la fibre inférieure', grandeur(r.Winf, 0, 'cm³')],
+  ['Module de la fibre supérieure', grandeur(r.Wsup, 0, 'cm³')],
+]
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+À Kisangani, une école de six classes est en construction. Les poutres du plancher sont coulées en même temps que la dalle : chaque poutre et la bande de dalle qui l'accompagne travaillent ensemble et forment une **section en T**. Avant de calculer les armatures, le bureau d'études a besoin des caractéristiques géométriques de cette section.
+
+### Les données
+
+- largeur de la table (bande de dalle associée à la poutre) : b = {grandeur(d.b, 0, 'cm')} ;
+- épaisseur de la table (épaisseur de la dalle) : h<sub>f</sub> = {grandeur(d.hf, 0, 'cm')} ;
+- largeur de l'âme (la nervure sous la dalle) : b<sub>w</sub> = {grandeur(d.bw, 0, 'cm')} ;
+- hauteur totale : h = {grandeur(d.h, 0, 'cm')}.
+
+La largeur de table est une **donnée de l'énoncé**. Sur un vrai projet, la largeur de dalle qui participe à la poutre se calcule avec l'EC2 (largeur participante, vue en L3).
+
+### Ce que tu rends
+
+1. L'aire de la section et la position de son centre de gravité.
+2. Son moment d'inertie par rapport à l'axe horizontal passant par G, par le théorème de Huygens.
+3. Le contrôle de cette inertie par l'intégrale ∫ b(y) (y − y<sub>G</sub>)² dy.
+4. Les modules de résistance des fibres inférieure et supérieure, et leur interprétation.
+
+<Regle type="simplification">
+On étudie la section **brute** de béton : les armatures, la fissuration et le fluage sont ignorés. C'est la première étape de tout calcul de poutre ; la section réelle, fissurée et armée, est traitée en béton armé (L3).
+</Regle>
+
+</Page>
+
+<FicheCalcul calcul="sectionTInertie">
+
+<Cahier titre="Étape 1 : la section et son centre de gravité" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi découper en deux rectangles ? Chaque rectangle a une aire, un centre et une inertie connus : on les assemble (N0.5.6 et L1.2.8).</Note>
+</Etape>
+
+<Etape n={2} titre="La section cotée">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="Aires et centre de gravité">
+<AN k="aires" />
+<AN k="yG" />
+<Note>Pourquoi G est-il au-dessus de la mi-hauteur ? La table, large, concentre beaucoup de matière en haut : la moyenne pondérée monte.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : l'inertie par le théorème de Huygens" etape="projet">
+
+<Etape n={4} titre="L'âme">
+<AN k="ame" />
+<Note>Pourquoi ajouter A d² ? L'inertie propre b h³/12 est calculée autour du centre de l'âme ; Huygens la transporte jusqu'à l'axe passant par G de toute la section.</Note>
+</Etape>
+
+<Etape n={5} titre="La table">
+<AN k="table" />
+</Etape>
+
+<Etape n={6} titre="La section entière">
+<AN k="IG" />
+<Resultat k="IG" libelle="Inertie de la section en T" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 : le contrôle et les modules de résistance" etape="projet">
+
+<Etape n={7} titre="Le contrôle par intégration">
+<AN k="integre" />
+<Note>Pourquoi ce contrôle ? Deux méthodes indépendantes qui donnent le même résultat écartent les erreurs de signe et d'axe, les plus fréquentes.</Note>
+</Etape>
+
+<Etape n={8} titre="Les modules de résistance">
+<AN k="W" />
+<Resultat k="Winf" libelle="Module de la fibre inférieure" />
+<Note couleur="vert">Contrôle : W<sub>inf</sub> &lt; W<sub>sup</sub>, car la fibre inférieure est la plus éloignée de G. Sous un moment donné, c'est elle qui subit la plus forte contrainte.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le récapitulatif : exemple corrigé">
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Grandeur</th><th>Valeur</th></tr></thead>
+    <tbody>{lignes.map(([nom, valeur]) => <tr key={nom}><td>{nom}</td><td>{valeur}</td></tr>)}</tbody>
+  </table>
+</div>
+
+### Ce qu'il faut en retenir
+
+- La table remonte le centre de gravité : {grandeur(r.yG, 2, 'cm')} depuis le bas, au lieu de {grandeur(d.h / 2, 0, 'cm')} pour une poutre rectangulaire.
+- Elle augmente l'inertie : la nervure seule (20 × 50 cm) n'a que {grandeur(nervure.Iexact, 0, 'cm⁴')} ; la section en T en a {nombre((r.IG / nervure.Iexact - 1) * 100, 0)} % de plus. Couler la dalle avec la poutre rend le plancher beaucoup plus raide.
+- Les deux modules diffèrent : la fibre inférieure, la plus éloignée de G, est la plus sollicitée. Sous un moment positif, elle est tendue : c'est là que l'on place les armatures principales.
+
+<Encadre type="attention">
+Ces caractéristiques sont celles de la section brute non fissurée. Elles servent à estimer les flèches et à vérifier la fissuration, mais pas à dimensionner l'acier à l'ELU, qui suppose le béton tendu fissuré.
+</Encadre>
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Découpage | Section non découpée | Âme et table séparées | Schéma coté, origine des y précisée |
+| Centre de gravité | Moyenne simple des hauteurs | Moyenne pondérée par les aires | Position commentée (au-dessus de la mi-hauteur) |
+| Huygens | A d² oublié | Les deux termes pour chaque partie | Distances d calculées depuis G de la section |
+| Contrôle | Aucun | Intégration de b(y) | Écart entre les deux méthodes commenté |
+| Modules | Un seul module | W<sub>inf</sub> et W<sub>sup</sub> | Fibre la plus sollicitée identifiée et expliquée |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Sous un moment de 50 kN·m, la contrainte de flexion vaut σ = M / W (résistance des matériaux, L2) : {grandeur(sInf, 2, 'MPa')} sur la fibre inférieure et {grandeur(sSup, 2, 'MPa')} sur la fibre supérieure. Et si la table faisait 100 cm de large ? L'inertie passerait à {grandeur(large.IG, 0, 'cm⁴')} et G remonterait à {grandeur(large.yG, 2, 'cm')}. Pourquoi l'inertie augmente-t-elle si peu, alors que la table est presque deux fois plus large ?
+</Encadre>
+
+<Quiz id="L1.2.P">
+
+<QCM n={1} question="Mon rendu donne-t-il l'aire, le centre de gravité, l'inertie par deux méthodes et les deux modules, chacun avec son unité, et signale-t-il les simplifications ?" choix={['Oui, tout y est', 'Il manque des unités ou un contrôle', 'Je n’ai fait qu’une partie des calculs']} bonne={0}>
+Sinon, complète-le : ces valeurs serviront au calcul des flèches et des armatures de la poutre.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

@@ -1,0 +1,347 @@
+---
+id: L1.2.2
+titre: "La dérivée : pente et taux de variation"
+objectifs:
+  - Calculer un taux de variation entre deux points
+  - Définir la dérivée comme limite du taux de variation
+  - Interpréter une dérivée comme une pente ou une vitesse, avec son unité
+  - Écrire l'équation d'une tangente
+  - Dériver les fonctions usuelles
+relecture: false
+normes: []
+glossaire:
+  - terme: Taux de variation
+    definition: Variation de f divisée par la variation de x entre deux points, [f(b) − f(a)] / (b − a) ; c'est la pente de la sécante.
+  - terme: Dérivée
+    definition: Limite du taux de variation quand l'écart h tend vers 0 ; c'est la pente de la courbe en un point, notée f′(x) ou df/dx.
+  - terme: Tangente
+    definition: Droite qui touche la courbe en un point et y a la même pente ; son coefficient directeur est la dérivée.
+  - terme: Profil en long
+    definition: Coupe verticale d'une route ou d'un réseau le long de son axe, qui montre l'altitude en fonction de la distance.
+  - terme: Raccordement parabolique
+    definition: Arc de parabole qui relie deux pentes différentes d'un profil en long, pour passer de l'une à l'autre progressivement.
+symboles:
+  - { symbole: 'x', signification: 'abscisse le long de l’axe', unite: 'm' }
+  - { symbole: 'h', signification: 'écart entre les deux points', unite: 'm' }
+  - { symbole: 'f′(x), df/dx', signification: 'dérivée de f en x', unite: 'unité de f par unité de x' }
+  - { symbole: 'z', signification: 'altitude du profil', unite: 'm' }
+  - { symbole: 'p₁, p₂', signification: 'pentes d’entrée et de sortie', unite: '%' }
+  - { symbole: 'L', signification: 'longueur du raccordement', unite: 'm' }
+formules:
+  - { nom: 'Taux de variation', tex: '\frac{f(x+h) - f(x)}{h}', domaine: 'Pente de la sécante entre x et x + h' }
+  - { nom: 'Dérivée', tex: 'f''(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}', domaine: 'Quand la limite existe' }
+  - { nom: 'Tangente en a', tex: 'y = f(a) + f''(a)\,(x - a)', domaine: 'f dérivable en a' }
+  - { nom: 'Puissances', tex: '(x^n)'' = n\,x^{n-1}', domaine: 'n entier ou réel' }
+  - { nom: 'Fonctions usuelles', tex: '(e^x)'' = e^x,\ (\ln x)'' = \tfrac{1}{x},\ (\sin x)'' = \cos x,\ (\cos x)'' = -\sin x', domaine: 'x en radians pour sin et cos' }
+  - { nom: 'Raccordement parabolique', tex: 'z(x) = z_0 + p_1 x + \frac{(p_2 - p_1)\,x^2}{2L}, \quad z''(x) = p_1 + \frac{(p_2 - p_1)\,x}{L}', domaine: 'Pentes en m/m, 0 ≤ x ≤ L' }
+---
+
+import { deriveePolynome, evaluerPolynome, EXEMPLE_RACCORDEMENT, penteSecante, raccordement } from '@/lib/calc/analyse'
+import { grandeur, nombre } from '@/lib/format'
+import { SecantesTangente } from '@/components/schemas/Analyse'
+
+export const carre = (x) => evaluerPolynome([0, 0, 1], x)
+export const sec = [1, 0.1, 0.01].map((h) => penteSecante(carre, 3, h).avant)
+export const d3 = evaluerPolynome(deriveePolynome([0, 0, 1]), 3)
+export const t13 = penteSecante(carre, 1, 2).avant
+export const r0 = raccordement(EXEMPLE_RACCORDEMENT)
+export const secR = [10, 1, 0.1].map((h) => raccordement({ ...EXEMPLE_RACCORDEMENT, h }).secante)
+export const camion = [0, 2, 0.25]
+export const v4 = evaluerPolynome(deriveePolynome(camion), 4)
+export const vMoy = penteSecante((t) => evaluerPolynome(camion, t), 2, 4).avant
+export const ex1 = deriveePolynome([7, -2, 0, 4])
+export const ex1v = evaluerPolynome(ex1, 2)
+export const r100 = raccordement({ ...EXEMPLE_RACCORDEMENT, x: 100 })
+export const r35 = raccordement({ ...EXEMPLE_RACCORDEMENT, x: 35 })
+
+<Page etape="intuition" titre="L'intuition : le compteur de vitesse">
+
+Un camion relie deux villages distants de 60 km en 2 heures. Sa vitesse **moyenne** vaut 30 km/h. Pourtant, son compteur n'a presque jamais affiché 30 : il a monté, ralenti dans les villages, accéléré sur la piste droite. Le compteur donne la vitesse **à l'instant**, pas la moyenne.
+
+Sur une route, c'est pareil pour la pente. Entre deux bornes, on calcule une pente moyenne : dénivelé ÷ distance. Mais en haut d'une côte, la pente diminue, s'annule au sommet, puis devient négative. La pente « ici, maintenant » change d'un point à l'autre.
+
+La **dérivée** est le compteur de vitesse d'une fonction : elle dit à quelle vitesse la grandeur change, en chaque point. On l'obtient en prenant une pente moyenne sur un intervalle de plus en plus court.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer la pente exacte d'une route en un point, et non plus seulement entre deux bornes ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : du taux de variation à la dérivée">
+
+### Le taux de variation
+
+Entre deux points d'abscisses x et x + h, la fonction f passe de f(x) à f(x + h). Son **taux de variation** est :
+
+$$\frac{f(x+h) - f(x)}{h}$$
+
+C'est la pente de la **sécante**, la droite qui joint les deux points de la courbe. Pour f(x) = x² entre 1 et 3 : (9 − 1) / 2 = {nombre(t13, 0)}.
+
+### La dérivée
+
+On rapproche les deux points : h tend vers 0. Si le taux de variation a une limite, c'est la **dérivée** de f en x :
+
+$$f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$$
+
+Pour f(x) = x² en 3 : avec h = 1, le taux vaut {nombre(sec[0], 2)} ; avec h = 0,1, {nombre(sec[1], 2)} ; avec h = 0,01, {nombre(sec[2], 2)}. En effet, ((3 + h)² − 9) / h = 6 + h, qui tend vers **{nombre(d3, 0)}**. La sécante devient la **tangente**.
+
+### Toujours une unité
+
+La dérivée a pour unité « unité de f par unité de x ».
+
+| Fonction | Variable | Dérivée | Unité |
+|---|---|---|---|
+| altitude z (m) | distance x (m) | pente | m/m, souvent en % |
+| position x (m) | temps t (s) | vitesse | m/s |
+| volume V (m³) | temps t (h) | débit | m³/h |
+| moment M (kN·m) | abscisse x (m) | effort tranchant | kN |
+| flèche y (m) | abscisse x (m) | rotation | m/m, soit rad |
+
+Une pente de 2,5 % signifie que la route monte de 2,5 cm par mètre : z′ = 0,025 m/m.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : dérivées usuelles et tangente">
+
+### Les dérivées à connaître
+
+| f(x) | f′(x) | | f(x) | f′(x) |
+|---|---|---|---|---|
+| c (constante) | 0 | | 1/x | −1/x² |
+| x | 1 | | eˣ | eˣ |
+| xⁿ | n xⁿ⁻¹ | | ln x | 1/x |
+| √x | 1 / (2√x) | | sin x | cos x (x en radians) |
+
+La dérivée d'une somme est la somme des dérivées, et une constante en facteur reste en facteur (L1.2.3). Ainsi, pour la position d'un engin x(t) = 2t + 0,25 t² (m), la vitesse vaut x′(t) = 2 + 0,5 t, soit {grandeur(v4, 0, 'm/s')} à t = 4 s.
+
+### L'équation de la tangente
+
+La tangente en a passe par le point (a ; f(a)) avec la pente f′(a) :
+
+$$y = f(a) + f'(a)\,(x - a)$$
+
+Près de a, la tangente et la courbe se confondent : c'est la base des approximations (L1.2.5).
+
+### Le signe de la dérivée
+
+Si f′ > 0 sur un intervalle, f y est **croissante** ; si f′ < 0, elle est décroissante. Là où f′ s'annule en changeant de signe, la courbe passe par un sommet ou un creux (L1.2.4).
+
+<Regle type="simplification">
+On suppose les fonctions « assez régulières » pour être dérivables. Une courbe qui fait un angle (le moment au droit d'une charge ponctuelle) n'a pas de dérivée en ce point : la pente à gauche et la pente à droite y diffèrent.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la sécante devient tangente">
+
+<SecantesTangente />
+
+Depuis le point A, on trace des sécantes vers des points de plus en plus proches. Leurs pentes diminuent et se rapprochent de la pente de la tangente, en rouge. La dérivée **est** cette pente limite.
+
+<Encadre type="retenir">
+Taux de variation = pente de la sécante, sur un intervalle. Dérivée = pente de la tangente, en un point. On passe de l'un à l'autre en faisant tendre h vers 0.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="raccordementProfil">
+
+<Cahier titre="Exemple résolu : la pente d'une route au passage d'une crête">
+
+**Énoncé.** Une route en terre monte en rampe de 4 %, puis redescend à 2 %. Pour ne pas créer de cassure, le projeteur relie ces deux pentes par un arc de parabole de 120 m, qui commence à l'altitude 300 m. Quelle est la pente exacte à 30 m du début de l'arc ? Compare-la à la pente moyenne mesurée sur les 10 m suivants. Où se trouve le point haut de la route ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi une pente de sortie négative ? Avec l'axe x dans le sens de la marche, une descente fait diminuer l'altitude : sa pente est négative.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : sécante, tangente et point haut">
+
+<Etape n={3} titre="Le modèle du profil">
+<AN k="modele" />
+<AN k="z" />
+<Note>Pourquoi cette parabole ? Sa pente varie régulièrement, de p₁ au début à p₂ à la fin : on vérifie que z′(0) = p₁ et z′(L) = p₂.</Note>
+</Etape>
+
+<Etape n={4} titre="La pente moyenne sur 10 m">
+<AN k="secante" />
+</Etape>
+
+<Etape n={5} titre="La pente exacte : la dérivée">
+<AN k="derivee" />
+<AN k="ecart" />
+<Note>Pourquoi la sécante est-elle plus faible ? La route s'aplatit en montant vers la crête : sur les 10 m suivants, la pente moyenne est déjà un peu plus douce.</Note>
+</Etape>
+
+<Etape n={6} titre="Le point haut">
+<AN k="sommet" />
+<Resultat k="pente" libelle="Pente en x" />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre pente moyenne et pente en un point.">
+Sur 10 m, la pente moyenne de l'exemple vaut {nombre(secR[0] * 100, 2)} %, mais la pente exacte à 30 m vaut {nombre(r0.pente * 100, 2)} %. Sur 1 m, on trouve {nombre(secR[1] * 100, 3)} % ; sur 0,1 m, {nombre(secR[2] * 100, 4)} % : on se rapproche de la dérivée.
+</Piege>
+
+<Piege erreur="oublier l'unité de la dérivée.">
+Une dérivée n'est pas un nombre « nu » : une pente est en m/m (ou en %), une vitesse en m/s, un débit en m³/h. L'unité dit ce que la dérivée signifie.
+</Piege>
+
+<Piege erreur="écrire (xⁿ)′ = xⁿ⁻¹.">
+L'exposant descend **en facteur** : (x³)′ = 3x², pas x².
+</Piege>
+
+<Piege erreur="dériver une constante en la gardant.">
+La dérivée de 300 (l'altitude de départ) est 0 : une constante ne varie pas. C'est pourquoi z₀ disparaît dans z′(x).
+</Piege>
+
+<Piege erreur="mélanger pourcentages et m/m.">
+2,5 % = 0,025 m/m. Dans les formules, on calcule en m/m ; on ne repasse en % qu'à la fin.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le profil en long.** Sur une route, le projeteur dessine l'altitude en fonction de la distance. Les tronçons en pente constante sont reliés par des arcs de parabole : **saillants** au passage d'une crête, **rentrants** au fond d'un creux. La dérivée de la parabole donne la pente en chaque point, et son annulation localise le point haut ou le point bas.
+
+<Encadre type="terrain" titre="Le point bas, ennemi de la route">
+En saison des pluies, l'eau ruisselle vers les points bas du profil. Une route en terre sans ouvrage à cet endroit se transforme en bourbier, puis en ravine. Localiser le point bas par z′(x) = 0, c'est savoir où placer le dalot ou la buse, et où renforcer la chaussée. Les pentes minimales d'écoulement et les rayons minimaux des raccordements sont fixés par les guides de conception routière (module routes).
+</Encadre>
+
+**La règle de 3 m.** Pour contrôler la pente d'un caniveau, le chef de chantier pose un niveau sur une règle de 3 m : il mesure un taux de variation sur 3 m. Sur un ouvrage dont la pente change, il répète la mesure en plusieurs points.
+
+**Les vitesses de chantier.** Débit d'une pompe (dérivée du volume pompé), vitesse d'avancement d'un engin (dérivée de la position), vitesse de tassement d'un remblai (dérivée du tassement) : chaque fois qu'on dit « par heure » ou « par mètre », on parle d'une dérivée.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : la dérivée">
+
+### Taux de variation
+
+$\dfrac{f(x+h) - f(x)}{h}$ = pente de la sécante
+
+### Dérivée
+
+$f'(x) = \lim_{h \to 0} \dfrac{f(x+h) - f(x)}{h}$ = pente de la tangente · unité de f par unité de x
+
+### Dérivées usuelles
+
+$(c)' = 0$ · $(x^n)' = n x^{n-1}$ · $(\sqrt{x})' = \frac{1}{2\sqrt{x}}$ · $(\frac{1}{x})' = -\frac{1}{x^2}$ · $(e^x)' = e^x$ · $(\ln x)' = \frac{1}{x}$ · $(\sin x)' = \cos x$ · $(\cos x)' = -\sin x$
+
+### Tangente en a
+
+$y = f(a) + f'(a)(x - a)$
+
+### Sens de variation
+
+f′ > 0 : f croît · f′ < 0 : f décroît · f′ = 0 avec changement de signe : sommet ou creux
+
+### Profil en long
+
+$z' = p_1 + (p_2 - p_1)\,x / L$ · point haut ou bas en $x = -p_1 L / (p_2 - p_1)$
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Dériver un polynôme">
+
+Soit f(x) = 4x³ − 2x + 7. Calcule f′(x), puis f′(2).
+
+<Indice>Dérive terme à terme : (x³)′ = 3x², (x)′ = 1, et une constante a pour dérivée 0.</Indice>
+
+<Corrige>
+f′(x) = 4 × 3x² − 2 × 1 + 0 = **12x² − 2** ; f′(2) = 12 × 4 − 2 = **{nombre(ex1v, 0)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La tangente après la crête">
+
+Sur le raccordement de l'exemple (rampe de 4 %, pente de 2 %, L = 120 m, z₀ = 300 m), calcule l'altitude et la pente à x = 100 m, puis l'équation de la tangente en ce point.
+
+<Indice>z(x) = z₀ + p₁ x + (p₂ − p₁) x² / (2L) et z′(x) = p₁ + (p₂ − p₁) x / L, pentes en m/m.</Indice>
+
+<Corrige>
+
+- z(100) = 300 + 0,04 × 100 − 0,06 × 100² / 240 = **{grandeur(r100.z, 2, 'm')}**.
+- z′(100) = 0,04 − 0,06 × 100 / 120 = **{nombre(r100.pente, 3)} m/m**, soit {nombre(r100.pente * 100, 1)} % : on a passé le point haut, la route descend.
+- Tangente : z = {nombre(r100.z, 2)} − {nombre(-r100.pente, 3)} × (x − 100), en mètres.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Sécante et milieu">
+
+Montre que pour une parabole f(x) = αx² + βx + γ, la pente de la sécante entre a et b est égale à la dérivée au milieu (a + b)/2. Vérifie-le sur l'exemple entre 30 m et 40 m, puis sur l'engin dont la position vaut x(t) = 2t + 0,25 t², entre 2 s et 6 s.
+
+<Indice>Calcule [f(b) − f(a)] / (b − a) et factorise b² − a² = (b − a)(b + a).</Indice>
+
+<Corrige>
+
+- [f(b) − f(a)] / (b − a) = α(b + a) + β, et f′(x) = 2αx + β vaut aussi α(a + b) + β en x = (a + b)/2.
+- Route : la sécante sur [30 ; 40] vaut **{nombre(r0.secante * 100, 2)} %**, et la dérivée en 35 m vaut **{nombre(r35.pente * 100, 2)} %**.
+- Engin : vitesse moyenne entre 2 et 6 s = **{grandeur(vMoy, 0, 'm/s')}**, égale à la vitesse à 4 s, x′(4) = {grandeur(v4, 0, 'm/s')}.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le taux de variation de f(x) = x² entre 1 et 3 vaut :" choix={['2', nombre(t13, 0), '8', '9']} bonne={1} colonnes={4}>
+(f(3) − f(1)) / (3 − 1) = (9 − 1) / 2 = {nombre(t13, 0)}.
+</QCM>
+
+<QCM n={2} question="La dérivée de x³ est :" choix={['x²', '3x²', '3x³', 'x⁴/4']} bonne={1} colonnes={4}>
+(xⁿ)′ = n xⁿ⁻¹ ; x⁴/4 serait une primitive (L1.2.6).
+</QCM>
+
+<QCM n={3} question="L'altitude z (m) d'une route dépend de la distance x (m). L'unité de dz/dx est :" choix={['m', 'm/m (sans unité)', 'm²', 'm/s']} bonne={1} colonnes={4}>
+Mètre d'altitude par mètre de distance : une pente, souvent écrite en %.
+</QCM>
+
+<QCM n={4} question="Le volume V (m³) d'un réservoir dépend du temps t (h). La dérivée dV/dt est :" choix={['une hauteur', 'un débit en m³/h', 'une surface', 'une pente en %']} bonne={1} colonnes={2}>
+C'est la vitesse de remplissage.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="En un point d'un profil, z′(x) = −0,02. La route, dans le sens de la marche :" choix={['monte de 2 cm par mètre', 'descend de 2 cm par mètre', 'descend de 2 m par mètre', 'est horizontale']} bonne={1} colonnes={2}>
+Pente négative : l'altitude diminue de 0,02 m par mètre, soit 2 %.
+</QCM>
+
+<QCM n={6} question="En un point où f′(a) = 0, la tangente à la courbe est :" choix={['verticale', 'horizontale', 'confondue avec l’axe des y', 'inexistante']} bonne={1} colonnes={4}>
+Sa pente est nulle : c'est souvent un sommet ou un creux.
+</QCM>
+
+<QCM n={7} question="Si f′(x) > 0 sur un intervalle, alors sur cet intervalle f est :" choix={['positive', 'croissante', 'constante', 'nulle']} bonne={1} colonnes={4}>
+Le signe de la dérivée donne le sens de variation, pas le signe de f.
+</QCM>
+
+<QCM n={8} question="Pour le raccordement de l'exemple, la pente moyenne sur 10 m à partir de x = 30 m est plus faible que la pente exacte en 30 m parce que :" choix={['on a fait une erreur d’arrondi', 'la route s’aplatit en approchant de la crête', 'la sécante est toujours plus faible', 'la pente est constante']} bonne={1} colonnes={2}>
+La pente décroît de 4 % vers −2 % : sur [30 ; 40], elle est en moyenne plus douce qu'en 30 m.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

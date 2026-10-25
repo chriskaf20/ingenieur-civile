@@ -1,0 +1,340 @@
+---
+id: L1.2.5
+titre: Approximations et développements limités
+objectifs:
+  - Remplacer une fonction par sa tangente au voisinage d'un point
+  - Utiliser les approximations des petits angles et du binôme
+  - Écrire un développement limité d'ordre 2 et estimer l'erreur commise
+  - Calculer la longueur d'un câble à partir de sa flèche
+relecture: false
+normes:
+  - "EN 1992-1-1 (EC2) §3.1.3(5) : coefficient de dilatation thermique du béton"
+glossaire:
+  - terme: Approximation linéaire
+    definition: Remplacement d'une fonction, près d'un point, par sa tangente en ce point ; on dit aussi linéarisation.
+  - terme: Développement limité
+    definition: "Écriture approchée d'une fonction près d'un point par un polynôme : à l'ordre 1, la tangente ; à l'ordre 2, on ajoute un terme en h²."
+  - terme: Petits angles
+    definition: Angles assez faibles pour que sin α ≈ α et tan α ≈ α, avec α en radians.
+  - terme: Erreur relative
+    definition: Écart entre la valeur approchée et la valeur exacte, divisé par la valeur exacte ; souvent exprimé en %.
+  - terme: Flèche d'un câble
+    definition: Distance verticale entre la corde qui relie les deux appuis et le point le plus bas du câble.
+symboles:
+  - { symbole: 'h', signification: 'petit écart autour du point a', unite: 'selon le problème' }
+  - { symbole: 'α', signification: 'angle', unite: 'rad' }
+  - { symbole: 'ε', signification: 'petite quantité sans dimension', unite: '—' }
+  - { symbole: 'l', signification: 'portée du câble', unite: 'm' }
+  - { symbole: 'f', signification: 'flèche du câble', unite: 'm' }
+  - { symbole: 'S', signification: 'longueur du câble', unite: 'm' }
+formules:
+  - { nom: 'Approximation linéaire', tex: 'f(a + h) \approx f(a) + f''(a)\,h', domaine: 'h petit' }
+  - { nom: 'Développement limité d’ordre 2', tex: 'f(a + h) \approx f(a) + f''(a)\,h + \tfrac{1}{2} f''''(a)\,h^2', domaine: 'h petit, f deux fois dérivable' }
+  - { nom: 'Petits angles', tex: '\sin\alpha \approx \alpha, \quad \tan\alpha \approx \alpha, \quad \cos\alpha \approx 1 - \tfrac{\alpha^2}{2}', domaine: 'α en radians, α petit' }
+  - { nom: 'Binôme', tex: '(1 + \varepsilon)^n \approx 1 + n\,\varepsilon', domaine: '|ε| petit, n quelconque' }
+  - { nom: 'Longueur d’un câble parabolique', tex: 'S \approx l\left(1 + \frac{8 f^2}{3 l^2}\right)', domaine: 'f petit devant l' }
+---
+
+import { binome, EXEMPLE_CABLE, longueurCable, petitAngle, sensibiliteFleche } from '@/lib/calc/analyse'
+import { MATERIAUX_THERMIQUES } from '@/lib/calc/physique'
+import { grandeur, nombre, scientifique } from '@/lib/format'
+import { PetitsAngles } from '@/components/schemas/Analyse'
+
+export const angles = [5, 10, 20, 30].map((d) => ({ d, ...petitAngle(d) }))
+export const a6 = petitAngle(6)
+export const a5 = petitAngle(5)
+export const c0 = longueurCable(EXEMPLE_CABLE)
+export const racine = binome(0.02, 0.5)
+export const inverse = binome(0.03, -1)
+export const cube = binome(0.01, 3)
+export const alphaB = MATERIAUX_THERMIQUES.beton.alpha
+export const surf = binome(alphaB * 40, 2)
+export const vol = binome(alphaB * 40, 3)
+export const tuyau = binome(0.02 * 0.02, 0.5)
+export const df = sensibiliteFleche(EXEMPLE_CABLE.l, EXEMPLE_CABLE.f, 0.1)
+
+<Page etape="intuition" titre="L'intuition : à la loupe, une courbe est une droite">
+
+Regarde une carte de la RDC : la Terre est ronde, mais le terrain d'un chantier de 100 m paraît parfaitement plat. Personne n'implante une maison en tenant compte de la courbure de la Terre.
+
+C'est une propriété générale. Si l'on zoome assez sur une courbe lisse, elle se confond avec sa **tangente**. Près d'un point, on peut donc remplacer une fonction compliquée par une droite, beaucoup plus simple à calculer. L'erreur est minuscule tant qu'on reste près du point.
+
+Les ingénieurs le font en permanence : un petit angle remplace son sinus, une petite déformation se calcule « au premier ordre », la longueur d'un câble peu tendu se déduit de sa flèche par une formule simple. Toute la question est de savoir **jusqu'où** l'approximation reste bonne.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quand peut-on remplacer une fonction par une formule plus simple, et quelle erreur commet-on ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : la tangente comme approximation">
+
+### L'approximation linéaire
+
+Près de a, la courbe et sa tangente se confondent (L1.2.2). Pour un petit écart h :
+
+$$f(a + h) \approx f(a) + f'(a)\,h$$
+
+L'erreur commise est proportionnelle à h² : si h est divisé par 10, l'erreur est divisée par environ 100.
+
+### Le binôme
+
+Avec f(x) = (1 + x)ⁿ, f(0) = 1 et f′(0) = n :
+
+$$(1 + \varepsilon)^n \approx 1 + n\,\varepsilon \qquad (\varepsilon \text{ petit})$$
+
+- √1,02 = (1 + 0,02)^½ ≈ 1 + 0,01 = {nombre(racine.approche, 2)} ; exact : {nombre(racine.exact, 6)}.
+- 1 / 1,03 = (1 + 0,03)⁻¹ ≈ 1 − 0,03 = {nombre(inverse.approche, 2)} ; exact : {nombre(inverse.exact, 6)}.
+- 1,01³ ≈ 1 + 3 × 0,01 = {nombre(cube.approche, 2)} ; exact : {nombre(cube.exact, 6)}.
+
+### Les petits angles
+
+Pour α en **radians**, sin α ≈ α et tan α ≈ α (tangentes en 0 de sin et tan). Un angle de 5° vaut {nombre(a5.rad, 4)} rad ; sin 5° = {nombre(a5.sin, 4)} et tan 5° = {nombre(a5.tan, 4)}.
+
+| α | α (rad) | erreur sur sin α | erreur sur tan α |
+|---|---|---|---|
+| {angles[0].d}° | {nombre(angles[0].rad, 4)} | {nombre(angles[0].erreurSin * 100, 2)} % | {nombre(angles[0].erreurTan * 100, 2)} % |
+| {angles[1].d}° | {nombre(angles[1].rad, 4)} | {nombre(angles[1].erreurSin * 100, 2)} % | {nombre(angles[1].erreurTan * 100, 2)} % |
+| {angles[2].d}° | {nombre(angles[2].rad, 4)} | {nombre(angles[2].erreurSin * 100, 2)} % | {nombre(angles[2].erreurTan * 100, 2)} % |
+| {angles[3].d}° | {nombre(angles[3].rad, 4)} | {nombre(angles[3].erreurSin * 100, 2)} % | {nombre(angles[3].erreurTan * 100, 2)} % |
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : l'ordre 2 et ses usages">
+
+### Le développement limité d'ordre 2
+
+Quand la tangente ne suffit pas (par exemple quand f′(a) = 0), on ajoute un terme :
+
+$$f(a + h) \approx f(a) + f'(a)\,h + \tfrac{1}{2} f''(a)\,h^2$$
+
+Pour le cosinus en 0 : cos 0 = 1, cos′ 0 = 0 et cos″ 0 = −1, d'où **cos α ≈ 1 − α²/2**. À 10°, l'erreur relative ne vaut que {scientifique(angles[1].erreurCos * 100, 2)} %.
+
+### Les petites déformations
+
+Une dalle en béton qui s'échauffe de 40 °C s'allonge de ε = α ΔT = {scientifique(alphaB * 40, 2)} dans chaque direction (α = {scientifique(alphaB, 2)} /°C, EC2 §3.1.3(5)). Sa surface est multipliée par (1 + ε)² ≈ 1 + 2ε et son volume par (1 + ε)³ ≈ 1 + 3ε : la variation de surface vaut {scientifique(surf.approche - 1, 2)} au lieu de {scientifique(surf.exact - 1, 4)} exactement. Aux petites déformations, l'approximation est parfaite.
+
+### La longueur d'un câble
+
+Un câble tendu entre deux appuis de même niveau, avec une flèche f faible devant la portée l, prend une forme de parabole. Sa longueur exacte s'écrit avec une racine et un logarithme. En appliquant √(1 + u) ≈ 1 + u/2 sous l'intégrale de longueur (on l'admet ici, l'intégrale est vue en L1.2.8), on obtient :
+
+$$S \approx l\left(1 + \frac{8 f^2}{3 l^2}\right)$$
+
+<Regle type="simplification">
+La parabole suppose une charge répartie le long de l'horizontale (un tablier suspendu). Un câble qui ne porte que son propre poids prend une forme de chaînette ; pour une flèche faible, les deux courbes sont presque confondues.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : sin, tan et l'angle en radians">
+
+<PetitsAngles marque={10} />
+
+Les trois courbes partent ensemble de l'origine, avec la même tangente. Jusqu'à 10° environ, elles sont indiscernables : c'est le domaine des petits angles. Au-delà de 20°, tan α s'envole et sin α s'écarte : l'approximation n'est plus acceptable.
+
+<Encadre type="retenir">
+Une approximation n'est jamais « juste » ou « fausse » : elle est valable dans un domaine. On donne toujours ce domaine, ou l'erreur commise.
+</Encadre>
+
+| Approximation | Domaine courant | Erreur au bord du domaine |
+|---|---|---|
+| sin α ≈ α | α ≤ 10° | {nombre(angles[1].erreurSin * 100, 2)} % |
+| tan α ≈ α | α ≤ 10° | {nombre(angles[1].erreurTan * 100, 2)} % |
+| cos α ≈ 1 − α²/2 | α ≤ 20° | {nombre(Math.abs(angles[2].erreurCos) * 100, 3)} % |
+| (1 + ε)ⁿ ≈ 1 + n ε | ε petit devant 1 | de l'ordre de ε² |
+
+</Page>
+
+<FicheCalcul calcul="longueurCable">
+
+<Cahier titre="Exemple résolu : le câble d'une passerelle">
+
+**Énoncé.** Pour une passerelle piétonne suspendue au-dessus d'une rivière, on tend un câble porteur entre deux pylônes de même hauteur, distants de 200 m. Au milieu, le câble descend de 6 m sous la ligne des sommets. Quelle longueur de câble faut-il entre les deux pylônes ? Compare la formule exacte et la formule approchée.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi la flèche compte-t-elle si peu ? Le câble n'est que légèrement plus long que la portée : c'est justement ce petit excès qu'on veut calculer précisément.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : exact ou approché ?">
+
+<Etape n={3} titre="Le rapport de forme">
+<AN k="k" />
+<Note>Pourquoi k ? C'est la pente du câble à l'appui (4f/l pour une parabole) : s'il est petit, le câble est peu incliné et l'approximation sera bonne.</Note>
+</Etape>
+
+<Etape n={4} titre="La longueur exacte">
+<AN k="exacte" />
+</Etape>
+
+<Etape n={5} titre="La longueur approchée">
+<AN k="approchee" />
+<AN k="ecart" />
+<Resultat k="exacte" libelle="Longueur du câble" />
+<Note couleur="vert">Contrôle : le câble dépasse la portée de <Val k="surlongueur" />. Augmente la flèche : l'écart entre les deux formules grandit, comme f⁴/l³.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="utiliser sin α ≈ α avec α en degrés.">
+sin 5° ≈ 5 est absurde : il faut d'abord convertir, 5° = {nombre(a5.rad, 4)} rad. L'approximation n'existe qu'en radians.
+</Piege>
+
+<Piege erreur="appliquer l'approximation trop loin.">
+À 30°, tan α ≈ α se trompe de {nombre(angles[3].erreurTan * 100, 0)} %. Avant d'approcher, on vérifie que la quantité est vraiment petite.
+</Piege>
+
+<Piege erreur="oublier le facteur n du binôme.">
+(1 + ε)³ ≈ 1 + 3ε, pas 1 + ε. Et (1 + ε)⁻¹ ≈ 1 − ε : le signe change avec l'exposant.
+</Piege>
+
+<Piege erreur="négliger l'ordre 2 quand la tangente est horizontale.">
+Pour cos α près de 0, la tangente donne cos α ≈ 1 : c'est trop grossier si l'on cherche la petite différence 1 − cos α. Il faut le terme α²/2.
+</Piege>
+
+<Piege erreur="arrondir trop tôt une petite différence.">
+La surlongueur du câble ({grandeur(c0.exacte - EXEMPLE_CABLE.l, 3, 'm')}) est petite devant 200 m. Arrondie au mètre, la longueur ferait disparaître exactement ce qu'on cherche.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**La règle du millième.** En topographie, un angle de 1 milliradian décale un point d'un millième de la distance de visée : écart ≈ distance × angle (petits angles). C'est ainsi qu'on estime l'effet d'une petite erreur de visée sur une implantation.
+
+<Encadre type="terrain" titre="Les passerelles à câbles">
+En RDC, de nombreuses rivières sont franchies par des passerelles piétonnes suspendues. Le réglage du câble est délicat : en dérivant S ≈ l + 8f²/(3l), on trouve qu'un câble trop long de 10 cm fait descendre le milieu de {grandeur(df * 100, 1, 'cm')} (exercice 3). Les tendeurs aux ancrages permettent de corriger la flèche après montage.
+</Encadre>
+
+**Les pentes faibles.** Un tuyau posé à 2 % sur 100 m mesure √(1 + 0,02²) ≈ 1 + 0,02²/2 = {nombre(tuyau.approche, 4)} fois sa longueur en plan. Pour les métrés, on confond longueur en pente et longueur en plan tant que la pente reste faible.
+
+**Les petites déformations.** Les déformations des matériaux de construction restent de l'ordre du millième. Tout le calcul des structures courantes est « linéarisé » : on néglige les termes en ε², ce qui rend les calculs additifs et beaucoup plus simples.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : approximations">
+
+### Ordre 1 (tangente)
+
+$f(a + h) \approx f(a) + f'(a)\,h$ · erreur en h²
+
+### Ordre 2
+
+$f(a + h) \approx f(a) + f'(a)\,h + \tfrac{1}{2}f''(a)\,h^2$
+
+### Petits angles (radians)
+
+$\sin\alpha \approx \alpha$ · $\tan\alpha \approx \alpha$ · $\cos\alpha \approx 1 - \alpha^2/2$ · erreur relative ≈ α²/6 pour sin, α²/3 pour tan
+
+### Binôme
+
+$(1 + \varepsilon)^n \approx 1 + n\varepsilon$ · $\sqrt{1 + \varepsilon} \approx 1 + \varepsilon/2$ · $\frac{1}{1 + \varepsilon} \approx 1 - \varepsilon$
+
+### Câble parabolique
+
+$S \approx l\,(1 + \frac{8f^2}{3l^2})$ · $df = \frac{3l}{16f}\,dS$
+
+### Dilatation
+
+surface : $1 + 2\alpha\Delta T$ · volume : $1 + 3\alpha\Delta T$
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le sinus de 6°">
+
+Calcule une valeur approchée de sin 6°, puis l'erreur relative commise.
+
+<Indice>Convertis d'abord 6° en radians : multiplie par π/180.</Indice>
+
+<Corrige>
+6° = {nombre(a6.rad, 4)} rad, donc sin 6° ≈ **{nombre(a6.rad, 4)}**. La valeur exacte est {nombre(a6.sin, 4)} : erreur relative de **{nombre(a6.erreurSin * 100, 2)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Calcul mental avec le binôme">
+
+Sans calculatrice, donne une valeur approchée de √1,02, de 1/1,03 et de 1,01³. Vérifie ensuite à la calculatrice.
+
+<Indice>Écris chaque nombre sous la forme (1 + ε)ⁿ.</Indice>
+
+<Corrige>
+
+- √1,02 ≈ 1 + 0,02/2 = **{nombre(racine.approche, 2)}** (exact {nombre(racine.exact, 5)}).
+- 1/1,03 ≈ 1 − 0,03 = **{nombre(inverse.approche, 2)}** (exact {nombre(inverse.exact, 5)}).
+- 1,01³ ≈ 1 + 3 × 0,01 = **{nombre(cube.approche, 2)}** (exact {nombre(cube.exact, 5)}).
+
+Dans les trois cas, l'erreur est de l'ordre de ε².
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un câble un peu trop long">
+
+Pour la passerelle de l'exemple (l = 200 m, f = 6 m), le câble est coupé 10 cm trop long. De combien la flèche augmente-t-elle ? Que conclus-tu pour le réglage ?
+
+<Indice>Différencie S ≈ l + 8f²/(3l) par rapport à f : dS ≈ (16 f / 3l) df.</Indice>
+
+<Corrige>
+dS = 16 f df / (3l), donc df = 3 l dS / (16 f) = 3 × 200 × 0,1 / (16 × 6) = **{grandeur(df, 3, 'm')}**. Dix centimètres de câble en trop font descendre le milieu de plus de 60 cm : la flèche est très sensible à la longueur. On règle donc la flèche sur place, aux tendeurs, plutôt que de compter sur une coupe parfaite.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'approximation sin α ≈ α est valable quand :" choix={['α est petit et en degrés', 'α est petit et en radians', 'α est proche de 90°', 'toujours']} bonne={1} colonnes={2}>
+En radians seulement, et pour α petit.
+</QCM>
+
+<QCM n={2} question="tan 5° vaut environ :" choix={['5', nombre(a5.rad, 4), '0,5', '0,0050']} bonne={1} colonnes={4}>
+5° = {nombre(a5.rad, 4)} rad, et tan α ≈ α.
+</QCM>
+
+<QCM n={3} question="1,01³ vaut environ :" choix={['1,01', nombre(cube.approche, 2), '1,3', '3,03']} bonne={1} colonnes={4}>
+(1 + ε)³ ≈ 1 + 3ε = {nombre(cube.approche, 2)}.
+</QCM>
+
+<QCM n={4} question="Le développement limité d'ordre 2 de cos α en 0 est :" choix={['1 − α', '1 − α²/2', 'α', '1 + α²/2']} bonne={1} colonnes={4}>
+cos 0 = 1, cos′ 0 = 0, cos″ 0 = −1.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="√(1 + ε) vaut environ, pour ε petit :" choix={['1 + ε', '1 + ε/2', '1 − ε/2', '1 + 2ε']} bonne={1} colonnes={4}>
+Binôme avec n = 1/2.
+</QCM>
+
+<QCM n={6} question="La formule S ≈ l (1 + 8f²/(3l²)) pour la longueur d'un câble suppose :" choix={['une flèche faible devant la portée', 'un câble vertical', 'des appuis de hauteurs très différentes', 'une flèche égale à la portée']} bonne={0} colonnes={2}>
+C'est un développement limité : il vaut pour f/l petit.
+</QCM>
+
+<QCM n={7} question="L'approximation linéaire de f près de a s'écrit :" choix={['f(a + h) ≈ f(a) + f′(a) h', 'f(a + h) ≈ f′(a) h', 'f(a + h) ≈ f(a) h', 'f(a + h) ≈ f(a) + h']} bonne={0} colonnes={2}>
+C'est l'équation de la tangente en a.
+</QCM>
+
+<QCM n={8} question="Une dalle s'échauffe : chaque dimension s'allonge de ε. Sa surface augmente d'environ :" choix={['ε', '2ε', '3ε', 'ε²']} bonne={1} colonnes={4}>
+(1 + ε)² ≈ 1 + 2ε ; le volume, lui, augmente d'environ 3ε.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

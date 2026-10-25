@@ -1,0 +1,336 @@
+---
+id: L1.2.3
+titre: Règles de dérivation
+objectifs:
+  - Dériver une somme, un produit et un quotient de fonctions
+  - Dériver une fonction composée avec la règle de la chaîne
+  - Calculer la rotation d'une poutre en dérivant sa flèche
+  - Contrôler une dérivée par un taux de variation sur un petit intervalle
+relecture: false
+normes:
+  - "EN 1992-1-1 (EC2) tableau 3.1 : module Ecm = 31 GPa pour un béton C25/30"
+  - "EN 1992-1-1 (EC2) §7.4.1(4) et (5) : flèches limites portée/250 et portée/500"
+glossaire:
+  - terme: Règle du produit
+    definition: La dérivée de u × v vaut u′ v + u v′ ; ce n'est pas u′ × v′.
+  - terme: Règle du quotient
+    definition: La dérivée de u / v vaut (u′ v − u v′) / v², là où v ne s'annule pas.
+  - terme: Fonction composée
+    definition: Fonction obtenue en appliquant une fonction au résultat d'une autre, comme (2x + 1)³ ou e^(−kt).
+  - terme: Flèche
+    definition: Déplacement vertical d'un point d'une poutre sous la charge, compté positivement vers le bas.
+  - terme: Rotation
+    definition: Angle dont tourne la poutre en un point ; pour de petites déformations, c'est la dérivée de la flèche, en radians.
+symboles:
+  - { symbole: 'u, v', signification: 'fonctions de x', unite: 'selon le problème' }
+  - { symbole: 'q', signification: 'charge répartie', unite: 'kN/m' }
+  - { symbole: 'L', signification: 'portée de la poutre', unite: 'm' }
+  - { symbole: 'E', signification: 'module d’élasticité du matériau', unite: 'GPa' }
+  - { symbole: 'I', signification: 'moment d’inertie de la section', unite: 'm⁴' }
+  - { symbole: 'y, θ', signification: 'flèche et rotation', unite: 'm, rad' }
+formules:
+  - { nom: 'Linéarité', tex: '(u + v)'' = u'' + v'', \quad (k\,u)'' = k\,u''', domaine: 'k constante' }
+  - { nom: 'Produit', tex: '(u\,v)'' = u''\,v + u\,v''', domaine: 'u et v dérivables' }
+  - { nom: 'Quotient', tex: '\left(\frac{u}{v}\right)'' = \frac{u''\,v - u\,v''}{v^2}', domaine: 'v ≠ 0' }
+  - { nom: 'Composée (règle de la chaîne)', tex: '[f(g(x))]'' = f''(g(x)) \times g''(x)', domaine: 'f et g dérivables' }
+  - { nom: 'Flèche et rotation', tex: 'y = \frac{q\,x\,(L^3 - 2Lx^2 + x^3)}{24\,EI}, \quad \theta = y'' = \frac{q\,(L^3 - 6Lx^2 + 4x^3)}{24\,EI}', domaine: 'Poutre sur deux appuis, charge uniforme, élasticité' }
+---
+
+import { EXEMPLE_FLECHE, flechePoutre, flecheLimite, monteeCone, penteSecante, rayonHydraulique, RAPPORT_FLECHE_CLOISONS } from '@/lib/calc/analyse'
+import { degres, grandeur, nombre, scientifique } from '@/lib/format'
+import { ReglesDerivationSchema } from '@/components/schemas/Analyse'
+
+export const f0 = flechePoutre(EXEMPLE_FLECHE)
+export const f2h = flechePoutre({ ...EXEMPLE_FLECHE, h: 2 * EXEMPLE_FLECHE.h })
+export const rh = rayonHydraulique(2, 0.5)
+export const rhNum = penteSecante((h) => rayonHydraulique(2, h).R, 0.5, 1e-3).centree
+export const c2 = monteeCone(3, 4, 6, 2)
+export const c1 = monteeCone(3, 4, 6, 1)
+export const lim = flecheLimite(EXEMPLE_FLECHE.L)
+export const lim500 = flecheLimite(EXEMPLE_FLECHE.L, RAPPORT_FLECHE_CLOISONS)
+
+<Page etape="intuition" titre="L'intuition : des briques de fonctions">
+
+Un mur est fait de briques, assemblées de quelques façons seulement : posées côte à côte, empilées, liées par le mortier. Si tu sais poser une brique et que tu connais ces assemblages, tu peux monter n'importe quel mur.
+
+Les fonctions, c'est pareil. Les briques sont les fonctions usuelles de L1.2.2 : xⁿ, eˣ, sin x, ln x. On les assemble de quatre façons : en les **additionnant**, en les **multipliant**, en les **divisant**, ou en les **emboîtant** l'une dans l'autre, comme e^(−2t) ou (2x + 1)³.
+
+Pour chaque assemblage, il existe une règle de dérivation. Avec ces quatre règles, tu peux dériver la flèche d'une poutre, le rayon hydraulique d'un canal ou le niveau d'un réservoir, sans repasser par les limites.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment dériver rapidement une fonction construite à partir de fonctions simples ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : somme et produit">
+
+### Somme et facteur constant
+
+$$(u + v)' = u' + v' \qquad (k\,u)' = k\,u'$$
+
+On dérive terme à terme. Le moment d'une poutre sous charge uniforme, M(x) = R<sub>A</sub> x − q x²/2, a pour dérivée M′(x) = R<sub>A</sub> − q x : c'est l'**effort tranchant** V(x).
+
+### Le produit
+
+$$(u\,v)' = u'\,v + u\,v'$$
+
+Pourquoi deux termes ? Imagine un rectangle de côtés u et v qui grandissent. L'aire u × v augmente d'une bande le long de v (u′ × v) et d'une bande le long de u (u × v′) ; le petit coin restant est négligeable quand l'accroissement tend vers 0.
+
+<Encadre type="exemple" titre="La flèche d'une poutre">
+Pour une poutre sur deux appuis, la flèche vaut $y = \frac{q}{24EI} \times x \times (L^3 - 2Lx^2 + x^3)$. Avec u = x et v = L³ − 2Lx² + x³ : u′ = 1 et v′ = −4Lx + 3x². Donc
+
+$$y' = \frac{q}{24EI}\,\big[(L^3 - 2Lx^2 + x^3) + x(-4Lx + 3x^2)\big] = \frac{q\,(L^3 - 6Lx^2 + 4x^3)}{24EI}$$
+
+C'est la **rotation** θ de la poutre en x. On retrouve le même résultat en développant d'abord, puis en dérivant terme à terme.
+</Encadre>
+
+<Regle type="simplification">
+Dire que la rotation est égale à la dérivée de la flèche suppose de petits déplacements : tan θ ≈ θ (L1.2.5). C'est le cas des poutres de bâtiment, dont les rotations restent de l'ordre du millième de radian.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : quotient et composée">
+
+### Le quotient
+
+$$\left(\frac{u}{v}\right)' = \frac{u'\,v - u\,v'}{v^2} \qquad (v \neq 0)$$
+
+Le **rayon hydraulique** d'un canal rectangulaire de largeur b, rempli sur une hauteur h, vaut R = b h / (b + 2h) : aire mouillée divisée par périmètre mouillé. Avec u = b h (u′ = b) et v = b + 2h (v′ = 2) :
+
+$$R'(h) = \frac{b\,(b + 2h) - b h \times 2}{(b + 2h)^2} = \frac{b^2}{(b + 2h)^2}$$
+
+Pour b = 2 m et h = 0,5 m : R = {grandeur(rh.R, 3, 'm')} et R′ = {nombre(rh.dR, 3)} m/m. Le taux de variation entre 0,499 m et 0,501 m donne {nombre(rhNum, 3)} : la règle est confirmée.
+
+### La composée : la règle de la chaîne
+
+$$[f(g(x))]' = f'(g(x)) \times g'(x)$$
+
+On dérive la fonction « extérieure » en gardant l'intérieur, puis on **multiplie par la dérivée de l'intérieur** :
+
+- $[(2x + 1)^3]' = 3\,(2x + 1)^2 \times 2 = 6\,(2x + 1)^2$
+- $(e^{-kt})' = -k\,e^{-kt}$ et $[\sin(\omega t)]' = \omega \cos(\omega t)$
+- $(\sqrt{1 + x^2})' = \dfrac{2x}{2\sqrt{1 + x^2}} = \dfrac{x}{\sqrt{1 + x^2}}$
+
+### Quand la variable dépend du temps
+
+Si une grandeur V dépend de h, et h du temps t, alors dV/dt = V′(h) × dh/dt. Dans un réservoir conique (pointe en bas) de rayon R à la hauteur H, V = π k² h³ / 3 avec k = R/H, donc dV/dt = π k² h² × dh/dt. Rempli au débit Q, le niveau monte à la vitesse dh/dt = Q / (π k² h²).
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : un canal et un réservoir">
+
+<ReglesDerivationSchema />
+
+À gauche, le rayon hydraulique est un **quotient** : la règle du quotient donne sa variation avec la hauteur d'eau. À droite, le volume dépend de h, qui dépend du temps : c'est une **composée**. Avec 3 m de rayon à 4 m de hauteur et 6 m³/h, le niveau monte de {grandeur(c1.dhdt, 2, 'm/h')} quand il y a 1 m d'eau, mais seulement de {grandeur(c2.dhdt, 2, 'm/h')} à 2 m : la surface libre a été multipliée par 4.
+
+<Encadre type="retenir">
+Produit : u′v + uv′. Quotient : (u′v − uv′)/v². Composée : dérivée de l'extérieur × dérivée de l'intérieur. Et toujours un contrôle possible par un taux de variation sur un petit intervalle.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="flechePoutre">
+
+<Cahier titre="Exemple résolu : la rotation d'une poutre de plancher">
+
+**Énoncé.** Une poutre en béton armé de 25 × 50 cm porte un plancher sur 6 m de portée ; elle repose simplement sur deux appuis. Sous la charge de service q = 15 kN/m (donnée de l'énoncé) et avec E = 31 GPa (valeur de Ecm d'un béton C25/30, EC2 tableau 3.1), calcule la flèche et la rotation à 1,5 m d'un appui, la rotation sur appui et la flèche maximale.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi E en GPa ? 1 GPa = 10⁶ kN/m² : on convertit pour que EI soit en kN·m² et la flèche en mètres.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+<Etape n={3} titre="La rigidité de la poutre">
+<AN k="I" />
+<AN k="EI" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : flèche et rotation">
+
+<Etape n={4} titre="Dériver la flèche">
+<AN k="derivation" />
+<Note>Pourquoi dériver ? La rotation est la pente de la déformée : c'est la dérivée de la flèche par rapport à x.</Note>
+</Etape>
+
+<Etape n={5} titre="La flèche et la rotation en x">
+<AN k="y" />
+<AN k="theta" />
+<AN k="controle" />
+</Etape>
+
+<Etape n={6} titre="Sur appui et à mi-portée">
+<AN k="appui" />
+<AN k="yMax" />
+<AN k="limite" />
+<Resultat k="theta" libelle="Rotation en x" />
+<Note couleur="vert">Contrôle : par symétrie, la déformée est horizontale au milieu ; la dérivée s'y annule, et la flèche y est maximale.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="écrire (u v)′ = u′ v′.">
+Test avec u = v = x : (x × x)′ = (x²)′ = 2x, alors que u′ v′ = 1 × 1 = 1. La règle du produit a **deux** termes.
+</Piege>
+
+<Piege erreur="oublier la dérivée de l'intérieur.">
+[(2x + 1)³]′ = 3(2x + 1)² × 2, et non 3(2x + 1)². De même, (e^(−kt))′ = −k e^(−kt) : le facteur −k vient de la dérivée de −kt.
+</Piege>
+
+<Piege erreur="inverser le numérateur du quotient.">
+C'est u′v − uv′, dans cet ordre. Inverser donne le bon nombre avec le mauvais signe, ce qui inverse le sens de variation.
+</Piege>
+
+<Piege erreur="laisser E en GPa à côté de charges en kN.">
+Avec E = 31 au lieu de 31 × 10⁶ kN/m², la flèche serait un million de fois trop grande. On convertit avant de calculer.
+</Piege>
+
+<Piege erreur="lire la rotation en degrés.">
+La dérivée de la flèche est en m/m, c'est-à-dire en radians : θ₀ = {scientifique(f0.theta0, 3)} rad, soit {nombre(degres(f0.theta0), 3)}°. Les formules de la mécanique utilisent les radians.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**La flèche des planchers.** Une poutre trop souple fissure les cloisons et les carrelages, et inquiète les occupants. L'EC2 (§7.4.1(4)) indique que l'aspect et l'utilisation peuvent être compromis au-delà de portée/250 sous charges quasi permanentes, soit {grandeur(lim * 1000, 0, 'mm')} pour 6 m ; pour protéger les cloisons, la flèche après construction est limitée à portée/500 (§7.4.1(5)), soit {grandeur(lim500 * 1000, 0, 'mm')}. La flèche élastique de l'exemple, {grandeur(f0.yMax * 1000, 2, 'mm')}, ne tient compte ni de la fissuration ni du fluage, qui l'augmentent nettement : le calcul réglementaire est vu au niveau 3.
+
+<Encadre type="terrain" titre="La rotation sur appui">
+Au bout d'une dalle posée sur un mur en blocs, la rotation soulève l'arête intérieure du mur et fait apparaître une fissure horizontale sous la dalle. Sur les ponts, les appareils d'appui en élastomère fretté sont choisis pour accepter cette rotation. La règle de dérivation donne directement sa valeur : θ₀ = q L³ / (24 EI).
+</Encadre>
+
+**Les canaux et les caniveaux.** La capacité d'un canal augmente avec son rayon hydraulique (formule de Manning-Strickler, L3.5). La dérivée b²/(b + 2h)², toujours inférieure à 1, montre que R augmente moins vite que la hauteur d'eau : un caniveau large et peu profond se remplit vite en largeur, mais gagne peu en efficacité.
+
+**Les châteaux d'eau à fond conique.** Dans une cuve tronconique, le niveau monte vite au début du remplissage, puis de plus en plus lentement : le flotteur ou la sonde de niveau ne bouge pas à vitesse constante, même avec un débit constant.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : règles de dérivation">
+
+### Somme et constante
+
+$(u + v)' = u' + v'$ · $(k\,u)' = k\,u'$
+
+### Produit
+
+$(u\,v)' = u'\,v + u\,v'$ · jamais $u' v'$
+
+### Quotient
+
+$\left(\frac{u}{v}\right)' = \frac{u'v - uv'}{v^2}$ · $\left(\frac{1}{v}\right)' = -\frac{v'}{v^2}$
+
+### Composée
+
+$[f(g(x))]' = f'(g(x))\,g'(x)$ · $(u^n)' = n\,u^{n-1}\,u'$ · $(e^u)' = u'\,e^u$ · $(\sqrt{u})' = \frac{u'}{2\sqrt{u}}$
+
+### Poutre sur deux appuis, charge uniforme
+
+$\theta = y'$ · $\theta_0 = \frac{qL^3}{24EI}$ · $y_{max} = \frac{5qL^4}{384EI}$ · flèche ∝ 1/h³ à largeur égale
+
+### Contrôle
+
+$f'(x) \approx \frac{f(x+h) - f(x-h)}{2h}$ pour h petit
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trois dérivées">
+
+Dérive f(x) = (3x + 1)(x² − 2), g(x) = (2x + 1)⁴ et k(x) = eˣ / x.
+
+<Indice>f est un produit, g une composée, k un quotient.</Indice>
+
+<Corrige>
+
+- f′(x) = 3(x² − 2) + (3x + 1)(2x) = **9x² + 2x − 6**.
+- g′(x) = 4(2x + 1)³ × 2 = **8(2x + 1)³**.
+- k′(x) = (eˣ × x − eˣ × 1) / x² = **eˣ (x − 1) / x²**.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le rayon hydraulique d'un caniveau">
+
+Un caniveau rectangulaire de 2 m de large coule sur 0,5 m de hauteur. Calcule son rayon hydraulique R = b h / (b + 2h) et la dérivée dR/dh. Vérifie la dérivée par le taux de variation entre h = 0,499 m et h = 0,501 m.
+
+<Indice>Règle du quotient avec u = b h et v = b + 2h.</Indice>
+
+<Corrige>
+R = 2 × 0,5 / (2 + 1) = **{grandeur(rh.R, 3, 'm')}** ; dR/dh = b² / (b + 2h)² = 4 / 9 = **{nombre(rh.dR, 3)} m/m**. Le taux de variation donne {nombre(rhNum, 3)} : c'est cohérent.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le niveau dans un réservoir conique">
+
+Un réservoir conique, pointe en bas, mesure 3 m de rayon à 4 m de hauteur. Une pompe y envoie 6 m³/h. À quelle vitesse le niveau monte-t-il quand l'eau atteint 1 m ? 2 m ? Explique le rapport entre les deux résultats.
+
+<Indice>V = π k² h³ / 3 avec k = R/H ; dérive par rapport au temps avec la règle de la chaîne.</Indice>
+
+<Corrige>
+
+- dV/dt = π k² h² × dh/dt = Q, donc dh/dt = Q / (π k² h²), avec k = 3/4.
+- À 1 m : **{grandeur(c1.dhdt, 3, 'm/h')}** ; à 2 m : **{grandeur(c2.dhdt, 3, 'm/h')}**.
+- La vitesse est divisée par {nombre(c1.dhdt / c2.dhdt, 0)} quand h double : elle varie comme 1/h², car la surface libre π k² h² est proportionnelle à h².
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La dérivée du produit u × v est :" choix={['u′ × v′', 'u′ v + u v′', 'u′ v − u v′', '(u v)′ / v²']} bonne={1} colonnes={4}>
+Deux termes : on dérive l'un, puis l'autre.
+</QCM>
+
+<QCM n={2} question="La dérivée de (3x − 1)² est :" choix={['2(3x − 1)', '6(3x − 1)', '6x', '3(3x − 1)²']} bonne={1} colonnes={4}>
+2(3x − 1) × 3 : on multiplie par la dérivée de l'intérieur.
+</QCM>
+
+<QCM n={3} question="La dérivée de e^(−2t) est :" choix={['e^(−2t)', '−2 e^(−2t)', '−2t e^(−2t − 1)', '2 e^(−2t)']} bonne={1} colonnes={4}>
+(e^u)′ = u′ e^u avec u = −2t, u′ = −2.
+</QCM>
+
+<QCM n={4} question="Avec la règle du quotient, la dérivée de 1/x vaut :" choix={['1/x²', '−1/x²', 'ln x', '−1/x']} bonne={1} colonnes={4}>
+(0 × x − 1 × 1) / x² = −1/x².
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour une poutre symétrique sous charge uniforme, la rotation à mi-portée vaut :" choix={['θ₀', '0', 'θ₀ / 2', 'la flèche maximale']} bonne={1} colonnes={4}>
+Par symétrie, la déformée y est horizontale : y′(L/2) = 0.
+</QCM>
+
+<QCM n={6} question="Si l'on double la hauteur h d'une poutre rectangulaire (même largeur, même charge), sa flèche est :" choix={['divisée par 2', 'divisée par 4', `divisée par ${nombre(f0.yMax / f2h.yMax, 0)}`, 'inchangée']} bonne={2} colonnes={4}>
+I = b h³ / 12 est multiplié par 8 : la flèche, proportionnelle à 1/(EI), est divisée par 8.
+</QCM>
+
+<QCM n={7} question="Dans le réservoir conique rempli à débit constant, quand la hauteur d'eau double, la vitesse de montée du niveau est :" choix={['doublée', 'inchangée', 'divisée par 2', 'divisée par 4']} bonne={3} colonnes={4}>
+dh/dt = Q / (π k² h²) : elle varie comme 1/h².
+</QCM>
+
+<QCM n={8} question="Pour M(x) = R_A x − q x²/2, la dérivée M′(x) est :" choix={['R_A − q x, l’effort tranchant', 'R_A x − q x', 'q x²', '− q / 2']} bonne={0} colonnes={2}>
+Dérivée terme à terme : c'est V(x), l'effort tranchant.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

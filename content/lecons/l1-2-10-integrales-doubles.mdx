@@ -1,0 +1,327 @@
+---
+id: L1.2.10
+titre: Intégrales doubles
+objectifs:
+  - Calculer une intégrale double sur un rectangle par deux intégrales successives
+  - Calculer l'aire, le moment statique et l'inertie d'une surface par intégrale double
+  - Utiliser les coordonnées polaires pour une section circulaire
+  - Calculer des volumes de déblai et de remblai sous une plate-forme
+relecture: false
+normes: []
+glossaire:
+  - terme: Intégrale double
+    definition: Somme, sur une surface, de petites quantités f(x, y) dA ; c'est le volume sous la surface z = f(x, y) quand f est positive.
+  - terme: Intégrales successives
+    definition: Calcul d'une intégrale double en intégrant d'abord par rapport à une variable (l'autre fixe), puis par rapport à la seconde.
+  - terme: Coordonnées polaires
+    definition: Repérage d'un point par sa distance r au centre et son angle θ ; l'élément d'aire vaut r dr dθ.
+  - terme: Moment polaire
+    definition: Intégrale ∬ r² dA d'une section par rapport à son centre ; il intervient en torsion.
+  - terme: Cubature
+    definition: Calcul des volumes de terre à déplacer (déblais et remblais) lors d'un terrassement.
+symboles:
+  - { symbole: 'D', signification: 'domaine d’intégration (surface)', unite: 'm²' }
+  - { symbole: 'dA', signification: 'élément d’aire, dx dy ou r dr dθ', unite: 'm²' }
+  - { symbole: 'r, θ', signification: 'coordonnées polaires', unite: 'm, rad' }
+  - { symbole: 'I, J', signification: 'inertie par rapport à un diamètre et moment polaire', unite: 'cm⁴' }
+  - { symbole: 'z_p', signification: 'niveau de la plate-forme', unite: 'm' }
+  - { symbole: 'V', signification: 'volume de déblai ou de remblai', unite: 'm³' }
+formules:
+  - { nom: 'Intégrales successives', tex: '\iint_{[a,b]\times[c,d]} f\,dA = \int_c^d \left(\int_a^b f(x, y)\,dx\right) dy', domaine: 'Rectangle, f continue' }
+  - { nom: 'Grandeurs d’une surface', tex: 'A = \iint_D dA, \quad S_x = \iint_D y\,dA, \quad I_x = \iint_D y^2\,dA', domaine: 'Axe x de référence' }
+  - { nom: 'Coordonnées polaires', tex: 'dA = r\,dr\,d\theta', domaine: 'x = r cos θ, y = r sin θ' }
+  - { nom: 'Disque de rayon R', tex: 'I = \frac{\pi R^4}{4} = \frac{\pi D^4}{64}, \quad J = \frac{\pi R^4}{2}', domaine: 'Inertie par rapport à un diamètre, moment polaire' }
+  - { nom: 'Cubature', tex: 'V_{net} = \iint_D (z - z_p)\,dA', domaine: 'Positif : déblai net' }
+---
+
+import { cubature, disque, EXEMPLE_CUBATURE, inertieParBandes, inertieTriangleDouble, integraleDoubleRectangle, integralePolynome, triangleIntegre } from '@/lib/calc/analyse'
+import { volumePrisme } from '@/lib/calc/algebre'
+import { grandeur, nombre } from '@/lib/format'
+import { DomainesDoubles } from '@/components/schemas/Analyse'
+
+export const cb = cubature(EXEMPLE_CUBATURE)
+export const cbBas = cubature({ ...EXEMPLE_CUBATURE, zp: 100 })
+export const xy = integraleDoubleRectangle((x, y) => x * y, 0, 2, 0, 3, 10)
+export const triD = inertieTriangleDouble(30, 45)
+export const tr = triangleIntegre(30, 45)
+export const pieu = disque(20)
+export const pieuNum = integraleDoubleRectangle((r, t) => (r * Math.sin(t)) ** 2 * r, 0, 20, 0, 2 * Math.PI, 200)
+export const carre = inertieParBandes({ b: 40, h: 40, n: 1 })
+
+<Page etape="intuition" titre="L'intuition : un terrain quadrillé">
+
+Pour préparer la plate-forme d'une école, le topographe quadrille le terrain et mesure l'altitude à chaque croisement. Dans chaque carré, il compare le terrain au niveau voulu : s'il faut enlever 30 cm de terre sur un carré de 5 m × 5 m, cela fait {grandeur(volumePrisme(5, 5, 0.3), 1, 'm³')} de déblai. En additionnant tous les carrés, il obtient le volume total.
+
+C'est une **intégrale double** : on découpe une surface en petites mailles d'aire dA, on multiplie chaque maille par une grandeur (ici l'épaisseur de terre), et l'on additionne. Plus les mailles sont fines, plus le résultat est exact.
+
+La même idée donne l'aire, le centre de gravité et l'inertie de n'importe quelle section, en additionnant de petites mailles plutôt que des bandes.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment additionner une grandeur qui varie dans deux directions à la fois, sur une surface ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : intégrer sur un rectangle">
+
+### Définition
+
+On découpe le domaine D en petites mailles d'aire ΔA. Dans chaque maille, on prend une valeur de f, et l'on additionne les produits f ΔA. Quand les mailles deviennent infiniment petites, la somme tend vers l'**intégrale double** :
+
+$$\iint_D f(x, y)\,dA$$
+
+Si f est positive, c'est le **volume** sous la surface z = f(x, y). Avec f = 1, c'est l'aire de D.
+
+### Deux intégrales successives
+
+Sur un rectangle [a ; b] × [c ; d], on intègre d'abord en x, **y étant fixé** (une bande), puis on additionne les bandes en y :
+
+$$\iint f\,dA = \int_c^d \left(\int_a^b f(x, y)\,dx\right) dy$$
+
+<Encadre type="exemple" titre="Un calcul pas à pas">
+Pour f(x, y) = x y sur [0 ; 2] × [0 ; 3] : à y fixé, ∫₀² x y dx = y [x²/2]₀² = 2y. Puis ∫₀³ 2y dy = [y²]₀³ = {nombre(integralePolynome([0, 2], 0, 3), 0)}. Le calcul numérique sur 10 × 10 mailles donne {nombre(xy, 3)}.
+</Encadre>
+
+L'ordre des intégrations ne change pas le résultat pour une fonction continue sur un rectangle (théorème de Fubini) : on choisit l'ordre le plus simple.
+
+### Les grandeurs d'une section
+
+$$A = \iint_D dA \qquad S_x = \iint_D y\,dA \qquad I_x = \iint_D y^2\,dA$$
+
+Pour un domaine non rectangulaire, les bornes de la première intégrale dépendent de l'autre variable. Pour un triangle de base b et de hauteur h, à la hauteur y, x varie sur une largeur b (1 − y/h) : on retrouve I<sub>base</sub> = ∫₀ʰ y² b (1 − y/h) dy = b h³ / 12. Pour b = 30 cm et h = 45 cm, le calcul sur 400 bandes donne {grandeur(triD, 0, 'cm⁴')}, pour {grandeur(tr.Ibase, 0, 'cm⁴')} exactement.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : coordonnées polaires et cubatures">
+
+### Les coordonnées polaires
+
+Pour un disque, on repère les points par leur distance r au centre et leur angle θ : x = r cos θ, y = r sin θ. Une petite maille, entre r et r + dr et entre θ et θ + dθ, est presque un rectangle de côtés dr et r dθ :
+
+$$dA = r\,dr\,d\theta$$
+
+Le **moment polaire** d'un disque de rayon R vaut alors
+
+$$J = \iint r^2\,dA = \int_0^{2\pi} \int_0^R r^3\,dr\,d\theta = \frac{\pi R^4}{2}$$
+
+et, par symétrie, l'inertie par rapport à un diamètre en vaut la moitié : **I = π R⁴ / 4 = π D⁴ / 64**. Pour un pieu de 40 cm de diamètre : I = {grandeur(pieu.I, 0, 'cm⁴')} ; le calcul numérique en polaires donne {grandeur(pieuNum, 0, 'cm⁴')}.
+
+### Les cubatures
+
+Pour une plate-forme au niveau z<sub>p</sub> sur un terrain d'altitude z(x, y), l'épaisseur de terre vaut z − z<sub>p</sub> : positive en déblai, négative en remblai.
+
+$$V_{net} = \iint_D (z - z_p)\,dA = A\,(\bar{z} - z_p)$$
+
+où z̄ est l'altitude moyenne du terrain sur la plate-forme. Les volumes de déblai et de remblai **séparés** demandent d'intégrer chaque zone à part : c'est ce qui fixe le nombre de camions et la quantité de terre à apporter.
+
+<Regle type="simplification">
+Entre les points levés, on suppose le terrain bilinéaire (une surface « tendue » entre quatre coins). Sur un vrai chantier, le quadrillage est plus fin, les talus s'ajoutent, et les terres foisonnent quand on les excave : ces points sont traités en terrassement (L3.8).
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : deux façons de mailler">
+
+<DomainesDoubles />
+
+À gauche, le rectangle est découpé en mailles dx dy : on intègre le long d'une bande (y fixé), puis on additionne les bandes. À droite, le disque est découpé en anneaux et en secteurs : la maille a pour aire r dr dθ, plus grande loin du centre. On choisit le maillage qui épouse la forme du domaine.
+
+<Encadre type="retenir">
+Rectangle : dA = dx dy, deux intégrales successives. Disque : dA = r dr dθ. L'intégrale double additionne une grandeur sur une surface : aire, volume, moment, inertie.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="cubature">
+
+<Cahier titre="Exemple résolu : la plate-forme d'une école">
+
+**Énoncé.** Une plate-forme de 30 m × 20 m doit être réglée au niveau 100,50 m pour construire une école. Le terrain naturel, levé aux quatre coins, est aux altitudes 101,20 m, 100,40 m, 100,80 m et 99,60 m. Entre les coins, on le suppose bilinéaire. Calcule le volume net, puis les volumes de déblai et de remblai.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi séparer déblai et remblai ? Le volume net peut être nul alors qu'il faut déplacer beaucoup de terre d'un côté à l'autre de la plate-forme.</Note>
+</Etape>
+
+<Etape n={2} titre="Le plan">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'intégrale double de l'épaisseur">
+
+<Etape n={3} titre="Le modèle du terrain">
+<AN k="modele" />
+</Etape>
+
+<Etape n={4} titre="Le volume net">
+<AN k="moyen" />
+<AN k="net" />
+<Note>Pourquoi la moyenne des coins ? Pour une surface bilinéaire, l'intégrale double de z vaut l'aire multipliée par la moyenne des quatre altitudes.</Note>
+</Etape>
+
+<Etape n={5} titre="Déblai et remblai">
+<AN k="separe" />
+<AN k="controle" />
+<Resultat k="Vdeblai" libelle="Déblai" />
+<Note couleur="vert">Contrôle : le niveau 100,50 m équilibre exactement déblais et remblais. Baisse la plate-forme à 100,00 m : le déblai l'emporte.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le facteur r en coordonnées polaires.">
+dA = r dr dθ, pas dr dθ. Sans le r, l'aire du disque vaudrait 2π R au lieu de π R², et l'unité serait fausse (m au lieu de m²).
+</Piege>
+
+<Piege erreur="garder des bornes constantes sur un domaine qui ne l'est pas.">
+Pour un triangle, la largeur dépend de la hauteur : la borne de l'intégrale en x est une fonction de y. Garder la largeur de la base revient à calculer un rectangle.
+</Piege>
+
+<Piege erreur="confondre volume net et volume à terrasser.">
+Dans l'exemple, le volume net est {grandeur(cb.Vnet, 0, 'm³')}, mais il faut déblayer {grandeur(cb.Vdeblai, 1, 'm³')} et remblayer autant. Le coût du terrassement dépend des volumes déplacés, pas du bilan.
+</Piege>
+
+<Piege erreur="confondre I et J.">
+Pour un disque, J = π R⁴ / 2 (torsion, par rapport au centre) et I = π R⁴ / 4 (flexion, par rapport à un diamètre). J = 2 I.
+</Piege>
+
+<Piege erreur="mélanger les unités des altitudes et des surfaces.">
+Altitudes en m, surfaces en m² : l'intégrale est en m³. Une épaisseur en cm multipliée par une surface en m² donne des « cm·m² », à convertir.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le carroyage.** Pour les cubatures de plates-formes, on lève le terrain sur un quadrillage régulier (par exemple tous les 5 ou 10 m). Chaque carré est traité comme un petit prisme : son volume vaut son aire multipliée par la moyenne des épaisseurs aux quatre coins. C'est l'intégrale double calculée maille par maille, comme dans l'exemple.
+
+<Encadre type="terrain" titre="Équilibrer déblais et remblais">
+Sur les chantiers de RDC, faire venir de la terre d'emprunt ou évacuer des déblais coûte cher, surtout en saison des pluies quand les pistes sont difficiles. On cherche donc le niveau de plate-forme qui **équilibre** déblais et remblais : c'est le niveau moyen du terrain ({grandeur(cb.zMoyen, 2, 'm')} dans l'exemple). Abaisser la plate-forme de 50 cm laisserait {grandeur(cbBas.Vnet, 0, 'm³')} de déblai net à évacuer.
+</Encadre>
+
+**Les pieux et les poteaux circulaires.** L'inertie π D⁴ / 64 d'une section circulaire sert pour les pieux, les poteaux ronds et les tuyaux. À diamètre égal au côté, un poteau rond a moins d'inertie qu'un poteau carré : {grandeur(pieu.I, 0, 'cm⁴')} pour un rond de 40 cm, contre {grandeur(carre.Iexact, 0, 'cm⁴')} pour un carré de 40 cm.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : intégrales doubles">
+
+### Rectangle
+
+$\iint f\,dA = \int_c^d \left(\int_a^b f\,dx\right) dy$ · ordre au choix (f continue)
+
+### Grandeurs d'une surface
+
+$A = \iint dA$ · $S_x = \iint y\,dA$ · $I_x = \iint y^2\,dA$ · $y_G = S_x / A$
+
+### Domaine non rectangulaire
+
+bornes intérieures fonctions de l'autre variable (triangle : largeur $b(1 - y/h)$)
+
+### Polaires
+
+$dA = r\,dr\,d\theta$ · disque : $A = \pi R^2$ · $I = \pi R^4/4 = \pi D^4/64$ · $J = \pi R^4/2$
+
+### Cubature
+
+$V_{net} = \iint (z - z_p)\,dA = A(\bar{z} - z_p)$ · déblai et remblai séparés zone par zone
+
+### Unités
+
+m × m² = m³ · cm² × cm² = cm⁴
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Deux intégrales successives">
+
+Calcule l'intégrale double de f(x, y) = x y sur le rectangle [0 ; 2] × [0 ; 3].
+
+<Indice>Intègre d'abord en x, y étant fixé, puis intègre le résultat en y.</Indice>
+
+<Corrige>
+∫₀² x y dx = 2y, puis ∫₀³ 2y dy = **{nombre(integralePolynome([0, 2], 0, 3), 0)}**. Le calcul numérique sur un quadrillage donne {nombre(xy, 3)}, exact ici car f est bilinéaire.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="L'inertie d'un pieu">
+
+Un pieu en béton a un diamètre de 40 cm. Calcule son aire, son inertie par rapport à un diamètre et son moment polaire. Compare son inertie avec celle d'un pieu carré de 40 cm de côté.
+
+<Indice>R = 20 cm. Utilise les coordonnées polaires, ou les formules qui en découlent.</Indice>
+
+<Corrige>
+
+- A = π R² = **{grandeur(pieu.A, 0, 'cm²')}** ; I = π R⁴ / 4 = **{grandeur(pieu.I, 0, 'cm⁴')}** ; J = π R⁴ / 2 = **{grandeur(pieu.J, 0, 'cm⁴')}**.
+- Carré : 40⁴ / 12 = {grandeur(carre.Iexact, 0, 'cm⁴')}. Le rond n'a que {nombre(pieu.I / carre.Iexact * 100, 0)} % de l'inertie du carré : il a moins de matière, et elle est plus proche du centre.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La plate-forme abaissée">
+
+Pour la plate-forme de l'exemple (30 m × 20 m, coins à 101,20 ; 100,40 ; 100,80 et 99,60 m), on décide de régler le niveau à 100,00 m. Calcule le volume net, puis les volumes de déblai et de remblai. Que devient la terre en excédent ?
+
+<Indice>V<sub>net</sub> = A (z̄ − z<sub>p</sub>). Pour les volumes séparés, utilise la fiche avec z<sub>p</sub> = 100.</Indice>
+
+<Corrige>
+
+- V<sub>net</sub> = 600 × ({nombre(cbBas.zMoyen, 2)} − 100,00) = **{grandeur(cbBas.Vnet, 0, 'm³')}** de déblai net.
+- Déblai : **{grandeur(cbBas.Vdeblai, 1, 'm³')}** ; remblai : **{grandeur(cbBas.Vremblai, 1, 'm³')}**.
+- L'excédent doit être évacué ou réutilisé (remblai d'une autre zone, digue, piste). Le volume transporté est plus grand que le volume en place, à cause du foisonnement des terres (L3.8).
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.10">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'intégrale double de 1 sur le rectangle [0 ; a] × [0 ; b] vaut :" choix={['a + b', 'a b', 'a² b²', '1']} bonne={1} colonnes={4}>
+C'est l'aire du rectangle.
+</QCM>
+
+<QCM n={2} question="Pour une fonction continue sur un rectangle, l'ordre des deux intégrations successives :" choix={['change le résultat', 'ne change pas le résultat', 'doit toujours commencer par y', 'est interdit']} bonne={1} colonnes={2}>
+Théorème de Fubini : on choisit l'ordre le plus simple.
+</QCM>
+
+<QCM n={3} question="En coordonnées polaires, l'élément d'aire vaut :" choix={['dr dθ', 'r dr dθ', 'r² dr dθ', 'dr / r']} bonne={1} colonnes={4}>
+La maille a pour côtés dr et r dθ.
+</QCM>
+
+<QCM n={4} question="L'inertie d'une section circulaire de diamètre D par rapport à un diamètre vaut :" choix={['π D² / 4', 'π D⁴ / 64', 'π D⁴ / 32', 'π D³ / 32']} bonne={1} colonnes={4}>
+π R⁴ / 4 avec R = D/2 ; π D⁴ / 32 est le moment polaire J.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour un disque, le moment polaire J et l'inertie I par rapport à un diamètre vérifient :" choix={['J = I', 'J = 2 I', 'J = I / 2', 'J = I²']} bonne={1} colonnes={4}>
+J = ∬ (x² + y²) dA = I<sub>x</sub> + I<sub>y</sub> = 2 I par symétrie.
+</QCM>
+
+<QCM n={6} question="Le volume net de terrassement sous une plate-forme au niveau z_p se calcule par :" choix={['∬ (z − z_p) dA', '∬ z dA', '(z − z_p) × périmètre', '∬ z_p dA']} bonne={0} colonnes={2}>
+On intègre l'épaisseur de terre sur la surface.
+</QCM>
+
+<QCM n={7} question="Pour un terrain bilinéaire sur un rectangle, l'altitude moyenne vaut :" choix={['l’altitude la plus haute', 'la moyenne des quatre coins', 'l’altitude au centre multipliée par 4', 'la plus basse']} bonne={1} colonnes={2}>
+L'intégrale double d'une fonction bilinéaire vaut l'aire multipliée par la moyenne des coins.
+</QCM>
+
+<QCM n={8} question="Dans l'exemple, le volume net est nul. Cela signifie :" choix={['qu’il n’y a aucun terrassement', 'que déblais et remblais s’équilibrent', 'que le terrain est plat', 'une erreur de calcul']} bonne={1} colonnes={2}>
+Il faut déblayer {grandeur(cb.Vdeblai, 1, 'm³')} et remblayer autant.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

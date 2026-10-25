@@ -1,0 +1,340 @@
+---
+id: L1.2.8
+titre: "Applications : aires, volumes, centres de gravité, inerties"
+objectifs:
+  - Calculer une aire et la position d'un centre de gravité par intégration
+  - Calculer le moment d'inertie d'une section en la découpant en bandes
+  - Changer d'axe avec le théorème de Huygens
+  - Calculer le volume d'un solide de révolution
+relecture: false
+normes: []
+glossaire:
+  - terme: Centre de gravité d'une surface
+    definition: Point où l'on peut concentrer toute l'aire pour calculer son moment statique ; sa position est une moyenne pondérée par l'aire.
+  - terme: Moment statique
+    definition: Intégrale ∫ y dA d'une surface par rapport à un axe, en cm³ ; il est nul par rapport à un axe passant par le centre de gravité.
+  - terme: Moment d'inertie
+    definition: Intégrale ∫ y² dA d'une section par rapport à un axe, en cm⁴ ; il mesure la rigidité de la section en flexion.
+  - terme: Théorème de Huygens
+    definition: L'inertie par rapport à un axe parallèle à l'axe passant par G, à la distance d, vaut I_G + A d².
+  - terme: Solide de révolution
+    definition: Solide engendré par la rotation d'une courbe autour d'un axe ; chaque tranche perpendiculaire à l'axe est un disque.
+symboles:
+  - { symbole: 'b(y)', signification: 'largeur de la section à la hauteur y', unite: 'cm' }
+  - { symbole: 'A', signification: 'aire de la section', unite: 'cm²' }
+  - { symbole: 'y_G', signification: 'position du centre de gravité', unite: 'cm' }
+  - { symbole: 'I_G', signification: 'moment d’inertie par rapport à l’axe passant par G', unite: 'cm⁴' }
+  - { symbole: 'd', signification: 'distance entre deux axes parallèles', unite: 'cm' }
+  - { symbole: 'r(z), V', signification: 'rayon à la hauteur z et volume', unite: 'm, m³' }
+formules:
+  - { nom: 'Aire et centre de gravité', tex: 'A = \int b(y)\,dy, \quad y_G = \frac{1}{A}\int y\,b(y)\,dy', domaine: 'Section découpée en bandes horizontales' }
+  - { nom: 'Moment d’inertie', tex: 'I = \int y^2\,b(y)\,dy', domaine: 'y mesuré depuis l’axe' }
+  - { nom: 'Rectangle', tex: 'I_G = \frac{b\,h^3}{12}', domaine: 'Axe parallèle à b, passant par G' }
+  - { nom: 'Triangle', tex: 'y_G = \frac{h}{3}, \quad I_G = \frac{b\,h^3}{36}', domaine: 'Depuis la base, axe parallèle à la base' }
+  - { nom: 'Théorème de Huygens', tex: 'I_{\Delta} = I_G + A\,d^2', domaine: 'Δ parallèle à l’axe passant par G' }
+  - { nom: 'Solide de révolution', tex: 'V = \int_a^b \pi\,r(z)^2\,dz', domaine: 'Rotation autour de l’axe z' }
+---
+
+import { cuveConique, EXEMPLE_BANDES, EXEMPLE_CUVE_CONIQUE, huygens, inertieParBandes, triangleIntegre, volumeRevolution } from '@/lib/calc/analyse'
+import { grandeur, nombre } from '@/lib/format'
+import { CuveRevolution, TriangleBandes } from '@/components/schemas/Analyse'
+
+export const b0 = inertieParBandes(EXEMPLE_BANDES)
+export const b10 = inertieParBandes({ ...EXEMPLE_BANDES, n: 10 })
+export const plat = inertieParBandes({ b: EXEMPLE_BANDES.h, h: EXEMPLE_BANDES.b, n: 5 })
+export const tr = triangleIntegre(30, 45)
+export const cuve = cuveConique(EXEMPLE_CUVE_CONIQUE)
+export const cone = cuveConique({ R: 1.5, Hc: 0, Hk: 3, r0: 0 })
+export const vCone = volumeRevolution(cuve.r, 0, EXEMPLE_CUVE_CONIQUE.Hk)
+export const hPleine = EXEMPLE_CUVE_CONIQUE.Hk + EXEMPLE_CUVE_CONIQUE.Hc
+export const vMi = volumeRevolution(cuve.r, 0, EXEMPLE_CUVE_CONIQUE.Hk + EXEMPLE_CUVE_CONIQUE.Hc / 2)
+
+<Page etape="intuition" titre="L'intuition : couper en tranches, puis additionner">
+
+Pour connaître le volume d'eau d'une cuve de forme compliquée, imagine-la remplie de crêpes : des disques très minces empilés. Chaque disque a un volume facile à calculer, π r² × épaisseur. On additionne : c'est une intégrale.
+
+Pour une poutre, on fait pareil avec sa section. On la découpe en bandes horizontales très fines. Chaque bande a une aire simple, largeur × épaisseur. En additionnant les aires, on obtient l'aire totale ; en pondérant par la hauteur, le centre de gravité ; en pondérant par le **carré** de la distance à l'axe, le **moment d'inertie**.
+
+Ce dernier est la clé de la flexion : une bande loin de l'axe compte beaucoup plus qu'une bande près de l'axe. C'est pourquoi une poutre posée de chant est bien plus raide que la même poutre posée à plat.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer les grandeurs d'une forme quelconque (aire, centre de gravité, inertie, volume) en la découpant en tranches ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : aire, centre de gravité, inertie">
+
+### Découper en bandes
+
+Une section de hauteur h a, à la hauteur y, une largeur b(y). La bande d'épaisseur dy a une aire dA = b(y) dy. On additionne :
+
+$$A = \int b(y)\,dy \qquad y_G = \frac{1}{A}\int y\,b(y)\,dy \qquad I = \int y^2\,b(y)\,dy$$
+
+L'aire est en cm², le moment statique ∫ y dA en cm³, l'inertie en cm⁴.
+
+### Le triangle
+
+Pour un triangle de base b (en bas) et de hauteur h, la largeur décroît linéairement : b(y) = b (1 − y/h). On intègre des polynômes (L1.2.6) :
+
+- A = b h / 2 ;
+- ∫ y b(y) dy = b h² / 6, donc **y<sub>G</sub> = h / 3** depuis la base ;
+- I<sub>base</sub> = ∫ y² b(y) dy = b h³ / 12.
+
+Pour b = 30 cm et h = 45 cm : A = {grandeur(tr.A, 0, 'cm²')}, y<sub>G</sub> = {grandeur(tr.yG, 0, 'cm')}, I<sub>base</sub> = {grandeur(tr.Ibase, 0, 'cm⁴')}.
+
+### Le rectangle
+
+Avec l'axe au milieu, b(y) = b de −h/2 à h/2 :
+
+$$I_G = \int_{-h/2}^{h/2} y^2\,b\,dy = b\left[\frac{y^3}{3}\right]_{-h/2}^{h/2} = \frac{b\,h^3}{12}$$
+
+Pour 20 × 50 cm : {grandeur(b0.Iexact, 0, 'cm⁴')}. Posée à plat (50 × 20 cm), la même poutre n'a plus que {grandeur(plat.Iexact, 0, 'cm⁴')} : la hauteur compte au cube.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : Huygens et volumes">
+
+### Le théorème de Huygens
+
+L'inertie dépend de l'axe. Par rapport à un axe Δ parallèle à l'axe passant par G, à la distance d :
+
+$$I_{\Delta} = I_G + A\,d^2$$
+
+En développant (y + d)² = y² + 2yd + d² dans l'intégrale, le terme du milieu disparaît, car ∫ y dA = 0 par rapport à un axe passant par G.
+
+- Rectangle 20 × 50 par rapport à sa base : I = {nombre(b0.Iexact, 0)} + {nombre(b0.A, 0)} × 25² = {grandeur(b0.IbaseHuygens, 0, 'cm⁴')} = b h³ / 3.
+- Triangle par rapport à l'axe passant par G : I<sub>G</sub> = I<sub>base</sub> − A (h/3)² = {grandeur(tr.IG, 0, 'cm⁴')} = b h³ / 36.
+
+Huygens permet d'assembler les sections composées (T, I, caissons) à partir de rectangles : c'est le mini-projet du module.
+
+### Les volumes de révolution
+
+Si un solide tourne autour de l'axe z avec un rayon r(z), la tranche à la hauteur z est un disque d'aire π r(z)² :
+
+$$V = \int_a^b \pi\,r(z)^2\,dz$$
+
+Pour un cône de rayon R et de hauteur H, r(z) = R z / H, et V = π R² H / 3. Avec R = 1,5 m et H = 3 m : {grandeur(cone.Vintegre, 3, 'm³')} par l'intégrale, {grandeur(cone.Vformules, 3, 'm³')} par la formule.
+
+<Regle type="simplification">
+On suppose les sections pleines et homogènes. Une section en béton armé fissurée, ou une section mixte acier-béton, demande de pondérer les matériaux par leurs modules : c'est la section homogénéisée, vue en béton armé (L3).
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le triangle en bandes">
+
+<TriangleBandes />
+
+Chaque bande horizontale a une largeur qui diminue en montant. Le centre de gravité est donc plus près de la base que du sommet : au tiers de la hauteur. La même découpe, pondérée par y², donne l'inertie.
+
+<Encadre type="retenir">
+A = ∫ dA (cm²) · y<sub>G</sub> = ∫ y dA / A (cm) · I = ∫ y² dA (cm⁴). Pour changer d'axe : I<sub>Δ</sub> = I<sub>G</sub> + A d², toujours à partir de G.
+</Encadre>
+
+</Page>
+
+<Vue3D titre="La cuve d'un château d'eau, solide de révolution" calques={[{ id: 'solide', libelle: 'Solide' }, { id: 'tranches', libelle: 'Tranches' }, { id: 'profil', libelle: 'Profil générateur' }, { id: 'cotes', libelle: 'Volume' }]}>
+
+La cuve a un fond tronconique ({grandeur(EXEMPLE_CUVE_CONIQUE.Hk, 1, 'm')} de haut, rayon de {grandeur(EXEMPLE_CUVE_CONIQUE.r0, 1, 'm')} à {grandeur(EXEMPLE_CUVE_CONIQUE.R, 1, 'm')}) surmonté d'un cylindre de {grandeur(EXEMPLE_CUVE_CONIQUE.Hc, 1, 'm')}. Active le profil générateur : en tournant autour de l'axe z, cette ligne brisée engendre la cuve. Les tranches montrent les disques que l'intégrale additionne.
+
+<CuveRevolution d={EXEMPLE_CUVE_CONIQUE} />
+
+<Encadre type="retenir">
+V = ∫ π r(z)² dz = {grandeur(cuve.Vintegre, 2, 'm³')}, soit {grandeur(vCone, 2, 'm³')} pour le fond et le reste pour le cylindre. Les formules du tronc de cône et du cylindre donnent {grandeur(cuve.Vformules, 2, 'm³')} : l'intégrale les retrouve.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="inertieBandes">
+
+<Cahier titre="Exemple résolu : l'inertie d'une poutre, bande par bande">
+
+**Énoncé.** Une poutre en béton a une section rectangulaire de 20 cm de large et 50 cm de haut. Calcule son moment d'inertie par rapport à l'axe horizontal passant par son centre de gravité, d'abord en la découpant en 5 bandes, puis par intégration. Déduis-en son inertie par rapport à sa base.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi des bandes horizontales ? Toute la bande est à la même distance de l'axe horizontal : sa contribution se calcule d'un coup.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : de la somme à l'intégrale">
+
+<Etape n={3} titre="La somme des bandes">
+<AN k="bandes" />
+<AN k="somme" />
+<Note>Pourquoi y² ? En flexion, une fibre éloignée de l'axe s'allonge davantage et travaille plus : elle compte à la fois par sa contrainte (∝ y) et par son bras de levier (∝ y).</Note>
+</Etape>
+
+<Etape n={4} titre="La limite : l'intégrale">
+<AN k="limite" />
+<AN k="ecart" />
+</Etape>
+
+<Etape n={5} titre="Changer d'axe">
+<AN k="huygens" />
+<Resultat k="Iexact" libelle="Inertie par rapport à G" />
+<Note couleur="vert">Contrôle : passe à 10 bandes ; l’écart tombe à {nombre(b10.ecartRelatif * 100, 0)} %. Il vaut −1/n² : avec 40 bandes, moins d’un millième.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="cuber la mauvaise dimension.">
+Pour un axe horizontal, c'est la hauteur h (perpendiculaire à l'axe) qui est au cube. 20 × 50 de chant : {grandeur(b0.Iexact, 0, 'cm⁴')} ; à plat : {grandeur(plat.Iexact, 0, 'cm⁴')}.
+</Piege>
+
+<Piege erreur="appliquer Huygens entre deux axes qui ne passent pas par G.">
+I<sub>Δ</sub> = I<sub>G</sub> + A d² part toujours de l'axe passant par G. Pour aller d'un axe Δ₁ à un axe Δ₂, on passe d'abord par G.
+</Piege>
+
+<Piege erreur="placer le centre de gravité d'un triangle à mi-hauteur.">
+Il est au tiers de la hauteur depuis la base ({grandeur(tr.yG, 0, 'cm')} pour 45 cm), là où la matière est la plus abondante.
+</Piege>
+
+<Piege erreur="mélanger les unités de l'inertie.">
+1 m⁴ = 10⁸ cm⁴. Une inertie en cm⁴ utilisée avec un module E en kN/m² donne une flèche fausse d'un facteur 10⁸.
+</Piege>
+
+<Piege erreur="intégrer 2π r au lieu de π r².">
+2π r dz est l'aire latérale d'une tranche (le coffrage), π r² dz son volume (le béton ou l'eau). On vérifie l'unité : m³ pour un volume.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Pourquoi les poutres sont hautes.** La flèche d'une poutre est proportionnelle à 1/(E I) (L1.2.3), et I croît comme h³. Doubler la hauteur divise la flèche par 8 ; doubler la largeur ne la divise que par 2. Les profilés métalliques en I et les poutres en T placent la matière loin de l'axe, là où elle est la plus utile.
+
+<Encadre type="terrain" titre="Le barème de jaugeage d'une cuve">
+Pour savoir combien d'eau contient un château d'eau à partir de la hauteur lue sur l'échelle de niveau, on établit un barème : V(h) = ∫₀ʰ π r(z)² dz. Dans la cuve de la vue 3D, il y a {grandeur(vCone, 2, 'm³')} quand le fond conique est plein ({grandeur(EXEMPLE_CUVE_CONIQUE.Hk, 1, 'm')} d'eau), {grandeur(vMi, 2, 'm³')} à mi-hauteur du cylindre, et {grandeur(cuve.Vintegre, 2, 'm³')} pleine ({grandeur(hPleine, 1, 'm')}). Le volume n'est pas proportionnel à la hauteur : c'est l'erreur classique des agents de distribution d'eau.
+</Encadre>
+
+**Les centres de gravité des ouvrages.** La stabilité d'un mur de soutènement, d'un muret en maçonnerie ou d'une charge levée par une grue dépend de la position de son centre de gravité. Pour les formes composées, on découpe en rectangles et triangles, et l'on fait la moyenne pondérée par les aires (N0.5.6).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : aires, inerties, volumes">
+
+### Découpage en bandes
+
+$dA = b(y)\,dy$ · $A = \int dA$ · $y_G = \frac{1}{A}\int y\,dA$ · $I = \int y^2\,dA$
+
+### Rectangle b × h
+
+$I_G = \frac{bh^3}{12}$ · par rapport à la base : $\frac{bh^3}{3}$
+
+### Triangle (base b, hauteur h)
+
+$A = \frac{bh}{2}$ · $y_G = \frac{h}{3}$ depuis la base · $I_G = \frac{bh^3}{36}$ · $I_{base} = \frac{bh^3}{12}$
+
+### Huygens
+
+$I_{\Delta} = I_G + A\,d^2$ · toujours depuis l'axe passant par G
+
+### Volumes de révolution
+
+$V = \int \pi\,r(z)^2\,dz$ · cône : $\frac{\pi R^2 H}{3}$ · tronc de cône : $\frac{\pi H}{3}(R^2 + Rr + r^2)$
+
+### Unités
+
+cm² · cm³ · cm⁴ · 1 m⁴ = 10⁸ cm⁴
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le triangle par intégration">
+
+Un mur de soutènement a une section triangulaire de 30 cm de base et 45 cm de hauteur (base en bas). Calcule son aire, la position de son centre de gravité et son inertie par rapport à l'axe horizontal passant par G.
+
+<Indice>b(y) = b (1 − y/h). Calcule ∫ b(y) dy, ∫ y b(y) dy et ∫ y² b(y) dy entre 0 et h, puis applique Huygens.</Indice>
+
+<Corrige>
+
+- A = b h / 2 = **{grandeur(tr.A, 0, 'cm²')}** ; y<sub>G</sub> = h / 3 = **{grandeur(tr.yG, 0, 'cm')}**.
+- I<sub>base</sub> = b h³ / 12 = {grandeur(tr.Ibase, 1, 'cm⁴')} ; I<sub>G</sub> = I<sub>base</sub> − A (h/3)² = **{grandeur(tr.IG, 1, 'cm⁴')}** = b h³ / 36.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="De chant ou à plat">
+
+Un madrier de 20 × 50 cm peut être posé de chant (50 cm de haut) ou à plat (20 cm de haut). Compare les deux inerties. Combien de fois la poutre posée de chant est-elle plus raide ?
+
+<Indice>I = b h³ / 12, avec h la dimension verticale.</Indice>
+
+<Corrige>
+De chant : 20 × 50³ / 12 = **{grandeur(b0.Iexact, 0, 'cm⁴')}** ; à plat : 50 × 20³ / 12 = **{grandeur(plat.Iexact, 0, 'cm⁴')}**. Rapport : **{nombre(b0.Iexact / plat.Iexact, 2)}**, soit (50/20)². Posée de chant, la poutre fléchit {nombre(b0.Iexact / plat.Iexact, 2)} fois moins.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le barème de la cuve">
+
+Pour la cuve de la vue 3D (fond tronconique de 1,5 m de haut, rayon de 0,5 m à 2,5 m, puis cylindre de 2,5 m de rayon sur 3 m), calcule le volume d'eau quand le fond est plein, puis quand la cuve est pleine. Vérifie avec les formules du tronc de cône et du cylindre.
+
+<Indice>Sur le fond, r(z) = 0,5 + (2,5 − 0,5) z / 1,5 ; au-dessus, r = 2,5 m.</Indice>
+
+<Corrige>
+
+- Fond : ∫₀^1,5 π r(z)² dz = **{grandeur(vCone, 3, 'm³')}**, égal à π × 1,5 × (2,5² + 2,5 × 0,5 + 0,5²) / 3.
+- Pleine : **{grandeur(cuve.Vintegre, 3, 'm³')}** ; formules : {grandeur(cuve.Vformules, 3, 'm³')}.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'unité d'un moment d'inertie de section est :" choix={['cm²', 'cm³', 'cm⁴', 'kN·m']} bonne={2} colonnes={4}>
+∫ y² dA : cm² × cm².
+</QCM>
+
+<QCM n={2} question="L'inertie d'un rectangle b × h par rapport à l'axe passant par G, parallèle à b, vaut :" choix={['b h² / 6', 'b h³ / 12', 'b³ h / 12', 'b h³ / 3']} bonne={1} colonnes={4}>
+b h³ / 3 est l'inertie par rapport à la base.
+</QCM>
+
+<QCM n={3} question="Le théorème de Huygens s'écrit :" choix={['I_Δ = I_G − A d²', 'I_Δ = I_G + A d²', 'I_Δ = I_G + A d', 'I_Δ = A d²']} bonne={1} colonnes={4}>
+L'inertie est minimale par rapport à l'axe passant par G.
+</QCM>
+
+<QCM n={4} question="Le centre de gravité d'un triangle de hauteur h se trouve, depuis sa base, à :" choix={['h/2', 'h/3', '2h/3', 'h/4']} bonne={1} colonnes={4}>
+y<sub>G</sub> = ∫ y b(y) dy / A = h/3.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="En intégrant π (R z / H)² entre 0 et H, on obtient le volume :" choix={['π R² H', 'π R² H / 3', 'π R² H / 2', '2π R H']} bonne={1} colonnes={4}>
+∫ π R² z² / H² dz = π R² H / 3 : le volume du cône.
+</QCM>
+
+<QCM n={6} question="Une poutre de 20 × 50 cm posée de chant, par rapport à la même posée à plat, est :" choix={['aussi raide', '2,5 fois plus raide', `${nombre(b0.Iexact / plat.Iexact, 2)} fois plus raide`, 'moins raide']} bonne={2} colonnes={2}>
+Le rapport des inerties vaut (50/20)² = {nombre(b0.Iexact / plat.Iexact, 2)}.
+</QCM>
+
+<QCM n={7} question="Pour un rectangle découpé en 10 bandes égales, la somme Σ b Δy y² sous-estime l'inertie exacte de :" choix={['10 %', `${nombre(-b10.ecartRelatif * 100, 0)} %`, '0,1 %', '0 %']} bonne={1} colonnes={4}>
+L'écart relatif vaut exactement −1/n².
+</QCM>
+
+<QCM n={8} question="Le volume d'un solide de révolution d'axe z se calcule par :" choix={['∫ 2π r(z) dz', '∫ π r(z)² dz', 'π r² × h toujours', '∫ r(z) dz']} bonne={1} colonnes={2}>
+Chaque tranche est un disque d'aire π r².
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

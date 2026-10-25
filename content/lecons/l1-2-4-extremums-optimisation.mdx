@@ -1,0 +1,329 @@
+---
+id: L1.2.4
+titre: Variations, extremums et optimisation
+objectifs:
+  - Dresser le tableau de variations d'une fonction à partir du signe de sa dérivée
+  - Trouver le maximum et le minimum d'une fonction sur un intervalle
+  - Localiser et calculer le moment fléchissant maximal d'une poutre
+  - Résoudre un problème d'optimisation en quatre étapes
+relecture: false
+normes: []
+glossaire:
+  - terme: Extremum
+    definition: Maximum ou minimum d'une fonction, sur tout son domaine (absolu) ou au voisinage d'un point (local).
+  - terme: Point critique
+    definition: Valeur de x où la dérivée s'annule ; c'est un candidat pour un extremum, à vérifier.
+  - terme: Dérivée seconde
+    definition: Dérivée de la dérivée, notée f″ ; son signe dit si la courbe est tournée vers le haut (f″ > 0) ou vers le bas (f″ < 0).
+  - terme: Optimisation
+    definition: Recherche de la valeur d'un paramètre qui rend une grandeur la plus grande ou la plus petite possible, sous des contraintes.
+  - terme: Effort tranchant
+    definition: Effort qui tend à faire glisser deux parties d'une poutre l'une par rapport à l'autre ; c'est la dérivée du moment fléchissant.
+symboles:
+  - { symbole: 'f′, f″', signification: 'dérivée première et dérivée seconde', unite: 'selon f' }
+  - { symbole: 'x₀', signification: 'abscisse de l’extremum', unite: 'm' }
+  - { symbole: 'V', signification: 'effort tranchant', unite: 'kN' }
+  - { symbole: 'M', signification: 'moment fléchissant', unite: 'kN·m' }
+  - { symbole: 'R_A, R_B', signification: 'réactions d’appui', unite: 'kN' }
+  - { symbole: 'W', signification: 'module de résistance de la section', unite: 'cm³' }
+formules:
+  - { nom: 'Point critique', tex: 'f''(x_0) = 0', domaine: 'Candidat extremum à l’intérieur de l’intervalle' }
+  - { nom: 'Test de la dérivée seconde', tex: 'f''''(x_0) < 0 \Rightarrow \text{maximum local}, \quad f''''(x_0) > 0 \Rightarrow \text{minimum local}', domaine: 'Si f''(x₀) = 0' }
+  - { nom: 'Moment et effort tranchant', tex: 'V(x) = \frac{dM}{dx}', domaine: 'Poutre droite, convention usuelle' }
+  - { nom: 'Charge uniforme', tex: 'M_{max} = \frac{q L^2}{8} \text{ en } x = \frac{L}{2}', domaine: 'Poutre sur deux appuis' }
+  - { nom: 'Canal rectangulaire optimal', tex: 'h = \sqrt{A/2}, \quad b = 2h', domaine: 'Périmètre mouillé minimal à section A donnée' }
+---
+
+import { canalOptimal, deriveePolynome, evaluerPolynome, EXEMPLE_MOMENT_MAX, moduleTronc, momentMax, perimetreCanal, poutreTronc } from '@/lib/calc/analyse'
+import { grandeur, nombre } from '@/lib/format'
+import { VariationsSchema } from '@/components/schemas/Analyse'
+
+export const m0 = momentMax(EXEMPLE_MOMENT_MAX)
+export const mq = momentMax({ L: 6, q: 20, P: 0, a: 0 })
+export const mP = momentMax({ L: 6, q: 0, P: 50, a: 2 })
+export const t30 = poutreTronc(30)
+export const canal = canalOptimal(2)
+export const pCanal = [0.5, 1, 1.5].map((h) => perimetreCanal(2, h))
+export const cub = [0, -3, 0, 1]
+export const ex1 = [1, 8, -2]
+export const ex1x = [0, 2, 5].map((x) => evaluerPolynome(ex1, x))
+export const q2 = [0, -4, 1]
+
+<Page etape="intuition" titre="L'intuition : en haut de la côte, on est à plat">
+
+Tu marches sur une piste qui monte, passe une crête, puis redescend. Pendant la montée, la pente est positive. Pendant la descente, elle est négative. Au sommet, pendant un instant, tu marches **à plat** : la pente est nulle.
+
+C'est l'idée de cette leçon : là où une grandeur atteint son maximum, sa dérivée s'annule, en passant du positif au négatif. Pour trouver le sommet, inutile de tout tracer : on cherche où la dérivée vaut zéro.
+
+L'ingénieur s'en sert tout le temps : le **moment fléchissant** d'une poutre est maximal là où sa dérivée, l'effort tranchant, s'annule ; on dimensionne la poutre à cet endroit. Et quand on cherche la meilleure forme d'un canal ou de la poutre taillée dans un tronc, on cherche aussi un sommet.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment trouver la valeur maximale d'une grandeur, et l'endroit où elle est atteinte ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : variations et extremums">
+
+### Le signe de la dérivée
+
+Sur un intervalle : si f′ > 0, f est **croissante** ; si f′ < 0, f est **décroissante**. On résume dans un **tableau de variations**.
+
+Pour f(x) = x³ − 3x : f′(x) = 3x² − 3 = 3(x − 1)(x + 1). La dérivée est positive avant −1, négative entre −1 et 1, positive après 1.
+
+| x | −∞ | | −1 | | 1 | | +∞ |
+|---|---|---|---|---|---|---|---|
+| f′(x) | | + | 0 | − | 0 | + | |
+| f(x) | | ↗ | {nombre(evaluerPolynome(cub, -1), 0)} | ↘ | {nombre(evaluerPolynome(cub, 1), 0)} | ↗ | |
+
+f a un **maximum local** {nombre(evaluerPolynome(cub, -1), 0)} en −1 et un **minimum local** {nombre(evaluerPolynome(cub, 1), 0)} en 1.
+
+### Où chercher un extremum
+
+Sur un intervalle fermé [a ; b], le maximum et le minimum se trouvent parmi :
+
+1. les **points critiques**, où f′(x) = 0 ;
+2. les points où f n'est pas dérivable (une pointe, un saut de la dérivée) ;
+3. les **bornes** a et b.
+
+On calcule f en chacun de ces points, et l'on compare.
+
+### La dérivée seconde
+
+Si f′(x₀) = 0 et f″(x₀) < 0, la courbe est tournée vers le bas : x₀ est un maximum local. Si f″(x₀) > 0, c'est un minimum local. Pour x³ − 3x : f″(x) = 6x, négatif en −1 (maximum), positif en 1 (minimum).
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : optimiser en quatre étapes">
+
+### La méthode
+
+1. **Nommer** la variable qu'on peut choisir, et la grandeur à rendre maximale ou minimale.
+2. **Écrire** cette grandeur en fonction d'une seule variable, en utilisant les contraintes.
+3. **Dériver** et chercher où la dérivée s'annule.
+4. **Vérifier** qu'il s'agit bien du maximum ou du minimum (signe de f′, f″, bornes), puis **interpréter**.
+
+<Encadre type="exemple" titre="Le canal qui frotte le moins">
+Un canal rectangulaire doit offrir une section d'eau A = 2 m². Plus le périmètre mouillé P est petit, moins l'eau frotte sur les parois. (1) Variable : la hauteur h ; grandeur : P = b + 2h. (2) Contrainte b h = A, donc b = A/h et P(h) = A/h + 2h. (3) P′(h) = −A/h² + 2 = 0 pour h = √(A/2) = {grandeur(canal.h, 2, 'm')}. (4) P″(h) = 2A/h³ > 0 : c'est un minimum. On trouve b = {grandeur(canal.b, 2, 'm')} et P = {grandeur(canal.P, 2, 'm')}, contre {grandeur(pCanal[0], 2, 'm')} pour h = 0,5 m et {grandeur(pCanal[2], 2, 'm')} pour h = 1,5 m. Le meilleur canal rectangulaire est **deux fois plus large que profond**.
+</Encadre>
+
+### Le moment maximal d'une poutre
+
+Le moment M(x) et l'effort tranchant V(x) sont liés par V = dM/dx. Le moment est donc maximal là où **V s'annule**, ou bien là où V **change de signe en sautant**, au droit d'une charge ponctuelle (cas 2 de la méthode).
+
+- Poutre de 6 m sous 20 kN/m : V = 0 en x = {grandeur(mq.x0, 0, 'm')}, M<sub>max</sub> = qL²/8 = {grandeur(mq.Mmax, 0, 'kN·m')}.
+- Même poutre sous 50 kN seuls, à 2 m : V saute de + à −, M<sub>max</sub> = {grandeur(mP.Mmax, 2, 'kN·m')} au droit de la charge.
+
+<Regle type="simplification">
+On étudie une poutre sur deux appuis simples, chargée verticalement, en élasticité. Les combinaisons de charges réglementaires (EC0), qui pondèrent et déplacent les charges, sont vues en L3.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le signe de f′ commande la courbe">
+
+<VariationsSchema />
+
+En haut, la courbe ; en bas, sa dérivée. Là où la dérivée est positive (en vert), la courbe monte ; là où elle est négative, la courbe descend. Aux deux points où la dérivée s'annule, la tangente est horizontale : un maximum local, puis un minimum local.
+
+<Encadre type="retenir">
+f′ s'annule en passant de + à − : maximum. De − à + : minimum. Sans changement de signe (comme x³ en 0) : ni l'un ni l'autre, seulement un replat.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="momentMaximal">
+
+<Cahier titre="Exemple résolu : où la poutre est-elle la plus sollicitée ?">
+
+**Énoncé.** Une poutre de plancher de 8 m repose sur deux appuis. Elle porte une charge uniforme de 10 kN/m et, à 2 m de l'appui A, un poteau qui lui transmet 30 kN. Où le moment fléchissant est-il maximal, et combien vaut-il ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi chercher le maximum ? C'est la section la plus sollicitée en flexion : c'est elle qui fixe les armatures de la poutre.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la dérivée du moment s'annule">
+
+<Etape n={3} titre="Les réactions d'appui">
+<AN k="reactions" />
+<Note>Pourquoi d'abord les réactions ? Le moment en x se calcule avec les forces situées à gauche de x, dont R<sub>A</sub>.</Note>
+</Etape>
+
+<Etape n={4} titre="Le moment et sa dérivée">
+<AN k="moment" />
+</Etape>
+
+<Etape n={5} titre="Là où V s'annule">
+<AN k="x0" />
+<Note>Pourquoi pas au droit de la charge ? Juste après le poteau, V est encore positif : le moment continue d'augmenter jusqu'à ce que V atteigne zéro.</Note>
+</Etape>
+
+<Etape n={6} titre="Le moment maximal">
+<AN k="Mmax" />
+<Resultat k="Mmax" libelle="Moment maximal" />
+<Note couleur="vert">Contrôle : sur le diagramme, le sommet de M est bien à l'aplomb du point où V coupe l'axe. Essaie a = 4 m : le maximum passe au droit de la charge.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="s'arrêter à f′(x₀) = 0 sans vérifier.">
+Un point critique peut être un maximum, un minimum ou un simple replat (x³ en 0). On vérifie le changement de signe de f′ ou le signe de f″.
+</Piege>
+
+<Piege erreur="oublier les bornes de l'intervalle.">
+Sur [0 ; 5], f(x) = −2x² + 8x + 1 a son minimum en x = 5, où f vaut {nombre(ex1x[2], 0)} : la dérivée n'y est pas nulle.
+</Piege>
+
+<Piege erreur="chercher V = 0 alors que V saute.">
+Sous une charge ponctuelle seule, V ne vaut jamais zéro : il passe d'un coup de + à −. Le maximum est au droit de la charge, là où la courbe de M fait une pointe.
+</Piege>
+
+<Piege erreur="prendre le moment au milieu par habitude.">
+qL²/8 au milieu n'est vrai que sous charge uniforme seule. Dans l'exemple, le maximum est à {grandeur(m0.x0, 2, 'm')}, pas à 4 m.
+</Piege>
+
+<Piege erreur="optimiser sans contrainte.">
+Sans la condition b h = A, le « meilleur » canal aurait un périmètre nul. La contrainte permet d'écrire la grandeur avec une seule variable.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les armatures suivent le moment.** Une poutre en béton armé reçoit plus d'acier là où le moment est grand. Le dessinateur place les barres principales sur toute la longueur, et ajoute des **renforts** dans la zone du moment maximal. Le calcul de x₀ dit où mettre ces renforts.
+
+<Encadre type="terrain" titre="La poutre taillée dans un tronc">
+Dans les scieries artisanales du Kasaï ou de l'Équateur, on débite des poutres dans des grumes de bois local. Quelle section donne la poutre la plus résistante ? En flexion, la résistance est proportionnelle au module W = b h² / 6. Pour un tronc de diamètre D, b² + h² = D², et le maximum est atteint pour h/b = √2 (exercice 3). Une telle poutre porte environ {nombre((t30.gain - 1) * 100, 0)} % de plus qu'une poutre carrée tirée du même tronc.
+</Encadre>
+
+**Les canaux et les fossés.** Le canal « deux fois plus large que profond » frotte le moins pour une section donnée : il demande moins de revêtement et écoule mieux l'eau. Sur le terrain, on adapte cette forme aux talus que le sol peut tenir (latérite, argile).
+
+**Ce que l'optimisation ne dit pas.** Le calcul donne le meilleur choix **pour le critère choisi**. Le canal optimal peut être trop profond pour être curé à la main ; la poutre optimale peut gaspiller du bois. L'ingénieur compare toujours plusieurs critères.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : variations et optimisation">
+
+### Sens de variation
+
+f′ > 0 : f croît · f′ < 0 : f décroît · tableau de variations
+
+### Où chercher un extremum
+
+points où f′ = 0 · points sans dérivée (pointes) · bornes de l'intervalle · comparer les valeurs
+
+### Nature d'un point critique
+
+changement de signe de f′ · ou $f''(x_0) < 0$ : maximum, $f''(x_0) > 0$ : minimum
+
+### Optimiser
+
+variable et grandeur · une seule variable grâce aux contraintes · dériver, annuler · vérifier et interpréter
+
+### Poutre
+
+$V = dM/dx$ · M maximal où V s'annule ou change de signe · charge uniforme : $M_{max} = qL^2/8$ en L/2
+
+### Résultats utiles
+
+canal rectangulaire : b = 2h · poutre dans un tronc : h/b = √2
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Maximum et minimum sur un intervalle">
+
+Sur [0 ; 5], trouve le maximum et le minimum de f(x) = −2x² + 8x + 1.
+
+<Indice>Cherche où f′ s'annule, puis calcule f en ce point et aux deux bornes.</Indice>
+
+<Corrige>
+f′(x) = −4x + 8 = 0 pour x = 2. On compare : f(0) = {nombre(ex1x[0], 0)}, f(2) = {nombre(ex1x[1], 0)}, f(5) = {nombre(ex1x[2], 0)}. Maximum **{nombre(ex1x[1], 0)} en x = 2** ; minimum **{nombre(ex1x[2], 0)} en x = 5**, sur une borne.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le moment sous charge uniforme">
+
+Une poutre de portée L repose sur deux appuis et porte une charge uniforme q. Montre que le moment maximal vaut qL²/8, au milieu. Applique à L = 6 m et q = 20 kN/m.
+
+<Indice>R<sub>A</sub> = qL/2 et M(x) = R<sub>A</sub> x − q x²/2. Dérive, annule, remplace.</Indice>
+
+<Corrige>
+M′(x) = qL/2 − q x = 0 pour x = L/2 ; M″ = −q < 0 : maximum. M(L/2) = qL²/4 − qL²/8 = **qL²/8**. Application : x₀ = {grandeur(mq.x0, 0, 'm')} et M<sub>max</sub> = 20 × 6² / 8 = **{grandeur(mq.Mmax, 0, 'kN·m')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La meilleure poutre d'un tronc">
+
+On taille une poutre rectangulaire b × h dans un tronc de 30 cm de diamètre. Sa résistance en flexion est proportionnelle à W = b h² / 6. Trouve b et h qui rendent W maximal, et compare avec la poutre carrée inscrite.
+
+<Indice>Les coins de la section touchent le cercle : b² + h² = D². Écris W en fonction de b seul.</Indice>
+
+<Corrige>
+
+- W(b) = b (D² − b²) / 6, W′(b) = (D² − 3b²) / 6 = 0 pour b = D/√3 = **{grandeur(t30.b, 1, 'cm')}**, puis h = D √(2/3) = **{grandeur(t30.h, 1, 'cm')}** ; W″(b) = −b < 0 : maximum.
+- W = **{grandeur(t30.W, 0, 'cm³')}**, contre {grandeur(t30.WCarre, 0, 'cm³')} pour le carré de {grandeur(t30.aCarre, 1, 'cm')} de côté : gain de {nombre((t30.gain - 1) * 100, 1)} %.
+- Contrôle : W(15) = {grandeur(moduleTronc(30, 15), 0, 'cm³')} et W(20) = {grandeur(moduleTronc(30, 20), 0, 'cm³')}, tous deux plus petits.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La dérivée de f s'annule en x₀ en passant de positive à négative. En x₀, f a :" choix={['un minimum local', 'un maximum local', 'un replat sans extremum', 'une discontinuité']} bonne={1} colonnes={2}>
+f monte, puis descend : c'est un sommet.
+</QCM>
+
+<QCM n={2} question="Le minimum de f(x) = x² − 4x vaut :" choix={['0', nombre(evaluerPolynome(q2, 2), 0), '2', '−2']} bonne={1} colonnes={4}>
+f′(x) = 2x − 4 = 0 en x = 2, et f(2) = 4 − 8 = {nombre(evaluerPolynome(q2, 2), 0)}.
+</QCM>
+
+<QCM n={3} question="Sur une poutre, le moment fléchissant est maximal là où :" choix={['la charge est la plus forte', 'l’effort tranchant s’annule ou change de signe', 'la réaction est maximale', 'la flèche est nulle']} bonne={1} colonnes={2}>
+V = dM/dx : M est maximal là où sa dérivée s'annule ou change de signe.
+</QCM>
+
+<QCM n={4} question={<>Une poutre de 6 m sur deux appuis porte 20 kN/m. Son moment maximal vaut :</>} choix={[grandeur(mq.Mmax, 0, 'kN·m'), grandeur(mq.Mmax * 2, 0, 'kN·m'), grandeur(mq.RA, 0, 'kN·m'), grandeur(mq.Mmax / 2, 0, 'kN·m')]} bonne={0} colonnes={4}>
+qL²/8 = 20 × 36 / 8 = {grandeur(mq.Mmax, 0, 'kN·m')}.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Sous une charge ponctuelle seule, le moment maximal d'une poutre sur deux appuis se trouve :" choix={['au milieu', 'au droit de la charge', 'sur l’appui le plus proche', 'là où V = 0']} bonne={1} colonnes={2}>
+V y saute de + à − sans s'annuler : la courbe de M fait une pointe sous la charge.
+</QCM>
+
+<QCM n={6} question="En un point critique x₀, on trouve f″(x₀) < 0. C'est :" choix={['un minimum local', 'un maximum local', 'un point d’inflexion', 'impossible à dire']} bonne={1} colonnes={2}>
+Courbe tournée vers le bas : sommet.
+</QCM>
+
+<QCM n={7} question="Le canal rectangulaire de périmètre mouillé minimal, à section donnée, a une largeur b égale à :" choix={['h', '2h', 'h/2', '√2 h']} bonne={1} colonnes={4}>
+h = √(A/2) et b = A/h = 2h.
+</QCM>
+
+<QCM n={8} question="Sur un intervalle fermé, le maximum d'une fonction peut se trouver :" choix={['seulement là où f′ = 0', 'aussi sur une borne de l’intervalle', 'jamais sur une borne', 'seulement au milieu']} bonne={1} colonnes={2}>
+On compare toujours les points critiques, les pointes et les bornes.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,330 @@
+---
+id: L1.2.9
+titre: Dérivées partielles
+objectifs:
+  - Lire une fonction de deux variables sur une carte en courbes de niveau
+  - Calculer des dérivées partielles en fixant les autres variables
+  - Calculer un gradient, la plus forte pente et sa direction
+  - Estimer une incertitude avec la différentielle totale
+relecture: false
+normes: []
+glossaire:
+  - terme: Fonction de deux variables
+    definition: Règle qui associe un nombre à chaque couple (x ; y), comme l'altitude d'un terrain en chaque point d'un plan.
+  - terme: Courbe de niveau
+    definition: Ligne qui relie les points de même altitude ; sur une carte, des courbes serrées signalent une forte pente.
+  - terme: Dérivée partielle
+    definition: Dérivée par rapport à une seule variable, les autres étant tenues fixes ; notée ∂f/∂x.
+  - terme: Gradient
+    definition: Vecteur des dérivées partielles ; il pointe vers la montée la plus raide, et sa norme est la plus forte pente.
+  - terme: Différentielle totale
+    definition: Variation approchée df = ∂f/∂x dx + ∂f/∂y dy d'une fonction quand toutes ses variables changent un peu.
+symboles:
+  - { symbole: 'x, y', signification: 'coordonnées en plan', unite: 'm' }
+  - { symbole: 'z(x, y)', signification: 'altitude du terrain', unite: 'm' }
+  - { symbole: '∂z/∂x, ∂z/∂y', signification: 'pentes selon x et selon y', unite: 'm/m' }
+  - { symbole: 'grad z', signification: 'gradient de z', unite: 'm/m' }
+  - { symbole: 'θ', signification: 'direction mesurée depuis l’axe x', unite: '°' }
+  - { symbole: 'dL, dl, dh', signification: 'écarts de mesure', unite: 'm' }
+formules:
+  - { nom: 'Dérivée partielle', tex: '\frac{\partial f}{\partial x}(x, y) = \lim_{h \to 0} \frac{f(x + h, y) - f(x, y)}{h}', domaine: 'y tenu fixe' }
+  - { nom: 'Gradient', tex: '\overrightarrow{\mathrm{grad}}\,f = \left(\frac{\partial f}{\partial x} ; \frac{\partial f}{\partial y}\right), \quad \|\overrightarrow{\mathrm{grad}}\,f\| = \sqrt{f_x^2 + f_y^2}', domaine: 'Montée la plus raide' }
+  - { nom: 'Pente dans une direction', tex: 'p_\theta = \frac{\partial f}{\partial x}\cos\theta + \frac{\partial f}{\partial y}\sin\theta', domaine: 'θ depuis l’axe x' }
+  - { nom: 'Différentielle totale', tex: 'df \approx \frac{\partial f}{\partial x}\,dx + \frac{\partial f}{\partial y}\,dy', domaine: 'Petits écarts' }
+  - { nom: 'Incertitude sur un produit', tex: '\frac{dV}{V} \approx \frac{dL}{L} + \frac{dl}{l} + \frac{dh}{h}', domaine: 'V = L l h, écarts au pire' }
+---
+
+import { cylindreDerivees, differentielleVolume, EXEMPLE_TERRAIN, penteDirectionnelle, terrain } from '@/lib/calc/analyse'
+import { grandeur, nombre } from '@/lib/format'
+import { CoupesTerrain } from '@/components/schemas/Analyse'
+
+export const t0 = terrain(EXEMPLE_TERRAIN)
+export const route = penteDirectionnelle(t0.zx, t0.zy, 30)
+export const niveau = penteDirectionnelle(t0.zx, t0.zy, t0.direction + 90)
+export const montee = penteDirectionnelle(t0.zx, t0.zy, t0.direction + 180)
+export const dv = differentielleVolume(10, 4, 0.2, 0.02, 0.02, 0.01)
+export const cyl = cylindreDerivees(2, 3)
+export const q8 = terrain({ z0: 0, a: 3, b: 4, c: 0, x: 0, y: 0 })
+
+<Page etape="intuition" titre="L'intuition : la pente dépend de la direction">
+
+Tu te tiens à flanc de colline, sur un terrain que l'on va terrasser. Si tu marches vers le sommet, ça monte fort. Si tu marches le long du flanc, en restant à la même hauteur, ça ne monte pas du tout. Entre les deux, la pente est intermédiaire.
+
+L'altitude du terrain dépend de **deux** coordonnées, x et y. Elle n'a donc pas une pente, mais une pente **dans chaque direction**. Pour la décrire, il suffit de deux nombres : la pente quand on avance selon x (y fixé) et la pente quand on avance selon y (x fixé). Ce sont les **dérivées partielles**.
+
+Avec elles, on trouve la direction de la plus forte pente, celle que suit l'eau qui ruisselle. C'est la première question à se poser avant de placer une plate-forme, un fossé ou une route.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer la pente d'un terrain dans n'importe quelle direction, et trouver où l'eau va couler ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : dérivées partielles">
+
+### Une fonction de deux variables
+
+Une fonction z = f(x, y) associe une altitude à chaque point du plan. On la représente par une **carte en courbes de niveau** : chaque courbe relie les points de même altitude, comme sur une carte topographique.
+
+### Fixer une variable
+
+La **dérivée partielle par rapport à x**, notée ∂f/∂x, est la dérivée de f quand on fait varier x seul, **y restant fixe** :
+
+$$\frac{\partial f}{\partial x}(x, y) = \lim_{h \to 0} \frac{f(x + h, y) - f(x, y)}{h}$$
+
+En pratique, on dérive comme d'habitude en traitant y comme une constante. Pour f(x, y) = x² y + 3y : ∂f/∂x = 2xy et ∂f/∂y = x² + 3.
+
+Géométriquement, ∂f/∂x est la pente de la **coupe** du terrain par un plan parallèle à l'axe x (schéma).
+
+<Encadre type="exemple" titre="Le volume d'un réservoir cylindrique">
+V(r, h) = π r² h. On dérive par rapport à r (h fixe) : ∂V/∂r = 2π r h ; par rapport à h (r fixe) : ∂V/∂h = π r². Pour r = 2 m et h = 3 m : ∂V/∂r = {grandeur(cyl.dVdr, 2, 'm²')} et ∂V/∂h = {grandeur(cyl.dVdh, 2, 'm²')}. Un centimètre de rayon en plus ajoute {nombre(cyl.dVdr / cyl.dVdh, 0)} fois plus d'eau qu'un centimètre de hauteur.
+</Encadre>
+
+### La différentielle totale
+
+Quand x et y changent tous les deux un peu, f change d'environ :
+
+$$df \approx \frac{\partial f}{\partial x}\,dx + \frac{\partial f}{\partial y}\,dy$$
+
+C'est l'approximation linéaire de L1.2.5, étendue à plusieurs variables. Elle sert à propager les **incertitudes de mesure**.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le gradient">
+
+### Définition
+
+Le **gradient** est le vecteur des deux dérivées partielles :
+
+$$\overrightarrow{\mathrm{grad}}\,z = \left(\frac{\partial z}{\partial x} ; \frac{\partial z}{\partial y}\right)$$
+
+Ses propriétés font de lui l'outil du terrassier :
+
+1. il pointe dans la direction de la **montée la plus raide** ;
+2. sa norme $\sqrt{z_x^2 + z_y^2}$ est la **plus forte pente** ;
+3. il est **perpendiculaire aux courbes de niveau** ;
+4. l'eau qui ruisselle suit **−grad z**, la plus forte descente.
+
+### La pente dans une direction
+
+Dans la direction qui fait l'angle θ avec l'axe x, la pente vaut :
+
+$$p_\theta = \frac{\partial z}{\partial x}\cos\theta + \frac{\partial z}{\partial y}\sin\theta$$
+
+C'est le produit scalaire du gradient par le vecteur unitaire de la direction (N0.6). Elle est maximale dans la direction du gradient, nulle le long d'une courbe de niveau.
+
+<Encadre type="exemple" titre="Le terrain de l'exemple résolu">
+Au point étudié, ∂z/∂x = {nombre(t0.zx * 100, 1)} % et ∂z/∂y = {nombre(t0.zy * 100, 1)} %. La plus forte pente vaut {nombre(t0.pente * 100, 2)} %. Le long d'une piste orientée à 30° de l'axe x, la pente n'est que de {nombre(route * 100, 2)} % ; le long de la courbe de niveau, elle vaut {nombre(Math.abs(niveau) * 100, 2)} %.
+</Encadre>
+
+<Regle type="simplification">
+Le terrain est décrit par une formule simple, z = z₀ + a x + b y + c y², valable sur une petite zone. Un vrai terrain est connu par des points levés ; on calcule alors les pentes à partir des altitudes voisines (taux de variation).
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : deux coupes, deux pentes">
+
+<CoupesTerrain d={EXEMPLE_TERRAIN} r={t0} />
+
+À gauche, on coupe le terrain en gardant y fixe : le profil est une droite, de pente ∂z/∂x. À droite, on garde x fixe : le profil est une parabole (un vallon), dont la tangente au point étudié a la pente ∂z/∂y. Les deux pentes ensemble suffisent pour connaître la pente dans **toutes** les directions.
+
+<Encadre type="retenir">
+∂z/∂x : pente de la coupe à y fixé. ∂z/∂y : pente de la coupe à x fixé. Le gradient combine les deux : direction de la plus forte montée, perpendiculaire aux courbes de niveau.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="pentesTerrain">
+
+<Cahier titre="Exemple résolu : où va l'eau sur la future plate-forme ?">
+
+**Énoncé.** Avant de terrasser une plate-forme pour un dépôt de matériaux, le topographe a modélisé le terrain naturel par z(x, y) = 320 + 0,03 x − 0,02 y + 0,002 y² (en m, x et y en m, données de l'énoncé). Au point (40 ; 25), calcule l'altitude, les pentes selon x et selon y, la plus forte pente et la direction dans laquelle l'eau s'écoule.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un terme en y² ? Il décrit un vallon : selon y, le terrain descend, passe par un creux, puis remonte.</Note>
+</Etape>
+
+<Etape n={2} titre="La carte">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : dérivées partielles et gradient">
+
+<Etape n={3} titre="Le modèle et l'altitude">
+<AN k="modele" />
+<AN k="z" />
+</Etape>
+
+<Etape n={4} titre="Les deux dérivées partielles">
+<AN k="zx" />
+<AN k="zy" />
+<Note>Pourquoi ∂z/∂y dépend-il de y ? Dans le vallon, la pente selon y change d'un point à l'autre ; selon x, le terrain est un plan incliné, de pente constante.</Note>
+</Etape>
+
+<Etape n={5} titre="La plus forte pente et l'écoulement">
+<AN k="pente" />
+<AN k="direction" />
+<Resultat k="pente" libelle="Plus forte pente" />
+<Note couleur="vert">Contrôle : sur la carte, la flèche verte coupe les courbes de niveau à angle droit, vers les altitudes décroissantes.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier de traiter l'autre variable comme une constante.">
+Pour ∂(x² y)/∂x, y est une constante : le résultat est 2xy, pas 2x ni 2x + x².
+</Piege>
+
+<Piege erreur="additionner les pentes au lieu de prendre la norme.">
+La plus forte pente vaut √(z<sub>x</sub>² + z<sub>y</sub>²), pas z<sub>x</sub> + z<sub>y</sub>. Pour 3 % et 4 %, on trouve {nombre(q8.pente * 100, 0)} %, pas 7 %.
+</Piege>
+
+<Piege erreur="faire couler l'eau selon le gradient.">
+Le gradient pointe vers la montée. L'eau suit −grad z : la direction opposée, ici à {nombre(t0.direction, 0)}° de l'axe x.
+</Piege>
+
+<Piege erreur="croire que la pente est la même dans toutes les directions.">
+Sur le terrain de l'exemple, elle passe de {nombre(t0.pente * 100, 2)} % (plus forte pente) à 0 % (le long d'une courbe de niveau). Une piste bien orientée peut éviter une forte rampe.
+</Piege>
+
+<Piege erreur="propager une incertitude en oubliant une variable.">
+Pour V = L l h, chaque mesure apporte sa part. Celle de l'épaisseur est souvent la plus grande, car h est petit : 1 cm sur 20 cm, c'est 5 %.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les plates-formes et le drainage.** Avant de terrasser, on étudie la carte du terrain : la direction de la plus forte pente indique où l'eau de ruissellement arrivera. On place les fossés de crête **en amont** de la plate-forme, perpendiculairement à cette direction, pour intercepter l'eau avant qu'elle n'érode les talus.
+
+<Encadre type="terrain" titre="Les ravines des villes en pente">
+À Kinshasa, Bukavu ou Kikwit, les ravines géantes naissent souvent d'une eau concentrée : une route, un caniveau ou une parcelle bétonnée envoie toute l'eau dans une même direction, sur un sol sableux sans protection. Lire le gradient du terrain, c'est prévoir où l'eau va se concentrer, et où il faut la ralentir (seuils, végétation, bassins).
+</Encadre>
+
+**Le tracé des pistes.** Une piste qui monte droit dans la pente subit la plus forte rampe et ravine vite. En l'orientant en biais, on réduit la pente en long (formule de la pente directionnelle) : c'est le principe des lacets en montagne.
+
+**Les incertitudes de métré.** Pour une dalle de 10 m × 4 m × 0,20 m, des écarts de 2 cm sur les longueurs et de 1 cm sur l'épaisseur changent le volume d'environ {grandeur(dv.dV, 2, 'm³')}, soit {nombre(dv.relatif * 100, 1)} % (exercice 3). La commande de béton prévoit une marge, et le chef de chantier contrôle surtout l'**épaisseur**.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : dérivées partielles">
+
+### Dérivée partielle
+
+$\partial f / \partial x$ : on dérive en x, les autres variables étant constantes · pente de la coupe à y fixé
+
+### Gradient
+
+$\overrightarrow{\mathrm{grad}}\,z = (z_x ; z_y)$ · vers la montée la plus raide · ⟂ aux courbes de niveau
+
+### Plus forte pente
+
+$\sqrt{z_x^2 + z_y^2}$ · l'eau suit $-\overrightarrow{\mathrm{grad}}\,z$
+
+### Pente dans la direction θ
+
+$p_\theta = z_x \cos\theta + z_y \sin\theta$ · nulle le long d'une courbe de niveau
+
+### Différentielle
+
+$df \approx f_x\,dx + f_y\,dy$ · produit : $\frac{dV}{V} \approx \frac{dL}{L} + \frac{dl}{l} + \frac{dh}{h}$
+
+### Cylindre
+
+$\partial V/\partial r = 2\pi r h$ · $\partial V/\partial h = \pi r^2$
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Les dérivées partielles d'un volume">
+
+Un réservoir cylindrique a un rayon r = 2 m et une hauteur h = 3 m. Calcule V, ∂V/∂r et ∂V/∂h. Lequel des deux paramètres faut-il augmenter pour gagner le plus de volume par centimètre ?
+
+<Indice>V = π r² h. Dérive par rapport à r en gardant h fixe, puis l'inverse.</Indice>
+
+<Corrige>
+V = {grandeur(cyl.V, 2, 'm³')} ; ∂V/∂r = 2π r h = **{grandeur(cyl.dVdr, 2, 'm²')}** ; ∂V/∂h = π r² = **{grandeur(cyl.dVdh, 2, 'm²')}**. Le rayon est plus efficace : 1 cm de rayon ajoute environ {grandeur(cyl.dVdr / 100, 3, 'm³')}, 1 cm de hauteur {grandeur(cyl.dVdh / 100, 3, 'm³')}.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une piste en biais">
+
+Sur le terrain de l'exemple, au point (40 ; 25), quelle est la pente d'une piste orientée à 30° de l'axe x ? Et le long de la courbe de niveau ?
+
+<Indice>p<sub>θ</sub> = z<sub>x</sub> cos θ + z<sub>y</sub> sin θ. La courbe de niveau est perpendiculaire au gradient.</Indice>
+
+<Corrige>
+p<sub>30°</sub> = {nombre(t0.zx, 3)} × cos 30° + {nombre(t0.zy, 3)} × sin 30° = **{nombre(route * 100, 2)} %**, contre {nombre(t0.pente * 100, 2)} % pour la plus forte pente. Le long de la courbe de niveau (direction du gradient + 90°), la pente vaut **{nombre(Math.abs(niveau) * 100, 2)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="L'incertitude sur un volume de béton">
+
+Une dalle mesure L = 10 m, l = 4 m et h = 0,20 m, avec des écarts possibles de 2 cm sur L et l et de 1 cm sur h. Estime l'écart possible sur le volume par la différentielle totale, et compare avec le calcul exact du cas le plus défavorable.
+
+<Indice>dV = l h dL + L h dl + L l dh, en prenant chaque écart dans le sens défavorable.</Indice>
+
+<Corrige>
+
+- V = **{grandeur(dv.V, 2, 'm³')}** ; ∂V/∂L = {grandeur(dv.dVdL, 2, 'm²')}, ∂V/∂l = {grandeur(dv.dVdl, 2, 'm²')}, ∂V/∂h = {grandeur(dv.dVdh, 0, 'm²')}.
+- dV = {nombre(dv.dVdL, 2)} × 0,02 + {nombre(dv.dVdl, 2)} × 0,02 + {nombre(dv.dVdh, 0)} × 0,01 = **{grandeur(dv.dV, 3, 'm³')}**, soit {nombre(dv.relatif * 100, 1)} %.
+- Exact : 10,02 × 4,02 × 0,21 − 8 = {grandeur(dv.exact, 3, 'm³')}. L'épaisseur pèse pour l'essentiel de l'écart.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La dérivée partielle de x² y par rapport à x vaut :" choix={['2x', '2xy', 'x²', '2x + y']} bonne={1} colonnes={4}>
+y est traité comme une constante.
+</QCM>
+
+<QCM n={2} question="La dérivée partielle de x² y par rapport à y vaut :" choix={['x²', '2xy', '0', 'y']} bonne={0} colonnes={4}>
+x² est traité comme une constante.
+</QCM>
+
+<QCM n={3} question="Le gradient de l'altitude d'un terrain pointe :" choix={['vers la plus forte descente', 'vers la plus forte montée', 'le long des courbes de niveau', 'vers le nord']} bonne={1} colonnes={2}>
+L'eau, elle, suit la direction opposée.
+</QCM>
+
+<QCM n={4} question="Par rapport aux courbes de niveau, le gradient est :" choix={['parallèle', 'perpendiculaire', 'à 45°', 'sans rapport']} bonne={1} colonnes={4}>
+Le long d'une courbe de niveau, l'altitude ne varie pas : la pente y est nulle.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Si ∂z/∂x = 3 % et ∂z/∂y = 4 %, la plus forte pente vaut :" choix={['7 %', `${nombre(q8.pente * 100, 0)} %`, '1 %', '12 %']} bonne={1} colonnes={4}>
+√(3² + 4²) = 5 : on prend la norme du gradient.
+</QCM>
+
+<QCM n={6} question="L'eau de ruissellement suit la direction :" choix={['du gradient', 'opposée au gradient', 'des courbes de niveau', 'de l’axe x']} bonne={1} colonnes={2}>
+−grad z : la plus forte descente.
+</QCM>
+
+<QCM n={7} question="Pour V = L l h, l'incertitude relative dV/V vaut environ :" choix={['dL/L × dl/l × dh/h', 'dL/L + dl/l + dh/h', 'dL + dl + dh', '(dL + dl + dh)/3']} bonne={1} colonnes={2}>
+Pour un produit, les incertitudes relatives s'additionnent (au pire).
+</QCM>
+
+<QCM n={8} question="Pour un cylindre V = π r² h, ∂V/∂h vaut :" choix={['2π r h', 'π r²', 'π r² h', '2π r']} bonne={1} colonnes={4}>
+r est fixe : la dérivée de π r² h par rapport à h est π r².
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

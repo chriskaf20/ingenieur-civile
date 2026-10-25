@@ -1,0 +1,333 @@
+---
+id: L1.2.6
+titre: Primitives et intégrale définie
+objectifs:
+  - Trouver une primitive des fonctions usuelles
+  - Calculer une intégrale définie à l'aide d'une primitive
+  - Interpréter une intégrale comme une aire, une distance ou une résultante de charge
+  - Approcher une intégrale par une somme de rectangles ou de trapèzes
+relecture: false
+normes: []
+glossaire:
+  - terme: Primitive
+    definition: Fonction F dont la dérivée est f ; elle est définie à une constante près.
+  - terme: Intégrale définie
+    definition: Nombre noté ∫ de a à b de f(x) dx, égal à F(b) − F(a) ; c'est l'aire algébrique entre la courbe et l'axe des x.
+  - terme: Somme de rectangles
+    definition: Approximation d'une intégrale par la somme des aires de rectangles de largeur Δx dont la hauteur est une valeur de f.
+  - terme: Méthode des trapèzes
+    definition: Approximation d'une intégrale en remplaçant la courbe, sur chaque intervalle, par la corde qui joint ses extrémités.
+  - terme: Résultante
+    definition: Force unique équivalente à une charge répartie ; elle vaut l'aire du diagramme de charge et passe par son centre de gravité.
+symboles:
+  - { symbole: 'F', signification: 'primitive de f', unite: 'selon le problème' }
+  - { symbole: 'q(x)', signification: 'charge répartie', unite: 'kN/m' }
+  - { symbole: 'R', signification: 'résultante de la charge', unite: 'kN' }
+  - { symbole: 'x̄', signification: 'abscisse de la résultante', unite: 'm' }
+  - { symbole: 'n, Δx', signification: 'nombre et largeur des intervalles', unite: '—, m' }
+formules:
+  - { nom: 'Primitive', tex: 'F''(x) = f(x)', domaine: 'F définie à une constante près' }
+  - { nom: 'Intégrale définie', tex: '\int_a^b f(x)\,dx = F(b) - F(a)', domaine: 'f continue sur [a ; b]' }
+  - { nom: 'Puissances', tex: '\int x^n\,dx = \frac{x^{n+1}}{n+1} + C', domaine: 'n ≠ −1' }
+  - { nom: 'Résultante d’une charge', tex: 'R = \int_0^L q(x)\,dx, \quad \bar{x} = \frac{1}{R}\int_0^L x\,q(x)\,dx', domaine: 'Charge répartie sur [0 ; L]' }
+  - { nom: 'Trapèzes', tex: '\int_a^b f \approx \Delta x \left[\tfrac{f_0}{2} + f_1 + \dots + f_{n-1} + \tfrac{f_n}{2}\right]', domaine: 'n intervalles égaux' }
+---
+
+import { chargeVariable, EXEMPLE_CHARGE_VARIABLE, evaluerPolynome, integralePolynome, rectanglesMilieu, simpson, trapezes } from '@/lib/calc/analyse'
+import { grandeur, nombre } from '@/lib/format'
+import { AireSigneeSchema } from '@/components/schemas/Analyse'
+
+export const c0 = chargeVariable(EXEMPLE_CHARGE_VARIABLE)
+export const tri = chargeVariable({ c0: 0, c1: 2, c2: 0, L: 6, n: 6 })
+export const para = (x) => evaluerPolynome([0, 0, 1], x)
+export const I3 = integralePolynome([0, 0, 1], 0, 3)
+export const rect = [2, 4].map((n) => rectanglesMilieu(para, 0, 3, n))
+export const trap = [2, 4].map((n) => trapezes(para, 0, 3, n))
+export const simp = simpson(para, 0, 3, 2)
+export const dist = integralePolynome([2, 0.5], 0, 10)
+export const ex1 = integralePolynome([1, 0, 3], 0, 2)
+export const q1 = integralePolynome([0, 2], 0, 1)
+export const courbe = chargeVariable({ ...EXEMPLE_CHARGE_VARIABLE, c2: 0.5, n: 3 })
+
+<Page etape="intuition" titre="L'intuition : additionner des tranches">
+
+Un camion livre du sable sur un plancher, en tas allongé : peu à une extrémité, beaucoup à l'autre. Quel est le poids total ? On peut découper le tas en tranches de 1 m, peser chaque tranche, puis additionner. Avec des tranches de 10 cm, le résultat est plus précis. Avec des tranches infiniment fines, il devient exact.
+
+Cette somme de tranches infiniment fines s'appelle une **intégrale**. Sur un dessin, c'est l'**aire** sous la courbe de charge : la charge (kN/m) multipliée par une petite longueur (m) donne une force (kN), et l'on additionne.
+
+Le miracle, c'est qu'on n'a pas besoin d'additionner une infinité de tranches. Il suffit de trouver une fonction dont la dérivée est la charge : une **primitive**. L'intégrale est le chemin inverse de la dérivée.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer exactement l'effet total d'une grandeur qui varie, comme une charge répartie non uniforme ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les primitives">
+
+### Définition
+
+F est une **primitive** de f si F′ = f. Si F en est une, F + C aussi (C constante) : la dérivée d'une constante est nulle.
+
+### Les primitives à connaître
+
+| f(x) | une primitive F(x) | | f(x) | une primitive F(x) |
+|---|---|---|---|---|
+| a (constante) | a x | | 1/x | ln x (x > 0) |
+| xⁿ (n ≠ −1) | xⁿ⁺¹ / (n + 1) | | eˣ | eˣ |
+| √x | (2/3) x^(3/2) | | e^(kx) | e^(kx) / k |
+| cos x | sin x | | sin x | −cos x |
+
+On contrôle toujours en dérivant : ((2/3) x^(3/2))′ = x^(1/2) = √x.
+
+### Linéarité
+
+Une primitive de a f + b g est a F + b G. Pour q(x) = 4 + 1,5 x : Q(x) = 4x + 0,75 x².
+
+<Encadre type="exemple" titre="La distance à partir de la vitesse">
+Un engin roule à v(t) = 2 + 0,5 t (m/s). Une primitive est x(t) = 2t + 0,25 t². En 10 s, il parcourt x(10) − x(0) = {grandeur(dist, 0, 'm')} : c'est l'aire sous la courbe de vitesse (N0.7.1).
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : l'intégrale définie">
+
+### Le théorème fondamental
+
+$$\int_a^b f(x)\,dx = F(b) - F(a) = \big[F(x)\big]_a^b$$
+
+On choisit n'importe quelle primitive : la constante C disparaît dans la différence. Exemple : $\int_0^3 x^2\,dx = [x^3/3]_0^3$ = 27/3 = {nombre(I3, 0)}.
+
+### Une aire algébrique
+
+Si f ≥ 0, l'intégrale est l'aire sous la courbe. Là où f < 0, l'aire compte **négativement**. Propriétés utiles :
+
+- $\int_a^b (\alpha f + \beta g) = \alpha \int_a^b f + \beta \int_a^b g$ (linéarité) ;
+- $\int_a^c f = \int_a^b f + \int_b^c f$ (relation de Chasles) ;
+- la valeur moyenne de f sur [a ; b] vaut $\frac{1}{b - a}\int_a^b f$.
+
+### La résultante d'une charge répartie
+
+Une charge q(x) (kN/m) sur [0 ; L] équivaut à une force unique, la **résultante** :
+
+$$R = \int_0^L q(x)\,dx \qquad \bar{x} = \frac{1}{R}\int_0^L x\,q(x)\,dx$$
+
+R est l'aire du diagramme de charge ; x̄ est l'abscisse de son centre de gravité. Pour une charge triangulaire de 0 à 12 kN/m sur 6 m : R = {grandeur(tri.R, 0, 'kN')} à x̄ = {grandeur(tri.xBarre, 0, 'm')}, aux deux tiers de la longueur à partir de la pointe.
+
+### Approcher une intégrale
+
+Quand on ne connaît pas de primitive (ou seulement des mesures), on additionne des rectangles de largeur Δx, ou des **trapèzes** qui suivent mieux la courbe. Pour $\int_0^3 x^2\,dx$ = {nombre(I3, 0)} : 4 rectangles au milieu donnent {nombre(rect[1], 3)}, 4 trapèzes {nombre(trap[1], 3)}, et la méthode de Simpson, qui suit la courbe par des arcs de parabole, {nombre(simp, 3)} dès 2 intervalles.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : une aire qui peut être négative">
+
+<AireSigneeSchema />
+
+L'intégrale additionne f(x) dx avec son signe. Entre 0 et 3, la courbe est au-dessus de l'axe : contribution positive. Entre 3 et 4, elle passe dessous : contribution négative. Pour une charge, une partie négative signifierait une charge qui tire vers le haut (soulèvement).
+
+<Encadre type="retenir">
+Intégrale = somme de tranches f(x) dx = F(b) − F(a). Elle a une unité : celle de f multipliée par celle de x (kN/m × m = kN ; m/s × s = m).
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="chargeVariable">
+
+<Cahier titre="Exemple résolu : la charge d'un pignon sur une poutre">
+
+**Énoncé.** Une poutre de 6 m porte le mur de pignon d'un hangar, dont la hauteur augmente d'une extrémité à l'autre. La charge transmise passe de 4 kN/m à 13 kN/m : q(x) = 4 + 1,5 x (kN/m, x en m). Calcule la résultante de cette charge et sa position. Compare avec une somme de 6 rectangles.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi c₂ = 0 ? La charge varie linéairement. Mets c₂ ≠ 0 pour une charge courbe : la méthode reste la même.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : intégrer la charge">
+
+<Etape n={3} titre="Le modèle et sa primitive">
+<AN k="modele" />
+<AN k="primitive" />
+</Etape>
+
+<Etape n={4} titre="La résultante">
+<AN k="R" />
+<Note>Pourquoi une intégrale ? Sur une petite longueur dx, la charge vaut q(x) dx (kN) ; on additionne toutes ces petites forces.</Note>
+</Etape>
+
+<Etape n={5} titre="Sa position">
+<AN k="moment" />
+<AN k="xBarre" />
+</Etape>
+
+<Etape n={6} titre="Le contrôle par les rectangles">
+<AN k="Rn" />
+<Resultat k="R" libelle="Résultante" />
+<Note couleur="vert">Contrôle : quand c₂ = 0, la charge est un trapèze ; son aire, (q(0) + q(L)) / 2 × L, redonne <Val k="R" />. Les rectangles au milieu sont exacts pour une charge linéaire ; mets c₂ ≠ 0 pour voir apparaître un écart.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier de diviser par n + 1.">
+Une primitive de x² est x³/3, pas x³ : on vérifie en dérivant, (x³/3)′ = x².
+</Piege>
+
+<Piege erreur="calculer F(a) − F(b).">
+C'est F(b) − F(a), borne du haut moins borne du bas. Inverser change le signe du résultat.
+</Piege>
+
+<Piege erreur="placer la résultante au milieu.">
+Pour une charge triangulaire, elle est aux deux tiers à partir de la pointe ({grandeur(tri.xBarre, 0, 'm')} sur 6 m), du côté où la charge est la plus forte. Seule une charge uniforme a sa résultante au milieu.
+</Piege>
+
+<Piege erreur="oublier l'unité de l'intégrale.">
+∫ q dx est en kN (kN/m × m), ∫ x q dx en kN·m. Une intégrale sans unité ne veut rien dire en mécanique.
+</Piege>
+
+<Piege erreur="croire qu'une somme de rectangles est toujours exacte.">
+Elle l'est pour une droite. Pour la charge courbe q(x) = 4 + 1,5 x + 0,5 x² sur 6 m, 3 rectangles donnent {grandeur(courbe.Rn, 2, 'kN')} au lieu de {grandeur(courbe.R, 2, 'kN')} : on augmente n, ou l'on intègre exactement.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les diagrammes de charge.** Poussée des terres sur un mur, pression de l'eau sur une paroi, charge d'un remblai ou d'un mur de hauteur variable : toutes ces charges varient le long de l'ouvrage. Pour les remplacer par une force unique, on calcule l'aire du diagramme (résultante) et son centre de gravité (point d'application). Pour les formes simples (rectangle, triangle, trapèze), on utilise directement les formules d'aires, qui sont des intégrales déjà calculées.
+
+<Encadre type="terrain" titre="Intégrer des mesures">
+Sur le terrain, on n'a souvent pas de formule, seulement des mesures : profondeurs d'une rivière tous les 2 m pour calculer la section d'écoulement, débits relevés toutes les heures pour obtenir un volume d'eau, épaisseurs de latérite à chaque piquet d'un profil. On applique alors la méthode des trapèzes : c'est elle que les métreurs utilisent pour calculer les surfaces des profils en travers d'une route.
+</Encadre>
+
+**Le volume pompé.** Le compteur d'une pompe indique un débit instantané (m³/h). Le volume pompé pendant la journée est l'intégrale du débit dans le temps, que le compteur totalisateur calcule en additionnant.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : primitives et intégrales">
+
+### Primitive
+
+F′ = f · définie à une constante près · on vérifie en dérivant
+
+### Primitives usuelles
+
+$\int x^n dx = \frac{x^{n+1}}{n+1}$ (n ≠ −1) · $\int \frac{dx}{x} = \ln x$ · $\int e^{kx} dx = \frac{e^{kx}}{k}$ · $\int \cos x\,dx = \sin x$ · $\int \sin x\,dx = -\cos x$
+
+### Intégrale définie
+
+$\int_a^b f(x)\,dx = F(b) - F(a)$ · aire algébrique · unité de f × unité de x
+
+### Propriétés
+
+linéarité · Chasles · valeur moyenne $\frac{1}{b-a}\int_a^b f$
+
+### Charge répartie
+
+$R = \int q\,dx$ (kN) · $\bar{x} = \frac{1}{R}\int x\,q\,dx$ · triangle : R = q L / 2 aux deux tiers depuis la pointe
+
+### Approximations
+
+rectangles · trapèzes · Simpson (exact pour les paraboles)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une intégrale de polynôme">
+
+Calcule $\int_0^2 (3x^2 + 1)\,dx$.
+
+<Indice>Une primitive de 3x² + 1 est x³ + x.</Indice>
+
+<Corrige>
+[x³ + x]₀² = (8 + 2) − 0 = **{nombre(ex1, 0)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La charge triangulaire">
+
+Une poutre de 6 m reçoit une charge qui croît de 0 kN/m (en x = 0) à 12 kN/m (en x = 6 m). Calcule la résultante et sa position par intégration, puis vérifie avec l'aire et le centre de gravité d'un triangle.
+
+<Indice>q(x) = 2x. Calcule ∫ 2x dx et ∫ 2x² dx entre 0 et 6.</Indice>
+
+<Corrige>
+
+- R = [x²]₀⁶ = **{grandeur(tri.R, 0, 'kN')}** ; ∫ x q dx = [2x³/3]₀⁶ = {grandeur(tri.moment, 0, 'kN·m')}, donc x̄ = {nombre(tri.moment, 0)} / {nombre(tri.R, 0)} = **{grandeur(tri.xBarre, 0, 'm')}**.
+- Triangle : aire = 12 × 6 / 2 = {grandeur(tri.R, 0, 'kN')} ; centre de gravité aux 2/3 depuis la pointe, soit {grandeur(tri.xBarre, 0, 'm')}.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Trois méthodes approchées">
+
+Pour $\int_0^3 x^2\,dx$, compare la valeur exacte avec : 2 puis 4 rectangles au milieu ; 2 puis 4 trapèzes ; la méthode de Simpson à 2 intervalles. Que remarques-tu sur les erreurs ?
+
+<Indice>Rectangles au milieu : Δx × Σ f(milieux). Trapèzes : Δx × (f₀/2 + f₁ + … + fₙ/2). Simpson : (Δx/3)(f₀ + 4f₁ + f₂).</Indice>
+
+<Corrige>
+
+- Exact : **{nombre(I3, 0)}**.
+- Rectangles : {nombre(rect[0], 4)} puis {nombre(rect[1], 4)} ; trapèzes : {nombre(trap[0], 4)} puis {nombre(trap[1], 4)}.
+- Simpson : **{nombre(simp, 4)}**, exact.
+
+Les rectangles sous-estiment, les trapèzes surestiment (la courbe est tournée vers le haut). Quand n double, l'erreur est divisée par 4. Simpson est exact pour les polynômes de degré 3 au plus.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une primitive de 3x² est :" choix={['6x', 'x³', '3x³', 'x³/3']} bonne={1} colonnes={4}>
+(x³)′ = 3x².
+</QCM>
+
+<QCM n={2} question="L'intégrale de 2x entre 0 et 1 vaut :" choix={['2', nombre(q1, 0), '0', '1/2']} bonne={1} colonnes={4}>
+[x²]₀¹ = 1 − 0 = {nombre(q1, 0)}.
+</QCM>
+
+<QCM n={3} question="La résultante d'une charge uniforme q sur une longueur L vaut :" choix={['q', 'q L', 'q L²/2', 'q / L']} bonne={1} colonnes={4}>
+Aire d'un rectangle de hauteur q et de base L.
+</QCM>
+
+<QCM n={4} question="Sur un graphique de la vitesse en fonction du temps, l'aire sous la courbe représente :" choix={['l’accélération', 'la distance parcourue', 'la vitesse moyenne', 'le temps de parcours']} bonne={1} colonnes={2}>
+∫ v dt : m/s × s = m.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="La résultante d'une charge triangulaire (nulle en x = 0, maximale en x = L) s'applique à :" choix={['L/2', 'L/3', '2L/3', 'L']} bonne={2} colonnes={4}>
+Au centre de gravité du triangle, du côté de la charge maximale.
+</QCM>
+
+<QCM n={6} question="L'intégrale de a à b de f(x) dx est égale à :" choix={['F(a) − F(b)', 'F(b) − F(a)', 'f(b) − f(a)', 'F(b) + F(a)']} bonne={1} colonnes={4}>
+Borne du haut moins borne du bas, avec une primitive F.
+</QCM>
+
+<QCM n={7} question="Si f(x) < 0 sur tout l'intervalle [a ; b] (avec a < b), l'intégrale de f sur [a ; b] est :" choix={['positive', 'négative', 'nulle', 'impossible à calculer']} bonne={1} colonnes={4}>
+L'aire compte négativement sous l'axe.
+</QCM>
+
+<QCM n={8} question="Pour une charge qui varie linéairement, la somme de rectangles pris au milieu :" choix={['donne exactement la résultante', 'est toujours trop faible', 'est toujours trop forte', 'ne converge pas']} bonne={0} colonnes={2}>
+Les petits triangles en trop et en moins se compensent exactement.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -7,6 +7,7 @@ import { Etiquette, Figure } from '@/components/drawing/Figure';
 import type { DefinitionCalcul, Entrees } from '@/components/gabarits/typesCalcul';
 import { num } from '@/components/gabarits/typesCalcul';
 import { CALCULS_ALGEBRE } from './algebre';
+import { CALCULS_ANALYSE } from './analyse';
 import { CALCULS_METHODE } from './methode';
 import { CALCULS_GEOMETRIE } from './geometrie';
 import { CALCULS_TRIGO } from './trigo';
@@ -391,13 +392,16 @@ export const REGISTRE = fusion(
   fusion(
     fusion(
       fusion(
-        fusion(fusion(fusion(fusion({ echelle, remblai, escalier, poteau, mur } as const, CALCULS_METHODE), CALCULS_ALGEBRE), CALCULS_UNITES), CALCULS_TRIGO),
-        CALCULS_GEOMETRIE,
+        fusion(
+          fusion(fusion(fusion(fusion({ echelle, remblai, escalier, poteau, mur } as const, CALCULS_METHODE), CALCULS_ALGEBRE), CALCULS_UNITES), CALCULS_TRIGO),
+          CALCULS_GEOMETRIE,
+        ),
+        CALCULS_VECTEURS,
       ),
-      CALCULS_VECTEURS,
+      CALCULS_PHYSIQUE,
     ),
-    CALCULS_PHYSIQUE,
+    CALCULS_PROJET,
   ),
-  CALCULS_PROJET,
+  CALCULS_ANALYSE,
 );
 export type NomCalcul = keyof typeof REGISTRE;

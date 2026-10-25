@@ -1,0 +1,341 @@
+---
+id: L1.2.7
+titre: Techniques d'intégration
+objectifs:
+  - Intégrer par changement de variable, en changeant aussi les bornes
+  - Intégrer par parties un produit de fonctions
+  - Choisir la technique adaptée à une intégrale et contrôler le résultat
+  - Calculer la résultante et le moment à la base d'une charge de vent variable
+relecture: false
+normes:
+  - "EN 1991-1-4 (EC1-1-4) §4.3.2 : profil de vent logarithmique, remplacé ici par une loi de puissance simplifiée"
+glossaire:
+  - terme: Changement de variable
+    definition: Technique qui remplace x par une nouvelle variable u = g(x) pour reconnaître une primitive connue ; on change aussi dx et les bornes.
+  - terme: Intégration par parties
+    definition: Formule ∫ u v′ = [u v] − ∫ u′ v, issue de la règle du produit, utile pour intégrer un polynôme multiplié par une exponentielle, un sinus ou un logarithme.
+  - terme: Loi de puissance
+    definition: Fonction de la forme a x^α ; ici, modèle simplifié de la charge de vent qui croît avec la hauteur.
+  - terme: Moment de renversement
+    definition: Moment à la base d'un ouvrage élancé (mât, pylône, château d'eau) dû aux charges horizontales ; la fondation doit le reprendre.
+  - terme: Méthode de Simpson
+    definition: Méthode numérique qui approche la courbe par des arcs de parabole sur des paires d'intervalles ; très précise pour les fonctions régulières.
+symboles:
+  - { symbole: 'u', signification: 'nouvelle variable d’intégration', unite: 'selon le problème' }
+  - { symbole: 'z', signification: 'hauteur au-dessus du sol', unite: 'm' }
+  - { symbole: 'q(z)', signification: 'charge de vent par mètre de hauteur', unite: 'kN/m' }
+  - { symbole: 'q_r, z_r', signification: 'charge et hauteur de référence', unite: 'kN/m, m' }
+  - { symbole: 'α', signification: 'exposant du profil de vent', unite: '—' }
+  - { symbole: 'F, M', signification: 'résultante et moment à la base', unite: 'kN, kN·m' }
+formules:
+  - { nom: 'Changement de variable', tex: '\int_a^b f(g(x))\,g''(x)\,dx = \int_{g(a)}^{g(b)} f(u)\,du', domaine: 'u = g(x), g dérivable' }
+  - { nom: 'Intégration par parties', tex: '\int_a^b u\,v''\,dx = \big[u\,v\big]_a^b - \int_a^b u''\,v\,dx', domaine: 'u et v dérivables' }
+  - { nom: 'Exemple par parties', tex: '\int x\,e^{x}\,dx = (x - 1)\,e^{x} + C', domaine: 'u = x, v′ = eˣ' }
+  - { nom: 'Vent en loi de puissance', tex: 'F = \frac{q_r\,H^{\alpha+1}}{(\alpha+1)\,z_r^{\alpha}}, \quad M = \frac{q_r\,H^{\alpha+2}}{(\alpha+2)\,z_r^{\alpha}}', domaine: 'q(z) = q_r (z/z_r)^α, simplification pédagogique' }
+---
+
+import { chargeExponentielle, EXEMPLE_VENT_PUISSANCE, integralePolynome, integraleXExp, ventPuissance } from '@/lib/calc/analyse'
+import { grandeur, nombre } from '@/lib/format'
+
+export const v0 = ventPuissance(EXEMPLE_VENT_PUISSANCE)
+export const vUni = ventPuissance({ ...EXEMPLE_VENT_PUISSANCE, alpha: 0 })
+export const sub = integralePolynome([0, 0, 0, 1], 1, 3)
+export const dev = integralePolynome([2, 12, 24, 16], 0, 1)
+export const ipp = integraleXExp(0, 3, 1)
+export const ce = chargeExponentielle(20, 2, 6)
+
+<Page etape="intuition" titre="L'intuition : changer de point de vue">
+
+Un pylône de télécommunication de 30 m se dresse au-dessus d'un village. Le vent ne souffle pas avec la même force partout : près du sol, les maisons et les arbres le freinent ; en haut, il passe librement. La charge sur le pylône augmente donc avec la hauteur.
+
+Pour dimensionner la fondation, il faut la force totale et le moment de renversement à la base : deux intégrales. Mais la charge a une forme en puissance, (z/10)^0,2, et la table des primitives ne la donne pas directement.
+
+Deux astuces permettent de ramener une intégrale inconnue à une intégrale connue. **Changer de variable**, c'est comme changer d'unité ou de repère : on mesure la hauteur « en dizaines de mètres », et la charge devient une simple puissance. **Intégrer par parties**, c'est utiliser la règle du produit à l'envers.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que faire quand la primitive n'est pas dans la table ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le changement de variable">
+
+### L'idée
+
+Si l'intégrale contient une fonction **et la dérivée de ce qu'il y a dedans**, on pose u = g(x) :
+
+$$\int_a^b f(g(x))\,g'(x)\,dx = \int_{g(a)}^{g(b)} f(u)\,du$$
+
+On remplace g′(x) dx par du, et les bornes par g(a) et g(b). C'est la règle de la chaîne (L1.2.3) lue à l'envers.
+
+<Encadre type="exemple" titre="Un exemple pas à pas">
+Pour $\int_0^1 2\,(2x + 1)^3\,dx$, on pose u = 2x + 1 : du = 2 dx ; x = 0 donne u = 1, x = 1 donne u = 3.
+
+$$\int_0^1 2\,(2x + 1)^3\,dx = \int_1^3 u^3\,du = \left[\frac{u^4}{4}\right]_1^3 = \frac{81 - 1}{4}$$
+
+On trouve {nombre(sub, 0)}. Contrôle en développant le polynôme avant d'intégrer : {nombre(dev, 0)}.
+</Encadre>
+
+### Le changement d'échelle
+
+Le cas le plus courant est u = x / a (une simple mise à l'échelle). Avec la charge de vent q(z) = q<sub>r</sub> (z/z<sub>r</sub>)<sup>α</sup>, on pose u = z/z<sub>r</sub>, donc dz = z<sub>r</sub> du :
+
+$$\int_0^H q(z)\,dz = q_r\,z_r \int_0^{H/z_r} u^{\alpha}\,du = \frac{q_r\,H^{\alpha+1}}{(\alpha + 1)\,z_r^{\alpha}}$$
+
+<Regle type="simplification">
+La loi de puissance est un modèle d'école. L'EC1-1-4 (§4.3.2) décrit la variation du vent avec la hauteur par un profil **logarithmique**, avec des coefficients de terrain, de turbulence et une vitesse de référence fixée par l'annexe nationale. Ici, q<sub>r</sub> et α sont des données de l'énoncé.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : l'intégration par parties">
+
+### La formule
+
+La règle du produit, (u v)′ = u′ v + u v′, s'intègre en :
+
+$$\int_a^b u\,v'\,dx = \big[u\,v\big]_a^b - \int_a^b u'\,v\,dx$$
+
+On choisit u et v′ pour que la nouvelle intégrale, ∫ u′ v, soit **plus simple** que celle de départ.
+
+### Le bon choix
+
+- polynôme × exponentielle, sinus ou cosinus : **u = le polynôme** (il se simplifie en dérivant) ;
+- polynôme × logarithme : **u = ln x** (sa dérivée 1/x est simple).
+
+<Encadre type="exemple" titre="∫ x e^(−x) dx entre 0 et 3">
+u = x, v′ = e^(−x) : u′ = 1 et v = −e^(−x). Donc
+
+$$\int_0^3 x\,e^{-x}\,dx = \big[-x\,e^{-x}\big]_0^3 + \int_0^3 e^{-x}\,dx = \big[-x\,e^{-x} - e^{-x}\big]_0^3 = 1 - 4\,e^{-3}$$
+
+soit {nombre(ipp, 4)}.
+</Encadre>
+
+### Le moment d'une charge
+
+Pour le moment d'une charge, ∫ z q(z) dz, on multiplie la charge par le bras de levier z. Avec la loi de puissance, z × z^α = z^(α+1) : le même changement de variable suffit, et l'on obtient M = q<sub>r</sub> H^(α+2) / ((α + 2) z<sub>r</sub>^α). Avec une charge exponentielle, z e^(−z/λ) demande une intégration par parties (exercice 3).
+
+### Toujours contrôler
+
+On vérifie un résultat en le **dérivant**, ou par une méthode numérique (trapèzes, Simpson). Les deux contrôles prennent une minute et évitent les erreurs de signe.
+
+</Page>
+
+<Infographie titre="Quelle technique choisir ?" sousTitre="Devant une intégrale, on se pose les questions dans cet ordre" etape="schemas">
+
+<Panneau n={1} titre="Primitive directe" icone="calcul" couleur="encre">
+Somme de puissances, d'exponentielles, de sinus et de cosinus : on lit la table des primitives (L1.2.6), terme à terme.
+</Panneau>
+
+<Panneau n={2} titre="Changement de variable" icone="idee" couleur="brique">
+On repère une fonction de g(x) multipliée par g′(x). On pose u = g(x), du = g′(x) dx, et l'on change les bornes. Exemple : ∫ 2x (x² + 1)⁵ dx.
+</Panneau>
+
+<Panneau n={3} titre="Par parties" icone="regle" couleur="terre">
+Un produit polynôme × exponentielle, sinus ou cosinus : u = le polynôme. Polynôme × logarithme : u = ln x. On peut répéter l'opération.
+</Panneau>
+
+<Panneau n={4} titre="Méthode numérique" icone="verification" couleur="validation">
+Pas de primitive simple, ou seulement des mesures : trapèzes ou Simpson. C'est aussi le contrôle des trois autres méthodes.
+</Panneau>
+
+<Panneau n={5} titre="Dans tous les cas" icone="retenir" couleur="acier" large>
+On dérive le résultat pour retrouver la fonction intégrée, on vérifie l'unité (kN/m × m = kN), et l'on compare l'ordre de grandeur avec un calcul simple : pour le mât, une charge uniforme égale à q<sub>r</sub> donnerait {grandeur(vUni.F, 0, 'kN')} et {grandeur(vUni.M, 0, 'kN·m')}.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="ventMat">
+
+<Cahier titre="Exemple résolu : le vent sur un pylône">
+
+**Énoncé.** Un pylône de télécommunication de 30 m reçoit une charge de vent par mètre de hauteur q(z) = 0,8 (z/10)^0,2 kN/m (profil simplifié, données de l'énoncé). Calcule la force totale du vent, sa hauteur d'application et le moment de renversement à la base, que le massif de fondation devra reprendre.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un exposant inférieur à 1 ? La charge croît vite près du sol, puis de plus en plus lentement : c'est l'allure observée du vent au-dessus d'un terrain.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : deux intégrales">
+
+<Etape n={3} titre="Le modèle et le changement de variable">
+<AN k="modele" />
+<AN k="changement" />
+</Etape>
+
+<Etape n={4} titre="La force totale">
+<AN k="F" />
+</Etape>
+
+<Etape n={5} titre="Le moment à la base">
+<AN k="M" />
+<Note>Pourquoi z q(z) ? Chaque tranche dz pousse avec la force q(z) dz, à la hauteur z : son moment par rapport à la base vaut z q(z) dz.</Note>
+</Etape>
+
+<Etape n={6} titre="La hauteur de la résultante et le contrôle">
+<AN k="zBarre" />
+<AN k="simpson" />
+<Resultat k="M" libelle="Moment à la base" />
+<Note couleur="vert">Contrôle : la résultante est au-dessus de la mi-hauteur, car le vent est plus fort en haut. Mets α = 0 : la charge devient uniforme et z̄ = H/2.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="changer de variable sans changer les bornes.">
+Après u = 2x + 1, les bornes 0 et 1 deviennent 1 et 3. Garder 0 et 1 donnerait [u⁴/4]₀¹ = {nombre(integralePolynome([0, 0, 0, 1], 0, 1), 2)} au lieu de {nombre(sub, 0)}.
+</Piege>
+
+<Piege erreur="oublier de remplacer dx.">
+Avec u = z / z<sub>r</sub>, dz = z<sub>r</sub> du : le facteur z<sub>r</sub> apparaît devant l'intégrale. L'oublier divise le résultat par z<sub>r</sub>.
+</Piege>
+
+<Piege erreur="mal choisir u dans l'intégration par parties.">
+Pour ∫ x eˣ dx, prendre u = eˣ et v′ = x donne ∫ (x²/2) eˣ dx, plus compliqué qu'au départ. On choisit u = x, qui disparaît en dérivant.
+</Piege>
+
+<Piege erreur="perdre un signe dans [u v].">
+Avec v = −e^(−x), le crochet [−x e^(−x)] est négatif. On écrit chaque signe, puis on contrôle en dérivant le résultat.
+</Piege>
+
+<Piege erreur="prendre la loi de puissance pour la règle.">
+C'est une simplification d'école. Pour un vrai pylône, on applique l'EC1-1-4 avec son profil logarithmique, ses coefficients et la vitesse de référence du site.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les ouvrages élancés.** Pylônes de télécommunication, mâts d'éclairage, châteaux d'eau, panneaux publicitaires, cheminées : pour tous ces ouvrages, la charge de vent varie avec la hauteur. Le moment de renversement à la base est souvent l'effort qui dimensionne la fondation. Pour l'exemple, la fondation reçoit {grandeur(v0.M, 0, 'kN·m')}, contre {grandeur(vUni.M, 0, 'kN·m')} si l'on avait pris une charge uniforme égale à q<sub>r</sub> : le profil compte.
+
+<Encadre type="terrain" titre="Les orages de saison des pluies">
+En Afrique centrale, les coups de vent les plus violents accompagnent les orages : rafales brèves, mais fortes, qui arrachent les toitures mal ancrées et couchent les panneaux. Les vitesses de vent à prendre en compte se fondent sur les données météorologiques locales ; elles sont étudiées avec les actions climatiques (L3.2).
+</Encadre>
+
+**Le calcul numérique au bureau d'études.** Les logiciels de calcul intègrent les charges variables par des méthodes numériques (Simpson, Gauss). Savoir faire le calcul exact sur un cas simple permet de **contrôler** ces logiciels : un écart de 10 % sur un mât doit alerter.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : techniques d'intégration">
+
+### Changement de variable
+
+$u = g(x)$, $du = g'(x)\,dx$ · $\int_a^b f(g(x))\,g'(x)\,dx = \int_{g(a)}^{g(b)} f(u)\,du$ · changer les bornes
+
+### Mise à l'échelle
+
+$u = x/a$, $dx = a\,du$ · $\int_0^H (z/z_r)^{\alpha} dz = \frac{H^{\alpha+1}}{(\alpha+1)\,z_r^{\alpha}}$
+
+### Par parties
+
+$\int u\,v' = [u\,v] - \int u'\,v$ · u = le polynôme (avec exp, sin, cos) · u = ln x (avec ln)
+
+### Résultats utiles
+
+$\int x\,e^{x} dx = (x - 1)e^{x}$ · $\int \ln x\,dx = x \ln x - x$
+
+### Vent sur un mât (modèle simplifié)
+
+F = ∫ q dz · M = ∫ z q dz · z̄ = M / F
+
+### Contrôle
+
+dériver le résultat · méthode numérique · unité · ordre de grandeur
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un changement de variable">
+
+Calcule $\int_0^1 2\,(2x + 1)^3\,dx$ avec u = 2x + 1, puis vérifie en développant.
+
+<Indice>du = 2 dx ; les bornes deviennent u = 1 et u = 3.</Indice>
+
+<Corrige>
+∫₁³ u³ du = [u⁴/4]₁³ = (81 − 1)/4 = **{nombre(sub, 0)}**. En développant, 2(2x + 1)³ = 16x³ + 24x² + 12x + 2, dont l'intégrale entre 0 et 1 vaut 4 + 8 + 6 + 2 = {nombre(dev, 0)}.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Par parties">
+
+Calcule $\int_0^3 x\,e^{-x}\,dx$.
+
+<Indice>u = x et v′ = e^(−x), donc u′ = 1 et v = −e^(−x).</Indice>
+
+<Corrige>
+[−x e^(−x)]₀³ + ∫₀³ e^(−x) dx = −3 e^(−3) + (1 − e^(−3)) = 1 − 4 e^(−3) = **{nombre(ipp, 4)}**. Contrôle : la dérivée de −x e^(−x) − e^(−x) vaut −e^(−x) + x e^(−x) + e^(−x) = x e^(−x).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une charge qui s'atténue">
+
+Un tas de matériaux stocké contre un mur exerce sur une poutre de 6 m une charge qui diminue avec la distance au mur : q(x) = 20 e^(−x/2) kN/m (donnée de l'énoncé). Calcule la résultante, son moment par rapport au mur, et sa position.
+
+<Indice>R = ∫ q dx a une primitive directe. Pour ∫ x q dx, intègre par parties avec u = x.</Indice>
+
+<Corrige>
+
+- R = 20 × [−2 e^(−x/2)]₀⁶ = 40 (1 − e^(−3)) = **{grandeur(ce.R, 2, 'kN')}**.
+- ∫ x q dx = 20 × [−2x e^(−x/2) − 4 e^(−x/2)]₀⁶ = 20 (4 − 16 e^(−3)) = **{grandeur(ce.M, 2, 'kN·m')}**.
+- x̄ = {nombre(ce.M, 2)} / {nombre(ce.R, 2)} = **{grandeur(ce.xBarre, 2, 'm')}** : la résultante est près du mur, là où la charge est forte.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.2.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une primitive de 2x (x² + 1)⁵ est :" choix={['(x² + 1)⁶ / 6', '2x (x² + 1)⁶', '(x² + 1)⁶', '10x (x² + 1)⁴']} bonne={0} colonnes={4}>
+u = x² + 1, du = 2x dx : ∫ u⁵ du = u⁶/6.
+</QCM>
+
+<QCM n={2} question="La formule d'intégration par parties est :" choix={['∫ u v′ = [u v] − ∫ u′ v', '∫ u v′ = u′ v′', '∫ u v′ = [u v] + ∫ u′ v′', '∫ u v′ = ∫ u × ∫ v′']} bonne={0} colonnes={2}>
+Elle vient de la règle du produit.
+</QCM>
+
+<QCM n={3} question="Pour calculer ∫ x eˣ dx par parties, on choisit :" choix={['u = eˣ, v′ = x', 'u = x, v′ = eˣ', 'u = x eˣ, v′ = 1', 'aucun choix ne marche']} bonne={1} colonnes={2}>
+Le polynôme x disparaît en dérivant.
+</QCM>
+
+<QCM n={4} question="∫ x eˣ dx vaut :" choix={['x eˣ + C', '(x − 1) eˣ + C', '(x + 1) eˣ + C', 'x² eˣ / 2 + C']} bonne={1} colonnes={4}>
+[x eˣ] − ∫ eˣ dx = (x − 1) eˣ ; contrôle en dérivant.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Dans une intégrale définie, après le changement de variable u = g(x), les bornes a et b deviennent :" choix={['a et b', 'g(a) et g(b)', 'g′(a) et g′(b)', '0 et 1']} bonne={1} colonnes={4}>
+On intègre en u, entre les valeurs de u.
+</QCM>
+
+<QCM n={6} question="Une primitive de ln x est :" choix={['1/x', 'x ln x − x', 'ln x / x', 'x ln x']} bonne={1} colonnes={4}>
+Par parties avec u = ln x et v′ = 1.
+</QCM>
+
+<QCM n={7} question="Sur un mât, la charge de vent croît avec la hauteur. Sa résultante s'applique :" choix={['à mi-hauteur', 'au-dessus de la mi-hauteur', 'en dessous de la mi-hauteur', 'au sommet']} bonne={1} colonnes={2}>
+Dans l'exemple, z̄ = {grandeur(v0.zBarre, 2, 'm')} pour un mât de 30 m.
+</QCM>
+
+<QCM n={8} question="Pour décrire la variation du vent avec la hauteur, l'EC1-1-4 utilise un profil :" choix={['uniforme', 'linéaire', 'logarithmique', 'en loi de puissance']} bonne={2} colonnes={4}>
+§4.3.2 ; la loi de puissance de la leçon est une simplification.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
