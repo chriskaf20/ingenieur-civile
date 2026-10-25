@@ -1,0 +1,276 @@
+---
+id: L1.1.7
+titre: "Normes et règlements : Eurocodes, BAEL, DTU"
+objectifs:
+  - Distinguer loi, norme, règle de l'art et document contractuel
+  - Citer les Eurocodes et le domaine de chacun
+  - Situer le BAEL, le CM 66 et les DTU par rapport aux Eurocodes
+  - Identifier les textes applicables à un ouvrage donné
+relecture: false
+normes:
+  - "EN 1990 à EN 1999 : Eurocodes (bases, actions, matériaux, géotechnique, séisme)"
+  - "BAEL 91 révisé 99 ; CM 66 ; NF DTU"
+glossaire:
+  - terme: Norme
+    definition: Document établi par consensus et approuvé par un organisme reconnu, qui fixe des règles techniques ; elle devient obligatoire si un texte ou un contrat l'impose.
+  - terme: Eurocodes
+    definition: Normes européennes de calcul des structures, numérotées de EN 1990 à EN 1999.
+  - terme: Annexe nationale
+    definition: Document qui fixe, pour un pays, les valeurs laissées au choix national dans un Eurocode (coefficients, paramètres).
+  - terme: BAEL
+    definition: Règles françaises de calcul du béton armé aux états limites (BAEL 91 révisé 99), remplacées en France par l'Eurocode 2.
+  - terme: DTU
+    definition: "Document technique unifié : règles de l'art pour l'exécution d'un type de travaux (maçonnerie, enduits, charpente…)."
+  - terme: CCTP
+    definition: "Cahier des clauses techniques particulières : pièce du marché qui décrit les travaux et fixe les textes applicables."
+symboles: []
+formules: []
+---
+
+import { PyramideTextes } from '@/components/schemas/Introduction'
+
+<Page etape="intuition" titre="L'intuition : un langage commun pour construire">
+
+Imagine deux ingénieurs : l'un calcule une dalle avec sa propre méthode, l'autre la vérifie avec une autre. Ils ne trouveront jamais le même résultat, et personne ne saura qui a raison. Une entreprise qui construit selon ses habitudes, un contrôleur qui juge selon les siennes : le conflit est assuré.
+
+Les **normes** et les **règles de l'art** donnent un langage commun : mêmes charges, mêmes coefficients de sécurité, mêmes méthodes de calcul, mêmes façons de mettre en œuvre. Elles condensent l'expérience de générations d'ingénieurs, y compris celle des accidents.
+
+Encore faut-il savoir quel texte s'applique, et avec quelle force : une loi, une norme, une règle de l'art ou un simple guide n'ont pas le même poids.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quels textes encadrent la conception et la construction, et lesquels s'appliquent à un projet donné ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les textes de référence" sousTitre="Du calcul des structures à la mise en œuvre" etape="cours">
+
+<Panneau n={1} titre="Eurocodes : bases et actions" icone="regle" couleur="encre">
+EN 1990 (EC0) : bases de calcul, combinaisons. EN 1991 (EC1) : actions (poids propres, exploitation, neige, vent, température).
+</Panneau>
+
+<Panneau n={2} titre="Eurocodes : matériaux" icone="materiaux" couleur="brique">
+EN 1992 (EC2) béton · EN 1993 (EC3) acier · EN 1994 (EC4) mixte acier-béton · EN 1995 (EC5) bois · EN 1996 (EC6) maçonnerie · EN 1999 (EC9) aluminium.
+</Panneau>
+
+<Panneau n={3} titre="Eurocodes : sol et séisme" icone="terrain" couleur="terre">
+EN 1997 (EC7) : calcul géotechnique (fondations, soutènements). EN 1998 (EC8) : calcul parasismique.
+</Panneau>
+
+<Panneau n={4} titre="Annexes nationales" icone="verification" couleur="validation">
+Chaque pays fixe certaines valeurs (coefficients, paramètres). Ce cours emploie l'annexe nationale française, faute d'annexe congolaise.
+</Panneau>
+
+<Panneau n={5} titre="Anciennes règles françaises" icone="quantites" couleur="acier">
+BAEL 91 révisé 99 (béton armé), CM 66 (charpente métallique), NV 65 (neige et vent), PS 92 (séisme). Remplacées en France par les Eurocodes, elles restent pratiquées en Afrique francophone.
+</Panneau>
+
+<Panneau n={6} titre="Règles de l'art" icone="exemple" couleur="terre">
+NF DTU (exécution des travaux de bâtiment), fascicules de travaux publics, règles professionnelles, avis techniques, notices des fabricants.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : force obligatoire et choix des textes">
+
+### Loi, norme, règle de l'art, contrat
+
+- Une **loi** ou un **règlement** s'impose à tous (urbanisme, sécurité des personnes).
+- Une **norme** n'est obligatoire que si un texte réglementaire ou le **marché** l'impose ; c'est très souvent le cas.
+- Une **règle de l'art** (DTU, guide) décrit la bonne pratique ; elle devient contractuelle quand le marché y renvoie, et elle sert de référence en cas de litige.
+- Le **marché** (notamment son CCTP) liste les textes applicables au projet : c'est la première pièce à lire.
+
+### Eurocodes et BAEL
+
+En France, depuis 2010, les Eurocodes ont remplacé les règles nationales comme le BAEL et le CM 66 pour le calcul des structures. Les Eurocodes vérifient les mêmes états limites que le BAEL, avec des coefficients et des modèles parfois différents : on ne mélange jamais les deux dans un même calcul.
+
+<Regle type="norme" source="EN 1992-1-1:2004">
+Ce cours calcule le béton selon l'EN 1992-1-1:2004 et son annexe nationale française. Une deuxième génération des Eurocodes est publiée depuis 2023 ; elle sera présentée en encart quand elle change le résultat.
+</Regle>
+
+<Encadre type="attention">
+En RDC, les marchés renvoient le plus souvent aux Eurocodes ou aux règles françaises, et l'Office congolais de contrôle intervient en matière de normalisation. Le statut exact des textes pour un projet se lit dans son marché, et se vérifie auprès de l'administration.
+</Encadre>
+
+<AVerifier note="A_VERIFIER.md n° 31 : textes de référence et normalisation en RDC" />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la pyramide des textes">
+
+<PyramideTextes />
+
+En haut, les lois et règlements, qui s'imposent à tous ; puis les normes, les règles de l'art, et à la base les guides et notices. À droite, le marché, qui dit lesquels de ces textes s'appliquent à un projet précis.
+
+<Encadre type="retenir">
+Pour savoir quel texte appliquer : lire d'abord le marché (CCTP), puis les normes et règles qu'il cite, avec leur annexe nationale.
+</Encadre>
+
+</Page>
+
+<Cahier titre="Exemple résolu : quels textes pour le dispensaire ?">
+
+**La situation.** Un dispensaire en béton armé, avec une charpente métallique et une toiture en tôles, sera construit au Kwango. Le CCTP indique : « Les ouvrages seront calculés selon les Eurocodes et leurs annexes nationales françaises, et exécutés selon les DTU en vigueur. » Quels textes l'ingénieur doit-il utiliser ?
+
+<Etape n={1} titre="Partir du marché">
+Le CCTP impose les Eurocodes avec les annexes nationales françaises pour le calcul, et les DTU pour l'exécution : ces textes deviennent obligatoires pour ce projet.
+
+<Note>Pourquoi le marché d'abord ? C'est lui qui donne la force obligatoire aux normes, ici comme dans la plupart des projets.</Note>
+</Etape>
+
+<Etape n={2} titre="Les bases et les actions">
+EN 1990 pour les combinaisons ; EN 1991 pour les poids propres, l'exploitation, le vent et la température.
+</Etape>
+
+<Etape n={3} titre="Les matériaux et le sol">
+EN 1992 pour le béton armé ; EN 1993 pour la charpente métallique ; EN 1997 pour les fondations. L'EN 1998 dépend de la sismicité du site.
+</Etape>
+
+<Etape n={4} titre="L'exécution">
+Les DTU de maçonnerie, d'enduits, de couverture et de charpente fixent les règles de mise en œuvre ; les notices des fabricants complètent pour les produits (tôles, fixations).
+
+<Note couleur="vert">Contrôle : chaque partie de l'ouvrage (béton, acier, sol, exécution) a son texte, et tous découlent de la phrase du CCTP.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="mélanger BAEL et Eurocodes dans un même calcul.">
+Les coefficients et les modèles diffèrent : un calcul hybride n'est conforme à aucun des deux. On choisit un référentiel, celui du marché, et l'on s'y tient.
+</Piege>
+
+<Piege erreur="oublier l'annexe nationale.">
+Un Eurocode sans son annexe nationale laisse des valeurs ouvertes. On précise toujours laquelle on utilise.
+</Piege>
+
+<Piege erreur="croire qu'une norme est toujours obligatoire.">
+Elle l'est si un règlement ou le marché l'impose. Le marché est la première pièce à lire.
+</Piege>
+
+<Piege erreur="négliger les règles de l'art.">
+Un ouvrage bien calculé mais mal exécuté échoue. Les DTU et les notices des fabricants comptent autant que les notes de calcul.
+</Piege>
+
+<Piege erreur="employer un texte périmé sans le savoir.">
+Les normes évoluent : on vérifie la version citée par le marché, et l'existence d'amendements.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Deux générations d'ingénieurs.** En Afrique francophone, beaucoup d'ingénieurs expérimentés ont appris le BAEL ; les jeunes apprennent les Eurocodes. Sur un même chantier, il faut savoir lire des notes de calcul dans les deux référentiels, et comparer leurs résultats sans les mélanger.
+
+<Encadre type="terrain" titre="Les routes en pays tropical">
+Pour les chaussées, les Eurocodes ne disent rien. En Afrique francophone, on se réfère souvent au guide de dimensionnement des chaussées pour les pays tropicaux du CEBTP, qui tient compte des latérites et du climat. Là encore, le marché précise la méthode retenue.
+</Encadre>
+
+**Les bailleurs.** Les projets financés par des bailleurs internationaux imposent parfois leurs propres spécifications techniques, en plus des normes : elles figurent dans les pièces du marché.
+
+**La note de calcul.** Toute note de calcul commence par la liste des textes appliqués, avec leur version et l'annexe nationale. C'est ce que vérifie d'abord un bureau de contrôle.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : normes et règlements">
+
+### Force des textes
+
+loi, règlement : obligatoire · norme : obligatoire si un texte ou le marché l'impose · règle de l'art : contractuelle par le marché · guide, notice : aide
+
+### Eurocodes
+
+EN 1990 bases · EN 1991 actions · EN 1992 béton · EN 1993 acier · EN 1994 mixte · EN 1995 bois · EN 1996 maçonnerie · EN 1997 géotechnique · EN 1998 séisme · EN 1999 aluminium
+
+### Annexe nationale
+
+valeurs choisies par chaque pays · ici : annexe française
+
+### Anciennes règles
+
+BAEL 91 révisé 99 · CM 66 · NV 65 · PS 92 · encore pratiquées en Afrique francophone · jamais mélangées aux Eurocodes
+
+### Réflexe
+
+lire le CCTP du marché en premier
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Quel Eurocode ?">
+
+Donne l'Eurocode à utiliser pour : (a) calculer une poutre en béton armé ; (b) fixer la charge d'exploitation d'une salle de classe ; (c) dimensionner une semelle ; (d) calculer une ferme métallique ; (e) combiner les charges.
+
+<Indice>EN 1990 à EN 1999.</Indice>
+
+<Corrige>
+(a) EN 1992 · (b) EN 1991 · (c) EN 1997 (et EN 1992 pour son béton armé) · (d) EN 1993 · (e) EN 1990.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Norme obligatoire ?">
+
+Le CCTP d'un marché de maison privée ne cite aucune norme. L'entreprise peut-elle construire « à sa façon » ? Quels risques prend-elle ?
+
+<Indice>Que se passe-t-il en cas de désordre, puis de litige ?</Indice>
+
+<Corrige>
+Sans norme citée, le marché est mal rédigé, mais l'entreprise reste tenue de construire selon les règles de l'art : en cas de litige, un expert jugera son travail par rapport aux normes et aux DTU. Construire « à sa façon » l'expose à une responsabilité lourde en cas de désordre. Le bon réflexe est de proposer au maître d'ouvrage de préciser les textes applicables avant de commencer.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Deux notes de calcul">
+
+Pour un même poteau, une note de calcul établie selon le BAEL et une autre selon l'Eurocode 2 donnent des sections d'acier un peu différentes. L'entreprise propose de retenir la plus faible des deux. Que réponds-tu ?
+
+<Indice>Quel référentiel le marché impose-t-il ? Peut-on choisir au cas par cas ?</Indice>
+
+<Corrige>
+On ne choisit pas le résultat le plus avantageux : on applique le référentiel imposé par le marché, en entier, avec ses coefficients et ses dispositions constructives. Si le marché impose l'Eurocode 2, c'est la note EC2 qui fait foi, même si elle donne plus d'acier. Mélanger ou choisir au cas par cas reviendrait à ne respecter aucun des deux textes.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.1.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'Eurocode qui traite du béton est :" choix={['EN 1990', 'EN 1992', 'EN 1997', 'EN 1993']} bonne={1} colonnes={4}>
+EC2 : EN 1992.
+</QCM>
+
+<QCM n={2} question="Les combinaisons de charges sont définies par :" choix={['EN 1990 (EC0)', 'EN 1995 (EC5)', 'le BAEL seulement', 'les DTU']} bonne={0} colonnes={2}>
+EC0 : bases de calcul des structures.
+</QCM>
+
+<QCM n={3} question="Une annexe nationale :" choix={['traduit l’Eurocode', 'fixe les valeurs laissées au choix de chaque pays', 'remplace l’Eurocode', 'concerne seulement les ponts']} bonne={1} colonnes={2}>
+Coefficients et paramètres nationaux.
+</QCM>
+
+<QCM n={4} question="Le BAEL 91 révisé 99 est :" choix={['un Eurocode', 'une ancienne règle française de calcul du béton armé', 'un DTU de maçonnerie', 'une loi congolaise']} bonne={1} colonnes={2}>
+Remplacé en France par l'EC2, encore pratiqué en Afrique francophone.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Les DTU fixent surtout :" choix={['les règles de mise en œuvre des travaux', 'les coefficients de sécurité', 'les prix des matériaux', 'les salaires']} bonne={0} colonnes={2}>
+Ce sont des règles de l'art pour l'exécution.
+</QCM>
+
+<QCM n={6} question="Pour savoir quels textes s'appliquent à un projet, on lit d'abord :" choix={['un manuel', 'le CCTP du marché', 'internet', 'le planning']} bonne={1} colonnes={4}>
+Le marché donne la liste des textes applicables.
+</QCM>
+
+<QCM n={7} question="Dans une même note de calcul, on peut :" choix={['mélanger BAEL et Eurocodes', 'appliquer un seul référentiel, en entier', 'choisir le coefficient le plus faible', 'ignorer l’annexe nationale']} bonne={1} colonnes={2}>
+Un calcul hybride n'est conforme à aucun texte.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

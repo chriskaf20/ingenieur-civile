@@ -1,0 +1,102 @@
+---
+id: L1.1.EX
+titre: "Examen du module L1.1 : introduction au génie civil"
+objectifs:
+  - Situer les domaines et les grands ouvrages du génie civil
+  - Distinguer les acteurs et les métiers d'un projet
+  - Ordonner les phases d'un projet et connaître la réception
+  - Nommer les éléments d'un bâtiment et suivre le chemin des charges
+  - Situer les textes de référence et les contraintes de la RDC
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { descenteSimple, EXEMPLE_DESCENTE, GARANTIES } from '@/lib/calc/projet'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+
+export const d = descenteSimple({ ...EXEMPLE_DESCENTE, lx: 5, ly: 6, niveaux: 3 })
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 1 heure.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Lis chaque question jusqu'au bout : plusieurs réponses peuvent sembler justes, une seule l'est vraiment.
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="L1.1.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="Un mur qui retient un talus le long d'une route est :" choix={['un bâtiment', 'un ouvrage d’art (soutènement)', 'un réseau d’assainissement', 'une fondation profonde']} bonne={1} colonnes={2}>
+Les ouvrages d'art franchissent un obstacle ou tiennent un terrain (L1.1.1).
+</QCM>
+
+<QCM n={2} question="En climat tropical, la première cause de dégradation des routes en terre est :" choix={['le trafic de piétons', 'l’eau mal évacuée', 'la chaleur', 'le vent']} bonne={1} colonnes={2}>
+Drainage et assainissement sont prioritaires (L1.1.1, L1.1.8).
+</QCM>
+
+<QCM n={3} question="Celui qui commande l'ouvrage, le finance et le reçoit est :" choix={['le maître d’œuvre', 'le maître d’ouvrage', 'l’entreprise', 'le bureau de contrôle']} bonne={1} colonnes={2}>
+Le client (L1.1.2).
+</QCM>
+
+<QCM n={4} question="Le maître d'œuvre et l'entreprise sont liés par :" choix={['un marché de travaux', 'aucun contrat : le maître d’œuvre dirige les travaux au nom du maître d’ouvrage', 'un contrat de sous-traitance', 'une convention de financement']} bonne={1} colonnes={2}>
+Tous les contrats partent du maître d'ouvrage (L1.1.2).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={5} question="Sur un chantier, la consigne du conducteur de travaux arrive aux compagnons par :" choix={['le bailleur', 'le chef de chantier puis le chef d’équipe', 'le bureau de contrôle', 'le maître d’ouvrage directement']} bonne={1} colonnes={2}>
+Chaîne d'encadrement du chantier (L1.1.3).
+</QCM>
+
+<QCM n={6} question="Avant de couler une dalle, il faut obligatoirement :" choix={['commander la peinture', 'réceptionner le ferraillage et l’étaiement', 'poser le carrelage', 'démonter les étais']} bonne={1} colonnes={2}>
+Pas d'action irréversible sans vérification (L1.1.3).
+</QCM>
+
+<QCM n={7} question="Quel est le bon ordre ?" choix={['marché → programme → études → réception', 'programme → études → autorisation → consultation → travaux → réception', 'études → travaux → programme → réception', 'autorisation → programme → travaux → études']} bonne={1}>
+Chaque phase produit le livrable de la suivante (L1.1.4).
+</QCM>
+
+<QCM n={8} question={<>En droit français, la garantie décennale couvre la solidité de l'ouvrage pendant :</>} choix={[`${GARANTIES[0].ans} an`, `${GARANTIES[1].ans} ans`, `${GARANTIES[2].ans} ans`, '20 ans']} bonne={2} colonnes={4}>
+À partir de la réception ({GARANTIES[2].article}) (L1.1.4).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={9} question="Une petite poutre qui porte le mur au-dessus d'une fenêtre s'appelle :" choix={['un chaînage', 'un linteau', 'une longrine', 'un acrotère']} bonne={1} colonnes={4}>
+Le linteau franchit l'ouverture (L1.1.5).
+</QCM>
+
+<QCM n={10} question={<>Un poteau intérieur d'une trame de 5 m × 6 m porte trois planchers (g = {nombre(EXEMPLE_DESCENTE.g, 0)} kN/m², q = {nombre(EXEMPLE_DESCENTE.q, 1)} kN/m², poteau de 25 cm sur 3 m par niveau). Son effort de service en pied vaut :</>} choix={[grandeur(d.Nser / 3, 0, 'kN'), grandeur(d.Nser, 0, 'kN'), grandeur(d.Nelu, 0, 'kN'), grandeur(4 * d.Nser, 0, 'kN')]} bonne={1} colonnes={4}>
+A = {grandeur(d.A, 0, 'm²')} ; 3 × ({nombre(d.Gp, 0)} + {nombre(d.PPniveau, 2)} + {nombre(d.Qp, 0)}) = {grandeur(d.Nser, 0, 'kN')} ; l'ELU donne {grandeur(d.Nelu, 0, 'kN')} (L1.1.6).
+</QCM>
+
+<QCM n={11} question="Pour savoir quels textes s'appliquent à un projet, on lit d'abord :" choix={['un manuel de cours', 'le CCTP du marché', 'le BAEL', 'le planning']} bonne={1} colonnes={4}>
+Le marché donne la force obligatoire aux normes (L1.1.7).
+</QCM>
+
+<QCM n={12} question="Sur une argile gonflante, on limite les fissures en :" choix={['fondant sur la terre végétale', 'fondant plus bas et en éloignant l’eau et les arbres des murs', 'arrosant les fondations', 'supprimant les chaînages']} bonne={1} colonnes={2}>
+L'argile gonfle et se rétracte avec l'eau (L1.1.8).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

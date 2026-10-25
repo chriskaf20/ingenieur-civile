@@ -1,0 +1,302 @@
+---
+id: L1.1.4
+titre: "Les phases d'un projet, de l'idée à la réception"
+objectifs:
+  - Ordonner les phases d'un projet, du programme à la réception
+  - Associer à chaque phase son livrable et ses acteurs
+  - Construire un planning simple et calculer la durée d'un projet
+  - Expliquer la réception et les garanties qui la suivent
+relecture: false
+normes:
+  - "Loi MOP (France, 1985), reprise dans le code de la commande publique : vocabulaire des phases"
+  - "Code civil (France), art. 1792 à 1792-6 : garanties des constructeurs"
+glossaire:
+  - terme: Programme
+    definition: Document du maître d'ouvrage qui décrit ses besoins, son budget et ses contraintes.
+  - terme: Avant-projet
+    definition: Étape de conception qui fixe les choix principaux (APS, sommaire) puis les précise et les chiffre (APD, définitif).
+  - terme: Dossier de consultation des entreprises
+    definition: Ensemble des pièces (plans, cahiers des charges, quantités) remis aux entreprises pour qu'elles fassent une offre.
+  - terme: Ordre de service
+    definition: Document écrit par lequel le maître d'œuvre notifie une décision à l'entreprise, par exemple le démarrage des travaux.
+  - terme: Réception
+    definition: Acte par lequel le maître d'ouvrage accepte l'ouvrage, avec ou sans réserves ; elle fait démarrer les garanties.
+  - terme: Réserve
+    definition: Défaut constaté à la réception, que l'entreprise doit corriger.
+symboles: []
+formules: []
+---
+
+import { DEBUT_TRAVAUX, EXEMPLE_PLANNING, GARANTIES, planning } from '@/lib/calc/projet'
+import { grandeur, nombre } from '@/lib/format'
+import { FrisePhases } from '@/components/schemas/Introduction'
+
+export const p0 = planning(EXEMPLE_PLANNING)
+export const p12 = planning(EXEMPLE_PLANNING.map((p) => (p.nom === 'Autorisation de bâtir' ? { ...p, duree: 12 } : p)))
+export const pParallele = planning(EXEMPLE_PLANNING.map((p) => (p.nom === 'Consultation des entreprises' ? { ...p, duree: 0 } : p.nom === 'Gros œuvre' ? { ...p, duree: 16 } : p)))
+export const etudes = EXEMPLE_PLANNING.slice(0, DEBUT_TRAVAUX)
+
+<Page etape="intuition" titre="L'intuition : la première pierre arrive tard">
+
+Une famille vient de réunir l'argent de sa maison. Elle voudrait poser la première pierre dès demain. Pourtant, il faut d'abord savoir exactement ce qu'elle veut, sur quel terrain, pour quel budget ; dessiner, calculer, chiffrer ; obtenir l'autorisation de bâtir ; choisir une entreprise. Le chantier ne commence qu'après.
+
+Et quand le dernier coup de pinceau est donné, le projet n'est pas terminé : il faut réceptionner l'ouvrage, noter les défauts, les faire corriger, puis l'entretenir pendant des années.
+
+Un projet de construction est une suite de **phases** ; chacune produit un **livrable** qui sert à la suivante. Sauter une phase, c'est préparer un problème pour plus tard.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Dans quel ordre se déroule un projet, que produit chaque phase, et combien de temps faut-il ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les phases d'un projet" sousTitre="Chaque phase produit le livrable de la suivante" etape="cours">
+
+<Panneau n={1} titre="Programme" icone="idee" couleur="terre">
+Le maître d'ouvrage décrit ses besoins, son budget, son terrain et son délai. Une étude de faisabilité vérifie que le projet est possible.
+</Panneau>
+
+<Panneau n={2} titre="Conception" icone="plan" couleur="encre">
+Esquisse, avant-projet sommaire puis définitif, projet : les plans et les calculs se précisent, le coût aussi. Livrable : plans, notes de calcul, devis.
+</Panneau>
+
+<Panneau n={3} titre="Autorisation" icone="regle" couleur="terre">
+Le dossier de demande d'autorisation de bâtir est déposé auprès de l'administration ; on ne commence pas les travaux avant de l'avoir obtenue.
+</Panneau>
+
+<Panneau n={4} titre="Consultation" icone="quantites" couleur="terre">
+Le dossier de consultation des entreprises est envoyé ; les offres sont analysées ; le marché est signé avec l'entreprise retenue.
+</Panneau>
+
+<Panneau n={5} titre="Travaux" icone="charges" couleur="brique">
+Préparation (plans d'exécution, installations), gros œuvre, second œuvre, équipements. Le maître d'œuvre dirige et contrôle ; l'entreprise exécute.
+</Panneau>
+
+<Panneau n={6} titre="Réception et garanties" icone="verification" couleur="validation">
+Visite contradictoire, procès-verbal, réserves à lever. Puis les garanties courent, et l'exploitation et l'entretien commencent.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : le vocabulaire des phases et la réception">
+
+### Un vocabulaire hérité de la loi MOP
+
+En Afrique francophone, on emploie souvent le vocabulaire français de la loi sur la maîtrise d'ouvrage publique (loi MOP de 1985, reprise dans le code de la commande publique) :
+
+- **ESQ** esquisse, **APS** avant-projet sommaire, **APD** avant-projet définitif, **PRO** projet ;
+- **DCE** dossier de consultation des entreprises, **ACT** assistance aux contrats de travaux ;
+- **EXE** études d'exécution, **DET** direction de l'exécution des travaux ;
+- **AOR** assistance aux opérations de réception.
+
+### La réception
+
+À la fin des travaux, le maître d'ouvrage visite l'ouvrage avec le maître d'œuvre et l'entreprise. Il le reçoit **avec ou sans réserves** dans un procès-verbal. L'entreprise doit lever les réserves ; la réception transfère la garde de l'ouvrage au maître d'ouvrage et fait courir les garanties.
+
+<Regle type="norme" source="Code civil (France)">
+Après la réception courent : la garantie de parfait achèvement ({GARANTIES[0].ans} an, {GARANTIES[0].article}), la garantie de bon fonctionnement des équipements, dite biennale ({GARANTIES[1].ans} ans, {GARANTIES[1].article}), et la garantie décennale ({GARANTIES[2].ans} ans, {GARANTIES[2].article}), qui couvre la solidité de l'ouvrage.
+</Regle>
+
+<AVerifier note="A_VERIFIER.md n° 30 : garanties des constructeurs en droit congolais" />
+
+<Encadre type="attention">
+Les garanties couvrent les défauts de construction, pas l'usure normale ni le manque d'entretien.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la frise d'un projet">
+
+<FrisePhases />
+
+Chaque flèche est une phase, sous laquelle figure son livrable. Après la réception, trois garanties de durées différentes prennent le relais.
+
+<Encadre type="retenir">
+Un livrable mal fait se paie à la phase suivante : un programme flou donne des plans à refaire, des plans incomplets donnent des avenants au marché.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="planning">
+
+<Cahier titre="Exemple résolu : le planning d'une école de trois classes">
+
+**Énoncé.** Une commune fait construire une école de trois classes. Les durées estimées des phases, en semaines, sont données ci-dessous. Les phases s'enchaînent sans se chevaucher. Combien de temps faut-il avant de démarrer le chantier ? Quelle est la durée totale du projet ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi des semaines ? C'est l'unité habituelle d'un planning de travaux : assez fine pour suivre le chantier, assez large pour les études.</Note>
+</Etape>
+
+<Etape n={2} titre="Le planning">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : avant le chantier, pendant, au total">
+
+<Etape n={3} titre="Avant le chantier">
+<AN k="avant" />
+<Note>Pourquoi si long ? Études, autorisation et consultation prennent souvent autant de temps que les travaux : il faut les prévoir dans le calendrier du maître d'ouvrage.</Note>
+</Etape>
+
+<Etape n={4} titre="Le chantier">
+<AN k="travaux" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<AN k="total" />
+<Resultat k="total" libelle="Durée totale du projet" />
+
+<Note couleur="vert">L'ordre de service de démarrer les travaux tombe en <Val k="debutTravaux" />. Contrôle : la somme des durées de toutes les phases redonne la durée totale.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="commencer le chantier avant la fin des études.">
+Les plans changent en cours de route : démolitions, avenants, retards. Le temps gagné au début se perd au centuple.
+</Piege>
+
+<Piege erreur="sous-estimer les délais administratifs.">
+Si l'autorisation de bâtir demande 12 semaines au lieu de {nombre(EXEMPLE_PLANNING[2].duree, 0)}, le projet passe de {grandeur(p0.total, 0, 'semaines')} à {grandeur(p12.total, 0, 'semaines')}.
+</Piege>
+
+<Piege erreur="oublier la saison des pluies.">
+Des terrassements et des fondations prévus en pleine saison des pluies prennent du retard et coûtent plus cher. On cale le planning sur les saisons.
+</Piege>
+
+<Piege erreur="réceptionner sans visite ni procès-verbal.">
+Sans procès-verbal ni liste de réserves, les défauts constatés ensuite sont difficiles à imputer à l'entreprise.
+</Piege>
+
+<Piege erreur="croire que les garanties remplacent l'entretien.">
+Elles couvrent les défauts de construction ; une toiture jamais nettoyée ou un caniveau bouché relèvent de l'entretien du propriétaire.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les saisons.** À Kinshasa, la grande saison sèche dure environ de juin à septembre ; à Lubumbashi, elle est plus longue. Les terrassements, les fondations et les routes en terre se programment de préférence en saison sèche.
+
+<Encadre type="terrain" titre="Les approvisionnements">
+Ciment, aciers, tôles, équipements : beaucoup de matériaux viennent de loin, par la route ou le fleuve. Les délais de livraison, les routes coupées en saison des pluies et les ruptures de stock doivent entrer dans le planning, souvent avec une marge.
+</Encadre>
+
+**Les jalons du bailleur.** Les projets financés par des bailleurs ont des dates limites de paiement. Un retard de démarrage peut faire perdre un financement : le planning devient un outil de négociation.
+
+**Le dossier des ouvrages exécutés.** À la réception, l'entreprise remet les plans de ce qui a vraiment été construit (réseaux, armatures modifiées). Il servira à l'entretien et aux travaux futurs.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : les phases d'un projet">
+
+### Les phases
+
+programme → conception (ESQ, APS, APD, PRO) → autorisation de bâtir → consultation (DCE, marché) → travaux (EXE, chantier) → réception → garanties et entretien
+
+### Les livrables
+
+besoins et budget · plans, notes de calcul, devis · autorisation · marché signé · ouvrage · procès-verbal de réception
+
+### La réception
+
+avec ou sans réserves · transfert de la garde · départ des garanties
+
+### Les garanties (droit français)
+
+{GARANTIES.map((g) => `${g.nom} : ${g.ans} an${g.ans > 1 ? 's' : ''}`).join(' · ')}
+
+### Le planning
+
+durées en semaines · somme des phases enchaînées · saisons et approvisionnements à intégrer
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Remettre dans l'ordre">
+
+Range ces étapes dans l'ordre : réception ; avant-projet définitif ; programme ; signature du marché ; gros œuvre ; autorisation de bâtir ; esquisse.
+
+<Indice>Les besoins d'abord, l'ouvrage terminé à la fin.</Indice>
+
+<Corrige>
+Programme → esquisse → avant-projet définitif → autorisation de bâtir → signature du marché → gros œuvre → réception.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La réception avec réserves">
+
+À la visite de réception d'un dispensaire, on constate deux portes qui frottent, une fissure dans un enduit et un caniveau dont la pente est inversée. Que fait le maître d'ouvrage ? Que doit faire l'entreprise ?
+
+<Indice>Réceptionner avec réserves, ou refuser la réception ?</Indice>
+
+<Corrige>
+Ces défauts n'empêchent pas d'utiliser le bâtiment : le maître d'ouvrage peut le recevoir **avec réserves**, en les listant dans le procès-verbal avec un délai de levée. L'entreprise doit corriger les trois défauts (le caniveau est le plus important : une eau mal évacuée abîme les fondations). Les garanties courent à partir de la réception.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Tenir un délai de 52 semaines">
+
+Le bailleur de l'école de l'exemple exige que tout soit terminé en 52 semaines après le lancement. Le planning de base en compte {nombre(p0.total, 0)}. Propose deux mesures réalistes et vérifie le nouveau total.
+
+<Indice>Certaines phases peuvent se dérouler en parallèle ; une deuxième équipe peut raccourcir une phase de travaux.</Indice>
+
+<Corrige>
+
+- Lancer la consultation des entreprises pendant l'instruction de l'autorisation de bâtir : la consultation ne s'ajoute plus au planning ({nombre(EXEMPLE_PLANNING[3].duree, 0)} semaines gagnées). On ne signe ou ne démarre le marché qu'après l'autorisation.
+- Renforcer le gros œuvre avec une deuxième équipe : 16 semaines au lieu de {nombre(EXEMPLE_PLANNING[5].duree, 0)}.
+- Nouveau total : **{grandeur(pParallele.total, 0, 'semaines')}** : le délai est tenu, sans marge. On garde un œil sur la saison des pluies.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.1.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le premier document d'un projet est :" choix={['le marché', 'le programme du maître d’ouvrage', 'le procès-verbal de réception', 'le plan de ferraillage']} bonne={1} colonnes={2}>
+Il décrit les besoins, le budget et les contraintes.
+</QCM>
+
+<QCM n={2} question="APS signifie :" choix={['avant-projet sommaire', 'autorisation provisoire de construire', 'assistance pour le suivi', 'appel public de soumission']} bonne={0} colonnes={2}>
+Puis vient l'avant-projet définitif (APD).
+</QCM>
+
+<QCM n={3} question="Le dossier de consultation des entreprises sert à :" choix={['réceptionner l’ouvrage', 'permettre aux entreprises de faire une offre', 'obtenir l’autorisation de bâtir', 'payer les ouvriers']} bonne={1} colonnes={2}>
+Plans, cahiers des charges et quantités.
+</QCM>
+
+<QCM n={4} question="La réception d'un ouvrage :" choix={['a lieu au début des travaux', 'accepte l’ouvrage, avec ou sans réserves, et fait courir les garanties', 'remplace le marché', 'est faite par l’entreprise seule']} bonne={1} colonnes={2}>
+Elle se fait de façon contradictoire, avec un procès-verbal.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>En droit français, la garantie qui couvre la solidité de l'ouvrage dure :</>} choix={[`${GARANTIES[0].ans} an`, `${GARANTIES[1].ans} ans`, `${GARANTIES[2].ans} ans`, '30 ans']} bonne={2} colonnes={4}>
+La garantie décennale ({GARANTIES[2].article}).
+</QCM>
+
+<QCM n={6} question={<>Dans l'exemple, les études, l'autorisation et la consultation durent ensemble :</>} choix={[grandeur(p0.travaux, 0, 'semaines'), grandeur(p0.debutTravaux, 0, 'semaines'), grandeur(p0.total, 0, 'semaines'), grandeur(etudes[1].duree, 0, 'semaines')]} bonne={1} colonnes={4}>
+{etudes.map((p) => nombre(p.duree, 0)).join(' + ')} = {grandeur(p0.debutTravaux, 0, 'semaines')}, presque autant que le chantier.
+</QCM>
+
+<QCM n={7} question="Les terrassements se programment de préférence :" choix={['en pleine saison des pluies', 'en saison sèche', 'n’importe quand', 'la nuit']} bonne={1} colonnes={4}>
+Sol sec, engins qui circulent, fouilles qui ne s'inondent pas.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

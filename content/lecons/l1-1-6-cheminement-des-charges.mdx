@@ -1,0 +1,311 @@
+---
+id: L1.1.6
+titre: Le cheminement des charges
+objectifs:
+  - Distinguer charges permanentes, charges d'exploitation et actions climatiques
+  - Suivre une charge de la toiture jusqu'au sol, élément par élément
+  - Calculer la surface d'influence et l'effort cumulé dans un poteau
+  - Calculer la pression moyenne transmise au sol par une semelle
+relecture: false
+normes:
+  - "EN 1990 (EC0) : combinaison fondamentale 6.10, tableau A1.2(B)"
+  - "EN 1991-1-1 (EC1) : poids propres et charges d'exploitation des bâtiments (L3.2)"
+glossaire:
+  - terme: Charge permanente
+    definition: Charge toujours présente (poids propre de la structure, revêtements, cloisons), notée G.
+  - terme: Charge d'exploitation
+    definition: Charge liée à l'usage (personnes, mobilier, stockage), qui varie dans le temps, notée Q.
+  - terme: Cheminement des charges
+    definition: Trajet suivi par une charge d'un élément porteur au suivant, jusqu'au sol.
+  - terme: Surface d'influence
+    definition: Part de plancher dont la charge revient à un poteau ; pour un poteau intérieur d'une trame régulière, une portée dans chaque sens.
+  - terme: Descente de charges
+    definition: Calcul qui cumule, niveau par niveau, les charges reçues par un poteau ou un mur jusqu'à la fondation.
+symboles:
+  - { symbole: 'G, Q', signification: 'charges permanentes et d’exploitation', unite: 'kN' }
+  - { symbole: 'g, q', signification: 'charges par mètre carré de plancher', unite: 'kN/m²' }
+  - { symbole: 'A', signification: 'surface d’influence', unite: 'm²' }
+  - { symbole: 'N', signification: 'effort normal dans le poteau', unite: 'kN' }
+  - { symbole: 'σ', signification: 'pression moyenne sous la semelle', unite: 'kPa' }
+formules:
+  - { nom: 'Surface d’influence (poteau intérieur)', tex: 'A = l_x \times l_y', domaine: 'Trame régulière, demi-portées de chaque côté' }
+  - { nom: 'Effort en pied', tex: 'N = \sum_{niveaux} (g + q)\,A + \text{poids des poteaux}', domaine: 'Descente de charges simplifiée' }
+  - { nom: 'Combinaison ELU', tex: 'N_{Ed} = 1{,}35\,G + 1{,}5\,Q', domaine: 'EC0, situation durable' }
+  - { nom: 'Pression sous la semelle', tex: '\sigma = N / B^2', domaine: 'Semelle carrée, poids propre négligé' }
+---
+
+import { descenteSimple, EXEMPLE_DESCENTE } from '@/lib/calc/projet'
+import { GAMMA_G, GAMMA_Q } from '@/lib/calc/charges'
+import { poidsDeMasse } from '@/lib/calc/unites'
+import { grandeur, nombre } from '@/lib/format'
+import { BatimentIso } from '@/components/schemas/Introduction'
+
+export const d0 = descenteSimple(EXEMPLE_DESCENTE)
+export const rive = descenteSimple({ ...EXEMPLE_DESCENTE, lx: EXEMPLE_DESCENTE.lx / 2 })
+export const r3 = descenteSimple({ ...EXEMPLE_DESCENTE, niveaux: 4 })
+export const sansPP = descenteSimple({ ...EXEMPLE_DESCENTE, a: 0 })
+export const toutePortee = descenteSimple({ ...EXEMPLE_DESCENTE, lx: 2 * EXEMPLE_DESCENTE.lx, ly: 2 * EXEMPLE_DESCENTE.ly })
+export const m3eau = poidsDeMasse(1000) / 1000
+
+<Page etape="intuition" titre="L'intuition : la goutte qui descend du toit">
+
+Une goutte de pluie tombe sur un toit. Elle glisse sur la tôle, rejoint la gouttière, descend par le tuyau et finit au sol. Elle suit un **chemin**, sans jamais s'arrêter en l'air.
+
+Les charges font la même chose. Le poids d'un réservoir posé sur la toiture appuie sur la dalle ; la dalle s'appuie sur les poutres ; les poutres sur les poteaux ; les poteaux sur les fondations ; les fondations sur le sol. Chaque élément reçoit, porte et transmet.
+
+Si un maillon manque ou cède, la charge ne trouve plus son chemin : l'élément se fissure, fléchit ou s'effondre. Concevoir une structure, c'est d'abord dessiner ce chemin et vérifier chaque maillon.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Par où une charge descend-elle jusqu'au sol, et quelle force chaque élément doit-il porter ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Le cheminement des charges" sousTitre="De la toiture au sol, sans maillon manquant" etape="cours">
+
+<Panneau n={1} titre="Les charges" icone="charges" couleur="correction">
+Permanentes G : poids propre, revêtements, cloisons. D'exploitation Q : personnes, mobilier. Climatiques : vent, pluie. Parfois le séisme.
+</Panneau>
+
+<Panneau n={2} titre="Dalle → poutres" icone="cadre" couleur="encre">
+La dalle reçoit les charges réparties et les reporte sur ses appuis : poutres ou murs.
+</Panneau>
+
+<Panneau n={3} titre="Poutres → poteaux" icone="flambement" couleur="encre">
+La poutre porte la dalle et les murs posés dessus, et transmet le tout à ses deux poteaux.
+</Panneau>
+
+<Panneau n={4} titre="Poteaux → fondations" icone="ferraillage" couleur="acier">
+Le poteau cumule les charges de tous les niveaux au-dessus de lui : plus on descend, plus il est chargé.
+</Panneau>
+
+<Panneau n={5} titre="Fondations → sol" icone="materiaux" couleur="terre">
+La semelle étale l'effort du poteau sur une surface de sol assez grande pour que la pression reste supportable.
+</Panneau>
+
+<Panneau n={6} titre="La règle" icone="verification" couleur="validation">
+Chaque élément doit pouvoir porter tout ce qu'il reçoit, et le chemin doit être continu jusqu'au sol.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : la descente de charges sur un poteau">
+
+### La surface d'influence
+
+Dans une trame régulière de poteaux espacés de $l_x$ dans un sens et $l_y$ dans l'autre, un poteau intérieur reprend la moitié de chaque portée de part et d'autre : une surface $A = l_x \times l_y$ par plancher. Un poteau de rive n'en reprend que la moitié, un poteau d'angle le quart.
+
+### Le cumul, niveau par niveau
+
+Chaque plancher apporte $g\,A$ de charge permanente et $q\,A$ d'exploitation ; le poteau ajoute son propre poids. En pied du poteau le plus bas :
+
+$$N = \sum_{\text{niveaux}} (g + q)\,A + \text{poids des poteaux}$$
+
+### Service et état limite ultime
+
+L'effort de **service**, $G + Q$, sert à vérifier le sol et les déformations. Pour vérifier la résistance, on majore les charges : $N_{Ed}$ = {nombre(GAMMA_G, 2)} G + {nombre(GAMMA_Q, 1)} Q (EC0, situation durable).
+
+### La pression sur le sol
+
+La semelle carrée de côté $B$ transmet au sol une pression moyenne $\sigma = N / B^2$ (N0.3.3), à comparer à ce que le sol peut porter.
+
+<Regle type="simplification">
+Mêmes charges à tous les niveaux, poids des poutres et de la semelle négligés, trame parfaitement régulière : c'est une descente de charges d'initiation. La méthode complète, avec les charges de l'EN 1991-1-1, vient en L3.2.
+</Regle>
+
+</Page>
+
+<Vue3D titre="Le chemin des charges dans le bâtiment" calques={[{ id: 'structure', libelle: 'Ossature' }, { id: 'planchers', libelle: 'Planchers' }, { id: 'charges', libelle: 'Charges' }, { id: 'cheminement', libelle: 'Cheminement' }, { id: 'fondations', libelle: 'Fondations' }]}>
+
+Les charges posées sur la toiture (rouge) suivent le chemin vert : la dalle les reporte sur une poutre, la poutre sur un poteau, le poteau descend jusqu'à sa semelle, la semelle les étale sur le sol.
+
+<BatimentIso avecReperes={false} />
+
+<Encadre type="retenir">
+Dalle → poutre → poteau → semelle → sol. Un poteau du rez-de-chaussée porte tous les niveaux qui sont au-dessus de lui.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="descenteCharges">
+
+<Cahier titre="Exemple résolu : le poteau intérieur d'une école R+1">
+
+**Énoncé.** Une école R+1 a une ossature en béton armé, avec une trame de poteaux de 4 m × 5 m. Un poteau intérieur porte deux planchers : celui de l'étage et la toiture-terrasse. Chaque plancher pèse g = 6 kN/m² et reçoit q = 2,5 kN/m² (données de l'énoncé). Le poteau mesure 25 × 25 cm, chaque niveau 3 m, et la semelle 1,20 × 1,20 m. Quel effort en pied de poteau ? Quelle pression sur le sol ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi g et q sont-ils des données ? Leurs valeurs dépendent de la dalle, des revêtements et de l'usage ; l'EN 1991-1-1 les fixe, nous l'étudierons en L3.2.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : surface, cumul, sol">
+
+<Etape n={3} titre="La surface d'influence et les charges d'un plancher">
+<AN k="aire" />
+<AN k="plancher" />
+<AN k="poteau" />
+<Note>Pourquoi lx × ly et non le double ? Le poteau ne reprend que la moitié de chaque portée de chaque côté : la moitié vers ses voisins revient aux autres poteaux.</Note>
+</Etape>
+
+<Etape n={4} titre="Le cumul jusqu'au pied">
+<AN k="totaux" />
+<AN k="elu" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<AN k="sol" />
+<Resultat k="Nser" libelle="Effort de service en pied de poteau" />
+
+<Note couleur="vert">ELU : <Val k="Nelu" /> pour vérifier le poteau ; service : <Val k="Nser" /> pour le sol, soit <Val k="sigma" /> sous la semelle. Contrôle : l'effort augmente à chaque niveau descendu.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre toute la portée autour du poteau.">
+Avec 8 × 10 m au lieu de 4 × 5 m, on trouverait {grandeur(toutePortee.Nser, 0, 'kN')} au lieu de {grandeur(d0.Nser, 0, 'kN')} : la moitié de chaque portée revient aux poteaux voisins.
+</Piege>
+
+<Piege erreur="oublier un niveau.">
+Le poteau du rez-de-chaussée porte la toiture **et** l'étage. Ne compter que le niveau du dessus divise presque l'effort par deux.
+</Piege>
+
+<Piege erreur="oublier le poids propre.">
+Sans le poids du poteau, l'effort de l'exemple passerait de {grandeur(d0.Nser, 2, 'kN')} à {grandeur(sansPP.Nser, 2, 'kN')}. Ici l'écart est faible ; avec des poutres, des murs et plusieurs étages, il ne l'est plus.
+</Piege>
+
+<Piege erreur="vérifier le sol avec l'effort ultime.">
+Le sol se vérifie avec l'effort de service (ou selon les règles de l'Eurocode 7) ; l'effort majoré de l'ELU sert à vérifier la résistance du poteau.
+</Piege>
+
+<Piege erreur="interrompre le chemin.">
+Un poteau d'étage posé au milieu d'une poutre, sans poteau en dessous, charge la poutre d'une force concentrée qu'elle n'était peut-être pas prévue pour porter. Le chemin doit être pensé dès la conception.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les réservoirs en toiture.** Un mètre cube d'eau pèse environ {grandeur(m3eau, 2, 'kN')}. Un réservoir de 2 m³ posé sur une dalle de toiture est une charge concentrée importante : il se pose sur une poutre ou près d'un poteau, jamais au milieu d'une dalle quelconque.
+
+<Encadre type="terrain" titre="Fissures et surélévations">
+À Kinshasa comme ailleurs, beaucoup de désordres viennent d'un chemin des charges oublié : étage ajouté sur des fondations de plain-pied, poteau supprimé pour agrandir une boutique, mur porteur percé. Les fissures en escalier dans les murs du rez-de-chaussée signalent souvent une fondation qui tasse sous une charge trop forte.
+</Encadre>
+
+**Les poteaux décalés.** Quand un poteau d'étage ne tombe pas sur celui du dessous, une poutre de transfert doit reprendre sa charge : c'est coûteux et à éviter dès les plans d'architecte.
+
+**Le vent et le séisme.** Les charges horizontales suivent aussi un chemin : dalles, contreventements (voiles, palées), fondations. Dans l'est du pays, au Kivu, le risque sismique impose d'y penser dès la conception.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : cheminement des charges">
+
+### Les charges
+
+G permanentes · Q d'exploitation · vent, pluie · séisme
+
+### Le chemin
+
+toiture ou dalle → poutres → poteaux (ou murs) → fondations → sol · continu, sans maillon manquant
+
+### Poteau intérieur
+
+$A = l_x \times l_y$ par plancher (rive : moitié, angle : quart) · cumul sur tous les niveaux au-dessus
+
+### Combinaisons
+
+service : G + Q (sol, déformations) · ELU : {nombre(GAMMA_G, 2)} G + {nombre(GAMMA_Q, 1)} Q (résistance, EC0)
+
+### Sol
+
+σ = N / B² (kPa) · à comparer à la capacité du sol
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le poteau de rive">
+
+Dans l'école de l'exemple, un poteau de rive ne reprend que la moitié de la surface d'un poteau intérieur dans le sens des 4 m. Calcule sa surface d'influence et son effort de service en pied (mêmes données).
+
+<Indice>lx devient 2 m.</Indice>
+
+<Corrige>
+A = 2 × 5 = **{grandeur(rive.A, 0, 'm²')}** ; N = **{grandeur(rive.Nser, 2, 'kN')}** (le poids du poteau ne change pas, les charges de plancher sont divisées par deux).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Et si l'école avait trois étages ?">
+
+Même poteau intérieur, même trame, mais quatre planchers portés (R+3). Calcule l'effort de service et l'effort ELU en pied, et la pression sous une semelle de 1,20 m.
+
+<Indice>Quatre niveaux au lieu de deux.</Indice>
+
+<Corrige>
+Nser = **{grandeur(r3.Nser, 2, 'kN')}** ; NEd = **{grandeur(r3.Nelu, 2, 'kN')}** ; σ = **{grandeur(r3.sigma, 1, 'kPa')}** : deux fois plus que pour R+1. La semelle et probablement le poteau doivent être agrandis.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Trouver le maillon manquant">
+
+Dans un immeuble R+2, on supprime un poteau du rez-de-chaussée pour ouvrir une grande boutique. Les poteaux de l'étage, au-dessus, restent en place. Décris le nouveau chemin des charges de ce poteau, et ce qu'il faut vérifier ou construire.
+
+<Indice>Les charges des étages arrivent toujours en bas du poteau d'étage : sur quoi s'appuient-elles maintenant ?</Indice>
+
+<Corrige>
+Les charges des deux étages descendent jusqu'au pied du poteau d'étage, qui repose maintenant sur une poutre du plancher bas de l'étage. Cette poutre reçoit une forte force concentrée et la renvoie vers ses deux poteaux voisins, qui reçoivent davantage, ainsi que leurs fondations. Il faut une poutre de transfert calculée pour cette charge, vérifier les poteaux et les fondations voisins, et étayer pendant les travaux. Sans étude, la suppression peut provoquer un effondrement.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.1.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le poids des cloisons et des revêtements est une charge :" choix={['d’exploitation', 'permanente', 'climatique', 'accidentelle']} bonne={1} colonnes={4}>
+Toujours présente : charge permanente G.
+</QCM>
+
+<QCM n={2} question="Dans quel ordre une charge de toiture descend-elle ?" choix={['poteau → poutre → dalle → sol', 'dalle → poutre → poteau → semelle → sol', 'semelle → poteau → dalle', 'poutre → dalle → sol']} bonne={1} colonnes={2}>
+Chaque élément transmet à celui qui le porte.
+</QCM>
+
+<QCM n={3} question="Un poteau intérieur d'une trame de 4 m × 5 m a une surface d'influence de :" choix={['9 m²', grandeur(d0.A, 0, 'm²'), '80 m²', '10 m²']} bonne={1} colonnes={4}>
+lx × ly = 4 × 5 = {grandeur(d0.A, 0, 'm²')}.
+</QCM>
+
+<QCM n={4} question="Le poteau le plus chargé d'une file est :" choix={['celui du dernier étage', 'celui du rez-de-chaussée', 'ils sont tous égaux', 'celui du milieu']} bonne={1} colonnes={2}>
+Il cumule les charges de tous les niveaux au-dessus de lui.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>À l'ELU, l'effort vaut :</>} choix={['G + Q', `${nombre(GAMMA_G, 2)} G + ${nombre(GAMMA_Q, 1)} Q`, '1,5 G + 1,35 Q', '2 (G + Q)']} bonne={1} colonnes={2}>
+Combinaison fondamentale de l'EC0 (6.10).
+</QCM>
+
+<QCM n={6} question={<>Pour le poteau de l'exemple (N = {grandeur(d0.Nser, 0, 'kN')}, semelle de {nombre(EXEMPLE_DESCENTE.B, 2)} m), la pression sur le sol vaut :</>} choix={[grandeur(d0.Nser / EXEMPLE_DESCENTE.B, 0, 'kPa'), grandeur(d0.sigma, 0, 'kPa'), grandeur(d0.Nser, 0, 'kPa'), grandeur(d0.Nelu / (EXEMPLE_DESCENTE.B * EXEMPLE_DESCENTE.B), 0, 'kPa')]} bonne={1} colonnes={4}>
+σ = N / B² = {grandeur(d0.sigma, 0, 'kPa')}, avec l'effort de service.
+</QCM>
+
+<QCM n={7} question="Supprimer un poteau du rez-de-chaussée sans étude :" choix={['n’a aucune conséquence', 'interrompt le chemin des charges et peut provoquer un effondrement', 'allège le bâtiment', 'renforce les étages']} bonne={1} colonnes={2}>
+Les charges des étages doivent trouver un autre chemin, calculé.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

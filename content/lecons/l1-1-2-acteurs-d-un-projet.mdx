@@ -1,0 +1,276 @@
+---
+id: L1.1.2
+titre: Les acteurs d'un projet
+objectifs:
+  - Distinguer maître d'ouvrage, maître d'œuvre, entreprise et bureau de contrôle
+  - Décrire le rôle et les responsabilités de chaque acteur
+  - Représenter les liens contractuels d'un projet
+  - Identifier les acteurs d'un projet réel à partir de son panneau de chantier
+relecture: false
+normes: []
+glossaire:
+  - terme: Maître d'ouvrage
+    definition: Personne ou organisme qui commande l'ouvrage, le finance et en sera propriétaire (le client).
+  - terme: Maître d'œuvre
+    definition: Concepteur qui traduit le besoin en plans et dirige l'exécution des travaux pour le maître d'ouvrage (architecte, bureau d'études).
+  - terme: Entreprise
+    definition: Société qui construit l'ouvrage selon un marché signé avec le maître d'ouvrage.
+  - terme: Bureau de contrôle
+    definition: Organisme indépendant qui vérifie la solidité et la sécurité de l'ouvrage, à la demande du maître d'ouvrage.
+  - terme: Marché
+    definition: Contrat qui lie le maître d'ouvrage à une entreprise pour réaliser des travaux à un prix et dans un délai donnés.
+  - terme: Sous-traitant
+    definition: Entreprise à qui l'entreprise titulaire confie une partie des travaux, sous sa responsabilité.
+symboles: []
+formules: []
+---
+
+import { OrganigrammeActeurs } from '@/components/schemas/Introduction'
+
+<Page etape="intuition" titre="L'intuition : qui fait quoi pour construire une maison ?">
+
+Une famille veut construire sa maison. Elle sait ce qu'elle veut (trois chambres, une cuisine, une citerne) et combien elle peut payer. Mais elle ne sait ni dessiner les plans, ni calculer les fondations, ni maçonner.
+
+Elle va donc s'entourer : un architecte ou un bureau d'études pour concevoir et surveiller, une entreprise pour construire, parfois un contrôleur pour vérifier. Chacun a son rôle, ses responsabilités, son contrat.
+
+Sur un grand projet public (une école, un pont), c'est la même organisation, avec plus d'acteurs : un bailleur qui finance, l'administration qui autorise, des sous-traitants, un laboratoire. Savoir qui fait quoi évite bien des conflits, et bien des malfaçons.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Qui commande, qui conçoit, qui construit, qui contrôle, et quels contrats les relient ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les acteurs d'un projet" sousTitre="Quatre rôles principaux, et ceux qui les entourent" etape="cours">
+
+<Panneau n={1} titre="Maître d'ouvrage" icone="quantites" couleur="encre">
+Le **client** : il exprime le besoin, finance, choisit les intervenants, signe les contrats et reçoit l'ouvrage. État, commune, ONG, entreprise ou particulier.
+</Panneau>
+
+<Panneau n={2} titre="Maître d'œuvre" icone="plan" couleur="encre">
+Le **concepteur** : architecte, bureau d'études techniques. Il fait les plans et les calculs, aide à choisir l'entreprise, puis dirige et surveille les travaux.
+</Panneau>
+
+<Panneau n={3} titre="Entreprise" icone="charges" couleur="brique">
+Le **constructeur** : il exécute les travaux conformément au marché, organise son chantier, ses équipes et ses sous-traitants, et répond de la qualité de son travail.
+</Panneau>
+
+<Panneau n={4} titre="Bureau de contrôle" icone="verification" couleur="validation">
+Le **vérificateur indépendant** : il examine plans et chantier du point de vue de la solidité et de la sécurité, et donne des avis au maître d'ouvrage.
+</Panneau>
+
+<Panneau n={5} titre="Autour du projet" icone="idee" couleur="terre" large>
+Bailleur de fonds (finance) · administration (autorisation de bâtir, contrôle de l'urbanisme) · géomètre (implantation) · laboratoire (essais de sols, de béton) · fournisseurs · assistant au maître d'ouvrage, quand le client n'a pas de compétence technique.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : rôles, contrats, responsabilités">
+
+### Trois contrats, une direction
+
+Le maître d'ouvrage signe en général **trois contrats** distincts :
+
+- avec le maître d'œuvre : un contrat de maîtrise d'œuvre (conception et direction des travaux) ;
+- avec l'entreprise : un **marché de travaux** (prix, délai, qualité) ;
+- avec le bureau de contrôle, s'il y en a un : un contrat de contrôle technique.
+
+Le maître d'œuvre n'a pas de contrat avec l'entreprise, mais il la **dirige** au nom du maître d'ouvrage : il donne des ordres de service, vérifie les travaux, mesure les quantités réalisées et propose les paiements.
+
+### Chacun sa responsabilité
+
+- Le maître d'ouvrage décide et paie : il ne donne pas d'ordres directement aux ouvriers.
+- Le maître d'œuvre répond de sa conception et de sa surveillance.
+- L'entreprise répond de son exécution, y compris celle de ses sous-traitants.
+- Le bureau de contrôle donne des avis : il ne dirige pas le chantier.
+
+<Regle type="simplification">
+Il existe d'autres organisations : en « conception-réalisation », une même équipe conçoit et construit ; sur un petit chantier privé, l'entreprise fait parfois les plans. Les rôles restent les mêmes, ils sont seulement regroupés.
+</Regle>
+
+<Encadre type="attention">
+En RDC, construire suppose une autorisation de bâtir délivrée par les services de l'urbanisme, et les marchés publics suivent une procédure d'appel d'offres encadrée par la loi. Les textes et les démarches sont à vérifier auprès de l'administration compétente.
+</Encadre>
+
+<AVerifier note="A_VERIFIER.md n° 29 : autorisation de bâtir et loi sur les marchés publics en RDC" />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : les liens entre les acteurs">
+
+<OrganigrammeActeurs />
+
+Les traits pleins sont des **contrats** : tous partent du maître d'ouvrage. Les pointillés sont des **missions** : le maître d'œuvre dirige l'entreprise, le bureau de contrôle donne son avis. Le bailleur finance, l'administration autorise.
+
+<Encadre type="retenir">
+Tous les contrats partent du maître d'ouvrage. Le maître d'œuvre dirige les travaux sans être lié par contrat à l'entreprise.
+</Encadre>
+
+</Page>
+
+<Cahier titre="Exemple résolu : qui est qui sur le chantier de l'école ?">
+
+**La situation.** Une ONG finance la construction d'une école primaire à Bandundu, à la demande de la commune, qui sera propriétaire du bâtiment. Un bureau d'études de Kinshasa a fait les plans ; une entreprise locale construit, avec un ferrailleur et un électricien sous-traitants ; un laboratoire teste le béton. Identifie les acteurs.
+
+<Etape n={1} titre="Le maître d'ouvrage">
+La **commune** : elle commande l'école et en sera propriétaire. L'ONG est le **bailleur** : elle finance, mais ne commande pas l'ouvrage.
+
+<Note>Pourquoi pas l'ONG ? Le maître d'ouvrage est celui pour qui l'ouvrage est construit et qui le reçoit. Ici, l'ONG peut aussi être maître d'ouvrage si elle signe les marchés à la place de la commune : c'est le contrat qui le dit.</Note>
+</Etape>
+
+<Etape n={2} titre="Le maître d'œuvre">
+Le **bureau d'études** : il a conçu les plans et doit en principe diriger les travaux. S'il est loin, il désigne un surveillant sur place.
+</Etape>
+
+<Etape n={3} titre="L'entreprise et ses sous-traitants">
+L'**entreprise locale** est titulaire du marché ; le ferrailleur et l'électricien sont ses **sous-traitants** : elle répond de leur travail devant le maître d'ouvrage.
+</Etape>
+
+<Etape n={4} titre="Les autres intervenants">
+Le **laboratoire** contrôle la qualité du béton (essais) ; il n'est pas un bureau de contrôle au sens du contrôle technique de la solidité, sauf si sa mission le prévoit.
+
+<Note couleur="vert">Contrôle : chaque acteur a été rattaché à un contrat (ou à l'absence de contrat) ; aucune décision n'est prise par quelqu'un qui n'en a pas la responsabilité.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre maître d'ouvrage et maître d'œuvre.">
+Le maître d'**ouvrage** commande et paie l'ouvrage ; le maître d'**œuvre** conçoit et dirige les travaux. Moyen mnémotechnique : l'ouvrage appartient au client, l'œuvre est le travail du concepteur.
+</Piege>
+
+<Piege erreur="laisser le client donner des ordres aux ouvriers.">
+Les ordres passent par le maître d'œuvre, puis par l'entreprise. Un changement demandé directement au maçon échappe au contrôle, au prix et à la responsabilité de chacun.
+</Piege>
+
+<Piege erreur="croire que le bureau de contrôle dirige le chantier.">
+Il vérifie et donne des avis ; il ne commande pas les travaux et ne les exécute pas.
+</Piege>
+
+<Piege erreur="oublier la responsabilité des sous-traitants.">
+Devant le maître d'ouvrage, c'est l'entreprise titulaire qui répond du travail de ses sous-traitants.
+</Piege>
+
+<Piege erreur="commencer sans autorisation ni marché signé.">
+Un chantier sans autorisation de bâtir peut être arrêté ou démoli ; des travaux sans marché écrit ouvrent la porte aux litiges sur le prix et la qualité.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le panneau de chantier.** À l'entrée d'un chantier, un panneau affiche l'objet des travaux, le maître d'ouvrage, le maître d'œuvre, l'entreprise, souvent le bailleur et les références de l'autorisation. C'est la première chose à lire lors d'une visite (mini-projet L1.1.P).
+
+<Encadre type="terrain" titre="Les projets financés par des bailleurs">
+En RDC, beaucoup d'écoles, de routes et d'adductions d'eau sont financées par des bailleurs internationaux ou des ONG. Ils imposent souvent leurs propres règles de passation des marchés et de contrôle, et désignent parfois un bureau de surveillance. Bien identifier qui décide, qui paie et qui contrôle est indispensable dès le premier jour.
+</Encadre>
+
+**Le compte rendu de chantier.** Chaque semaine, le maître d'œuvre réunit l'entreprise et parfois le maître d'ouvrage ; le compte rendu écrit fixe les décisions et les responsabilités. Ce document fait foi en cas de litige.
+
+**Le jeune ingénieur.** Selon son employeur, il travaille côté maîtrise d'ouvrage (suivre le projet pour le client), côté maîtrise d'œuvre (concevoir, surveiller) ou côté entreprise (construire). Les trois postes demandent de bien connaître les rôles des autres.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : les acteurs d'un projet">
+
+### Les quatre rôles
+
+maître d'ouvrage : commande, finance, reçoit · maître d'œuvre : conçoit, dirige les travaux · entreprise : construit · bureau de contrôle : vérifie, donne des avis
+
+### Les contrats
+
+tous partent du maître d'ouvrage : maîtrise d'œuvre · marché de travaux · contrôle technique
+
+### Les missions
+
+le maître d'œuvre dirige l'entreprise (ordres de service) sans contrat avec elle
+
+### Autour
+
+bailleur · administration (autorisation de bâtir) · géomètre · laboratoire · sous-traitants (sous la responsabilité de l'entreprise)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Qui suis-je ?">
+
+Pour chaque phrase, nomme l'acteur : (a) « Je paie et je serai propriétaire. » (b) « Je fais les plans et je surveille le chantier. » (c) « Je coule le béton et je monte les murs. » (d) « Je vérifie que la structure est solide et je donne mon avis. »
+
+<Indice>Quatre phrases, les quatre rôles principaux.</Indice>
+
+<Corrige>
+(a) maître d'ouvrage · (b) maître d'œuvre · (c) entreprise · (d) bureau de contrôle.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le changement de dernière minute">
+
+Pendant les travaux d'une maison, le propriétaire demande directement au chef maçon de déplacer une fenêtre et d'agrandir une baie. Quels problèmes cela pose-t-il ? Comment aurait-il dû procéder ?
+
+<Indice>Pense à la structure (linteau, chaînage), au prix et à la responsabilité.</Indice>
+
+<Corrige>
+Agrandir une baie peut exiger un linteau plus fort et modifier le cheminement des charges (L1.1.6) : sans le maître d'œuvre, personne ne le vérifie. Le prix et le délai changent sans accord écrit, et en cas de fissure, la responsabilité devient floue. Le propriétaire aurait dû demander la modification au maître d'œuvre, qui la vérifie, la chiffre avec l'entreprise et la transmet par un ordre de service écrit.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Dessiner l'organigramme d'un projet">
+
+Une province fait construire un pont, financé par un bailleur international. Un bureau d'études étranger conçoit l'ouvrage, un bureau local surveille les travaux, une entreprise construit avec deux sous-traitants (fondations profondes, peinture), et un bureau de contrôle vérifie les plans. Dessine l'organigramme : contrats en traits pleins, missions en pointillés.
+
+<Indice>Le maître d'ouvrage est la province ; la maîtrise d'œuvre est partagée entre conception et surveillance.</Indice>
+
+<Corrige>
+
+- Contrats depuis la province : bureau d'études (conception), bureau local (surveillance des travaux), entreprise (marché de travaux), bureau de contrôle.
+- Le bailleur finance la province (convention de financement) et suit le projet.
+- Missions : la maîtrise d'œuvre (bureau local) dirige l'entreprise ; le bureau de contrôle donne son avis ; les deux sous-traitants sont liés à l'entreprise seulement.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.1.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le maître d'ouvrage est :" choix={['l’architecte', 'le client qui commande et finance', 'le chef de chantier', 'le bureau de contrôle']} bonne={1} colonnes={2}>
+Il commande, paie et reçoit l'ouvrage.
+</QCM>
+
+<QCM n={2} question="Le maître d'œuvre :" choix={['construit l’ouvrage', 'conçoit l’ouvrage et dirige les travaux', 'finance le projet', 'délivre l’autorisation de bâtir']} bonne={1} colonnes={2}>
+Architecte ou bureau d'études, pour le compte du maître d'ouvrage.
+</QCM>
+
+<QCM n={3} question="Le marché de travaux lie :" choix={['le maître d’œuvre et l’entreprise', 'le maître d’ouvrage et l’entreprise', 'l’entreprise et ses ouvriers', 'le bailleur et l’architecte']} bonne={1} colonnes={2}>
+Tous les contrats partent du maître d'ouvrage.
+</QCM>
+
+<QCM n={4} question="Le bureau de contrôle :" choix={['dirige les ouvriers', 'vérifie la solidité et la sécurité et donne des avis', 'paie l’entreprise', 'dessine les plans d’architecture']} bonne={1} colonnes={2}>
+Il est indépendant et ne dirige pas le chantier.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Un sous-traitant répond de son travail devant :" choix={['le maître d’ouvrage directement', 'l’entreprise titulaire du marché', 'le bureau de contrôle', 'personne']} bonne={1} colonnes={2}>
+L'entreprise titulaire répond de ses sous-traitants devant le maître d'ouvrage.
+</QCM>
+
+<QCM n={6} question="Une modification des travaux doit passer par :" choix={['le chef maçon', 'le maître d’œuvre, qui la transmet par écrit', 'le voisin', 'le fournisseur']} bonne={1} colonnes={2}>
+Ordre de service écrit, après vérification et chiffrage.
+</QCM>
+
+<QCM n={7} question="Sur un panneau de chantier, on lit en général :" choix={['les salaires des ouvriers', 'le maître d’ouvrage, le maître d’œuvre et l’entreprise', 'les plans de ferraillage', 'les résultats des essais']} bonne={1} colonnes={2}>
+Et souvent le bailleur et la référence de l'autorisation.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,272 @@
+---
+id: L1.1.5
+titre: "Anatomie d'un bâtiment"
+objectifs:
+  - Nommer les fondations, la structure, l'enveloppe et les équipements d'un bâtiment
+  - Distinguer éléments porteurs et éléments non porteurs
+  - Distinguer gros œuvre et second œuvre
+  - Identifier les éléments d'une maison sur une coupe
+relecture: false
+normes: []
+glossaire:
+  - terme: Fondation
+    definition: Partie de l'ouvrage qui transmet les charges au sol (semelle, radier, pieu).
+  - terme: Longrine
+    definition: Poutre en béton armé au niveau du sol, qui relie les fondations et porte les murs du rez-de-chaussée.
+  - terme: Ossature
+    definition: Ensemble des éléments porteurs (poteaux, poutres, dalles, voiles) qui forme le squelette du bâtiment.
+  - terme: Chaînage
+    definition: Ceinture en béton armé, horizontale ou verticale, qui tient une maçonnerie et la rend solidaire.
+  - terme: Linteau
+    definition: Petite poutre au-dessus d'une baie (porte, fenêtre), qui porte le mur situé au-dessus.
+  - terme: Dallage
+    definition: Plancher bas en béton coulé directement sur le sol préparé (hérisson), à distinguer d'une dalle portée.
+  - terme: Acrotère
+    definition: Petit mur en rive d'une toiture-terrasse, qui retient l'étanchéité et sert de garde-corps bas.
+  - terme: Second œuvre
+    definition: Travaux de finition et d'équipement réalisés après le gros œuvre (menuiseries, enduits, électricité, plomberie, peinture).
+symboles: []
+formules: []
+---
+
+import { BatimentIso, CoupeMaison } from '@/components/schemas/Introduction'
+
+<Page etape="intuition" titre="L'intuition : un corps qui tient debout">
+
+Un bâtiment ressemble à un corps humain. Il a des **pieds** qui reposent sur le sol : les fondations. Un **squelette** qui le tient debout : poteaux, poutres, dalles, murs porteurs. Une **peau** qui le protège de la pluie, du soleil et des intrus : murs de remplissage, toiture, menuiseries. Et des **organes** qui le font vivre : eau, électricité, évacuations.
+
+Comme pour un corps, chaque partie a son rôle : on peut changer de vêtement (repeindre, changer une fenêtre), mais on ne retire pas un os sans conséquences.
+
+Savoir nommer chaque élément et dire s'il porte ou non, c'est la base pour lire un plan, parler avec un chantier, et éviter les transformations dangereuses.
+
+<Encadre type="idee" titre="La question de cette leçon">
+De quels éléments un bâtiment est-il fait, et lesquels le tiennent debout ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Anatomie d'un bâtiment" sousTitre="Des fondations à la toiture" etape="cours">
+
+<Panneau n={1} titre="Fondations" icone="materiaux" couleur="terre">
+Semelles isolées sous les poteaux, semelles filantes sous les murs, radier sous tout le bâtiment, pieux en sol médiocre. Les longrines relient les fondations.
+</Panneau>
+
+<Panneau n={2} titre="Ossature" icone="cadre" couleur="encre">
+Poteaux, poutres, dalles, voiles en béton armé ; ou murs porteurs en maçonnerie tenus par des chaînages. Elle porte tout le reste.
+</Panneau>
+
+<Panneau n={3} titre="Planchers et toiture" icone="charges" couleur="acier">
+Dallage au rez-de-chaussée, dalles aux étages, toiture-terrasse avec acrotère, ou charpente (fermes, pannes) et couverture en tôles.
+</Panneau>
+
+<Panneau n={4} titre="Enveloppe" icone="plan" couleur="brique">
+Murs de remplissage, portes et fenêtres, enduits, étanchéité de la toiture : elle protège de la pluie, du soleil, de la chaleur et du bruit.
+</Panneau>
+
+<Panneau n={5} titre="Équipements" icone="quantites" couleur="validation">
+Eau froide, réservoir, évacuations des eaux usées et des eaux de pluie, électricité, ventilation : les réseaux qui rendent le bâtiment habitable.
+</Panneau>
+
+<Panneau n={6} titre="Gros œuvre et second œuvre" icone="idee" couleur="encre">
+Gros œuvre : fondations, ossature, murs, toiture. Second œuvre : menuiseries, enduits, carrelage, plomberie, électricité, peinture.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : porteur ou non porteur">
+
+### Deux grandes familles de structures
+
+- **Ossature en béton armé** : des poteaux et des poutres forment un cadre ; les dalles s'appuient dessus ; les murs ne font que remplir. C'est la règle pour les bâtiments à étages.
+- **Maçonnerie porteuse chaînée** : les murs en blocs portent la toiture ; des chaînages horizontaux et verticaux en béton armé les tiennent ensemble. C'est fréquent pour les maisons de plain-pied.
+
+### Porteur ou non porteur ?
+
+Un élément **porteur** reprend des charges et les transmet vers le sol (poteau, poutre, dalle, mur porteur, linteau). Un élément **non porteur** ne porte que son propre poids (cloison, mur de remplissage, menuiserie). On peut modifier un élément non porteur ; toucher à un élément porteur demande un calcul.
+
+<Encadre type="attention">
+Un mur peut être porteur sans en avoir l'air, et un mur de remplissage peut porter par accident (une poutre trop souple qui s'appuie dessus). Avant de démolir ou de percer, on vérifie sur les plans, ou on fait appel à un ingénieur.
+</Encadre>
+
+### Dalle ou dallage ?
+
+Une **dalle** est portée par des poutres ou des murs : elle franchit le vide. Un **dallage** repose directement sur le sol compacté, sur une couche de pierres (hérisson) : il ne franchit rien.
+
+</Page>
+
+<Vue3D titre="Le bâtiment en perspective, couche par couche" calques={[{ id: 'fondations', libelle: 'Fondations' }, { id: 'planchers', libelle: 'Planchers' }, { id: 'structure', libelle: 'Ossature' }, { id: 'enveloppe', libelle: 'Enveloppe' }, { id: 'equipements', libelle: 'Équipements', actif: false }, { id: 'reperes', libelle: 'Repères' }]}>
+
+Un petit bâtiment R+1 à ossature en béton armé, en vue écorchée : les murs de façade côté lecteur ne sont pas dessinés. Les numéros renvoient à la légende. Désactive l'enveloppe pour voir l'ossature seule, puis les planchers pour ne garder que poteaux et poutres.
+
+<BatimentIso />
+
+<Encadre type="retenir">
+Semelles et longrines sous le sol ; dallage, poteaux, poutres, dalles ; murs de remplissage et baies ; réservoir et descentes d'eau : chaque couche a son rôle.
+</Encadre>
+
+</Vue3D>
+
+<Cahier titre="Exemple résolu : nommer les éléments d'une maison">
+
+**La situation.** Voici la coupe d'une maison de plain-pied en maçonnerie chaînée, avec une toiture en tôles. Nomme chaque élément numéroté et dis s'il est porteur.
+
+<CoupeMaison />
+
+<Etape n={1} titre="Sous le sol">
+**1** semelle filante en béton armé (porteuse) ; **2** mur de soubassement (porteur), qui remonte jusqu'au niveau du plancher bas.
+
+<Note>Pourquoi une semelle plus large que le mur ? Elle étale la charge sur une plus grande surface de sol, pour que la pression reste supportable (N0.3.3).</Note>
+</Etape>
+
+<Etape n={2} titre="Le plancher bas et les murs">
+**3** dallage sur hérisson (repose sur le sol, ne porte que lui-même et son contenu) ; **4** mur en blocs (porteur ici, il reçoit la charpente) ; **5** baie avec son linteau (porteur : il franchit l'ouverture).
+</Etape>
+
+<Etape n={3} titre="Le haut des murs et la toiture">
+**6** chaînage haut en béton armé (porteur, il ceinture les murs et reçoit la charpente) ; **7** ferme de charpente (porteuse) ; **8** pannes et tôles (la couverture : les pannes portent les tôles) ; **9** débord de toit, qui éloigne la pluie des murs.
+</Etape>
+
+<Etape n={4} titre="Autour de la maison">
+**10** trottoir et caniveau périphériques : non porteurs, mais essentiels, car ils éloignent l'eau des fondations.
+
+<Note couleur="vert">Contrôle : en suivant les éléments porteurs de haut en bas (tôles, pannes, ferme, chaînage, mur, soubassement, semelle), on arrive au sol sans interruption.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="démolir un mur sans savoir s'il porte.">
+Abattre un mur porteur pour agrandir une pièce peut faire fléchir ou effondrer ce qu'il porte. On vérifie d'abord.
+</Piege>
+
+<Piege erreur="confondre dalle et dallage.">
+Le dallage repose sur le sol ; la dalle franchit le vide entre des appuis. Leurs armatures et leurs calculs n'ont rien à voir.
+</Piege>
+
+<Piege erreur="oublier les chaînages.">
+Une maçonnerie sans chaînage se fissure et se disloque au moindre tassement ou séisme. Les chaînages la transforment en boîte solidaire.
+</Piege>
+
+<Piege erreur="percer une poutre pour passer un tuyau.">
+Une réservation dans une poutre ou une dalle se prévoit sur les plans ; un trou improvisé peut couper des armatures.
+</Piege>
+
+<Piege erreur="négliger ce qui protège de l'eau.">
+Débords de toit, gouttières, trottoirs, caniveaux ne portent rien, mais leur absence ruine fondations et enduits.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les maisons de Kinshasa.** On y voit les deux familles : maisons de plain-pied en blocs de ciment chaînés, couvertes de tôles ; immeubles à ossature en béton armé, avec remplissage en blocs. Reconnaître la structure d'un bâtiment est le premier réflexe d'un ingénieur qui le visite.
+
+<Encadre type="terrain" titre="Ajouter un étage : danger">
+Il est fréquent de surélever une maison pour gagner de la place. Mais des fondations et des murs prévus pour un plain-pied peuvent ne pas supporter un étage de plus. Avant toute surélévation, il faut vérifier les fondations, les murs ou poteaux, et prévoir des chaînages : c'est le rôle de l'ingénieur.
+</Encadre>
+
+**Les toitures en tôles.** Pannes, fermes, fixations : sous les vents violents des orages tropicaux, une toiture mal ancrée au chaînage peut s'envoler. L'ancrage de la charpente fait partie de la structure.
+
+**Les équipements.** Réservoirs en toiture, gouttières et descentes d'eaux pluviales, fosse septique : leur poids et leurs réseaux se prévoient dès la conception.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : anatomie d'un bâtiment">
+
+### Les quatre parties
+
+fondations (semelles, radier, pieux, longrines) · ossature (poteaux, poutres, dalles, voiles, murs porteurs, chaînages, linteaux) · enveloppe (remplissage, menuiseries, enduits, étanchéité) · équipements (eau, évacuations, électricité)
+
+### Deux structures
+
+ossature béton armé + remplissage · maçonnerie porteuse chaînée
+
+### Porteur ou non
+
+porteur : transmet des charges · non porteur : son propre poids seulement · vérifier avant de démolir
+
+### À ne pas confondre
+
+dalle (franchit le vide) ≠ dallage (sur le sol) · gros œuvre ≠ second œuvre
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Porteur ou non porteur ?">
+
+Classe ces éléments : poteau, cloison en carreaux de plâtre, linteau, fenêtre, dalle d'étage, chaînage, enduit, poutre.
+
+<Indice>Un élément porteur transmet des charges qui ne sont pas les siennes.</Indice>
+
+<Corrige>
+Porteurs : poteau, linteau, dalle d'étage, chaînage, poutre. Non porteurs : cloison, fenêtre, enduit.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Gros œuvre ou second œuvre ?">
+
+Range ces travaux : coulage des semelles, pose du carrelage, élévation des murs, câblage électrique, pose de la charpente, peinture, pose des menuiseries, coulage de la dalle.
+
+<Indice>Le gros œuvre fait tenir et fermer le bâtiment ; le second œuvre le finit et l'équipe.</Indice>
+
+<Corrige>
+Gros œuvre : semelles, murs, charpente, dalle. Second œuvre : carrelage, câblage électrique, peinture, menuiseries.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La surélévation">
+
+Un propriétaire veut ajouter un étage sur sa maison de plain-pied en maçonnerie chaînée. Quels éléments faut-il vérifier, du haut vers le bas, et pourquoi ?
+
+<Indice>Suis le chemin des nouvelles charges jusqu'au sol (L1.1.6).</Indice>
+
+<Corrige>
+Le nouvel étage apporte une dalle (ou une charpente), des murs et des charges d'usage. Il faut vérifier : la capacité de l'ancienne toiture ou dalle à servir de plancher ; les chaînages et les murs, qui recevront beaucoup plus de charge ; les linteaux, plus chargés ; les fondations et la pression sur le sol, qui augmente. Souvent, il faut renforcer ou créer des poteaux et des fondations : une étude de structure est indispensable.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.1.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une semelle filante se place :" choix={['sous un poteau isolé', 'sous un mur, sur toute sa longueur', 'au sommet d’un mur', 'sur une toiture']} bonne={1} colonnes={2}>
+La semelle isolée, elle, est sous un poteau.
+</QCM>
+
+<QCM n={2} question="Un linteau sert à :" choix={['décorer une façade', 'porter le mur au-dessus d’une baie', 'fermer une fenêtre', 'relier deux semelles']} bonne={1} colonnes={2}>
+C'est une petite poutre au-dessus de l'ouverture.
+</QCM>
+
+<QCM n={3} question="Un dallage :" choix={['franchit le vide entre deux poutres', 'repose directement sur le sol préparé', 'est une toiture', 'est un mur']} bonne={1} colonnes={2}>
+La dalle, elle, est portée.
+</QCM>
+
+<QCM n={4} question="Un mur de remplissage, dans une ossature en béton armé :" choix={['porte les dalles', 'ne porte en principe que son propre poids', 'remplace les poteaux', 'sert de fondation']} bonne={1} colonnes={2}>
+Ce sont les poteaux et les poutres qui portent.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Les chaînages d'une maçonnerie :" choix={['sont décoratifs', 'rendent les murs solidaires et reprennent les efforts', 'servent à l’évacuation de l’eau', 'remplacent les fondations']} bonne={1} colonnes={2}>
+Ils transforment les murs en une boîte solidaire.
+</QCM>
+
+<QCM n={6} question="La pose du carrelage fait partie :" choix={['du gros œuvre', 'du second œuvre', 'des fondations', 'de l’ossature']} bonne={1} colonnes={4}>
+C'est une finition.
+</QCM>
+
+<QCM n={7} question="Avant de démolir un mur intérieur, il faut :" choix={['prévenir les voisins seulement', 'vérifier s’il est porteur', 'le peindre', 'attendre la saison sèche']} bonne={1} colonnes={2}>
+Un mur porteur ne se démolit pas sans calcul.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

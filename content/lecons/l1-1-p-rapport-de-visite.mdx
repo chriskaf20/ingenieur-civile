@@ -1,0 +1,118 @@
+---
+id: L1.1.P
+titre: "Mini-projet : rapport de visite de chantier"
+objectifs:
+  - Observer un chantier avec méthode et en sécurité
+  - Identifier le projet, ses acteurs, sa phase et les métiers présents
+  - Repérer les bonnes pratiques et les anomalies de qualité et de sécurité
+  - Rédiger un rapport de visite clair, illustré et argumenté
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { ChantierVirtuel } from '@/components/schemas/Introduction'
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Tu vas visiter un chantier, réel ou virtuel, et en rédiger le **rapport de visite**, comme le ferait un jeune ingénieur envoyé par son bureau d'études ou par le maître d'ouvrage.
+
+### Deux possibilités
+
+- **Un chantier réel** près de chez toi : demande l'autorisation au chef de chantier, porte casque et chaussures de sécurité, reste avec ton guide, ne monte sur aucun échafaudage et ne prends aucune photo sans accord.
+- **Le chantier virtuel** de la page suivante : un bâtiment R+1 en cours de gros œuvre, avec neuf points d'observation numérotés.
+
+### Ce que tu rends : un rapport de deux à quatre pages
+
+1. L'identification du projet : objet, maître d'ouvrage, maître d'œuvre, entreprise, autorisation (panneau de chantier).
+2. La description de l'ouvrage : type, structure, matériaux principaux.
+3. La phase en cours et ce qui reste à faire.
+4. Les acteurs et les métiers observés.
+5. La sécurité : protections individuelles et collectives, balisage, ordre du chantier.
+6. Un tableau d'observations : constat, appréciation (conforme ou à corriger), action proposée.
+7. Des croquis ou photos légendés, et une conclusion avec les questions à poser au chef de chantier.
+
+<Encadre type="attention">
+Un chantier est un lieu dangereux. Sans autorisation et sans équipement de protection, on n'y entre pas, même « pour regarder ».
+</Encadre>
+
+</Page>
+
+<Page etape="projet" titre="Le chantier virtuel">
+
+<ChantierVirtuel />
+
+Points d'observation : **1** le panneau de chantier ; **2** la clôture ; **3** la dalle en cours ; **4** l'étaiement sous la dalle ; **5** les armatures en attente au-dessus des poteaux ; **6** l'échafaudage ; **7** la bétonnière ; **8** le stock de ciment ; **9** la tranchée ouverte.
+
+<Encadre type="exemple" titre="Méthode d'observation">
+Fais d'abord le tour complet du chantier sans rien noter. Puis reprends chaque point : qu'est-ce que c'est, à quoi ça sert, est-ce bien fait, quel risque, quelle action ? Distingue toujours ce que tu as **vu** de ce que tu **supposes**.
+</Encadre>
+
+</Page>
+
+<Cahier titre="Le rapport : exemple corrigé (extraits)" etape="projet">
+
+<Etape n={1} titre="Identification et description">
+Construction d'un bâtiment R+1 à ossature en béton armé (poteaux, poutres, dalles), murs de remplissage prévus en blocs. Les noms du maître d'ouvrage, du maître d'œuvre et de l'entreprise sont à relever sur le panneau (point 1) ; la référence de l'autorisation de bâtir doit y figurer.
+
+<Note>Pourquoi commencer par le panneau ? Il dit qui fait quoi : c'est le cadre de toutes les observations qui suivent.</Note>
+</Etape>
+
+<Etape n={2} titre="Phase en cours et métiers">
+Gros œuvre du rez-de-chaussée : poteaux coulés, dalle haute coffrée et étayée (points 3 et 4). Métiers attendus : coffreurs, ferrailleurs, maçons, conducteur de bétonnière, chef de chantier ; un électricien doit poser les gaines avant le coulage de la dalle.
+</Etape>
+
+<Etape n={3} titre="Tableau d'observations">
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Point</th><th>Constat</th><th>Appréciation</th><th>Action proposée</th></tr></thead>
+    <tbody>
+      <tr><td>2</td><td>Clôture interrompue sur la façade principale</td><td>à corriger</td><td>Fermer le chantier au public, balisage</td></tr>
+      <tr><td>4</td><td>Étais en place sous la dalle</td><td>conforme, à vérifier</td><td>Contrôler l'appui des étais sur un sol stable</td></tr>
+      <tr><td>5</td><td>Attentes d'armatures sans protection</td><td>à corriger</td><td>Capuchons de protection contre l'empalement</td></tr>
+      <tr><td>6</td><td>Échafaudage sans garde-corps</td><td>à corriger</td><td>Garde-corps et plinthes avant tout travail en hauteur</td></tr>
+      <tr><td>8</td><td>Sacs de ciment posés au sol, à l'air libre</td><td>à corriger</td><td>Stockage surélevé, couvert, au sec</td></tr>
+      <tr><td>9</td><td>Tranchée ouverte sans balisage</td><td>à corriger</td><td>Balisage, et blindage si elle est profonde</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</Etape>
+
+<Etape n={4} titre="Conclusion et questions">
+Le chantier avance normalement, mais plusieurs points de sécurité sont à corriger avant le coulage de la dalle. Questions au chef de chantier : le ferraillage de la dalle a-t-il été réceptionné ? Quand le béton sera-t-il testé ? Qui est responsable de la sécurité ?
+
+<Note couleur="vert">Contrôle : chaque observation est rattachée à un point du chantier, qualifiée, et suivie d'une action concrète.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Identification | Acteurs absents | Maître d'ouvrage, maître d'œuvre, entreprise | Autorisation et bailleur relevés |
+| Description | Vague | Type d'ouvrage et structure | Phase en cours et suite des travaux expliquées |
+| Métiers | Non cités | Métiers présents | Rôle de chacun dans la tâche observée |
+| Observations | Liste sans avis | Constat et appréciation | Action concrète pour chaque anomalie |
+| Sécurité | Oubliée | EPI relevés | Protections collectives et risques analysés |
+| Présentation | Sans illustration | Croquis légendés | Rapport clair, vu et supposé distingués |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Reviens sur le même chantier (ou imagine-le) deux semaines plus tard : rédige une page de suivi. Les anomalies ont-elles été corrigées ? Le chantier a-t-il avancé comme prévu ?
+</Encadre>
+
+<Quiz id="L1.1.P">
+
+<QCM n={1} question="Mon rapport identifie-t-il les acteurs, décrit-il la phase en cours, et propose-t-il une action pour chaque anomalie observée ?" choix={['Oui, tout y est', 'Il manque des acteurs ou des actions', 'Je n’ai fait qu’une liste d’observations']} bonne={0}>
+Sinon, complète-le : un rapport de visite sert à décider, pas seulement à décrire.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>
