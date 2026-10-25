@@ -1,0 +1,313 @@
+---
+id: L1.3.2
+titre: Moment d'une force et couple
+objectifs:
+  - Calculer le moment d'une force par rapport à un point avec son bras de levier
+  - Calculer un moment par les composantes de la force (théorème de Varignon)
+  - Choisir et appliquer une convention de signe pour les moments
+  - Reconnaître un couple et calculer son moment
+relecture: false
+normes: []
+glossaire:
+  - terme: Moment d'une force
+    definition: Effet de rotation d'une force autour d'un point ; il vaut l'intensité de la force multipliée par son bras de levier, en kN·m.
+  - terme: Bras de levier
+    definition: Distance entre le point et la ligne d'action de la force, mesurée perpendiculairement à cette ligne.
+  - terme: Ligne d'action
+    definition: Droite qui porte la force ; on peut faire glisser la force sur cette droite sans changer son moment.
+  - terme: Théorème de Varignon
+    definition: Le moment d'une force est égal à la somme des moments de ses composantes.
+  - terme: Couple
+    definition: Deux forces égales, parallèles et de sens opposés ; leur résultante est nulle et leur moment est le même en tout point.
+symboles:
+  - { symbole: 'M_O', signification: 'moment par rapport au point O', unite: 'kN·m' }
+  - { symbole: 'd', signification: 'bras de levier', unite: 'm' }
+  - { symbole: 'F_x, F_y', signification: 'composantes de la force', unite: 'kN' }
+  - { symbole: 'x_A, y_A', signification: 'coordonnées du point d’application par rapport à O', unite: 'm' }
+  - { symbole: 'θ', signification: 'direction de la force depuis l’axe x', unite: '°' }
+formules:
+  - { nom: 'Moment par le bras de levier', tex: 'M_O = \pm F\,d', domaine: 'Signe + dans le sens trigonométrique' }
+  - { nom: 'Théorème de Varignon', tex: 'M_O = x_A\,F_y - y_A\,F_x', domaine: 'A repéré depuis O' }
+  - { nom: 'Couple', tex: 'C = F\,d', domaine: 'Deux forces égales et opposées, distantes de d' }
+  - { nom: 'Levier', tex: 'F\,b_F = P\,b_P', domaine: 'Équilibre des moments autour du pivot' }
+---
+
+import { EXEMPLE_MOMENT_FORCE, forceLevier, momentForceO } from '@/lib/calc/statique'
+import { grandeur, nombre } from '@/lib/format'
+import { MomentForceSchema } from '@/components/schemas/Statique'
+
+export const m0 = momentForceO(EXEMPLE_MOMENT_FORCE)
+export const panneau = { xA: 0, yA: 2.5, F: 6, theta: 0 }
+export const mp = momentForceO(panneau)
+export const mVert = momentForceO({ ...EXEMPLE_MOMENT_FORCE, theta: -90 })
+export const mMur = momentForceO({ ...EXEMPLE_MOMENT_FORCE, theta: -105 })
+export const levier = forceLevier(3, 0.15, 1.35)
+export const faux = EXEMPLE_MOMENT_FORCE.F * m0.OA
+
+<Page etape="intuition" titre="L'intuition : la clé et la porte">
+
+Pour desserrer un écrou rouillé, tu prends une clé plus longue. Pour ouvrir une porte lourde, tu pousses près de la poignée, loin des gonds, jamais près de la charnière. Dans les deux cas, la même force produit un effet de rotation bien plus grand quand elle est appliquée **loin** du point de rotation.
+
+Cet effet de rotation s'appelle le **moment** de la force. Il dépend de l'intensité de la force et de son **bras de levier** : la distance entre le point de rotation et la droite qui porte la force.
+
+En structure, tout est affaire de moments : un poteau qui reçoit une poussée horizontale en tête, un panneau publicitaire poussé par le vent, une console qui porte une charge à son extrémité. Le moment dit ce que la fixation doit retenir.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer l'effet de rotation d'une force, et comment le calculer quand la force est inclinée ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : moment et bras de levier">
+
+### Définition
+
+Le **moment** d'une force F par rapport à un point O vaut :
+
+$$M_O = \pm\,F\,d$$
+
+où d est le **bras de levier** : la distance de O à la **ligne d'action** de F, mesurée **perpendiculairement** à cette ligne. Le moment s'exprime en kN·m (N0.6.5).
+
+### Le signe
+
+On choisit un sens positif, et on s'y tient. Convention habituelle : **positif dans le sens trigonométrique** (inverse des aiguilles d'une montre), négatif dans le sens horaire.
+
+### Trois propriétés utiles
+
+1. Une force dont la ligne d'action **passe par O** a un moment nul en O : son bras de levier est nul.
+2. On peut faire **glisser** une force le long de sa ligne d'action sans changer son moment.
+3. Le moment dépend du point choisi : une même force a des moments différents en des points différents.
+
+<Encadre type="exemple" titre="Le vent sur un panneau">
+Le vent pousse un panneau de chantier avec une force horizontale de {grandeur(panneau.F, 0, 'kN')} appliquée à {grandeur(panneau.yA, 1, 'm')} de haut. Au pied du poteau, le bras de levier est la hauteur : M = {nombre(panneau.F, 0)} × {nombre(panneau.yA, 1)} = {grandeur(Math.abs(mp.M), 1, 'kN·m')}, dans le sens horaire si le vent souffle vers la droite.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : Varignon et les couples">
+
+### Le théorème de Varignon
+
+Quand la force est inclinée, trouver le bras de levier demande de la géométrie. Plus simple : on décompose F en F<sub>x</sub> et F<sub>y</sub> (N0.6.2), et l'on additionne leurs moments. Avec A repéré par (x<sub>A</sub> ; y<sub>A</sub>) depuis O :
+
+$$M_O = x_A\,F_y - y_A\,F_x$$
+
+F<sub>y</sub> a pour bras de levier x<sub>A</sub> ; F<sub>x</sub> a pour bras de levier y<sub>A</sub>, avec un signe moins (une force vers la droite au-dessus de O fait tourner dans le sens horaire). C'est la composante z du produit vectoriel de N0.6.5.
+
+### Le couple
+
+Deux forces **égales, parallèles et de sens opposés**, distantes de d, forment un **couple**. Leur résultante est nulle : elles ne déplacent pas le solide, elles le font seulement tourner. Leur moment vaut C = F d, **le même en tout point**.
+
+<Encadre type="exemple" titre="Le serrage d'un boulon">
+Une clé dynamométrique applique un couple de serrage, en N·m, indiqué par le fabricant du boulon ou de l'assemblage. L'ouvrier pousse d'un côté ; l'écrou retient de l'autre : ensemble, ils forment un couple.
+</Encadre>
+
+### Le levier
+
+Un levier en équilibre autour de son pivot vérifie F b<sub>F</sub> = P b<sub>P</sub> : les moments des deux forces se compensent. Avec un bras long du côté de l'effort, une petite force soulève une grande charge : c'est le principe de la barre à mine.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le bras de levier se mesure perpendiculairement">
+
+<MomentForceSchema d={panneau} r={mp} />
+
+La force est horizontale, appliquée en haut du poteau : sa ligne d'action (en trait mixte) est horizontale, et le bras de levier, perpendiculaire à cette ligne, est la hauteur du point d'application. La composante verticale est nulle ; tout le moment vient de F<sub>x</sub>.
+
+<Encadre type="retenir">
+Moment = force × bras de levier, le bras étant mesuré **perpendiculairement** à la ligne d'action. Par les composantes : M<sub>O</sub> = x<sub>A</sub> F<sub>y</sub> − y<sub>A</sub> F<sub>x</sub>.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="momentPoint">
+
+<Cahier titre="Exemple résolu : la fixation d'une potence murale">
+
+**Énoncé.** Une potence est fixée au mur en O. À son extrémité A, située à 1,20 m du mur et 0,40 m au-dessus de la fixation, le câble d'un palan exerce une force de 20 kN dirigée vers le bas, inclinée à 75° sous l'horizontale et tournée vers l'extérieur. Quel moment la fixation doit-elle reprendre ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi θ = −75° ? On mesure la direction depuis l'axe x horizontal, positivement dans le sens trigonométrique : une force tournée vers le bas a un angle négatif.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : composantes et moment">
+
+<Etape n={3} titre="Les composantes">
+<AN k="composantes" />
+</Etape>
+
+<Etape n={4} titre="Le moment par Varignon">
+<AN k="varignon" />
+<AN k="sens" />
+<Note>Pourquoi deux termes ? La composante verticale fait tourner la potence vers le bas ; la composante horizontale, appliquée au-dessus de O, ajoute un peu de rotation dans le même sens.</Note>
+</Etape>
+
+<Etape n={5} titre="Le bras de levier">
+<AN k="bras" />
+<Resultat k="M" libelle="Moment à la fixation" />
+<Note couleur="vert">Contrôle : sur le schéma, le segment bleu de O à la ligne d'action mesure bien <Val k="bras" />, un peu plus que la distance horizontale de 1,20 m.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre la distance OA comme bras de levier.">
+Le bras de levier est la distance de O à la ligne d'action, pas au point d'application. Avec OA, on trouverait {grandeur(faux, 2, 'kN·m')} au lieu de {grandeur(Math.abs(m0.M), 2, 'kN·m')}.
+</Piege>
+
+<Piege erreur="oublier le signe.">
+Deux moments de sens contraires se retranchent. On fixe une convention (trigonométrique positif) et on l'écrit avant de calculer.
+</Piege>
+
+<Piege erreur="écrire kN/m au lieu de kN·m.">
+Un moment est une force multipliée par une longueur : kN·m. Le kN/m est une charge répartie, une tout autre grandeur.
+</Piege>
+
+<Piege erreur="chercher un moment à une force qui passe par le point.">
+Une force dont la ligne d'action passe par O ne fait pas tourner autour de O : son moment y est nul, quelle que soit son intensité.
+</Piege>
+
+<Piege erreur="croire qu'un couple se réduit à une force.">
+Un couple a une résultante nulle : aucune force unique ne peut le remplacer. Il se décrit par son seul moment.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les fixations au mur.** Potences, consoles, auvents, garde-corps : la fixation reprend la charge **et** son moment. Plus la charge est loin du mur, plus les chevilles du haut sont arrachées. C'est pourquoi on dimensionne les fixations avec le moment, pas seulement avec le poids.
+
+<Encadre type="terrain" titre="Les panneaux et le vent">
+Panneaux publicitaires, enseignes et panneaux de chantier sont nombreux le long des grands axes de Kinshasa. Sous une rafale, la force du vent appliquée en hauteur crée un moment important au pied du poteau : {grandeur(Math.abs(mp.M), 1, 'kN·m')} dans l'exemple du cours. Un massif de fondation trop petit, ou un poteau mal encastré, et le panneau se couche.
+</Encadre>
+
+**Les leviers de chantier.** Barre à mine, pied-de-biche, brouette : tous jouent sur le bras de levier. La brouette porte la charge près de la roue (petit bras) et l'ouvrier soulève loin de la roue (grand bras) : il ne porte qu'une fraction du poids.
+
+**Les couples de serrage.** Les boulons des charpentes métalliques et des ancrages se serrent à un couple prescrit. Trop faible, l'assemblage se desserre ; trop fort, le boulon peut se rompre.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : moments et couples">
+
+### Moment d'une force
+
+$M_O = \pm F\,d$ · d perpendiculaire à la ligne d'action · kN·m
+
+### Signe
+
+positif dans le sens trigonométrique (convention à écrire)
+
+### Varignon
+
+$M_O = x_A\,F_y - y_A\,F_x$ · somme des moments des composantes
+
+### Propriétés
+
+force passant par O : moment nul · glissement sur la ligne d'action : moment inchangé
+
+### Couple
+
+$C = F\,d$ · résultante nulle · même moment en tout point
+
+### Levier
+
+$F\,b_F = P\,b_P$
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le panneau de chantier">
+
+Le vent pousse un panneau avec une force horizontale de {grandeur(panneau.F, 0, 'kN')}, appliquée à {grandeur(panneau.yA, 1, 'm')} du sol. Quel moment au pied du poteau ?
+
+<Indice>La force est horizontale : son bras de levier par rapport au pied est la hauteur.</Indice>
+
+<Corrige>
+M = F × d = {nombre(panneau.F, 0)} × {nombre(panneau.yA, 1)} = **{grandeur(Math.abs(mp.M), 1, 'kN·m')}**, dans le sens horaire pour un vent soufflant vers la droite (M = {grandeur(mp.M, 1, 'kN·m')} avec la convention trigonométrique).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La barre à mine">
+
+Pour soulever une pierre de 3 kN, un ouvrier glisse une barre à mine sous la pierre, avec un pivot à 0,15 m de la pierre. Il appuie à 1,35 m du pivot. Quelle force doit-il exercer ?
+
+<Indice>Équilibre des moments autour du pivot : F × 1,35 = 3 × 0,15.</Indice>
+
+<Corrige>
+F = 3 × 0,15 / 1,35 = **{grandeur(levier, 3, 'kN')}**, soit environ {grandeur(levier * 1000, 0, 'N')} : {nombre(3 / levier, 0)} fois moins que le poids de la pierre.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le câble change de direction">
+
+Pour la potence de l'exemple (A à 1,20 m du mur et 0,40 m au-dessus de O, force de 20 kN), calcule le moment en O si le câble devient vertical (θ = −90°), puis s'il s'incline vers le mur (θ = −105°). Explique les écarts.
+
+<Indice>Varignon : M = x<sub>A</sub> F<sub>y</sub> − y<sub>A</sub> F<sub>x</sub>. Le signe de F<sub>x</sub> change quand le câble passe de l'autre côté de la verticale.</Indice>
+
+<Corrige>
+
+- Vertical : F<sub>x</sub> = 0, M = 1,20 × (−20) = **{grandeur(mVert.M, 2, 'kN·m')}**.
+- Incliné vers le mur : **{grandeur(mMur.M, 2, 'kN·m')}**, contre {grandeur(m0.M, 2, 'kN·m')} dans l'exemple.
+- Tournée vers l'extérieur, la composante horizontale ajoute du moment ; tournée vers le mur, elle en retire. La verticale de la charge n'est donc pas toujours le cas le plus défavorable.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le bras de levier d'une force par rapport à un point O est :" choix={['la distance de O au point d’application', 'la distance de O à la ligne d’action, mesurée perpendiculairement', 'la longueur du vecteur force', 'l’angle de la force']} bonne={1} colonnes={2}>
+On le mesure perpendiculairement à la ligne d'action.
+</QCM>
+
+<QCM n={2} question="L'unité d'un moment est :" choix={['kN/m', 'kN·m', 'kN', 'kN/m²']} bonne={1} colonnes={4}>
+Une force multipliée par une longueur.
+</QCM>
+
+<QCM n={3} question="Une force dont la ligne d'action passe par O a, par rapport à O, un moment :" choix={['maximal', 'nul', 'égal à F', 'négatif']} bonne={1} colonnes={4}>
+Son bras de levier est nul.
+</QCM>
+
+<QCM n={4} question={<>Une force horizontale de {nombre(panneau.F, 0)} kN appliquée à {nombre(panneau.yA, 1)} m au-dessus de O a un moment en O de valeur absolue :</>} choix={[grandeur(Math.abs(mp.M), 1, 'kN·m'), grandeur(panneau.F + panneau.yA, 1, 'kN·m'), grandeur(panneau.F / panneau.yA, 1, 'kN·m'), '0 kN·m']} bonne={0} colonnes={4}>
+M = F × d, avec d = la hauteur.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Le théorème de Varignon dit que le moment d'une force est égal :" choix={['au produit de ses composantes', 'à la somme des moments de ses composantes', 'à sa composante horizontale', 'à zéro']} bonne={1} colonnes={2}>
+M<sub>O</sub> = x<sub>A</sub> F<sub>y</sub> − y<sub>A</sub> F<sub>x</sub>.
+</QCM>
+
+<QCM n={6} question="Un couple est formé de deux forces :" choix={['égales, parallèles et de même sens', 'égales, parallèles et de sens opposés', 'perpendiculaires', 'de même ligne d’action']} bonne={1} colonnes={2}>
+Leur résultante est nulle, leur moment ne l'est pas (sauf si elles ont la même ligne d'action).
+</QCM>
+
+<QCM n={7} question="Le moment d'un couple :" choix={['dépend du point choisi', 'est le même en tout point', 'est toujours nul', 'vaut 2F']} bonne={1} colonnes={2}>
+C = F d, partout.
+</QCM>
+
+<QCM n={8} question="Avec la convention habituelle, un moment négatif fait tourner :" choix={['dans le sens trigonométrique', 'dans le sens horaire', 'dans les deux sens', 'il ne fait pas tourner']} bonne={1} colonnes={2}>
+Positif = sens trigonométrique ; négatif = sens horaire.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

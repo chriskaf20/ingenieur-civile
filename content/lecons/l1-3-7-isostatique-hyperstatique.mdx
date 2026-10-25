@@ -1,0 +1,314 @@
+---
+id: L1.3.7
+titre: Systèmes isostatiques et hyperstatiques
+objectifs:
+  - Compter les inconnues de liaison et les équations d'une structure plane
+  - Calculer le degré d'hyperstaticité d'une poutre, d'un portique ou d'un treillis
+  - Distinguer structure hypostatique, isostatique et hyperstatique
+  - Repérer une structure instable malgré un comptage favorable
+relecture: false
+normes: []
+glossaire:
+  - terme: Isostatique
+    definition: Structure dont les réactions et les efforts se calculent avec les seules équations de la statique ; autant d'inconnues que d'équations.
+  - terme: Hyperstatique
+    definition: Structure qui a plus d'inconnues de liaison que d'équations de la statique ; il faut tenir compte des déformations pour la calculer.
+  - terme: Hypostatique
+    definition: Structure qui a moins de liaisons qu'il n'en faut ; c'est un mécanisme, qui peut bouger sans se déformer.
+  - terme: Degré d'hyperstaticité
+    definition: Nombre d'inconnues en trop par rapport aux équations, noté h.
+  - terme: Rotule
+    definition: Articulation placée à l'intérieur d'une structure, entre deux parties ; elle transmet deux forces mais pas de moment.
+symboles:
+  - { symbole: 'r', signification: 'inconnues de liaison avec le sol', unite: '—' }
+  - { symbole: 'p', signification: 'nombre de solides', unite: '—' }
+  - { symbole: 'i', signification: 'inconnues des liaisons intérieures (2 par rotule)', unite: '—' }
+  - { symbole: 'h', signification: 'degré d’hyperstaticité', unite: '—' }
+  - { symbole: 'b, n', signification: 'barres et nœuds d’un treillis', unite: '—' }
+formules:
+  - { nom: 'Un solide', tex: 'h = r - 3', domaine: 'Structure plane d’un seul tenant' }
+  - { nom: 'Plusieurs solides', tex: 'h = r + i - 3p', domaine: 'p solides reliés par des rotules (i = 2 par rotule)' }
+  - { nom: 'Treillis articulé', tex: 'h = b + r - 2n', domaine: 'Barres articulées, charges aux nœuds' }
+  - { nom: 'Classement', tex: 'h < 0 : \text{mécanisme}, \quad h = 0 : \text{isostatique}, \quad h > 0 : \text{hyperstatique}', domaine: 'Liaisons bien disposées' }
+---
+
+import { degreHyperstaticite, degreTreillis, STRUCTURES_TYPES } from '@/lib/calc/statique'
+import { nombre } from '@/lib/format'
+import { GalerieStructures } from '@/components/schemas/Statique'
+
+export const h = (id) => {
+  const s = STRUCTURES_TYPES.find((t) => t.id === id)
+  return degreHyperstaticite(s.r, s.p, s.internes).h
+}
+export const galerie = ['deuxRouleaux', 'deuxAppuis', 'console', 'continue', 'gerber', 'portiqueEncastre']
+export const degres = galerie.map(h)
+export const troisAppuis = degreHyperstaticite(4, 1, 0)
+export const pratt = degreTreillis(13, 3, 8)
+export const prattPlus = degreTreillis(14, 3, 8)
+export const prattMoins = degreTreillis(12, 3, 8)
+
+<Page etape="intuition" titre="L'intuition : le tabouret à trois pieds">
+
+Un tabouret à **trois pieds** tient toujours, même sur un sol inégal : chaque pied touche le sol, et la charge se partage d'une seule façon possible. Avec **quatre pieds**, sur un sol bosselé, il boite : un pied flotte, et la répartition de la charge dépend du sol et de la rigidité du tabouret. Avec **deux pieds**, il tombe.
+
+Les structures se rangent dans ces trois familles. Avec juste assez de liaisons, elles sont **isostatiques** : la statique suffit à les calculer. Avec trop de liaisons, elles sont **hyperstatiques** : plus robustes, mais il faut connaître leurs déformations. Avec pas assez, ce sont des **mécanismes** : elles bougent.
+
+Avant de calculer une structure, l'ingénieur compte donc ses liaisons : ce comptage dit quelle méthode employer, et parfois qu'il manque un appui.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment savoir si la statique suffit pour calculer une structure ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : compter inconnues et équations">
+
+### Pour un seul solide
+
+On compte les **inconnues de liaison** r (L1.3.5) : 1 par appui simple, 2 par articulation, 3 par encastrement. La statique fournit **3 équations**. Le degré d'hyperstaticité vaut :
+
+$$h = r - 3$$
+
+| h | Nature | Conséquence |
+|---|---|---|
+| h < 0 | hypostatique | mécanisme : la structure bouge, inacceptable |
+| h = 0 | isostatique | la statique suffit |
+| h > 0 | hyperstatique | h inconnues de trop : il faut les déformations (L2, L3) |
+
+<Encadre type="exemple" titre="Trois poutres">
+Articulation + appui simple : h = 3 − 3 = {nombre(h('deuxAppuis'), 0)}. Deux appuis simples : h = 2 − 3 = {nombre(h('deuxRouleaux'), 0)}, la poutre peut glisser horizontalement. Articulation + deux appuis simples (poutre continue) : h = 4 − 3 = {nombre(h('continue'), 0)}.
+</Encadre>
+
+### Un comptage nécessaire, pas suffisant
+
+h ≥ 0 ne garantit pas la stabilité : les liaisons doivent aussi être **bien disposées**. Une poutre posée sur trois appuis simples verticaux a r = 3, donc h = 0, mais rien ne l'empêche de glisser horizontalement : c'est un mécanisme. De même, trois réactions concourantes en un point laissent la rotation libre autour de ce point.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : rotules, portiques et treillis">
+
+### Plusieurs solides
+
+Si la structure est faite de p parties reliées par des **rotules**, chaque partie fournit 3 équations, et chaque rotule entre deux parties ajoute 2 inconnues intérieures (i) :
+
+$$h = r + i - 3p$$
+
+La poutre **Gerber** (console + rotule + appui) : r = 4, p = 2, i = 2, donc h = {nombre(h('gerber'), 0)}. Le **portique à trois articulations** : h = {nombre(h('troisRotules'), 0)}. Le portique **encastré en pied**, lui, est un seul solide avec r = 6 : h = {nombre(h('portiqueEncastre'), 0)}.
+
+### Les treillis
+
+Pour un treillis articulé de b barres et n nœuds, chaque nœud fournit 2 équations et chaque barre est une inconnue :
+
+$$h = b + r - 2n$$
+
+### Avantages et inconvénients
+
+- Une structure **hyperstatique** a des réserves : si une liaison cède, les autres peuvent reprendre la charge. Ses moments sont souvent plus faibles. Mais elle est sensible aux **tassements d'appui** et aux variations de température, qui créent des efforts.
+- Une structure **isostatique** suit les tassements sans effort supplémentaire, mais la défaillance d'une seule liaison la rend instable.
+
+<Regle type="simplification">
+Les formules supposent des liaisons parfaites et des charges dans le plan. Un bâtiment réel en béton armé coulé d'un seul tenant est fortement hyperstatique : on le calcule par des méthodes de la résistance des matériaux et par logiciel (niveau 3).
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : six structures, six degrés">
+
+<GalerieStructures ids={galerie} degres={degres} />
+
+De gauche à droite et de haut en bas : deux appuis simples (mécanisme), articulation et appui simple, console, poutre continue, poutre Gerber, portique encastré. Seules les structures en vert se calculent avec la seule statique.
+
+<Encadre type="retenir">
+h = r − 3 pour un solide ; h = r + i − 3p avec des rotules ; h = b + r − 2n pour un treillis. Et toujours vérifier que les liaisons sont bien disposées.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="hyperstatique">
+
+<Cahier titre="Exemple résolu : la poutre Gerber d'un petit pont">
+
+**Énoncé.** Un petit pont en béton franchit un ruisseau en deux parties : une poutre encastrée dans la culée gauche, prolongée en console, sur laquelle s'appuie par une rotule une seconde poutre, posée sur un appui simple à droite. Combien d'inconnues de liaison ce système comporte-t-il ? Est-il isostatique ? Change de structure dans la liste pour comparer.
+
+<Etape n={1} titre="La structure">
+<Entrees />
+<Note>Pourquoi une rotule au milieu ? Elle coupe la transmission du moment : chaque partie peut suivre un tassement sans que des efforts parasites apparaissent.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le comptage">
+
+<Etape n={3} titre="Les inconnues">
+<AN k="inconnues" />
+<Note>Pourquoi 2 inconnues pour la rotule ? Elle transmet une force horizontale et une force verticale entre les deux poutres, mais aucun moment.</Note>
+</Etape>
+
+<Etape n={4} titre="Les équations">
+<AN k="equations" />
+</Etape>
+
+<Etape n={5} titre="Le degré">
+<AN k="h" />
+<Resultat k="nature" libelle="Nature de la structure" />
+<Note couleur="vert">Contrôle : choisis le portique encastré en pied ; tu dois trouver h = 3, la valeur classique d'un cadre fermé sur le sol.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="compter 2 inconnues pour un appui simple.">
+Un appui simple n'empêche qu'un déplacement : 1 inconnue. Une articulation : 2. Un encastrement : 3.
+</Piege>
+
+<Piege erreur="oublier les liaisons intérieures.">
+Une rotule entre deux parties ajoute 2 inconnues, mais aussi 3 équations pour la seconde partie : le bilan change.
+</Piege>
+
+<Piege erreur="croire que h = 0 suffit à garantir la stabilité.">
+Trois appuis simples verticaux donnent h = 0, mais la poutre glisse horizontalement. Il faut aussi des liaisons bien disposées.
+</Piege>
+
+<Piege erreur="confondre hyperstatique et instable.">
+Une structure hyperstatique a trop de liaisons, pas trop peu : elle est stable, souvent très robuste. C'est l'hypostatique qui est instable.
+</Piege>
+
+<Piege erreur="penser qu'une structure hyperstatique est un défaut.">
+C'est souvent un avantage (réserves de résistance, moments plus faibles). Il faut seulement la calculer avec les déformations, et surveiller les tassements.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les bâtiments en béton armé.** Poteaux, poutres et dalles coulés ensemble forment une ossature très hyperstatique. C'est une force : si une poutre est endommagée, les charges trouvent d'autres chemins. Mais le calcul demande des méthodes de la résistance des matériaux et, en pratique, un logiciel.
+
+<Encadre type="terrain" titre="Les sols qui bougent">
+Sur les argiles gonflantes ou les remblais mal compactés, les appuis peuvent se déplacer de plusieurs centimètres au fil des saisons des pluies et de la saison sèche. Une structure hyperstatique fissure alors, car chaque tassement différentiel crée des efforts. Les ponts et les ouvrages construits sur ces sols sont souvent conçus **isostatiques** (travées indépendantes, poutres Gerber, joints), pour suivre les mouvements sans dommage.
+</Encadre>
+
+**Les joints de dilatation.** Couper un long bâtiment par des joints (N0.7.6) revient à réduire son hyperstaticité : chaque bloc peut se dilater librement, sans efforts dus à la température.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : isostatique ou hyperstatique">
+
+### Inconnues de liaison
+
+appui simple 1 · articulation 2 · encastrement 3 · rotule intérieure 2
+
+### Degré d'hyperstaticité
+
+un solide : $h = r - 3$ · p solides : $h = r + i - 3p$ · treillis : $h = b + r - 2n$
+
+### Classement
+
+h < 0 : mécanisme · h = 0 : isostatique · h > 0 : hyperstatique
+
+### Attention
+
+comptage nécessaire mais pas suffisant : liaisons bien disposées (pas toutes parallèles, pas toutes concourantes)
+
+### Choix
+
+hyperstatique : réserves, moments réduits, sensible aux tassements · isostatique : suit les tassements, sans réserve
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une poutre sur trois appuis">
+
+Une poutre repose sur une articulation et deux appuis simples. Calcule son degré d'hyperstaticité.
+
+<Indice>r = 2 + 1 + 1, un seul solide.</Indice>
+
+<Corrige>
+r = 4, h = 4 − 3 = **{nombre(troisAppuis.h, 0)}** : la poutre continue est **{troisAppuis.nature}** de degré 1.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Trois portiques">
+
+Calcule h pour un portique articulé en pied, un portique encastré en pied et un portique à trois articulations (deux articulations en pied et une rotule au faîtage).
+
+<Indice>Pour le troisième, compte deux solides et une rotule intérieure.</Indice>
+
+<Corrige>
+
+- Articulé en pied : r = 2 + 2 = 4, h = **{nombre(h('portiqueArticule'), 0)}**.
+- Encastré en pied : r = 3 + 3 = 6, h = **{nombre(h('portiqueEncastre'), 0)}**.
+- Trois articulations : r = 4, i = 2, p = 2, h = 4 + 2 − 6 = **{nombre(h('troisRotules'), 0)}** : isostatique.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un treillis de passerelle">
+
+Une poutre treillis Pratt à 4 panneaux compte 8 nœuds et 13 barres ; elle repose sur une articulation et un appui simple. Calcule h. Que se passe-t-il si l'on ajoute une seconde diagonale dans un panneau ? Si l'on retire une diagonale ?
+
+<Indice>h = b + r − 2n, avec r = 3.</Indice>
+
+<Corrige>
+
+- 13 + 3 − 16 = **{nombre(pratt.h, 0)}** : isostatique.
+- Une diagonale de plus : h = **{nombre(prattPlus.h, 0)}**, hyperstatique.
+- Une diagonale de moins : h = **{nombre(prattMoins.h, 0)}** : le panneau se déforme en parallélogramme, c'est un mécanisme.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une poutre sur une articulation et un appui simple est :" choix={['hypostatique', 'isostatique', 'hyperstatique de degré 1', 'hyperstatique de degré 2']} bonne={1} colonnes={2}>
+r = 3, h = 0.
+</QCM>
+
+<QCM n={2} question="Une poutre encastrée à une extrémité et posée sur un appui simple à l'autre a un degré h égal à :" choix={['0', '1', '2', '3']} bonne={1} colonnes={4}>
+r = 3 + 1 = 4, h = 1.
+</QCM>
+
+<QCM n={3} question="Une structure hypostatique est :" choix={['trop rigide', 'un mécanisme qui peut bouger', 'calculable par la statique', 'toujours sûre']} bonne={1} colonnes={2}>
+Il lui manque des liaisons.
+</QCM>
+
+<QCM n={4} question="Pour un treillis articulé, le degré d'hyperstaticité vaut :" choix={['b − n', 'b + r − 2n', 'r − 3', '2n − b']} bonne={1} colonnes={4}>
+Chaque nœud donne 2 équations.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une rotule intérieure entre deux parties d'une structure ajoute :" choix={['1 inconnue', '2 inconnues', '3 inconnues', 'aucune inconnue']} bonne={1} colonnes={4}>
+Deux forces transmises, pas de moment.
+</QCM>
+
+<QCM n={6} question="Une poutre posée sur trois appuis simples verticaux a r = 3. Elle est :" choix={['isostatique et stable', 'instable : rien n’empêche le glissement horizontal', 'hyperstatique', 'encastrée']} bonne={1} colonnes={2}>
+Le comptage ne suffit pas : les trois réactions sont parallèles.
+</QCM>
+
+<QCM n={7} question="Sur un sol qui tasse de façon inégale, on préfère souvent une structure :" choix={['isostatique', 'hyperstatique', 'hypostatique', 'sans appui']} bonne={0} colonnes={4}>
+Elle suit les tassements sans efforts supplémentaires.
+</QCM>
+
+<QCM n={8} question="Un portique encastré en pied est hyperstatique de degré :" choix={['0', '1', '2', '3']} bonne={3} colonnes={4}>
+r = 6, un seul solide : h = 3.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

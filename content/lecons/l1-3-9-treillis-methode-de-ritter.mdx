@@ -1,0 +1,307 @@
+---
+id: L1.3.9
+titre: "Treillis : méthode des sections (Ritter)"
+objectifs:
+  - Couper un treillis à travers trois barres et isoler une partie
+  - Calculer directement l'effort d'une barre par une équation de moments bien choisie
+  - Relier les efforts des membrures au moment fléchissant et ceux des diagonales à l'effort tranchant
+  - Contrôler un résultat par la méthode des nœuds
+relecture: false
+normes: []
+glossaire:
+  - terme: Méthode de Ritter
+    definition: Méthode des sections qui coupe un treillis à travers trois barres et obtient chaque effort par une équation de moments autour du point où se coupent les deux autres barres.
+  - terme: Coupe
+    definition: Ligne imaginaire qui traverse le treillis et sépare deux parties ; les efforts des barres coupées deviennent des forces extérieures pour chaque partie.
+  - terme: Centre des moments
+    definition: Point choisi pour écrire l'équation des moments ; à l'intersection de deux barres coupées, leurs efforts disparaissent de l'équation.
+  - terme: Effort tranchant
+    definition: Somme des forces verticales d'un côté d'une coupe ; dans un treillis, ce sont les diagonales qui le reprennent.
+  - terme: Moment fléchissant
+    definition: Moment des forces d'un côté d'une coupe ; dans un treillis, ce sont les membrures qui le reprennent.
+symboles:
+  - { symbole: 'M', signification: 'moment fléchissant au droit d’un nœud', unite: 'kN·m' }
+  - { symbole: 'V', signification: 'effort tranchant dans un panneau', unite: 'kN' }
+  - { symbole: 'h', signification: 'hauteur du treillis', unite: 'm' }
+  - { symbole: 'N_sup, N_inf, N_diag', signification: 'efforts des barres coupées', unite: 'kN' }
+  - { symbole: 'k', signification: 'numéro du panneau coupé', unite: '—' }
+formules:
+  - { nom: 'Membrure supérieure', tex: 'N_{sup} = -\frac{M_{droite}}{h}', domaine: 'Moments autour du nœud inférieur droit du panneau' }
+  - { nom: 'Membrure inférieure', tex: 'N_{inf} = \frac{M_{gauche}}{h}', domaine: 'Moments autour du nœud supérieur du panneau' }
+  - { nom: 'Diagonale', tex: 'N_{diag} = \frac{V}{\sin\theta}', domaine: 'Projection verticale, membrures parallèles' }
+---
+
+import { EXEMPLE_PRATT, geometriePratt, ritterPratt, treillis } from '@/lib/calc/statique'
+import { grandeur, nombre } from '@/lib/format'
+import { CoupeRitter } from '@/components/schemas/Statique'
+
+export const r2 = ritterPratt(EXEMPLE_PRATT, 2)
+export const r1 = ritterPratt(EXEMPLE_PRATT, 1)
+export const t0 = treillis(geometriePratt(EXEMPLE_PRATT))
+export const d6 = { n: 6, a: 2.5, h: 2, P: 15 }
+export const s62 = ritterPratt(d6, 2)
+export const s63 = ritterPratt(d6, 3)
+
+<Page etape="intuition" titre="L'intuition : couper pour voir à l'intérieur">
+
+Un pont en treillis de 60 m compte des dizaines de barres. On veut seulement savoir si la membrure du milieu, la plus sollicitée, est assez forte. Avec la méthode des nœuds, il faudrait traverser le pont nœud par nœud depuis l'appui : long, et chaque erreur se propage.
+
+L'idée de Ritter, ingénieur allemand du XIX<sup>e</sup> siècle : **couper** le treillis d'un trait, juste à travers la barre qui nous intéresse et deux autres. La partie gauche, isolée, est en équilibre sous ses charges, sa réaction d'appui et les trois efforts coupés. Une équation de moments bien choisie donne l'effort cherché **directement**.
+
+C'est aussi la façon dont l'ingénieur « lit » un treillis : les membrures portent le moment, les diagonales portent l'effort tranchant, comme dans une poutre.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment trouver l'effort dans une barre précise d'un treillis, sans calculer toutes les autres ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : la coupe et les moments">
+
+### La méthode
+
+1. Calculer les **réactions** du treillis entier.
+2. Tracer une **coupe** qui traverse au plus **trois barres** dont les efforts sont inconnus, et qui ne sont pas toutes concourantes.
+3. Isoler l'une des deux parties (souvent la plus simple) : elle est en équilibre sous ses charges, ses réactions et les **trois efforts coupés**, dessinés en traction.
+4. Pour chaque barre, prendre les moments autour du **point d'intersection des deux autres** : seule la barre cherchée reste dans l'équation.
+5. Si deux barres sont **parallèles** (les membrures), leur intersection est rejetée à l'infini : on projette alors perpendiculairement à elles pour obtenir la troisième.
+
+### Dans une poutre Pratt
+
+Coupons le panneau k, entre les nœuds inférieurs B<sub>k−1</sub> et B<sub>k</sub> :
+
+- **membrure supérieure** : moments autour de B<sub>k</sub>, où se coupent la membrure inférieure et la diagonale : N<sub>sup</sub> h + M(B<sub>k</sub>) = 0 ;
+- **membrure inférieure** : moments autour du nœud supérieur où se coupent la membrure supérieure et la diagonale : N<sub>inf</sub> h = M ;
+- **diagonale** : les membrures sont parallèles ; la projection verticale donne N<sub>diag</sub> sin θ = V, l'effort tranchant du panneau.
+
+<Regle type="simplification">
+Comme pour la méthode des nœuds, on suppose les nœuds articulés et les charges aux nœuds. La coupe doit traverser le treillis de part en part : chaque partie doit être un solide complet, en équilibre.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le treillis lu comme une poutre">
+
+### Membrures et moment fléchissant
+
+Les deux membrures forment un **couple** : l'une poussée, l'autre tirée, distantes de h. Ce couple équilibre le moment fléchissant M des forces situées à gauche de la coupe :
+
+$$N_{inf} \approx -N_{sup} \approx \frac{M}{h}$$
+
+Les membrures sont donc les plus chargées là où le moment est maximal : **au milieu de la portée**.
+
+### Diagonales et effort tranchant
+
+L'effort tranchant V (somme des forces verticales à gauche de la coupe) ne peut être repris que par la diagonale, la seule barre coupée qui ne soit pas horizontale. Les diagonales sont donc les plus chargées **près des appuis**, là où V est maximal.
+
+<Encadre type="exemple" titre="La passerelle de L1.3.8">
+Dans le panneau 2 : M au nœud droit = {grandeur(r2.Mdroite, 0, 'kN·m')}, d'où N<sub>sup</sub> = −{nombre(r2.Mdroite, 0)} / 3 = {grandeur(r2.Nsup, 0, 'kN')}. Effort tranchant V = {grandeur(r2.V, 0, 'kN')}, d'où N<sub>diag</sub> = {grandeur(r2.Ndiag, 2, 'kN')}. La méthode des nœuds donne exactement les mêmes valeurs.
+</Encadre>
+
+### Les deux méthodes ensemble
+
+La méthode des **nœuds** est idéale pour obtenir **toutes** les barres d'un petit treillis. La méthode de **Ritter** est idéale pour **une** barre dans un grand treillis, ou pour contrôler un calcul.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la coupe dans le panneau d'about">
+
+<CoupeRitter d={EXEMPLE_PRATT} r={r1} />
+
+Dans le panneau d'about, la coupe traverse la diagonale d'about et la membrure inférieure : il n'y a pas de membrure supérieure. La diagonale, inclinée vers le haut, reprend tout l'effort tranchant (la réaction R<sub>A</sub>) en compression : {grandeur(r1.Ndiag, 2, 'kN')}.
+
+<Encadre type="retenir">
+Couper à travers trois barres au plus ; moments autour de l'intersection des deux autres ; projection perpendiculaire aux membrures pour la diagonale. Membrures ↔ moment fléchissant, diagonales ↔ effort tranchant.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="ritter">
+
+<Cahier titre="Exemple résolu : la membrure du milieu de la passerelle">
+
+**Énoncé.** Reprends la passerelle de L1.3.8 : treillis Pratt de 4 panneaux de 3 m, hauteur 3 m, 20 kN à chaque nœud intérieur inférieur. Par la méthode de Ritter, calcule directement les efforts des trois barres du panneau 2 : membrure supérieure, membrure inférieure et diagonale.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi le panneau 2 ? Il touche le milieu de la portée : sa membrure supérieure est la plus comprimée.</Note>
+</Etape>
+
+<Etape n={2} titre="La coupe">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : trois barres, trois équations">
+
+<Etape n={3} titre="La partie gauche">
+<AN k="coupe" />
+<AN k="moments" />
+</Etape>
+
+<Etape n={4} titre="Les membrures">
+<AN k="sup" />
+<AN k="inf" />
+<Note>Pourquoi ces centres de moments ? Autour du nœud inférieur droit, la membrure inférieure et la diagonale passent par le point : seule la membrure supérieure reste.</Note>
+</Etape>
+
+<Etape n={5} titre="La diagonale">
+<AN k="diag" />
+</Etape>
+
+<Etape n={6} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="Nsup" libelle="Membrure supérieure" />
+<Note couleur="vert">Contrôle : passe à 6 panneaux et coupe le panneau 3 ; la membrure supérieure du milieu est la plus comprimée, la diagonale la moins chargée.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="couper quatre barres inconnues.">
+Trois équations ne résolvent pas quatre inconnues. On choisit une coupe qui traverse trois barres au plus.
+</Piege>
+
+<Piege erreur="prendre un centre de moments quelconque.">
+Le résultat reste juste, mais avec deux ou trois inconnues dans l'équation. L'intérêt de Ritter est de prendre l'intersection des deux autres barres.
+</Piege>
+
+<Piege erreur="oublier une charge de la partie isolée.">
+Toutes les charges situées à gauche de la coupe entrent dans les équations, avec la réaction d'appui. Une charge oubliée fausse les trois résultats.
+</Piege>
+
+<Piege erreur="confondre le moment au nœud gauche et au nœud droit du panneau.">
+La membrure supérieure utilise le moment au nœud inférieur droit ({grandeur(r2.Mdroite, 0, 'kN·m')}) ; la membrure inférieure, le moment au droit du nœud supérieur ({grandeur(r2.Mgauche, 0, 'kN·m')}).
+</Piege>
+
+<Piege erreur="mal lire le signe de la diagonale.">
+On la dessine en traction ; un résultat négatif signale une compression, comme pour la diagonale d'about.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Vérifier une barre critique.** Lors de l'inspection d'un pont en treillis, l'ingénieur repère les barres corrodées ou déformées. La méthode de Ritter lui donne en quelques lignes l'effort de chacune, pour juger si la section restante suffit, sans refaire tout le calcul.
+
+<Encadre type="terrain" titre="Contrôler les logiciels">
+Les bureaux d'études calculent les treillis par ordinateur. Une coupe de Ritter au milieu de la portée est le contrôle le plus rapide : l'effort des membrures doit être voisin de M/h, avec M le moment de la poutre équivalente. Un écart important signale une erreur de saisie (charge oubliée, appui mal défini).
+</Encadre>
+
+**Choisir la hauteur.** Puisque N<sub>membrure</sub> ≈ M/h, doubler la hauteur divise par deux l'effort des membrures. Les grands ponts en treillis ont une hauteur de l'ordre du dixième de leur portée (règle de l'art) : un compromis entre efforts, poids des diagonales et prise au vent.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : méthode de Ritter">
+
+### Méthode
+
+réactions · coupe à travers 3 barres au plus · partie isolée · moments autour de l'intersection des 2 autres
+
+### Membrures (poutre Pratt, panneau k)
+
+$N_{sup} = -M(B_k)/h$ · $N_{inf} = M/h$ au droit du nœud supérieur
+
+### Diagonale
+
+$N_{diag} = V/\sin\theta$ · V = somme des forces verticales à gauche
+
+### Lecture
+
+membrures ↔ moment (maximal au milieu) · diagonales ↔ effort tranchant (maximal aux appuis)
+
+### Choix de méthode
+
+nœuds : toutes les barres · Ritter : une barre, ou un contrôle
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La membrure du milieu">
+
+Pour la passerelle (4 panneaux de 3 m, h = 3 m, 20 kN par nœud), calcule le moment au nœud inférieur du milieu, puis l'effort de la membrure supérieure du panneau 2.
+
+<Indice>R<sub>A</sub> = 30 kN ; M = R<sub>A</sub> × 6 − 20 × 3.</Indice>
+
+<Corrige>
+M = 30 × 6 − 20 × 3 = **{grandeur(r2.Mdroite, 0, 'kN·m')}** ; N<sub>sup</sub> = −{nombre(r2.Mdroite, 0)} / 3 = **{grandeur(r2.Nsup, 0, 'kN')}** (compression).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un treillis à six panneaux">
+
+Un treillis Pratt de 6 panneaux de 2,5 m, haut de 2 m, porte 15 kN à chaque nœud intérieur inférieur. Calcule par Ritter les efforts des trois barres du panneau 3.
+
+<Indice>R<sub>A</sub> = 5 × 15 / 2. Moments au droit des nœuds x = 5 m et x = 7,5 m ; V = R<sub>A</sub> − 2 P.</Indice>
+
+<Corrige>
+
+- R<sub>A</sub> = **{grandeur(s63.RA, 1, 'kN')}** ; M(5 m) = {grandeur(s63.Mgauche, 2, 'kN·m')} ; M(7,5 m) = {grandeur(s63.Mdroite, 2, 'kN·m')}.
+- N<sub>sup</sub> = **{grandeur(s63.Nsup, 2, 'kN')}** ; N<sub>inf</sub> = **{grandeur(s63.Ninf, 2, 'kN')}** ; V = {grandeur(s63.V, 1, 'kN')}, N<sub>diag</sub> = **{grandeur(s63.Ndiag, 2, 'kN')}**.
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Où sont les barres les plus chargées ?">
+
+Pour le treillis de l'exercice 2, compare les efforts des membrures supérieures et des diagonales des panneaux 2 et 3. Relie tes résultats au moment fléchissant et à l'effort tranchant.
+
+<Indice>Utilise la fiche avec n = 6, a = 2,5 m, h = 2 m, P = 15 kN, en changeant k.</Indice>
+
+<Corrige>
+Membrures supérieures : {grandeur(s62.Nsup, 2, 'kN')} (panneau 2) puis **{grandeur(s63.Nsup, 2, 'kN')}** (panneau 3) : elles croissent vers le milieu, comme le moment. Diagonales : **{grandeur(s62.Ndiag, 2, 'kN')}** puis {grandeur(s63.Ndiag, 2, 'kN')} : elles décroissent vers le milieu, comme l'effort tranchant.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La méthode de Ritter coupe le treillis à travers au plus :" choix={['une barre', 'deux barres', 'trois barres inconnues', 'toutes les barres']} bonne={2} colonnes={4}>
+Trois équations d'équilibre pour la partie isolée.
+</QCM>
+
+<QCM n={2} question="Pour obtenir directement l'effort d'une barre coupée, on prend les moments :" choix={['au milieu de la barre', 'à l’intersection des deux autres barres coupées', 'à l’appui le plus proche', 'au centre du treillis']} bonne={1} colonnes={2}>
+Les deux autres efforts y ont un bras de levier nul.
+</QCM>
+
+<QCM n={3} question="Dans une poutre treillis, les membrures reprennent surtout :" choix={['l’effort tranchant', 'le moment fléchissant', 'les réactions', 'rien']} bonne={1} colonnes={2}>
+Elles forment un couple de bras de levier h.
+</QCM>
+
+<QCM n={4} question="Les diagonales d'une poutre treillis reprennent surtout :" choix={['le moment fléchissant', 'l’effort tranchant', 'le poids propre seul', 'la température']} bonne={1} colonnes={2}>
+Ce sont les seules barres coupées inclinées.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour la passerelle, la membrure supérieure du panneau 2 reçoit :" choix={[grandeur(r2.Nsup, 0, 'kN'), grandeur(-r2.Nsup, 0, 'kN'), grandeur(r2.Ninf, 0, 'kN'), grandeur(r2.Ndiag, 2, 'kN')]} bonne={0} colonnes={4}>
+N<sub>sup</sub> = −M / h = −{nombre(r2.Mdroite, 0)} / 3.
+</QCM>
+
+<QCM n={6} question="Quand les deux autres barres coupées sont parallèles, on obtient la troisième par :" choix={['une équation de moments', 'une projection perpendiculaire aux barres parallèles', 'la méthode graphique seulement', 'impossible']} bonne={1} colonnes={2}>
+Leur intersection est à l'infini.
+</QCM>
+
+<QCM n={7} question="Les membrures d'une poutre treillis sur deux appuis sont les plus chargées :" choix={['près des appuis', 'au milieu de la portée', 'partout pareil', 'au premier panneau']} bonne={1} colonnes={2}>
+Là où le moment fléchissant est maximal.
+</QCM>
+
+<QCM n={8} question="Si l'on double la hauteur d'un treillis, l'effort de ses membrures est environ :" choix={['doublé', 'divisé par deux', 'inchangé', 'divisé par quatre']} bonne={1} colonnes={4}>
+N ≈ M / h.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

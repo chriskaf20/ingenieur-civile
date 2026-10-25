@@ -1,0 +1,302 @@
+---
+id: L1.3.5
+titre: "Liaisons et appuis : appui simple, articulation, encastrement"
+objectifs:
+  - Relier chaque type d'appui aux mouvements qu'il empêche
+  - Associer à chaque appui ses réactions (forces et moment)
+  - Choisir le modèle d'appui adapté à un détail de construction réel
+  - Calculer les réactions d'une console encastrée
+relecture: false
+normes: []
+glossaire:
+  - terme: Liaison
+    definition: Contact entre deux solides, ou entre un solide et le sol, qui empêche certains mouvements ; à chaque mouvement empêché correspond une réaction.
+  - terme: Appui simple
+    definition: Liaison qui empêche seulement le déplacement perpendiculaire au support ; elle exerce une seule réaction, perpendiculaire au support.
+  - terme: Articulation
+    definition: Liaison qui empêche les deux déplacements mais laisse la rotation libre ; elle exerce deux réactions et aucun moment.
+  - terme: Encastrement
+    definition: Liaison qui empêche tout mouvement, translations et rotation ; elle exerce deux réactions et un moment.
+  - terme: Porte-à-faux
+    definition: Partie d'un élément qui dépasse de son dernier appui, comme un balcon ou une console.
+symboles:
+  - { symbole: 'H, V', signification: 'réactions horizontale et verticale', unite: 'kN' }
+  - { symbole: 'M', signification: 'moment d’encastrement', unite: 'kN·m' }
+  - { symbole: 'L', signification: 'longueur du porte-à-faux', unite: 'm' }
+  - { symbole: 'q', signification: 'charge répartie', unite: 'kN/m' }
+  - { symbole: 'P, a', signification: 'charge ponctuelle et sa distance à l’encastrement', unite: 'kN, m' }
+formules:
+  - { nom: 'Degrés de liberté', tex: '3 \text{ dans le plan : } u_x,\ u_y,\ \theta', domaine: 'Solide plan non lié' }
+  - { nom: 'Réactions', tex: '\text{appui simple : } 1, \quad \text{articulation : } 2, \quad \text{encastrement : } 3', domaine: 'Liaisons planes parfaites' }
+  - { nom: 'Console encastrée', tex: 'V = qL + P, \quad M = \frac{qL^2}{2} + P\,a', domaine: 'Charges verticales' }
+---
+
+import { consoleEncastree, EXEMPLE_CONSOLE } from '@/lib/calc/statique'
+import { grandeur, nombre } from '@/lib/format'
+import { LiaisonsIso } from '@/components/schemas/Statique'
+
+export const c0 = consoleEncastree(EXEMPLE_CONSOLE)
+export const c2 = consoleEncastree({ L: 2, q: 5, P: 0, a: 0 })
+export const cMi = consoleEncastree({ ...EXEMPLE_CONSOLE, a: EXEMPLE_CONSOLE.L / 2 })
+
+<Page etape="intuition" titre="L'intuition : posé, cloué ou scellé">
+
+Pose une planche sur deux briques : elle tient, mais si tu la pousses, elle glisse ; si tu appuies au bout, elle bascule. Cloue-la d'un côté : elle ne glisse plus, mais elle peut encore tourner autour du clou. Scelle-la dans un mur : elle ne peut plus ni glisser, ni tourner.
+
+Chaque manière de tenir un élément **empêche certains mouvements**. Et pour empêcher un mouvement, l'appui doit exercer une force, ou un moment : une **réaction**. Plus l'appui bloque de mouvements, plus il exerce de réactions.
+
+Avant tout calcul, l'ingénieur doit donc décider comment chaque élément est tenu. Ce choix change les réactions, et parfois tout le dimensionnement.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quels efforts un appui exerce-t-il, selon la manière dont il tient la structure ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : mouvements empêchés et réactions">
+
+### Trois mouvements possibles
+
+Dans le plan, un solide libre peut faire trois mouvements : glisser horizontalement, glisser verticalement, tourner. On dit qu'il a **trois degrés de liberté**.
+
+### Les trois liaisons de base
+
+| Liaison | Mouvements empêchés | Réactions | Exemple |
+|---|---|---|---|
+| appui simple | 1 translation | 1 force, perpendiculaire au support | poutre posée sur un appareil glissant |
+| articulation | 2 translations | 2 forces, H et V | pied de poteau métallique sur deux tiges |
+| encastrement | 2 translations + rotation | 2 forces et 1 moment | balcon sorti d'une dalle, poteau scellé |
+
+Règle à retenir : **à chaque mouvement empêché correspond une réaction**. Un mouvement laissé libre ne crée aucune réaction : une articulation n'exerce pas de moment, un appui simple n'exerce pas de force parallèle au support.
+
+### Les symboles
+
+Sur les schémas : l'appui simple est un triangle posé sur des rouleaux, l'articulation un triangle fixé au sol, l'encastrement une paroi hachurée dans laquelle l'élément est pris.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : du détail réel au modèle">
+
+### Aucun appui n'est parfait
+
+Un modèle est une idéalisation. Une poutre en béton posée sur un mur en maçonnerie tourne un peu, glisse un peu : on la modélise par un **appui simple** ou une **articulation**. Un poteau coulé avec sa semelle sur un bon sol retient presque toute rotation : on le modélise par un **encastrement**.
+
+### Choisir le modèle prudent
+
+Le choix change les efforts :
+
+- une poutre supposée articulée à ses extrémités a son plus grand moment au milieu ;
+- la même poutre supposée encastrée reporte une partie du moment sur ses appuis.
+
+Si l'on suppose un encastrement que le détail ne réalise pas, l'appui reçoit un moment qu'il ne peut pas reprendre, et la travée est sous-dimensionnée. On choisit donc le modèle qui correspond **vraiment** à ce qui est construit, ou l'on encadre les deux cas.
+
+<Regle type="simplification">
+Les liaisons sont supposées **parfaites** : sans jeu, sans frottement, et infiniment rigides dans les directions bloquées. Les appareils d'appui réels (néoprène, plaques glissantes) ont une raideur et un frottement, étudiés en ouvrages d'art (L3).
+</Regle>
+
+<Encadre type="exemple" titre="Le balcon">
+Un balcon sorti d'une dalle n'a qu'un seul appui : son encastrement dans la dalle. Celui-ci doit reprendre à la fois la charge verticale et le moment qui tend à faire basculer le balcon : c'est l'exemple résolu.
+</Encadre>
+
+</Page>
+
+<Vue3D titre="Les trois liaisons en perspective" calques={[{ id: 'appuis', libelle: 'Appuis' }, { id: 'reactions', libelle: 'Réactions' }, { id: 'noms', libelle: 'Noms' }]}>
+
+De gauche à droite : une poutre posée sur un rouleau, une poutre tenue par un axe entre deux flasques, une poutre engagée dans un mur. Active le calque des réactions : une seule force pour le rouleau, deux pour l'axe, deux forces et un moment pour le mur.
+
+<LiaisonsIso />
+
+<Encadre type="retenir">
+Appui simple : 1 réaction. Articulation : 2 réactions. Encastrement : 3 réactions (2 forces et 1 moment). À chaque mouvement empêché, une réaction.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="consoleEncastree">
+
+<Cahier titre="Exemple résolu : l'encastrement d'un balcon">
+
+**Énoncé.** Un balcon en béton armé dépasse de 1,50 m de la façade. Une bande de 1 m de large porte une charge répartie de 6 kN/m (poids propre et exploitation) et, à son extrémité, le garde-corps et les personnes qui s'y appuient, soit 2 kN (données de l'énoncé). Quelles réactions l'encastrement doit-il fournir ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi une bande de 1 m ? On calcule le balcon par mètre de largeur : les résultats sont en kN et kN·m par mètre de façade.</Note>
+</Etape>
+
+<Etape n={2} titre="La console isolée">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : force et moment d'encastrement">
+
+<Etape n={3} titre="La réaction verticale">
+<AN k="V" />
+</Etape>
+
+<Etape n={4} titre="Le moment d'encastrement">
+<AN k="M" />
+<Note>Pourquoi q L²/2 ? La charge répartie a pour résultante q L, appliquée au milieu, à L/2 de l'encastrement.</Note>
+</Etape>
+
+<Etape n={5} titre="La réaction horizontale">
+<AN k="H" />
+<Resultat k="M" libelle="Moment d'encastrement" />
+<Note couleur="vert">Contrôle : déplace P vers l'encastrement (a plus petit). V ne change pas, mais M diminue : le moment dépend de l'endroit où la charge est appliquée.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le moment d'encastrement.">
+Une console sans moment à l'encastrement bascule. Pour l'exemple, l'encastrement doit reprendre {grandeur(c0.M, 2, 'kN·m')} en plus de {grandeur(c0.V, 0, 'kN')}.
+</Piege>
+
+<Piege erreur="supposer qu'une poutre posée sur un mur reprend un moment.">
+Un simple appui sur maçonnerie laisse la poutre tourner : on le modélise par un appui simple ou une articulation, pas par un encastrement.
+</Piege>
+
+<Piege erreur="mettre deux articulations sur une poutre droite.">
+La poutre ne peut alors plus s'allonger librement quand la température change : des efforts horizontaux apparaissent. On place une articulation et un appui simple, sauf calcul particulier.
+</Piege>
+
+<Piege erreur="confondre articulation et appui simple.">
+L'articulation retient aussi les efforts horizontaux (deux réactions) ; l'appui simple, une seule direction.
+</Piege>
+
+<Piege erreur="croire que le modèle n'a pas d'importance.">
+Le même élément, supposé articulé ou encastré, n'a pas les mêmes moments. Le modèle doit correspondre au détail réellement construit.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les balcons et les consoles.** Dans les immeubles des centres-villes, les balcons en porte-à-faux sont nombreux. Leur seul appui est l'encastrement dans la dalle : les armatures qui reprennent le moment sont placées **en partie haute**, là où le béton est tendu. Un balcon dont les aciers ont été posés en bas, ou écrasés par les ouvriers pendant le bétonnage, peut s'effondrer.
+
+<Encadre type="terrain" titre="Les appuis des ponts">
+Sur les ponts, on ne laisse pas le tablier se dilater contre des appuis fixes : on combine un appui fixe (articulation) et des appuis glissants ou en néoprène fretté, qui laissent le tablier s'allonger et tourner. Sur les petits ponts en béton des pistes rurales, un appui mal réalisé se fissure au fil des saisons.
+</Encadre>
+
+**Les pieds de poteaux.** Un poteau métallique fixé par deux tiges d'ancrage proches de son axe tourne facilement : c'est une articulation. Pour un encastrement, il faut une platine large, des tiges écartées et un massif capable de reprendre le moment.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : liaisons et appuis">
+
+### Degrés de liberté (plan)
+
+2 translations + 1 rotation = 3
+
+### Appui simple
+
+1 translation empêchée · 1 réaction perpendiculaire au support
+
+### Articulation
+
+2 translations empêchées · 2 réactions (H, V) · pas de moment
+
+### Encastrement
+
+tout est empêché · H, V et M
+
+### Règle
+
+à chaque mouvement empêché, une réaction · le modèle doit correspondre au détail construit
+
+### Console encastrée
+
+$V = qL + P$ · $M = qL^2/2 + P\,a$
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une console simple">
+
+Une console encastrée de 2 m porte une charge répartie de 5 kN/m. Calcule les réactions de l'encastrement.
+
+<Indice>V = q L ; M = q L² / 2.</Indice>
+
+<Corrige>
+V = 5 × 2 = **{grandeur(c2.V, 0, 'kN')}** ; M = 5 × 2² / 2 = **{grandeur(c2.M, 0, 'kN·m')}** ; H = 0.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Compter les réactions">
+
+Combien de réactions exercent : une poutre sur articulation et appui simple ; une console encastrée ; une poutre encastrée à gauche et posée sur un appui simple à droite ? Lesquelles peut-on calculer avec la seule statique ?
+
+<Indice>Additionne 1, 2 ou 3 réactions selon les appuis, et compare au nombre d'équations (3).</Indice>
+
+<Corrige>
+
+- Articulation + appui simple : 2 + 1 = **3** réactions, calculables.
+- Console encastrée : **3** réactions, calculables.
+- Encastrement + appui simple : 3 + 1 = **4** réactions pour 3 équations : une de trop, la poutre est hyperstatique (L1.3.7).
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Où placer la charge ?">
+
+Pour le balcon de l'exemple, compare le moment d'encastrement quand la charge de 2 kN est au bout (a = 1,50 m) et quand elle est au milieu (a = 0,75 m). Pourquoi les normes de garde-corps prévoient-elles des charges en bout ?
+
+<Indice>Seul le terme P a change.</Indice>
+
+<Corrige>
+Au bout : M = **{grandeur(c0.M, 2, 'kN·m')}** ; au milieu : M = **{grandeur(cMi.M, 2, 'kN·m')}**. La charge en bout donne le moment le plus fort : c'est le cas le plus défavorable, qu'il faut prévoir puisque les personnes s'appuient sur le garde-corps.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Combien de réactions exerce une articulation dans le plan ?" choix={['0', '1', '2', '3']} bonne={2} colonnes={4}>
+Deux forces (H et V), pas de moment.
+</QCM>
+
+<QCM n={2} question="Un appui simple exerce :" choix={['une force perpendiculaire au support', 'deux forces', 'une force et un moment', 'un moment seul']} bonne={0} colonnes={2}>
+Il n'empêche qu'un déplacement.
+</QCM>
+
+<QCM n={3} question="Un encastrement exerce :" choix={['une force', 'deux forces', 'deux forces et un moment', 'un moment seul']} bonne={2} colonnes={2}>
+Il empêche les deux translations et la rotation.
+</QCM>
+
+<QCM n={4} question="Un solide libre dans le plan possède :" choix={['1 degré de liberté', '2 degrés de liberté', '3 degrés de liberté', '6 degrés de liberté']} bonne={2} colonnes={4}>
+Deux translations et une rotation ; 6 dans l'espace.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour le balcon de l'exemple, le moment d'encastrement vaut :" choix={[grandeur(c0.M, 2, 'kN·m'), grandeur(c0.V, 2, 'kN·m'), grandeur(c0.Mq, 2, 'kN·m'), grandeur(c0.MP, 2, 'kN·m')]} bonne={0} colonnes={4}>
+q L²/2 + P a = {nombre(c0.Mq, 2)} + {nombre(c0.MP, 2)}.
+</QCM>
+
+<QCM n={6} question="Une poutre en béton simplement posée sur un mur en maçonnerie se modélise par :" choix={['un encastrement', 'un appui simple ou une articulation', 'deux encastrements', 'aucun appui']} bonne={1} colonnes={2}>
+Elle peut tourner sur son appui.
+</QCM>
+
+<QCM n={7} question="Dans un balcon en porte-à-faux, les armatures principales sont placées :" choix={['en partie basse', 'en partie haute, près de l’encastrement', 'au milieu de l’épaisseur', 'n’importe où']} bonne={1} colonnes={2}>
+Le moment d'encastrement tend la face supérieure.
+</QCM>
+
+<QCM n={8} question="Une réaction apparaît dans une liaison quand :" choix={['un mouvement est empêché', 'un mouvement est libre', 'la structure est légère', 'la charge est horizontale']} bonne={0} colonnes={2}>
+À chaque mouvement empêché correspond une réaction.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,329 @@
+---
+id: L1.3.8
+titre: "Treillis : méthode des nœuds"
+objectifs:
+  - Énoncer les hypothèses du treillis articulé et leurs limites
+  - Calculer les efforts dans les barres en isolant les nœuds un par un
+  - Distinguer barres tendues, comprimées et barres nulles
+  - Interpréter la répartition des efforts dans une poutre treillis
+relecture: false
+normes: []
+glossaire:
+  - terme: Treillis
+    definition: Assemblage de barres droites formant des triangles, reliées à leurs extrémités par des nœuds.
+  - terme: Nœud
+    definition: Point où se rejoignent plusieurs barres ; on le suppose articulé et c'est là que s'appliquent les charges.
+  - terme: Membrure
+    definition: Barre du contour supérieur ou inférieur d'une poutre treillis ; la membrure supérieure est comprimée, l'inférieure tendue, sous charges descendantes.
+  - terme: Effort normal
+    definition: Effort dirigé selon l'axe d'une barre, positif en traction et négatif en compression, en kN.
+  - terme: Barre nulle
+    definition: Barre dont l'effort est nul pour un chargement donné ; elle reste utile pour la stabilité et d'autres chargements.
+symboles:
+  - { symbole: 'N', signification: 'effort normal dans une barre (traction positive)', unite: 'kN' }
+  - { symbole: 'θ', signification: 'inclinaison d’une diagonale sur l’horizontale', unite: '°' }
+  - { symbole: 'a, h', signification: 'longueur d’un panneau, hauteur du treillis', unite: 'm' }
+  - { symbole: 'P', signification: 'charge appliquée à un nœud', unite: 'kN' }
+  - { symbole: 'b, n', signification: 'nombre de barres et de nœuds', unite: '—' }
+formules:
+  - { nom: 'Équilibre d’un nœud', tex: '\sum F_x = 0, \quad \sum F_y = 0', domaine: 'Deux inconnues au plus par nœud' }
+  - { nom: 'Isostaticité', tex: 'b + r = 2n', domaine: 'Treillis plan articulé' }
+  - { nom: 'Nœud d’appui (passerelle)', tex: 'N_{diag} = -\frac{R_A}{\sin\theta}, \quad N_{inf} = -N_{diag}\cos\theta', domaine: 'Diagonale d’about et membrure inférieure' }
+---
+
+import { EXEMPLE_PRATT, geometriePratt, ritterPratt, treillis } from '@/lib/calc/statique'
+import { grandeur, nombre } from '@/lib/format'
+import { NoeudIsole, TreillisDessin } from '@/components/schemas/Statique'
+
+export const g0 = geometriePratt(EXEMPLE_PRATT)
+export const t0 = treillis(g0)
+export const RA = t0.reactions[0].Ry
+export const sinT = ritterPratt(EXEMPLE_PRATT, 1).sinDiag
+export const angleDiag = (Math.atan2(EXEMPLE_PRATT.h, EXEMPLE_PRATT.a) * 180) / Math.PI
+export const t30 = treillis(geometriePratt({ ...EXEMPLE_PRATT, P: 30 }))
+export const tBas = treillis(geometriePratt({ ...EXEMPLE_PRATT, h: 2 }))
+
+<Page etape="intuition" titre="L'intuition : le triangle ne se déforme pas">
+
+Prends quatre baguettes et relie-les par des clous à leurs extrémités pour former un carré. Pousse sur un coin : le carré s'écrase en losange, sans qu'aucune baguette ne plie. Fais la même chose avec trois baguettes en triangle : impossible de le déformer sans casser ou allonger une baguette.
+
+Le **triangle** est la seule figure indéformable quand ses côtés sont articulés. En assemblant des triangles, on obtient un **treillis** : une structure légère et rigide, qui porte de grandes charges avec peu de matière. Fermes de toiture, ponts métalliques, pylônes électriques, grues : tous sont des treillis.
+
+Dans un treillis bien conçu, chaque barre est simplement **tirée** ou **poussée** suivant son axe, sans fléchir. Il suffit de connaître ces efforts pour choisir les barres.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment trouver l'effort dans chaque barre d'un treillis ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le modèle du treillis articulé">
+
+### Les hypothèses
+
+On calcule un treillis en supposant :
+
+1. les barres **droites**, reliées par des **nœuds articulés** ;
+2. les charges appliquées **aux nœuds** seulement ;
+3. le poids propre des barres négligé, ou ramené aux nœuds.
+
+Chaque barre est alors une barre à deux forces (L1.3.4) : elle ne transmet qu'un **effort normal** N, dirigé selon son axe. Convention : **N > 0 en traction**, N < 0 en compression.
+
+<Regle type="simplification">
+Dans la réalité, les nœuds sont soudés, boulonnés ou assemblés par des goussets et des pointes : ils ne sont pas de vraies articulations. Le modèle articulé reste excellent pour les efforts principaux, car les barres sont élancées et les triangles imposent la géométrie. Les petits moments dans les barres sont étudiés en construction métallique et en bois (L3).
+</Regle>
+
+### Le comptage
+
+Un treillis plan de b barres, n nœuds et r réactions est isostatique si b + r = 2n (L1.3.7). La passerelle de l'exemple compte {g0.barres.length} barres et {g0.noeuds.length} nœuds, avec r = 3 : {g0.barres.length} + 3 = 2 × {g0.noeuds.length}.
+
+### Lire le sens d'un effort
+
+À un nœud, l'effort d'une barre **tendue** tire le nœud vers la barre : la flèche **quitte** le nœud. Une barre **comprimée** pousse le nœud : la flèche **arrive** sur le nœud.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la méthode des nœuds">
+
+### Les étapes
+
+1. Calculer les **réactions** d'appui en considérant le treillis entier (L1.3.6).
+2. Choisir un nœud où il n'y a que **deux barres inconnues**, souvent un appui.
+3. Isoler ce nœud : dessiner les efforts des barres inconnues comme des tractions (flèches qui quittent le nœud).
+4. Écrire ΣF<sub>x</sub> = 0 et ΣF<sub>y</sub> = 0 : deux équations, deux inconnues. Un résultat négatif indique une compression.
+5. Passer au nœud voisin qui n'a plus que deux inconnues, et recommencer.
+6. Le dernier nœud sert de **contrôle**.
+
+### Repérer les barres nulles
+
+Sans charge au nœud :
+
+- si trois barres s'y rejoignent, dont deux alignées, la troisième est **nulle** ;
+- si seulement deux barres non alignées s'y rejoignent, **les deux** sont nulles.
+
+Dans la passerelle, le montant central est nul : au nœud supérieur du milieu, sans charge, les deux membrures sont alignées.
+
+### Ce que montrent les résultats
+
+Comme dans une poutre fléchie, la **membrure supérieure est comprimée** et la **membrure inférieure tendue**. Les efforts des membrures sont maximaux au milieu ; ceux des diagonales et des montants, près des appuis.
+
+</Page>
+
+<PlancheTechnique
+  titre="Passerelle en treillis Pratt : efforts dans les barres"
+  projet="Passerelle piétonne, exemple L1.3.8"
+  numero="TR-01"
+  echelle="sans échelle"
+  date="10/2026"
+  indice="A"
+  notes={[
+    `Treillis articulé : ${g0.barres.length} barres, ${g0.noeuds.length} nœuds, une articulation (B0) et un appui simple (B4).`,
+    `Charges de ${nombre(EXEMPLE_PRATT.P, 0)} kN aux nœuds intérieurs de la membrure inférieure (données de l'énoncé).`,
+    'Efforts en kN : positifs en traction (bleu), négatifs en compression (rouge), barre nulle en pointillés.',
+    'Poids propre des barres non compris ; les barres comprimées sont à vérifier au flambement (L2).',
+  ]}
+>
+
+<Vue titre="Élévation et efforts" pleineLargeur>
+<TreillisDessin d={g0} r={t0} prefixe="pl-tr" />
+</Vue>
+
+<Vue titre="Nœud B0 isolé">
+<NoeudIsole compact titre="Nœud B0" forces={[{ nom: 'RA', angle: 90, valeur: RA, type: 'reaction' }, { nom: 'diag1', angle: angleDiag, valeur: t0.efforts.diag1, type: 'barre' }, { nom: 'inf1', angle: 0, valeur: t0.efforts.inf1, type: 'barre' }]} />
+</Vue>
+
+<Vue titre="Nœud B1 isolé">
+<NoeudIsole compact titre="Nœud B1" forces={[{ nom: 'P', angle: -90, valeur: EXEMPLE_PRATT.P, type: 'charge' }, { nom: 'inf1', angle: 180, valeur: t0.efforts.inf1, type: 'barre' }, { nom: 'inf2', angle: 0, valeur: t0.efforts.inf2, type: 'barre' }, { nom: 'mont1', angle: 90, valeur: t0.efforts.mont1, type: 'barre' }]} />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="treillisNoeuds">
+
+<Cahier titre="Exemple résolu : une passerelle piétonne en treillis">
+
+**Énoncé.** Une passerelle piétonne de 12 m franchit un ravin. Ses deux poutres latérales sont des treillis Pratt à 4 panneaux de 3 m, hauteur 3 m. Le platelage transmet à chaque nœud intérieur de la membrure inférieure une charge de 20 kN (données de l'énoncé). Calcule les réactions, puis les efforts dans les barres, en commençant par le nœud d'appui B0.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi des charges aux nœuds inférieurs ? Le platelage repose sur des pièces de pont fixées aux nœuds de la membrure inférieure : la charge arrive bien aux nœuds.</Note>
+</Etape>
+
+<Etape n={2} titre="Le treillis">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : nœud après nœud">
+
+<Etape n={3} titre="Les réactions et la géométrie">
+<AN k="reactions" />
+<AN k="angle" />
+</Etape>
+
+<Etape n={4} titre="Le nœud d'appui B0">
+<AN k="noeudA" />
+<Note>Pourquoi commencer par B0 ? Deux barres seulement y arrivent : deux inconnues, deux équations.</Note>
+</Etape>
+
+<Etape n={5} titre="Le nœud B1">
+<AN k="noeudB1" />
+</Etape>
+
+<Etape n={6} titre="Tous les efforts">
+<AN k="tableau" />
+<Resultat k="diag1" libelle="Diagonale d'about" />
+<Note couleur="vert">Contrôle : les efforts sont symétriques par rapport au milieu, et le montant central est nul, comme prévu par la règle des barres nulles.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="appliquer des charges entre les nœuds.">
+Une charge au milieu d'une barre la fait fléchir : le modèle articulé ne s'applique plus tel quel. On ramène les charges aux nœuds (par les pièces de pont, les pannes) ou l'on calcule la barre en flexion.
+</Piege>
+
+<Piege erreur="se tromper de sens de flèche.">
+On dessine toujours les inconnues en traction (flèches qui quittent le nœud) : le signe du résultat dit ensuite la vérité, sans hésitation.
+</Piege>
+
+<Piege erreur="commencer par un nœud à trois inconnues.">
+Deux équations ne résolvent pas trois inconnues. On commence par un nœud d'appui, après avoir calculé les réactions.
+</Piege>
+
+<Piege erreur="oublier une composante dans une projection.">
+Une diagonale à {nombre(angleDiag, 0)}° contribue aux deux équations : N cos θ sur x et N sin θ sur y.
+</Piege>
+
+<Piege erreur="supprimer les barres nulles.">
+Une barre nulle pour ce chargement peut travailler pour un autre (vent, charge dissymétrique), et elle tient souvent les barres comprimées contre le flambement. On ne l'enlève pas.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les ponts en treillis.** Les ponts métalliques modulaires de type Bailey, montés à la main et boulonnés, permettent de rétablir rapidement un franchissement emporté par une crue. On les rencontre sur de nombreuses pistes de RDC. Leurs panneaux sont des treillis : chaque élément travaille en traction ou en compression.
+
+<Encadre type="terrain" titre="Pourquoi la hauteur compte">
+Les membrures d'un treillis jouent le rôle des fibres d'une poutre : plus le treillis est haut, plus leur bras de levier est grand et plus leurs efforts sont faibles. Pour la passerelle, la membrure supérieure centrale reçoit {grandeur(t0.efforts.sup2, 1, 'kN')} avec 3 m de hauteur, mais {grandeur(tBas.efforts.sup2, 1, 'kN')} avec 2 m.
+</Encadre>
+
+**Les pylônes et les échafaudages.** Les lignes électriques à haute tension et les tours de télécommunication sont des treillis dans l'espace. Les échafaudages tubulaires sont contreventés par des diagonales : sans elles, comme le carré articulé, ils se déforment et s'écroulent.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : méthode des nœuds">
+
+### Hypothèses
+
+barres droites · nœuds articulés · charges aux nœuds · effort normal seul
+
+### Convention
+
+N > 0 : traction (flèche qui quitte le nœud) · N < 0 : compression
+
+### Méthode
+
+réactions · nœud à 2 inconnues · ΣF<sub>x</sub> = 0, ΣF<sub>y</sub> = 0 · nœud suivant · dernier nœud = contrôle
+
+### Barres nulles (nœud non chargé)
+
+3 barres dont 2 alignées : la 3e est nulle · 2 barres non alignées : les deux sont nulles
+
+### Comptage
+
+isostatique si $b + r = 2n$
+
+### Lecture
+
+membrure supérieure comprimée, inférieure tendue · plus de hauteur, moins d'effort
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le montant central">
+
+Dans la passerelle, pourquoi le montant central (entre le nœud supérieur du milieu et le nœud inférieur du milieu) est-il nul ?
+
+<Indice>Isole le nœud supérieur du milieu : quelles barres y arrivent, et y a-t-il une charge ?</Indice>
+
+<Corrige>
+Au nœud supérieur central arrivent les deux membrures supérieures, alignées, et le montant ; aucune charge n'y est appliquée. ΣF<sub>y</sub> = 0 ne fait intervenir que le montant : N<sub>mont2</sub> = **{nombre(t0.efforts.mont2, 0)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une passerelle plus chargée">
+
+On porte la charge à 30 kN par nœud. Calcule la réaction R<sub>A</sub>, puis les efforts dans la diagonale d'about et dans la première membrure inférieure.
+
+<Indice>R<sub>A</sub> = 3 P / 2 ; au nœud B0, N<sub>diag1</sub> = −R<sub>A</sub> / sin θ et N<sub>inf1</sub> = −N<sub>diag1</sub> cos θ.</Indice>
+
+<Corrige>
+R<sub>A</sub> = 3 × 30 / 2 = **{grandeur(t30.reactions[0].Ry, 0, 'kN')}** ; N<sub>diag1</sub> = **{grandeur(t30.efforts.diag1, 2, 'kN')}** (compression) ; N<sub>inf1</sub> = **{grandeur(t30.efforts.inf1, 2, 'kN')}** (traction). Les efforts sont proportionnels aux charges.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un treillis moins haut">
+
+On réduit la hauteur de la passerelle à 2 m, sans changer les charges. Comment évoluent l'effort de la membrure supérieure centrale et celui de la diagonale d'about ? Explique.
+
+<Indice>Utilise la fiche avec h = 2 m, ou refais le nœud B0 avec le nouvel angle.</Indice>
+
+<Corrige>
+Membrure supérieure centrale : {grandeur(t0.efforts.sup2, 1, 'kN')} → **{grandeur(tBas.efforts.sup2, 1, 'kN')}** ; diagonale d'about : {grandeur(t0.efforts.diag1, 1, 'kN')} → **{grandeur(tBas.efforts.diag1, 1, 'kN')}**. Le treillis plus bas a moins de bras de levier : ses membrures sont plus chargées, et ses diagonales plus couchées travaillent davantage.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Dans un treillis articulé chargé aux nœuds, chaque barre transmet :" choix={['un moment', 'un effort normal, selon son axe', 'un effort perpendiculaire à son axe', 'rien']} bonne={1} colonnes={2}>
+C'est une barre à deux forces.
+</QCM>
+
+<QCM n={2} question="Par convention, une barre tendue a un effort :" choix={['positif', 'négatif', 'nul', 'infini']} bonne={0} colonnes={4}>
+N > 0 en traction, N < 0 en compression.
+</QCM>
+
+<QCM n={3} question="Pour commencer la méthode des nœuds, on choisit un nœud où il y a :" choix={['le plus de barres', 'deux barres inconnues au plus', 'la plus grande charge', 'une barre nulle']} bonne={1} colonnes={2}>
+Deux équations par nœud : deux inconnues au plus.
+</QCM>
+
+<QCM n={4} question="À un nœud non chargé où se rejoignent trois barres, dont deux alignées, la troisième est :" choix={['tendue', 'comprimée', 'nulle', 'impossible à calculer']} bonne={2} colonnes={4}>
+La projection perpendiculaire aux deux barres alignées ne contient qu'elle.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Dans une poutre treillis sous charges descendantes, la membrure supérieure est :" choix={['tendue', 'comprimée', 'nulle', 'fléchie']} bonne={1} colonnes={4}>
+Comme les fibres supérieures d'une poutre fléchie.
+</QCM>
+
+<QCM n={6} question="Pour la passerelle de l'exemple, l'effort dans la diagonale d'about vaut :" choix={[grandeur(t0.efforts.diag1, 2, 'kN'), grandeur(-t0.efforts.diag1, 2, 'kN'), grandeur(RA, 2, 'kN'), grandeur(t0.efforts.inf1, 2, 'kN')]} bonne={0} colonnes={4}>
+N = −R<sub>A</sub> / sin θ : la diagonale d'about est comprimée.
+</QCM>
+
+<QCM n={7} question="Si l'on augmente la hauteur d'une poutre treillis (même portée, mêmes charges), l'effort dans les membrures :" choix={['augmente', 'diminue', 'ne change pas', 's’annule']} bonne={1} colonnes={4}>
+Leur bras de levier augmente.
+</QCM>
+
+<QCM n={8} question="Une barre nulle pour un chargement donné :" choix={['peut être supprimée', 'reste utile pour d’autres chargements et contre le flambement', 'est toujours comprimée', 'signale une erreur']} bonne={1} colonnes={2}>
+On ne l'enlève pas.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -13,6 +13,7 @@ import { CALCULS_GEOMETRIE } from './geometrie';
 import { CALCULS_TRIGO } from './trigo';
 import { CALCULS_PHYSIQUE } from './physique';
 import { CALCULS_PROJET } from './projet';
+import { CALCULS_STATIQUE } from './statique';
 import { CALCULS_UNITES } from './unites';
 import { CALCULS_VECTEURS } from './vecteurs';
 import { MurSchema } from '@/components/schemas/MurCloture';
@@ -402,6 +403,6 @@ export const REGISTRE = fusion(
     ),
     CALCULS_PROJET,
   ),
-  CALCULS_ANALYSE,
+  fusion(CALCULS_ANALYSE, CALCULS_STATIQUE),
 );
 export type NomCalcul = keyof typeof REGISTRE;

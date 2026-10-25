@@ -1,0 +1,307 @@
+---
+id: L1.3.10
+titre: Frottement, glissement et renversement
+objectifs:
+  - Vérifier le non-glissement d'un ouvrage avec la loi de frottement de Coulomb
+  - Vérifier le non-renversement par les moments autour de l'arête de basculement
+  - Calculer l'excentricité de la réaction du sol sous un mur poids
+  - Proposer des dispositions qui améliorent la stabilité d'un mur
+relecture: false
+normes:
+  - "EN 1991-1-1 (EC1) annexe A : poids volumique du béton non armé, 24 kN/m³"
+  - "EN 1997-1 (EC7) §2.4.7 : vérifications de l'équilibre statique (EQU) et de la résistance du sol (GEO), citées sans valeur"
+glossaire:
+  - terme: Mur poids
+    definition: Mur de soutènement qui résiste à la poussée des terres grâce à son propre poids.
+  - terme: Glissement
+    definition: Déplacement d'un ouvrage sur sa base, quand la force horizontale dépasse le frottement mobilisable.
+  - terme: Renversement
+    definition: Basculement d'un ouvrage autour d'une arête de sa base, quand le moment des forces motrices dépasse celui des forces stabilisatrices.
+  - terme: Arête aval
+    definition: Arête de la base située du côté opposé aux terres, autour de laquelle un mur de soutènement tend à basculer.
+  - terme: Barbacane
+    definition: Tuyau ou trou traversant un mur de soutènement pour évacuer l'eau infiltrée derrière lui.
+symboles:
+  - { symbole: 'W', signification: 'poids du mur par mètre de longueur', unite: 'kN/m' }
+  - { symbole: 'Q', signification: 'poussée horizontale des terres', unite: 'kN/m' }
+  - { symbole: 'μ', signification: 'coefficient de frottement base-sol', unite: '—' }
+  - { symbole: 'M_s, M_r', signification: 'moments stabilisant et renversant autour de O', unite: 'kN·m/m' }
+  - { symbole: 'e', signification: 'excentricité de la réaction du sol', unite: 'm' }
+formules:
+  - { nom: 'Frottement de Coulomb', tex: 'T \le \mu\,N', domaine: 'Contact sec, pas de cohésion' }
+  - { nom: 'Glissement', tex: 'F_g = \frac{\mu\,W}{Q}', domaine: 'Sol horizontal, pas de butée en pied' }
+  - { nom: 'Renversement', tex: 'F_r = \frac{M_s}{M_r} = \frac{\sum W_i\,x_i}{Q\,z_Q}', domaine: 'Moments autour de l’arête aval O' }
+  - { nom: 'Excentricité', tex: 'x_N = \frac{M_s - M_r}{W}, \quad e = \frac{B}{2} - x_N', domaine: 'Tiers central si |e| ≤ B/6' }
+---
+
+import { baseMinGlissement, EXEMPLE_MUR_POIDS, FS_REPERE_MUR, murPoids } from '@/lib/calc/statique'
+import { pousseeParoi } from '@/lib/calc/physique'
+import { grandeur, nombre } from '@/lib/format'
+import { MurPoidsIso } from '@/components/schemas/Statique'
+
+export const m0 = murPoids(EXEMPLE_MUR_POIDS)
+export const Bmin = baseMinGlissement(EXEMPLE_MUR_POIDS, FS_REPERE_MUR)
+export const mB = murPoids({ ...EXEMPLE_MUR_POIDS, B: Math.ceil(Bmin * 20) / 20 })
+export const rect = murPoids({ H: 2, b: 0.8, B: 0.8, gamma: 24, Q: 12, zQ: 2 / 3, mu: 0.55 })
+export const eau = pousseeParoi(EXEMPLE_MUR_POIDS.H)
+export const mEau = murPoids({ ...EXEMPLE_MUR_POIDS, Q: EXEMPLE_MUR_POIDS.Q + eau.F })
+
+<Page etape="intuition" titre="L'intuition : pousser une armoire">
+
+Pousse une lourde caisse posée par terre : tant que tu pousses doucement, elle ne bouge pas, le frottement la retient. Pousse plus fort : elle **glisse**. Pousse maintenant une armoire haute et étroite, en haut : avant de glisser, elle **bascule** autour de son arête du bas.
+
+Un mur de soutènement vit la même chose. Les terres qu'il retient le poussent horizontalement. Il peut glisser sur sa base, ou basculer autour de son arête côté vide. Le **mur poids** résiste par sa seule masse : son poids crée le frottement qui l'empêche de glisser, et un moment qui l'empêche de basculer.
+
+Ces deux vérifications, glissement et renversement, sont les premières de tout ouvrage soumis à une poussée : murs, digues, culées de ponts, réservoirs.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Un mur poids est-il assez lourd et assez large pour ne ni glisser ni basculer ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : glissement et renversement">
+
+### Le glissement
+
+D'après la loi de Coulomb (N0.7.3), la base peut développer une force de frottement au plus égale à μ N, où N est la force normale (ici le poids W) et μ le coefficient de frottement entre la base et le sol. Le mur ne glisse pas si la poussée Q reste inférieure à ce maximum. On calcule le rapport :
+
+$$F_g = \frac{\mu\,W}{Q}$$
+
+### Le renversement
+
+Le mur tend à basculer autour de l'**arête aval** O, côté vide. On compare les moments autour de O :
+
+- **moment stabilisant** M<sub>s</sub> = Σ W<sub>i</sub> x<sub>i</sub>, dû aux poids ;
+- **moment renversant** M<sub>r</sub> = Q z<sub>Q</sub>, dû à la poussée.
+
+$$F_r = \frac{M_s}{M_r}$$
+
+Pour un mur trapézoïdal, on découpe la section en un rectangle et un triangle (L1.3.11), chacun avec son poids et son centre de gravité.
+
+### Les coefficients de sécurité
+
+Un rapport supérieur à 1 signifie l'équilibre, mais sans marge. L'ancienne pratique demandait des coefficients globaux d'au moins {nombre(FS_REPERE_MUR, 1)} au glissement et au renversement : c'est une **règle de l'art**, retenue ici comme repère <AVerifier note="A_VERIFIER.md n° 33 : coefficients globaux de l'ancienne pratique pour les murs" />. L'EC7 remplace ces coefficients globaux par des coefficients partiels sur les actions et les résistances (vérifications EQU et GEO), étudiés en géotechnique (L3.4).
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la réaction du sol et les remèdes">
+
+### Où passe la réaction du sol ?
+
+La réaction du sol N = W passe à la distance x<sub>N</sub> de O telle que les moments s'équilibrent :
+
+$$x_N = \frac{M_s - M_r}{W} \qquad e = \frac{B}{2} - x_N$$
+
+Si |e| ≤ B/6, la réaction reste dans le tiers central (L1.3.3) : le sol est comprimé sous toute la base. Plus e grandit, plus la pression se concentre sous l'arête aval.
+
+### Améliorer la stabilité
+
+- **Élargir la base** : plus de poids et un bras de levier plus grand.
+- **Ajouter une bêche** sous la base : un ergot enfoncé dans le sol qui s'oppose au glissement.
+- **Drainer** le remblai : barbacanes, couche drainante, fossé en tête. L'eau accumulée derrière un mur ajoute sa propre poussée et peut le renverser.
+- **Changer de type de mur** : mur en béton armé en T renversé, dont le talon porte des terres qui le stabilisent.
+
+<Regle type="simplification">
+La poussée Q et le coefficient μ sont des données de l'énoncé. Leur calcul (théories de Rankine ou de Coulomb, caractéristiques du sol) est vu en géotechnique. On néglige aussi la butée des terres devant le pied du mur, ce qui va dans le sens de la sécurité.
+</Regle>
+
+</Page>
+
+<Vue3D titre="Le mur poids en perspective" calques={[{ id: 'terre', libelle: 'Remblai' }, { id: 'mur', libelle: 'Mur' }, { id: 'forces', libelle: 'Forces' }, { id: 'cotes', libelle: 'Repères' }]}>
+
+Un tronçon de mur retient le remblai situé à gauche. Active le calque des forces : le poids W descend, la poussée Q pousse le mur vers le vide, le sol répond par la réaction N et le frottement. Le mur bascule, s'il bascule, autour de l'arête aval O.
+
+<MurPoidsIso d={EXEMPLE_MUR_POIDS} r={m0} />
+
+<Encadre type="retenir">
+Glissement : μ W / Q. Renversement : M<sub>s</sub> / M<sub>r</sub> autour de l'arête aval. Réaction du sol : e = B/2 − (M<sub>s</sub> − M<sub>r</sub>) / W, à garder dans le tiers central.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="murPoids">
+
+<Cahier titre="Exemple résolu : un mur poids le long d'une piste">
+
+**Énoncé.** Pour élargir une piste à flanc de colline, on construit un mur poids en béton non armé de 3 m de haut, large de 0,50 m en tête et de 1,60 m à la base ; son parement côté terres est vertical. Les terres le poussent horizontalement avec Q = 30 kN par mètre de mur, à 1 m au-dessus de la base ; le frottement base-sol vaut μ = 0,55 (données de l'énoncé, à justifier par une étude de sol). Le poids volumique du béton non armé est 24 kN/m³ (EC1, annexe A). Vérifie le renversement, le glissement et la position de la réaction du sol.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi raisonner par mètre de mur ? Le mur est long et uniforme : chaque mètre se comporte comme le voisin.</Note>
+</Etape>
+
+<Etape n={2} titre="La coupe">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les trois vérifications">
+
+<Etape n={3} titre="Les poids">
+<AN k="poids" />
+</Etape>
+
+<Etape n={4} titre="Le renversement">
+<AN k="moments" />
+<AN k="renversement" />
+<Note>Pourquoi autour de O ? C'est l'arête du côté vide : si le mur bascule, il tourne autour d'elle.</Note>
+</Etape>
+
+<Etape n={5} titre="Le glissement">
+<AN k="glissement" />
+</Etape>
+
+<Etape n={6} titre="La réaction du sol">
+<AN k="excentricite" />
+<Resultat k="FSg" libelle="Coefficient au glissement" />
+<Note couleur="vert">Conclusion : le mur ne bascule pas, mais sa marge au glissement est insuffisante. Élargis la base dans les données jusqu’à atteindre le repère (exercice 2).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre les moments autour de la mauvaise arête.">
+Le mur bascule vers le vide, autour de l'arête aval. Autour de l'arête côté terres, le poids deviendrait « renversant » et le calcul n'aurait aucun sens.
+</Piege>
+
+<Piege erreur="oublier une partie du poids.">
+Un mur trapézoïdal se découpe en rectangle et triangle, chacun avec son propre bras de levier : le triangle, côté aval, a un petit bras de levier ({grandeur(m0.x2, 2, 'm')} contre {grandeur(m0.x1, 2, 'm')} pour le rectangle).
+</Piege>
+
+<Piege erreur="choisir μ au hasard.">
+Le coefficient de frottement dépend du sol et de l'état de la base. Il vient d'une étude de sol ; une valeur optimiste rend le calcul de glissement sans valeur.
+</Piege>
+
+<Piege erreur="négliger l'eau derrière le mur.">
+Si les barbacanes sont bouchées, l'eau ajoute sa poussée, {grandeur(eau.F, 1, 'kN/m')} pour 3 m d'eau. Le renversement tombe alors à {nombre(mEau.FSr, 2)} et le glissement à {nombre(mEau.FSg, 2)} : le mur cède.
+</Piege>
+
+<Piege erreur="se contenter d'un rapport à peine supérieur à 1.">
+Un rapport de 1,05 signifie que le mur tient tout juste avec les valeurs supposées. Les incertitudes sur Q et μ exigent une marge.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les routes en relief.** À Bukavu, à Goma ou sur les routes de montagne du Kivu, les murs de soutènement tiennent les talus des routes et des parcelles. Beaucoup sont en maçonnerie de moellons, en béton cyclopéen ou en **gabions**, cages grillagées remplies de pierres : des murs poids, lourds et drainants.
+
+<Encadre type="terrain" titre="Les murs qui tombent en saison des pluies">
+La plupart des effondrements de murs de soutènement surviennent après de fortes pluies. L'eau s'infiltre dans le remblai, les barbacanes bouchées par la boue ne l'évacuent plus, et la poussée augmente brutalement. Entretenir les barbacanes, poser une couche drainante derrière le mur et un fossé en tête coûtent peu ; reconstruire un mur et une route coûte beaucoup.
+</Encadre>
+
+**Les ouvrages poids.** Les digues, les barrages poids, les culées de ponts et les massifs d'ancrage des passerelles se vérifient de la même façon : glissement sur leur base, renversement autour d'une arête, position de la réaction du sol.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : glissement et renversement">
+
+### Glissement
+
+$T \le \mu N$ · $F_g = \mu W / Q$
+
+### Renversement
+
+autour de l'arête aval O · $M_s = \sum W_i x_i$ · $M_r = Q\,z_Q$ · $F_r = M_s / M_r$
+
+### Réaction du sol
+
+$x_N = (M_s - M_r)/W$ · $e = B/2 - x_N$ · tiers central : $|e| \le B/6$
+
+### Repère
+
+ancienne pratique : coefficients globaux ≥ {nombre(FS_REPERE_MUR, 1)} (règle de l'art, à vérifier) · EC7 : coefficients partiels
+
+### Remèdes
+
+base plus large · bêche · drainage (barbacanes, couche drainante) · mur en T renversé
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un mur rectangulaire">
+
+Un mur rectangulaire en béton non armé (24 kN/m³) mesure 2 m de haut et 0,80 m d'épaisseur. Une poussée de 12 kN/m s'applique à 2/3 m de la base. Calcule son poids, son moment stabilisant autour de l'arête aval, et le coefficient de renversement.
+
+<Indice>W = γ B H, appliqué au milieu de la base : bras de levier B/2.</Indice>
+
+<Corrige>
+W = 24 × 0,80 × 2 = **{grandeur(rect.W, 1, 'kN/m')}** ; M<sub>s</sub> = {nombre(rect.W, 1)} × 0,40 = **{grandeur(rect.Ms, 2, 'kN·m/m')}** ; M<sub>r</sub> = 12 × 2/3 = {grandeur(rect.Mr, 0, 'kN·m/m')} ; F<sub>r</sub> = **{nombre(rect.FSr, 2)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Élargir la base">
+
+Pour le mur de l'exemple, quelle largeur de base B faut-il, la tête restant à 0,50 m, pour atteindre un coefficient de glissement de {nombre(FS_REPERE_MUR, 1)} ?
+
+<Indice>W = γ H (b + B) / 2 et μ W ≥ {nombre(FS_REPERE_MUR, 1)} Q.</Indice>
+
+<Corrige>
+Il faut W ≥ {nombre(FS_REPERE_MUR, 1)} × 30 / 0,55, donc b + B ≥ 2 × {nombre(FS_REPERE_MUR, 1)} × 30 / (0,55 × 24 × 3), soit **B ≥ {grandeur(Bmin, 2, 'm')}**. Avec B = {grandeur(Math.ceil(Bmin * 20) / 20, 2, 'm')} : glissement {nombre(mB.FSg, 2)}, renversement {nombre(mB.FSr, 2)}.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Les barbacanes bouchées">
+
+Après un orage, les barbacanes du mur de l'exemple sont bouchées et l'eau monte jusqu'en haut du mur. On ajoute, en simplifiant, la poussée de l'eau à celle des terres, au même point (1 m). Calcule la poussée de l'eau, puis les nouveaux coefficients.
+
+<Indice>Poussée de l'eau : ρ g H² / 2 (N0.7.5), appliquée à H/3.</Indice>
+
+<Corrige>
+Poussée de l'eau : 1 000 × 9,81 × 3² / 2 = **{grandeur(eau.F, 2, 'kN/m')}**, à 1 m. Q devient {grandeur(EXEMPLE_MUR_POIDS.Q + eau.F, 2, 'kN/m')} : renversement **{nombre(mEau.FSr, 2)}**, glissement **{nombre(mEau.FSg, 2)}**. Le mur glisse et frôle le basculement : le drainage n'est pas un détail.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.10">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un mur ne glisse pas si la poussée horizontale reste inférieure à :" choix={['son poids', 'μ fois son poids', 'son moment stabilisant', 'la pression du sol']} bonne={1} colonnes={2}>
+Frottement maximal de Coulomb : μ N.
+</QCM>
+
+<QCM n={2} question="Pour vérifier le renversement d'un mur de soutènement, on prend les moments autour :" choix={['du centre de gravité du mur', 'de l’arête aval, côté vide', 'de l’arête côté terres', 'du point d’application de la poussée']} bonne={1} colonnes={2}>
+C'est l'arête autour de laquelle le mur basculerait.
+</QCM>
+
+<QCM n={3} question="Pour le mur de l'exemple, le coefficient de renversement vaut :" choix={[nombre(m0.FSr, 2), nombre(m0.FSg, 2), nombre(1 / m0.FSr, 2), '1,00']} bonne={0} colonnes={4}>
+M<sub>s</sub> / M<sub>r</sub> = {nombre(m0.Ms, 2)} / {nombre(m0.Mr, 2)}.
+</QCM>
+
+<QCM n={4} question="Une bêche sous la base d'un mur sert surtout à :" choix={['réduire son poids', 'améliorer la résistance au glissement', 'décorer', 'évacuer l’eau']} bonne={1} colonnes={2}>
+Elle s'enfonce dans le sol et s'oppose au glissement.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Les barbacanes d'un mur de soutènement servent à :" choix={['alléger le mur', 'évacuer l’eau qui s’accumule derrière le mur', 'ancrer le mur', 'mesurer la poussée']} bonne={1} colonnes={2}>
+L'eau accumulée ajoute une poussée dangereuse.
+</QCM>
+
+<QCM n={6} question="La réaction du sol reste dans le tiers central de la base si :" choix={['|e| ≤ B/2', '|e| ≤ B/6', '|e| ≤ B/3', 'e = 0']} bonne={1} colonnes={4}>
+Comme pour une semelle (L1.3.3).
+</QCM>
+
+<QCM n={7} question="Élargir la base d'un mur poids :" choix={['réduit sa stabilité', 'augmente son poids et ses bras de levier', 'ne change rien', 'augmente la poussée']} bonne={1} colonnes={2}>
+Glissement et renversement s'améliorent.
+</QCM>
+
+<QCM n={8} question="Pour les murs de soutènement, l'EC7 remplace les coefficients de sécurité globaux par :" choix={['des coefficients partiels sur les actions et les résistances', 'aucune vérification', 'un coefficient unique de 3', 'des essais en laboratoire seulement']} bonne={0} colonnes={2}>
+Vérifications EQU et GEO, vues en géotechnique.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,312 @@
+---
+id: L1.3.3
+titre: Torseur des actions mécaniques
+objectifs:
+  - Réduire un ensemble de forces en un point (résultante et moment résultant)
+  - Transporter un torseur d'un point à un autre
+  - Remplacer un système de forces par une force unique équivalente
+  - Calculer l'excentricité d'une charge sur une semelle et la comparer au tiers central
+relecture: false
+normes: []
+glossaire:
+  - terme: Torseur
+    definition: Résumé d'un ensemble de forces en un point, par deux éléments, la résultante et le moment résultant en ce point.
+  - terme: Résultante
+    definition: Somme vectorielle de toutes les forces du système ; elle ne dépend pas du point choisi.
+  - terme: Moment résultant
+    definition: Somme des moments de toutes les forces par rapport au point de réduction ; il change quand on change de point.
+  - terme: Systèmes équivalents
+    definition: Deux systèmes de forces qui ont le même torseur en un point (donc en tout point) ; ils ont le même effet sur un solide indéformable.
+  - terme: Excentricité
+    definition: Distance entre le centre d'une base et le point où passe la résultante des charges, égale à M / N.
+symboles:
+  - { symbole: 'R_x, R_y', signification: 'composantes de la résultante', unite: 'kN' }
+  - { symbole: 'M_A', signification: 'moment résultant au point A', unite: 'kN·m' }
+  - { symbole: 'x̄', signification: 'position de la force unique équivalente', unite: 'm' }
+  - { symbole: 'N, H', signification: 'efforts vertical et horizontal sur une semelle', unite: 'kN' }
+  - { symbole: 'e', signification: 'excentricité', unite: 'm' }
+  - { symbole: 'B', signification: 'largeur de la semelle', unite: 'm' }
+formules:
+  - { nom: 'Torseur en A', tex: '\vec R = \sum \vec F_i, \quad M_A = \sum M_A(\vec F_i)', domaine: 'Forces planes' }
+  - { nom: 'Transport du moment', tex: 'M_B = M_A + (x_A - x_B)\,R_y - (y_A - y_B)\,R_x', domaine: 'Changement de point de réduction' }
+  - { nom: 'Force unique équivalente', tex: '\bar x = x_A + \frac{M_A}{R_y}', domaine: 'R_y ≠ 0, ligne d’action coupant l’horizontale de A' }
+  - { nom: 'Excentricité', tex: 'e = \frac{M}{N}', domaine: 'Effort vertical N et moment M au centre de la base' }
+  - { nom: 'Tiers central', tex: '|e| \le \frac{B}{6}', domaine: 'Base rectangulaire, répartition linéaire des pressions' }
+---
+
+import { EXEMPLE_SEMELLE_TORSEUR, reduction, semelleTorseur } from '@/lib/calc/statique'
+import { grandeur, nombre } from '@/lib/format'
+import { TorseurEquivalent } from '@/components/schemas/Statique'
+
+export const trois = [
+  { nom: 'F1', x: 1, y: 0, Fx: 0, Fy: -10 },
+  { nom: 'F2', x: 3, y: 0, Fx: 0, Fy: -20 },
+  { nom: 'F3', x: 5, y: 0, Fx: 0, Fy: -15 },
+]
+export const red = reduction(trois, 0, 0)
+export const redB = reduction(trois, 6, 0)
+export const s0 = semelleTorseur(EXEMPLE_SEMELLE_TORSEUR)
+export const ex2 = semelleTorseur({ N: 400, H: 30, h: 1.5, B: 1.5 })
+export const mat = semelleTorseur({ N: 60, H: 12, h: 4, B: 2 })
+export const sansH = semelleTorseur({ ...EXEMPLE_SEMELLE_TORSEUR, H: 0 })
+
+<Page etape="intuition" titre="L'intuition : résumer sans trahir">
+
+Une poutre porte un mur, un poteau, des sacs de ciment, son propre poids. Pour calculer ses appuis, faut-il garder chaque charge séparément ? Non : on peut **résumer** toutes ces forces par une seule force et un moment, sans rien changer à leur effet sur la poutre.
+
+C'est comme un relevé de compte : des dizaines d'opérations se résument par un solde. Ici, le « solde » des forces s'appelle la **résultante**, et leur effet de rotation global, le **moment résultant**. Ce couple de deux informations, calculé en un point choisi, forme le **torseur** des actions.
+
+Pour une fondation, ce résumé dit tout de suite si la charge tombe bien au centre, ou si elle est décalée au point de soulever un bord de la semelle.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment remplacer un ensemble de forces par un système plus simple, qui a exactement le même effet ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : réduire un système de forces">
+
+### Le torseur en un point
+
+Pour un système de forces dans le plan, le **torseur en A** se compose de :
+
+- la **résultante** $\vec R = \sum \vec F_i$, de composantes R<sub>x</sub> = Σ F<sub>x</sub> et R<sub>y</sub> = Σ F<sub>y</sub> ;
+- le **moment résultant** M<sub>A</sub> = Σ M<sub>A</sub>(F<sub>i</sub>), calculé avec la convention de signe de L1.3.2.
+
+La résultante ne dépend pas du point ; le moment, si.
+
+<Encadre type="exemple" titre="Trois charges sur une barre">
+Charges de 10, 20 et 15 kN à 1, 3 et 5 m du point A. Résultante : {grandeur(Math.abs(red.Ry), 0, 'kN')} vers le bas. Moment en A : −(10 × 1 + 20 × 3 + 15 × 5) = {grandeur(red.M, 0, 'kN·m')} (sens horaire).
+</Encadre>
+
+### Changer de point
+
+Si l'on connaît le torseur en A, on l'obtient en B en ajoutant le moment de la résultante placée en A :
+
+$$M_B = M_A + (x_A - x_B)\,R_y - (y_A - y_B)\,R_x$$
+
+Pour les trois charges, au point B situé à 6 m : M<sub>B</sub> = {nombre(red.M, 0)} + (0 − 6) × ({nombre(red.Ry, 0)}) = {grandeur(redB.M, 0, 'kN·m')}.
+
+<Regle type="simplification">
+Remplacer des forces par leur torseur suppose un solide **indéformable**. Pour calculer des appuis ou l'équilibre, c'est exact. Pour les efforts intérieurs d'une poutre (L2), on ne peut plus regrouper les charges n'importe comment : l'endroit où chacune s'applique compte.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : force unique et excentricité">
+
+### La force unique équivalente
+
+Si la résultante n'est pas nulle, on peut trouver une droite où le moment s'annule : la résultante, placée sur cette droite, remplace **seule** tout le système. Pour des forces verticales, son abscisse vaut :
+
+$$\bar x = x_A + \frac{M_A}{R_y}$$
+
+Pour les trois charges : x̄ = {nombre(red.M, 0)} / ({nombre(red.Ry, 0)}) = {grandeur(red.xCoupe, 2, 'm')}. On retrouve la position de la résultante d'une charge répartie (L1.2.6).
+
+Si la résultante est nulle mais pas le moment, le système se réduit à un **couple** : aucune force unique ne peut le remplacer.
+
+### L'excentricité sur une semelle
+
+Un poteau transmet à sa semelle un effort vertical N, et souvent un effort horizontal H (vent) appliqué plus haut. Réduits au centre de la base : N, H et un moment M = H h. Le point où la résultante coupe la base est décalé du centre de l'**excentricité** :
+
+$$e = \frac{M}{N}$$
+
+### Le tiers central
+
+Si l'on suppose que la pression sous une base rectangulaire varie linéairement, elle reste partout positive (le sol est comprimé partout) tant que la résultante tombe dans le **tiers central** de la base : |e| ≤ B/6. Au-delà, un bord de la semelle tend à se soulever.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : trois écritures du même système">
+
+<TorseurEquivalent forces={trois} L={6} />
+
+En haut, les trois charges réelles. Au milieu, leur torseur en A : une résultante et un moment. En bas, la résultante seule, placée en x̄. Les trois systèmes donnent les mêmes réactions d'appui et le même équilibre.
+
+<Encadre type="retenir">
+Torseur en un point = résultante + moment résultant. On change de point en ajoutant le moment de la résultante. Une force unique équivalente existe si la résultante n'est pas nulle.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="torseurSemelle">
+
+<Cahier titre="Exemple résolu : la semelle d'un poteau de hangar">
+
+**Énoncé.** Un poteau de hangar transmet à sa semelle un effort vertical N = 600 kN. Le vent sur le bardage lui applique un effort horizontal H = 40 kN, à 1,20 m au-dessus de la base de la semelle (données de l'énoncé). La semelle mesure 1,80 m de large dans le plan du vent. Réduis les efforts au centre de la base, calcule l'excentricité et vérifie le tiers central.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi le centre de la base ? C'est là qu'on compare la charge à la semelle : si la résultante y passe, la pression est uniforme.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : torseur et tiers central">
+
+<Etape n={3} titre="Le torseur au centre de la base">
+<AN k="M" />
+<AN k="R" />
+<Note>Pourquoi H crée-t-il un moment ? Il est appliqué au-dessus de la base : son bras de levier par rapport au centre est la hauteur h.</Note>
+</Etape>
+
+<Etape n={4} titre="L'excentricité">
+<AN k="e" />
+</Etape>
+
+<Etape n={5} titre="Le tiers central">
+<AN k="tiers" />
+<Resultat k="e" libelle="Excentricité" />
+<Note couleur="vert">Contrôle : augmente H ou h dans les données ; l'excentricité grandit, et l'alerte apparaît quand la résultante sort du tiers central.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="déplacer une force sans ajouter de moment.">
+Transporter une force parallèlement à elle-même change son moment. Pour garder le même effet, on ajoute le couple de transport F × d.
+</Piege>
+
+<Piege erreur="oublier que le moment dépend du point.">
+Pour les trois charges, M<sub>A</sub> = {grandeur(red.M, 0, 'kN·m')} mais M<sub>B</sub> = {grandeur(redB.M, 0, 'kN·m')}. Un moment donné sans son point ne veut rien dire.
+</Piege>
+
+<Piege erreur="écrire e = N / M.">
+L'excentricité est une longueur : e = M / N, en kN·m / kN = m.
+</Piege>
+
+<Piege erreur="confondre B/3 et B/6.">
+Le tiers central a une largeur B/3, centrée : la résultante doit rester à moins de B/6 de chaque côté du centre.
+</Piege>
+
+<Piege erreur="négliger l'effort horizontal parce qu'il est petit.">
+Sans le vent, l'excentricité serait {grandeur(sansH.e, 2, 'm')} ; avec 40 kN seulement, elle passe à {grandeur(s0.e, 2, 'm')}. Un petit effort appliqué haut crée un grand moment.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les fondations des ouvrages légers.** Mâts d'éclairage, pylônes, panneaux, hangars légers : l'effort vertical est faible, mais le vent pousse haut. L'excentricité devient grande, et la semelle doit être large ou lourde pour garder la résultante dans le tiers central (exercice 3).
+
+<Encadre type="terrain" titre="Les hangars de stockage">
+Autour des marchés et des ports fluviaux de RDC, les hangars métalliques légers se multiplient. Sous une rafale, le vent pousse les parois et soulève la toiture. Les semelles reçoivent alors peu de charge verticale et beaucoup de moment : c'est souvent le poids de la semelle elle-même qui stabilise le poteau.
+</Encadre>
+
+**Les charges excentrées.** Un poteau de rive posé au bord de sa semelle, une semelle bloquée contre une limite de parcelle, un mur posé sur le bord d'une longrine : chaque fois, la charge est excentrée et crée un moment, même sans aucune force horizontale.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : torseur">
+
+### Torseur en A
+
+$\vec R = \sum \vec F_i$ · $M_A = \sum M_A(\vec F_i)$ · R indépendante du point
+
+### Changement de point
+
+$M_B = M_A + (x_A - x_B)R_y - (y_A - y_B)R_x$
+
+### Force unique
+
+$\bar x = x_A + M_A / R_y$ (si R ≠ 0) · R = 0, M ≠ 0 : couple
+
+### Systèmes équivalents
+
+même torseur en un point · même effet sur un solide indéformable
+
+### Semelle
+
+$M = H\,h$ · $e = M / N$ · tiers central : $|e| \le B/6$
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Réduire trois charges">
+
+Trois charges verticales de 10, 20 et 15 kN agissent à 1, 3 et 5 m d'un point A. Calcule le torseur en A et la position de la force unique équivalente.
+
+<Indice>R = somme des forces ; M<sub>A</sub> = somme des moments ; x̄ = M<sub>A</sub> / R<sub>y</sub>.</Indice>
+
+<Corrige>
+R = **{grandeur(Math.abs(red.Ry), 0, 'kN')}** vers le bas ; M<sub>A</sub> = **{grandeur(red.M, 0, 'kN·m')}** ; x̄ = {nombre(red.M, 0)} / ({nombre(red.Ry, 0)}) = **{grandeur(red.xCoupe, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une autre semelle">
+
+N = 400 kN, H = 30 kN appliqué à 1,5 m au-dessus de la base, semelle de 1,5 m de large. Calcule M, e, et vérifie le tiers central.
+
+<Indice>M = H h, e = M / N, à comparer avec B/6.</Indice>
+
+<Corrige>
+M = 30 × 1,5 = **{grandeur(ex2.M, 1, 'kN·m')}** ; e = {nombre(ex2.M, 1)} / 400 = **{grandeur(ex2.e, 4, 'm')}** ; B/6 = {grandeur(ex2.tiers, 3, 'm')} : la résultante reste dans le tiers central.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le mât d'éclairage">
+
+Un mât d'éclairage transmet N = 60 kN (fût et massif compris) et reçoit un effort de vent H = 12 kN à 4 m au-dessus de la base. Quelle largeur minimale doit avoir le massif pour que la résultante reste dans le tiers central ? Que peut-on faire d'autre ?
+
+<Indice>e = H h / N ; il faut B ≥ 6 e.</Indice>
+
+<Corrige>
+M = 12 × 4 = {grandeur(mat.M, 0, 'kN·m')} ; e = {nombre(mat.M, 0)} / 60 = **{grandeur(mat.e, 2, 'm')}** ; il faudrait B ≥ 6 e = **{grandeur(mat.Bmin, 1, 'm')}**. C'est énorme : on préfère alourdir le massif (N augmente, e diminue), l'enterrer plus profondément, ou accepter un décollement partiel vérifié par un calcul de sol (L3).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le torseur des actions en un point est formé :" choix={['de la seule résultante', 'de la résultante et du moment résultant en ce point', 'des réactions d’appui', 'du poids propre']} bonne={1} colonnes={2}>
+Deux éléments : R et M<sub>A</sub>.
+</QCM>
+
+<QCM n={2} question="Quand on change de point de réduction :" choix={['la résultante change', 'le moment résultant change', 'les deux restent identiques', 'les deux changent']} bonne={1} colonnes={2}>
+La résultante est la même partout ; le moment dépend du point.
+</QCM>
+
+<QCM n={3} question="Un système de résultante nulle et de moment non nul se réduit à :" choix={['une force', 'un couple', 'rien du tout', 'deux forces de même sens']} bonne={1} colonnes={2}>
+Aucune force unique ne peut le remplacer.
+</QCM>
+
+<QCM n={4} question="Trois charges de 10, 20 et 15 kN, à 1, 3 et 5 m de A, ont une résultante placée à :" choix={['3 m', grandeur(red.xCoupe, 2, 'm'), '2,5 m', '5 m']} bonne={1} colonnes={4}>
+x̄ = Σ F x / Σ F = {nombre(-red.M, 0)} / {nombre(-red.Ry, 0)}.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="L'excentricité d'un effort vertical N accompagné d'un moment M vaut :" choix={['N / M', 'M / N', 'M × N', 'M + N']} bonne={1} colonnes={4}>
+e = M / N, en mètres.
+</QCM>
+
+<QCM n={6} question="Pour une base rectangulaire de largeur B, la résultante reste dans le tiers central si :" choix={['|e| ≤ B/3', '|e| ≤ B/6', '|e| ≤ B/2', '|e| ≤ B']} bonne={1} colonnes={4}>
+Le tiers central, de largeur B/3, s'étend à B/6 de chaque côté du centre.
+</QCM>
+
+<QCM n={7} question="Deux systèmes de forces sont équivalents s'ils ont :" choix={['le même nombre de forces', 'le même torseur en un point', 'la même résultante seulement', 'les mêmes points d’application']} bonne={1} colonnes={2}>
+Même torseur en un point, donc en tout point.
+</QCM>
+
+<QCM n={8} question="Une force H = 40 kN appliquée à 1,2 m au-dessus de la base crée, au centre de la base, un moment de :" choix={[grandeur(s0.M, 0, 'kN·m'), '40 kN·m', '33 kN·m', '1,2 kN·m']} bonne={0} colonnes={4}>
+M = H × h = 40 × 1,2.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

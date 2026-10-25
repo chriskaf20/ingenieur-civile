@@ -1,0 +1,201 @@
+---
+id: L1.3.P
+titre: "Mini-projet : ferme de toiture en bois"
+objectifs:
+  - Ramener les charges d'une toiture aux nœuds d'une ferme
+  - Calculer les réactions d'appui d'une ferme
+  - Calculer les efforts dans toutes les barres par la méthode des nœuds
+  - Présenter les résultats sur une planche et repérer les barres critiques
+relecture: false
+normes:
+  - "EN 1990 (EC0) §6.4.3.2, expression (6.10) : 1,35 G + 1,5 Q"
+  - "EN 1991-1-1 (EC1) §6.3.4 : charges sur les toitures (catégorie H, entretien), citées sans valeur"
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { BARRES_FERME, EXEMPLE_FERME_EFFORTS, fermeEfforts } from '@/lib/calc/statique'
+import { ferme } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { NoeudIsole, TreillisDessin } from '@/components/schemas/Statique'
+
+export const d = EXEMPLE_FERME_EFFORTS
+export const r = fermeEfforts(d)
+export const N = r.resultat.efforts
+export const Lb = r.resultat.longueurs
+export const geo = ferme(d.ferme)
+export const nature = (v) => (Math.abs(v) < 1e-6 ? 'nulle' : v > 0 ? 'traction' : 'compression')
+export const plusComprimee = BARRES_FERME.reduce((a, b) => ((N[b.id] ?? 0) < (N[a.id] ?? 0) ? b : a))
+export const plusTendue = BARRES_FERME.reduce((a, b) => ((N[b.id] ?? 0) > (N[a.id] ?? 0) ? b : a))
+export const plat = fermeEfforts({ ...d, ferme: { ...d.ferme, alpha: 20 } })
+export const lignes = BARRES_FERME.filter((b) => !b.id.includes('M2') && b.id !== 'D2-B' && b.id !== 'D2-S').map((b) => [b.nom, grandeur(Lb[b.id], 2, 'm'), grandeur(N[b.id], 2, 'kN'), nature(N[b.id])])
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+À Kikwit, une coopérative de menuisiers construit un atelier de 8 m de large et 12 m de long. La couverture en tôles repose sur des pannes, elles-mêmes portées par des **fermes en bois en W** espacées de {grandeur(d.ferme.entraxe, 1, 'm')}. La géométrie de ces fermes a été étudiée en N0.4 ; il reste à calculer les efforts dans leurs barres, pour choisir les sections de bois et les assemblages.
+
+### Les données
+
+- portée entre appuis : L = {grandeur(d.ferme.L, 1, 'm')} ; pente des arbalétriers : {nombre(d.ferme.alpha, 0)}° ; entraxe des fermes : {grandeur(d.ferme.entraxe, 1, 'm')} ;
+- ferme en W : arbalétriers coupés en leur milieu (nœuds M1, M2), entrait coupé en trois (nœuds D1, D2), quatre diagonales ;
+- charges permanentes (tôles, pannes, ferme) : g = {grandeur(d.g, 2, 'kN/m²')}, et charge d'entretien : q = {grandeur(d.q, 2, 'kN/m²')}, toutes deux en projection horizontale <AVerifier note="A_VERIFIER.md n° 34 : charges de toiture du mini-projet (hypothèses)" /> ;
+- les pannes sont posées au droit des nœuds de l'arbalétrier.
+
+### Ce que tu rends
+
+1. Les charges ELU ramenées aux nœuds de l'arbalétrier.
+2. Les réactions d'appui.
+3. Les efforts dans les onze barres, par la méthode des nœuds, avec un contrôle.
+4. Un tableau des efforts et la désignation des barres les plus sollicitées.
+5. Une planche de synthèse.
+
+<Regle type="simplification">
+Nœuds supposés articulés (assemblages cloués ou boulonnés), charges appliquées aux nœuds, poids propre de la ferme compris dans g. Le **vent** n'est pas étudié ici : sur une toiture légère, il peut soulever la couverture et inverser les efforts. Il est traité avec les actions climatiques (L3.2) ; le dimensionnement des barres en bois relève de l'EC5 (L3).
+</Regle>
+
+</Page>
+
+<FicheCalcul calcul="fermeEfforts">
+
+<Cahier titre="Étape 1 : la ferme et ses charges" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi des charges en projection horizontale ? On les multiplie directement par la longueur de toiture en plan : c'est plus simple, et c'est ainsi qu'elles sont données.</Note>
+</Etape>
+
+<Etape n={2} titre="La ferme">
+<Schema k="elevation" />
+</Etape>
+
+<Etape n={3} titre="Les charges aux nœuds">
+<AN k="charges" />
+<Note>Pourquoi L/4 par nœud ? Chaque nœud intérieur de l'arbalétrier reçoit la toiture située à mi-distance de ses voisins, soit L/4 en plan ; les nœuds d'appui n'en reçoivent que la moitié.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : les réactions et les premiers nœuds" etape="projet">
+
+<Etape n={4} titre="Les réactions">
+<AN k="reactions" />
+</Etape>
+
+<Etape n={5} titre="Le nœud A">
+<Schema k="noeudA" />
+<AN k="noeudA" />
+</Etape>
+
+<Etape n={6} titre="Les nœuds M1 et D1">
+<AN k="noeudM1" />
+<AN k="noeudD1" />
+<Note>Pourquoi cet ordre ? Après A, le nœud M1 n'a plus que deux barres inconnues ; puis D1, à son tour.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 : tous les efforts" etape="projet">
+
+<Etape n={7} titre="Le tableau des efforts">
+<AN k="tableau" />
+</Etape>
+
+<Etape n={8} titre="Les barres critiques">
+<Resultat k="max" libelle="Efforts extrêmes" />
+<Note couleur="vert">Contrôle : les efforts sont symétriques ; à la main, l'équilibre du nœud S (faîtage), qui n'a pas servi au calcul, se vérifie avec les efforts trouvés. Change la pente : plus la toiture est plate, plus les arbalétriers et l'entrait sont sollicités.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<PlancheTechnique
+  titre="Ferme en W : efforts ELU"
+  projet="Atelier de menuiserie, mini-projet L1.3.P"
+  numero="CH-01"
+  echelle="sans échelle"
+  date="10/2026"
+  indice="A"
+  etape="projet"
+  notes={[
+    `Portée ${nombre(d.ferme.L, 2)} m, pente ${nombre(d.ferme.alpha, 0)}°, entraxe ${nombre(d.ferme.entraxe, 2)} m ; hauteur au faîtage ${nombre(geo.h, 2)} m.`,
+    `Charges ELU aux nœuds : ${nombre(r.Pnoeud, 2)} kN (nœuds intérieurs), ${nombre(r.Prive, 2)} kN (appuis).`,
+    'Efforts en kN : traction positive (bleu), compression négative (rouge).',
+    'Sections et assemblages à justifier selon l’EC5 ; barres comprimées à vérifier au flambement.',
+  ]}
+>
+
+<Vue titre="Élévation et efforts" pleineLargeur>
+<TreillisDessin d={r.treillis} r={r.resultat} prefixe="pl-fe" />
+</Vue>
+
+<Vue titre="Nœud A isolé">
+<NoeudIsole compact titre="Nœud A" forces={[{ nom: 'RA', angle: 90, valeur: r.resultat.reactions[0].Ry, type: 'reaction' }, { nom: 'P/2', angle: -90, valeur: r.Prive, type: 'charge' }, { nom: 'A-M1', angle: d.ferme.alpha, valeur: N['A-M1'], type: 'barre' }, { nom: 'A-D1', angle: 0, valeur: N['A-D1'], type: 'barre' }]} />
+</Vue>
+
+<Vue titre="Demi-ferme : longueurs et efforts">
+<div className="tableau">
+  <table>
+    <thead><tr><th>Barre</th><th>Longueur</th><th>Effort</th></tr></thead>
+    <tbody>{lignes.map(([nom, L, eff, nat]) => <tr key={nom}><td>{nom}</td><td>{L}</td><td>{eff} ({nat})</td></tr>)}</tbody>
+  </table>
+</div>
+</Vue>
+
+</PlancheTechnique>
+
+<Page etape="projet" titre="Le récapitulatif : exemple corrigé">
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Grandeur</th><th>Valeur</th></tr></thead>
+    <tbody>
+      <tr><td>Charge ELU par nœud intérieur</td><td>{grandeur(r.Pnoeud, 2, 'kN')}</td></tr>
+      <tr><td>Réaction de chaque appui</td><td>{grandeur(r.resultat.reactions[0].Ry, 2, 'kN')}</td></tr>
+      <tr><td>Barre la plus comprimée : {plusComprimee.nom}</td><td>{grandeur(N[plusComprimee.id], 2, 'kN')}</td></tr>
+      <tr><td>Barre la plus tendue : {plusTendue.nom}</td><td>{grandeur(N[plusTendue.id], 2, 'kN')}</td></tr>
+      <tr><td>Entrait central</td><td>{grandeur(N['D1-D2'], 2, 'kN')}</td></tr>
+      <tr><td>Diagonales courtes</td><td>{grandeur(N['D1-M1'], 2, 'kN')}</td></tr>
+      <tr><td>Diagonales longues</td><td>{grandeur(N['D1-S'], 2, 'kN')}</td></tr>
+    </tbody>
+  </table>
+</div>
+
+### Ce qu'il faut en retenir
+
+- Les **arbalétriers sont comprimés** et l'**entrait tendu** : la ferme fonctionne comme un arc dont l'entrait retient la poussée. Sans entrait, les arbalétriers écarteraient les murs.
+- Les efforts les plus forts sont **près des appuis** : {grandeur(N['A-M1'], 2, 'kN')} dans l'arbalétrier bas, {grandeur(N['A-D1'], 2, 'kN')} dans l'entrait d'extrémité.
+- Les arbalétriers comprimés et longs sont les barres critiques : il faudra vérifier leur **flambement** (L2, EC5), pas seulement leur résistance.
+
+<Encadre type="attention">
+Sur une toiture légère en tôles, le vent peut soulever la couverture : les efforts changent alors de signe. L'entrait devient comprimé et doit être tenu contre le flambement, les assemblages doivent résister à l'arrachement. Ce cas, souvent déterminant en RDC lors des orages, n'est pas traité dans ce mini-projet.
+</Encadre>
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Charges | Charges réparties laissées sur les barres | Charges ramenées aux nœuds | Combinaison ELU écrite, demi-charges aux appuis |
+| Réactions | Réactions supposées égales sans justification | Calculées par l'équilibre | Symétrie utilisée et contrôlée |
+| Nœuds | Signes au hasard | Inconnues dessinées en traction, signes interprétés | Ordre des nœuds justifié (deux inconnues à chaque fois) |
+| Contrôle | Aucun | Symétrie vérifiée | Dernier nœud (S) ou coupe de Ritter vérifiés |
+| Présentation | Valeurs isolées | Tableau des efforts | Planche avec efforts, barres critiques signalées |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Avec une pente de 20° au lieu de 30°, l'arbalétrier bas passe à {grandeur(plat.resultat.efforts['A-M1'], 2, 'kN')} et l'entrait d'extrémité à {grandeur(plat.resultat.efforts['A-D1'], 2, 'kN')}. Pourquoi une toiture plus plate sollicite-t-elle davantage sa ferme ? Et pourquoi, en revanche, une toiture plus raide prend-elle plus le vent ?
+</Encadre>
+
+<Quiz id="L1.3.P">
+
+<QCM n={1} question="Mon rendu donne-t-il les charges aux nœuds, les réactions, l'effort de chaque barre avec sa nature (traction ou compression), un contrôle et une planche lisible ?" choix={['Oui, tout y est', 'Il manque le contrôle ou la planche', 'Je n’ai fait qu’une partie des calculs']} bonne={0}>
+Sinon, complète-le : ce sont ces efforts qui serviront à choisir les sections de bois et les assemblages.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

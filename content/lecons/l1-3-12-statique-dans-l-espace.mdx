@@ -1,0 +1,301 @@
+---
+id: L1.3.12
+titre: Statique dans l'espace (aperçu)
+objectifs:
+  - Écrire les six équations d'équilibre d'un solide dans l'espace
+  - Calculer le moment d'une force par rapport à un axe
+  - Calculer les réactions d'un plateau posé sur trois appuis
+  - Relier la stabilité d'un appui à la position des charges dans le triangle des appuis
+relecture: false
+normes: []
+glossaire:
+  - terme: Équilibre dans l'espace
+    definition: Un solide est en équilibre si les trois sommes de forces et les trois sommes de moments, selon x, y et z, sont nulles.
+  - terme: Moment par rapport à un axe
+    definition: Effet de rotation d'une force autour d'un axe ; pour une force verticale, c'est la force multipliée par sa distance horizontale à l'axe.
+  - terme: Forces parallèles
+    definition: Forces de même direction, comme les poids et les réactions verticales ; elles ne donnent que trois équations utiles.
+  - terme: Triangle des appuis
+    definition: Triangle formé par trois appuis ; un plateau reste stable tant que la résultante des charges tombe à l'intérieur.
+  - terme: Trépied
+    definition: Support à trois pieds, toujours en contact avec le sol, même inégal ; utilisé pour lever des charges au-dessus d'un puits.
+symboles:
+  - { symbole: 'x, y, z', signification: 'axes du repère (z vertical)', unite: 'm' }
+  - { symbole: 'F', signification: 'charge verticale', unite: 'kN' }
+  - { symbole: 'R_A, R_B, R_C', signification: 'réactions des trois appuis', unite: 'kN' }
+  - { symbole: 'M_x, M_y', signification: 'moments par rapport aux axes x et y', unite: 'kN·m' }
+formules:
+  - { nom: 'Équilibre dans l’espace', tex: '\sum \vec F = \vec 0, \quad \sum \vec M_O = \vec 0', domaine: '6 équations scalaires' }
+  - { nom: 'Moment vectoriel', tex: '\vec M_O = \vec{OA} \wedge \vec F', domaine: 'Force F appliquée en A (N0.6.5)' }
+  - { nom: 'Plateau sur trois appuis', tex: '\sum R_i = \sum F, \quad \sum R_i\,x_i = \sum F\,x, \quad \sum R_i\,y_i = \sum F\,y', domaine: 'Charges et réactions verticales' }
+---
+
+import { EXEMPLE_TROIS_APPUIS, troisAppuis } from '@/lib/calc/statique'
+import { moment3D } from '@/lib/calc/vecteurs'
+import { grandeur, nombre } from '@/lib/format'
+import { TroisAppuisIso } from '@/components/schemas/Statique'
+
+export const r0 = troisAppuis(EXEMPLE_TROIS_APPUIS)
+export const centre = troisAppuis({ appuis: EXEMPLE_TROIS_APPUIS.appuis, charges: [{ nom: 'cuve', x: 2, y: 3.5 / 3, F: 240 }] })
+export const dehors = troisAppuis({ appuis: EXEMPLE_TROIS_APPUIS.appuis, charges: [{ nom: 'charge', x: 3.8, y: 2.5, F: 50 }] })
+export const potence = moment3D([0, 0, 0], [0, 2, 5], [0, 0, -1.2])
+
+<Page etape="intuition" titre="L'intuition : la table à trois pieds">
+
+Un tabouret à trois pieds ne boite jamais : trois points définissent toujours un plan, même sur un sol inégal. C'est pourquoi les trépieds des géomètres, les chèvres qui lèvent les seaux au-dessus des puits et beaucoup de petits châteaux d'eau ont trois pieds.
+
+Mais tous les pieds ne portent pas la même charge. Pose un sac sur le tabouret, près d'un pied : ce pied porte presque tout, les deux autres presque rien. Pose-le au-delà du bord, hors du triangle des pieds : le tabouret bascule.
+
+Pour calculer ces charges, le plan ne suffit plus : les pieds ne sont pas alignés, la structure est **dans l'espace**. Les équations d'équilibre gagnent une dimension.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment écrire l'équilibre d'un solide dans l'espace, et que portent les pieds d'un plateau ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : six équations">
+
+### L'équilibre dans l'espace
+
+Un solide libre dans l'espace a **six degrés de liberté** : trois translations, trois rotations. L'équilibre s'écrit :
+
+$$\sum F_x = 0, \quad \sum F_y = 0, \quad \sum F_z = 0$$
+$$\sum M_x = 0, \quad \sum M_y = 0, \quad \sum M_z = 0$$
+
+Six équations : la statique permet de trouver au plus six inconnues pour un solide.
+
+### Le moment d'une force
+
+Le moment d'une force F appliquée en A, par rapport au point O, est le vecteur $\vec M_O = \vec{OA} \wedge \vec F$ (produit vectoriel, N0.6.5). Ses trois composantes sont les moments par rapport aux axes x, y et z.
+
+Pour une **force verticale** F (vers le bas) appliquée au point (x ; y), les moments se lisent directement :
+
+- autour de l'axe x, le bras de levier est y ;
+- autour de l'axe y, le bras de levier est x ;
+- autour de l'axe z (vertical), le moment est nul.
+
+<Encadre type="exemple" titre="La potence de levage">
+Une charge de 1,2 kN pend au bout d'une potence de 2 m de bras, à 5 m de haut. Par le produit vectoriel, son moment au pied vaut ({nombre(potence[0], 1)} ; {nombre(potence[1], 1)} ; {nombre(potence[2], 1)}) kN·m : un moment de {grandeur(Math.abs(potence[0]), 1, 'kN·m')} autour de l'axe x, que le pied du mât doit reprendre.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le plateau sur trois appuis">
+
+### Trois équations utiles
+
+Quand toutes les forces sont **verticales** (poids et réactions), trois équations sont automatiquement vérifiées (ΣF<sub>x</sub>, ΣF<sub>y</sub>, ΣM<sub>z</sub>). Il reste :
+
+$$\sum R_i = \sum F \qquad \sum R_i\,x_i = \sum F\,x \qquad \sum R_i\,y_i = \sum F\,y$$
+
+Avec trois appuis non alignés, ces trois équations donnent les trois réactions : le plateau sur trois appuis est **isostatique**. Avec quatre appuis, il y a une inconnue de trop : c'est la table qui boite.
+
+### La méthode
+
+1. Choisir un repère (origine sur un appui, axe x passant par un second appui simplifie les calculs).
+2. Relever les coordonnées des appuis et des charges.
+3. Écrire les trois équations ; les résoudre (souvent une équation ne contient qu'une inconnue).
+4. **Contrôler** : la somme des réactions égale la somme des charges.
+
+### La condition de stabilité
+
+Toutes les réactions sont positives si et seulement si la résultante des charges tombe **à l'intérieur du triangle des appuis**. Si elle sort du triangle, une réaction devient négative : le plateau bascule autour du côté le plus proche, sauf s'il est ancré.
+
+<Regle type="simplification">
+On suppose des appuis ponctuels qui ne transmettent que des forces verticales, et un plateau indéformable. Un vrai château d'eau reçoit aussi le vent (forces horizontales) : ses pieds et leurs contreventements se calculent en trois dimensions, souvent par logiciel.
+</Regle>
+
+</Page>
+
+<Vue3D titre="La cuve sur trois pieds en perspective" calques={[{ id: 'structure', libelle: 'Structure' }, { id: 'charges', libelle: 'Charges' }, { id: 'reactions', libelle: 'Réactions' }]}>
+
+Un plateau triangulaire porte une cuve pleine et une pompe. Active les calques : les charges descendent, les trois pieds répondent par des réactions verticales. Le pied le plus proche des charges porte le plus.
+
+<TroisAppuisIso d={EXEMPLE_TROIS_APPUIS} R={r0.R} />
+
+<Encadre type="retenir">
+Six équations dans l'espace ; trois seulement pour des forces parallèles. Plateau sur trois appuis : isostatique. Résultante dans le triangle des appuis : toutes les réactions sont positives.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="troisAppuis">
+
+<Cahier titre="Exemple résolu : la cuve d'un dispensaire sur trois pieds">
+
+**Énoncé.** Un dispensaire du Sankuru stocke son eau dans une cuve posée sur un plateau en béton porté par trois pieds A (0 ; 0), B (4 ; 0) et C (2 ; 3,5), coordonnées en mètres. La cuve pleine pèse 240 kN, son centre est en (2 ; 1,5) ; une pompe de 12 kN est posée en (3 ; 0,5) (données de l'énoncé). Calcule la charge reprise par chaque pied.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi l'origine en A et l'axe x passant par B ? A et B ont alors y = 0 : l'équation des moments autour de l'axe x ne contient que R<sub>C</sub>.</Note>
+</Etape>
+
+<Etape n={2} titre="Le plan">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : trois équations, trois réactions">
+
+<Etape n={3} titre="Les sommes">
+<AN k="sommes" />
+</Etape>
+
+<Etape n={4} titre="Les équations">
+<AN k="equations" />
+</Etape>
+
+<Etape n={5} titre="La résolution">
+<AN k="solution" />
+<Resultat k="RC" libelle="Réaction du pied C" />
+<Note couleur="vert">Contrôle : la somme des réactions est égale à la somme des charges. Déplace la pompe hors du triangle : une réaction diminue, et l'alerte de basculement apparaît si elle devient négative.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre les bras de levier des deux axes.">
+Autour de l'axe x, le bras de levier d'une force verticale est sa coordonnée y ; autour de l'axe y, c'est sa coordonnée x. On écrit chaque équation en précisant l'axe.
+</Piege>
+
+<Piege erreur="raisonner comme dans le plan.">
+Avec trois pieds non alignés, une seule équation de moments ne suffit pas : il en faut deux, autour de deux axes différents, plus l'équilibre vertical.
+</Piege>
+
+<Piege erreur="oublier une charge excentrée.">
+La pompe ne pèse que 12 kN, mais placée près de B, elle change la répartition. Chaque charge entre dans les trois équations avec ses propres coordonnées.
+</Piege>
+
+<Piege erreur="ajouter un quatrième pied « pour la sécurité » sans calcul.">
+Avec quatre pieds, la répartition dépend de la rigidité du plateau et des tassements : un pied peut se retrouver presque seul à porter. Le calcul devient hyperstatique.
+</Piege>
+
+<Piege erreur="ignorer une réaction négative.">
+Elle signale un basculement. Avec une charge de 50 kN placée en (3,8 ; 2,5), hors du triangle, R<sub>A</sub> vaut {grandeur(dehors.R[0], 2, 'kN')} : le plateau se soulève en A.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les trépieds de levage.** Au-dessus des puits et des forages, les équipes utilisent souvent une chèvre à trois pieds pour descendre la pompe ou les tubages. La charge suspendue au sommet doit rester à la verticale du centre du triangle formé par les pieds : un tirage oblique décale la résultante, charge un pied et peut faire basculer l'ensemble.
+
+<Encadre type="terrain" titre="Les châteaux d'eau des villages">
+Beaucoup de petits châteaux d'eau ruraux sont des cuves posées sur trois ou quatre poteaux. Les pieds doivent reprendre le poids de l'eau, mais aussi le vent, qui pousse latéralement la cuve haut placée. Un poteau mal fondé, sur un sol qui se tasse en saison des pluies, et la cuve penche : le centre de gravité se décale, la charge se reporte sur les autres pieds, et le mouvement s'aggrave.
+</Encadre>
+
+**Les machines et les appareils de mesure.** Les trépieds de géomètre, les bétonnières sur trois roues, les stabilisateurs des grues reposent sur le même principe : trois appuis suffisent, et la stabilité dépend de la position de la charge par rapport au polygone des appuis.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : statique dans l'espace">
+
+### Équilibre
+
+$\sum F_x = \sum F_y = \sum F_z = 0$ · $\sum M_x = \sum M_y = \sum M_z = 0$ · 6 équations
+
+### Moment
+
+$\vec M_O = \vec{OA} \wedge \vec F$ · force verticale en (x ; y) : bras y autour de x, bras x autour de y
+
+### Forces verticales
+
+3 équations utiles : $\sum R_i = \sum F$ · $\sum R_i x_i = \sum F x$ · $\sum R_i y_i = \sum F y$
+
+### Appuis
+
+3 appuis non alignés : isostatique · 4 appuis : hyperstatique
+
+### Stabilité
+
+résultante dans le triangle des appuis ⟺ réactions toutes positives
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La charge au centre">
+
+La cuve de 240 kN est placée au centre de gravité du triangle ABC, en (2 ; 3,5/3). Que porte chaque pied ?
+
+<Indice>Par symétrie de rôle, chaque pied porte un tiers… vérifie-le avec les équations.</Indice>
+
+<Corrige>
+Les trois équations donnent **R<sub>A</sub> = R<sub>B</sub> = R<sub>C</sub> = {grandeur(centre.R[0], 0, 'kN')}** : au centre de gravité du triangle, la charge se partage en trois parts égales.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La cuve et la pompe">
+
+Reprends l'exemple résolu sans la fiche : écris les trois équations et calcule R<sub>C</sub>, puis R<sub>B</sub>, puis R<sub>A</sub>.
+
+<Indice>Moments autour de l'axe x (A et B ont y = 0) : 3,5 R<sub>C</sub> = 240 × 1,5 + 12 × 0,5.</Indice>
+
+<Corrige>
+R<sub>C</sub> = **{grandeur(r0.R[2], 2, 'kN')}** ; puis 4 R<sub>B</sub> + 2 R<sub>C</sub> = 240 × 2 + 12 × 3, donc R<sub>B</sub> = **{grandeur(r0.R[1], 2, 'kN')}** ; enfin R<sub>A</sub> = {nombre(r0.Ftot, 0)} − R<sub>B</sub> − R<sub>C</sub> = **{grandeur(r0.R[0], 2, 'kN')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une charge hors du triangle">
+
+Une charge de 50 kN est posée seule en (3,8 ; 2,5) sur le plateau, qui déborde des pieds. Calcule les réactions. Que se passe-t-il ?
+
+<Indice>Vérifie d'abord si le point est dans le triangle : la droite BC passe par x = 4 − (2/3,5) y.</Indice>
+
+<Corrige>
+R<sub>C</sub> = {grandeur(dehors.R[2], 2, 'kN')} ; R<sub>B</sub> = {grandeur(dehors.R[1], 2, 'kN')} ; R<sub>A</sub> = **{grandeur(dehors.R[0], 2, 'kN')}**. La réaction en A est négative : la charge est hors du triangle (au-delà de la droite BC), et le plateau bascule autour de BC s'il n'est pas ancré en A.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.12">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Dans l'espace, l'équilibre d'un solide s'écrit avec :" choix={['3 équations', '4 équations', '6 équations', '9 équations']} bonne={2} colonnes={4}>
+Trois sommes de forces et trois sommes de moments.
+</QCM>
+
+<QCM n={2} question="Pour des forces toutes verticales, le nombre d'équations utiles est :" choix={['1', '2', '3', '6']} bonne={2} colonnes={4}>
+ΣF<sub>z</sub> = 0, ΣM<sub>x</sub> = 0, ΣM<sub>y</sub> = 0.
+</QCM>
+
+<QCM n={3} question="Un plateau posé sur trois appuis non alignés est :" choix={['hypostatique', 'isostatique', 'hyperstatique', 'instable']} bonne={1} colonnes={4}>
+Trois inconnues, trois équations utiles.
+</QCM>
+
+<QCM n={4} question="Autour de l'axe x, le bras de levier d'une force verticale appliquée en (x ; y) est :" choix={['x', 'y', 'z', '√(x² + y²)']} bonne={1} colonnes={4}>
+La distance de la force à l'axe x est sa coordonnée y.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour l'exemple résolu, le pied C porte :" choix={[grandeur(r0.R[2], 2, 'kN'), grandeur(r0.R[0], 2, 'kN'), grandeur(r0.R[1], 2, 'kN'), grandeur(r0.Ftot / 3, 2, 'kN')]} bonne={0} colonnes={4}>
+3,5 R<sub>C</sub> = 240 × 1,5 + 12 × 0,5.
+</QCM>
+
+<QCM n={6} question="Un plateau sur trois appuis reste stable tant que la résultante des charges :" choix={['passe par un appui', 'tombe à l’intérieur du triangle des appuis', 'est horizontale', 'est très faible']} bonne={1} colonnes={2}>
+Sinon, une réaction devient négative.
+</QCM>
+
+<QCM n={7} question="Une table à quatre pieds sur un sol inégal boite parce qu'elle est :" choix={['isostatique', 'hyperstatique', 'hypostatique', 'trop légère']} bonne={1} colonnes={4}>
+Quatre inconnues pour trois équations : la répartition dépend des déformations et du sol.
+</QCM>
+
+<QCM n={8} question="Le moment d'une force F appliquée en A par rapport à O s'écrit :" choix={['OA + F', 'OA · F (produit scalaire)', 'OA ∧ F (produit vectoriel)', 'F / OA']} bonne={2} colonnes={2}>
+C'est un vecteur (N0.6.5).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

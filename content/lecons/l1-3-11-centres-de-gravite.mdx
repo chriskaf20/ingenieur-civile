@@ -1,0 +1,312 @@
+---
+id: L1.3.11
+titre: Centres de gravité et moments statiques
+objectifs:
+  - Calculer le moment statique d'une surface par rapport à un axe
+  - Calculer le centre de gravité d'une section composée, trous compris
+  - Calculer le centre de gravité des poids d'un ouvrage fait de plusieurs matériaux
+  - Utiliser le centre de gravité pour placer la résultante des poids
+relecture: false
+normes: []
+glossaire:
+  - terme: Centre de gravité
+    definition: Point où passe la résultante des poids d'un corps ; pour une surface homogène, il se confond avec le centre de la surface.
+  - terme: Moment statique
+    definition: Somme des aires multipliées par leur distance à un axe, S = Σ A y, en cm³ ou m³ ; il est nul par rapport à un axe passant par le centre de gravité.
+  - terme: Section composée
+    definition: Section formée de plusieurs figures simples (rectangles, triangles, cercles), éventuellement percée de trous.
+  - terme: Aire négative
+    definition: Façon de compter un trou, en le soustrayant d'une figure pleine qui l'englobe.
+  - terme: Axe de symétrie
+    definition: Droite qui partage une figure en deux moitiés superposables ; le centre de gravité est toujours dessus.
+symboles:
+  - { symbole: 'A_i', signification: 'aire d’une figure simple', unite: 'cm²' }
+  - { symbole: 'x_i, y_i', signification: 'coordonnées de son centre', unite: 'cm' }
+  - { symbole: 'S_x', signification: 'moment statique par rapport à l’axe x', unite: 'cm³' }
+  - { symbole: 'x_G, y_G', signification: 'coordonnées du centre de gravité', unite: 'cm ou m' }
+  - { symbole: 'W_i', signification: 'poids d’une partie, par mètre de longueur', unite: 'kN/m' }
+formules:
+  - { nom: 'Moment statique', tex: 'S_x = \sum A_i\,y_i, \quad S_y = \sum A_i\,x_i', domaine: 'Figures simples de centres connus' }
+  - { nom: 'Centre de gravité d’une surface', tex: 'x_G = \frac{S_y}{A}, \quad y_G = \frac{S_x}{A}, \quad A = \sum A_i', domaine: 'Trous comptés avec une aire négative' }
+  - { nom: 'Centre des poids', tex: 'x_G = \frac{\sum W_i\,x_i}{\sum W_i}', domaine: 'Matériaux différents : on pondère par les poids' }
+---
+
+import { caniveauU, centrePoids, EXEMPLE_CANIVEAU } from '@/lib/calc/statique'
+import { gravite, rectangle } from '@/lib/calc/geometrie'
+import { grandeur, nombre } from '@/lib/format'
+import { CaniveauSchema } from '@/components/schemas/Statique'
+
+export const c0 = caniveauU(EXEMPLE_CANIVEAU)
+export const corniere = gravite([rectangle('aile', 0, 0, 10, 1), rectangle('âme', 0, 1, 1, 9)])
+export const mur = centrePoids([
+  { nom: 'semelle', gamma: 24, x0: 0, y0: 0, b: 1.2, h: 0.4 },
+  { nom: 'mur', gamma: 18, x0: 0.2, y0: 0.4, b: 0.2, h: 2 },
+])
+export const couvert = gravite([{ nom: 'caniveau', A: c0.A, x: EXEMPLE_CANIVEAU.B / 2, y: c0.yG }, rectangle('dallette', 0, EXEMPLE_CANIVEAU.H, EXEMPLE_CANIVEAU.B, 10)])
+export const moyenneFausse = gravite([{ nom: 'a', A: 1, x: 0, y: 7.5 }, { nom: 'b', A: 1, x: 0, y: 42.5 }])
+
+<Page etape="intuition" titre="L'intuition : la règle en équilibre sur le doigt">
+
+Pose une règle sur ton doigt : il existe un seul point où elle tient en équilibre. Colle une pièce de monnaie à un bout : le point d'équilibre se déplace vers la pièce. Ce point d'équilibre est le **centre de gravité** : c'est là que passe la résultante de tous les petits poids de l'objet (L1.3.3).
+
+Pour l'ingénieur, ce point compte partout. La stabilité d'un mur dépend de la position de son centre de gravité (L1.3.10) ; la flexion d'une poutre se fait autour d'un axe passant par le centre de gravité de sa section (L2) ; une charge levée par une grue doit être élinguée au-dessus de son centre de gravité.
+
+Pour une forme compliquée, on la découpe en formes simples dont on connaît le centre, et l'on fait une moyenne pondérée. C'est l'objet de cette leçon, qui prolonge N0.5.6.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Où se trouve le centre de gravité d'une section ou d'un ouvrage fait de plusieurs morceaux ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : moment statique et centre de gravité">
+
+### Le moment statique
+
+Le **moment statique** d'une surface par rapport à l'axe x est la somme des aires multipliées par leur distance à cet axe :
+
+$$S_x = \sum A_i\,y_i$$
+
+C'est l'analogue, pour une surface, du moment d'une force : les aires jouent le rôle des forces, les distances celui des bras de levier. Unités : cm³ ou m³.
+
+### Le centre de gravité
+
+Le centre de gravité G est le point où l'on peut concentrer toute l'aire sans changer le moment statique :
+
+$$y_G = \frac{S_x}{A} \qquad x_G = \frac{S_y}{A} \qquad A = \sum A_i$$
+
+Conséquence : le moment statique par rapport à un axe passant par G est **nul**. C'est ce qui rend G si utile.
+
+### Trois raccourcis
+
+1. Si la figure a un **axe de symétrie**, G est dessus : une seule coordonnée à calculer.
+2. Un **trou** se compte avec une **aire négative** : on prend la figure pleine, puis on retranche le vide.
+3. Le résultat se **contrôle** : G doit se trouver à l'intérieur du contour général de la figure, du côté où la matière est la plus abondante.
+
+<Encadre type="exemple" titre="Une cornière">
+Une cornière à ailes égales de 10 cm et d'épaisseur 1 cm se découpe en un rectangle 10 × 1 (centre à 0,5 cm du bas) et un rectangle 1 × 9 (centre à 5,5 cm). y<sub>G</sub> = (10 × 0,5 + 9 × 5,5) / 19 = {grandeur(corniere.yG, 2, 'cm')}, et x<sub>G</sub> a la même valeur par symétrie par rapport à la bissectrice : G est hors de la matière, dans l'angle de la cornière.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : les centres de gravité des poids">
+
+### Plusieurs matériaux
+
+Si l'ouvrage est fait de matériaux différents, le centre de gravité **des poids** ne se calcule plus avec les aires, mais avec les **poids** :
+
+$$x_G = \frac{\sum W_i\,x_i}{\sum W_i} \qquad W_i = \gamma_i\,V_i$$
+
+Un mur en blocs (γ ≈ 18 kN/m³) posé sur une semelle en béton (24 kN/m³) a son centre de gravité plus près de la semelle qu'un calcul par les aires ne l'indiquerait.
+
+<Encadre type="exemple" titre="Un mur sur sa semelle">
+Semelle de 1,20 × 0,40 m en béton (24 kN/m³), mur de 0,20 × 2,00 m en blocs (18 kN/m³, donnée de l'énoncé), posé entre x = 0,20 et 0,40 m. Poids : {grandeur(mur.poids[0].W, 2, 'kN/m')} et {grandeur(mur.poids[1].W, 2, 'kN/m')}. Centre des poids : x<sub>G</sub> = {grandeur(mur.xG, 3, 'm')} depuis le bord de la semelle.
+</Encadre>
+
+### À quoi sert le centre de gravité ?
+
+- **Stabilité** : le poids d'un ouvrage agit en son centre de gravité ; son bras de levier par rapport à l'arête de basculement donne le moment stabilisant.
+- **Flexion** : une poutre fléchit autour d'un axe passant par le centre de gravité de sa section, l'**axe neutre** (L2).
+- **Levage** : une charge élinguée au-dessus de son centre de gravité reste horizontale ; sinon, elle bascule pendant le levage.
+
+<Regle type="simplification">
+On suppose chaque morceau homogène, avec son centre de gravité au centre de sa forme. Un poids volumique « moyen » de maçonnerie (blocs, joints, enduits) est une approximation : sur un projet, on prend les valeurs de l'EC1 ou des fiches des fabricants.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : compter un vide en négatif">
+
+<CaniveauSchema d={EXEMPLE_CANIVEAU} r={c0.trou} trou prefixe="cu-t" />
+
+Plutôt que de découper le caniveau en trois rectangles, on prend le rectangle plein B × H, et l'on retranche le vide intérieur, compté avec une aire négative. Les deux méthodes donnent le même centre de gravité : y<sub>G</sub> = {grandeur(c0.trou.yG, 2, 'cm')}.
+
+<Encadre type="retenir">
+S = Σ A<sub>i</sub> y<sub>i</sub> ; y<sub>G</sub> = S / A. Symétrie : G sur l'axe. Trous : aires négatives. Matériaux différents : on pondère par les poids.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="caniveauU">
+
+<Cahier titre="Exemple résolu : le caniveau en U préfabriqué">
+
+**Énoncé.** Une entreprise de Mbandaka préfabrique des caniveaux en U en béton : 80 cm de large et 70 cm de haut à l'extérieur, parois de 12 cm, radier de 15 cm. Pour les manutentionner et les poser, on veut connaître l'aire de leur section et la position de leur centre de gravité.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi seulement y<sub>G</sub> ? La section est symétrique par rapport à son axe vertical : x<sub>G</sub> = B/2.</Note>
+</Etape>
+
+<Etape n={2} titre="La section">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la moyenne pondérée">
+
+<Etape n={3} titre="Les morceaux">
+<AN k="morceaux" />
+</Etape>
+
+<Etape n={4} titre="Aire et moment statique">
+<AN k="somme" />
+</Etape>
+
+<Etape n={5} titre="Le centre de gravité">
+<AN k="yG" />
+<Note>Pourquoi G est-il si bas ? Le radier, large, concentre beaucoup de matière en bas ; les parois sont hautes mais minces.</Note>
+</Etape>
+
+<Etape n={6} titre="Le contrôle par le vide">
+<AN k="trou" />
+<Resultat k="yG" libelle="Centre de gravité au-dessus du fond" />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="faire la moyenne des hauteurs sans pondérer.">
+La moyenne simple des centres du radier et des parois donne {grandeur(moyenneFausse.yG, 1, 'cm')}, au lieu de {grandeur(c0.yG, 2, 'cm')} : chaque morceau doit compter pour son aire.
+</Piege>
+
+<Piege erreur="oublier qu'un trou se retranche.">
+Un vide compté positivement déplace G du mauvais côté et augmente l'aire. On l'affecte d'une aire négative.
+</Piege>
+
+<Piege erreur="mesurer les distances depuis des origines différentes.">
+Tous les y<sub>i</sub> se mesurent depuis le même axe, choisi au départ (ici le fond du caniveau). On l'écrit sur le schéma.
+</Piege>
+
+<Piege erreur="utiliser les aires pour des matériaux différents.">
+Pour un mur en blocs sur une semelle en béton, on pondère par les poids W = γ V, pas par les aires.
+</Piege>
+
+<Piege erreur="croire que G est toujours dans la matière.">
+Pour une cornière, un anneau ou un U, G peut tomber dans le vide. Ce n'est pas une erreur.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le levage des éléments préfabriqués.** Un caniveau, une buse, une dalle préfabriquée se lèvent par des points d'accroche placés pour que la charge reste horizontale : la verticale du crochet doit passer par le centre de gravité. Une erreur, et l'élément bascule, se brise, ou blesse quelqu'un.
+
+<Encadre type="terrain" titre="Les caniveaux des villes">
+Dans les villes de RDC, les caniveaux en béton longent les avenues pour évacuer les pluies tropicales. Les éléments préfabriqués en U, posés bout à bout, sont plus rapides à mettre en œuvre que des caniveaux coulés en place. Leur centre de gravité bas les rend stables sur leur lit de pose ; quand on les couvre d'une dallette, le centre de gravité de l'ensemble remonte (exercice 3).
+</Encadre>
+
+**La stabilité des ouvrages.** Pour un mur, une cuve, un massif de fondation, la position du centre de gravité des poids donne le bras de levier du moment stabilisant (L1.3.10). Un ouvrage lourd mais dont le poids est mal placé peut être moins stable qu'un ouvrage plus léger bien proportionné.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : centres de gravité">
+
+### Moment statique
+
+$S_x = \sum A_i\,y_i$ · $S_y = \sum A_i\,x_i$ · cm³ · nul par rapport à un axe passant par G
+
+### Centre de gravité
+
+$x_G = S_y / A$ · $y_G = S_x / A$ · $A = \sum A_i$
+
+### Raccourcis
+
+symétrie : G sur l'axe · trou : aire négative · G peut être hors de la matière
+
+### Plusieurs matériaux
+
+$x_G = \sum W_i x_i / \sum W_i$ avec $W_i = \gamma_i V_i$
+
+### Méthode
+
+découper · tableau A, y, A y · sommes · quotient · contrôle (position plausible, autre découpage)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une cornière">
+
+Calcule le centre de gravité d'une cornière à ailes égales de 10 cm, d'épaisseur 1 cm, avec l'origine à l'angle extérieur.
+
+<Indice>Deux rectangles : 10 × 1 et 1 × 9 ; les deux coordonnées sont égales par symétrie.</Indice>
+
+<Corrige>
+A = 10 + 9 = **{grandeur(corniere.A, 0, 'cm²')}** ; S<sub>x</sub> = 10 × 0,5 + 9 × 5,5 = {grandeur(corniere.Sx, 1, 'cm³')} ; y<sub>G</sub> = x<sub>G</sub> = **{grandeur(corniere.yG, 2, 'cm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le mur sur sa semelle">
+
+Une semelle en béton de 1,20 m × 0,40 m (24 kN/m³) porte un mur en blocs de 0,20 m × 2,00 m (18 kN/m³, donnée de l'énoncé) placé entre x = 0,20 et x = 0,40 m. Calcule le poids total par mètre et la position horizontale du centre des poids.
+
+<Indice>Pondère par les poids W = γ b h, pas par les aires.</Indice>
+
+<Corrige>
+W<sub>semelle</sub> = **{grandeur(mur.poids[0].W, 2, 'kN/m')}** à x = 0,60 m ; W<sub>mur</sub> = **{grandeur(mur.poids[1].W, 2, 'kN/m')}** à x = 0,30 m ; W = {grandeur(mur.W, 2, 'kN/m')} ; x<sub>G</sub> = **{grandeur(mur.xG, 3, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le caniveau couvert">
+
+On pose sur le caniveau de l'exemple une dallette de couverture de 80 × 10 cm, sur toute sa largeur. Où se trouve le centre de gravité de l'ensemble ?
+
+<Indice>Deux morceaux : le caniveau (aire et y<sub>G</sub> connus) et la dallette (centre à 70 + 5 cm du fond).</Indice>
+
+<Corrige>
+A = {nombre(c0.A, 0)} + 800 = **{grandeur(couvert.A, 0, 'cm²')}** ; S = {nombre(c0.Sx, 0)} + 800 × 75 = {grandeur(couvert.Sx, 0, 'cm³')} ; y<sub>G</sub> = **{grandeur(couvert.yG, 2, 'cm')}** : le centre de gravité remonte nettement.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.11">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le moment statique d'une surface par rapport à un axe s'exprime en :" choix={['cm', 'cm²', 'cm³', 'cm⁴']} bonne={2} colonnes={4}>
+Une aire multipliée par une distance.
+</QCM>
+
+<QCM n={2} question="Le moment statique par rapport à un axe passant par le centre de gravité est :" choix={['maximal', 'nul', 'égal à l’aire', 'négatif']} bonne={1} colonnes={4}>
+C'est la définition même de G.
+</QCM>
+
+<QCM n={3} question="Pour une figure qui a un axe de symétrie, le centre de gravité :" choix={['est sur l’axe de symétrie', 'est hors de la figure', 'est au milieu de la base', 'ne peut pas être calculé']} bonne={0} colonnes={2}>
+Une seule coordonnée reste à calculer.
+</QCM>
+
+<QCM n={4} question="Dans un calcul de centre de gravité, un trou se compte :" choix={['avec une aire positive', 'avec une aire négative', 'pas du tout', 'deux fois']} bonne={1} colonnes={4}>
+On retranche le vide de la figure pleine.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour le caniveau de l'exemple, le centre de gravité est à :" choix={[grandeur(c0.yG, 2, 'cm'), grandeur(EXEMPLE_CANIVEAU.H / 2, 2, 'cm'), grandeur(moyenneFausse.yG, 2, 'cm'), grandeur(EXEMPLE_CANIVEAU.ef / 2, 2, 'cm')]} bonne={0} colonnes={4}>
+y<sub>G</sub> = {nombre(c0.Sx, 0)} / {nombre(c0.A, 0)}.
+</QCM>
+
+<QCM n={6} question="Pour un ouvrage fait de plusieurs matériaux, on calcule le centre de gravité des poids en pondérant par :" choix={['les aires', 'les poids', 'les hauteurs', 'les volumes seuls']} bonne={1} colonnes={4}>
+W = γ V : deux volumes égaux de matériaux différents n'ont pas le même poids.
+</QCM>
+
+<QCM n={7} question="Le centre de gravité d'une cornière se trouve :" choix={['toujours dans la matière', 'parfois dans le vide, dans l’angle', 'au milieu de l’aile', 'au bout de l’âme']} bonne={1} colonnes={2}>
+Comme pour un anneau ou un U.
+</QCM>
+
+<QCM n={8} question="Pour lever une dalle préfabriquée sans qu'elle bascule, le crochet doit être :" choix={['au-dessus du centre de gravité', 'à un bord', 'n’importe où', 'sous la dalle']} bonne={0} colonnes={2}>
+La résultante des poids passe alors par le crochet.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

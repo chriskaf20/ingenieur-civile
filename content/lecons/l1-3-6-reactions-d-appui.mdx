@@ -1,0 +1,311 @@
+---
+id: L1.3.6
+titre: Réactions d'appui d'une poutre
+objectifs:
+  - Remplacer une charge répartie par sa résultante, au bon endroit
+  - Calculer les réactions d'une poutre sous charges ponctuelles et réparties
+  - Traiter une poutre avec porte-à-faux et repérer un soulèvement
+  - Contrôler les réactions par une équation indépendante
+relecture: false
+normes: []
+glossaire:
+  - terme: Réaction d'appui
+    definition: Force exercée par un appui sur la poutre pour la maintenir en équilibre.
+  - terme: Résultante d'une charge répartie
+    definition: Force unique équivalente à la charge, égale à l'aire du diagramme de charge et appliquée à son centre de gravité.
+  - terme: Porte-à-faux
+    definition: Partie de poutre qui dépasse d'un appui ; une charge en porte-à-faux soulage l'appui opposé, jusqu'à le soulever.
+  - terme: Soulèvement
+    definition: Situation où une réaction devient négative ; l'appui devrait tirer la poutre vers le bas, sinon elle décolle.
+  - terme: Superposition
+    definition: Les réactions dues à plusieurs charges sont la somme des réactions dues à chaque charge seule.
+symboles:
+  - { symbole: 'R_A, R_B', signification: 'réactions verticales des appuis', unite: 'kN' }
+  - { symbole: 'L', signification: 'longueur de la poutre', unite: 'm' }
+  - { symbole: 'x_B', signification: 'position de l’appui B (A en x = 0)', unite: 'm' }
+  - { symbole: 'q', signification: 'charge répartie', unite: 'kN/m' }
+  - { symbole: 'P, a', signification: 'charge ponctuelle et sa position', unite: 'kN, m' }
+formules:
+  - { nom: 'Charge ponctuelle (poutre sur deux appuis)', tex: 'R_A = \frac{P\,(L - a)}{L}, \quad R_B = \frac{P\,a}{L}', domaine: 'Appuis aux extrémités' }
+  - { nom: 'Charge uniforme', tex: 'R_A = R_B = \frac{qL}{2}', domaine: 'Appuis aux extrémités' }
+  - { nom: 'Charge triangulaire', tex: 'R = \frac{q_{max} L}{2} \text{ aux } \frac{2}{3} \text{ depuis la pointe}', domaine: 'De 0 à q_max' }
+  - { nom: 'Cas général', tex: 'R_B = \frac{\sum R_i\,(x_i - x_A)}{x_B - x_A}, \quad R_A = \sum R_i - R_B', domaine: 'Charges verticales, appuis en x_A et x_B' }
+---
+
+import { chargeMaxSansSoulevement, EXEMPLE_POUTRE_CONSOLE, poutreConsole, reactionsAppuis, resultanteCharge } from '@/lib/calc/statique'
+import { grandeur, nombre } from '@/lib/format'
+import { PoutreReactions } from '@/components/schemas/Statique'
+
+export const r0 = poutreConsole(EXEMPLE_POUTRE_CONSOLE)
+export const souleve = { L: 7, xB: 5, q: 4, P: 30, a: 7 }
+export const rs = poutreConsole(souleve)
+export const pMax = chargeMaxSansSoulevement(EXEMPLE_POUTRE_CONSOLE)
+export const ex1 = reactionsAppuis(0, 6, [{ type: 'ponctuelle', nom: 'P', F: 24, a: 2 }])
+export const tri = reactionsAppuis(0, 6, [{ type: 'repartie', nom: 'triangle', q1: 0, q2: 12, a: 0, b: 6 }])
+export const rtri = resultanteCharge({ type: 'repartie', nom: 'triangle', q1: 0, q2: 12, a: 0, b: 6 })
+export const entreAppuis = resultanteCharge({ type: 'repartie', nom: 'q', q1: 12, q2: 12, a: 0, b: 5.5 })
+export const sansCtrl = poutreConsole({ ...EXEMPLE_POUTRE_CONSOLE, xB: EXEMPLE_POUTRE_CONSOLE.L })
+
+<Page etape="intuition" titre="L'intuition : porter une poutre à deux">
+
+Deux ouvriers portent un madrier chargé d'un seau de mortier. Si le seau est au milieu, chacun porte la moitié. Si le seau glisse vers l'un des deux, celui-là porte davantage, et l'autre est soulagé. Si le seau dépasse au-delà d'un ouvrier, l'autre doit même retenir son bout vers le bas pour que le madrier ne bascule pas.
+
+Les appuis d'une poutre se comportent comme ces deux ouvriers. Leurs **réactions** dépendent de la valeur des charges et surtout de **leur position**.
+
+Calculer ces réactions est le premier calcul de toute poutre : elles donnent les charges transmises aux poteaux, aux murs et aux fondations, et elles sont le point de départ des efforts intérieurs (L2).
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer ce que chaque appui reçoit, quelle que soit la disposition des charges ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : la méthode">
+
+### Étape 1 : les résultantes
+
+Pour l'équilibre, une charge répartie se remplace par sa **résultante** (L1.2.6) :
+
+- charge uniforme q sur une longueur ℓ : R = q ℓ, au milieu ;
+- charge triangulaire de 0 à q<sub>max</sub> : R = q<sub>max</sub> ℓ / 2, aux deux tiers depuis la pointe ;
+- charge trapézoïdale : un rectangle plus un triangle, ou la formule de la résultante.
+
+### Étape 2 : les moments en A
+
+Avec A et B les deux appuis, les moments en A éliminent R<sub>A</sub> :
+
+$$R_B\,(x_B - x_A) = \sum R_i\,(x_i - x_A)$$
+
+### Étape 3 : l'équilibre vertical
+
+$$R_A = \sum R_i - R_B$$
+
+### Étape 4 : le contrôle
+
+On écrit les moments en B, qui donnent R<sub>A</sub> directement : si le résultat diffère, il y a une erreur. Ce contrôle prend une minute et évite des fondations mal dimensionnées.
+
+### Les cas à connaître par cœur
+
+Poutre de portée L sur deux appuis d'extrémité :
+
+- charge P en a : R<sub>A</sub> = P (L − a) / L et R<sub>B</sub> = P a / L ;
+- charge uniforme q : R<sub>A</sub> = R<sub>B</sub> = q L / 2.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : superposition et porte-à-faux">
+
+### La superposition
+
+Les équations d'équilibre sont **linéaires** : les réactions dues à plusieurs charges sont la somme des réactions dues à chaque charge seule. On peut donc traiter les charges une par une, puis additionner.
+
+### Le porte-à-faux
+
+Quand la poutre dépasse d'un appui, une charge placée sur le porte-à-faux a un bras de levier **au-delà** de l'appui : elle augmente la réaction de cet appui et **diminue** celle de l'autre. Si elle est assez forte, la réaction opposée devient négative : la poutre se **soulève**. Il faut alors un ancrage, un contrepoids, ou un autre schéma statique.
+
+<Encadre type="exemple" titre="Une poutre qui se soulève">
+Poutre de 7 m sur appuis en x = 0 et x = 5 m, charge de 4 kN/m et 30 kN au bout du porte-à-faux : R<sub>B</sub> = {grandeur(rs.RB, 2, 'kN')} et R<sub>A</sub> = {grandeur(rs.RA, 2, 'kN')}. La réaction en A est négative : sans ancrage, le côté A décolle (schéma).
+</Encadre>
+
+<Regle type="simplification">
+On considère des charges verticales et des appuis qui ne s'enfoncent pas. Les charges inclinées ajoutent une réaction horizontale à l'articulation, calculée par ΣF<sub>x</sub> = 0 ; les tassements d'appui ne changent pas les réactions d'une poutre isostatique.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le soulèvement">
+
+<PoutreReactions d={souleve} r={rs} prefixe="pr-s" />
+
+La charge de 30 kN placée au bout du porte-à-faux fait basculer la poutre autour de l'appui B. La réaction en A change de sens : l'appui doit retenir la poutre vers le bas. Sur un vrai ouvrage, on ancre la poutre dans un poteau ou un massif, ou l'on raccourcit le porte-à-faux.
+
+<Encadre type="retenir">
+Résultantes, puis moments en A pour R<sub>B</sub>, équilibre vertical pour R<sub>A</sub>, et contrôle par les moments en B. Une réaction négative signale un soulèvement.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="reactionsAppuis">
+
+<Cahier titre="Exemple résolu : une poutre de rive avec porte-à-faux">
+
+**Énoncé.** Une poutre de 7 m repose sur deux appuis : A en x = 0 et B en x = 5,50 m ; elle dépasse donc de 1,50 m au-delà de B pour porter un auvent. Elle reçoit une charge répartie de 12 kN/m sur toute sa longueur et, au bout du porte-à-faux, la charge d'un poteau d'auvent de 20 kN (données de l'énoncé). Calcule les réactions.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi la charge répartie sur toute la longueur ? Le plancher s'appuie aussi sur la partie en porte-à-faux : on l'oublie souvent.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : moments, projection, contrôle">
+
+<Etape n={3} titre="Les résultantes">
+<AN k="resultantes" />
+</Etape>
+
+<Etape n={4} titre="Les moments en A">
+<AN k="RB" />
+<Note>Pourquoi R<sub>B</sub> dépasse-t-elle la moitié de la charge ? Une partie de la charge est au-delà de B : elle s'appuie surtout sur B.</Note>
+</Etape>
+
+<Etape n={5} titre="L'équilibre vertical">
+<AN k="RA" />
+</Etape>
+
+<Etape n={6} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="RB" libelle="Réaction en B" />
+<Note couleur="vert">Contrôle : le moment en B des forces doit être nul. Augmente P : R<sub>A</sub> diminue, puis devient négative (alerte de soulèvement).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="placer la résultante d'une charge triangulaire au milieu.">
+Elle est aux deux tiers depuis la pointe, du côté où la charge est la plus forte : pour 0 à 12 kN/m sur 6 m, {grandeur(rtri.R, 0, 'kN')} à {grandeur(rtri.x, 0, 'm')} de la pointe.
+</Piege>
+
+<Piege erreur="oublier la charge répartie sur le porte-à-faux.">
+La résultante de 12 kN/m s'étend sur 7 m, pas sur les 5,50 m entre appuis : {grandeur(r0.parties[0].R, 0, 'kN')} et non {grandeur(entreAppuis.R, 0, 'kN')}.
+</Piege>
+
+<Piege erreur="supposer R_A = R_B par habitude.">
+C'est vrai seulement pour une poutre et un chargement symétriques. Sans porte-à-faux (B en bout), la même poutre aurait R<sub>A</sub> = {grandeur(sansCtrl.RA, 2, 'kN')} et R<sub>B</sub> = {grandeur(sansCtrl.RB, 2, 'kN')}.
+</Piege>
+
+<Piege erreur="se tromper de bras de levier dans le porte-à-faux.">
+Le bras se mesure depuis le point des moments : une charge au bout du porte-à-faux est à 7 m de A, pas à 1,50 m.
+</Piege>
+
+<Piege erreur="sauter le contrôle.">
+Une erreur de signe ou de bras de levier passe inaperçue sans la seconde équation de moments. Le contrôle fait partie du calcul.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Des réactions aux fondations.** Les réactions d'une poutre sont les charges que reçoivent les poteaux ou les murs qui la portent. En les cumulant d'étage en étage, on obtient la descente de charges (L1.1.6), puis la taille des semelles.
+
+<Encadre type="terrain" titre="Les auvents et les vérandas">
+Beaucoup de maisons prolongent leur toiture ou leur dalle par un auvent porté en porte-à-faux. Chaque fois qu'on ajoute une charge au bout (un mur, une citerne, un étage), on soulage l'appui opposé. Pour la poutre de l'exemple, une charge de bout de {grandeur(pMax, 0, 'kN')} suffirait à soulever A : au-delà, la poutre doit être ancrée.
+</Encadre>
+
+**Les engins de levage.** Une grue mobile s'appuie sur ses stabilisateurs. Quand elle lève une charge loin de son axe, la réaction des stabilisateurs opposés diminue : s'ils décollent, la grue bascule. Les tableaux de charge du constructeur reposent sur ce calcul de réactions.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : réactions d'appui">
+
+### Méthode
+
+résultantes · moments en A → R<sub>B</sub> · ΣF<sub>y</sub> → R<sub>A</sub> · contrôle : moments en B
+
+### Résultantes
+
+uniforme : q ℓ au milieu · triangle : q<sub>max</sub> ℓ / 2 aux 2/3 depuis la pointe
+
+### Cas usuels (appuis aux extrémités)
+
+$R_A = P(L - a)/L$ · $R_B = P a / L$ · uniforme : $qL/2$ de chaque côté
+
+### Superposition
+
+réactions de plusieurs charges = somme des réactions de chaque charge
+
+### Porte-à-faux
+
+une charge au-delà de B soulage A · réaction négative = soulèvement → ancrage
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une charge ponctuelle">
+
+Une poutre de 6 m sur deux appuis d'extrémité porte une charge de 24 kN à 2 m de A. Calcule R<sub>A</sub> et R<sub>B</sub>.
+
+<Indice>R<sub>B</sub> = P a / L, puis R<sub>A</sub> = P − R<sub>B</sub>.</Indice>
+
+<Corrige>
+R<sub>B</sub> = 24 × 2 / 6 = **{grandeur(ex1.RB, 0, 'kN')}** ; R<sub>A</sub> = 24 − {nombre(ex1.RB, 0)} = **{grandeur(ex1.RA, 0, 'kN')}**. L'appui le plus proche de la charge porte le plus.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une charge triangulaire">
+
+Une poutre de 6 m sur deux appuis d'extrémité porte une charge qui croît de 0 (en A) à 12 kN/m (en B). Calcule les réactions.
+
+<Indice>Résultante R = 12 × 6 / 2, à 4 m de A.</Indice>
+
+<Corrige>
+R = **{grandeur(rtri.R, 0, 'kN')}** à {grandeur(rtri.x, 0, 'm')} de A ; R<sub>B</sub> = {nombre(rtri.R, 0)} × 4 / 6 = **{grandeur(tri.RB, 0, 'kN')}** ; R<sub>A</sub> = **{grandeur(tri.RA, 0, 'kN')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Jusqu'où charger le porte-à-faux ?">
+
+Pour la poutre de l'exemple (7 m, appuis en 0 et 5,50 m, 12 kN/m sur toute la longueur), quelle charge peut-on placer au bout du porte-à-faux sans que A se soulève ?
+
+<Indice>Écris R<sub>A</sub> en fonction de P et cherche P pour que R<sub>A</sub> = 0.</Indice>
+
+<Corrige>
+Moments en B : R<sub>A</sub> × 5,50 = 12 × 7 × (5,50 − 3,50) − P × (7 − 5,50). R<sub>A</sub> ≥ 0 tant que P ≤ 12 × 7 × 2 / 1,50 = **{grandeur(pMax, 0, 'kN')}**. Au-delà, il faut ancrer A ; en pratique, on garde une marge confortable, car les charges réelles varient.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La résultante d'une charge uniforme q sur une longueur ℓ vaut :" choix={['q', 'q ℓ, au milieu', 'q ℓ / 2, au tiers', 'q ℓ²']} bonne={1} colonnes={2}>
+C'est l'aire du rectangle de charge, appliquée en son centre.
+</QCM>
+
+<QCM n={2} question={<>Poutre de 6 m sur deux appuis, charge de 24 kN à 2 m de A. R<sub>B</sub> vaut :</>} choix={[grandeur(ex1.RA, 0, 'kN'), grandeur(ex1.RB, 0, 'kN'), '12 kN', '24 kN']} bonne={1} colonnes={4}>
+R<sub>B</sub> = P a / L = 24 × 2 / 6.
+</QCM>
+
+<QCM n={3} question="Pour trouver R_B en une seule équation, on écrit :" choix={['ΣF_y = 0', 'les moments en A', 'les moments en B', 'ΣF_x = 0']} bonne={1} colonnes={2}>
+R<sub>A</sub> passe par A : elle disparaît de l'équation.
+</QCM>
+
+<QCM n={4} question="Une poutre symétrique sous charge uniforme sur deux appuis d'extrémité a des réactions :" choix={['qL chacune', 'qL/2 chacune', 'qL/4 chacune', 'différentes']} bonne={1} colonnes={4}>
+Par symétrie, chaque appui porte la moitié.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une charge placée sur un porte-à-faux, au-delà de l'appui B :" choix={['augmente R_A', 'diminue R_A', 'ne change pas R_A', 'annule R_B']} bonne={1} colonnes={4}>
+Elle fait basculer la poutre autour de B et soulage A.
+</QCM>
+
+<QCM n={6} question="Une réaction négative signifie :" choix={['une erreur', 'un soulèvement : l’appui doit retenir la poutre vers le bas', 'que l’appui est inutile', 'une charge horizontale']} bonne={1} colonnes={2}>
+Sans ancrage, la poutre décolle.
+</QCM>
+
+<QCM n={7} question="Le principe de superposition dit que les réactions dues à plusieurs charges :" choix={['se multiplient', 'sont la somme des réactions dues à chaque charge', 'sont égales à la plus grande', 'ne peuvent pas être calculées']} bonne={1} colonnes={2}>
+Les équations d'équilibre sont linéaires.
+</QCM>
+
+<QCM n={8} question="Pour la poutre de l'exemple, la réaction en B vaut :" choix={[grandeur(r0.RB, 2, 'kN'), grandeur(r0.RA, 2, 'kN'), grandeur(r0.Rtot / 2, 2, 'kN'), grandeur(r0.Rtot, 2, 'kN')]} bonne={0} colonnes={4}>
+R<sub>B</sub> = {nombre(r0.MA, 0)} / 5,50.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

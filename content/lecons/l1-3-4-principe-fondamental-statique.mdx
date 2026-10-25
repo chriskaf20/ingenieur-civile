@@ -1,0 +1,304 @@
+---
+id: L1.3.4
+titre: Principe fondamental de la statique (plan)
+objectifs:
+  - Isoler un solide et faire le bilan de toutes les actions extérieures
+  - Écrire les trois équations d'équilibre d'un solide dans le plan
+  - Choisir le point des moments pour résoudre simplement
+  - Interpréter le signe d'une inconnue et contrôler le résultat
+relecture: false
+normes: []
+glossaire:
+  - terme: Principe fondamental de la statique
+    definition: Un solide est en équilibre si la somme des forces extérieures et la somme de leurs moments en un point sont nulles.
+  - terme: Isoler un solide
+    definition: "Le dessiner seul, en remplaçant chaque contact (appui, câble, sol) par les forces qu'il exerce : c'est le bilan des actions extérieures."
+  - terme: Barre à deux forces
+    definition: Barre articulée à ses deux extrémités et chargée seulement en ces points ; l'effort y est porté par l'axe de la barre.
+  - terme: Tirant
+    definition: Élément tendu qui retient une structure, comme un câble ou une barre en acier.
+  - terme: Forces concourantes
+    definition: Forces dont les lignes d'action passent par un même point ; trois forces non parallèles en équilibre sont toujours concourantes.
+symboles:
+  - { symbole: 'ΣF_x, ΣF_y', signification: 'sommes des composantes des forces', unite: 'kN' }
+  - { symbole: 'ΣM_A', signification: 'somme des moments au point A', unite: 'kN·m' }
+  - { symbole: 'T', signification: 'effort dans le tirant', unite: 'kN' }
+  - { symbole: 'H_A, V_A', signification: 'réactions de l’articulation A', unite: 'kN' }
+  - { symbole: 'α', signification: 'angle du tirant avec la marquise', unite: '°' }
+formules:
+  - { nom: 'Équilibre d’un solide (plan)', tex: '\sum F_x = 0, \quad \sum F_y = 0, \quad \sum M_A = 0', domaine: 'Solide indéformable au repos, A quelconque' }
+  - { nom: 'Marquise : tirant', tex: 'T = \frac{q L^2 / 2 + P L}{L \sin\alpha}', domaine: 'Moments en A' }
+  - { nom: 'Marquise : articulation', tex: 'H_A = T\cos\alpha, \quad V_A = qL + P - T\sin\alpha', domaine: 'Projections' }
+  - { nom: 'Console triangulée', tex: 'N_{AB} = \frac{P L}{h}, \quad N_{CB} = -\frac{P\sqrt{L^2 + h^2}}{h}', domaine: 'Barres à deux forces, charge P au nœud B' }
+---
+
+import { consoleTriangulee, EXEMPLE_MARQUISE, marquise, reactionsAppuis } from '@/lib/calc/statique'
+import { grandeur, nombre } from '@/lib/format'
+import { TroisForcesMarquise } from '@/components/schemas/Statique'
+
+export const m0 = marquise(EXEMPLE_MARQUISE)
+export const m25 = marquise({ ...EXEMPLE_MARQUISE, alpha: 25 })
+export const m60 = marquise({ ...EXEMPLE_MARQUISE, alpha: 60 })
+export const pt = reactionsAppuis(0, 5, [{ type: 'ponctuelle', nom: 'P', F: 30, a: 2 }])
+export const ct = consoleTriangulee(10, 1.5, 1)
+
+<Page etape="intuition" titre="L'intuition : ce qui ne bouge pas est équilibré">
+
+Un livre posé sur une table ne s'enfonce pas, ne glisse pas, ne tourne pas. La table le pousse vers le haut exactement autant que la pesanteur le tire vers le bas. Si l'on pousse le livre sur le côté, il ne bouge toujours pas tant que le frottement le retient.
+
+Une structure, c'est pareil : une poutre, un mur, une marquise restent immobiles parce que toutes les forces qui s'exercent sur eux se compensent. Rien ne bouge, donc rien ne « gagne » : ni dans une direction, ni en rotation.
+
+Ce constat simple est le **principe fondamental de la statique**. Il fournit trois équations, et ces trois équations suffisent pour trouver les forces que les appuis doivent exercer, les **réactions**, et l'effort dans un tirant ou un câble.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment trouver les forces inconnues qui maintiennent une structure en équilibre ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : les trois équations">
+
+### Le principe
+
+Un solide au repos (ou en mouvement rectiligne uniforme) est en **équilibre** : la somme des forces extérieures est nulle, et la somme de leurs moments par rapport à n'importe quel point est nulle. Dans le plan :
+
+$$\sum F_x = 0 \qquad \sum F_y = 0 \qquad \sum M_A = 0$$
+
+Trois équations : on peut trouver **au plus trois inconnues** avec la seule statique.
+
+### La méthode en six étapes
+
+1. **Isoler** le solide : on le dessine seul.
+2. **Faire le bilan** des actions extérieures : charges connues, et à chaque liaison les forces inconnues, dessinées dans un sens supposé.
+3. **Choisir le point des moments** là où passent le plus d'inconnues : elles disparaissent de l'équation.
+4. **Écrire et résoudre** les trois équations.
+5. **Interpréter les signes** : une valeur négative signifie que la force agit dans le sens opposé à celui supposé. Ce n'est pas une erreur.
+6. **Contrôler** avec une équation non utilisée (par exemple les moments en un autre point).
+
+<Regle type="simplification">
+On suppose le solide **indéformable** et les liaisons **parfaites** (sans frottement dans les articulations). Pour une structure de bâtiment, les déformations sont si petites que l'équilibre s'écrit sur la géométrie initiale : c'est l'hypothèse des petits déplacements.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : deux forces, trois forces">
+
+### Solide soumis à deux forces
+
+Si un solide n'est soumis qu'à deux forces, elles sont **égales, opposées et portées par la même droite**. C'est le cas d'une barre articulée à ses deux bouts et chargée seulement à ses extrémités : l'effort suit l'axe de la barre. Elle est soit **tendue** (tirant), soit **comprimée** (buton, bracon).
+
+### Solide soumis à trois forces
+
+Si trois forces non parallèles maintiennent un solide en équilibre :
+
+- leurs lignes d'action sont **concourantes** (elles se coupent en un même point) ;
+- leurs vecteurs, mis bout à bout, forment un **triangle fermé**.
+
+On s'en sert pour trouver graphiquement la direction d'une réaction, ou pour contrôler un calcul.
+
+<Encadre type="exemple" titre="La marquise">
+Une marquise articulée au mur en A est tenue en bout par un tirant. Elle est soumise à trois forces : la charge totale W, l'effort du tirant T et la réaction de l'articulation. Avec les données de l'exemple résolu : T = {grandeur(m0.T, 2, 'kN')}, H<sub>A</sub> = {grandeur(m0.HA, 2, 'kN')} et V<sub>A</sub> = {grandeur(m0.VA, 2, 'kN')}. Le schéma montre que les trois lignes d'action se coupent bien en un point.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : trois forces concourantes">
+
+<TroisForcesMarquise d={EXEMPLE_MARQUISE} r={m0} />
+
+À gauche, la ligne d'action de la charge totale (rouge) coupe celle du tirant (bleu) en I. La réaction en A passe forcément par I (vert). À droite, les trois vecteurs mis bout à bout se referment : la somme des forces est nulle.
+
+<Encadre type="retenir">
+Isoler, faire le bilan, prendre les moments là où passent les inconnues, résoudre, interpréter les signes, contrôler. Trois forces en équilibre sont concourantes et forment un triangle fermé.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="marquise">
+
+<Cahier titre="Exemple résolu : la marquise d'une entrée">
+
+**Énoncé.** Une marquise de 3 m de long protège l'entrée d'un dispensaire. Elle est articulée au mur en A et tenue en bout B par un tirant ancré dans le mur au-dessus de A, incliné à 35° sur la marquise. Elle porte une charge répartie de 2 kN/m et, en bout, une charge de 1,5 kN (gouttière pleine, données de l'énoncé). Calcule l'effort dans le tirant et les réactions de l'articulation.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi une articulation en A ? La marquise est simplement fixée au mur par des pattes : on suppose qu'elles ne retiennent aucun moment.</Note>
+</Etape>
+
+<Etape n={2} titre="La marquise isolée">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : trois équations, trois inconnues">
+
+<Etape n={3} titre="Le bilan">
+<AN k="inconnues" />
+</Etape>
+
+<Etape n={4} titre="Les moments en A">
+<AN k="T" />
+<Note>Pourquoi le point A ? H<sub>A</sub> et V<sub>A</sub> y passent : l'équation ne contient plus que T.</Note>
+</Etape>
+
+<Etape n={5} titre="Les projections">
+<AN k="HA" />
+<AN k="VA" />
+</Etape>
+
+<Etape n={6} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="T" libelle="Effort dans le tirant" />
+<Note couleur="vert">Contrôle : les moments en B (où passent T et la charge P) redonnent zéro. Diminue l'angle α : le tirant s'aplatit et son effort augmente fortement.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier une force dans le bilan.">
+Poids propre, réaction horizontale, charge en bout : une force oubliée fausse toutes les équations. On fait le tour du solide isolé et l'on remplace **chaque** contact par ses forces.
+</Piege>
+
+<Piege erreur="croire qu'une réaction négative est une erreur.">
+Elle signifie seulement que la force agit dans le sens opposé à celui dessiné. On garde le calcul et l'on corrige le sens sur le schéma.
+</Piege>
+
+<Piege erreur="oublier la réaction horizontale de l'articulation.">
+Le tirant incliné tire la marquise vers le mur : le mur la repousse en A avec H<sub>A</sub> = {grandeur(m0.HA, 2, 'kN')}. Sans cette force, l'équilibre horizontal est impossible.
+</Piege>
+
+<Piege erreur="prendre les moments en un point quelconque.">
+Le résultat est le même, mais avec plus d'inconnues dans l'équation. En choisissant le point où passent les inconnues, on résout en une ligne.
+</Piege>
+
+<Piege erreur="chercher plus d'inconnues que d'équations.">
+Avec trois équations, la statique ne donne que trois inconnues. Au-delà, la structure est hyperstatique (L1.3.7) : il faut d'autres outils.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les marquises et auvents.** Très courants au-dessus des entrées et des vérandas, ils sont souvent suspendus par des tirants en acier. Le tirant doit résister à T, et surtout son **ancrage** dans le mur doit le retenir : une cheville dans une maçonnerie creuse s'arrache facilement.
+
+<Encadre type="terrain" titre="L'angle du tirant">
+Plus le tirant est couché, plus il est sollicité : avec la même marquise, T vaut {grandeur(m60.T, 2, 'kN')} si le tirant est incliné à 60°, {grandeur(m0.T, 2, 'kN')} à 35°, et {grandeur(m25.T, 2, 'kN')} à 25°. Un tirant ancré trop bas, parce que le mur s'arrête sous la toiture, peut être dangereux. On remonte l'ancrage ou l'on change de système.
+</Encadre>
+
+**Les étais et les butons.** Sur chantier, les étais qui soutiennent un coffrage et les butons qui tiennent une fouille sont des barres à deux forces : comprimées, elles doivent aussi résister au flambement (L2).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : principe fondamental de la statique">
+
+### Équilibre plan
+
+$\sum F_x = 0$ · $\sum F_y = 0$ · $\sum M_A = 0$ · au plus 3 inconnues
+
+### Méthode
+
+isoler · bilan des actions · moments là où passent les inconnues · résoudre · signes · contrôle
+
+### Deux forces
+
+égales, opposées, même ligne d'action · barre tendue ou comprimée
+
+### Trois forces
+
+concourantes · triangle des forces fermé
+
+### Marquise à tirant
+
+$T = \frac{qL^2/2 + PL}{L\sin\alpha}$ · $H_A = T\cos\alpha$ · $V_A = qL + P - T\sin\alpha$
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une poutre et une charge">
+
+Une poutre de 5 m repose sur une articulation en A et un appui simple en B. Elle porte une charge de 30 kN à 2 m de A. Calcule les réactions.
+
+<Indice>Moments en A pour trouver R<sub>B</sub>, puis ΣF<sub>y</sub> = 0. Il n'y a pas de charge horizontale.</Indice>
+
+<Corrige>
+Moments en A : R<sub>B</sub> × 5 = 30 × 2, donc R<sub>B</sub> = **{grandeur(pt.RB, 1, 'kN')}** ; ΣF<sub>y</sub> : R<sub>A</sub> = 30 − {nombre(pt.RB, 1)} = **{grandeur(pt.RA, 1, 'kN')}** ; H<sub>A</sub> = 0.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un tirant plus couché">
+
+Reprends la marquise de l'exemple avec un tirant incliné à 25° au lieu de 35°. Que deviennent T, H<sub>A</sub> et V<sub>A</sub> ?
+
+<Indice>Seul sin α et cos α changent ; V<sub>A</sub> ne dépend pas de l'angle.</Indice>
+
+<Corrige>
+T = (2 × 3² / 2 + 1,5 × 3) / (3 × sin 25°) = **{grandeur(m25.T, 2, 'kN')}** ; H<sub>A</sub> = T cos 25° = **{grandeur(m25.HA, 2, 'kN')}** ; V<sub>A</sub> = **{grandeur(m25.VA, 2, 'kN')}**, inchangée. Le tirant et le mur travaillent beaucoup plus.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La console triangulée">
+
+Une barre horizontale AB de 1,5 m est articulée au mur en A. Un bracon CB, articulé au mur en C, 1 m sous A, la soutient en B, où pend une charge de 10 kN. Calcule l'effort dans chaque barre et dis si elle est tendue ou comprimée.
+
+<Indice>Les deux barres sont des barres à deux forces. Isole le nœud B : trois forces (P, N<sub>AB</sub>, N<sub>CB</sub>) et deux équations de projection.</Indice>
+
+<Corrige>
+
+- ΣF<sub>y</sub> au nœud B : la composante verticale du bracon reprend P : |N<sub>CB</sub>| = P × {nombre(ct.longueurBracon, 3)} / 1 = **{grandeur(Math.abs(ct.NCB), 2, 'kN')}**, en **compression** (le bracon pousse B vers le haut).
+- ΣF<sub>x</sub> : la barre AB équilibre la composante horizontale : N<sub>AB</sub> = 10 × 1,5 / 1 = **{grandeur(ct.NAB, 1, 'kN')}**, en **traction**.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.3.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Dans le plan, le principe fondamental de la statique donne :" choix={['une équation', 'deux équations', 'trois équations', 'six équations']} bonne={2} colonnes={4}>
+ΣF<sub>x</sub> = 0, ΣF<sub>y</sub> = 0, ΣM = 0.
+</QCM>
+
+<QCM n={2} question="Pour écrire l'équation des moments, on choisit de préférence :" choix={['le milieu du solide', 'le point où passent le plus d’inconnues', 'le point le plus chargé', 'n’importe quel point loin des forces']} bonne={1} colonnes={2}>
+Les inconnues qui y passent disparaissent de l'équation.
+</QCM>
+
+<QCM n={3} question="Le calcul donne une réaction de −4 kN. Cela signifie :" choix={['une erreur de calcul', 'que la réaction agit dans le sens opposé à celui supposé', 'que l’appui est inutile', 'que la structure s’effondre']} bonne={1} colonnes={2}>
+On corrige seulement le sens de la flèche.
+</QCM>
+
+<QCM n={4} question="Une barre articulée à ses deux extrémités et chargée seulement en ces points transmet un effort :" choix={['perpendiculaire à son axe', 'dirigé selon son axe', 'nul', 'de flexion']} bonne={1} colonnes={2}>
+C'est une barre à deux forces : tendue ou comprimée.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Trois forces non parallèles en équilibre ont des lignes d'action :" choix={['parallèles', 'concourantes en un point', 'perpendiculaires', 'quelconques']} bonne={1} colonnes={2}>
+Et leurs vecteurs forment un triangle fermé.
+</QCM>
+
+<QCM n={6} question="Pour la marquise de l'exemple, l'effort dans le tirant vaut :" choix={[grandeur(m0.T, 2, 'kN'), grandeur(m0.VA, 2, 'kN'), grandeur(m0.HA, 2, 'kN'), '7,50 kN']} bonne={0} colonnes={4}>
+T = (2 × 3² / 2 + 1,5 × 3) / (3 × sin 35°).
+</QCM>
+
+<QCM n={7} question="Si l'on incline davantage le tirant vers l'horizontale (α plus petit), l'effort T :" choix={['diminue', 'augmente', 'ne change pas', 's’annule']} bonne={1} colonnes={4}>
+T est inversement proportionnel à sin α.
+</QCM>
+
+<QCM n={8} question="Combien d'inconnues la statique permet-elle de trouver pour un seul solide dans le plan ?" choix={['1', '2', '3', 'autant qu’on veut']} bonne={2} colonnes={4}>
+Au-delà, la structure est hyperstatique.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
