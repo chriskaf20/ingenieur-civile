@@ -1,0 +1,343 @@
+---
+id: N0.6.3
+titre: Composantes et projections
+objectifs:
+  - Décomposer une force sur deux axes perpendiculaires
+  - Choisir des axes adaptés au problème, par exemple ceux d'un versant
+  - Décomposer une force selon deux directions quelconques
+  - Calculer la tension des brins d'une élingue et expliquer la limite d'angle
+relecture: false
+normes: []
+glossaire:
+  - terme: Composante
+    definition: Partie d'une force portée par un axe ; les composantes réunies ont le même effet que la force.
+  - terme: Projection orthogonale
+    definition: Ombre d'un vecteur sur un axe, éclairé perpendiculairement à cet axe ; elle vaut F cos β, β étant l'angle entre la force et l'axe.
+  - terme: Élingue
+    definition: Câble, chaîne ou sangle qui relie une charge au crochet d'un engin de levage.
+  - terme: Brin
+    definition: Chacune des branches d'une élingue, du crochet à un point de levage.
+  - terme: Angle au sommet
+    definition: Angle entre deux brins, mesuré au crochet.
+  - terme: CMU
+    definition: Charge maximale d'utilisation d'un accessoire de levage, fixée par son fabricant et marquée sur l'accessoire.
+symboles:
+  - { symbole: 'Fx, Fy', signification: 'composantes sur les axes x et y', unite: 'kN' }
+  - { symbole: 'P∥, P⊥', signification: 'composantes du poids parallèle et perpendiculaire au versant', unite: 'kN' }
+  - { symbole: 'α', signification: 'pente du versant, ou angle d’un brin avec l’horizontale', unite: '°' }
+  - { symbole: 'β', signification: 'angle au sommet entre deux brins', unite: '°' }
+  - { symbole: 'T1, T2', signification: 'tensions des brins', unite: 'kN' }
+formules:
+  - { nom: 'Composantes orthogonales', tex: 'F_x = F\cos\theta, \quad F_y = F\sin\theta', domaine: 'θ compté depuis l’axe x' }
+  - { nom: 'Poids sur un versant', tex: 'P_\parallel = P\sin\alpha, \quad P_\perp = P\cos\alpha', domaine: 'Versant de pente α' }
+  - { nom: 'Élingue symétrique', tex: 'T = \frac{P}{2\sin\alpha} = \frac{P}{2\cos(\beta/2)}', domaine: 'Deux brins égaux' }
+  - { nom: 'Élingue dissymétrique', tex: 'T_1 = \frac{P\cos\alpha_2}{\sin(\alpha_1 + \alpha_2)}, \quad T_2 = \frac{P\cos\alpha_1}{\sin(\alpha_1 + \alpha_2)}', domaine: 'Brins inclinés de α1 et α2' }
+---
+
+import { depuisPolaire, direction, elingues, EXEMPLE_ANNEAU, EXEMPLE_ELINGUES, facteurElingue, norme, sommeForces } from '@/lib/calc/vecteurs'
+import { decomposerSurVersant } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { DecompositionSchema } from '@/components/schemas/Vecteurs'
+
+export const s0 = sommeForces(EXEMPLE_ANNEAU)
+export const P0 = 12
+export const a0 = 30
+export const v0 = decomposerSurVersant(P0, a0)
+export const e0 = elingues(EXEMPLE_ELINGUES)
+export const angles = [0, 60, 90, 120, 150]
+export const ex1 = depuisPolaire(20, 30)
+export const ex2 = decomposerSurVersant(1.5, 12)
+export const ex3 = elingues({ P: 10, alpha1: 30, alpha2: 60 })
+export const q1 = depuisPolaire(10, 60)
+export const vec = (v, d = 2) => `(${nombre(v[0], d)} ; ${nombre(v[1], d)})`
+
+<Page etape="intuition" titre="L'intuition : l'ombre d'une force">
+
+Un après-midi, le soleil est juste au-dessus de toi : un piquet incliné planté dans la cour projette son ombre sur le sol. Cette ombre est la **projection** du piquet sur le sol. Si le piquet est presque couché, son ombre est longue ; s'il est presque vertical, elle est courte.
+
+Pour une force, c'est pareil. Une force inclinée a une « ombre » sur l'horizontale et une « ombre » sur la verticale : ses **composantes**. Ces deux morceaux, mis bout à bout, reconstituent la force.
+
+Pourquoi les découper ? Parce que chaque morceau a un effet différent. Le câble qui tire un mât vers le bas et vers l'extérieur : la partie horizontale retient le mât, la partie verticale le comprime. Sur un talus, le poids d'un bloc se coupe en une partie qui le fait **glisser** et une partie qui le **plaque** contre le sol.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment découper une force en morceaux utiles, et pourquoi une élingue trop ouverte devient dangereuse ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : composantes sur deux axes perpendiculaires">
+
+### Les composantes sur x et y
+
+Une force $\vec{F}$ d'intensité $F$ (kN), de direction $\theta$ (°, comptée depuis l'axe x dans le sens trigonométrique), se décompose en :
+
+$$F_x = F\cos\theta, \qquad F_y = F\sin\theta$$
+
+Inversement, $F = \sqrt{F_x^2 + F_y^2}$, et la direction se retrouve par l'arctangente en regardant les signes (N0.6.2).
+
+### La projection sur un axe quelconque
+
+La composante d'une force sur un axe est sa **projection orthogonale** : $F\cos\beta$, où $\beta$ est l'angle entre la force et l'axe. Elle est positive si $\beta < 90°$, nulle si $\beta = 90°$, négative si $\beta > 90°$.
+
+### Choisir ses axes
+
+On n'est pas obligé de prendre l'horizontale et la verticale. Pour un bloc de poids $P$ sur un versant de pente $\alpha$, on prend un axe **le long du versant** et un axe **perpendiculaire** :
+
+$$P_\parallel = P\sin\alpha \;\text{(fait glisser)}, \qquad P_\perp = P\cos\alpha \;\text{(plaque contre le sol)}$$
+
+Pourquoi un sinus pour la partie parallèle ? Le poids est vertical et la perpendiculaire au versant fait l'angle $\alpha$ avec la verticale : deux angles dont les côtés sont perpendiculaires deux à deux sont égaux. Tu l'as déjà utilisé pour les pannes de toiture (N0.4.4).
+
+<Encadre type="retenir">
+Bons axes = calcul simple. On choisit les axes selon ce qui compte : glisser ou non, tirer ou comprimer.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : directions quelconques et élingues">
+
+### Décomposer selon deux directions non perpendiculaires
+
+On cherche deux nombres $c_1$ et $c_2$ tels que $\vec{F} = c_1\,\hat{u}_1 + c_2\,\hat{u}_2$. Graphiquement, c'est la règle du parallélogramme à l'envers : on trace par la pointe de $\vec{F}$ des parallèles aux deux directions. Par le calcul, on écrit l'égalité sur x et sur y : c'est un système de deux équations à deux inconnues (N0.2.6).
+
+<Encadre type="attention">
+Sur des axes non perpendiculaires, les composantes ne sont **pas** les projections orthogonales. Projeter donne des valeurs fausses : il faut décomposer.
+</Encadre>
+
+### L'élingue à deux brins
+
+Le crochet est en équilibre sous trois forces : le câble de la grue (P, vers le haut) et les deux brins (vers les points de levage). Si les brins font les angles $\alpha_1$ et $\alpha_2$ avec l'horizontale :
+
+- horizontalement : $T_1\cos\alpha_1 = T_2\cos\alpha_2$ ;
+- verticalement : $T_1\sin\alpha_1 + T_2\sin\alpha_2 = P$.
+
+Pour des brins symétriques ($\alpha_1 = \alpha_2 = \alpha$) : $T = \dfrac{P}{2\sin\alpha}$. Plus les brins sont couchés, plus $\sin\alpha$ est petit et plus la tension est grande.
+
+<Regle type="art" source="pratique du levage">
+On évite un angle au sommet $\beta$ supérieur à 120° entre deux brins : à 120°, chaque brin porte déjà tout le poids de la charge. La charge admissible d'une élingue (sa CMU) se lit sur son marquage et dans la notice du fabricant, pour le mode d'élingage et l'angle utilisés : on ne l'invente pas.
+</Regle>
+
+<AVerifier note="A_VERIFIER.md n° 23 : limite de 120° à confirmer" />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : deux façons de choisir les axes">
+
+À gauche, on décompose la résultante de la leçon précédente ({grandeur(s0.norme, 2, 'kN')} à {nombre(s0.theta, 2)}°) sur x et y : on retrouve ses composantes. À droite, un bloc de béton de {nombre(P0, 0)} kN posé sur un talus incliné à {nombre(a0, 0)}°.
+
+<DecompositionSchema F={s0.norme} theta={s0.theta} P={P0} alpha={a0} />
+
+Sur le talus, {grandeur(v0.para, 2, 'kN')} poussent le bloc vers le bas de la pente ; {grandeur(v0.perp, 2, 'kN')} le plaquent contre le sol. C'est cette seconde partie qui crée le frottement capable de le retenir (N0.7.3). Les pointillés montrent que les deux composantes, mises bout à bout, redonnent le poids.
+
+<Encadre type="retenir">
+Composante le long du versant : P sin α. Composante perpendiculaire : P cos α. Si le talus devient plus raide, la première augmente et la seconde diminue : le bloc glisse plus facilement.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="elingues">
+
+<Cahier titre="Exemple résolu : lever une poutre préfabriquée">
+
+**Énoncé.** Une poutre préfabriquée en béton armé pèse 24 kN. On la lève avec une élingue à deux brins accrochés à deux points de levage symétriques ; chaque brin fait 50° avec l'horizontale. Calcule la tension de chaque brin et l'angle entre les brins.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi l'angle avec l'horizontale ? On le déduit sur place de la longueur des brins et de l'écartement des points de levage : cos α = demi-écartement ÷ longueur du brin.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'équilibre du crochet">
+
+<Etape n={3} titre="L'équilibre du crochet">
+<AN k="equilibre" />
+<Note>Pourquoi le crochet ? C'est le point où se rencontrent les trois forces : le câble de la grue et les deux brins.</Note>
+</Etape>
+
+<Etape n={4} titre="Les tensions">
+<AN k="T1" />
+<AN k="T2" />
+<AN k="verif" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="Tmax" libelle="Tension du brin le plus chargé" />
+<AN k="sommet" />
+
+<Note couleur="vert">Angle au sommet <Val k="sommet" /> : chaque brin porte <Val k="rapport" /> fois le poids. On choisit une élingue dont la CMU, lue sur son marquage pour cet angle, couvre la charge.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="exemple" titre="Pourquoi ouvrir les brins coûte cher">
+
+Pour deux brins symétriques, la tension d'un brin rapportée au poids ne dépend que de l'angle au sommet $\beta$ : $T / P = 1 / (2\cos(\beta/2))$.
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Angle au sommet β</th><th>Angle brin / horizontale α</th><th>Tension d'un brin T / P</th></tr></thead>
+    <tbody>{angles.map((b) => <tr key={b}><td>{nombre(b, 0)}°</td><td>{nombre(90 - b / 2, 0)}°</td><td>{nombre(facteurElingue(b), 3)}</td></tr>)}</tbody>
+  </table>
+</div>
+
+À 0° (brins verticaux), chaque brin porte la moitié du poids. À 120°, il porte le poids entier. À 150°, presque deux fois le poids : une élingue prévue pour la charge peut rompre alors que la charge, elle, n'a pas changé.
+
+<Encadre type="attention">
+Le poids ne change pas, mais les tensions, si. Un brin trop court oblige à ouvrir l'angle : on prend des brins plus longs ou un palonnier, qui garde les brins verticaux.
+</Encadre>
+
+</Page>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="échanger sinus et cosinus.">
+Fx = F cos θ seulement si θ est mesuré depuis l'axe x. Si l'angle est donné depuis la verticale, les rôles s'échangent. On dessine toujours l'angle avant d'écrire la formule.
+</Piege>
+
+<Piege erreur="prendre l'angle d'un brin avec la verticale au lieu de l'horizontale.">
+Avec 50° depuis la verticale au lieu de l'horizontale, on obtient {grandeur(elingues({ P: EXEMPLE_ELINGUES.P, alpha1: 40, alpha2: 40 }).T1, 2, 'kN')} au lieu de {grandeur(e0.T1, 2, 'kN')}. On vérifie sur le schéma quel angle on utilise.
+</Piege>
+
+<Piege erreur="projeter sur des axes obliques.">
+Pour deux directions non perpendiculaires, les composantes se trouvent par le parallélogramme ou par un système, pas par projection.
+</Piege>
+
+<Piege erreur="croire que des brins couchés soulagent l'élingue.">
+C'est l'inverse : plus les brins sont couchés, plus leur tension augmente (tableau de la page précédente).
+</Piege>
+
+<Piege erreur="oublier le signe des composantes.">
+Une composante négative indique un sens : vers la gauche, vers le bas. La perdre, c'est inverser la force.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le levage.** Poutres préfabriquées, buses en béton, cadres d'ouvrages, armatures : sur chantier, presque tout se lève avec des élingues. Le chef de manœuvre contrôle l'angle des brins avant chaque levage. Un levage mal élingué peut rompre une élingue ou arracher un point de levage, avec un risque grave pour les personnes.
+
+<Encadre type="terrain" titre="Talus de latérite">
+Le long des routes en terre de RDC, les talus de latérite sont souvent raides. Le poids d'un bloc de sol se décompose comme sur le schéma : quand la pente augmente, la part qui fait glisser augmente. Après de fortes pluies, l'eau réduit en plus le frottement : c'est la saison des éboulements. Adoucir la pente ou drainer le talus agit sur ces deux causes.
+</Encadre>
+
+**Les toitures.** Une panne de toiture reçoit des charges verticales (poids, poussière, pluie) et le vent, perpendiculaire au versant. On décompose tout dans les axes du versant pour vérifier la panne dans ses deux directions.
+
+**Les haubans et étais.** La force d'un hauban se décompose en une part horizontale, qui retient, et une part verticale, qui comprime le mât et tend à arracher l'ancrage. On dimensionne chaque élément avec la composante qui le concerne (mini-projet).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : composantes et projections">
+
+### Axes perpendiculaires
+
+$F_x = F\cos\theta$, $F_y = F\sin\theta$ (θ depuis l'axe x) · $F = \sqrt{F_x^2 + F_y^2}$
+
+### Projection sur un axe
+
+$F\cos\beta$ (β : angle force / axe) · signe : positif si β &lt; 90°
+
+### Versant de pente α
+
+$P_\parallel = P\sin\alpha$ (glisse) · $P_\perp = P\cos\alpha$ (plaque)
+
+### Directions quelconques
+
+parallélogramme ou système 2 × 2 · jamais de projection sur des axes obliques
+
+### Élingue à deux brins
+
+$T_1\cos\alpha_1 = T_2\cos\alpha_2$ et $T_1\sin\alpha_1 + T_2\sin\alpha_2 = P$ · symétrique : $T = P / (2\sin\alpha)$ · angle au sommet ≤ 120° (règle de l'art, à vérifier) · CMU : marquage du fabricant
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Décomposer une force">
+
+Décompose une force de 20 kN de direction 30° sur les axes x et y.
+
+<Indice>Fx = F cos θ, Fy = F sin θ.</Indice>
+
+<Corrige>
+Fx = 20 cos 30° = **{grandeur(ex1[0], 2, 'kN')}** ; Fy = 20 sin 30° = **{grandeur(ex1[1], 2, 'kN')}**. Contrôle : √(Fx² + Fy²) = {grandeur(norme(ex1), 2, 'kN')} ✓.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La brouette sur la rampe">
+
+Une brouette de béton pèse 1,5 kN. Elle est sur une rampe de chantier inclinée à 12°. Quelle force faut-il exercer le long de la rampe pour la retenir (frottements négligés) ? Quelle force la rampe reçoit-elle perpendiculairement ?
+
+<Indice>Axes du versant : P sin α et P cos α.</Indice>
+
+<Corrige>
+Le long de la rampe : 1,5 sin 12° = **{grandeur(ex2.para, 3, 'kN')}** ; perpendiculairement : 1,5 cos 12° = **{grandeur(ex2.perp, 3, 'kN')}**. Une rampe douce demande peu d'effort : c'est pour cela qu'on limite la pente des rampes de chantier.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une élingue dissymétrique">
+
+Une charge de 10 kN est levée par deux brins inclinés de 30° et 60° sur l'horizontale (les points de levage ne sont pas symétriques par rapport au centre de gravité). Calcule les deux tensions. Quel brin est le plus chargé ?
+
+<Indice>Équilibre horizontal et vertical du crochet, ou les formules de T1 et T2.</Indice>
+
+<Corrige>
+
+- T1 (brin à 30°) = 10 × cos 60° / sin 90° = **{grandeur(ex3.T1, 2, 'kN')}** ; T2 (brin à 60°) = 10 × cos 30° / sin 90° = **{grandeur(ex3.T2, 2, 'kN')}**.
+- Le brin le plus proche de la verticale est le plus chargé. L'angle au sommet vaut {nombre(ex3.angleSommet, 0)}° : chaque brin reste sous le poids, mais un seul brin porte {grandeur(ex3.rapport * 100, 0, '%')} de la charge. On choisit l'élingue pour ce brin-là.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.6.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une force de 10 kN, de direction 60°, a pour composante horizontale :" choix={[grandeur(q1[1], 2, 'kN'), grandeur(q1[0], 2, 'kN'), '10 kN', '6 kN']} bonne={1} colonnes={4}>
+Fx = 10 cos 60° = {grandeur(q1[0], 2, 'kN')}.
+</QCM>
+
+<QCM n={2} question="Sur un versant de pente α, la partie du poids qui fait glisser un bloc vaut :" choix={['P cos α', 'P sin α', 'P tan α', 'P']} bonne={1} colonnes={4}>
+Parallèle au versant : P sin α.
+</QCM>
+
+<QCM n={3} question="Si le talus devient plus raide, la composante du poids le long du versant :" choix={['diminue', 'augmente', 'ne change pas', 'devient nulle']} bonne={1} colonnes={4}>
+sin α augmente avec α.
+</QCM>
+
+<QCM n={4} question="Élingue symétrique, angle au sommet 120° : chaque brin porte :" choix={['la moitié du poids', `${nombre(facteurElingue(120), 0)} fois le poids`, 'le tiers du poids', 'deux fois le poids']} bonne={1} colonnes={2}>
+1 / (2 cos 60°) = {nombre(facteurElingue(120), 0)} : chaque brin porte tout le poids.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Une charge de {nombre(EXEMPLE_ELINGUES.P, 0)} kN est levée par deux brins à {nombre(EXEMPLE_ELINGUES.alpha1, 0)}° sur l'horizontale. Chaque brin porte :</>} choix={[grandeur(EXEMPLE_ELINGUES.P / 2, 2, 'kN'), grandeur(e0.T1, 2, 'kN'), grandeur(EXEMPLE_ELINGUES.P, 2, 'kN'), grandeur(elingues({ P: EXEMPLE_ELINGUES.P, alpha1: 40, alpha2: 40 }).T1, 2, 'kN')]} bonne={1} colonnes={4}>
+T = P / (2 sin α) = {grandeur(e0.T1, 2, 'kN')}.
+</QCM>
+
+<QCM n={6} question="Pour décomposer une force selon deux directions non perpendiculaires, on :" choix={['projette orthogonalement sur chaque direction', 'utilise le parallélogramme ou un système de deux équations', 'divise la force par deux', 'prend la composante horizontale seulement']} bonne={1}>
+Les projections ne sont égales aux composantes que sur des axes perpendiculaires.
+</QCM>
+
+<QCM n={7} question="Élingue dissymétrique : le brin le plus chargé est :" choix={['le plus long', 'le plus proche de la verticale', 'le plus proche de l’horizontale', 'aucun, ils sont égaux']} bonne={1} colonnes={2}>
+Exercice 3 : le brin à 60° porte {grandeur(ex3.T2, 2, 'kN')}, celui à 30° seulement {grandeur(ex3.T1, 2, 'kN')}.
+</QCM>
+
+<QCM n={8} question="Une force a pour composantes Fx = −6 kN et Fy = 8 kN. Son intensité et sa direction sont :" choix={[`${grandeur(norme([-6, 8]), 0, 'kN')} à ${nombre(direction([-6, 8]), 2)}°`, `${grandeur(norme([-6, 8]), 0, 'kN')} à ${nombre(direction([6, -8]), 2)}°`, `14 kN à ${nombre(direction([-6, 8]), 2)}°`, `2 kN à 90°`]} bonne={0} colonnes={2}>
+√((−6)² + 8²) pour l'intensité ; Fx &lt; 0 et Fy &gt; 0 : la force est dans le deuxième quadrant, entre 90° et 180°.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

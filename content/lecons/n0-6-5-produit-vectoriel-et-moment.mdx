@@ -1,0 +1,332 @@
+---
+id: N0.6.5
+titre: Produit vectoriel et moment d'une force
+objectifs:
+  - Calculer le moment d'une force par rapport à un point, dans le plan
+  - Déterminer le bras de levier et le sens de rotation
+  - Calculer un produit vectoriel par les composantes et l'orienter par la règle de la main droite
+  - Interpréter les trois composantes du moment au pied d'une potence
+relecture: false
+normes: []
+glossaire:
+  - terme: Moment d'une force
+    definition: Capacité d'une force à faire tourner un objet autour d'un point ; il vaut la force multipliée par le bras de levier, en kN·m.
+  - terme: Bras de levier
+    definition: Distance du point à la ligne d'action de la force, mesurée perpendiculairement à celle-ci.
+  - terme: Produit vectoriel
+    definition: Vecteur perpendiculaire à deux vecteurs u et v, de norme ‖u‖ × ‖v‖ × sin θ, orienté par la règle de la main droite.
+  - terme: Trièdre direct
+    definition: Trois axes x, y, z disposés comme le pouce, l'index et le majeur de la main droite.
+  - terme: Flexion
+    definition: Effet d'un moment d'axe perpendiculaire à la pièce ; il la courbe.
+  - terme: Torsion
+    definition: Effet d'un moment d'axe confondu avec celui de la pièce ; il la vrille.
+symboles:
+  - { symbole: 'M_O', signification: 'moment par rapport au point O', unite: 'kN·m' }
+  - { symbole: 'd', signification: 'bras de levier', unite: 'm' }
+  - { symbole: 'OA (fléché)', signification: 'position du point d’application vue de O', unite: 'm' }
+  - { symbole: 'u × v', signification: 'produit vectoriel', unite: 'produit des unités' }
+  - { symbole: 'Mx, My, Mz', signification: 'composantes du moment dans l’espace', unite: 'kN·m' }
+formules:
+  - { nom: 'Moment dans le plan', tex: 'M_O = x_A F_y - y_A F_x', domaine: 'O à l’origine, A point d’application' }
+  - { nom: 'Bras de levier', tex: '|M_O| = F \times d', domaine: 'd mesuré perpendiculairement à la ligne d’action' }
+  - { nom: 'Produit vectoriel', tex: '\vec{u} \times \vec{v} = (u_y v_z - u_z v_y \,;\, u_z v_x - u_x v_z \,;\, u_x v_y - u_y v_x)', domaine: 'Repère orthonormé direct' }
+  - { nom: 'Moment dans l’espace', tex: '\vec{M}_O = \vec{OA} \times \vec{F}', domaine: 'Toute force' }
+---
+
+import { direction, EXEMPLE_MOMENT, EXEMPLE_POTENCE, moment2D, momentForce, norme, potence, scalaire, vectoriel } from '@/lib/calc/vecteurs'
+import { grandeur, nombre } from '@/lib/format'
+import { PotenceIso, TriedreVectoriel } from '@/components/schemas/Vecteurs'
+
+export const p0 = potence(EXEMPLE_POTENCE)
+export const m1 = moment2D([0, 0], [3, 0], [0, -10])
+export const v3 = (v, d = 2) => `(${nombre(v[0], d)} ; ${nombre(v[1], d)} ; ${nombre(v[2], d)})`
+export const ex1 = moment2D([0, 0], [4, 0], [0, -6])
+export const ex2 = momentForce({ xA: 1.5, yA: 3, F: norme([2, -1]), theta: direction([2, -1]) })
+export const mh = momentForce(EXEMPLE_MOMENT)
+export const q2 = Math.abs(moment2D([0, 0], [2, 0], [0, 5]))
+export const ex3 = vectoriel([1, 2, 0], [0, 1, 3])
+export const q4 = vectoriel([1, 0, 0], [0, 1, 0])
+
+<Page etape="intuition" titre="L'intuition : la clé longue">
+
+Un boulon rouillé ne se desserre pas. Tu prends une clé plus longue, ou tu enfiles un tube sur le manche : le boulon cède. Ta force n'a pas changé ; seule la **distance** entre ta main et le boulon a augmenté.
+
+Pousse une porte tout près des gonds : elle résiste. Pousse-la près de la poignée : elle s'ouvre sans effort. Pour faire tourner, ce qui compte, c'est la force **et** sa distance à l'axe de rotation. Ce produit s'appelle le **moment** de la force.
+
+En génie civil, les moments sont partout : le poids d'un balcon en console tend à le faire tourner autour de son encastrement ; le vent sur un panneau publicitaire tend à faire basculer le poteau autour de son pied. Pour dimensionner l'encastrement, la fondation ou le poteau, il faut calculer ces moments.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer l'effet de rotation d'une force, dans le plan puis dans l'espace ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le moment dans le plan">
+
+### Force × bras de levier
+
+Le moment d'une force $\vec{F}$ par rapport à un point O vaut :
+
+$$|M_O| = F \times d$$
+
+où $d$ (m) est le **bras de levier** : la distance de O à la ligne d'action de la force, mesurée **perpendiculairement** à celle-ci. Unité : kN·m. On donne un signe au moment : **positif** si la force fait tourner dans le sens trigonométrique (inverse des aiguilles d'une montre), **négatif** dans le sens horaire.
+
+<Encadre type="attention">
+Le kN·m d'un moment n'est pas un kJ, bien que ce soit le même produit d'unités : un moment n'est pas une énergie. On écrit toujours kN·m pour un moment.
+</Encadre>
+
+### Par les composantes
+
+Chercher $d$ demande souvent un calcul de géométrie. Avec O à l'origine et A, point d'application, de coordonnées $(x_A \,;\, y_A)$ :
+
+$$M_O = x_A F_y - y_A F_x$$
+
+Le signe sort tout seul du calcul.
+
+<Encadre type="exemple">
+Une charge de 10 kN, verticale vers le bas, appliquée à 3 m de O sur l'horizontale : $M_O$ = 3 × (−10) − 0 × 0 = {grandeur(m1, 0, 'kN·m')} (sens horaire).
+</Encadre>
+
+### Deux remarques utiles
+
+- Une force dont la ligne d'action passe par O a un moment **nul** en O : son bras de levier est nul.
+- Faire glisser une force le long de sa ligne d'action ne change pas son moment : le bras de levier reste le même (N0.6.1).
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le produit vectoriel">
+
+### Définition
+
+Le produit vectoriel $\vec{u} \times \vec{v}$ est un **vecteur** :
+
+- perpendiculaire à $\vec{u}$ et à $\vec{v}$ ;
+- de norme $\|\vec{u}\|\,\|\vec{v}\|\sin\theta$ ;
+- orienté par la **règle de la main droite** : les doigts de la main droite tournent de $\vec{u}$ vers $\vec{v}$, le pouce indique le sens de $\vec{u} \times \vec{v}$. C'est aussi le sens dans lequel avance une vis ordinaire quand on la visse.
+
+Par les composantes, dans un repère orthonormé direct :
+
+$$\vec{u} \times \vec{v} = (u_y v_z - u_z v_y \,;\, u_z v_x - u_x v_z \,;\, u_x v_y - u_y v_x)$$
+
+Il change de signe si l'on échange les vecteurs : $\vec{v} \times \vec{u} = -\,\vec{u} \times \vec{v}$. Il est nul si les vecteurs sont parallèles.
+
+### Le moment, un produit vectoriel
+
+Le moment en O d'une force $\vec{F}$ appliquée en A est :
+
+$$\vec{M}_O = \vec{OA} \times \vec{F}$$
+
+Dans le plan (composantes z nulles), seule la troisième composante reste : $x_A F_y - y_A F_x$. C'est la formule de la page précédente. Dans l'espace, le moment a trois composantes $(M_x \,;\, M_y \,;\, M_z)$ : chacune dit autour de quel axe la force fait tourner.
+
+<Regle type="simplification">
+Nous calculons ici le moment des forces appliquées. Les efforts dans la matière (flexion, torsion) et leur vérification viendront en résistance des matériaux ; il faudra alors aussi le moment des réactions d'appui.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la règle de la main droite">
+
+<TriedreVectoriel />
+
+Le trièdre (x, y, z) est **direct** : en tournant de x vers y, une vis à droite avance selon z. Le produit vectoriel de u (selon x) par v (selon y) est dirigé selon z.
+
+<Encadre type="retenir">
+Toutes les vues en perspective de ce module dessinent un trièdre direct : le sens d'un moment s'y lit avec la main droite, sans piège de miroir.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="momentForce">
+
+<Cahier titre="Exemple résolu : le moment du hauban au pied du mât">
+
+**Énoncé.** On reprend le hauban de N0.6.1 : il tire la tête du mât, A(0 ; 8), avec 12 kN dirigés vers l'ancrage B(6 ; 0), coordonnées en mètres. Le pied du mât est en O, à l'origine. Calcule le moment de cette force en O, son bras de levier et son sens.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi cette direction ? C'est celle du vecteur AB, de composantes (6 ; −8), calculée en N0.6.1.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : composantes et moment">
+
+<Etape n={3} titre="Les composantes de la force">
+<AN k="composantes" />
+</Etape>
+
+<Etape n={4} titre="Le moment et le bras de levier">
+<AN k="M" />
+<AN k="bras" />
+<Note>Pourquoi la composante verticale ne compte-t-elle pas ici ? A est sur l'axe du mât (xA = 0) : la composante verticale passe par O, son bras de levier est nul.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="M" libelle="Moment du hauban au pied du mât" />
+<AN k="sens" />
+
+<Note couleur="vert">Bras de levier <Val k="bras" />. Contrôle : le bras de levier ne dépasse jamais la distance OA. Un hauban seul ferait basculer le mât vers son ancrage : d'autres haubans doivent l'équilibrer, c'est le mini-projet.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Vue3D titre="La potence en perspective : trois moments au pied" calques={[{ id: 'structure', libelle: 'Potence' }, { id: 'forces', libelle: 'Forces' }, { id: 'moments', libelle: 'Moments au pied' }, { id: 'cotes', libelle: 'Cotes' }]}>
+
+Une potence d'éclairage : mât vertical de {nombre(EXEMPLE_POTENCE.hauteur, 0)} m, bras horizontal de {nombre(EXEMPLE_POTENCE.bras, 0)} m selon x. En bout de bras : la lanterne, {grandeur(EXEMPLE_POTENCE.P, 1, 'kN')} vers le bas, et un effort de vent de {grandeur(EXEMPLE_POTENCE.V, 1, 'kN')} selon y (valeurs d'énoncé ; le calcul du vent viendra avec l'EC1-1-4).
+
+<PotenceIso d={EXEMPLE_POTENCE} M={p0.M} />
+
+Dans l'encart de droite, les moments en O sont dessinés à part, avec les mêmes axes. $\vec{M}_O = \vec{OA} \times \vec{F}$ avec $\vec{OA}$ = {v3(p0.r, 0)} m et $\vec{F}$ = {v3(p0.F, 1)} kN : $\vec{M}_O$ = **{v3(p0.M)} kN·m**. Mx et My fléchissent le mât (moment de flexion total {grandeur(p0.flexion, 2, 'kN·m')}) ; Mz = {grandeur(p0.torsion, 2, 'kN·m')} le vrille : c'est une **torsion**, due au vent qui agit au bout du bras.
+
+</Vue3D>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre la distance OA comme bras de levier.">
+Le bras de levier est la distance **perpendiculaire** à la ligne d'action. Pour le hauban, OA = {grandeur(EXEMPLE_MOMENT.yA, 0, 'm')}, mais le bras de levier vaut {grandeur(mh.bras, 2, 'm')} : on le calcule (fiche), on ne le mesure pas le long du mât.
+</Piege>
+
+<Piege erreur="oublier le signe.">
+Deux moments de même valeur et de sens contraires s'annulent. Sans signe, on les additionnerait. On fixe une convention (+ trigonométrique) et on s'y tient.
+</Piege>
+
+<Piege erreur="inverser l'ordre du produit vectoriel.">
+$\vec{M}_O = \vec{OA} \times \vec{F}$, pas $\vec{F} \times \vec{OA}$ : l'ordre inverse donne le moment opposé.
+</Piege>
+
+<Piege erreur="écrire un moment en kN ou en kJ.">
+Un moment est une force × une distance : kN·m. Écrire {grandeur(Math.abs(mh.M), 1, 'kN')} est une erreur d'unité ; écrire {grandeur(Math.abs(mh.M), 1, 'kJ')} confond moment et énergie.
+</Piege>
+
+<Piege erreur="utiliser la main gauche, ou un dessin en miroir.">
+La règle est celle de la **main droite**, dans un trièdre direct. Un trièdre dessiné à l'envers inverse tous les sens de rotation.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les consoles et balcons.** Une charge au bout d'un balcon de 1,50 m crée un moment à l'encastrement. C'est là que les armatures principales sont placées, en partie **haute** de la dalle : sous un moment de console, c'est le dessus qui est tendu.
+
+<Encadre type="terrain" titre="Panneaux, pylônes et potences">
+Panneaux publicitaires, potences d'éclairage, pylônes de télécommunication : le vent appliqué en hauteur crée au pied un grand moment. La fondation doit le reprendre sans basculer. Un panneau à bras déporté subit en plus une torsion, comme la potence de la vue en perspective.
+</Encadre>
+
+**Le levage.** Une grue à tour soulève une charge au bout de sa flèche : le moment de la charge est équilibré par le contrepoids. La plaque de charge de la grue limite la charge selon la portée, parce que le moment augmente avec la distance.
+
+**Les clés dynamométriques.** Le serrage des boulons de charpente métallique se règle en N·m : c'est un moment. La notice du boulon donne la valeur ; on ne serre pas « à la force du bras ».
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : produit vectoriel et moment">
+
+### Moment dans le plan
+
+$|M_O| = F \times d$ (d perpendiculaire à la ligne d'action) · signe + trigonométrique, − horaire · kN·m · $M_O = x_A F_y - y_A F_x$
+
+### Moments nuls
+
+ligne d'action passant par O · force parallèle à OA
+
+### Produit vectoriel
+
+$\vec{u} \times \vec{v}$ ⊥ aux deux, norme $\|\vec{u}\|\,\|\vec{v}\|\sin\theta$, main droite · $(u_y v_z - u_z v_y \,;\, u_z v_x - u_x v_z \,;\, u_x v_y - u_y v_x)$ · $\vec{v} \times \vec{u} = -\,\vec{u} \times \vec{v}$
+
+### Moment dans l'espace
+
+$\vec{M}_O = \vec{OA} \times \vec{F}$ · composantes perpendiculaires à la pièce : flexion · composante selon l'axe de la pièce : torsion
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La console">
+
+Une charge de 6 kN, verticale vers le bas, est appliquée au bout d'une console horizontale de 4 m. Calcule son moment à l'encastrement O (à l'origine, la console selon x).
+
+<Indice>A(4 ; 0), F = (0 ; −6) kN.</Indice>
+
+<Corrige>
+M_O = 4 × (−6) − 0 × 0 = **{grandeur(ex1, 0, 'kN·m')}** : sens horaire, la console tend à tourner vers le bas.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une force oblique">
+
+Une force F = (2 ; −1) kN est appliquée au point A(1,5 ; 3), en mètres. Calcule son moment en O, origine du repère, puis son bras de levier.
+
+<Indice>M_O = x_A F_y − y_A F_x, puis d = |M_O| / F.</Indice>
+
+<Corrige>
+M_O = 1,5 × (−1) − 3 × 2 = **{grandeur(ex2.M, 2, 'kN·m')}** (sens {ex2.sens}) ; F = {grandeur(norme([2, -1]), 3, 'kN')}, donc d = |M_O| / F = **{grandeur(ex2.bras, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un produit vectoriel dans l'espace">
+
+Calcule $\vec{u} \times \vec{v}$ pour $\vec{u}$ = (1 ; 2 ; 0) et $\vec{v}$ = (0 ; 1 ; 3). Vérifie que le résultat est perpendiculaire à $\vec{u}$ et à $\vec{v}$.
+
+<Indice>Applique la formule composante par composante ; la perpendicularité se vérifie par le produit scalaire (N0.6.4).</Indice>
+
+<Corrige>
+
+- $\vec{u} \times \vec{v}$ = (2 × 3 − 0 × 1 ; 0 × 0 − 1 × 3 ; 1 × 1 − 2 × 0) = **{v3(ex3, 0)}**.
+- Contrôle : {v3(ex3, 0)} · (1 ; 2 ; 0) = {nombre(scalaire(ex3, [1, 2, 0]), 0)} et {v3(ex3, 0)} · (0 ; 1 ; 3) = {nombre(scalaire(ex3, [0, 1, 3]), 0)} : perpendiculaire aux deux ✓.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.6.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le bras de levier d'une force par rapport à un point O est :" choix={['la distance de O au point d’application', 'la distance de O à la ligne d’action, mesurée perpendiculairement', 'la longueur de la force', 'la hauteur du point d’application']} bonne={1}>
+C'est la distance perpendiculaire à la ligne d'action.
+</QCM>
+
+<QCM n={2} question="Une force de 5 kN a un bras de levier de 2 m. Son moment vaut, en valeur absolue :" choix={['2,5 kN·m', grandeur(q2, 0, 'kN·m'), '7 kN·m', grandeur(q2, 0, 'kJ')]} bonne={1} colonnes={4}>
+5 × 2 = {grandeur(q2, 0, 'kN·m')} ; un moment s'écrit en kN·m.
+</QCM>
+
+<QCM n={3} question="Le moment en O d'une force dont la ligne d'action passe par O est :" choix={['maximal', 'nul', 'égal à la force', 'négatif']} bonne={1} colonnes={4}>
+Le bras de levier est nul.
+</QCM>
+
+<QCM n={4} question="Avec x, y, z formant un trièdre direct, x × y est dirigé selon :" choix={['+z', '−z', '+x', '+y']} bonne={0} colonnes={4}>
+(1 ; 0 ; 0) × (0 ; 1 ; 0) = {v3(q4, 0)} : selon +z, règle de la main droite.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="v × u vaut :" choix={['u × v', '−(u × v)', '0', 'u · v']} bonne={1} colonnes={4}>
+Le produit vectoriel change de signe quand on échange les vecteurs.
+</QCM>
+
+<QCM n={6} question="Au pied d'un poteau vertical, la composante verticale (selon l'axe du poteau) du moment produit :" choix={['une flexion', 'une torsion', 'une compression', 'rien du tout']} bonne={1} colonnes={2}>
+Un moment d'axe confondu avec l'axe de la pièce la vrille : torsion.
+</QCM>
+
+<QCM n={7} question="Avec O à l'origine, une force F = (Fx ; Fy) appliquée en A(xA ; yA) a pour moment :" choix={['xA Fx + yA Fy', 'xA Fy − yA Fx', 'yA Fx − xA Fy', 'F × OA']} bonne={1} colonnes={2}>
+C'est la composante z de OA × F.
+</QCM>
+
+<QCM n={8} question="Pour desserrer un boulon avec la même force, on a intérêt à :" choix={['raccourcir la clé', 'allonger la clé', 'tirer parallèlement au manche', 'pousser vers le boulon']} bonne={1} colonnes={2}>
+Plus le bras de levier est grand, plus le moment est grand. Tirer le long du manche donnerait un bras de levier nul.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

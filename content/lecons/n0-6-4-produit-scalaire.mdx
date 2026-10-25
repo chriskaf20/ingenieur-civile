@@ -1,0 +1,324 @@
+---
+id: N0.6.4
+titre: Produit scalaire
+objectifs:
+  - Calculer un produit scalaire par les composantes et par le cosinus
+  - Calculer l'angle entre deux directions et reconnaître un angle droit
+  - Projeter une force sur une direction donnée
+  - Calculer le travail d'une force constante sur un déplacement rectiligne
+relecture: false
+normes: []
+glossaire:
+  - terme: Produit scalaire
+    definition: Nombre (et non vecteur) associé à deux vecteurs ; il vaut ‖u‖ × ‖v‖ × cos θ.
+  - terme: Vecteurs orthogonaux
+    definition: Vecteurs de directions perpendiculaires ; leur produit scalaire est nul.
+  - terme: Travail d'une force
+    definition: Énergie fournie par une force dont le point d'application se déplace ; W = F · d.
+  - terme: Joule
+    definition: Unité SI du travail et de l'énergie ; 1 J = 1 N × 1 m, donc 1 kJ = 1 kN × 1 m.
+  - terme: Équerrage
+    definition: Contrôle ou réglage d'un angle droit, par exemple entre deux axes d'implantation d'un bâtiment.
+symboles:
+  - { symbole: 'u · v', signification: 'produit scalaire', unite: 'produit des unités (m², kN·m)' }
+  - { symbole: 'θ', signification: 'angle entre les deux vecteurs', unite: '°' }
+  - { symbole: 'd (fléché)', signification: 'déplacement', unite: 'm' }
+  - { symbole: 'W', signification: 'travail d’une force', unite: 'kJ' }
+formules:
+  - { nom: 'Définition', tex: '\vec{u} \cdot \vec{v} = \|\vec{u}\|\,\|\vec{v}\|\cos\theta', domaine: 'θ : angle entre les vecteurs' }
+  - { nom: 'Par les composantes', tex: '\vec{u} \cdot \vec{v} = u_x v_x + u_y v_y \;(+\,u_z v_z)', domaine: 'Repère orthonormé' }
+  - { nom: 'Angle de deux directions', tex: '\cos\theta = \frac{\vec{u} \cdot \vec{v}}{\|\vec{u}\|\,\|\vec{v}\|}', domaine: 'Vecteurs non nuls' }
+  - { nom: 'Travail', tex: 'W = \vec{F} \cdot \vec{d} = F\,d\cos\theta', domaine: 'Force constante, déplacement rectiligne' }
+---
+
+import { angleVecteurs, depuisPolaire, norme, projection, scalaire, travail } from '@/lib/calc/vecteurs'
+import { convertirAngle, rectHypotenuseCote } from '@/lib/calc/trigo'
+import { grandeur, nombre } from '@/lib/format'
+import { ProjectionScalaire } from '@/components/schemas/Vecteurs'
+
+export const u0 = [3, 1]
+export const v0 = [2, 4]
+export const Ft = depuisPolaire(2, 25)
+export const dt = [15, 0]
+export const Wt = travail(Ft, dt)
+export const pt = projection(Ft, dt)
+export const r10 = rectHypotenuseCote(10, 1)
+export const dB = [r10.b, 1]
+export const PB = [0, -1.2]
+export const WB = travail(PB, dB)
+export const Wsans = travail([2, 0], dt)
+export const vec = (v, d = 2) => `(${nombre(v[0], d)} ; ${nombre(v[1], d)})`
+
+<Page etape="intuition" titre="L'intuition : tirer de travers fatigue pour rien">
+
+Tu tires une charrette avec une corde. Si la corde est horizontale, tout ton effort sert à avancer. Si tu lèves la corde très haut, une partie de ton effort soulève l'avant de la charrette au lieu de la faire avancer : tu te fatigues pour rien.
+
+La partie **utile** de ta force est sa projection sur la direction du mouvement. Le **produit scalaire** mesure exactement cela : il dit « combien » un vecteur va dans la direction d'un autre.
+
+Il répond aussi à une question de chantier : deux axes d'implantation sont-ils **vraiment perpendiculaires** ? Si le produit scalaire de leurs directions est nul, l'angle est droit ; sinon, il dit de combien il s'en écarte.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer, par le calcul, l'angle entre deux directions et la part utile d'une force ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : définition et calcul">
+
+### Deux formules, un même nombre
+
+Le produit scalaire de $\vec{u}$ et $\vec{v}$ est un **nombre** :
+
+$$\vec{u} \cdot \vec{v} = \|\vec{u}\|\,\|\vec{v}\|\cos\theta$$
+
+où $\theta$ est l'angle entre les deux vecteurs (de 0 à 180°). Dans un repère orthonormé, on le calcule plus simplement par les composantes :
+
+$$\vec{u} \cdot \vec{v} = u_x v_x + u_y v_y \quad (+\,u_z v_z \text{ dans l'espace})$$
+
+<Encadre type="exemple">
+$\vec{u}$ = (3 ; 1) et $\vec{v}$ = (2 ; 4) : $\vec{u} \cdot \vec{v}$ = 3 × 2 + 1 × 4 = {nombre(scalaire(u0, v0), 0)}. Avec ‖u‖ = {nombre(norme(u0), 3)} et ‖v‖ = {nombre(norme(v0), 3)} : cos θ = {nombre(scalaire(u0, v0) / (norme(u0) * norme(v0)), 4)}, donc θ = {nombre(angleVecteurs(u0, v0), 0)}°.
+</Encadre>
+
+### Le signe dit l'angle
+
+- $\vec{u} \cdot \vec{v} > 0$ : angle aigu (moins de 90°) ;
+- $\vec{u} \cdot \vec{v} = 0$ : angle droit, les vecteurs sont **orthogonaux** ;
+- $\vec{u} \cdot \vec{v} < 0$ : angle obtus (plus de 90°).
+
+### L'angle entre deux directions
+
+En égalant les deux formules : $\cos\theta = \dfrac{\vec{u} \cdot \vec{v}}{\|\vec{u}\|\,\|\vec{v}\|}$, puis $\theta = \arccos(\ldots)$, calculatrice en degrés.
+
+<Encadre type="retenir">
+Produit scalaire nul ⟺ directions perpendiculaires. C'est le test d'angle droit le plus simple qui soit.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : projection et travail">
+
+### La projection d'une force sur une direction
+
+La part d'une force $\vec{F}$ dans la direction d'un vecteur $\vec{u}$ est sa projection : $\vec{F} \cdot \hat{u} = F\cos\theta$, avec $\hat{u} = \vec{u} / \|\vec{u}\|$ (N0.6.1). C'est la composante de N0.6.3, calculée cette fois sans dessiner l'angle.
+
+### Le travail d'une force
+
+Quand le point d'application d'une force constante $\vec{F}$ se déplace en ligne droite de $\vec{d}$, la force fournit un **travail** :
+
+$$W = \vec{F} \cdot \vec{d} = F\,d\cos\theta$$
+
+Unités : kN × m = kJ (kilojoule). Le travail est **moteur** si $\theta < 90°$, **nul** si la force est perpendiculaire au déplacement, **résistant** si $\theta > 90°$ (frottement, poids d'une charge qu'on monte).
+
+<Encadre type="exemple">
+Un treuil tire une pièce sur {nombre(dt[0], 0)} m avec un câble de 2 kN incliné de 25° sur le déplacement. Part utile : {grandeur(pt.valeur, 2, 'kN')} ; travail : W = 2 × {nombre(dt[0], 0)} × cos 25° = {grandeur(Wt, 2, 'kJ')}.
+</Encadre>
+
+<Regle type="simplification">
+W = F · d suppose une force constante et un déplacement rectiligne. Si la force varie ou si le trajet est courbe, on découpe le trajet en petits morceaux et l'on additionne les travaux : c'est une intégrale.
+</Regle>
+
+L'énergie et la puissance d'un treuil ou d'une pompe seront calculées en N0.7.4.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : projection et produit scalaire">
+
+<ProjectionScalaire theta={50} />
+
+Le vecteur $\vec{v}$ fait l'angle θ avec $\vec{u}$. Sa projection sur la direction de $\vec{u}$ (trait vert) mesure ‖v‖ cos θ. Le produit scalaire est cette longueur multipliée par ‖u‖.
+
+<Encadre type="retenir">
+Si θ grandit jusqu'à 90°, la projection se réduit à un point : produit nul. Au-delà, elle passe de l'autre côté de l'origine : produit négatif.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="angleDirections">
+
+<Cahier titre="Exemple résolu : l'angle droit d'une implantation">
+
+**Énoncé.** Pour implanter un bâtiment, le géomètre a piqueté le coin A et un point sur chacun des deux axes de façade : B sur le premier axe, D sur le second. La station totale donne leurs coordonnées en mètres. L'angle BAD doit être droit. L'est-il ? Sinon, de combien faut-il déplacer D ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi des coordonnées ? La station totale mesure des angles et des distances ; on les traduit en coordonnées (N0.5.4), avec lesquelles tout contrôle devient un calcul.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : produit scalaire et angle">
+
+<Etape n={3} titre="Les vecteurs et leur produit scalaire">
+<AN k="vecteurs" />
+<AN k="produit" />
+<Note>Pourquoi le produit scalaire ? S'il était nul, l'angle serait droit. Ici, il ne l'est pas : on calcule l'angle exact.</Note>
+</Etape>
+
+<Etape n={4} titre="L'angle">
+<AN k="normes" />
+<AN k="cos" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="theta" libelle="Angle BAD" />
+<AN k="decalage" />
+
+<Note couleur="vert">Écart <Val k="ecart" /> : on déplace D de <Val k="decalage" /> perpendiculairement à AD, puis on contrôle à nouveau. On compare l'écart à la tolérance fixée par le marché.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire que le produit scalaire est un vecteur.">
+C'est un nombre, avec une unité (m², kN·m, kJ). Il n'a ni direction ni sens.
+</Piege>
+
+<Piege erreur="oublier le cosinus.">
+Le travail d'une force inclinée n'est pas F × d. Pour le treuil : 2 × {nombre(dt[0], 0)} = {grandeur(Wsans, 0, 'kJ')} au lieu de {grandeur(Wt, 2, 'kJ')}.
+</Piege>
+
+<Piege erreur="calculer arccos avec la calculatrice en radians.">
+arccos donne alors un résultat en radians ({nombre(convertirAngle(90, 'deg', 'rad'), 2)} pour un angle droit). On règle la calculatrice en degrés, ou l'on convertit (N0.4.1).
+</Piege>
+
+<Piege erreur="prendre le mauvais angle.">
+θ est l'angle **entre les deux vecteurs**, pas l'angle de chacun avec l'axe x. Par les composantes, on n'a pas à le chercher.
+</Piege>
+
+<Piege erreur="conclure « angle droit » parce que le produit est petit.">
+Un produit de quelques dixièmes de m² peut cacher plusieurs centimètres d'erreur sur de longs côtés. On calcule l'angle et le décalage, puis on les compare à la tolérance.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**L'implantation.** Avant de creuser les fondations, on implante les axes du bâtiment. L'équerrage se contrôle par les coordonnées, comme dans l'exemple, ou au ruban avec la méthode 3-4-5 : un triangle de côtés 3 m, 4 m et 5 m a un angle droit (réciproque de Pythagore). Une erreur d'équerrage non corrigée se retrouve dans tout le bâtiment : murs hors d'équerre, carrelage en biais, charpente qui ne tombe pas juste.
+
+<Encadre type="terrain" titre="Parcelles et bornage">
+Dans les quartiers en extension de Kinshasa ou de Lubumbashi, les limites de parcelle sont souvent piquetées à la main. Avant de construire, on contrôle que les angles du plan cadastral se retrouvent sur le terrain : le produit scalaire des côtés mesurés le dit en une ligne de calcul.
+</Encadre>
+
+**Le travail des engins.** Un treuil ou une grue fournit un travail : force × déplacement × cos θ. Un câble mal orienté gaspille une partie de l'effort et charge inutilement les points d'ancrage.
+
+**Le poids qui monte et qui descend.** Le travail du poids ne dépend que de la différence de hauteur (exercice 3). C'est pour cela qu'une rampe longue réduit l'effort nécessaire, mais pas l'énergie à fournir.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : produit scalaire">
+
+### Calcul
+
+$\vec{u} \cdot \vec{v} = \|\vec{u}\|\,\|\vec{v}\|\cos\theta = u_x v_x + u_y v_y\,(+\,u_z v_z)$ · résultat : un nombre
+
+### Signe
+
+&gt; 0 : angle aigu · = 0 : perpendiculaires · &lt; 0 : angle obtus
+
+### Angle de deux directions
+
+$\cos\theta = \dfrac{\vec{u} \cdot \vec{v}}{\|\vec{u}\|\,\|\vec{v}\|}$ · calculatrice en degrés
+
+### Projection
+
+part de $\vec{F}$ selon $\vec{u}$ : $\vec{F} \cdot \hat{u} = F\cos\theta$
+
+### Travail
+
+$W = \vec{F} \cdot \vec{d} = F\,d\cos\theta$ (kN × m = kJ) · moteur, nul ou résistant selon θ
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Perpendiculaires ?">
+
+Les vecteurs $\vec{u}$ = (3 ; 4) et $\vec{v}$ = (4 ; −3) sont-ils perpendiculaires ?
+
+<Indice>Calcule u_x v_x + u_y v_y.</Indice>
+
+<Corrige>
+u · v = 3 × 4 + 4 × (−3) = **{nombre(scalaire([3, 4], [4, -3]), 0)}** : le produit est nul, les vecteurs sont **perpendiculaires**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="L'angle entre deux murs">
+
+Sur un plan, un mur suit la direction $\vec{u}$ = (5 ; 1) et un autre la direction $\vec{v}$ = (1 ; 4). Quel angle font-ils ?
+
+<Indice>cos θ = u · v / (‖u‖ ‖v‖).</Indice>
+
+<Corrige>
+u · v = {nombre(scalaire([5, 1], [1, 4]), 0)} ; ‖u‖ = {nombre(norme([5, 1]), 3)}, ‖v‖ = {nombre(norme([1, 4]), 3)} ; cos θ = {nombre(scalaire([5, 1], [1, 4]) / (norme([5, 1]) * norme([1, 4])), 4)}, donc θ = **{nombre(angleVecteurs([5, 1], [1, 4]), 2)}°**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La brouette sur la rampe">
+
+Un ouvrier pousse une brouette de 1,2 kN en haut d'une rampe de 10 m de long qui monte de 1 m. Calcule le travail du poids. Que devient ce travail si la rampe mesure 20 m pour la même hauteur ?
+
+<Indice>Le déplacement vaut (longueur horizontale ; 1 m) ; le poids vaut (0 ; −1,2) kN.</Indice>
+
+<Corrige>
+
+- Longueur horizontale : √(10² − 1²) = {grandeur(r10.b, 2, 'm')}, donc $\vec{d}$ = {vec(dB)} m.
+- W = P · d = 0 × {nombre(dB[0], 2)} + (−1,2) × 1 = **{grandeur(WB, 2, 'kJ')}** : le travail est résistant, l'ouvrier doit fournir au moins cette énergie.
+- Avec une rampe de 20 m, la composante verticale du déplacement reste 1 m : le travail du poids est **le même**. La rampe longue réduit la force à fournir, pas l'énergie.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.6.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le produit scalaire de deux vecteurs est :" choix={['un vecteur perpendiculaire aux deux', 'un nombre', 'un angle', 'toujours positif']} bonne={1} colonnes={2}>
+C'est un nombre, qui peut être négatif.
+</QCM>
+
+<QCM n={2} question="Avec u = (2 ; 3) et v = (4 ; −1), u · v vaut :" choix={[nombre(scalaire([2, 3], [4, -1]), 0), '11', '(8 ; −3)', '14']} bonne={0} colonnes={4}>
+2 × 4 + 3 × (−1) = {nombre(scalaire([2, 3], [4, -1]), 0)}.
+</QCM>
+
+<QCM n={3} question="Deux directions ont un produit scalaire nul. Elles sont :" choix={['parallèles', 'perpendiculaires', 'confondues', 'de même norme']} bonne={1} colonnes={4}>
+cos 90° = 0.
+</QCM>
+
+<QCM n={4} question="Un produit scalaire négatif signifie que l'angle entre les vecteurs est :" choix={['aigu', 'droit', 'obtus', 'nul']} bonne={2} colonnes={4}>
+cos θ &lt; 0 pour θ entre 90° et 180°.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Un treuil tire avec 2 kN, incliné de 25° sur un déplacement de {nombre(dt[0], 0)} m. Le travail vaut :</>} choix={[grandeur(Wsans, 0, 'kJ'), grandeur(Wt, 2, 'kJ'), grandeur(Ft[1] * dt[0], 2, 'kJ'), grandeur(pt.valeur, 2, 'kJ')]} bonne={1} colonnes={4}>
+W = F d cos θ = {grandeur(Wt, 2, 'kJ')}.
+</QCM>
+
+<QCM n={6} question="Une charge transportée horizontalement à vitesse constante : le travail de son poids est :" choix={['positif', 'nul', 'négatif', 'égal au poids']} bonne={1} colonnes={4}>
+Le poids est vertical, le déplacement horizontal : ils sont perpendiculaires.
+</QCM>
+
+<QCM n={7} question="Pour calculer l'angle entre deux directions u et v, on utilise :" choix={['cos θ = u · v / (‖u‖ ‖v‖)', 'θ = u · v', 'tan θ = ‖u‖ / ‖v‖', 'θ = ‖u‖ × ‖v‖']} bonne={0} colonnes={2}>
+On égale les deux expressions du produit scalaire.
+</QCM>
+
+<QCM n={8} question="1 kN × 1 m correspond à :" choix={['1 kW', '1 kJ', '1 kPa', '1 kN/m']} bonne={1} colonnes={4}>
+Le joule est le newton-mètre de travail : 1 kN × 1 m = 1 kJ.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

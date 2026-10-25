@@ -1,0 +1,116 @@
+---
+id: N0.6.EX
+titre: "Examen du module N0.6 : vecteurs"
+objectifs:
+  - Représenter une force par ses composantes, sa norme et sa direction
+  - Additionner des forces et multiplier un vecteur par un nombre
+  - Décomposer une force selon des axes adaptés, calculer une élingue
+  - Utiliser le produit scalaire pour un angle et un travail
+  - Calculer le moment d'une force et la tension d'un hauban
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { depuisPolaire, elingues, fois, forceCable, matHaubane, moment2D, norme, scalaire, sommeForces, travail } from '@/lib/calc/vecteurs'
+import { decomposerSurVersant } from '@/lib/calc/trigo'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+
+export const vec = (v, d = 2) => `(${nombre(v[0], d)} ; ${nombre(v[1], d)})`
+export const c1 = forceCable({ xA: 0, yA: 4, xB: 3, yB: 0, T: 15, echelle: 1 })
+export const n2 = norme([-5, 12])
+export const s3 = sommeForces([{ F: 8, theta: 0 }, { F: 6, theta: 90 }])
+export const s4 = sommeForces([{ F: 20, theta: 0 }, { F: 20, theta: 120 }])
+export const p5 = fois(-3, [2, 5])
+export const f6 = depuisPolaire(12, 150)
+export const t7 = decomposerSurVersant(20, 25)
+export const e8 = elingues({ P: 30, alpha1: 45, alpha2: 45 })
+export const ps9 = scalaire([4, 1], [-1, 4])
+export const w10 = travail(depuisPolaire(3, 60), [10, 0])
+export const m11 = moment2D([0, 0], [2, 5], [4, -3])
+export const h12 = matHaubane({ h: 9, r: 12, H: 3, psi: 270, phi0: 90, marge: 0 })
+export const t12 = Math.max(...h12.haubans.map((h) => h.T))
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 1 heure.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Pour chaque calcul : **schéma** au brouillon avec les flèches et les axes, formule, application numérique avec unités, puis contrôle (signe, ordre de grandeur).
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="N0.6.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="Un câble tendu à 15 kN va du point A(0 ; 4) au point B(3 ; 0), en mètres. La force qu'il exerce en A vaut :" choix={[`${vec(fois(-1, c1.F), 0)} kN`, `${vec(c1.F, 0)} kN`, `${vec([-c1.F[1], -c1.F[0]], 0)} kN`, `${vec(c1.AB, 0)} kN`]} bonne={1} colonnes={4}>
+û = AB / ‖AB‖ = {vec(c1.u, 1)}, puis F = 15 û = {vec(c1.F, 0)} kN : la force est dirigée vers l'ancrage B (N0.6.1).
+</QCM>
+
+<QCM n={2} question="La norme du vecteur (−5 ; 12) vaut :" choix={['7', '17', nombre(n2, 0), '−13']} bonne={2} colonnes={4}>
+√((−5)² + 12²) = {nombre(n2, 0)} ; une norme n'est jamais négative (N0.6.1).
+</QCM>
+
+<QCM n={3} question="Deux forces de 8 kN (direction 0°) et 6 kN (direction 90°) agissent au même point. Leur résultante vaut :" choix={['14 kN à 45°', `${grandeur(s3.norme, 0, 'kN')} à ${nombre(s3.theta, 2)}°`, '2 kN à 0°', `${grandeur(s3.norme, 0, 'kN')} à 45°`]} bonne={1} colonnes={2}>
+R = (8 ; 6) kN : {grandeur(s3.norme, 0, 'kN')}, direction arctan(6/8) = {nombre(s3.theta, 2)}° (N0.6.2).
+</QCM>
+
+<QCM n={4} question="Deux câbles de 20 kN chacun tirent un anneau, dans les directions 0° et 120°. La résultante vaut :" choix={['40 kN', grandeur(s4.norme, 0, 'kN'), '34,64 kN', '0 kN']} bonne={1} colonnes={4}>
+R = {vec(s4.R)} kN, soit {grandeur(s4.norme, 0, 'kN')} à {nombre(s4.theta, 0)}° : avec 120° entre elles, deux forces égales ont une résultante égale à chacune (N0.6.2).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={5} question="Avec u = (2 ; 5), le vecteur −3 u vaut :" choix={['(6 ; 15)', vec(p5, 0), '(−1 ; 2)', '(−6 ; 15)']} bonne={1} colonnes={4}>
+On multiplie chaque composante par −3 : même direction, sens inversé, norme triplée (N0.6.2).
+</QCM>
+
+<QCM n={6} question="Une force de 12 kN a la direction 150°. Ses composantes sont :" choix={[`${vec(f6)} kN`, `${vec([f6[1], f6[0]])} kN`, `${vec([-f6[0], f6[1]])} kN`, `${vec([f6[0], -f6[1]])} kN`]} bonne={0} colonnes={2}>
+Fx = 12 cos 150° &lt; 0 et Fy = 12 sin 150° &gt; 0 : deuxième quadrant (N0.6.3).
+</QCM>
+
+<QCM n={7} question="Un bloc de 20 kN repose sur un talus incliné à 25°. La composante de son poids qui tend à le faire glisser vaut :" choix={[grandeur(t7.perp, 2, 'kN'), grandeur(t7.para, 2, 'kN'), '20,00 kN', '10,00 kN']} bonne={1} colonnes={4}>
+Le long du versant : P sin α = 20 sin 25° = {grandeur(t7.para, 2, 'kN')} (N0.6.3).
+</QCM>
+
+<QCM n={8} question="Une charge de 30 kN est levée par deux brins symétriques inclinés de 45° sur l'horizontale. Chaque brin porte :" choix={['15,00 kN', grandeur(e8.T1, 2, 'kN'), '30,00 kN', '42,43 kN']} bonne={1} colonnes={4}>
+T = P / (2 sin 45°) = {grandeur(e8.T1, 2, 'kN')} ; angle au sommet {nombre(e8.angleSommet, 0)}° (N0.6.3).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={9} question="Les directions u = (4 ; 1) et v = (−1 ; 4) font entre elles un angle :" choix={['aigu', 'droit', 'obtus', 'nul']} bonne={1} colonnes={4}>
+u · v = 4 × (−1) + 1 × 4 = {nombre(ps9, 0)} : produit scalaire nul, directions perpendiculaires (N0.6.4).
+</QCM>
+
+<QCM n={10} question="Un treuil tire avec 3 kN, sous un angle de 60° avec le déplacement, sur 10 m. Le travail fourni vaut :" choix={['30 kJ', grandeur(w10, 0, 'kJ'), '25,98 kJ', '15 kN·m de moment']} bonne={1} colonnes={2}>
+W = F d cos θ = 3 × 10 × cos 60° = {grandeur(w10, 0, 'kJ')} (N0.6.4).
+</QCM>
+
+<QCM n={11} question="Une force F = (4 ; −3) kN est appliquée au point A(2 ; 5), en mètres. Son moment par rapport à l'origine O vaut :" choix={[grandeur(-m11, 0, 'kN·m'), grandeur(m11, 0, 'kN·m'), '14 kN·m', '−7 kN·m']} bonne={1} colonnes={4}>
+M_O = xA Fy − yA Fx = 2 × (−3) − 5 × 4 = {grandeur(m11, 0, 'kN·m')} : sens horaire (N0.6.5).
+</QCM>
+
+<QCM n={12} question="Un mât est tenu par un hauban attaché à 9 m de haut et ancré à 12 m du pied. Il retient seul un effort horizontal de 3 kN en tête. Sa tension vaut :" choix={['3,00 kN', grandeur(t12, 2, 'kN'), '2,40 kN', '5,00 kN']} bonne={1} colonnes={4}>
+L = √(9² + 12²) = {grandeur(h12.L, 0, 'm')} ; T = H × L / r = {grandeur(t12, 2, 'kN')} (N0.6.P).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

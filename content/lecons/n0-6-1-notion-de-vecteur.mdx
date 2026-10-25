@@ -1,0 +1,320 @@
+---
+id: N0.6.1
+titre: Notion de vecteur
+objectifs:
+  - Définir un vecteur par sa direction, son sens et sa norme
+  - Calculer les composantes et la norme d'un vecteur défini par deux points
+  - Représenter une force par une flèche à l'échelle des forces
+  - Distinguer un vecteur libre d'une force, qui a un point d'application
+relecture: false
+normes: []
+glossaire:
+  - terme: Vecteur
+    definition: Objet défini par une direction, un sens et une norme ; on le dessine par une flèche.
+  - terme: Norme
+    definition: Longueur d'un vecteur ; pour une force, c'est son intensité, en N ou en kN.
+  - terme: Composantes
+    definition: Coordonnées (x ; y) d'un vecteur dans un repère ; pour le vecteur AB, (xB − xA ; yB − yA).
+  - terme: Vecteur unitaire
+    definition: Vecteur de norme 1 qui indique seulement une direction et un sens.
+  - terme: Ligne d'action
+    definition: Droite qui porte une force et passe par son point d'application.
+  - terme: Point d'application
+    definition: Point où une force agit sur un objet ; deux forces égales appliquées en des points différents n'ont pas le même effet.
+symboles:
+  - { symbole: 'AB (fléché)', signification: 'vecteur d’origine A et d’extrémité B', unite: 'm' }
+  - { symbole: '‖AB‖', signification: 'norme du vecteur AB', unite: 'm' }
+  - { symbole: 'û', signification: 'vecteur unitaire', unite: '—' }
+  - { symbole: 'F', signification: 'force (vecteur) et son intensité', unite: 'kN' }
+formules:
+  - { nom: 'Composantes de AB', tex: '\vec{AB} = (x_B - x_A \,;\, y_B - y_A)', domaine: 'Vecteurs du plan' }
+  - { nom: 'Norme', tex: '\|\vec{AB}\| = \sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}', domaine: 'Vecteurs du plan' }
+  - { nom: 'Force portée par un câble', tex: '\vec{F} = T \, \frac{\vec{AB}}{\|\vec{AB}\|}', domaine: 'Câbles, élingues, tirants' }
+---
+
+import { direction, EXEMPLE_FORCE_CABLE, fois, forceCable, norme, somme, vecteurAB } from '@/lib/calc/vecteurs'
+import { grandeur, nombre } from '@/lib/format'
+import { VecteurAnatomie } from '@/components/schemas/Vecteurs'
+
+export const f0 = forceCable(EXEMPLE_FORCE_CABLE)
+export const v1 = vecteurAB([2, 1], [5, 5])
+export const ex2 = forceCable({ xA: 0, yA: 10, xB: -4, yB: 0, T: 8, echelle: 2 })
+export const reaction = fois(-1, f0.F)
+export const q2 = { somme: somme([2, 1], [5, 5]), oppose: fois(-1, v1), milieu: fois(0.5, somme([2, 1], [5, 5])) }
+export const vec = (v, d = 2) => `(${nombre(v[0], d)} ; ${nombre(v[1], d)})`
+
+<Page etape="intuition" titre="L'intuition : « à 3 km » ne suffit pas">
+
+Un ami t'appelle : « Le camion de sable est à 3 km. » Tu ne sais pas où aller : 3 km, mais dans quelle direction ? Vers le fleuve ou vers la colline ? Et même avec la direction (« sur la route de Matadi »), il faut encore le **sens** : vers Matadi ou vers Kinshasa ?
+
+Pour décrire un déplacement, il faut donc trois informations : une **direction**, un **sens** et une **longueur**. C'est exactement ce qu'est un **vecteur**.
+
+Les forces sont des vecteurs. Un câble qui retient un mât ne tire pas « avec 12 kN » tout court : il tire avec 12 kN, **le long du câble**, **vers l'ancrage**. Si l'on oublie la direction ou le sens, le calcul de la structure est faux.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment décrire précisément une force (sa direction, son sens, son intensité) pour pouvoir la dessiner et la calculer ?
+</Encadre>
+
+<Encadre type="attention">
+Un nombre seul (« 12 kN ») ne décrit pas une force. Sur un schéma de calcul, chaque force est une **flèche** : une ligne d'action, un sens et une valeur avec son unité.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : direction, sens, norme">
+
+### Les trois caractéristiques
+
+Un vecteur, noté $\vec{AB}$, est défini par :
+
+- sa **direction** : la droite qui le porte (ou toute droite parallèle) ;
+- son **sens** : de A vers B (indiqué par la pointe de la flèche) ;
+- sa **norme** $\|\vec{AB}\|$ : sa longueur.
+
+Deux vecteurs sont **égaux** s'ils ont même direction, même sens et même norme, même s'ils sont dessinés à des endroits différents. Le vecteur **opposé** $-\vec{AB} = \vec{BA}$ a même direction et même norme, mais le sens contraire.
+
+### Les composantes
+
+Dans un repère, le vecteur $\vec{AB}$ a pour composantes $(x_B - x_A \,;\, y_B - y_A)$ : on part de A, on arrive en B (N0.5.4). Sa norme se calcule par Pythagore :
+
+$$\|\vec{AB}\| = \sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}$$
+
+<Encadre type="exemple">
+A(2 ; 1) et B(5 ; 5) : $\vec{AB}$ = {vec(v1, 0)}, de norme {nombre(norme(v1), 0)}.
+</Encadre>
+
+### Le vecteur unitaire
+
+En divisant un vecteur par sa norme, on obtient un vecteur de norme 1 qui ne garde que la direction et le sens : $\hat{u} = \vec{AB} / \|\vec{AB}\|$. Il sert à « orienter » une intensité connue.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la force, un vecteur avec un point d'application">
+
+### La force
+
+Une force a une **intensité** (sa norme, en N ou en kN), une **direction** et un **sens**, et aussi un **point d'application** : l'endroit où elle agit. La droite qui la porte s'appelle sa **ligne d'action**.
+
+<Regle type="simplification">
+Pour un objet que l'on suppose indéformable, on peut faire glisser une force **le long de sa ligne d'action** sans changer son effet. On ne peut pas la déplacer ailleurs : elle ne ferait plus tourner l'objet de la même façon (N0.6.5).
+</Regle>
+
+### La force portée par un câble
+
+Un câble tendu tire toujours **le long du câble**. Si un câble va du point A au point B avec une tension $T$ (kN), la force qu'il exerce en A vaut :
+
+$$\vec{F} = T \, \hat{u} = T \, \frac{\vec{AB}}{\|\vec{AB}\|}$$
+
+Au point B, il exerce la force opposée $-\vec{F}$ : c'est le principe des actions réciproques (troisième loi de Newton, N0.7.2).
+
+### Dessiner une force à l'échelle
+
+On choisit une **échelle des forces**, par exemple 1 cm pour {nombre(EXEMPLE_FORCE_CABLE.echelle, 0)} kN. Une force de {nombre(EXEMPLE_FORCE_CABLE.T, 0)} kN se dessine alors par une flèche de {grandeur(f0.fleche, 0, 'cm')}. Cette échelle n'a rien à voir avec l'échelle des longueurs du plan : on l'écrit à côté du dessin.
+
+<Encadre type="retenir">
+Une force = un point d'application + une direction + un sens + une intensité avec son unité.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'anatomie d'un vecteur">
+
+<VecteurAnatomie />
+
+À gauche, le vecteur $\vec{AB}$ : la droite en trait mixte est sa direction, la pointe donne son sens, la cote sa norme. À droite, $\vec{AB}$ et $\vec{CD}$ sont égaux bien qu'ils ne soient pas au même endroit ; $-\vec{AB}$ (bleu) a le sens contraire.
+
+<Encadre type="retenir">
+Pour un vecteur mathématique, la position n'importe pas. Pour une force, elle importe : on précise toujours son point d'application.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="vecteurForce">
+
+<Cahier titre="Exemple résolu : la force d'un hauban">
+
+**Énoncé.** Un mât vertical est retenu par un hauban attaché au point A(0 ; 8) et ancré au sol au point B(6 ; 0), coordonnées en mètres, le pied du mât étant à l'origine. Le câble est tendu à 12 kN. Calcule la force qu'il exerce sur le mât en A (composantes, direction) et dessine-la à l'échelle 1 cm pour 2 kN.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi le vecteur va-t-il de A vers B ? Un câble tire : il ramène le point A vers l'ancrage B.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : du câble à la force">
+
+<Etape n={3} titre="La direction du câble">
+<AN k="AB" />
+<AN k="L" />
+<AN k="u" />
+</Etape>
+
+<Etape n={4} titre="La force et son dessin">
+<AN k="F" />
+<AN k="theta" />
+<AN k="fleche" />
+<Note>Pourquoi Fy est-il négatif ? Le câble tire le haut du mât vers le bas (vers l'ancrage au sol) : la composante verticale est dirigée vers les y négatifs.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="F" libelle="Force du hauban sur le mât" />
+
+<Note couleur="vert">Intensité <Val k="T" />, direction <Val k="theta" /> ; flèche de <Val k="fleche" />. Contrôle : la norme des composantes de F redonne bien la tension T.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="donner une force par un nombre seul.">
+« 12 kN » sans direction ni sens ne permet aucun calcul. On écrit les composantes, ou l'intensité et l'angle, et l'on dessine la flèche.
+</Piege>
+
+<Piege erreur="calculer AB comme A − B.">
+$\vec{AB}$ = B − A : on soustrait l'origine de l'extrémité. Inverser donne le vecteur opposé, donc une force dans le mauvais sens.
+</Piege>
+
+<Piege erreur="perdre le signe d'une composante.">
+Fy = {nombre(f0.F[1], 2)} kN : le signe dit que la force descend. L'écrire {nombre(Math.abs(f0.F[1]), 2)} kN, c'est inverser le sens de cette composante.
+</Piege>
+
+<Piege erreur="confondre l'échelle des forces et l'échelle du plan.">
+Sur un même dessin, 1 cm peut représenter 0,5 m de longueur et 2 kN de force. On écrit les deux échelles.
+</Piege>
+
+<Piege erreur="déplacer une force hors de sa ligne d'action.">
+Une force déplacée parallèlement à elle-même ne fait plus tourner l'objet de la même façon. Seul le glissement le long de la ligne d'action est permis.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les plans de structure** représentent les charges par des flèches : charges ponctuelles, charges réparties, réactions d'appui. Savoir lire une flèche (direction, sens, valeur, unité) est indispensable dès la première note de calcul.
+
+<Encadre type="terrain" titre="Haubans et tirants">
+Les pylônes de télécommunication, nombreux dans les villes et le long des routes de RDC, sont souvent haubanés. Chaque hauban exerce sur le pylône une force dirigée vers son ancrage, et sur le massif d'ancrage la force opposée, qui tend à l'arracher. Le calcul des ancrages commence par ces vecteurs (mini-projet N0.6.P).
+</Encadre>
+
+**Les élingues, les tirants, les butons** d'étaiement : chacun porte une force le long de son axe. La direction est donnée par la géométrie, l'intensité par le calcul.
+
+**Les logiciels** de calcul demandent les forces par leurs composantes, dans le repère du modèle. Une erreur de signe (une charge vers le haut au lieu du bas) est une erreur classique de saisie : on contrôle toujours le dessin des charges affiché par le logiciel.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : notion de vecteur">
+
+### Un vecteur
+
+direction (droite support) · sens (pointe) · norme (longueur) · vecteurs égaux : mêmes direction, sens et norme · opposé : sens contraire
+
+### Composantes et norme
+
+$\vec{AB} = (x_B - x_A \,;\, y_B - y_A)$ · $\|\vec{AB}\| = \sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}$ · unitaire $\hat{u} = \vec{AB} / \|\vec{AB}\|$
+
+### Une force
+
+point d'application + ligne d'action + sens + intensité (kN) · glissement le long de la ligne d'action seulement
+
+### Force d'un câble
+
+$\vec{F} = T\,\hat{u}$, dirigée vers l'ancrage ; l'ancrage reçoit $-\vec{F}$
+
+### Dessin
+
+échelle des forces écrite à côté du dessin (ex. 1 cm ↔ 2 kN)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Composantes et norme">
+
+Calcule les composantes et la norme du vecteur $\vec{AB}$, avec A(2 ; 1) et B(5 ; 5).
+
+<Indice>Composantes : B − A ; norme : Pythagore.</Indice>
+
+<Corrige>
+$\vec{AB}$ = (5 − 2 ; 5 − 1) = **{vec(v1, 0)}** ; norme √({nombre(v1[0], 0)}² + {nombre(v1[1], 0)}²) = **{nombre(norme(v1), 0)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un autre câble">
+
+Un câble va de A(0 ; 10) à B(−4 ; 0), en mètres, avec une tension de 8 kN. Calcule la force qu'il exerce en A, sa direction et la longueur de la flèche à l'échelle 1 cm pour 2 kN.
+
+<Indice>û = AB / ‖AB‖, puis F = 8 û.</Indice>
+
+<Corrige>
+$\vec{AB}$ = {vec(ex2.AB)} m, ‖AB‖ = {grandeur(ex2.L, 2, 'm')} ; F = **{vec(ex2.F)} kN** ; direction **{nombre(ex2.theta, 2)}°** ; flèche **{grandeur(ex2.fleche, 1, 'cm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Et sur l'ancrage ?">
+
+Reprends l'exemple résolu (hauban de A(0 ; 8) à B(6 ; 0), 12 kN). Quelle force le câble exerce-t-il sur le massif d'ancrage en B ? Quelle composante tend à arracher le massif, laquelle tend à le faire glisser ?
+
+<Indice>Le câble tire l'ancrage vers A : c'est la force opposée.</Indice>
+
+<Corrige>
+
+- Force sur l'ancrage : $-\vec{F}$ = **{vec(reaction)} kN**, dirigée de B vers A, direction {nombre(direction(reaction), 2)}°.
+- La composante verticale ({nombre(reaction[1], 2)} kN, vers le haut) tend à **arracher** le massif ; la composante horizontale ({nombre(reaction[0], 2)} kN, vers le mât) tend à le faire **glisser**. Le massif doit résister aux deux (poids, frottement, butée du sol).
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.6.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un vecteur est défini par :" choix={['sa longueur seulement', 'sa direction, son sens et sa norme', 'son point de départ', 'deux nombres positifs']} bonne={1} colonnes={2}>
+Direction, sens, norme.
+</QCM>
+
+<QCM n={2} question="Les composantes du vecteur AB, avec A(2 ; 1) et B(5 ; 5), sont :" choix={[vec(q2.somme, 0), vec(v1, 0), vec(q2.oppose, 0), vec(q2.milieu, 1)]} bonne={1} colonnes={4}>
+B − A ; {vec(q2.somme, 0)} est la somme A + B, {vec(q2.oppose, 0)} le vecteur BA, {vec(q2.milieu, 1)} le milieu de [AB].
+</QCM>
+
+<QCM n={3} question="La norme du vecteur (6 ; −8) vaut :" choix={['14', nombre(norme([6, -8]), 0), '−2', '100']} bonne={1} colonnes={4}>
+√(6² + (−8)²) = {nombre(norme([6, -8]), 0)} : une norme est toujours positive.
+</QCM>
+
+<QCM n={4} question="Le vecteur −AB :" choix={['est égal à AB', 'a la même direction et le sens contraire', 'est perpendiculaire à AB', 'est nul']} bonne={1} colonnes={2}>
+−AB = BA.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Un câble tendu exerce une force :" choix={['perpendiculaire au câble', 'le long du câble, vers son autre extrémité', 'toujours verticale', 'toujours horizontale']} bonne={1}>
+Un câble ne peut que tirer, le long de son axe.
+</QCM>
+
+<QCM n={6} question={<>À l'échelle 1 cm pour 2 kN, une force de {nombre(EXEMPLE_FORCE_CABLE.T, 0)} kN se dessine par une flèche de :</>} choix={[grandeur(EXEMPLE_FORCE_CABLE.T * EXEMPLE_FORCE_CABLE.echelle, 0, 'cm'), grandeur(f0.fleche, 0, 'cm'), grandeur(EXEMPLE_FORCE_CABLE.T, 0, 'cm'), grandeur(EXEMPLE_FORCE_CABLE.echelle, 0, 'cm')]} bonne={1} colonnes={4}>
+{nombre(EXEMPLE_FORCE_CABLE.T, 0)} kN ÷ {nombre(EXEMPLE_FORCE_CABLE.echelle, 0)} kN/cm = {grandeur(f0.fleche, 0, 'cm')} : on divise par l'échelle, on ne multiplie pas.
+</QCM>
+
+<QCM n={7} question="Ce qui distingue une force d'un vecteur quelconque, c'est :" choix={['son unité seulement', 'son point d’application', 'sa couleur sur le dessin', 'sa norme']} bonne={1} colonnes={2}>
+Le même vecteur appliqué ailleurs n'a pas le même effet.
+</QCM>
+
+<QCM n={8} question={<>La force du hauban de l'exemple sur le mât vaut {vec(f0.F)} kN. Sur l'ancrage, le câble exerce :</>} choix={[`${vec(f0.F)} kN`, `${vec(reaction)} kN`, `${vec([0, 0])} kN`, `${vec([f0.F[0], -f0.F[1]])} kN`]} bonne={1} colonnes={2}>
+La force opposée : actions réciproques.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

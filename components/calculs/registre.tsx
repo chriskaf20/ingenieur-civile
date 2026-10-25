@@ -11,6 +11,7 @@ import { CALCULS_METHODE } from './methode';
 import { CALCULS_GEOMETRIE } from './geometrie';
 import { CALCULS_TRIGO } from './trigo';
 import { CALCULS_UNITES } from './unites';
+import { CALCULS_VECTEURS } from './vecteurs';
 import { MurSchema } from '@/components/schemas/MurCloture';
 import { CoupePlateforme, PlanPlateforme } from '@/components/schemas/Remblai';
 import { EXEMPLE_POTEAU, poteauCompressionCentree, type DonneesPoteau, type ResultatPoteau } from '@/lib/calc/ba/poteau';
@@ -385,7 +386,10 @@ function fusion<A extends object, B extends object>(a: A, b: Disjoint<A, B>): A 
 }
 
 export const REGISTRE = fusion(
-  fusion(fusion(fusion(fusion({ echelle, remblai, escalier, poteau, mur } as const, CALCULS_METHODE), CALCULS_ALGEBRE), CALCULS_UNITES), CALCULS_TRIGO),
-  CALCULS_GEOMETRIE,
+  fusion(
+    fusion(fusion(fusion(fusion({ echelle, remblai, escalier, poteau, mur } as const, CALCULS_METHODE), CALCULS_ALGEBRE), CALCULS_UNITES), CALCULS_TRIGO),
+    CALCULS_GEOMETRIE,
+  ),
+  CALCULS_VECTEURS,
 );
 export type NomCalcul = keyof typeof REGISTRE;

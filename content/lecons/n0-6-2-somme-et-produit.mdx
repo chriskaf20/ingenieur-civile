@@ -1,0 +1,331 @@
+---
+id: N0.6.2
+titre: Somme de vecteurs et produit par un nombre
+objectifs:
+  - Additionner des vecteurs bout à bout et par la règle du parallélogramme
+  - Calculer la résultante de forces concourantes par leurs composantes
+  - Multiplier un vecteur par un nombre et interpréter le signe du nombre
+  - Reconnaître l'équilibre d'un point à son polygone des forces fermé
+relecture: false
+normes:
+  - "EN 1990 (EC0) : tableau A1.2(B), coefficient γG = 1,35 des actions permanentes à l'ELU"
+glossaire:
+  - terme: Résultante
+    definition: Force unique qui a le même effet que plusieurs forces appliquées au même point ; c'est leur somme vectorielle.
+  - terme: Forces concourantes
+    definition: Forces dont les lignes d'action passent par un même point.
+  - terme: Polygone des forces
+    definition: Les forces dessinées bout à bout ; la résultante va du départ de la première à la pointe de la dernière.
+  - terme: Relation de Chasles
+    definition: "Règle d'addition des vecteurs bout à bout : AB + BC = AC."
+  - terme: Équilibre d'un point
+    definition: État d'un point immobile ; la somme des forces qu'il reçoit est nulle et leur polygone est fermé.
+symboles:
+  - { symbole: 'R', signification: 'résultante (somme des forces)', unite: 'kN' }
+  - { symbole: 'Fx, Fy', signification: 'composantes d’une force', unite: 'kN' }
+  - { symbole: 'θ', signification: 'direction d’une force, depuis l’axe x', unite: '°' }
+  - { symbole: 'k', signification: 'nombre (scalaire) multipliant un vecteur', unite: '—' }
+  - { symbole: 'γG', signification: 'coefficient partiel des actions permanentes', unite: '—' }
+formules:
+  - { nom: 'Somme par composantes', tex: '\vec{u} + \vec{v} = (u_x + v_x \,;\, u_y + v_y)', domaine: 'Tous vecteurs' }
+  - { nom: 'Composantes d’une force', tex: '\vec{F} = (F\cos\theta \,;\, F\sin\theta)', domaine: 'θ compté depuis l’axe x' }
+  - { nom: 'Produit par un nombre', tex: 'k\,\vec{u} = (k\,u_x \,;\, k\,u_y)', domaine: 'k réel' }
+  - { nom: 'Équilibre d’un point', tex: '\sum \vec{F} = \vec{0}', domaine: 'Point immobile' }
+---
+
+import { EXEMPLE_ANNEAU, difference, fois, norme, somme, sommeForces } from '@/lib/calc/vecteurs'
+import { GAMMA_G } from '@/lib/calc/charges'
+import { grandeur, nombre } from '@/lib/format'
+import { PolygoneForces, ProduitParNombre } from '@/components/schemas/Vecteurs'
+
+export const s0 = sommeForces(EXEMPLE_ANNEAU)
+export const s3 = sommeForces([...EXEMPLE_ANNEAU, { F: s0.norme, theta: (s0.theta + 180) % 360 }])
+export const G0 = 80
+export const u1 = [3, 1]
+export const v1 = [-1, 4]
+export const ex2 = sommeForces([{ F: 6, theta: 0 }, { F: 8, theta: 90 }, { F: 5, theta: 210 }])
+export const cl = (a) => sommeForces([{ F: 2, theta: 0 }, { F: 2, theta: a }])
+export const q1 = sommeForces([{ F: 3, theta: 0 }, { F: 4, theta: 90 }])
+export const vec = (v, d = 2) => `(${nombre(v[0], d)} ; ${nombre(v[1], d)})`
+export const intensites = EXEMPLE_ANNEAU[0].F + EXEMPLE_ANNEAU[1].F
+
+<Page etape="intuition" titre="L'intuition : deux cordes, un seul mouvement">
+
+Sur la berge du fleuve, deux pêcheurs tirent une pirogue avec deux cordes. L'un tire vers l'amont, l'autre vers la berge. La pirogue ne suit ni l'une ni l'autre corde : elle part **entre les deux**, plus près de celle qui tire le plus fort.
+
+Tout se passe comme si **une seule corde** tirait dans cette direction intermédiaire. Cette force unique, qui remplace les deux autres, s'appelle la **résultante**. La trouver, c'est **additionner des vecteurs**.
+
+Mais attention : si l'un tire avec 15 kN et l'autre avec 10 kN, la pirogue ne reçoit pas 25 kN. Les deux efforts ne vont pas dans la même direction, donc une partie de chacun « se perd » sur le côté. On n'additionne pas des intensités : on additionne des **flèches**.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment remplacer plusieurs forces par une seule, et comment savoir si elles se compensent ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : additionner des vecteurs">
+
+### Bout à bout : la relation de Chasles
+
+Pour additionner $\vec{u}$ et $\vec{v}$, on dessine $\vec{v}$ en partant de la pointe de $\vec{u}$. La somme va du départ de $\vec{u}$ à la pointe de $\vec{v}$ :
+
+$$\vec{AB} + \vec{BC} = \vec{AC}$$
+
+Avec plus de deux vecteurs, on continue la chaîne : c'est le **polygone des forces**.
+
+### Le parallélogramme
+
+Si les deux vecteurs partent du même point, la somme est la **diagonale** du parallélogramme construit sur eux. C'est la même chose que bout à bout : le côté opposé du parallélogramme est égal à $\vec{v}$.
+
+### Par le calcul : les composantes
+
+On additionne les composantes une à une :
+
+$$\vec{u} + \vec{v} = (u_x + v_x \,;\, u_y + v_y)$$
+
+Une force donnée par son intensité $F$ et sa direction $\theta$ (comptée depuis l'axe x, sens trigonométrique) a pour composantes $(F\cos\theta \,;\, F\sin\theta)$ (N0.4.4). Pour la résultante de plusieurs forces : $R_x = \sum F_x$, $R_y = \sum F_y$, puis la norme par Pythagore et la direction par l'arctangente, en regardant les signes de $R_x$ et $R_y$ pour choisir le bon quadrant (N0.5.4).
+
+<Encadre type="attention">
+La norme d'une somme n'est pas la somme des normes : $\|\vec{u} + \vec{v}\| \le \|\vec{u}\| + \|\vec{v}\|$. L'égalité n'a lieu que si les deux vecteurs ont même direction et même sens.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : produit par un nombre, équilibre">
+
+### Multiplier un vecteur par un nombre
+
+Le vecteur $k\,\vec{u} = (k\,u_x \,;\, k\,u_y)$ a la **même direction** que $\vec{u}$ ; sa norme est multipliée par $|k|$ ; son sens est conservé si $k > 0$ et inversé si $k < 0$. La différence se ramène à une somme : $\vec{u} - \vec{v} = \vec{u} + (-1)\,\vec{v}$.
+
+<Regle type="norme" source="EN 1990 (EC0), tableau A1.2(B)">
+Pour vérifier une structure à l'état limite ultime (ELU), en situation durable, on multiplie les charges permanentes défavorables par le coefficient partiel $\gamma_G$ = {nombre(GAMMA_G, 2)}. C'est un produit par un nombre positif : la charge garde sa direction et son sens, seule son intensité augmente.
+</Regle>
+
+### L'équilibre d'un point
+
+Un point qui reste immobile reçoit des forces dont la somme est nulle :
+
+$$\sum \vec{F} = \vec{0}$$
+
+Graphiquement, les forces mises bout à bout **reviennent au point de départ** : le polygone des forces est **fermé**. C'est la première condition de l'équilibre, que la statique complétera par les moments (N0.6.5, puis L1.3).
+
+<Regle type="simplification">
+Nous additionnons ici des forces **concourantes**, appliquées au même point. Si les lignes d'action ne se coupent pas en un même point, la somme donne bien la résultante, mais il faut encore trouver où elle s'applique (moments, N0.6.5).
+</Regle>
+
+<Encadre type="retenir">
+Résultante = somme des vecteurs, jamais somme des intensités. Équilibre = polygone fermé.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Les schémas (1/2) : le polygone fermé de l'équilibre">
+
+On reprend les deux câbles de l'exemple résolu (page suivante). Si l'anneau ne bouge pas, c'est qu'une troisième force, exercée par la souche et le sol, vaut exactement l'opposé de leur résultante : $\vec{F_3} = -\vec{R}$ = {vec(fois(-1, s0.R))} kN.
+
+<PolygoneForces s={s3} />
+
+À gauche, les trois forces partent de l'anneau. À droite, mises bout à bout, elles reviennent à leur point de départ : la résultante est nulle (calcul : {grandeur(s3.norme, 2, 'kN')}). Si la souche cède, le polygone s'ouvre et l'anneau part dans la direction de $\vec{R}$.
+
+</Page>
+
+<Page etape="schemas" titre="Les schémas (2/2) : multiplier une force par un nombre">
+
+Un poteau reçoit une charge permanente G = {nombre(G0, 0)} kN, vers le bas. Multiplier par {nombre(GAMMA_G, 2)} ou par 0,5 change l'intensité ; multiplier par −1 inverse le sens.
+
+<ProduitParNombre G={G0} />
+
+<Encadre type="retenir">
+Les quatre flèches ont la même direction (verticale). Le nombre agit sur la longueur ; son signe agit sur le sens. La flèche −G est la réaction qui équilibre la charge : G + (−G) = 0.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="sommeForces">
+
+<Cahier titre="Exemple résolu : deux treuils sur une souche">
+
+**Énoncé.** Pour dégager l'emprise d'une future route, on arrache une souche. Deux câbles de treuil sont accrochés au même anneau : le premier tire avec 15 kN dans la direction 20°, le second avec 10 kN dans la direction 110° (directions comptées depuis l'axe x, sens trigonométrique). Quelle force unique l'anneau reçoit-il ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi ne pas additionner les intensités ? Les deux câbles ne tirent pas dans la même direction : on additionne des vecteurs, donc leurs composantes.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : composantes, somme, direction">
+
+<Etape n={3} titre="Les composantes de chaque force">
+<AN k="composantes" />
+<Note>Pourquoi des composantes ? Sur un même axe, les forces s'additionnent comme des nombres, avec leur signe.</Note>
+</Etape>
+
+<Etape n={4} titre="La somme, sa norme et sa direction">
+<AN k="somme" />
+<AN k="norme" />
+<AN k="direction" />
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="R" libelle="Résultante sur l'anneau" />
+
+<Note couleur="vert">Direction <Val k="theta" />, composantes <Val k="Rv" />. Contrôle : la résultante ne dépasse jamais la somme des intensités, et le polygone des forces donne la même flèche que le calcul.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="additionner les intensités.">
+15 kN + 10 kN = {nombre(intensites, 0)} kN est faux : la résultante de l'exemple vaut {grandeur(s0.norme, 2, 'kN')}. On additionne les composantes, jamais les intensités de forces de directions différentes.
+</Piege>
+
+<Piege erreur="se tromper de quadrant pour la direction.">
+arctan(Ry / Rx) donne le même angle pour (3 ; 4) et pour (−3 ; −4). On regarde les signes : Rx &lt; 0 et Ry &lt; 0, la résultante est dans le troisième quadrant, il faut ajouter 180°.
+</Piege>
+
+<Piege erreur="dessiner la résultante dans le mauvais sens sur le polygone.">
+R part du départ de la première flèche et arrive à la pointe de la dernière. Elle ne « ferme » pas le polygone en suivant les autres flèches : elle le traverse en sens inverse.
+</Piege>
+
+<Piege erreur="oublier une force.">
+Le poids propre, la réaction du sol, la poussée de l'eau : une force oubliée fausse la résultante. On fait la liste des forces avant de calculer.
+</Piege>
+
+<Piege erreur="multiplier par un nombre négatif sans inverser le sens.">
+−2 $\vec{u}$ est deux fois plus long que $\vec{u}$ **et** de sens contraire. Seule la direction est conservée.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les poteaux d'angle.** Un poteau d'une clôture droite reçoit deux tractions égales et opposées : leur somme est nulle, il ne travaille presque pas. Un poteau d'**angle** reçoit deux tractions qui ne se compensent plus : leur résultante tend à le coucher vers l'intérieur de l'angle. On le retient par une jambe de force, placée à l'intérieur de l'angle, qui pousse, ou par un hauban, ancré à l'extérieur, qui tire : les deux fournissent la force opposée à la résultante (exercice 3).
+
+<Encadre type="terrain" titre="Lignes électriques et téléphoniques">
+Le long des routes de RDC, les poteaux d'angle des lignes basse tension sont haubanés, souvent par un câble ancré dans un bloc de béton. Le hauban doit équilibrer la résultante des tractions des conducteurs. Un poteau d'angle sans hauban finit par pencher, surtout dans les sols argileux détrempés en saison des pluies.
+</Encadre>
+
+**Les combinaisons de charges.** La combinaison de l'ELU, $\gamma_G\,G + \gamma_Q\,Q$, est un produit par des nombres suivi d'une somme. Quand charges et vent n'ont pas la même direction (une charge verticale, un vent horizontal), on les additionne comme des vecteurs, composante par composante.
+
+**Le treuillage.** Pour dégager un engin embourbé sur une route en terre, on combine parfois deux points de traction. La force sur l'engin est la résultante : on l'oriente dans l'axe de la sortie voulue, en réglant les deux tractions.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : somme et produit par un nombre">
+
+### Somme
+
+bout à bout (Chasles) : $\vec{AB} + \vec{BC} = \vec{AC}$ · parallélogramme : diagonale · composantes : $(u_x + v_x \,;\, u_y + v_y)$
+
+### Résultante de forces concourantes
+
+$F_x = F\cos\theta$, $F_y = F\sin\theta$ · $R_x = \sum F_x$, $R_y = \sum F_y$ · $\|R\| = \sqrt{R_x^2 + R_y^2}$ · direction : arctangente + signes (quadrant)
+
+### Produit par un nombre
+
+$k\,\vec{u}$ : même direction, norme × |k|, sens inversé si k &lt; 0 · $\vec{u} - \vec{v} = \vec{u} + (-\vec{v})$ · ELU : $\gamma_G$ = {nombre(GAMMA_G, 2)} (EC0, tableau A1.2(B))
+
+### Équilibre d'un point
+
+$\sum \vec{F} = \vec{0}$ · polygone des forces fermé
+
+### Piège
+
+‖u + v‖ ≤ ‖u‖ + ‖v‖ : on n'additionne jamais les intensités
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Calculer avec les composantes">
+
+Avec $\vec{u}$ = (3 ; 1) et $\vec{v}$ = (−1 ; 4), calcule $\vec{u} + \vec{v}$, $\vec{u} - \vec{v}$ et $3\,\vec{u}$.
+
+<Indice>Composante par composante, avec les signes.</Indice>
+
+<Corrige>
+$\vec{u} + \vec{v}$ = **{vec(somme(u1, v1), 0)}** ; $\vec{u} - \vec{v}$ = **{vec(difference(u1, v1), 0)}** ; $3\,\vec{u}$ = **{vec(fois(3, u1), 0)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Trois câbles sur un anneau">
+
+Un anneau reçoit trois forces : 6 kN à 0°, 8 kN à 90° et 5 kN à 210°. Calcule la résultante (intensité et direction).
+
+<Indice>La force à 210° a ses deux composantes négatives.</Indice>
+
+<Corrige>
+Composantes : {ex2.forces.map((f) => vec(f)).join(' ; ')} kN. Somme : R = {vec(ex2.R)} kN, soit **{grandeur(ex2.norme, 2, 'kN')}** dans la direction **{nombre(ex2.theta, 2)}°**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le poteau d'angle">
+
+Les fils d'une clôture tirent un poteau d'angle avec 2 kN dans chaque direction (valeur d'énoncé). Le premier côté est dans la direction 0°. Calcule la résultante si le second côté est dans la direction 90°, puis 120°, puis 60°. Quand les deux côtés se referment (angle plus petit), l'effort sur le poteau augmente-t-il ? Dans quelle direction placer la jambe de force pour 90° ?
+
+<Indice>La résultante est dans la bissectrice de l'angle entre les fils ; la jambe de force doit fournir la force opposée.</Indice>
+
+<Corrige>
+
+- 90° : **{grandeur(cl(90).norme, 2, 'kN')}** à {nombre(cl(90).theta, 0)}° ; 120° : **{grandeur(cl(120).norme, 2, 'kN')}** à {nombre(cl(120).theta, 0)}° ; 60° : **{grandeur(cl(60).norme, 2, 'kN')}** à {nombre(cl(60).theta, 0)}°.
+- Plus l'angle entre les fils est petit, plus la résultante est grande : un angle aigu charge beaucoup le poteau. Pour 180° (clôture droite), elle serait nulle ({grandeur(cl(180).norme, 2, 'kN')}).
+- Pour 90°, la jambe de force doit fournir {grandeur(cl(90).norme, 2, 'kN')} dans la direction {nombre((cl(90).theta + 180) % 360, 0)}° : placée à l'intérieur de l'angle, elle pousse le poteau vers l'extérieur, à l'opposé de la traction des fils.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="N0.6.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Deux forces de 3 kN et 4 kN, perpendiculaires, appliquées au même point, ont une résultante de :" choix={['7 kN', grandeur(q1.norme, 0, 'kN'), '1 kN', '12 kN']} bonne={1} colonnes={4}>
+√(3² + 4²) = {grandeur(q1.norme, 0, 'kN')} : Pythagore, parce que les forces sont perpendiculaires.
+</QCM>
+
+<QCM n={2} question="Avec u = (2 ; −1) et v = (1 ; 3), le vecteur u + v vaut :" choix={[vec(somme([2, -1], [1, 3]), 0), vec(difference([2, -1], [1, 3]), 0), '(2 ; −3)', '(3 ; 4)']} bonne={0} colonnes={4}>
+Composante par composante : (2 + 1 ; −1 + 3).
+</QCM>
+
+<QCM n={3} question="Le vecteur −2 u, comparé à u :" choix={['même sens, deux fois plus long', 'sens contraire, deux fois plus long', 'perpendiculaire à u', 'sens contraire, deux fois plus court']} bonne={1} colonnes={2}>
+La norme est multipliée par |−2| = 2, le signe moins inverse le sens.
+</QCM>
+
+<QCM n={4} question={<>À l'ELU, une charge permanente défavorable G = {nombre(G0, 0)} kN est multipliée par γG = {nombre(GAMMA_G, 2)}. Elle devient :</>} choix={[grandeur(G0 + GAMMA_G, 2, 'kN'), grandeur(GAMMA_G * G0, 0, 'kN'), grandeur(G0 / GAMMA_G, 2, 'kN'), grandeur(G0, 0, 'kN')]} bonne={1} colonnes={4}>
+{nombre(GAMMA_G, 2)} × {nombre(G0, 0)} = {grandeur(GAMMA_G * G0, 0, 'kN')}, toujours vers le bas (EC0, tableau A1.2(B)).
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Les forces appliquées à un point, mises bout à bout, reviennent au point de départ. On en conclut :" choix={['la résultante est maximale', 'la résultante est nulle : le point est en équilibre', 'une force a été oubliée', 'les forces sont parallèles']} bonne={1}>
+Polygone fermé = somme nulle = équilibre (première condition).
+</QCM>
+
+<QCM n={6} question="Deux forces de 10 kN, de même direction et de sens contraires, ont une résultante de :" choix={['20 kN', grandeur(norme(somme([10, 0], [-10, 0])), 0, 'kN'), '10 kN', '14,14 kN']} bonne={1} colonnes={4}>
+Elles se compensent exactement.
+</QCM>
+
+<QCM n={7} question="Deux câbles tirent un anneau avec 15 kN et 10 kN. La résultante vaut 25 kN :" choix={['toujours', 'seulement si les câbles ont même direction et même sens', 'seulement s’ils sont perpendiculaires', 'jamais']} bonne={1} colonnes={2}>
+Sinon, la résultante est plus petite : dans l'exemple, {grandeur(s0.norme, 2, 'kN')}.
+</QCM>
+
+<QCM n={8} question="La relation de Chasles s'écrit :" choix={['AB + BC = AC', 'AB + BC = BA', 'AB + AC = BC', 'AB − BC = AC']} bonne={0} colonnes={4}>
+Bout à bout : de A à B, puis de B à C, revient à aller de A à C.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,169 @@
+---
+id: N0.6.P
+titre: "Mini-projet : efforts dans les haubans d'un mât"
+objectifs:
+  - Décrire la géométrie d'un mât haubané avec des vecteurs
+  - Calculer la tension des haubans sous un effort horizontal donné
+  - Rechercher la direction d'effort la plus défavorable pour chaque hauban
+  - En déduire la compression du mât, l'arrachement des ancrages et la longueur de câble
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { variation } from '@/lib/calc/algebre'
+import { enveloppeMat, EXEMPLE_MAT, matHaubane } from '@/lib/calc/vecteurs'
+import { grandeur, nombre } from '@/lib/format'
+import { MatIso } from '@/components/schemas/Vecteurs'
+
+export const d = EXEMPLE_MAT
+export const r = matHaubane(d)
+export const env = enveloppeMat(d)
+export const pire = matHaubane({ ...d, psi: env.psiMax })
+export const tNord = Math.max(...r.haubans.map((h) => h.T))
+export const vPire = Math.max(...pire.haubans.map((h) => h.V))
+export const dirs = r.haubans.map((h) => `${nombre(h.phi, 0)}°`).join(', ')
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Une radio communautaire de Kisangani installe une antenne au sommet d'un mât. Le mât est tenu par **trois haubans** attachés à {grandeur(d.h, 0, 'm')} de haut et ancrés dans trois massifs de béton, à {grandeur(d.r, 0, 'm')} du pied, à 120° les uns des autres. On te demande les efforts qui serviront à choisir les câbles et les ancrages.
+
+### Les données
+
+- Directions des ancrages vues du pied du mât : {dirs} (comptées depuis l'est, dans le sens trigonométrique : 90° est le nord).
+- Le vent sur l'antenne et le haut du mât est représenté par un **effort horizontal de {grandeur(d.H, 1, 'kN')} en tête**. Vent du nord : l'effort pousse la tête vers le sud, direction {nombre(d.psi, 0)}°.
+- On ajoute {grandeur(d.marge, 0, 'm')} de câble par hauban pour les attaches et le tendeur.
+
+Ces valeurs sont des **données de l'énoncé**. Sur un vrai projet, l'effort du vent se calcule selon l'EN 1991-1-4 (EC1-1-4), vu plus tard dans le cursus.
+
+### Ce que tu rends
+
+1. La longueur et l'inclinaison d'un hauban.
+2. Les tensions des trois haubans par vent du nord.
+3. La direction d'effort la plus défavorable et la tension maximale d'un hauban.
+4. La compression ajoutée au mât et l'arrachement de l'ancrage le plus chargé.
+5. La longueur totale de câble à commander.
+
+<Regle type="simplification">
+On néglige la prétension des haubans (en réalité, on les tend au montage), le poids des câbles (qui leur donne une légère flèche) et celui du mât. Un câble ne travaille qu'en **traction** : il ne peut pas pousser.
+</Regle>
+
+</Page>
+
+<Vue3D titre="Le mât haubané en perspective" etape="projet" calques={[{ id: 'mat', libelle: 'Mât et sol' }, { id: 'haubans', libelle: 'Haubans' }, { id: 'effort', libelle: 'Effort en tête' }, { id: 'tensions', libelle: 'Tensions' }, { id: 'cotes', libelle: 'Cotes' }]}>
+
+Par vent du nord, l'effort pousse la tête du mât vers le sud. Le hauban ancré au nord (en rouge) le retient ; les deux autres (en pointillés) se détendent. Active les calques un à un pour suivre le raisonnement.
+
+<MatIso d={d} r={r} />
+
+</Vue3D>
+
+<FicheCalcul calcul="matHaubane">
+
+<Cahier titre="Étape 1 : la géométrie et l'effort à reprendre" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un effort « cible » ? La tête du mât est en équilibre : la somme des forces horizontales des haubans doit compenser exactement l'effort du vent (N0.6.2).</Note>
+</Etape>
+
+<Etape n={2} titre="La géométrie des haubans">
+<AN k="geometrie" />
+<AN k="cible" />
+</Etape>
+
+<Etape n={3} titre="La vue en plan">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : les tensions, le mât et les ancrages" etape="projet">
+
+<Etape n={4} titre="La répartition entre les haubans">
+<AN k="repartition" />
+<Note>Pourquoi deux haubans seulement ? Un câble ne pousse pas. L'effort cible se décompose selon les deux haubans qui l'encadrent (décomposition oblique, N0.6.3) ; le hauban situé du côté opposé se détend.</Note>
+</Etape>
+
+<Etape n={5} titre="Les tensions">
+<AN k="tensions" />
+<Note>Pourquoi T = c × L / r ? La composante horizontale d'une tension vaut T cos α, et cos α = r / L dans le triangle formé par le hauban, le mât et le sol (N0.6.3).</Note>
+</Etape>
+
+<Etape n={6} titre="Le mât et les ancrages">
+<AN k="mat" />
+<AN k="controle" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 : le cas le plus défavorable et le câble" etape="projet">
+
+<Etape n={7} titre="Faire tourner le vent">
+<AN k="enveloppe" />
+<Note>Pourquoi faire tourner le vent ? Il peut venir de partout. Un hauban n'est pas le plus chargé quand il est seul face au vent, mais quand il partage l'effort avec un voisin : décomposée selon deux directions écartées de 120°, une force donne une composante plus grande qu'elle, comme pour l'élingue (N0.6.3).</Note>
+</Etape>
+
+<Etape n={8} titre="Le câble à commander">
+<AN k="cable" />
+<Resultat k="Tenv" libelle="Tension maximale d'un hauban, toutes directions" />
+
+<Note couleur="vert">Tension maximale <Val k="Tenv" />, pour un effort vers <Val k="psiEnv" />. C'est elle, et non la tension par vent du nord, qui sert à choisir les câbles et les ancrages.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le récapitulatif : exemple corrigé">
+
+### Les tensions, hauban par hauban
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Hauban (direction de l'ancrage)</th><th>Tension par vent du nord</th><th>Tension maximale</th><th>Effort le plus défavorable</th></tr></thead>
+    <tbody>{env.parHauban.map((p, i) => <tr key={p.phi}><td>{nombre(p.phi, 0)}°</td><td>{grandeur(r.haubans[i].T, 2, 'kN')}</td><td>{grandeur(p.Tmax, 2, 'kN')}</td><td>vers {nombre(p.psi, 0)}°</td></tr>)}</tbody>
+  </table>
+</div>
+
+Les trois haubans ont la même tension maximale, {grandeur(env.Tmax, 2, 'kN')} : c'est logique, ils sont disposés symétriquement. Le cas « vent du nord », qui semblait le plus simple, sous-estime cette tension de {grandeur(variation(tNord, env.Tmax) * 100, 1, '%')}.
+
+### Les efforts transmis
+
+- **Compression du mât** : {grandeur(r.N, 2, 'kN')} par vent du nord, {grandeur(pire.N, 2, 'kN')} dans le cas le plus défavorable (deux haubans tirent vers le bas).
+- **Arrachement de l'ancrage le plus chargé** : {grandeur(vPire, 2, 'kN')} vers le haut, plus une composante horizontale qui tend à le faire glisser vers le mât.
+- **Câble** : {grandeur(r.cable, 2, 'm')} à commander, attaches comprises.
+
+<Encadre type="attention">
+Ces efforts restent ceux d'un modèle simplifié. Sur un vrai projet, on ajoute la prétension, on calcule le vent selon l'EC1-1-4 et l'on applique les coefficients partiels de l'Eurocode avant de choisir les câbles (selon leur notice) et de dimensionner les massifs d'ancrage.
+</Encadre>
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Géométrie | Longueur des haubans fausse | L et α justes | Triangle hauban, mât, sol dessiné et coté |
+| Équilibre de la tête | Effort cible mal orienté | Effort cible opposé au vent | Polygone des forces dessiné et fermé |
+| Tensions | Les trois haubans supposés tendus | Deux haubans tendus, un détendu | Décomposition oblique expliquée |
+| Cas défavorable | Un seul vent étudié | Plusieurs directions essayées | Direction la plus défavorable trouvée et justifiée |
+| Efforts transmis | Oubliés | Compression et arrachement donnés | Unités, signes et simplifications signalés |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Rapproche les ancrages à 6 m du pied, puis éloigne-les à 12 m (fiche de calcul, champ r). Que deviennent la tension maximale, la compression du mât et la longueur de câble ? Quel compromis choisirais-tu, sachant que l'emprise au sol est limitée ?
+</Encadre>
+
+<Quiz id="N0.6.P">
+
+<QCM n={1} question="Mon rendu donne-t-il les tensions dans le cas le plus défavorable, avec les efforts transmis au mât et aux ancrages, et les simplifications du modèle ?" choix={['Oui, tout y est', 'Il manque le cas défavorable ou les efforts transmis', 'Je n’ai calculé que le vent du nord']} bonne={0}>
+Sinon, complète-le : c'est le cas défavorable qui sert à choisir les câbles et les ancrages.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>
