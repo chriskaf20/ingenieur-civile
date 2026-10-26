@@ -36,7 +36,8 @@ formules:
 import { EXEMPLE_LINTEAU, poidsElement, POIDS_VOLUMIQUE_BA } from '@/lib/calc/methode'
 import { grandeur, nombre } from '@/lib/format'
 import { poutreUniforme } from '@/lib/calc/rdm'
-import { CinqEtapes } from '@/components/schemas/Methode'
+import { CinqEtapes, CubeMetre, DonneesCherchees, OrdreGrandeur, PoteauCote, PoutreDeuxMurs } from '@/components/schemas/Methode'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
 
 export const lin = EXEMPLE_LINTEAU
 export const linr = poidsElement(lin)
@@ -97,15 +98,21 @@ Comprendre → représenter → supposer → calculer → **douter**. On ne saut
 
 </Infographie>
 
-<Page etape="cours" titre="Le cours : chaque étape en détail">
+<Page etape="cours" titre="Le cours (1/2) : données et schéma">
 
 ### 1. Les données
 
 Classe les valeurs de l'énoncé en deux listes : **connues** et **cherchées**. Note à côté l'unité, puis convertis : 20 cm s'écrit 0,20 m.
 
+<DonneesCherchees L={lin.L} b={lin.b} h={lin.h} gamma={lin.gamma} />
+
 ### 2. Le schéma
 
 Un schéma utile est **coté** (les dimensions y figurent) et porte les **noms des grandeurs** ($L$, $b$, $h$). Il n'a pas besoin d'être beau ; il doit être juste.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : hypothèses, calcul, vérification">
 
 ### 3. Les hypothèses
 
@@ -130,6 +137,8 @@ $P = L \times b \times h \times \gamma$ avec $L$, $b$, $h$ en m et $\gamma$ en k
 ### 5. La vérification
 
 Arrondis chaque donnée à **un chiffre significatif** et refais le calcul de tête. Si les deux résultats ont le même ordre de grandeur, le calcul est plausible. S'ils diffèrent d'un facteur 10 ou plus, il y a une erreur.
+
+<OrdreGrandeur exact={linr.poids} estime={linr.estimation} faux={faux.poids} unite="kN" />
 
 <Regle type="simplification">
 « Même ordre de grandeur » veut dire ici : écart inférieur à 50 %. C'est un seuil de contrôle pédagogique, pas une règle de calcul.
@@ -185,6 +194,8 @@ Arrondis chaque donnée à **un chiffre significatif** et refais le calcul de t�
 Avec 240 × 20 × 25 cm et γ = 25 kN/m³, on trouve {grandeur(faux.poids, 0, 'kN')} au lieu de {grandeur(linr.poids, 2, 'kN')} : un million de fois trop, car 1 m³ = 1 000 000 cm³. Convertis tout en mètres d'abord.
 </Piege>
 
+<CubeMetre />
+
 <Piege erreur="chercher la formule avant d'avoir compris la question.">
 Lis l'énoncé jusqu'au bout et écris ce qu'on cherche. La moitié des copies fausses répondent à une autre question.
 </Piege>
@@ -206,6 +217,8 @@ Un linteau de porte de {grandeur(faux.poids, 0, 'kN')}, c'est le poids de plusie
 <Page etape="terrain" titre="Sur le terrain">
 
 **Au bureau d'études**, une note de calcul suit exactement ces cinq étapes : hypothèses générales (normes, matériaux, charges), schémas, calculs, vérifications. Elle est relue par un vérificateur, puis par le bureau de contrôle. Une note sans hypothèses écrites est renvoyée.
+
+<DiagrammeFlux alt="Chaîne de contrôle d'un calcul : l'auteur suit les cinq étapes, un vérificateur relit, le bureau de contrôle valide, le chantier contrôle encore l'ordre de grandeur." etapes={[{ titre: 'Auteur', texte: 'cinq étapes, hypothèses écrites', teinte: 'encre' }, { titre: 'Vérificateur', texte: 'relit et refait les points clés', teinte: 'acier' }, { titre: 'Bureau de contrôle', texte: 'valide ou renvoie la note', teinte: 'terre' }, { titre: 'Chantier', texte: 'ordre de grandeur avant d’agir', teinte: 'validation' }]} />
 
 <Encadre type="terrain" titre="Le contrôle sur le chantier">
 Sur le chantier, le linteau de l'exemple est souvent préfabriqué au sol puis posé à la main. Avant de demander à une équipe de le soulever, le conducteur de travaux estime son poids : c'est la vérification par ordre de grandeur, appliquée à la sécurité des ouvriers.
@@ -245,6 +258,8 @@ Arrondis chaque donnée à un chiffre significatif, refais le calcul de tête, c
 
 Un poteau en béton armé mesure {nombre(pot.b * 100, 0)} × {nombre(pot.h * 100, 0)} cm de section et {nombre(pot.L, 2)} m de haut. Calcule son poids en suivant les 5 étapes.
 
+<PoteauCote L={pot.L} b={pot.b} h={pot.h} />
+
 <Indice>Convertis la section en mètres, puis $P = L \times b \times h \times \gamma$.</Indice>
 
 <Corrige>
@@ -260,6 +275,8 @@ Une poutre en béton armé de {nombre(pou.L, 2)} m porte sur deux murs. Sa secti
 
 <Corrige>
 $g$ = {nombre(pou.b, 2)} × {nombre(pou.h, 2)} × {pou.gamma} = **{grandeur(pour.chargeLineique, 2, 'kN/m')}** ; $P$ = {grandeur(pour.poids, 2, 'kN')} ; chaque mur reçoit **{grandeur(pouApp, 2, 'kN')}**. Contrôle des unités : m × m × kN/m³ = kN/m ✓.
+
+<PoutreDeuxMurs L={pou.L} g={pour.chargeLineique} R={pouApp} />
 </Corrige>
 </Exercice>
 

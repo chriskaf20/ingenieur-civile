@@ -28,7 +28,8 @@ formules:
 ---
 
 import { POIDS_VOLUMIQUE_BA, POIDS_VOLUMIQUE_BETON, INTERVALLES_REVISION } from '@/lib/calc/methode'
-import { PageCornell, FicheRectoVerso } from '@/components/schemas/Methode'
+import { BoiteFiches, CartesQuestions, FicheAvantApres, PageCarnetChantier, PageCornell, FicheRectoVerso } from '@/components/schemas/Methode'
+import { DiagrammeComparaison, DiagrammeFlux } from '@/components/drawing/Diagrammes'
 
 export const gBA = POIDS_VOLUMIQUE_BA
 export const gB = POIDS_VOLUMIQUE_BETON
@@ -39,6 +40,8 @@ export const intervalles = INTERVALLES_REVISION.map((n) => `J+${n}`).join(', ')
 Regarde un chef de chantier expérimenté. Dans sa poche, un petit carnet usé. Il n'y a pas recopié les normes ni les plans : il y a noté **l'essentiel** dont il a besoin vite. Un dosage, une cote d'implantation, le téléphone du ferrailleur, une erreur à ne plus refaire.
 
 Tes notes de cours doivent ressembler à ce carnet, pas à une photocopie du tableau. Et tes fiches de révision doivent être encore plus courtes : une question, une réponse, rien de plus.
+
+<DiagrammeComparaison alt="Recopier le tableau ou noter l'essentiel : recopier occupe la main sans faire comprendre ; noter l'essentiel garde les définitions, les formules avec unités, les schémas et les questions." gauche={{ titre: 'Recopier le tableau', items: ['tout écrire, mot pour mot', 'pas le temps de comprendre', 'aucune question à se poser ensuite'] }} droite={{ titre: 'Noter l’essentiel', items: ['définitions avec ses mots', 'formules avec symboles et unités', 'schémas, exemples chiffrés', 'un « ? » quand on ne comprend pas'] }} />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment passer d'un cours d'une heure à quelques fiches qui te serviront jusqu'à l'examen, et même après ?
@@ -72,6 +75,8 @@ Dans les 24 heures, sans attendre :
 2. En bas de page, écris un **résumé** de trois lignes : l'idée principale du cours.
 3. Résous les **?** : relis le polycopié, demande à un camarade ou au professeur.
 
+<DiagrammeFlux alt="Le chemin des notes : pendant le cours, la zone des notes ; le soir même, les questions et le résumé ; puis des fiches question-réponse ; puis les révisions espacées." etapes={[{ titre: 'Pendant le cours', texte: 'zone ② : notes, formules, schémas, « ? »', teinte: 'encre' }, { titre: 'Le soir même', texte: 'zone ① : questions ; zone ③ : résumé', teinte: 'acier' }, { titre: 'Les fiches', texte: 'une question au recto, la réponse au verso', teinte: 'terre' }, { titre: 'Les révisions', texte: 'rappel actif aux jours J+1, J+3…', teinte: 'validation' }]} />
+
 <Regle type="art" source="méthode Cornell (W. Pauk)">
 Cette organisation n'est pas une obligation. C'est une méthode éprouvée : la colonne de questions transforme directement tes notes en support de **rappel actif** (voir N0.1.1).
 </Regle>
@@ -96,6 +101,8 @@ Range les fiches par **date de révision** et non par matière. Une boîte à ci
 
 - Réponse retrouvée sans hésiter : la fiche avance d'un compartiment.
 - Réponse fausse ou incomplète : la fiche revient au premier.
+
+<BoiteFiches />
 
 <Encadre type="retenir">
 Une fiche qu'on ne peut pas lire en 30 secondes est trop longue. Coupe-la en deux fiches.
@@ -143,6 +150,8 @@ Trois notions : la formule du poids propre ; les deux valeurs de γ ; la différ
 - Fiche 2 : « Quel γ pour le béton armé ? Pour le béton non armé ? Source ? »
 - Fiche 3 : « Poids volumique ou masse volumique : quelle différence, quelles unités ? »
 
+<CartesQuestions questions={['Comment calculer le poids propre d’un élément ?', 'Quel γ pour le béton armé ? Pour le non armé ? Source ?', 'Poids volumique ou masse volumique : quelle différence, quelles unités ?']} />
+
 </Etape>
 
 <Etape n={3} titre="Rédiger les versos">
@@ -176,6 +185,8 @@ Une fiche sans question n'est qu'un résumé. Pour réviser activement, il faut 
 « P = γ × V » sans unités est inutilisable : avec V en cm³ et γ en kN/m³, le résultat est faux d'un facteur un million.
 </Piege>
 
+<FicheAvantApres gamma={gBA} />
+
 <Piege erreur="oublier le domaine de validité.">
 Une formule vraie pour une poutre sur deux appuis ne l'est pas pour une console. Note toujours quand la formule s'applique.
 </Piege>
@@ -197,6 +208,8 @@ Le travail de transformation du cours en questions fait déjà apprendre. Les fi
 <Encadre type="terrain" titre="Le réflexe de la date">
 Chaque page de notes porte la date, le lieu et le sujet. Au bureau d'études comme sur le chantier, une note non datée ne prouve rien.
 </Encadre>
+
+<PageCarnetChantier />
 
 **Au bureau d'études**, les ingénieurs gardent souvent un classeur ou un dossier numérique de « fiches métier » : poids volumiques, enrobages, sections d'acier, formules usuelles, chacune avec sa **source**. C'est exactement la fiche de cette leçon, en version professionnelle.
 
@@ -250,7 +263,7 @@ Il manque : le nom et l'unité de chaque symbole (P en kN, γ en kN/m³, V en m�
 
 <Exercice n={3} niveau="difficile" titre="Une heure de cours, combien de fiches ?">
 
-Ton cours de statique d'une heure a présenté : la définition d'une force, son unité, les trois types d'appuis, et l'équilibre d'un solide (deux équations dans le plan). Propose la liste de tes fiches (questions seulement) et explique ton découpage.
+Ton cours de statique d'une heure a présenté : la définition d'une force, son unité, les trois types d'appuis, et l'équilibre d'un solide (trois équations dans le plan). Propose la liste de tes fiches (questions seulement) et explique ton découpage.
 
 <Indice>Une fiche = une notion qu'on pourrait te demander seule.</Indice>
 
@@ -263,6 +276,8 @@ Un découpage possible en six fiches :
 4. « Articulation : quelles réactions ? Schéma ? »
 5. « Encastrement : quelles réactions ? Schéma ? »
 6. « Quelles équations traduisent l'équilibre d'un solide dans le plan ? »
+
+<CartesQuestions questions={['Qu’est-ce qu’une force ? Ce qui la définit ?', 'Unité d’une force ? Multiples usuels ?', 'Appui simple : réactions ? Schéma ?', 'Articulation : réactions ? Schéma ?', 'Encastrement : réactions ? Schéma ?', 'Équilibre d’un solide dans le plan : quelles équations ?']} />
 
 Les trois appuis sont séparés : on les confond souvent, il faut pouvoir les réviser un par un.
 

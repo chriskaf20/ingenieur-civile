@@ -29,7 +29,8 @@ formules: []
 
 import { fckDeClasse } from '@/lib/calc/ba/materiaux'
 import { POIDS_VOLUMIQUE_BA as gBA, POIDS_VOLUMIQUE_BETON as gB } from '@/lib/calc/methode'
-import { PyramideSources } from '@/components/schemas/Methode'
+import { CausesResistanceBeton, ClassementSources, FamilleEurocodes, FiltreCinqQuestions, NePasMelanger, NoteReferences, PyramideSources, SectionPoteauCitee, TroisNatures } from '@/components/schemas/Methode'
+import { DiagrammeComparaison } from '@/components/drawing/Diagrammes'
 
 export const fck25 = fckDeClasse('C25/30')
 
@@ -38,6 +39,8 @@ export const fck25 = fckDeClasse('C25/30')
 Au marché, quelqu'un affirme : « Le prix du ciment va doubler la semaine prochaine. » Tu ne vides pas ton compte pour acheter cent sacs. Tu te demandes : **qui** le dit ? **comment** le sait-il ? Est-ce que **quelqu'un d'autre** le confirme ?
 
 Sur Internet, c'est pareil, en plus rapide. Une vidéo affirme qu'« un poteau de 15 × 15 suffit pour un R+2 ». Un schéma de ferraillage circule sur les réseaux sociaux, partagé mille fois. Être partagé ne veut pas dire être juste.
+
+<DiagrammeComparaison alt="Rumeur ou information vérifiée : une rumeur n'a ni auteur, ni date, ni source ; une information vérifiée remonte à une norme ou à un essai et se confirme ailleurs." gauche={{ titre: 'Une rumeur', items: ['auteur inconnu, pas de date', 'aucune source citée', 'très partagée', 'impossible à recalculer'] }} droite={{ titre: 'Une information vérifiée', items: ['auteur et date connus', 'norme, article ou essai cité', 'unités et ordre de grandeur cohérents', 'confirmée par une autre source'] }} />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment savoir si une information technique est fiable, avant de l'utiliser dans un calcul ou sur un chantier ?
@@ -49,11 +52,13 @@ En génie civil, une information fausse peut faire tomber un bâtiment. Les règ
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : les sources et leur fiabilité">
+<Page etape="cours" titre="Le cours (1/3) : les sources et leur fiabilité">
 
 ### Les normes : la référence de base
 
 Une **norme** fixe des règles de calcul, des valeurs et des méthodes d'essai reconnues. En Europe, les **Eurocodes** (EN 1990 à EN 1999) fixent le calcul des structures. Chaque pays les complète par une **annexe nationale**. Dans cette académie, le béton suit l'EN 1992-1-1:2004 avec l'annexe nationale française.
+
+<FamilleEurocodes />
 
 <Regle type="norme" source="EN 1992-1-1:2004 + NF EN 1992-1-1/NA">
 Une norme a une **date** et une **version**. On vérifie toujours qu'on utilise celle qui est **en vigueur** pour le projet, et celle que demande le marché ou le cahier des charges.
@@ -71,7 +76,7 @@ Les règles françaises **BAEL 91** (béton armé) ont été remplacées en Fran
 
 </Page>
 
-<Page etape="cours" titre="Le cours (2/2) : vérifier en cinq questions">
+<Page etape="cours" titre="Le cours (2/3) : vérifier en cinq questions">
 
 Devant une information technique, pose-toi cinq questions :
 
@@ -81,9 +86,15 @@ Devant une information technique, pose-toi cinq questions :
 4. **Cohérent ?** Les unités sont-elles justes ? L'ordre de grandeur est-il plausible ? Peux-tu **refaire le calcul** ?
 5. **Confirmé ?** Une **deuxième source indépendante** dit-elle la même chose ?
 
+<FiltreCinqQuestions />
+
 <Encadre type="retenir">
 Une valeur de calcul doit pouvoir être **retrouvée** : norme, article, tableau. Si tu ne peux pas écrire la référence à côté, tu ne peux pas l'utiliser.
 </Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : trois natures de règles">
 
 ### Trois natures de règles, toujours distinguées
 
@@ -98,6 +109,8 @@ Une valeur de calcul doit pouvoir être **retrouvée** : norme, article, tableau
 <Regle type="simplification">
 **Simplification pédagogique** : raccourci utile pour apprendre, à ne pas confondre avec une règle de calcul.
 </Regle>
+
+<TroisNatures />
 
 </Page>
 
@@ -127,8 +140,14 @@ Auteur anonyme, aucune qualification indiquée.
 Pas de date, pas de norme citée. Or la classe C25/30 est définie par la norme **EN 206** : elle désigne une résistance caractéristique en compression **mesurée par essais**, $f_{ck}$ = {fck25} MPa sur cylindre à 28 jours.
 </Etape>
 
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : cohérence et conclusion">
+
 <Etape n={3} titre="Cohérent ?">
 Non : la résistance ne dépend pas que du dosage en ciment. Elle dépend aussi de la quantité d'eau (rapport eau/ciment), des granulats, du type de ciment, du malaxage, de la mise en place et de la cure. Deux bétons à 350 kg/m³ peuvent avoir des résistances très différentes.
+
+<CausesResistanceBeton />
 
 <Note>Pourquoi est-ce important ? Un béton trop mouillé sur chantier, pour qu'il « coule mieux », perd beaucoup de résistance malgré un bon dosage.</Note>
 </Etape>
@@ -157,6 +176,8 @@ Vérifie la version et l'annexe nationale demandées par le projet. Une valeur p
 Chaque référence a ses coefficients et ses méthodes. On choisit une référence pour tout le calcul et on la nomme ; on peut ensuite comparer, à part.
 </Piege>
 
+<NePasMelanger />
+
 <Piege erreur="recopier une valeur sans son unité ni sa référence.">
 « γ = {gBA} » ne dit ni l'unité ni d'où vient la valeur. Écris « γ = {gBA} kN/m³ (EN 1991-1-1, tab. A.1) ».
 </Piege>
@@ -176,6 +197,8 @@ Les normes sont payantes et parfois difficiles à obtenir. Les bibliothèques un
 </Encadre>
 
 **Au bureau d'études**, chaque note de calcul commence par une liste de **références** : normes avec leur date, annexes nationales, documents du projet. Un contrôleur technique qui lit « valeur trouvée sur Internet » refuse la note.
+
+<NoteReferences />
 
 **Dans cette académie**, les valeurs incertaines portent le badge <AVerifier /> et sont listées dans un registre. Ce n'est pas un aveu de faiblesse : c'est exactement ce que fait un ingénieur honnête.
 
@@ -212,6 +235,8 @@ Classe de la plus fiable à la moins fiable : une vidéo de chantier ; l'EN 1992
 <Indice>Utilise la pyramide des sources.</Indice>
 
 <Corrige>
+<ClassementSources sources={['EN 1992-1-1 + annexe nationale', 'fiche technique du fabricant', 'polycopié de l’université', 'vidéo de chantier']} />
+
 EN 1992-1-1 + annexe nationale → fiche technique du fabricant → polycopié → vidéo. Le polycopié et la fiche technique sont proches : tout dépend de leur date et de ce qu'on y cherche.
 </Corrige>
 </Exercice>
@@ -236,6 +261,8 @@ Un article de blog sans auteur, daté de 2008, donne les « coefficients de séc
 <Exercice n={3} niveau="difficile" titre="La règle du chantier">
 
 Un chef de chantier affirme : « Pour un R+1, des poteaux de 20 × 20 avec 4 barres de 10, ça passe toujours. » Comment réagir, en restant respectueux de son expérience ?
+
+<SectionPoteauCitee b={0.2} n={4} phi={10} />
 
 <Indice>De quoi dépend l'effort dans un poteau ? Pense aux portées, aux charges, au sol, aux matériaux réellement mis en œuvre.</Indice>
 

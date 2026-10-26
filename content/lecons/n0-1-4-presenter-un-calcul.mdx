@@ -30,7 +30,9 @@ formules:
 
 import { EXEMPLE_DALLE, volumeDalle } from '@/lib/calc/methode'
 import { arrondi, arrondiSup, grandeur, nombre } from '@/lib/format'
-import { AnatomieCalcul } from '@/components/schemas/Methode'
+import { AnatomieCalcul, BonCommandeBeton, ChequeEtCalcul, DroitesArrondis } from '@/components/schemas/Methode'
+import { PlanDalle } from '@/components/calculs/methode'
+import { DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
 
 export const d = EXEMPLE_DALLE
 export const r = volumeDalle(d)
@@ -47,6 +49,8 @@ export const ex3r = volumeDalle(ex3)
 Quand tu remplis un chèque ou un bon de commande, tu écris le montant en chiffres **et** en lettres, avec la monnaie. Pourquoi ? Pour que personne ne puisse se tromper en le lisant.
 
 Un calcul d'ingénieur se lit comme un chèque. Il sera relu par ton professeur, par un collègue, par un contrôleur, par l'entreprise qui va construire. Chacun doit pouvoir **suivre chaque ligne** et **refaire le calcul** sans te téléphoner.
+
+<ChequeEtCalcul ligne={`V = L × l × e = ${grandeur(d.L, 2, 'm')} × ${grandeur(d.l, 2, 'm')} × ${grandeur(r.epaisseur, 2, 'm')} = ${grandeur(r.volumeAffiche, 2, 'm³')}`} />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment écrire un calcul pour qu'un autre le comprenne et le vérifie en une minute ?
@@ -71,6 +75,8 @@ Un résultat juste mais illisible compte peu. À l'examen, le correcteur ne peut
 - Une **espace** entre le nombre et l'unité : 25 kN/m³, 15 cm.
 - Les symboles d'unités ne prennent **pas de « s »** et pas de point : 3 m, 5 kg.
 - On écrit l'unité **sur chaque ligne** d'application numérique, pas seulement à la fin.
+
+<DiagrammeComparaison alt="Écriture des nombres et des unités : à éviter, 2.35 m, 12.500 kg, 25kN/m³, 3 ms ; à faire, 2,35 m, 12 500 kg, 25 kN/m³, 3 m." gauche={{ titre: 'À éviter', items: ['2.35 m (point décimal)', '12.500 kg ou 12,500 kg', '25kN/m³ (collé)', '3 ms, 5 kgs (« s » ajouté)'] }} droite={{ titre: 'À écrire', items: ['2,35 m', '12 500 kg (espace des milliers)', '25 kN/m³ (espace avant l’unité)', '3 m, 5 kg'] }} />
 
 <Regle type="norme" source="Système international d'unités (BIPM)">
 Le SI fixe les noms et symboles des unités (m, kg, s, N, Pa) et l'espace entre le nombre et l'unité. En France, la virgule décimale est l'usage officiel.
@@ -104,6 +110,8 @@ En pratique au bureau d'études : longueurs au cm (2 décimales en m), surfaces 
 
 - Pour **rendre compte** d'un résultat : arrondi **au plus proche** (2,295 → {nombre(arrondi(2.295, 2), 2)}).
 - Pour **commander** un matériau : arrondi **par excès**, au conditionnement disponible. Si le fournisseur livre par 0,5 m³, on commande {grandeur(arrondiSup(2.295, 0.5), 1, 'm³')}, pas {grandeur(arrondi(2.295, 1), 1, 'm³')}.
+
+<DroitesArrondis cas={[{ valeur: 2.295, pas: 0.01, mode: 'proche', titre: 'rendre compte' }, { valeur: 2.295, pas: 0.5, mode: 'exces', titre: 'commander', unite: 'm³' }]} />
 
 <Regle type="simplification">
 Plus tard, en béton armé, tu verras d'autres arrondis « du côté de la sécurité » : une section d'acier se prend toujours au-dessus du minimum calculé.
@@ -173,6 +181,8 @@ $V = S \times e$ avec $S = L \times l$, toutes les longueurs en mètres.
 Avec la surface arrondie à {grandeur(arrondi(r.surface, 0), 0, 'm²')} trop tôt, on trouve {grandeur(r.volumeArrondiTrop, 2, 'm³')} au lieu de {grandeur(r.volumeAffiche, 2, 'm³')}. Il manquerait {grandeur(r.volume - r.volumeArrondiTrop, 3, 'm³')} de béton.
 </Piege>
 
+<DiagrammeBarres alt={`Volume calculé sans arrondi ${grandeur(r.volumeAffiche, 2, 'm³')}, avec la surface arrondie trop tôt ${grandeur(r.volumeArrondiTrop, 2, 'm³')}`} barres={[{ libelle: 'sans arrondi intermédiaire', valeur: r.volume, texte: grandeur(r.volumeAffiche, 2, 'm³'), teinte: 'validation' }, { libelle: 'surface arrondie trop tôt', valeur: r.volumeArrondiTrop, texte: grandeur(r.volumeArrondiTrop, 2, 'm³'), teinte: 'correction' }]} />
+
 <Piege erreur="oublier l'unité, ou ne la mettre qu'à la fin.">
 Une ligne sans unité ne peut pas être contrôlée. Le correcteur ne sait pas si « 15 » sont des cm ou des m.
 </Piege>
@@ -194,6 +204,8 @@ En français : 2,35 m et 12 500 kg. Sur un plan relu en Europe ou en Afrique fra
 <Page etape="terrain" titre="Sur le terrain">
 
 **Le bon de commande de béton** reprend exactement ces règles : volume en m³, classe de béton, lieu et heure de livraison. Une unité oubliée ou une virgule mal placée, et la centrale livre une mauvaise quantité.
+
+<BonCommandeBeton volume={r.volumeAffiche} commande={r.volumeCommande} ouvrage={`dalle de ${grandeur(d.L, 2, 'm')} × ${grandeur(d.l, 2, 'm')}, ${d.e} cm`} />
 
 <Encadre type="terrain" titre="Le métré et le devis">
 Dans un devis quantitatif (le DQE, vu en L3.7), chaque ligne indique une quantité, son unité et un prix unitaire. Le prix total est faux si l'unité est fausse : 15 m² facturés comme 15 m³ changent tout.
@@ -236,12 +248,16 @@ Arrondis {nombre(a1[0], 3)} au centième ; {nombre(a2[0], 2)} au dixième ; puis
 
 <Corrige>
 {nombre(a1[0], 3)} → **{nombre(arrondi(a1[0], a1[1]), 2)}** ; {nombre(a2[0], 2)} → **{nombre(arrondi(a2[0], a2[1]), 1)}** ; {nombre(a3[0], 2)} m³ → **{grandeur(arrondiSup(a3[0], a3[1]), 1, 'm³')}**.
+
+<DroitesArrondis cas={[{ valeur: a1[0], pas: 0.01, mode: 'proche', titre: 'au centième' }, { valeur: a2[0], pas: 0.1, mode: 'proche', titre: 'au dixième' }, { valeur: a3[0], pas: a3[1], mode: 'exces', titre: 'commande', unite: 'm³' }]} />
 </Corrige>
 </Exercice>
 
 <Exercice n={2} niveau="moyen" titre="Réécrire une copie">
 
 Une copie dit : « 5 × 4 × 12 = 240, donc 240 m³ ». Réécris le calcul proprement pour une dalle de {nombre(ex2.L, 2)} m × {nombre(ex2.l, 2)} m et {ex2.e} cm d'épaisseur, puis donne la commande par {grandeur(ex2.pas, 1, 'm³')}.
+
+<PlanDalle d={ex2} prefixe="dal-ex2" />
 
 <Indice>Convertis l'épaisseur en mètres et écris les trois temps de la ligne de calcul.</Indice>
 
@@ -260,6 +276,9 @@ Dalle de {nombre(ex3.L, 2)} m × {nombre(ex3.l, 2)} m, {ex3.e} cm. Un étudiant 
 
 - Sans arrondi intermédiaire : $S$ = {grandeur(ex3r.surface, 4, 'm²')}, $V$ = {grandeur(ex3r.volume, 4, 'm³')} ≈ **{grandeur(ex3r.volumeAffiche, 2, 'm³')}** ; commande **{grandeur(ex3r.volumeCommande, 1, 'm³')}**.
 - Avec $S$ arrondie à {grandeur(arrondi(ex3r.surface, 0), 0, 'm²')} : $V$ = {grandeur(ex3r.volumeArrondiTrop, 2, 'm³')} ; commande {grandeur(arrondiSup(ex3r.volumeArrondiTrop, ex3.pas), 1, 'm³')}.
+
+<DiagrammeBarres alt={`Dalle de l'exercice 3 : ${grandeur(ex3r.volumeAffiche, 2, 'm³')} sans arrondi intermédiaire, ${grandeur(ex3r.volumeArrondiTrop, 2, 'm³')} avec la surface arrondie`} barres={[{ libelle: 'sans arrondi intermédiaire', valeur: ex3r.volume, texte: grandeur(ex3r.volumeAffiche, 2, 'm³'), teinte: 'validation' }, { libelle: 'surface arrondie à l’unité', valeur: ex3r.volumeArrondiTrop, texte: grandeur(ex3r.volumeArrondiTrop, 2, 'm³'), teinte: 'correction' }]} />
+
 - Ici la commande ne change pas, mais le volume rendu est faux. Sur un ouvrage de cent dalles, ces écarts s'additionnent : on n'arrondit qu'à la fin.
 
 </Corrige>

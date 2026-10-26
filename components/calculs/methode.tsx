@@ -38,7 +38,7 @@ const liste = (xs: readonly number[]) => (xs.length ? xs.map((x) => nombre(x, 0)
 type ResRevisions = PlanRevisions & { jourCours: number; jourExamen: number };
 
 /** Frise du semestre : cours, révisions (avant / après l'examen) et examen. */
-function FriseRevisions({ r }: { r: ResRevisions }) {
+export function FriseRevisions({ r }: { r: ResRevisions }) {
   const fin = Math.max(r.jourExamen, ...r.jours) + 3;
   const x0 = 30;
   const lg = 560;
@@ -63,7 +63,7 @@ function FriseRevisions({ r }: { r: ResRevisions }) {
         </g>
       ))}
       <circle cx={sx(r.jourCours)} cy={y} r={7} fill="var(--color-encre)" />
-      <Etiquette x={sx(r.jourCours)} y={y - 14} ancre="middle" taille={11.5} gras classe="encre">
+      <Etiquette x={sx(r.jourCours)} y={y - 30} ancre="middle" taille={11.5} gras classe="encre">
         cours (j {r.jourCours})
       </Etiquette>
       {r.jours.map((j, i) => {
@@ -89,7 +89,7 @@ function FriseRevisions({ r }: { r: ResRevisions }) {
         examen (j {r.jourExamen})
       </Etiquette>
       <Etiquette x={x0} y={118} taille={10.5} classe="etiquette">
-        ● révision avant l’examen   ○ révision après l’examen   S = semaine
+        ● révision avant l’examen · ○ révision après l’examen · S = semaine
       </Etiquette>
     </Figure>
   );
@@ -189,7 +189,7 @@ const revisions: DefinitionCalcul<ResRevisions> = {
 type ResPoids = ResultatPoids & { d: DonneesPoids };
 const versPoids = (e: Entrees): DonneesPoids => ({ L: num(e, 'L'), b: num(e, 'b'), h: num(e, 'h'), gamma: num(e, 'gamma') });
 
-function SchemaLinteau({ d }: { d: DonneesPoids }) {
+export function SchemaLinteau({ d }: { d: DonneesPoids }) {
   const k = Math.min(150, 380 / d.L, 110 / d.h);
   const L = d.L * k;
   const h = d.h * k;
@@ -281,16 +281,16 @@ const poids: DefinitionCalcul<ResPoids> = {
 type ResDalle = ResultatDalle & { d: DonneesDalle };
 const versDalle = (e: Entrees): DonneesDalle => ({ L: num(e, 'L'), l: num(e, 'l'), e: num(e, 'e'), pas: num(e, 'pas') });
 
-function PlanDalle({ d }: { d: DonneesDalle }) {
-  const k = Math.min(400 / d.L, 170 / d.l);
+export function PlanDalle({ d, prefixe = 'dal', hauteurMax = 170 }: { d: DonneesDalle; prefixe?: string; hauteurMax?: number }) {
+  const k = Math.min(400 / d.L, hauteurMax / d.l);
   const L = d.L * k;
   const l = d.l * k;
   const x0 = 70;
   const y0 = 30;
   return (
     <Figure alt={`Plan d'une dalle de ${n2(d.L)} m sur ${n2(d.l)} m, épaisseur ${nombre(d.e, 0)} cm`} largeur={620} hauteur={y0 + l + 50}>
-      <Hachures prefixe="dal" types={['ba']} />
-      <rect x={x0} y={y0} width={L} height={l} fill={hachure('dal', 'ba')} className="t-fort" />
+      <Hachures prefixe={prefixe} types={['ba']} />
+      <rect x={x0} y={y0} width={L} height={l} fill={hachure(prefixe, 'ba')} className="t-fort" />
       <Cote x1={x0} y1={y0 + l} x2={x0 + L} y2={y0 + l} decalage={-22} texte={`L = ${n2(d.L)} m`} />
       <Cote x1={x0} y1={y0} x2={x0} y2={y0 + l} decalage={-22} texte={`l = ${n2(d.l)} m`} />
       <Etiquette x={x0 + L + 16} y={y0 + l / 2} taille={12} gras classe="encre">

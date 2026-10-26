@@ -27,7 +27,8 @@ formules:
 
 import { budgetSemaine, EXEMPLE_BUDGET, HEURES_SEMAINE, repartirHeures } from '@/lib/calc/methode'
 import { grandeur, nombre } from '@/lib/format'
-import { FriseSemestre } from '@/components/schemas/Methode'
+import { FriseSemestre, RetroplanningChantier, Semaine168 } from '@/components/schemas/Methode'
+import { DiagrammeBarres, DiagrammeCycle, DiagrammeFlux } from '@/components/drawing/Diagrammes'
 
 export const b0 = budgetSemaine(EXEMPLE_BUDGET)
 export const ex1 = { ...EXEMPLE_BUDGET, transport: 3 }
@@ -52,6 +53,8 @@ export const phases = [
 <Page etape="intuition" titre="L'intuition : le planning d'un chantier">
 
 Sur un chantier, personne ne coule la dalle avant d'avoir monté les poteaux. Le conducteur de travaux part de la date de livraison et remonte le temps : finitions, toiture, dalle, poteaux, fondations. C'est un **rétroplanning**. Il vérifie aussi que ses équipes ne travaillent pas 25 heures par jour.
+
+<RetroplanningChantier />
 
 Ton année d'étude est un chantier. La date de livraison, c'est l'examen. Les tâches, ce sont les cours, les exercices et les révisions. Les équipes, c'est toi, avec un nombre d'heures **limité** : une semaine n'a que {HEURES_SEMAINE} heures.
 
@@ -79,6 +82,8 @@ Une semaine compte $7 \times 24$ = {HEURES_SEMAINE} h. On y retire :
 
 Ce qui reste est le temps **libre** : $T_{libre} = 168 - (C + kC + 7s + 7v + n\,t)$.
 
+<Semaine168 parts={b0.parts} total={HEURES_SEMAINE} />
+
 <Regle type="hypothese">
 Le rapport $k$ entre travail personnel et heures de cours n'a pas de valeur officielle. Une heure de travail par heure de cours est un **point de départ** courant en début de licence, à ajuster selon tes résultats et la difficulté des matières.
 </Regle>
@@ -101,6 +106,8 @@ Le sommeil n'est pas du temps perdu : c'est pendant le sommeil que la mémoire c
 2. Pour chaque matière, place les **révisions finales** dans les deux ou trois semaines qui précèdent.
 3. Avant, pendant tout le semestre : cours, fiches le soir même, **révisions espacées** (N0.1.1).
 4. Garde une **marge** : une semaine chargée imprévue arrive toujours.
+
+<DiagrammeFlux alt="Rétroplanning en quatre temps : noter les dates d'examen, placer les révisions finales juste avant, faire courir les révisions espacées depuis la première semaine, garder une semaine de marge." etapes={[{ titre: 'Dates d’examen', texte: 'et de rendu de projets', teinte: 'correction' }, { titre: 'Révisions finales', texte: 'les 2 ou 3 semaines d’avant', teinte: 'terre' }, { titre: 'Révisions espacées', texte: 'dès la semaine 1', teinte: 'validation' }, { titre: 'Une marge', texte: 'une semaine sans tâche nouvelle', teinte: 'acier' }]} />
 
 ### Répartir le travail personnel
 
@@ -184,6 +191,8 @@ $T_{libre} = 168 - (C + kC + 7s + 7v + n\,t)$, tout en heures par semaine.
 Sur le papier tout tient ; dans la réalité, il manque des heures chaque jour, et le retard s'accumule. Fais d'abord le budget-temps.
 </Piege>
 
+<DiagrammeBarres alt={`Temps libre calculé sans le sommeil, les repas ni le transport : ${grandeur(HEURES_SEMAINE - EXEMPLE_BUDGET.cours - b0.perso, 0, 'h')} ; temps libre réel : ${grandeur(b0.libre, 0, 'h')}`} barres={[{ libelle: 'libre « sur le papier »', valeur: HEURES_SEMAINE - EXEMPLE_BUDGET.cours - b0.perso, texte: grandeur(HEURES_SEMAINE - EXEMPLE_BUDGET.cours - b0.perso, 0, 'h'), teinte: 'correction' }, { libelle: 'libre réel (budget complet)', valeur: b0.libre, texte: grandeur(b0.libre, 0, 'h'), teinte: 'validation' }]} titre="heures libres par semaine (exemple résolu)" />
+
 <Piege erreur="commencer à réviser trois semaines avant l'examen.">
 Trois semaines suffisent à consolider, pas à tout apprendre. Les révisions espacées commencent dès la première semaine.
 </Piege>
@@ -213,6 +222,8 @@ Coupures de courant, grèves, examens reportés : le calendrier réel bouge. Gar
 **Dans le métier**, l'ingénieur passe une grande partie de son temps à planifier : planning de chantier, rétroplanning d'un dossier d'appel d'offres, charge de travail d'une équipe. Il utilise les mêmes outils que toi : une liste de tâches, des durées réalistes, une date butoir et une marge. Tu les retrouveras en M2.6 (management de projet).
 
 **Une habitude professionnelle** : le point hebdomadaire. Chaque semaine, on compare l'avancement réel au planning et on corrige. Fais-le pour toi, le dimanche soir, en dix minutes.
+
+<DiagrammeCycle alt="Point hebdomadaire : planifier, faire, comparer le réel au plan, corriger, puis replanifier." centre="le point du dimanche soir" etapes={[{ titre: 'Planifier', texte: 'la semaine qui vient', teinte: 'encre' }, { titre: 'Faire', texte: 'créneaux fixes, fiches, exercices' }, { titre: 'Comparer', texte: 'le réel au plan', teinte: 'terre' }, { titre: 'Corriger', texte: 'décaler, ajouter une marge', teinte: 'validation' }]} />
 
 </Page>
 
@@ -257,6 +268,8 @@ Après le partiel, l'étudiant décide de passer à $k$ = {nombre(ex2.ratio, 1)}
 
 <Corrige>
 Travail personnel : {nombre(ex2.ratio, 1)} × {ex2.cours} = **{grandeur(ex2r.perso, 0, 'h')}** ; libre : **{grandeur(ex2r.libre, 0, 'h')}** par semaine, environ {grandeur(ex2r.libre / 7, 1, 'h')} par jour. C'est tenable quelques semaines, mais il faut garder au moins une demi-journée de vraie coupure.
+
+<DiagrammeBarres alt={`Heures libres par semaine : exemple ${grandeur(b0.libre, 0, 'h')}, avec plus de transport ${grandeur(ex1r.libre, 0, 'h')}, avec plus de travail personnel ${grandeur(ex2r.libre, 0, 'h')}`} titre="heures libres par semaine" barres={[{ libelle: 'exemple résolu', valeur: b0.libre, texte: grandeur(b0.libre, 0, 'h'), teinte: 'validation' }, { libelle: 'exercice 1 : plus de transport', valeur: ex1r.libre, texte: grandeur(ex1r.libre, 0, 'h'), teinte: 'terre' }, { libelle: `exercice 2 : k = ${nombre(ex2.ratio, 1)} h/h`, valeur: ex2r.libre, texte: grandeur(ex2r.libre, 0, 'h'), teinte: 'brique' }]} />
 </Corrige>
 </Exercice>
 
@@ -271,6 +284,8 @@ Les {grandeur(b0.perso, 0, 'h')} de travail personnel de l'exemple sont à répa
 {matieres.map((m, i) => `${m.nom} : ${grandeur(rep[i], 1, 'h')}`).join(' ; ')}. Total : {grandeur(rep.reduce((a, x) => a + x, 0), 0, 'h')} ✓.
 
 Ensuite, on ajuste : si la mécanique pose problème, on lui donne une heure prise sur une autre matière.
+
+<DiagrammeBarres alt={`Répartition du travail personnel : ${matieres.map((m, i) => `${m.nom} ${grandeur(rep[i], 1, 'h')}`).join(', ')}`} titre="heures de travail personnel par semaine, en proportion des crédits" barres={matieres.map((m, i) => ({ libelle: `${m.nom} (${m.credits} cr.)`, valeur: rep[i], texte: grandeur(rep[i], 1, 'h'), teinte: 'encre' }))} />
 
 </Corrige>
 </Exercice>

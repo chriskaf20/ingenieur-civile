@@ -17,6 +17,8 @@ formules: []
 import { budgetSemaine, EXEMPLE_BUDGET, HEURES_SEMAINE, joursRevision, poidsElement, POIDS_VOLUMIQUE_BA, volumeDalle } from '@/lib/calc/methode'
 import { grandeur, nombre } from '@/lib/format'
 import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { PoteauCote } from '@/components/schemas/Methode'
+import { PlanDalle } from '@/components/calculs/methode'
 
 export const jr = joursRevision(12)
 export const pot = { L: 2.8, b: 0.2, h: 0.3, gamma: POIDS_VOLUMIQUE_BA }
@@ -65,6 +67,8 @@ Comprendre, représenter, supposer, calculer, douter (N0.1.3).
 
 <Page etape="examen" titre="Les questions (2/3)">
 
+<PoteauCote L={pot.L} b={pot.b} h={pot.h} />
+
 <QCM n={5} question={<>Un poteau en béton armé de {nombre(pot.b * 100, 0)} × {nombre(pot.h * 100, 0)} cm et {nombre(pot.L, 2)} m de haut (γ = {POIDS_VOLUMIQUE_BA} kN/m³) pèse :</>} choix={[grandeur(potr.poids / 10, 2, 'kN'), grandeur(potr.poids, 2, 'kN'), grandeur(potr.poids * 100, 0, 'kN'), grandeur(potr.volume, 3, 'kN')]} bonne={1} colonnes={2}>
 V = {nombre(pot.L, 2)} × {nombre(pot.b, 2)} × {nombre(pot.h, 2)} = {grandeur(potr.volume, 3, 'm³')} ; P = {nombre(potr.volume, 3)} × {POIDS_VOLUMIQUE_BA} = {grandeur(potr.poids, 2, 'kN')}.
 </QCM>
@@ -72,6 +76,8 @@ V = {nombre(pot.L, 2)} × {nombre(pot.b, 2)} × {nombre(pot.h, 2)} = {grandeur(p
 <QCM n={6} question="Le produit b × h × γ (b et h en m, γ en kN/m³) s'exprime en :" choix={['kN', 'kN/m', 'kN/m²', 'kN/m³']} bonne={1} colonnes={4}>
 m × m × kN/m³ = kN/m : une charge linéique.
 </QCM>
+
+<PlanDalle d={dal} hauteurMax={110} />
 
 <QCM n={7} question={<>Une dalle de {nombre(dal.L, 2)} × {nombre(dal.l, 2)} m et {dal.e} cm d'épaisseur ; la centrale livre par {grandeur(dal.pas, 1, 'm³')}. On commande :</>} choix={[grandeur(dalr.volumeAffiche, 2, 'm³'), grandeur(dalr.volumeCommande - dal.pas, 1, 'm³'), grandeur(dalr.volumeCommande, 1, 'm³'), grandeur(dalr.surface * dal.e, 1, 'm³')]} bonne={2} colonnes={2}>
 V = {grandeur(dalr.surface, 2, 'm²')} × {grandeur(dalr.epaisseur, 2, 'm')} = {grandeur(dalr.volume, 4, 'm³')} → par excès : {grandeur(dalr.volumeCommande, 1, 'm³')} (N0.1.4).

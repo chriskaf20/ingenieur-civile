@@ -15,7 +15,8 @@ formules: []
 
 import { budgetSemaine, EXEMPLE_BUDGET, HEURES_SEMAINE, INTERVALLES_REVISION, joursRevision, repartirHeures, revisionsParJour } from '@/lib/calc/methode'
 import { grandeur, nombre } from '@/lib/format'
-import { FriseSemestre } from '@/components/schemas/Methode'
+import { ChargeRevisions, FriseSemestre } from '@/components/schemas/Methode'
+import { DiagrammeBarres } from '@/components/drawing/Diagrammes'
 
 export const b = budgetSemaine(EXEMPLE_BUDGET)
 export const matieres = [
@@ -116,7 +117,7 @@ Remplace les valeurs par **tes** données. Le schéma et les calculs se mettent 
 
 </FicheCalcul>
 
-<Cahier titre="Étapes 2 et 3 : exemple corrigé" etape="projet">
+<Cahier titre="Étape 2 : la répartition, exemple corrigé" etape="projet">
 
 **Données de l'exemple.** Le budget de N0.1.5 donne {grandeur(b.perso, 0, 'h')} de travail personnel par semaine. Quatre matières : {matieres.map((m) => `${m.nom} (${m.credits} crédits)`).join(', ')}. Chaque matière a un cours par semaine, les jours {matieres.map((m) => m.jour).join(', ')}.
 
@@ -131,13 +132,21 @@ Remplace les valeurs par **tes** données. Le schéma et les calculs se mettent 
 
 <Note>Pourquoi des demi-heures ? Parce qu'en dessous, un créneau ne laisse pas le temps de se concentrer.</Note>
 <Note couleur="vert">Total : {grandeur(rep.reduce((a, x) => a + x, 0), 0, 'h')} ✓ (rien de perdu, rien d'ajouté).</Note>
+
+<DiagrammeBarres alt={`Répartition : ${matieres.map((m, i) => `${m.nom} ${grandeur(rep[i], 1, 'h')}`).join(', ')}`} barres={matieres.map((m, i) => ({ libelle: `${m.nom} (${m.credits} cr.)`, valeur: rep[i], texte: grandeur(rep[i], 1, 'h'), teinte: 'encre' }))} />
 </Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 : le calendrier de révisions, exemple corrigé" etape="projet">
 
 <Etape n={3} titre="Le calendrier de révisions">
 
 <ul>{matieres.map((m) => <li key={m.nom}>{m.nom} (cours jour {m.jour}) : révisions jours {joursRevision(m.jour).join(', ')}</li>)}</ul>
 
 Jours où deux révisions se superposent : **{doubles.length ? doubles.map(([j, n]) => `jour ${j} (${n})`).join(', ') : 'aucun'}**.
+
+<ChargeRevisions cours={matieres.map((m) => m.jour)} noms={matieres.map((m) => m.nom)} />
 
 <Note>Pourquoi les repérer ? Deux révisions courtes le même jour restent tenables ; au-delà de trois, avance l'une d'elles d'un jour.</Note>
 </Etape>
