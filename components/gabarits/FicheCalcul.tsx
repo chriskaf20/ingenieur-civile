@@ -26,9 +26,11 @@ function useCalcul(): Ctx {
  * Elle fournit l'état du calcul à une ou plusieurs pages <Cahier> : les données saisies
  * sur la première page pilotent les applications numériques des pages suivantes.
  */
-export function FicheCalcul({ calcul, children }: { calcul: NomCalcul; children: React.ReactNode }) {
+/** `depart` remplace une partie des valeurs de l'énoncé, pour réemployer une fiche dans une autre leçon. */
+export function FicheCalcul({ calcul, depart, children }: { calcul: NomCalcul; depart?: Entrees; children: React.ReactNode }) {
   const def = REGISTRE[calcul] as DefinitionCalcul<unknown>;
-  const [e, setE] = useState<Entrees>(def.defaut);
+  const initial = useMemo<Entrees>(() => ({ ...def.defaut, ...depart }), [def, depart]);
+  const [e, setE] = useState<Entrees>(initial);
   const r = useMemo(() => def.calculer(e), [def, e]);
   const valeur = useMemo<Ctx>(
     () => ({
@@ -36,9 +38,9 @@ export function FicheCalcul({ calcul, children }: { calcul: NomCalcul; children:
       e,
       r,
       majEntree: (cle, v) => setE((prec) => ({ ...prec, [cle]: v })),
-      reinitialiser: () => setE(def.defaut),
+      reinitialiser: () => setE(initial),
     }),
-    [def, e, r],
+    [def, e, r, initial],
   );
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>;
 }

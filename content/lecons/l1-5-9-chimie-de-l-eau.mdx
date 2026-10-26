@@ -1,0 +1,315 @@
+---
+id: L1.5.9
+titre: "Chimie de l'eau : gâchage et consommation"
+objectifs:
+  - Citer les substances d'une eau qui nuisent au béton et celles qui nuisent à la santé
+  - Lire une analyse d'eau et la comparer aux limites de l'EN 1008 et aux repères de l'OMS
+  - Juger si une eau convient au gâchage, à la boisson, ou à aucun des deux
+  - Distinguer l'eau de gâchage d'une eau agressive au contact du béton durci
+relecture: false
+normes:
+  - "EN 1008 : eau de gâchage pour bétons (chlorures, sulfates, pH ; l'eau potable convient sans essai)"
+  - "Directives de qualité pour l'eau de boisson de l'OMS (valeurs guides et repères d'acceptabilité)"
+  - "EN 206, tableau 2 : classes d'exposition XA"
+glossaire:
+  - terme: Eau de gâchage
+    definition: Eau introduite dans le béton ou le mortier lors du malaxage, y compris l'eau des granulats et des adjuvants.
+  - terme: Valeur guide
+    definition: Concentration fixée par l'OMS au-dessous de laquelle une substance ne présente pas de risque notable pour la santé.
+  - terme: Repère d'acceptabilité
+    definition: Seuil au-delà duquel l'eau a un goût, une odeur ou un aspect que les consommateurs rejettent, sans risque sanitaire direct.
+  - terme: Turbidité
+    definition: Trouble de l'eau dû aux particules en suspension, mesuré en NTU ; une eau trouble se désinfecte mal.
+  - terme: Eau agressive
+    definition: Eau qui, au contact prolongé du béton durci, l'attaque (sulfates, acidité, CO₂ agressif) ; classes XA de l'EN 206.
+symboles:
+  - { symbole: 'mg/L', signification: 'milligrammes de substance par litre d’eau', unite: 'mg/L' }
+  - { symbole: 'NTU', signification: 'unité de turbidité néphélométrique', unite: '—' }
+formules:
+  - { nom: 'Conversion', tex: '1\ \mathrm{g/L} = 1\,000\ \mathrm{mg/L}', domaine: 'Concentrations massiques' }
+---
+
+import { analyseEau, EAU_DE_MER, EXEMPLE_EAU, LIMITES_GACHAGE, REPERES_OMS } from '@/lib/calc/chimie'
+import { grandeur, nombre } from '@/lib/format'
+import { AnalyseEauSchema } from '@/components/schemas/Chimie'
+
+export const e0 = analyseEau(EXEMPLE_EAU, 'arme')
+export const mer = analyseEau(EAU_DE_MER, 'arme')
+export const merNonArme = analyseEau(EAU_DE_MER, 'nonArme')
+export const puits = { pH: 7.2, chlorures: 300, sulfates: 150, nitrates: 80, turbidite: 2 }
+export const ep = analyseEau(puits, 'arme')
+export const L = LIMITES_GACHAGE
+export const R = REPERES_OMS
+export const refus = (a) => a.filter((c) => !c.ok).map((c) => c.nom).join(', ')
+
+<Page etape="intuition" titre="L'intuition : une eau claire n'est pas une eau pure">
+
+Sur un chantier loin du réseau, on gâche le béton avec l'eau qu'on a : un forage, une rivière, un puits. Elle paraît claire : est-elle bonne ? Et les ouvriers peuvent-ils la boire ?
+
+Une eau limpide peut contenir beaucoup de sels dissous, invisibles : des chlorures qui feront rouiller les armatures, des sulfates qui feront gonfler le béton, des nitrates nocifs pour les nourrissons. À l'inverse, une eau un peu trouble peut convenir au béton sans être buvable.
+
+Le béton et la santé ne craignent pas les mêmes substances. Une règle simple guide le chantier : **une eau potable convient au béton sans essai**. Pour toute autre eau, on analyse.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment lire une analyse d'eau pour décider si elle convient au gâchage, à la boisson, ou à aucun des deux ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Une eau, deux usages" sousTitre="Ce que craint le béton, ce que craint la santé" etape="cours">
+
+<Panneau n={1} titre="Le béton craint" icone="ferraillage" couleur="acier">
+Les **chlorures** (rouille des armatures), les **sulfates** (ettringite expansive), les **sucres** (prise retardée), les eaux trop acides, les huiles et les matières organiques.
+</Panneau>
+
+<Panneau n={2} titre="La santé craint" icone="attention" couleur="correction">
+Les microbes avant tout (analyse bactériologique), puis certaines substances : nitrates, arsenic, plomb, fluorures en excès. D'autres ne gênent que le goût : chlorures, sulfates.
+</Panneau>
+
+<Panneau n={3} titre="Les sources" icone="terrain" couleur="terre">
+Réseau public, forage, puits, rivière, eau de pluie, eau de lavage recyclée. Chaque source a ses risques : sel près de la mer, sulfates et acidité près des mines, pollution près des villes.
+</Panneau>
+
+<Panneau n={4} titre="Les analyses" icone="verification" couleur="encre">
+Sur place : pH, turbidité, conductivité (sels dissous). Au laboratoire : ions dissous (chlorures, sulfates, nitrates), métaux, matières organiques, bactéries.
+</Panneau>
+
+<Panneau n={5} titre="Les règles" icone="regle" couleur="validation">
+Gâchage : EN 1008 ; l'eau potable y convient sans essai. Boisson : directives de l'OMS et réglementation nationale. Béton au contact d'une eau agressive : classes XA de l'EN 206.
+</Panneau>
+
+<Panneau n={6} titre="À retenir" icone="retenir" couleur="brique">
+Potable ⇒ bonne pour le béton. Bonne pour le béton ⇏ potable. Une analyse vaut pour un prélèvement : on la renouvelle si la source change.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : les limites et leur sens">
+
+### L'eau de gâchage (EN 1008)
+
+L'EN 1008 admet l'eau potable sans essai. Pour les autres eaux, elle fixe notamment <AVerifier note="A_VERIFIER.md n° 35 : limites de l'EN 1008" /> :
+
+- les **chlorures** selon l'usage : {nombre(L.chlorures.precontraint, 0)} mg/L pour le béton précontraint, {nombre(L.chlorures.arme, 0)} mg/L pour le béton armé, {nombre(L.chlorures.nonArme, 0)} mg/L pour le béton non armé ;
+- les **sulfates** : {nombre(L.sulfates, 0)} mg/L au plus ;
+- le **pH** : au moins {nombre(L.pHmin, 0)}.
+
+Elle demande aussi de contrôler les sucres, les huiles, les matières humiques, et de comparer le temps de prise et la résistance avec ceux d'une eau de référence.
+
+### L'eau de boisson (OMS)
+
+Les directives de l'OMS distinguent les **valeurs guides**, fondées sur la santé, et les **repères d'acceptabilité** <AVerifier note="A_VERIFIER.md n° 36 : repères de l'OMS et réglementation congolaise" /> :
+
+- nitrates : {nombre(R.nitrates, 0)} mg/L, valeur guide (risque pour les nourrissons) ;
+- chlorures : goût au-delà de {nombre(R.chlorures, 0)} mg/L environ ; sulfates : goût et effet laxatif au-delà de {nombre(R.sulfates, 0)} mg/L ;
+- turbidité : au plus {nombre(R.turbidite, 0)} NTU, et idéalement moins de 1 pour bien désinfecter ;
+- pH : repère d'exploitation de {nombre(R.pHmin, 1)} à {nombre(R.pHmax, 1)}.
+
+La première exigence reste microbiologique : une eau chimiquement correcte peut transmettre le choléra.
+
+### Gâcher n'est pas baigner
+
+L'eau de gâchage est consommée par le ciment et ne se renouvelle pas. Une eau souterraine au contact d'une fondation, elle, se renouvelle sans cesse et apporte des sulfates pendant des années : les seuils de **l'eau agressive** (classes XA) sont donc bien plus bas que ceux de l'eau de gâchage.
+
+<Regle type="simplification">
+L'analyse de la fiche ne retient que cinq paramètres. Une décision réelle s'appuie sur l'analyse complète demandée par l'EN 1008 ou par la réglementation de l'eau de boisson, faite par un laboratoire.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'eau de mer au banc d'essai">
+
+<AnalyseEauSchema gachage={mer.gachage} potable={mer.potable} titreGachage="eau de mer pour un béton armé (EN 1008)" />
+
+L'eau de mer contient environ {grandeur(EAU_DE_MER.chlorures, 0, 'mg/L')} de chlorures, soit {nombre(EAU_DE_MER.chlorures / L.chlorures.arme, 0)} fois la limite du béton armé. Elle est refusée pour le béton armé et précontraint ; même pour un béton non armé, elle reste {merNonArme.gachageOk ? 'admise' : 'hors limite'} selon ces critères. Pour la boisson, elle est évidemment exclue.
+
+Chaque ligne compare une mesure à sa limite ; une seule ligne rouge suffit pour refuser l'eau pour cet usage.
+
+</Page>
+
+<FicheCalcul calcul="analyseEau">
+
+<Cahier titre="Exemple résolu : l'eau d'une rivière près d'une mine">
+
+**Énoncé.** Pour un chantier près de Kolwezi, on envisage de pomper l'eau d'une rivière en aval d'un site minier. Le laboratoire donne : pH {nombre(EXEMPLE_EAU.pH, 1)}, chlorures {grandeur(EXEMPLE_EAU.chlorures, 0, 'mg/L')}, sulfates {grandeur(EXEMPLE_EAU.sulfates, 0, 'mg/L')}, nitrates {grandeur(EXEMPLE_EAU.nitrates, 0, 'mg/L')}, turbidité {grandeur(EXEMPLE_EAU.turbidite, 0, 'NTU')} (données de l'énoncé). Peut-on gâcher du béton armé avec cette eau ? Les ouvriers peuvent-ils la boire ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi l'usage du béton ? La limite en chlorures dépend de la présence d'acier, et de sa nature (armé ou précontraint).</Note>
+</Etape>
+
+<Etape n={2} titre="Le gâchage">
+<AN k="gachage" />
+</Etape>
+
+<Etape n={3} titre="La boisson">
+<AN k="potable" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le verdict">
+
+<Etape n={4} titre="La conclusion">
+<AN k="conclusion" />
+<Resultat k="gachage" libelle="Gâchage" />
+<Note couleur="vert">Contrôle : chaque critère est comparé à sa limite. Monte les chlorures à 1 500 mg/L : l'eau devient impropre au béton armé.</Note>
+</Etape>
+
+<Etape n={5} titre="Et pour le béton enterré ?">
+<AN k="xa" />
+<Note>Pourquoi cette différence ? Gâcher consomme une quantité d'eau fixée une fois pour toutes ; baigner une fondation l'expose à des sulfates sans cesse renouvelés.</Note>
+</Etape>
+
+<Etape n={6} titre="Le tableau">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="juger une eau à sa couleur.">
+Les sels dissous sont invisibles : une eau limpide peut contenir des grammes de chlorures par litre. Seule l'analyse renseigne.
+</Piege>
+
+<Piege erreur="gâcher du béton armé à l'eau de mer.">
+Ses chlorures dépassent de loin la limite : les armatures rouilleraient de l'intérieur. Près de la mer, on fait venir de l'eau douce.
+</Piege>
+
+<Piege erreur="croire que faire bouillir rend toute eau potable.">
+L'ébullition tue les microbes, mais elle ne retire ni les nitrates ni les métaux : elle les concentre même un peu en évaporant l'eau.
+</Piege>
+
+<Piege erreur="confondre mg/L et g/L.">
+{nombre(L.chlorures.arme, 0)} mg/L, c'est {nombre(L.chlorures.arme / 1000, 0)} g/L. Une erreur d'unité multiplie ou divise par mille.
+</Piege>
+
+<Piege erreur="se fier à une analyse ancienne.">
+Une rivière change avec les saisons et avec les rejets en amont. On analyse au démarrage du chantier, puis à chaque changement de source ou de saison.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le chantier isolé.** Sans réseau, on prélève l'eau du forage ou de la rivière dans des flacons propres, on la fait analyser, et l'on garde les résultats au dossier du chantier. Un essai simple de conductivité, sur place, permet ensuite de vérifier qu'elle ne change pas.
+
+<Encadre type="terrain" titre="L'eau des ouvriers">
+Sur les chantiers de RDC, l'eau de boisson des ouvriers est une question de santé publique : risque de choléra et de diarrhées. On fournit une eau traitée (réseau, chloration, filtration) et l'on ne laisse jamais boire l'eau destinée au béton si elle n'est pas potable.
+</Encadre>
+
+**L'eau de lavage.** L'eau de lavage des toupies et des malaxeurs peut être recyclée dans le béton sous conditions (EN 1008) : elle contient des fines de ciment et parfois des adjuvants, qui modifient la prise. On l'emploie avec mesure et contrôle.
+
+**Près des mines.** Les eaux d'exhaure et les rivières en aval des sites miniers peuvent être acides et sulfatées. Elles posent deux questions distinctes : peut-on gâcher avec, et le béton qui y baignera résistera-t-il ? La seconde est souvent la plus exigeante.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : chimie de l'eau">
+
+### Gâchage (EN 1008)
+
+eau potable : sans essai · chlorures : {nombre(L.chlorures.precontraint, 0)} (précontraint), {nombre(L.chlorures.arme, 0)} (armé), {nombre(L.chlorures.nonArme, 0)} mg/L (non armé) · sulfates ≤ {nombre(L.sulfates, 0)} mg/L · pH ≥ {nombre(L.pHmin, 0)}
+
+### Boisson (OMS)
+
+microbes d'abord · nitrates ≤ {nombre(R.nitrates, 0)} mg/L (santé) · chlorures ≈ {nombre(R.chlorures, 0)}, sulfates ≈ {nombre(R.sulfates, 0)} mg/L (goût) · turbidité ≤ {nombre(R.turbidite, 0)} NTU
+
+### Eau agressive
+
+au contact du béton durci : classes XA (EN 206), seuils plus bas que pour le gâchage
+
+### Méthode
+
+prélever proprement · analyser · comparer critère par critère · un seul critère hors limite suffit à refuser
+
+### Pièges
+
+couleur trompeuse · eau de mer · ébullition · mg/L et g/L · analyse périmée
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="L'eau de mer">
+
+Avec {grandeur(EAU_DE_MER.chlorures, 0, 'mg/L')} de chlorures, l'eau de mer convient-elle au gâchage d'un béton armé ?
+
+<Indice>Compare à la limite des chlorures pour le béton armé.</Indice>
+
+<Corrige>
+Non : {nombre(EAU_DE_MER.chlorures, 0)} mg/L > {nombre(L.chlorures.arme, 0)} mg/L. Critères refusés : **{refus(mer.gachage)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="L'eau d'un puits">
+
+Un puits donne : pH {nombre(puits.pH, 1)}, chlorures {nombre(puits.chlorures, 0)} mg/L, sulfates {nombre(puits.sulfates, 0)} mg/L, nitrates {nombre(puits.nitrates, 0)} mg/L, turbidité {nombre(puits.turbidite, 0)} NTU. Convient-elle au béton armé ? À la boisson ?
+
+<Indice>Deux listes de critères, l'une après l'autre.</Indice>
+
+<Corrige>
+Gâchage : **{ep.gachageOk ? 'oui' : 'non'}**, tous les critères vérifiés sont respectés. Boisson : **{ep.potableOk ? 'oui' : 'non'}** ; critères refusés : {refus(ep.potable)}. Les nitrates, sans doute venus de latrines ou d'engrais proches, rendent cette eau dangereuse pour les nourrissons.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Bonne pour gâcher, agressive pour baigner">
+
+L'eau de la rivière de l'exemple convient au gâchage du béton armé, mais elle relève de la classe {e0.xa.classe} si elle baigne une fondation. Ces deux conclusions sont-elles contradictoires ?
+
+<Indice>Compare les quantités de sulfates apportées dans les deux cas, et pendant combien de temps.</Indice>
+
+<Corrige>
+Non. Au gâchage, un mètre cube de béton reçoit une fois pour toutes son eau, de l'ordre de 180 L (hypothèse de l'énoncé), soit {nombre((180 * EXEMPLE_EAU.sulfates) / 1000, 0)} g de sulfates, que le ciment fixe. Au contact permanent, l'eau se renouvelle pendant toute la vie de l'ouvrage et apporte des sulfates sans limite : il faut alors un béton conçu pour la classe **{e0.xa.classe}** (compacité, ciment adapté), précisé en L2.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.5.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Selon l'EN 1008, une eau potable :" choix={['doit toujours être analysée', 'convient au béton sans essai', 'est interdite pour le béton', 'convient seulement au béton non armé']} bonne={1} colonnes={2}>
+Elle peut être utilisée sans essai préalable.
+</QCM>
+
+<QCM n={2} question="Pour un béton armé, la limite de chlorures de l'eau de gâchage est de :" choix={[grandeur(L.chlorures.arme, 0, 'mg/L'), grandeur(L.chlorures.precontraint, 0, 'mg/L'), grandeur(L.chlorures.nonArme, 0, 'mg/L'), grandeur(R.chlorures, 0, 'mg/L')]} bonne={0} colonnes={4}>
+Plus stricte pour le précontraint, plus large pour le béton non armé.
+</QCM>
+
+<QCM n={3} question="Les nitrates sont surveillés dans l'eau de boisson parce que :" choix={['ils donnent mauvais goût', 'ils sont dangereux pour les nourrissons', 'ils font rouiller les tuyaux', 'ils colorent l’eau']} bonne={1} colonnes={2}>
+C'est une valeur guide fondée sur la santé.
+</QCM>
+
+<QCM n={4} question="Faire bouillir une eau :" choix={['retire les nitrates', 'tue les microbes mais ne retire pas les sels ni les métaux', 'la rend toujours potable', 'retire les chlorures']} bonne={1} colonnes={2}>
+Les substances dissoutes restent dans l'eau.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Dans l'exemple de Kolwezi, l'eau est :" choix={['bonne pour le béton armé et potable', 'bonne pour le béton armé mais pas potable', 'mauvaise pour le béton mais potable', 'mauvaise pour les deux']} bonne={1} colonnes={2}>
+pH, sulfates et turbidité la rendent impropre à la boisson sans traitement.
+</QCM>
+
+<QCM n={6} question="Une turbidité élevée gêne surtout :" choix={['la prise du béton', 'la désinfection de l’eau de boisson', 'la couleur du béton', 'rien']} bonne={1} colonnes={2}>
+Les particules protègent les microbes du chlore.
+</QCM>
+
+<QCM n={7} question="Pourquoi les seuils de l'eau agressive (XA) sont-ils plus bas que ceux de l'eau de gâchage ?" choix={['parce que les normes se contredisent', 'parce que l’eau au contact se renouvelle pendant toute la vie de l’ouvrage', 'parce que le béton durci est plus fragile', 'parce que l’eau de gâchage s’évapore']} bonne={1} colonnes={2}>
+L'apport de sulfates n'a pas de fin.
+</QCM>
+
+<QCM n={8} question="1 000 mg/L correspondent à :" choix={['1 g/L', '10 g/L', '0,1 g/L', '1 kg/L']} bonne={0} colonnes={4}>
+1 g = 1 000 mg.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

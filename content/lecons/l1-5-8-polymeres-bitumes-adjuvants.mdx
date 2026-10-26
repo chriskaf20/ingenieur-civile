@@ -1,0 +1,297 @@
+---
+id: L1.5.8
+titre: Polymères, bitumes et adjuvants
+objectifs:
+  - Décrire la structure d'un polymère et distinguer thermoplastiques, thermodurcissables et élastomères
+  - Décrire la nature colloïdale d'un bitume et son vieillissement
+  - Expliquer l'action des principaux adjuvants du béton
+  - Calculer la quantité d'adjuvant et l'eau qu'il apporte dans une gâchée
+relecture: false
+normes:
+  - "EN 934-2 : adjuvants pour béton (plastifiants, superplastifiants, retardateurs, accélérateurs, entraîneurs d'air)"
+  - "EN 12591 : bitumes routiers, classes de pénétration (exemples : 35/50, 50/70)"
+glossaire:
+  - terme: Polymère
+    definition: Grande molécule formée par la répétition d'un motif, le monomère ; ses chaînes sont covalentes, ses liaisons entre chaînes faibles.
+  - terme: Thermoplastique
+    definition: Polymère à chaînes libres qui se ramollit à la chaleur et durcit en refroidissant (PVC, polyéthylène).
+  - terme: Thermodurcissable
+    definition: Polymère dont les chaînes sont reliées en réseau ; une fois durci, il ne fond plus (résines époxy).
+  - terme: Bitume
+    definition: Résidu lourd du raffinage du pétrole ; mélange colloïdal d'asphaltènes dispersés dans une huile, les maltènes.
+  - terme: Adjuvant
+    definition: Produit ajouté en faible quantité au béton pour modifier une propriété (maniabilité, prise, air occlus).
+  - terme: Extrait sec
+    definition: Part de matière active d'un adjuvant liquide ; le reste est de l'eau.
+symboles:
+  - { symbole: 'C', signification: 'dosage en ciment', unite: 'kg/m³' }
+  - { symbole: 'd', signification: 'dosage en adjuvant', unite: '% de la masse de ciment' }
+  - { symbole: 'es', signification: 'extrait sec', unite: '%' }
+  - { symbole: 'ρ', signification: 'masse volumique de l’adjuvant', unite: 'kg/L' }
+formules:
+  - { nom: 'Masse d’adjuvant', tex: 'm_a = C \cdot d', domaine: 'Par m³ de béton' }
+  - { nom: 'Volume à doser', tex: 'V_a = \frac{m_a}{\rho}', domaine: 'Adjuvant liquide' }
+  - { nom: 'Eau apportée', tex: 'm_{eau} = m_a\,(1 - es)', domaine: 'À retrancher de l’eau ajoutée' }
+---
+
+import { dosageAdjuvant, EXEMPLE_ADJUVANT } from '@/lib/calc/chimie'
+import { grandeur, nombre } from '@/lib/format'
+import { StructuresOrganiques } from '@/components/schemas/Chimie'
+
+export const a0 = dosageAdjuvant(EXEMPLE_ADJUVANT)
+export const d0 = EXEMPLE_ADJUVANT
+export const a2 = dosageAdjuvant({ ...EXEMPLE_ADJUVANT, C: 400, dosage: 0.8 })
+export const eauPrevue = 180
+export const reduction = 12
+export const eauReduite = eauPrevue * (1 - reduction / 100)
+export const eauMalaxeur = eauReduite - a0.eau
+
+<Page etape="intuition" titre="L'intuition : des chaînes, du goudron et des additifs">
+
+Un sac plastique s'étire, un tuyau en PVC se plie à chaud, une colle époxy devient dure comme de la pierre. Le bitume d'une route colle aux semelles par une journée chaude et devient cassant au fil des années. Tous ces matériaux sont **organiques** : faits de longues molécules de carbone et d'hydrogène.
+
+Leur comportement s'explique par leur architecture : des chaînes libres qui glissent quand on chauffe, des chaînes nouées en réseau qui ne fondent plus, des amas de molécules lourdes dispersés dans une huile.
+
+Le béton lui-même en contient : quelques litres d'**adjuvant** par mètre cube suffisent à le rendre fluide sans ajouter d'eau, ou à retarder sa prise par forte chaleur. Bien dosés, ils améliorent le béton ; mal dosés, ils le ruinent.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment la structure des polymères et des bitumes explique-t-elle leur comportement, et comment agit un adjuvant ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les matériaux organiques du chantier" sousTitre="Chaînes, réseaux, colloïdes, adjuvants" etape="cours">
+
+<Panneau n={1} titre="Les polymères" icone="materiaux" couleur="encre">
+De longues chaînes covalentes de carbone, répétant un même motif (le monomère). Entre les chaînes, des liaisons faibles : c'est elles qui cèdent à la chaleur.
+</Panneau>
+
+<Panneau n={2} titre="Thermoplastiques" icone="regle" couleur="acier">
+PVC des tuyaux, polyéthylène (PEHD) des conduites et des géomembranes, polypropylène des fibres : chaînes libres, ramollies à chaud, soudables, recyclables.
+</Panneau>
+
+<Panneau n={3} titre="Réseaux et élastomères" icone="calcul" couleur="brique">
+Résines époxy et polyesters : chaînes nouées en réseau, dures, collantes, qui ne fondent plus. Élastomères (néoprène des appareils d'appui) : réseau lâche, très déformable.
+</Panneau>
+
+<Panneau n={4} titre="Les bitumes" icone="terrain" couleur="terre">
+Résidu lourd du pétrole : des amas d'asphaltènes dans une huile. Visqueux à chaud, ferme à froid. Liant des enrobés et des enduits routiers, des chapes d'étanchéité.
+</Panneau>
+
+<Panneau n={5} titre="Les adjuvants" icone="quantites" couleur="validation">
+Une faible fraction de la masse de ciment : plastifiants et superplastifiants (moins d'eau), retardateurs, accélérateurs, entraîneurs d'air, hydrofuges (EN 934-2).
+</Panneau>
+
+<Panneau n={6} titre="Précautions" icone="attention" couleur="correction">
+Soleil et chaleur dégradent les plastiques ; l'air oxyde le bitume ; un adjuvant se dose à la balance, selon la fiche technique, et se teste avec le ciment du chantier.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : structure et action">
+
+### Polymériser
+
+On relie des milliers de petites molécules en chaînes : l'éthylène donne le polyéthylène, le chlorure de vinyle le PVC. Au-dessous d'une certaine température, les chaînes sont figées et le plastique est rigide ; au-dessus, elles glissent et il devient souple. Les **thermodurcissables** sont obtenus en mélangeant deux composants (résine et durcisseur) qui tissent un réseau en durcissant : ils collent et résistent, mais ne se refondent pas.
+
+### Le bitume
+
+Le bitume est un **colloïde** : des amas d'asphaltènes, sombres et durs, dispersés dans les maltènes, huileux. Sa consistance dépend fortement de la température : on le classe par sa **pénétration** à 25 °C (EN 12591). Avec le temps, l'oxygène de l'air et le soleil oxydent les maltènes : le bitume durcit et se fissure. Pour l'employer à froid, on l'émulsionne dans de l'eau (émulsion) ou on le fluidifie par un solvant.
+
+### Les adjuvants du béton
+
+- **Superplastifiants** : leurs molécules en peigne s'accrochent aux grains de ciment et les écartent ; la pâte devient fluide avec moins d'eau. Le béton est plus compact, plus résistant, plus durable <AVerifier note="A_VERIFIER.md n° 39 : réductions d'eau exigées par l'EN 934-2" />.
+- **Retardateurs** : ils ralentissent l'hydratation ; utiles par forte chaleur ou pour un long transport. Le sucre est un retardateur puissant : une eau sucrée peut empêcher la prise.
+- **Accélérateurs** : ils hâtent la prise et le durcissement ; ceux à base de chlorure sont proscrits dans le béton armé (L1.5.6).
+- **Entraîneurs d'air**, **hydrofuges** : microbulles d'air, réduction de l'absorption d'eau.
+
+<Regle type="art">
+Un adjuvant liquide contient surtout de l'eau : on la compte dans l'eau de gâchage. Et l'on vérifie, par un essai de convenance, que l'adjuvant fonctionne avec le ciment et les granulats du chantier.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : quatre architectures">
+
+<StructuresOrganiques />
+
+**1.** Les chaînes d'un thermoplastique sont indépendantes : la chaleur les fait glisser. **2.** Dans un thermodurcissable, des ponts relient les chaînes : le réseau ne fond plus. **3.** Le bitume est une huile chargée d'amas d'asphaltènes : quand l'huile s'oxyde, il durcit. **4.** Le superplastifiant recouvre les grains de ciment de « peignes » qui les tiennent à distance : moins d'eau pour la même fluidité.
+
+<Encadre type="attention">
+Le bitume ne se choisit pas au hasard : un bitume trop mou en climat chaud flue sous les roues et ressue en surface ; le choix d'un grade adapté au climat relève du dimensionnement routier <AVerifier note="A_VERIFIER.md n° 40 : choix du grade de bitume en climat chaud" />.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="dosageAdjuvant">
+
+<Cahier titre="Exemple résolu : un superplastifiant à la centrale">
+
+**Énoncé.** Une centrale à béton de Kinshasa fabrique un béton dosé à {grandeur(d0.C, 0, 'kg/m³')} de ciment. Elle ajoute un superplastifiant dosé à {grandeur(d0.dosage, 1, '%')} de la masse de ciment ; sa fiche technique indique un extrait sec de {grandeur(d0.extraitSec, 0, '%')} et une masse volumique de {grandeur(d0.densite, 2, 'kg/L')} (données de l'énoncé). Calcule la masse et le volume d'adjuvant par m³, et l'eau qu'il apporte.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un dosage en % du ciment ? L'adjuvant agit sur les grains de ciment : sa dose suit la quantité de ciment, pas le volume de béton.</Note>
+</Etape>
+
+<Etape n={2} titre="La masse et le volume">
+<AN k="masse" />
+<AN k="volume" />
+</Etape>
+
+<Etape n={3} titre="L'eau de l'adjuvant">
+<AN k="eau" />
+<Resultat k="volume" libelle="Volume d'adjuvant" />
+<Note couleur="vert">Contrôle : l'adjuvant reste une petite fraction du ciment. Double le dosage : l'eau apportée double aussi, et le risque de ségrégation apparaît.</Note>
+</Etape>
+
+<Etape n={4} titre="Le bilan">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="surdoser un superplastifiant « pour être sûr ».">
+Au-delà du dosage de la fiche technique, le béton peut ségréger (le gravier tombe, la laitance remonte) et sa prise être retardée. On dose à la balance et l'on respecte la plage indiquée.
+</Piege>
+
+<Piege erreur="ajouter l'adjuvant et toute l'eau prévue.">
+Le superplastifiant sert à **réduire** l'eau : si l'on garde toute l'eau, on obtient un béton trop fluide et moins résistant. On ajuste l'eau sur un essai.
+</Piege>
+
+<Piege erreur="oublier l'eau contenue dans l'adjuvant.">
+Dans l'exemple, l'adjuvant apporte {grandeur(a0.eau, 2, 'L')} d'eau par m³ : on la retranche de l'eau ajoutée au malaxeur.
+</Piege>
+
+<Piege erreur="gâcher avec une eau sucrée ou souillée.">
+Le sucre retarde fortement la prise ; une eau de lavage de fûts ou de sacs peut en contenir. On contrôle l'eau de gâchage (L1.5.9).
+</Piege>
+
+<Piege erreur="laisser un tuyau en PVC au soleil.">
+Les ultraviolets cassent les chaînes : le tuyau jaunit et devient cassant. On l'enterre, on le gaine ou on choisit un matériau stabilisé.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les routes revêtues.** Les enrobés et les enduits superficiels des routes de RDC utilisent des bitumes et des émulsions. La chaleur et le soleil les vieillissent vite : le bitume s'oxyde, se fissure, et l'eau entre dans la chaussée. Un entretien précoce (enduit de scellement) coûte bien moins qu'une reconstruction.
+
+<Encadre type="terrain" titre="Bétonner loin de la centrale">
+Pour un chantier éloigné, le béton voyage longtemps sous la chaleur. Un retardateur prolonge sa maniabilité ; un superplastifiant ajouté à l'arrivée lui rend sa fluidité sans eau. Ajouter de l'eau dans la toupie, au contraire, affaiblit le béton : c'est à interdire.
+</Encadre>
+
+**Les polymères du génie civil.** Tuyaux en PVC et en PEHD pour l'eau et l'assainissement, géomembranes en PEHD pour les bassins et les sites miniers, résines époxy pour les scellements et les réparations, néoprène fretté pour les appareils d'appui de ponts, mastics pour les joints : chacun a sa plage de température et sa durée de vie, indiquées par le fabricant.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : polymères, bitumes, adjuvants">
+
+### Polymères
+
+chaînes covalentes, liaisons faibles entre chaînes · thermoplastiques (PVC, PEHD) · thermodurcissables (époxy) · élastomères (néoprène)
+
+### Bitumes
+
+colloïde asphaltènes + maltènes · classe de pénétration (EN 12591) · vieillit par oxydation · émulsion pour l'emploi à froid
+
+### Adjuvants (EN 934-2)
+
+superplastifiant : moins d'eau · retardateur : prise plus tardive (sucre !) · accélérateur sans chlorure en béton armé
+
+### Calcul
+
+$m_a = C \cdot d$ · $V_a = m_a / \rho$ · eau apportée $= m_a (1 - es)$, à retrancher
+
+### Pièges
+
+surdosage · eau ajoutée en plus · plastiques au soleil · bitume trop mou en climat chaud
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Classer des matériaux">
+
+Classe chaque matériau : un tuyau en PVC, une colle époxy à deux composants, un appareil d'appui en néoprène, le bitume d'un enrobé.
+
+<Indice>Chaînes libres, réseau dur, réseau souple, colloïde.</Indice>
+
+<Corrige>
+PVC : **thermoplastique**. Époxy : **thermodurcissable**. Néoprène : **élastomère**. Bitume : **colloïde** d'asphaltènes dans des maltènes, qui n'est pas un polymère au sens strict.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un autre dosage">
+
+Même adjuvant que l'exemple, mais dosé à 0,8 % dans un béton à 400 kg/m³ de ciment. Calcule la masse, le volume et l'eau apportée.
+
+<Indice>Masse = C × d ; volume = masse / ρ ; eau = masse × (1 − es).</Indice>
+
+<Corrige>
+Masse : 400 × 0,8 % = **{grandeur(a2.masse, 2, 'kg/m³')}** ; volume : **{grandeur(a2.volume, 2, 'L/m³')}** ; eau apportée : **{grandeur(a2.eau, 2, 'kg/m³')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="L'eau à mettre au malaxeur">
+
+Sans adjuvant, le béton de l'exemple demandait {grandeur(eauPrevue, 0, 'L/m³')} d'eau. Le superplastifiant permet, d'après l'essai de convenance, de réduire l'eau de {nombre(reduction, 0)} % pour la même maniabilité (données de l'énoncé). Quelle eau faut-il ajouter au malaxeur ?
+
+<Indice>Calcule l'eau totale réduite, puis retranche l'eau déjà apportée par l'adjuvant.</Indice>
+
+<Corrige>
+Eau totale : {nombre(eauPrevue, 0)} × (1 − {nombre(reduction, 0)} %) = {grandeur(eauReduite, 1, 'L')} ; eau à ajouter : {nombre(eauReduite, 1)} − {nombre(a0.eau, 2)} = **{grandeur(eauMalaxeur, 1, 'L/m³')}**. Moins d'eau pour le même ciment : un rapport eau/ciment plus bas, donc un béton plus résistant et plus durable.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.5.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un thermoplastique :" choix={['ne fond jamais', 'se ramollit à la chaleur', 'est un métal', 'durcit à l’eau']} bonne={1} colonnes={4}>
+Ses chaînes libres glissent quand la température monte.
+</QCM>
+
+<QCM n={2} question="Une résine époxy durcie :" choix={['se refond à 60 °C', 'forme un réseau qui ne fond plus', 'est un bitume', 'se dissout dans l’eau']} bonne={1} colonnes={2}>
+Résine et durcisseur tissent un réseau de chaînes.
+</QCM>
+
+<QCM n={3} question="Le bitume vieillit surtout par :" choix={['la pluie', 'l’oxydation de ses huiles à l’air et au soleil', 'le gel', 'la carbonatation']} bonne={1} colonnes={2}>
+Il durcit, devient cassant et se fissure.
+</QCM>
+
+<QCM n={4} question="Un superplastifiant permet surtout :" choix={['de réduire l’eau à maniabilité égale', 'd’accélérer la prise', 'de colorer le béton', 'de remplacer le ciment']} bonne={0} colonnes={2}>
+Il disperse les grains de ciment.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Dans le béton armé, on proscrit les accélérateurs :" choix={['à base de chlorure', 'sans chlorure', 'liquides', 'en poudre']} bonne={0} colonnes={4}>
+Les chlorures dépassivent les armatures.
+</QCM>
+
+<QCM n={6} question="Dans l'exemple, la masse d'adjuvant par m³ vaut :" choix={[grandeur(a0.masse, 2, 'kg'), grandeur(a0.volume, 2, 'kg'), grandeur(a0.actif, 2, 'kg'), grandeur(a0.masse * 10, 2, 'kg')]} bonne={0} colonnes={4}>
+{nombre(d0.C, 0)} kg × {nombre(d0.dosage, 1)} %.
+</QCM>
+
+<QCM n={7} question="L'eau contenue dans un adjuvant liquide :" choix={['est négligée', 'est retranchée de l’eau ajoutée au malaxeur', 'est ajoutée deux fois', 'n’existe pas']} bonne={1} colonnes={2}>
+Elle fait partie de l'eau de gâchage.
+</QCM>
+
+<QCM n={8} question="Une eau de gâchage sucrée risque de :" choix={['accélérer la prise', 'retarder fortement, voire empêcher la prise', 'augmenter la résistance', 'colorer le béton']} bonne={1} colonnes={2}>
+Le sucre est un retardateur puissant.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

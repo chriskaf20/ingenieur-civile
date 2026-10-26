@@ -1,0 +1,108 @@
+---
+id: L1.5.EX
+titre: "Examen du module L1.5 : chimie des matériaux"
+objectifs:
+  - Relier les liaisons chimiques aux propriétés des matériaux
+  - Équilibrer une réaction et calculer des masses
+  - Calculer et interpréter un pH
+  - Expliquer la prise des liants et les mécanismes de dégradation du béton et de l'acier
+  - Juger une eau pour le gâchage et pour la boisson
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { bogue, concentrationDepH, diagnosticCarbonatation, dureeCarbonatation, LIMITES_GACHAGE, massesReaction, masseMolaire, reaction, vitessePenetration } from '@/lib/calc/chimie'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+
+export const q2 = masseMolaire('CaCO3')
+export const q3 = massesReaction(reaction('calcination'), 0, 1000)
+export const q4 = concentrationDepH(4) / concentrationDepH(7)
+export const q7 = bogue({ CaO: 65, SiO2: 21, Al2O3: 5, Fe2O3: 3, SO3: 1 })
+export const q9 = vitessePenetration(2)
+export const q10 = diagnosticCarbonatation({ age: 25, x: 18, c: 30 })
+export const q10b = dureeCarbonatation(30, q10.K)
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 1 h 30.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon, le tableau des masses atomiques.
+- **Interdit** : le cours, tes fiches, Internet.
+- Pour chaque question de calcul : écris l'équation équilibrée, passe par les moles, vérifie les unités (mg/L, g/L ; µm, mm) et l'ordre de grandeur.
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="L1.5.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="L'acier se déforme beaucoup avant de rompre parce que sa liaison est :" choix={['ionique', 'covalente', 'métallique', 'hydrogène']} bonne={2} colonnes={4}>
+Le nuage d'électrons laisse glisser les plans d'atomes (L1.5.1).
+</QCM>
+
+<QCM n={2} question="La masse molaire du carbonate de calcium CaCO₃ vaut :" choix={[grandeur(q2, 2, 'g/mol'), grandeur(masseMolaire('CaO'), 2, 'g/mol'), grandeur(masseMolaire('Ca(OH)2'), 2, 'g/mol'), '68,10 g/mol']} bonne={0} colonnes={4}>
+Ca + C + 3 O (L1.5.2).
+</QCM>
+
+<QCM n={3} question="Une tonne de calcaire pur cuite donne une masse de chaux vive de :" choix={[grandeur(q3.lignes[1].m, 0, 'kg'), '1 000 kg', grandeur(q3.lignes[2].m, 0, 'kg'), '750 kg']} bonne={0} colonnes={4}>
+CaCO₃ → CaO + CO₂ : on calcule en moles (L1.5.2).
+</QCM>
+
+<QCM n={4} question="Une eau à pH 4 contient, par rapport à une eau à pH 7 :" choix={['3 fois plus d’ions H₃O⁺', `${nombre(q4, 0)} fois plus d’ions H₃O⁺`, '1,75 fois plus d’ions H₃O⁺', 'autant d’ions H₃O⁺']} bonne={1} colonnes={2}>
+Trois unités de pH : 10 × 10 × 10 (L1.5.3).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={5} question="Pour neutraliser 2 moles d'ions H⁺, il faut une quantité de chaux éteinte Ca(OH)₂ de :" choix={['0,5 mole', '1 mole', '2 moles', '4 moles']} bonne={1} colonnes={4}>
+Ca(OH)₂ + 2 H⁺ → Ca²⁺ + 2 H₂O (L1.5.3).
+</QCM>
+
+<QCM n={6} question="Dans le ciment, le gypse sert à :" choix={['augmenter la résistance', 'régler la prise en freinant le C₃A', 'colorer le ciment', 'apporter du fer']} bonne={1} colonnes={2}>
+Il forme de l'ettringite avec le C₃A (L1.5.4).
+</QCM>
+
+<QCM n={7} question="Un clinker contient 5 % d'Al₂O₃ et 3 % de Fe₂O₃. Sa teneur en C₃A (Bogue) vaut :" choix={[grandeur(q7.C3A, 2, '%'), grandeur(q7.C4AF, 2, '%'), '5,00 %', '13,25 %']} bonne={0} colonnes={4}>
+C₃A = 2,650 × 5 − 1,692 × 3 (L1.5.4).
+</QCM>
+
+<QCM n={8} question="Une chaux aérienne durcit :" choix={['sous l’eau', 'en reprenant le CO₂ de l’air', 'en quelques minutes', 'par la chaleur']} bonne={1} colonnes={2}>
+Ca(OH)₂ + CO₂ → CaCO₃ + H₂O ; elle ne prend pas enterrée (L1.5.5).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={9} question="Une barre corrodée à 2 µA/cm² perd chaque année une épaisseur d'environ :" choix={[grandeur(q9, 1, 'µm'), '2 µm', '2 mm', grandeur(q9 * 10, 0, 'µm')]} bonne={0} colonnes={4}>
+Loi de Faraday : environ {nombre(vitessePenetration(1), 1)} µm/an pour 1 µA/cm² (L1.5.6).
+</QCM>
+
+<QCM n={10} question="Un béton de 25 ans est carbonaté sur 18 mm. Avec la loi x = K √t, le front atteindra un enrobage de 30 mm vers :" choix={[grandeur(q10b, 0, 'ans'), '42 ans', '30 ans', '100 ans']} bonne={0} colonnes={4}>
+K = 18 / √25 = {nombre(q10.K, 1)} mm/√an ; t = (30 / K)² (L1.5.7).
+</QCM>
+
+<QCM n={11} question="Des fissures en réseau, avec un gel dans les fissures, sur une pile de pont humide, font penser à :" choix={['la carbonatation', 'l’alcali-réaction', 'un défaut de coffrage', 'une attaque par le gel']} bonne={1} colonnes={2}>
+Granulat réactif, alcalis et eau ; à confirmer par un examen au microscope (L1.5.7).
+</QCM>
+
+<QCM n={12} question="L'eau de mer convient-elle au gâchage d'un béton armé ?" choix={['oui, si elle est claire', `non : ses chlorures dépassent de loin ${nombre(LIMITES_GACHAGE.chlorures.arme, 0)} mg/L`, 'oui, après ébullition', 'non, car son pH est trop bas']} bonne={1} colonnes={2}>
+Les chlorures dépassiveraient les armatures (L1.5.9).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

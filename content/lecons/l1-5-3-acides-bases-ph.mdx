@@ -1,0 +1,303 @@
+---
+id: L1.5.3
+titre: Acides, bases et pH
+objectifs:
+  - Définir un acide, une base et le pH d'une solution
+  - Calculer un pH à partir d'une concentration, et inversement
+  - Mesurer le pH d'une eau ou d'un sol et interpréter le résultat
+  - Calculer la quantité de chaux nécessaire pour neutraliser une eau acide
+relecture: false
+normes:
+  - "ISO 10390 : détermination du pH d'un sol (méthode citée sans détail)"
+glossaire:
+  - terme: Acide
+    definition: Espèce capable de céder des ions H⁺ ; dans l'eau, elle augmente la concentration en ions H₃O⁺.
+  - terme: Base
+    definition: Espèce capable de capter des ions H⁺ ; dans l'eau, elle augmente la concentration en ions OH⁻.
+  - terme: pH
+    definition: "Mesure de l'acidité : pH = −log [H₃O⁺], la concentration étant en mol/L."
+  - terme: Neutralisation
+    definition: Réaction d'un acide avec une base, qui forme de l'eau et un sel.
+  - terme: Indicateur coloré
+    definition: Substance qui change de couleur selon le pH, comme la phénolphtaléine, rose en milieu nettement basique.
+symboles:
+  - { symbole: '[H₃O⁺]', signification: 'concentration en ions oxonium', unite: 'mol/L' }
+  - { symbole: '[OH⁻]', signification: 'concentration en ions hydroxyde', unite: 'mol/L' }
+  - { symbole: 'K_e', signification: 'produit ionique de l’eau (10⁻¹⁴ à 25 °C)', unite: '—' }
+  - { symbole: 'V', signification: 'volume d’eau', unite: 'm³' }
+  - { symbole: 'n', signification: 'quantité de matière', unite: 'mol' }
+formules:
+  - { nom: 'Définition du pH', tex: '\mathrm{pH} = -\log_{10} [\mathrm{H_3O^+}], \quad [\mathrm{H_3O^+}] = 10^{-\mathrm{pH}}', domaine: 'Solutions diluées' }
+  - { nom: 'Produit ionique de l’eau', tex: '[\mathrm{H_3O^+}]\,[\mathrm{OH^-}] = 10^{-14}, \quad \mathrm{pH} + \mathrm{pOH} = 14', domaine: '25 °C' }
+  - { nom: 'Acidité libre à neutraliser', tex: 'n_{H^+} = V \cdot 1000 \cdot (10^{-\mathrm{pH}_0} - 10^{-\mathrm{pH}_1})', domaine: 'V en m³, acide fort, sans effet tampon' }
+---
+
+import { concentrationDepH, ECHELLE_PH, EXEMPLE_NEUTRALISATION, KE_25, neutralisation, pHdeConcentration, pOH, PH_DEPASSIVATION, PH_PASSIVATION } from '@/lib/calc/chimie'
+import { grandeur, nombre, scientifique } from '@/lib/format'
+import { EchellePH } from '@/components/schemas/Chimie'
+
+export const d0 = EXEMPLE_NEUTRALISATION
+export const r0 = neutralisation(d0)
+export const pluie = ECHELLE_PH.find((e) => e.nom === 'eau de pluie').pH
+export const pores = ECHELLE_PH.find((e) => e.nom === 'eau des pores du béton').pH
+export const ex1 = pHdeConcentration(2.5e-6)
+export const ex2 = concentrationDepH(5) / concentrationDepH(8)
+export const d3 = { V: 2000, pH0: 4, pH1: 6.5, purete: 85 }
+export const r3 = neutralisation(d3)
+
+<Page etape="intuition" titre="L'intuition : du citron au béton frais">
+
+Le jus de citron pique la langue : il est **acide**. Le savon glisse entre les doigts : il est **basique**. Entre les deux, l'eau pure est neutre.
+
+Le béton frais est une base très forte : l'eau de ses pores a un pH voisin de {nombre(pores, 0)}. C'est pour cela qu'un ouvrier qui travaille sans gants ni bottes peut se brûler la peau. Mais c'est aussi cette basicité qui protège les armatures de la rouille, tant que le béton reste sain.
+
+À l'inverse, les eaux acides, comme celles qui s'écoulent de certaines mines du Katanga, attaquent le béton et corrodent l'acier. Savoir mesurer le pH, et le corriger, est donc utile à l'ingénieur.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer l'acidité d'une eau ou d'un sol, et combien de chaux faut-il pour la neutraliser ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : acides, bases et pH">
+
+### Acides et bases
+
+Un **acide** cède des ions H⁺ ; dans l'eau, ils forment des ions oxonium H₃O⁺. Une **base** capte des ions H⁺ ou libère des ions OH⁻. Une solution acide est riche en H₃O⁺, une solution basique en OH⁻.
+
+### Le pH
+
+$$\mathrm{pH} = -\log_{10} [\mathrm{H_3O^+}] \qquad [\mathrm{H_3O^+}] = 10^{-\mathrm{pH}}$$
+
+L'échelle est **logarithmique** : une unité de pH en moins, c'est dix fois plus d'ions H₃O⁺. Une eau à pH 3 est {nombre(concentrationDepH(3) / concentrationDepH(7), 0)} fois plus acide qu'une eau à pH 7.
+
+### Le produit ionique de l'eau
+
+Dans toute solution aqueuse à 25 °C, [H₃O⁺] × [OH⁻] = {scientifique(KE_25, 1)}, d'où pH + pOH = 14. L'eau pure a pH = 7 : neutre. En dessous, la solution est acide ; au-dessus, basique.
+
+<Encadre type="exemple" titre="L'eau des pores du béton">
+À pH {nombre(pores, 0)}, pOH = {nombre(pOH(pores), 0)} : [OH⁻] = {scientifique(concentrationDepH(pOH(pores)), 1)} mol/L, et [H₃O⁺] = {scientifique(concentrationDepH(pores), 1)} mol/L. Les ions OH⁻ sont {scientifique(concentrationDepH(pOH(pores)) / concentrationDepH(pores), 1)} fois plus nombreux que les ions H₃O⁺.
+</Encadre>
+
+<Regle type="simplification">
+Les formules de cette leçon supposent des solutions diluées à 25 °C et des acides forts, entièrement dissociés. Les eaux naturelles contiennent des espèces qui amortissent les variations de pH (carbonates, métaux dissous) : leur acidité réelle se mesure par un dosage au laboratoire.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : mesurer et neutraliser">
+
+### Mesurer un pH
+
+- **pH-mètre** : une électrode plongée dans la solution ; on l'**étalonne** avant chaque série de mesures avec des solutions de pH connu.
+- **papier indicateur** : une couleur à comparer à une échelle ; rapide, à une unité près.
+- **phénolphtaléine** : incolore en milieu acide ou peu basique, rose au-dessus d'un pH voisin de {nombre(PH_DEPASSIVATION, 0)}. Pulvérisée sur une cassure fraîche de béton, elle révèle la zone carbonatée (L1.5.7).
+- **pH d'un sol** : on met le sol en suspension dans de l'eau selon une méthode normalisée (ISO 10390), on agite, puis on mesure l'eau.
+
+### Neutraliser
+
+Un acide et une base réagissent pour former de l'eau : H₃O⁺ + OH⁻ → 2 H₂O. Pour remonter le pH d'une eau acide, on ajoute de la chaux éteinte :
+
+$$\mathrm{Ca(OH)_2 + 2\,H^+ \rightarrow Ca^{2+} + 2\,H_2O}$$
+
+Une mole de chaux neutralise **deux** moles d'ions H⁺. Pour un volume V (m³), l'acidité libre à enlever vaut n = V × 1 000 × (10<sup>−pH₀</sup> − 10<sup>−pH₁</sup>) mol.
+
+<Encadre type="retenir">
+pH = −log [H₃O⁺] ; une unité = un facteur 10. pH + pOH = 14 à 25 °C. Ca(OH)₂ neutralise 2 H⁺. Un pH-mètre s'étalonne ; une eau naturelle se dose au laboratoire.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'échelle de pH du génie civil">
+
+<EchellePH prefixe="ph-sch" />
+
+Les repères vont des eaux de drainage minier, très acides, à l'eau des pores du béton, très basique. L'eau de pluie est légèrement acide (pH voisin de {nombre(pluie, 1)}) : le CO₂ de l'air s'y dissout.
+
+La bande du bas rappelle ce qui compte pour l'acier dans le béton : au-dessus d'un pH voisin de {nombre(PH_PASSIVATION, 0)}, il est **passivé** par une fine couche d'oxyde protectrice ; en dessous de {nombre(PH_DEPASSIVATION, 0)}, cette couche disparaît et l'acier peut rouiller (L1.5.6).
+
+</Page>
+
+<FicheCalcul calcul="neutralisationChaux">
+
+<Cahier titre="Exemple résolu : un bassin d'eau d'exhaure">
+
+**Énoncé.** Près de Likasi, un bassin recueille {grandeur(d0.V, 0, 'm³')} d'eau d'exhaure d'une mine, mesurée à pH {nombre(d0.pH0, 0)}. Avant rejet, l'exploitant veut la remonter à pH {nombre(d0.pH1, 0)} avec une chaux éteinte titrant {nombre(d0.purete, 0)} % de Ca(OH)₂ (données de l'énoncé). Quelle masse de chaux faut-il au minimum ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi « au minimum » ? On ne compte ici que l'acidité libre ; les métaux dissous d'une eau de mine consomment aussi de la chaux.</Note>
+</Etape>
+
+<Etape n={2} titre="Le pH avant et après">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'acidité et la chaux">
+
+<Etape n={3} titre="Les concentrations">
+<AN k="concentrations" />
+</Etape>
+
+<Etape n={4} titre="L'acidité à neutraliser">
+<AN k="nH" />
+<Note>Pourquoi 1 000 ? Les concentrations sont en mol par litre, et un mètre cube contient 1 000 litres.</Note>
+</Etape>
+
+<Etape n={5} titre="La chaux">
+<AN k="chaux" />
+<AN k="masse" />
+<Resultat k="mCommerciale" libelle="Chaux commerciale" />
+<Note couleur="vert">Contrôle : passer de pH 3 à pH 7 enlève presque toute l'acidité libre. Un dosage au laboratoire donnera la quantité réelle, souvent bien plus grande.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="lire l'échelle de pH comme une échelle linéaire.">
+Une eau à pH 5 n'est pas « un peu » plus acide qu'une eau à pH 8 : elle l'est {nombre(ex2, 0)} fois plus.
+</Piege>
+
+<Piege erreur="oublier le facteur 1 000 entre m³ et litres.">
+Les concentrations sont en mol/L : un bassin de {nombre(d0.V, 0)} m³ contient {nombre(d0.V * 1000, 0)} litres.
+</Piege>
+
+<Piege erreur="compter une mole de chaux par mole de H⁺.">
+Ca(OH)₂ apporte deux OH⁻ : une mole neutralise deux moles de H⁺. Oublier ce 2 double la dose.
+</Piege>
+
+<Piege erreur="mesurer sans étalonner le pH-mètre.">
+Une électrode dérive avec le temps : sans étalonnage, l'appareil affiche un nombre précis mais faux.
+</Piege>
+
+<Piege erreur="confondre pH et quantité d'acide.">
+Le pH mesure la concentration en ions H₃O⁺ libres, pas tout l'acide présent. Une eau chargée en fer ou en aluminium dissous consomme beaucoup plus de chaux que ne le laisse croire son pH.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le ciment brûle la peau.** Un mortier frais a un pH voisin de {nombre(pores, 0)} : un contact prolongé avec la peau provoque des brûlures, parfois graves, qui n'apparaissent qu'après plusieurs heures. Gants, bottes, manches longues : ce n'est pas du confort, c'est de la chimie.
+
+<Encadre type="terrain" titre="Les eaux de mine">
+Dans la ceinture du cuivre, l'air et l'eau oxydent les sulfures des roches et des stériles : il se forme de l'acide sulfurique. Ces eaux acides attaquent le béton des ouvrages qu'elles baignent, corrodent les aciers et polluent les rivières. On les traite souvent à la chaux, dans des bassins où l'on suit le pH en continu.
+</Encadre>
+
+**Les sols acides.** Beaucoup de sols tropicaux lessivés, dont certaines latérites, sont acides. Le pH d'un sol se mesure avant d'y enterrer du béton ou des conduites métalliques, et avant de le traiter à la chaux (L1.5.5).
+
+**L'eau de boisson.** Une eau trop acide attaque les canalisations et dissout des métaux ; une eau trop basique désinfecte mal au chlore. Le pH fait partie des contrôles de toute eau distribuée (L1.5.9).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : acides, bases et pH">
+
+### Définitions
+
+acide : cède H⁺ · base : capte H⁺ (ou libère OH⁻) · neutralisation : acide + base → eau + sel
+
+### pH
+
+$\mathrm{pH} = -\log[\mathrm{H_3O^+}]$ · 1 unité = facteur 10 · 25 °C : pH + pOH = 14, neutre à 7
+
+### Repères
+
+pluie ≈ {nombre(pluie, 1)} · eau pure 7 · béton ≈ {nombre(pores, 0)} · acier dépassivé sous ≈ {nombre(PH_DEPASSIVATION, 0)}
+
+### Mesure
+
+pH-mètre étalonné · papier indicateur · phénolphtaléine (béton carbonaté) · sol : ISO 10390
+
+### Neutraliser à la chaux
+
+$n_{H^+} = V \cdot 1000 \cdot (10^{-pH_0} - 10^{-pH_1})$ · Ca(OH)₂ neutralise 2 H⁺ · dose réelle : dosage au laboratoire
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le pH d'une eau de pluie">
+
+Une eau de pluie contient 2,5 × 10⁻⁶ mol/L d'ions H₃O⁺. Calcule son pH.
+
+<Indice>pH = −log [H₃O⁺].</Indice>
+
+<Corrige>
+pH = −log(2,5 × 10⁻⁶) = **{nombre(ex1, 2)}** : légèrement acide, à cause du CO₂ dissous.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Combien de fois plus acide ?">
+
+Combien de fois plus d'ions H₃O⁺ une eau à pH 5 contient-elle qu'une eau à pH 8 ?
+
+<Indice>Chaque unité de pH correspond à un facteur 10.</Indice>
+
+<Corrige>
+10⁻⁵ / 10⁻⁸ = 10³ : **{nombre(ex2, 0)} fois** plus.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un second bassin">
+
+Un bassin de {grandeur(d3.V, 0, 'm³')} est à pH {nombre(d3.pH0, 0)}. On veut atteindre pH {nombre(d3.pH1, 1)} avec une chaux à {nombre(d3.purete, 0)} %. Calcule la masse de chaux minimale, puis compare-la à l'exemple résolu.
+
+<Indice>Même méthode : acidité libre, moles de chaux, masse, puis pureté.</Indice>
+
+<Corrige>
+n(H⁺) = {nombre(d3.V, 0)} × 1 000 × ({scientifique(r3.h0, 2)} − {scientifique(r3.h1, 2)}) = {grandeur(r3.nH, 1, 'mol')} ; n(Ca(OH)₂) = {grandeur(r3.nChaux, 1, 'mol')} ; masse pure {grandeur(r3.mPure, 2, 'kg')}, soit **{grandeur(r3.mCommerciale, 1, 'kg')}** de chaux commerciale. Quatre fois plus d'eau, mais une eau dix fois moins acide : il faut moins de chaux que dans l'exemple ({grandeur(r0.mCommerciale, 1, 'kg')}). Le pH initial compte plus que le volume.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.5.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une eau de pH 4 est, par rapport à une eau de pH 6 :" choix={['deux fois plus acide', 'cent fois plus acide', 'moins acide', 'aussi acide']} bonne={1} colonnes={2}>
+Deux unités de pH : 10 × 10.
+</QCM>
+
+<QCM n={2} question="À 25 °C, une solution de pH 13 a un pOH de :" choix={['13', '1', '7', '−13']} bonne={1} colonnes={4}>
+pH + pOH = 14.
+</QCM>
+
+<QCM n={3} question="Le pH de l'eau des pores d'un béton sain est voisin de :" choix={['3', '7', nombre(pores, 0), '15']} bonne={2} colonnes={4}>
+La portlandite et les alcalis du ciment rendent la solution très basique.
+</QCM>
+
+<QCM n={4} question="Une mole de chaux éteinte Ca(OH)₂ neutralise :" choix={['une mole de H⁺', 'deux moles de H⁺', 'une demi-mole de H⁺', 'aucun H⁺']} bonne={1} colonnes={2}>
+Elle libère deux ions OH⁻.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="La phénolphtaléine pulvérisée sur un béton reste incolore. Cela signifie :" choix={['que le béton est très basique', 'que le béton est carbonaté (pH plus bas)', 'que le béton est neuf', 'que le béton contient des chlorures']} bonne={1} colonnes={2}>
+Elle devient rose seulement en milieu nettement basique.
+</QCM>
+
+<QCM n={6} question="Avant une série de mesures, un pH-mètre doit être :" choix={['chauffé', 'étalonné', 'séché', 'plongé dans le béton']} bonne={1} colonnes={4}>
+Avec des solutions de pH connu.
+</QCM>
+
+<QCM n={7} question="Dans l'exemple résolu, la masse minimale de chaux commerciale vaut :" choix={[grandeur(r0.mCommerciale, 1, 'kg'), grandeur(r0.mPure, 1, 'kg'), grandeur(r0.mCommerciale * 2, 1, 'kg'), grandeur(r0.nChaux, 1, 'kg')]} bonne={0} colonnes={4}>
+La masse pure divisée par la teneur de la chaux.
+</QCM>
+
+<QCM n={8} question="Pourquoi la dose réelle de chaux d'une eau de mine est-elle souvent plus grande que le calcul ?" choix={['parce que le pH-mètre se trompe', 'parce que les métaux dissous consomment aussi de la chaux', 'parce que la chaux s’évapore', 'parce que l’eau est froide']} bonne={1} colonnes={2}>
+Le pH ne mesure que l'acidité libre ; un dosage au laboratoire mesure l'acidité totale.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

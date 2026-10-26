@@ -1,0 +1,294 @@
+---
+id: L1.5.1
+titre: Atomes, liaisons et structure de la matière
+objectifs:
+  - Décrire un atome par son noyau, ses électrons et son numéro atomique
+  - Distinguer les liaisons ionique, covalente, métallique et faibles
+  - Relier le type de liaison à la dureté, la fragilité, la ductilité et la conductivité d'un matériau
+  - Expliquer le gonflement des argiles par leur structure en feuillets
+relecture: false
+normes: []
+glossaire:
+  - terme: Atome
+    definition: Plus petite partie d'un élément chimique ; un noyau (protons et neutrons) entouré d'électrons.
+  - terme: Numéro atomique
+    definition: Nombre de protons du noyau, noté Z ; il définit l'élément (Z = 20 pour le calcium).
+  - terme: Ion
+    definition: Atome ou groupe d'atomes qui a perdu des électrons (cation, positif) ou en a gagné (anion, négatif).
+  - terme: Liaison ionique
+    definition: Attraction entre ions de signes contraires ; elle donne des solides durs et fragiles (sels, oxydes).
+  - terme: Liaison covalente
+    definition: Mise en commun d'électrons entre deux atomes voisins ; très solide et orientée (silice, polymères).
+  - terme: Liaison métallique
+    definition: Ions positifs baignant dans un nuage d'électrons libres ; elle donne des matériaux ductiles et conducteurs.
+  - terme: Liaisons faibles
+    definition: "Forces de van der Waals et liaisons hydrogène : attractions faibles entre molécules, entre chaînes ou entre feuillets."
+symboles:
+  - { symbole: 'Z', signification: 'numéro atomique', unite: '—' }
+  - { symbole: 'M', signification: 'masse molaire', unite: 'g/mol' }
+formules:
+  - { nom: 'Masse molaire d’un composé', tex: 'M = \sum_k n_k\, M_k', domaine: 'n_k atomes de masse molaire M_k' }
+---
+
+import { MASSES_ATOMIQUES, NUMEROS_ATOMIQUES, masseMolaire } from '@/lib/calc/chimie'
+import { grandeur, nombre } from '@/lib/format'
+import { TypesLiaisons } from '@/components/schemas/Chimie'
+
+export const Ma = MASSES_ATOMIQUES
+export const Z = NUMEROS_ATOMIQUES
+export const mm = (f) => grandeur(masseMolaire(f), 2, 'g/mol')
+
+<Page etape="intuition" titre="L'intuition : pourquoi l'acier plie et le verre casse">
+
+Plie une barre d'acier : elle se tord sans se rompre. Plie une plaque de verre : elle casse net. Mouille une argile : elle devient collante, gonfle, puis se fissure en séchant. Pourtant, tous ces matériaux sont faits d'atomes.
+
+La différence tient à la façon dont les atomes **s'accrochent** entre eux. Dans l'acier, les atomes partagent un nuage d'électrons : des plans d'atomes peuvent glisser les uns sur les autres sans se séparer. Dans le verre, chaque atome est tenu par des liaisons rigides et orientées : rien ne peut glisser, tout casse d'un coup. Dans l'argile, des feuillets solides ne sont retenus entre eux que par de l'eau et des forces faibles.
+
+Connaître ces liaisons, c'est comprendre d'avance comment un matériau va se comporter sur le chantier : s'il plie ou s'il casse, s'il rouille, s'il gonfle.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment la liaison entre les atomes explique-t-elle les propriétés des matériaux de construction ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="De l'atome au matériau" sousTitre="Quatre façons de tenir ensemble" etape="cours">
+
+<Panneau n={1} titre="L'atome" icone="materiaux" couleur="encre">
+Un noyau de protons et de neutrons, entouré d'électrons. Le **numéro atomique** Z compte les protons : Z = {Z.Ca} pour le calcium, {Z.Si} pour le silicium, {Z.Fe} pour le fer. La masse d'une mole d'atomes est la **masse atomique** : {grandeur(Ma.Ca, 3, 'g/mol')} pour le calcium.
+</Panneau>
+
+<Panneau n={2} titre="Liaison ionique" icone="regle" couleur="brique">
+Un atome cède des électrons à un autre : deux ions de signes contraires s'attirent. Sels et oxydes : chaux vive CaO, alumine, oxydes du ciment. Solides durs, fragiles, isolants.
+</Panneau>
+
+<Panneau n={3} titre="Liaison covalente" icone="calcul" couleur="terre">
+Deux atomes mettent des électrons en commun. Dans la silice SiO₂ (quartz, sable, verre), chaque silicium est lié à quatre oxygènes : un réseau rigide, très dur, qui résiste à la chaleur. Les chaînes des polymères sont aussi covalentes.
+</Panneau>
+
+<Panneau n={4} titre="Liaison métallique" icone="ferraillage" couleur="acier">
+Des ions positifs baignent dans un nuage d'électrons libres. Les plans d'atomes glissent sans se séparer : le métal est **ductile**. Les électrons libres conduisent le courant et la chaleur, mais le fer les cède aussi facilement : il **rouille** (L1.5.6).
+</Panneau>
+
+<Panneau n={5} titre="Liaisons faibles" icone="attention" couleur="correction">
+Forces de van der Waals et liaisons hydrogène, bien plus faibles que les liaisons fortes. Elles tiennent les molécules d'eau entre elles, les chaînes de PVC, les feuillets d'argile. L'eau qui entre entre les feuillets fait **gonfler** certaines argiles.
+</Panneau>
+
+<Panneau n={6} titre="À retenir" icone="retenir" couleur="validation">
+Liaisons fortes et rigides : dur et fragile. Nuage d'électrons : ductile et conducteur. Liaisons faibles : tendre, sensible à l'eau et à la chaleur.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : structure et propriétés">
+
+### Cristallin ou amorphe
+
+Dans un **cristal**, les atomes sont rangés selon un motif régulier : l'acier, le quartz, la calcite. Dans un solide **amorphe**, ils sont en désordre : le verre, une partie des C-S-H du ciment hydraté (L1.5.4). La plupart des matériaux de construction mélangent les deux, avec des pores et des défauts.
+
+### Pourquoi l'acier est ductile
+
+Un cristal métallique contient des défauts en ligne, les **dislocations**. Sous l'effort, elles se déplacent et les plans d'atomes glissent de proche en proche : le métal s'allonge sans rompre. C'est ce qui permet à une armature de prévenir avant la rupture (grande déformation).
+
+### Pourquoi le béton est fragile en traction
+
+Le béton durci est une céramique : liaisons ioniques et covalentes, et des millions de microfissures. En traction, une fissure s'ouvre et se propage sans que rien ne glisse pour la freiner : la rupture est soudaine. D'où les armatures, placées là où le béton est tendu.
+
+### Les argiles
+
+Une argile est faite de **feuillets** de silice et d'alumine, très solides dans leur plan, empilés et tenus entre eux par des ions et des liaisons faibles. Dans certaines argiles, comme la montmorillonite, l'eau entre facilement entre les feuillets : le sol **gonfle** à la saison des pluies et se **rétracte** à la saison sèche.
+
+<Regle type="simplification">
+On présente quatre liaisons « pures ». Dans les matériaux réels, les liaisons sont souvent mixtes : la liaison Si–O, par exemple, est à la fois covalente et ionique. Les propriétés dépendent aussi des défauts, des pores et de l'eau.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : quatre façons de tenir ensemble">
+
+<TypesLiaisons />
+
+**1.** Ions + et − alternés : chaque ion est entouré d'ions de signe contraire. Déplacer un plan d'un cran mettrait face à face des ions de même signe : ils se repoussent, le cristal casse.
+
+**2.** Deux tétraèdres de silice partagent un oxygène : c'est ainsi que se construit le réseau du quartz et du verre.
+
+**3.** Les ions du métal sont noyés dans les électrons libres, qui ne retiennent aucun ion en particulier : les plans peuvent glisser.
+
+**4.** Les feuillets d'argile sont séparés par des molécules d'eau, tenues par des liaisons faibles (pointillés) : l'eau peut entrer ou sortir.
+
+</Page>
+
+<Cahier titre="Exemple résolu : six matériaux du chantier">
+
+**Énoncé.** Sur un chantier à Kinshasa, on trouve : des armatures en acier, du sable de quartz, de la chaux vive, des tuyaux en PVC, un sol argileux gonflant et du câble électrique en cuivre. Pour chacun, indique la liaison dominante, la propriété qui en découle et la précaution de chantier.
+
+<Etape n={1} titre="Les métaux : acier et cuivre">
+Liaison **métallique** (fer, Z = {Z.Fe} ; cuivre, Z = {Z.Cu}). Propriétés : ductiles, conducteurs. Précautions : l'acier rouille s'il est exposé à l'eau et à l'air ; le cuivre conduit le courant, il faut l'isoler.
+
+<Note>Pourquoi l'acier rouille-t-il et pas le cuivre aussi vite ? Le fer cède plus facilement ses électrons : il est plus « actif » (L1.5.6).</Note>
+</Etape>
+
+<Etape n={2} titre="Le sable de quartz">
+Liaison **covalente** dans la silice SiO₂, de masse molaire {mm('SiO2')}. Propriétés : très dur, inerte, stable : c'est un bon granulat. Précaution : certaines silices mal cristallisées réagissent avec les alcalis du ciment (L1.5.7).
+</Etape>
+
+<Etape n={3} titre="La chaux vive">
+Liaison **ionique** dans l'oxyde CaO ({mm('CaO')}). Propriétés : solide dur et friable, qui réagit violemment avec l'eau en chauffant. Précaution : lunettes et gants (L1.5.5).
+</Etape>
+
+<Etape n={4} titre="Le PVC">
+Liaisons **covalentes** le long des chaînes, **faibles** entre les chaînes. Propriétés : léger, souple, isolant ; il se ramollit à la chaleur. Précaution : ne pas l'exposer au soleil sans protection, ni à l'eau chaude s'il n'est pas prévu pour.
+</Etape>
+
+<Etape n={5} titre="L'argile gonflante">
+Feuillets **ioniques et covalents**, tenus entre eux par des **liaisons faibles** et de l'eau. Propriété : gonfle à l'humidité, se rétracte au séchage. Précaution : fondations ancrées sous la zone qui varie, drainage, pas d'arbres trop près.
+
+<Note couleur="vert">Contrôle : chaque propriété s'explique par la liaison ; c'est le réflexe à garder face à un matériau inconnu.</Note>
+</Etape>
+
+</Cahier>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre atome, ion et molécule.">
+L'atome est neutre ; l'ion a gagné ou perdu des électrons ; la molécule est un groupe d'atomes liés (H₂O). Dans la chaux vive, il n'y a pas de molécules CaO, mais un empilement d'ions Ca²⁺ et O²⁻.
+</Piege>
+
+<Piege erreur="croire que dur veut dire résistant.">
+Le verre et le béton sont durs mais fragiles : ils cassent sans prévenir. L'acier est moins dur que le quartz, mais ductile : il se déforme beaucoup avant de rompre.
+</Piege>
+
+<Piege erreur="penser que les métaux ne réagissent pas.">
+Le nuage d'électrons qui rend le métal ductile le rend aussi réactif : le fer s'oxyde dès qu'il y a de l'eau et de l'oxygène.
+</Piege>
+
+<Piege erreur="croire qu'une argile gonfle seulement parce qu'elle est mouillée.">
+Le gonflement vient de l'eau qui entre **entre les feuillets** : une argile sans cette structure (kaolinite) gonfle peu, une argile qui l'a (montmorillonite) gonfle beaucoup.
+</Piege>
+
+<Piege erreur="confondre numéro atomique et masse atomique.">
+Le calcium a Z = {Z.Ca} protons, mais une masse molaire de {grandeur(Ma.Ca, 3, 'g/mol')} : les neutrons comptent dans la masse.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les argiles gonflantes.** Les sols argileux gonflants existent dans de nombreuses régions tropicales. Leurs mouvements saisonniers fissurent les murs et soulèvent les dallages des maisons légères. On les reconnaît par des fentes de retrait profondes en saison sèche ; on les identifie au laboratoire (limites d'Atterberg, L3.4).
+
+<Encadre type="terrain" titre="Les latérites, durcies par le fer">
+Les latérites, très répandues en RDC, sont riches en oxydes de fer et d'aluminium. Ces oxydes cimentent les grains : séchée, la latérite peut former une cuirasse dure. C'est aussi pourquoi le graveleux latéritique est un bon matériau de chaussée, à condition de rester drainé (L3).
+</Encadre>
+
+**Le cuivre du Katanga.** La liaison métallique explique la grande conductivité du cuivre, exploité dans le sud-est de la RDC : c'est le métal des câbles électriques. Le contact direct entre cuivre et acier crée une pile qui fait rouiller l'acier (L1.5.6).
+
+**Les matières plastiques au soleil.** Les liaisons faibles entre chaînes se défont à la chaleur et sous les ultraviolets : un tuyau en PVC exposé au soleil vieillit, jaunit et devient cassant. On l'enterre ou on le protège.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : atomes et liaisons">
+
+### Atome
+
+noyau (protons, neutrons) + électrons · Z = nombre de protons · masse molaire M en g/mol
+
+### Liaisons fortes
+
+ionique (sels, oxydes) : dur, fragile · covalente (silice, polymères) : très dur, rigide · métallique (acier, cuivre) : ductile, conducteur
+
+### Liaisons faibles
+
+van der Waals, hydrogène : entre molécules, chaînes, feuillets · tendre, sensible à l'eau et à la chaleur
+
+### Structure
+
+cristal : ordonné · amorphe : désordonné · défauts et pores comptent autant que la liaison
+
+### Chantier
+
+acier : ductile mais rouille · béton : fragile en traction · argile : gonfle par l'eau entre feuillets
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Quelle liaison ?">
+
+Associe chaque matériau à sa liaison dominante : un fil de fer, du sel de cuisine, un morceau de quartz, la cire d'une bougie.
+
+<Indice>Métal, sel, réseau Si–O, longues molécules tenues entre elles faiblement.</Indice>
+
+<Corrige>
+Fil de fer : **métallique**. Sel (NaCl) : **ionique**. Quartz (SiO₂) : **covalente**. Cire : liaisons covalentes dans les molécules, **faibles** entre les molécules, d'où sa mollesse et son point de fusion bas.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une masse molaire">
+
+Calcule la masse molaire de la silice SiO₂ et de la calcite CaCO₃ à partir des masses atomiques.
+
+<Indice>M = somme des masses atomiques, chacune multipliée par son nombre d'atomes.</Indice>
+
+<Corrige>
+SiO₂ : {nombre(Ma.Si, 3)} + 2 × {nombre(Ma.O, 3)} = **{mm('SiO2')}**. CaCO₃ : {nombre(Ma.Ca, 3)} + {nombre(Ma.C, 3)} + 3 × {nombre(Ma.O, 3)} = **{mm('CaCO3')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le dallage qui se soulève">
+
+Le dallage d'une maison construite sur un sol argileux se soulève au milieu à chaque saison des pluies, puis redescend. Explique le phénomène à l'échelle des feuillets et propose deux parades.
+
+<Indice>Où l'eau entre-t-elle ? Comment empêcher le sol de changer de teneur en eau sous la maison ?</Indice>
+
+<Corrige>
+L'eau de pluie s'infiltre et entre **entre les feuillets** de l'argile, tenus par des liaisons faibles : les feuillets s'écartent, le sol gonfle ; au séchage, l'eau repart et le sol se rétracte. Parades : stabiliser la teneur en eau (trottoir étanche périphérique, drainage, gouttières), descendre les fondations sous la zone qui varie, ou désolidariser le dallage (vide sanitaire). Le traitement à la chaux du sol peut aussi réduire le gonflement (L1.5.5).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.5.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le numéro atomique Z d'un élément est :" choix={['le nombre de neutrons', 'le nombre de protons', 'sa masse molaire', 'le nombre de liaisons']} bonne={1} colonnes={2}>
+Il définit l'élément : Z = {Z.Ca} pour le calcium.
+</QCM>
+
+<QCM n={2} question="La liaison qui rend un métal ductile est :" choix={['ionique', 'covalente', 'métallique', 'hydrogène']} bonne={2} colonnes={4}>
+Le nuage d'électrons permet aux plans d'atomes de glisser.
+</QCM>
+
+<QCM n={3} question="Le quartz du sable est dur parce que :" choix={['ses atomes sont liés par des liaisons covalentes rigides', 'il contient du fer', 'il est amorphe', 'il est mouillé']} bonne={0} colonnes={2}>
+Chaque silicium est lié à quatre oxygènes dans un réseau rigide.
+</QCM>
+
+<QCM n={4} question="Un matériau à liaisons ioniques est en général :" choix={['ductile et conducteur', 'dur et fragile', 'mou et élastique', 'liquide']} bonne={1} colonnes={2}>
+Un glissement mettrait face à face des ions de même signe.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Certaines argiles gonflent parce que :" choix={['leurs feuillets se dissolvent', 'l’eau entre entre leurs feuillets', 'elles contiennent du métal', 'leurs liaisons covalentes cassent']} bonne={1} colonnes={2}>
+Les feuillets sont tenus par des liaisons faibles : l'eau peut s'y glisser.
+</QCM>
+
+<QCM n={6} question="Le béton est fragile en traction car :" choix={['c’est un métal', 'c’est une céramique pleine de microfissures', 'il contient de l’eau', 'il est trop dur']} bonne={1} colonnes={2}>
+Rien ne glisse pour freiner une fissure qui s'ouvre : d'où les armatures.
+</QCM>
+
+<QCM n={7} question="La masse molaire de CaCO₃ vaut :" choix={[mm('CaCO3'), mm('CaO'), grandeur(Ma.Ca, 2, 'g/mol'), mm('CO2')]} bonne={0} colonnes={4}>
+Ca + C + 3 O.
+</QCM>
+
+<QCM n={8} question="Un tuyau en PVC laissé au soleil devient cassant parce que :" choix={['ses liaisons faibles entre chaînes se dégradent', 'il rouille', 'il absorbe du ciment', 'il devient métallique']} bonne={0} colonnes={2}>
+Chaleur et ultraviolets attaquent la structure du polymère.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

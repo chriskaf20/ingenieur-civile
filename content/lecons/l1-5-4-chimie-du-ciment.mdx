@@ -1,0 +1,311 @@
+---
+id: L1.5.4
+titre: "Chimie du ciment : clinker et hydratation"
+objectifs:
+  - Décrire la fabrication du ciment, du cru au clinker puis au ciment
+  - Nommer les phases du clinker et leur rôle dans la prise et le durcissement
+  - Expliquer la prise et le durcissement par les réactions d'hydratation
+  - Calculer la composition potentielle d'un clinker par la méthode de Bogue
+relecture: false
+normes:
+  - "EN 197-1 : ciments courants, types CEM I à CEM V et classes de résistance 32,5, 42,5 et 52,5"
+glossaire:
+  - terme: Clinker
+    definition: Nodules obtenus par cuisson du cru vers 1 450 °C ; broyé avec du gypse, il donne le ciment Portland.
+  - terme: Hydratation
+    definition: Ensemble des réactions du ciment avec l'eau, qui forment des hydrates solides ; le ciment durcit sans sécher.
+  - terme: C-S-H
+    definition: Silicates de calcium hydratés, de composition variable ; ce sont eux qui donnent la résistance.
+  - terme: Portlandite
+    definition: Hydroxyde de calcium Ca(OH)₂ formé par l'hydratation ; il rend le béton très basique.
+  - terme: Prise
+    definition: Passage de la pâte de l'état plastique à l'état solide, en quelques heures ; le durcissement continue ensuite des semaines.
+symboles:
+  - { symbole: 'C, S, A, F, H', signification: 'notation cimentière : CaO, SiO₂, Al₂O₃, Fe₂O₃, H₂O', unite: '—' }
+  - { symbole: 'C₃S, C₂S, C₃A, C₄AF', signification: 'phases du clinker', unite: '% massiques' }
+formules:
+  - { nom: 'Bogue : C₃S', tex: 'C_3S = 4{,}071\,C - 7{,}600\,S - 6{,}718\,A - 1{,}430\,F - 2{,}852\,\bar{S}', domaine: 'Teneurs en % ; A/F ≥ 0,64' }
+  - { nom: 'Bogue : autres phases', tex: 'C_2S = 2{,}867\,S - 0{,}7544\,C_3S, \quad C_3A = 2{,}650\,A - 1{,}692\,F, \quad C_4AF = 3{,}043\,F', domaine: 'Teneurs en % ; A/F ≥ 0,64' }
+  - { nom: 'Hydratation du C₃S (simplifiée)', tex: '2\,C_3S + 7\,H \rightarrow C_3S_2H_4 + 3\,CH', domaine: 'Bilan global' }
+---
+
+import { bogue, coefficientsBogue, DOSAGES_CIMENTERIE, EXEMPLE_CLINKER, hydratationSilicates, reaction, TEMPERATURES_CUISSON } from '@/lib/calc/chimie'
+import { grandeur, nombre } from '@/lib/format'
+import { equationTexte, FiliereCiment } from '@/components/schemas/Chimie'
+
+export const o0 = EXEMPLE_CLINKER
+export const b0 = bogue(o0)
+export const k = coefficientsBogue()
+export const h1 = hydratationSilicates(1, 100, 0)
+export const h2 = hydratationSilicates(1, 0, 100)
+export const o2 = { CaO: 66, SiO2: 22, Al2O3: 4.5, Fe2O3: 3.5, SO3: 0.8 }
+export const b2 = bogue(o2)
+export const dosage = 350
+export const clinker = dosage * (1 - DOSAGES_CIMENTERIE.gypse / 100)
+export const h3 = hydratationSilicates(clinker, b0.C3S, b0.C2S)
+export const pc = (v) => grandeur(v, 1, '%')
+
+<Page etape="intuition" titre="L'intuition : une pierre que l'on refait">
+
+Le calcaire est une pierre. On le broie avec de l'argile, on le cuit très fort, on le broie encore : on obtient une poudre grise, le ciment. Mélangé à de l'eau, il redevient une pierre en quelques heures, et il continue à durcir pendant des semaines, même sous l'eau.
+
+Le ciment ne « sèche » pas comme une peinture : il **réagit** avec l'eau. La cuisson a fabriqué des minéraux instables, avides d'eau ; l'eau les transforme en cristaux et en gels qui s'enchevêtrent et collent les grains de sable et de gravier.
+
+Comprendre cette chimie explique les règles du chantier : ne pas ajouter d'eau dans un béton qui raidit, garder le béton humide pendant qu'il durcit, se méfier de la chaleur des grandes masses coulées en plein soleil.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que se passe-t-il, chimiquement, entre le calcaire de la carrière et le béton durci ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Du calcaire au béton durci" sousTitre="Cuisson, broyage, hydratation" etape="cours">
+
+<Panneau n={1} titre="Le cru" icone="materiaux" couleur="terre">
+Environ {nombre(DOSAGES_CIMENTERIE.calcaire, 0)} % de calcaire (CaCO₃) et {nombre(DOSAGES_CIMENTERIE.argile, 0)} % d'argile (silice, alumine, oxyde de fer), broyés très finement et dosés au laboratoire.
+</Panneau>
+
+<Panneau n={2} titre="La cuisson" icone="attention" couleur="correction">
+Dans un four rotatif, vers {nombre(TEMPERATURES_CUISSON.clinker, 0)} °C : le calcaire perd son CO₂, puis la chaux se combine à la silice, à l'alumine et au fer. Le cru fond en partie et forme des nodules : le **clinker**.
+</Panneau>
+
+<Panneau n={3} titre="Le clinker" icone="quantites" couleur="encre">
+Quatre phases, en notation cimentière (C = CaO, S = SiO₂, A = Al₂O₃, F = Fe₂O₃) : **C₃S** (alite), **C₂S** (bélite), **C₃A** et **C₄AF**. Les silicates en forment l'essentiel : {pc(b0.C3S + b0.C2S)} dans l'exemple résolu.
+</Panneau>
+
+<Panneau n={4} titre="Le ciment" icone="regle" couleur="acier">
+Le clinker est broyé avec environ {nombre(DOSAGES_CIMENTERIE.gypse, 0)} % de gypse, qui règle la prise. L'EN 197-1 classe les ciments courants en types (CEM I à CEM V, selon les ajouts) et en classes de résistance (32,5, 42,5, 52,5 MPa à 28 jours).
+</Panneau>
+
+<Panneau n={5} titre="L'hydratation" icone="calcul" couleur="brique">
+Avec l'eau, les silicates forment des **C-S-H** (la colle) et de la **portlandite** Ca(OH)₂ (la réserve basique). Le C₃A et le gypse forment de l'**ettringite**. Ces réactions dégagent de la chaleur.
+</Panneau>
+
+<Panneau n={6} titre="Prise et durcissement" icone="retenir" couleur="validation">
+La prise, en quelques heures, fige la pâte. Le durcissement continue des semaines tant qu'il reste de l'eau et du ciment non hydraté. La résistance de référence se mesure à 28 jours.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : les réactions d'hydratation">
+
+### Les silicates
+
+Les deux silicates donnent les mêmes produits, à des vitesses différentes. Formules simplifiées :
+
+- C₃S, rapide (résistance des premiers jours) : {equationTexte(reaction('hydratationC3S'))} ;
+- C₂S, lent (résistance à long terme) : {equationTexte(reaction('hydratationC2S'))}.
+
+Par kilogramme de C₃S, il se fixe {grandeur(h1.eauParKgC3S, 3, 'kg')} d'eau et il se forme {grandeur(h1.chParKgC3S, 3, 'kg')} de portlandite ; le C₂S en forme beaucoup moins ({grandeur(h2.chParKgC2S, 3, 'kg')} par kilogramme).
+
+### Les aluminates et le gypse
+
+Seul, le C₃A réagit très vite avec l'eau : la pâte se figerait en quelques minutes (fausse prise). Le gypse l'en empêche en formant avec lui de l'**ettringite** : {equationTexte(reaction('ettringite'))}.
+
+### L'eau : chimique et de maniabilité
+
+La chimie ne demande qu'une partie de l'eau du béton. Le reste sert à rendre le béton maniable ; en s'évaporant, il laisse des **pores**. Plus il y a d'eau en excès, plus le béton est poreux, moins il est résistant et durable (rapport eau/ciment, L2.6).
+
+### La chaleur
+
+L'hydratation est **exothermique** : le C₃A et le C₃S chauffent le plus. Dans une grosse pièce coulée en plein soleil, le cœur s'échauffe, la surface refroidit : des fissures thermiques peuvent apparaître.
+
+<Regle type="simplification">
+Les formules des hydrates sont simplifiées : les C-S-H n'ont pas de composition fixe. Le calcul de Bogue donne une composition « potentielle » ; la composition réelle du clinker, mesurée par diffraction des rayons X, s'en écarte un peu.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la filière du ciment">
+
+<FiliereCiment />
+
+De gauche à droite : le cru broyé entre dans le four, où le calcaire perd son CO₂ et où se forment les phases du clinker ; le clinker refroidi est broyé avec le gypse.
+
+En bas, ce que devient le ciment au gâchage : des C-S-H qui collent, de la portlandite qui protège les aciers, de l'ettringite qui règle la prise. Le ciment ne sèche pas : il fixe l'eau dans de nouveaux minéraux.
+
+</Page>
+
+<FicheCalcul calcul="bogueClinker">
+
+<Cahier titre="Exemple résolu : la composition d'un clinker">
+
+**Énoncé.** Le laboratoire d'une cimenterie du Kongo-Central analyse un clinker : CaO {pc(o0.CaO)}, SiO₂ {pc(o0.SiO2)}, Al₂O₃ {pc(o0.Al2O3)}, Fe₂O₃ {pc(o0.Fe2O3)}, SO₃ {pc(o0.SO3)} (données de l'énoncé). Calcule sa composition potentielle par la méthode de Bogue, puis la portlandite que ses silicates formeront.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi partir des oxydes ? C'est ce que mesure l'analyse chimique ; les phases, elles, se calculent.</Note>
+</Etape>
+
+<Etape n={2} titre="Le fer, l'alumine et le soufre">
+<AN k="fer" />
+<AN k="alumine" />
+<AN k="chaux" />
+<Note>Pourquoi cet ordre ? Chaque oxyde « rare » est entièrement placé dans une phase ; le CaO et la silice restants se partagent ensuite entre les deux silicates.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les silicates et l'hydratation">
+
+<Etape n={3} titre="Le partage entre C₃S et C₂S">
+<AN k="systeme" />
+<AN k="silicates" />
+<Resultat k="C3S" libelle="Teneur en C₃S" />
+</Etape>
+
+<Etape n={4} titre="La portlandite">
+<AN k="hydratation" />
+<Note couleur="vert">Contrôle : on retrouve les formules de Bogue (C₃S = 4,071 CaO − 7,600 SiO₂ − …). Augmente CaO : le C₃S monte, le C₂S baisse.</Note>
+</Etape>
+
+<Etape n={5} titre="La composition">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="dire que le béton sèche.">
+Il durcit en fixant l'eau. Un béton qui sèche trop tôt, au soleil et au vent, arrête de durcir en surface : il devient poudreux et fissuré. La cure, qui le garde humide, fait partie du travail.
+</Piege>
+
+<Piege erreur="rajouter de l'eau à un béton qui raidit.">
+La prise a commencé : l'eau ajoutée ne réagit plus, elle ne fait que créer des pores. Le béton perd en résistance et en durabilité.
+</Piege>
+
+<Piege erreur="confondre clinker et ciment.">
+Le ciment est le clinker broyé avec du gypse, et souvent avec des ajouts (laitier, cendres, pouzzolanes, calcaire) : c'est le type CEM de l'EN 197-1.
+</Piege>
+
+<Piege erreur="croire que plus de ciment est toujours mieux.">
+Plus de ciment, c'est plus de chaleur et plus de retrait, donc plus de fissures. On dose le ciment pour la résistance et la durabilité visées, pas « pour être sûr ».
+</Piege>
+
+<Piege erreur="lire la classe 42,5 comme un dosage.">
+42,5 est la résistance minimale en MPa, à 28 jours, du mortier normalisé fait avec ce ciment ; ce n'est ni une quantité ni la résistance du béton.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Stocker le ciment en climat humide.** Le ciment réagit avec l'humidité de l'air : un sac mal stocké se couvre de grumeaux durs. On stocke les sacs sur palettes, à l'abri, sans les poser contre un mur, et l'on utilise les plus anciens d'abord. Un ciment éventé se refuse.
+
+<Encadre type="terrain" titre="Bétonner sous la chaleur">
+En RDC, le béton est souvent coulé par forte chaleur. L'hydratation s'accélère, la prise est plus rapide, l'eau s'évapore. Parades : bétonner tôt le matin, protéger du soleil, garder les granulats à l'ombre, utiliser un retardateur si nécessaire (L1.5.8), et surtout assurer une cure humide pendant plusieurs jours.
+</Encadre>
+
+**Les cimenteries.** Le Kongo-Central possède des gisements de calcaire et plusieurs cimenteries. Le ciment local évite de longs transports, mais il se choisit, comme tout ciment, sur la fiche technique : type CEM, classe de résistance, et marquage de conformité.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : chimie du ciment">
+
+### Fabrication
+
+cru (calcaire + argile) · four ≈ {nombre(TEMPERATURES_CUISSON.clinker, 0)} °C · clinker + gypse broyés = ciment (EN 197-1 : CEM I à V ; 32,5 / 42,5 / 52,5)
+
+### Phases du clinker
+
+C₃S : résistance rapide · C₂S : résistance lente · C₃A : prise, chaleur, sulfates · C₄AF : peu réactif
+
+### Bogue
+
+C₃S = 4,071 C − 7,600 S − 6,718 A − 1,430 F − 2,852 S̄ · C₃A = 2,650 A − 1,692 F · C₄AF = 3,043 F
+
+### Hydratation
+
+silicates + eau → C-S-H (résistance) + portlandite (pH ≈ 13) · C₃A + gypse → ettringite · exothermique
+
+### Chantier
+
+le béton ne sèche pas, il durcit · pas d'eau ajoutée après coup · cure humide · attention à la chaleur
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le rôle du gypse">
+
+Pourquoi ajoute-t-on du gypse au clinker ? Que se passerait-il sans lui ?
+
+<Indice>Quelle phase réagit très vite avec l'eau ?</Indice>
+
+<Corrige>
+Le gypse **règle la prise** : il réagit avec le C₃A pour former de l'ettringite, qui ralentit l'hydratation des aluminates. Sans lui, le C₃A réagirait en quelques minutes et la pâte se figerait avant la mise en place (fausse prise).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un second clinker">
+
+Un clinker contient CaO {pc(o2.CaO)}, SiO₂ {pc(o2.SiO2)}, Al₂O₃ {pc(o2.Al2O3)}, Fe₂O₃ {pc(o2.Fe2O3)}, SO₃ {pc(o2.SO3)}. Calcule sa composition de Bogue et compare-la à celle de l'exemple.
+
+<Indice>Commence par C₄AF, puis C₃A, puis C₃S ; C₂S en dernier.</Indice>
+
+<Corrige>
+C₄AF = **{pc(b2.C4AF)}**, C₃A = **{pc(b2.C3A)}**, C₃S = **{pc(b2.C3S)}**, C₂S = **{pc(b2.C2S)}**. Moins d'alumine et plus de fer qu'à l'exemple : moins de C₃A ({pc(b2.C3A)} contre {pc(b0.C3A)}), donc un ciment qui chauffe moins et résiste mieux aux sulfates (L1.5.7).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La réserve basique d'un béton">
+
+Un béton est dosé à {grandeur(dosage, 0, 'kg/m³')} d'un ciment CEM I fait de {nombre(100 - DOSAGES_CIMENTERIE.gypse, 0)} % du clinker de l'exemple. Quelle masse de portlandite ses silicates formeront-ils, par m³, une fois entièrement hydratés ?
+
+<Indice>Masse de clinker, puis masses de C₃S et C₂S, puis la portlandite de chaque silicate.</Indice>
+
+<Corrige>
+Clinker : {nombre(clinker, 1)} kg/m³ ; C₃S : {grandeur(h3.mC3S, 1, 'kg')} et C₂S : {grandeur(h3.mC2S, 1, 'kg')}. Portlandite : {nombre(h3.mC3S, 1)} × {nombre(h3.chParKgC3S, 3)} + {nombre(h3.mC2S, 1)} × {nombre(h3.chParKgC2S, 3)} = **{grandeur(h3.portlandite, 0, 'kg/m³')}**. C'est cette réserve que la carbonatation consomme peu à peu (L1.5.7).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.5.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le clinker est obtenu par cuisson du cru vers :" choix={['150 °C', '900 °C', `${nombre(TEMPERATURES_CUISSON.clinker, 0)} °C`, '3 000 °C']} bonne={2} colonnes={4}>
+À cette température, le cru fond en partie et les phases du clinker se forment.
+</QCM>
+
+<QCM n={2} question="La phase du clinker qui donne la résistance des premiers jours est :" choix={['C₃S', 'C₂S', 'C₄AF', 'le gypse']} bonne={0} colonnes={4}>
+Le C₂S agit plus lentement, à long terme.
+</QCM>
+
+<QCM n={3} question="Le gypse est ajouté au clinker pour :" choix={['augmenter la résistance', 'régler la prise', 'colorer le ciment', 'réduire le CO₂']} bonne={1} colonnes={2}>
+Il freine la réaction rapide du C₃A.
+</QCM>
+
+<QCM n={4} question="Les C-S-H sont :" choix={['des impuretés', 'les hydrates qui donnent la résistance', 'des granulats', 'une forme de rouille']} bonne={1} colonnes={2}>
+Ce sont la « colle » de la pâte de ciment.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="La portlandite Ca(OH)₂ formée par l'hydratation :" choix={['affaiblit le béton', 'rend le béton très basique et protège les aciers', 'provoque la prise', 'est un granulat']} bonne={1} colonnes={2}>
+Elle maintient un pH voisin de 13 dans les pores.
+</QCM>
+
+<QCM n={6} question="Dans l'exemple, la composition de Bogue donne un C₃S de :" choix={[pc(b0.C3S), pc(b0.C2S), pc(o0.CaO), pc(b0.C3A)]} bonne={0} colonnes={4}>
+4,071 × 65 − 7,600 × 21 − 6,718 × 5,5 − 1,430 × 3 − 2,852 × 1.
+</QCM>
+
+<QCM n={7} question="Un béton qui raidit sur le chantier :" choix={['se rattrape en ajoutant de l’eau', 'a commencé sa prise : ajouter de l’eau l’affaiblit', 'est sec', 'doit être chauffé']} bonne={1} colonnes={2}>
+L'eau ajoutée ne réagit plus : elle laisse des pores.
+</QCM>
+
+<QCM n={8} question="La classe 42,5 d'un ciment indique :" choix={['un dosage de 42,5 kg', 'une résistance minimale de 42,5 MPa à 28 jours (mortier normalisé)', 'une finesse de 42,5', 'une température de cuisson']} bonne={1} colonnes={2}>
+C'est une classe de résistance de l'EN 197-1.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

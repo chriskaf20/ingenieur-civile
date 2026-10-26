@@ -1,0 +1,159 @@
+---
+id: L1.5.P
+titre: "Mini-projet : fiche d'analyse d'une dégradation"
+objectifs:
+  - Décrire une dégradation avec précision avant d'en chercher la cause
+  - Relier une dégradation observée à son mécanisme chimique
+  - Choisir les essais qui confirment ou écartent une hypothèse
+  - Proposer une réparation qui traite la cause et une prévention pour les ouvrages neufs
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { diagnosticCarbonatation, EXEMPLE_CARBONATATION, PH_DEPASSIVATION } from '@/lib/calc/chimie'
+import { grandeur, nombre } from '@/lib/format'
+import { QuatreDegradations } from '@/components/schemas/Chimie'
+
+export const d = EXEMPLE_CARBONATATION
+export const r = diagnosticCarbonatation(d)
+export const cEclat = 10
+export const rEclat = diagnosticCarbonatation({ ...d, c: cEclat })
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Un bureau d'études de Kinshasa est mandaté pour inspecter quatre ouvrages qui se dégradent. Pour chacun, l'inspecteur a relevé l'aspect, la localisation et le milieu. Tu es chargé de rédiger la **fiche d'analyse** de chaque dégradation.
+
+<QuatreDegradations />
+
+### Les observations
+
+- **A. Sous-face d'un balcon** d'immeuble de {nombre(d.age, 0)} ans, exposé à la pluie : éclats de béton, armatures visibles, coulures brunes. Mesures : profondeur carbonatée {grandeur(d.x, 0, 'mm')} en partie courante, enrobage moyen {grandeur(d.c, 0, 'mm')}, mais {grandeur(cEclat, 0, 'mm')} seulement au droit des éclats (données de l'énoncé).
+- **B. Pile d'un pont** en milieu humide : fissures en réseau sur les faces exposées à l'eau, dépôts blanchâtres dans les fissures, ouvrage d'une vingtaine d'années.
+- **C. Pied d'un mur de clôture** fondé dans un sol chargé en sulfates (zone minière) : béton gonflé, friable sur une trentaine de centimètres au-dessus du sol.
+- **D. Regard d'un collecteur d'eaux usées** : voûte rongée au-dessus de l'eau, béton sableux, odeur d'œuf pourri.
+
+### Ce que tu rends
+
+1. Pour chaque cas, une fiche : observation, hypothèse de cause, mécanisme chimique (équation si possible), essais de confirmation, réparation, prévention.
+2. Le calcul du cas A : coefficient de carbonatation, âge où le front atteint les armatures, en partie courante et au droit des éclats.
+3. Un tableau de synthèse des quatre cas.
+
+<Regle type="simplification">
+Les observations sont données ; sur un vrai ouvrage, le diagnostic demande des mesures en plusieurs points, des prélèvements et des essais de laboratoire, et il est conduit par un spécialiste. Ce mini-projet entraîne au raisonnement, pas à la décision de réparer.
+</Regle>
+
+</Page>
+
+<Infographie titre="La démarche de diagnostic" sousTitre="De l'observation à la réparation" etape="projet">
+
+<Panneau n={1} titre="Observer" icone="verification" couleur="encre">
+Forme des fissures (parallèles aux armatures, en réseau, inclinées), couleur des dépôts (brun : rouille ; blanc : sels ou gel), localisation (angles, sous-faces, pied de mur, zone humide).
+</Panneau>
+
+<Panneau n={2} titre="Situer le milieu" icone="terrain" couleur="terre">
+Air, pluie, mer, sol, eau souterraine, effluents, chaleur. Le milieu désigne les suspects : CO₂, chlorures, sulfates, acides, alcalis.
+</Panneau>
+
+<Panneau n={3} titre="Formuler des hypothèses" icone="idee" couleur="brique">
+Pour chaque suspect, quel mécanisme (L1.5.6, L1.5.7) ? Quelles traces devrait-il laisser ? Garder plusieurs hypothèses ouvertes.
+</Panneau>
+
+<Panneau n={4} titre="Tester" icone="calcul" couleur="acier">
+Phénolphtaléine, détecteur d'armatures, dosage des chlorures et des sulfates, carottes et examen au microscope. Un essai doit pouvoir écarter une hypothèse.
+</Panneau>
+
+<Panneau n={5} titre="Conclure" icone="retenir" couleur="validation">
+Une cause principale, parfois des causes associées (enrobage insuffisant **et** carbonatation). Écrire ce qui est prouvé et ce qui reste supposé.
+</Panneau>
+
+<Panneau n={6} titre="Réparer et prévenir" icone="regle" couleur="correction">
+Supprimer la cause ou couper le mécanisme, puis réparer. Pour les ouvrages neufs : enrobage, compacité, ciment adapté, drainage, contrôle des granulats et de l'eau.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="carbonatation">
+
+<Cahier titre="Étape 1 : le calcul du cas A, en partie courante" etape="projet">
+
+<Etape n={1} titre="Les mesures">
+<Entrees />
+<Note>Pourquoi deux enrobages ? Les éclats apparaissent là où l'enrobage est le plus faible : il faut faire le calcul aux deux endroits.</Note>
+</Etape>
+
+<Etape n={2} titre="Le coefficient et l'échéance">
+<AN k="K" />
+<AN k="armatures" />
+<AN k="reste" />
+<Resultat k="tArmatures" libelle="Front aux armatures (partie courante)" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : au droit des éclats" etape="projet">
+
+<Etape n={3} titre="La courbe">
+<Schema />
+<Note couleur="vert">Mets maintenant l'enrobage mesuré au droit des éclats, {nombre(cEclat, 0)} mm : le front a atteint l'acier depuis longtemps. Les éclats sont là où l'enrobage manquait.</Note>
+</Etape>
+
+<Etape n={4} titre="La projection">
+<AN k="avenir" />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le corrigé : les quatre fiches">
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Cas</th><th>Cause probable</th><th>Essais de confirmation</th><th>Réparation et prévention</th></tr></thead>
+    <tbody>
+      <tr><td>A. Balcon</td><td>Corrosion des armatures par carbonatation, aggravée par un enrobage insuffisant</td><td>Phénolphtaléine (front à {grandeur(d.x, 0, 'mm')}), détecteur d'armatures, mesure de l'éclatement</td><td>Dégager l'acier, le traiter ou le remplacer, reconstituer l'enrobage ; ouvrages neufs : cales d'enrobage, béton compact</td></tr>
+      <tr><td>B. Pile de pont</td><td>Alcali-réaction (granulat réactif, alcalis, humidité)</td><td>Carotte, examen au microscope du gel, essai de gonflement résiduel</td><td>Limiter l'eau (drainage, protection), surveiller ; ouvrages neufs : granulats qualifiés, ciment et additions adaptés</td></tr>
+      <tr><td>C. Pied de mur</td><td>Attaque sulfatique externe (ettringite et gypse)</td><td>Dosage des sulfates du sol et de l'eau, analyse du béton dégradé</td><td>Purger, reconstituer avec un béton adapté, couper l'eau (drainage, barrière) ; classe XA, ciment pauvre en C₃A</td></tr>
+      <tr><td>D. Regard d'égout</td><td>Attaque acide biogénique (H₂S → H₂SO₄)</td><td>pH de surface, dosage des sulfates, mesure du H₂S dans l'air</td><td>Ventiler, réhabiliter avec un mortier ou un revêtement résistant aux acides</td></tr>
+    </tbody>
+  </table>
+</div>
+
+### Le cas A en chiffres
+
+En partie courante, K = {nombre(r.K, 2)} mm/√an : le front atteindra l'enrobage de {grandeur(d.c, 0, 'mm')} vers **{grandeur(r.tArmatures, 0, 'ans')}**, dans {grandeur(r.reste, 0, 'ans')}. Au droit des éclats, avec {grandeur(cEclat, 0, 'mm')} d'enrobage, l'acier a été atteint vers **{grandeur(rEclat.tArmatures, 0, 'ans')}** : depuis, le béton carbonaté (pH sous {nombre(PH_DEPASSIVATION, 0)} environ) ne protège plus l'acier, et la pluie a fourni l'eau de la pile. La cause est double : carbonatation **et** enrobage insuffisant.
+
+<Encadre type="attention">
+Réparer seulement les éclats ne suffit pas : dans {grandeur(r.reste, 0, 'ans')}, le front atteindra aussi les armatures de la partie courante. Une protection de surface (revêtement anti-carbonatation) ralentit le front ; elle se décide avec un spécialiste.
+</Encadre>
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Observation | Description vague (« le béton est abîmé ») | Forme, couleur et localisation décrites | Milieu et âge de l'ouvrage reliés aux observations |
+| Mécanisme | Cause affirmée sans explication | Mécanisme nommé | Équation chimique et conditions du mécanisme écrites |
+| Essais | Aucun | Un essai par hypothèse | Essais choisis pour départager deux hypothèses |
+| Calcul (cas A) | Absent | K et échéance calculés | Calcul fait aussi au droit des éclats, cause double identifiée |
+| Réparation | Reboucher les fissures | Traiter la cause avant de réparer | Prévention pour les ouvrages neufs, limites du diagnostic signalées |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Le balcon A est à Muanda, au bord de la mer, au lieu de Kinshasa. Quelles mesures ajouterais-tu à ton diagnostic, et pourquoi la corrosion pourrait-elle y avancer même dans un béton non carbonaté ?
+</Encadre>
+
+<Quiz id="L1.5.P">
+
+<QCM n={1} question="Mes quatre fiches donnent-elles l'observation, le mécanisme, les essais, la réparation et la prévention, avec le calcul du cas A en partie courante et au droit des éclats ?" choix={['Oui, tout y est', 'Il manque les essais ou la prévention', 'Je n’ai traité qu’une partie des cas']} bonne={0}>
+Sinon, complète-les : une réparation sans diagnostic de la cause recommence quelques années plus tard.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

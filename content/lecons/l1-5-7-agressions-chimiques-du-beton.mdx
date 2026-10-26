@@ -1,0 +1,309 @@
+---
+id: L1.5.7
+titre: "Agressions chimiques du béton : carbonatation, sulfates, alcali-réaction"
+objectifs:
+  - Expliquer la carbonatation et estimer la progression de son front
+  - Décrire l'attaque des sulfates et la formation d'ettringite expansive
+  - Reconnaître l'alcali-réaction et les conditions qui la déclenchent
+  - Choisir les parades adaptées (compacité, enrobage, ciment, granulats, drainage)
+relecture: false
+normes:
+  - "EN 206 : classes d'exposition XC (carbonatation), XD et XS (chlorures), XA (attaques chimiques)"
+  - "EN 197-1 : ciments résistant aux sulfates (SR), cités sans valeur"
+glossaire:
+  - terme: Carbonatation
+    definition: Réaction du CO₂ de l'air avec la portlandite du béton ; le pH de la zone touchée tombe vers 9 et l'acier n'y est plus protégé.
+  - terme: Front de carbonatation
+    definition: Limite entre béton carbonaté et béton sain ; il progresse depuis le parement, à peu près comme la racine carrée du temps.
+  - terme: Ettringite
+    definition: Sulfoaluminate de calcium très hydraté ; formée tardivement dans le béton durci, elle gonfle et le fissure.
+  - terme: Alcali-réaction
+    definition: Réaction entre une silice mal cristallisée des granulats et les alcalis du ciment ; le gel formé gonfle en absorbant de l'eau.
+  - terme: Alcalin équivalent
+    definition: "Teneur en alcalis d'un ciment exprimée en Na₂O : Na₂Oéq = Na₂O + 0,658 K₂O."
+symboles:
+  - { symbole: 'x', signification: 'profondeur carbonatée', unite: 'mm' }
+  - { symbole: 'K', signification: 'coefficient de carbonatation', unite: 'mm/√an' }
+  - { symbole: 't', signification: 'âge du béton', unite: 'an' }
+  - { symbole: 'c', signification: 'enrobage', unite: 'mm' }
+formules:
+  - { nom: 'Front de carbonatation', tex: 'x = K\sqrt{t}', domaine: 'Loi simplifiée, béton d’humidité stable' }
+  - { nom: 'Armatures atteintes', tex: 't = \Big(\frac{c}{K}\Big)^2', domaine: 'Même loi' }
+  - { nom: 'Alcalin équivalent', tex: '\mathrm{Na_2O_{éq}} = \mathrm{Na_2O} + 0{,}658\,\mathrm{K_2O}', domaine: 'Teneurs en % de la masse de ciment' }
+---
+
+import { alcalinEquivalent, classeXA, COEF_K2O, diagnosticCarbonatation, massesReaction, masseMolaire, PH_DEPASSIVATION, profondeurCarbonatation, reaction } from '@/lib/calc/chimie'
+import { grandeur, nombre } from '@/lib/format'
+import { TroisAgressions } from '@/components/schemas/Chimie'
+
+export const depart = { age: 15, x: 12, c: 30 }
+export const d0 = diagnosticCarbonatation(depart)
+export const ettr = massesReaction(reaction('ettringite'), 0, 1)
+export const x30 = profondeurCarbonatation(4, 30)
+export const xa2 = classeXA(1500, 6)
+export const na = alcalinEquivalent(0.2, 0.8)
+export const alcalisM3 = (400 * na) / 100
+
+<Page etape="intuition" titre="L'intuition : un béton qui vieillit de l'extérieur">
+
+Un béton bien fait ressemble à une pierre éternelle. Pourtant, il vit dans un milieu qui l'attaque : l'air contient du CO₂, les sols et les eaux contiennent des sulfates, certaines eaux sont acides, et certains granulats réagissent avec le ciment lui-même.
+
+La plupart de ces attaques avancent **depuis la surface**, par les pores remplis d'air ou d'eau. Elles sont lentes, invisibles pendant des années, puis apparaissent d'un coup : rouille et éclats sous un balcon, béton gonflé au pied d'un mur, fissures en réseau sur une pile de pont.
+
+Comme en médecine, il vaut mieux prévenir que guérir : un béton compact, bien enrobé et adapté à son milieu résiste des décennies. Un diagnostic précoce permet de réparer avant que la structure ne soit en danger.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelles réactions chimiques détruisent le béton, à quelle vitesse, et comment s'en protéger ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les ennemis chimiques du béton" sousTitre="Mécanismes et parades" etape="cours">
+
+<Panneau n={1} titre="Carbonatation" icone="attention" couleur="brique">
+Le CO₂ de l'air réagit avec la portlandite : Ca(OH)₂ + CO₂ → CaCO₃ + H₂O. Le pH tombe vers {nombre(PH_DEPASSIVATION, 0)} : le béton ne protège plus l'acier, qui peut rouiller (L1.5.6).
+</Panneau>
+
+<Panneau n={2} titre="Chlorures" icone="erreur" couleur="correction">
+Air marin, sable de mer, eau salée, accélérateurs chlorés : les chlorures percent la couche passive de l'acier, même dans un béton non carbonaté.
+</Panneau>
+
+<Panneau n={3} titre="Sulfates" icone="quantites" couleur="terre">
+Venus du sol, des eaux souterraines ou d'effluents, ils forment de l'ettringite et du gypse dans le béton durci : le béton gonfle, se fissure, se désagrège.
+</Panneau>
+
+<Panneau n={4} titre="Acides" icone="regle" couleur="acier">
+Eaux acides, eaux de mine, égouts : l'acide dissout la portlandite puis les C-S-H. Le béton perd sa pâte et devient sableux en surface.
+</Panneau>
+
+<Panneau n={5} titre="Alcali-réaction" icone="calcul" couleur="encre">
+Une silice mal cristallisée de certains granulats réagit avec les alcalis du ciment. Le gel formé absorbe l'eau et gonfle : fissures en réseau.
+</Panneau>
+
+<Panneau n={6} titre="Parades" icone="retenir" couleur="validation">
+Béton compact (peu d'eau, bonne cure), enrobage suffisant, ciment adapté au milieu, granulats contrôlés, drainage. La classe d'exposition de l'EN 206 traduit le milieu en exigences.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : mécanismes et vitesses">
+
+### La carbonatation
+
+Le CO₂ entre par les pores et consomme la portlandite couche après couche. Le front avance vite au début, puis de plus en plus lentement : en première approche, **x = K √t**. Le coefficient K dépend surtout de la compacité du béton et de son humidité : la carbonatation est lente dans un béton saturé d'eau, où le CO₂ circule mal, et dans un béton très sec, où il manque l'eau de la réaction. On la mesure en pulvérisant de la **phénolphtaléine** sur une cassure fraîche : le béton sain devient rose, la zone carbonatée reste incolore.
+
+### Les sulfates
+
+Les ions sulfate qui pénètrent dans le béton durci réagissent avec les aluminates et la portlandite. Pour 1 kg de C₃A, il se forme {grandeur(ettr.lignes[3].m, 2, 'kg')} d'ettringite, très hydratée et volumineuse : dans un béton déjà rigide, elle n'a pas la place et elle fissure. L'EN 206 classe les eaux et les sols agressifs en **XA1 à XA3** selon leur teneur en sulfates, leur pH et d'autres ions <AVerifier note="A_VERIFIER.md n° 37 : seuils des classes XA (EN 206, tableau 2)" />. Parades : béton compact et ciment pauvre en C₃A, comme les ciments résistant aux sulfates de l'EN 197-1 <AVerifier note="A_VERIFIER.md n° 38 : ciments SR et formation différée d'ettringite" />.
+
+Une forme interne existe aussi : si le béton a été trop chaud pendant son durcissement (grosses pièces coulées sous le soleil, étuvage), l'ettringite peut se former des mois plus tard et faire gonfler l'ouvrage. On limite donc la température du béton jeune.
+
+### L'alcali-réaction
+
+Il faut trois conditions à la fois : un granulat **réactif**, assez d'**alcalis** (Na₂Oéq = Na₂O + {nombre(COEF_K2O, 3)} K₂O, le coefficient étant le rapport des masses molaires) et de l'**eau**. La réaction est lente : les fissures apparaissent souvent après plusieurs années. Parades : granulats qualifiés non réactifs, ciments et additions qui limitent les alcalis, ouvrages drainés <AVerifier note="A_VERIFIER.md n° 38 : recommandations nationales de prévention de l'alcali-réaction" />.
+
+<Regle type="simplification">
+La loi en racine du temps et les coefficients K de cette leçon sont des simplifications : sur un ouvrage, K se déduit d'une mesure, et il varie selon l'orientation, l'abri de la pluie et l'humidité.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : trois agressions, trois signatures">
+
+<TroisAgressions />
+
+**1. Carbonatation.** Le front (rouge clair) a atteint les armatures : la rouille gonfle et fait éclater l'enrobage, d'abord sur les angles et les sous-faces.
+
+**2. Sulfates.** Le pied du mur, au contact d'un sol chargé en sulfates, gonfle et se désagrège ; la partie hors du sol reste saine.
+
+**3. Alcali-réaction.** Des fissures en réseau, ou en faïençage, souvent bordées de dépôts blanchâtres de gel, sur des parties humides de l'ouvrage.
+
+<Encadre type="attention">
+Une signature n'est qu'un indice. Le diagnostic se confirme par des essais : phénolphtaléine, dosage des chlorures et des sulfates, examen au microscope d'une carotte.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="carbonatation" depart={depart}>
+
+<Cahier titre="Exemple résolu : un poteau de parking à Kinshasa">
+
+**Énoncé.** Dans un parking couvert de {grandeur(depart.age, 0, 'ans')}, abrité de la pluie, on mesure sur un poteau une profondeur carbonatée de {grandeur(depart.x, 0, 'mm')} à la phénolphtaléine, et un enrobage de {grandeur(depart.c, 0, 'mm')} au détecteur d'armatures (données de l'énoncé). Les armatures sont-elles atteintes ? Quand le seront-elles ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un parking ? Abrité de la pluie, le béton y reste à humidité moyenne : c'est là que la carbonatation est la plus rapide.</Note>
+</Etape>
+
+<Etape n={2} titre="Le coefficient de carbonatation">
+<AN k="K" />
+</Etape>
+
+<Etape n={3} titre="L'âge où le front atteint l'acier">
+<AN k="armatures" />
+<AN k="reste" />
+<Resultat k="reste" libelle="Délai avant les armatures" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la projection">
+
+<Etape n={4} titre="Le front dans le futur">
+<AN k="avenir" />
+<Note couleur="vert">Contrôle : le front ralentit avec le temps. Diminue l'enrobage à 15 mm : le délai fond, car t varie comme le carré de c.</Note>
+</Etape>
+
+<Etape n={5} titre="La courbe">
+<Schema />
+<Note>Pourquoi ne pas s'inquiéter ici ? L'enrobage est généreux et le béton reste sec : même atteint, l'acier rouillerait lentement. Sous un balcon exposé à la pluie, le même calcul donne un tout autre verdict (mini-projet).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire que la carbonatation affaiblit le béton.">
+Le béton carbonaté reste aussi résistant, parfois plus. Le danger est pour l'acier, qui n'est plus protégé.
+</Piege>
+
+<Piege erreur="penser qu'un béton résistant ne craint rien.">
+La résistance ne dit pas tout : un béton résistant mais mal vibré ou mal curé en surface laisse entrer CO₂, chlorures et sulfates. La durabilité se joue sur les premiers centimètres.
+</Piege>
+
+<Piege erreur="choisir un ciment résistant aux sulfates et s'arrêter là.">
+Sans compacité, le meilleur ciment ne suffit pas : l'eau agressive circule dans les pores. Ciment adapté **et** béton compact **et** drainage.
+</Piege>
+
+<Piege erreur="confondre efflorescences et alcali-réaction.">
+Des traces blanches de sels qui sèchent en surface (efflorescences) sont en général sans gravité. L'alcali-réaction se reconnaît à des fissures en réseau, ouvertes, avec un gel dans les fissures : il faut une analyse pour conclure.
+</Piege>
+
+<Piege erreur="réparer un éclat sans traiter la cause.">
+Reboucher un éclat au mortier sans dégager l'acier rouillé ni traiter le béton carbonaté autour : la corrosion continue sous la réparation, qui tombera à son tour.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les égouts et les fosses.** Dans les réseaux d'assainissement, des bactéries transforment le soufre des eaux usées en hydrogène sulfuré, puis en acide sulfurique sur les parois humides : la voûte des regards et des collecteurs se ronge au-dessus de l'eau. On choisit des bétons et des revêtements adaptés, et l'on ventile.
+
+<Encadre type="terrain" titre="Les sols et les eaux des zones minières">
+Autour des mines du Katanga, les eaux d'exhaure et certains sols sont chargés en sulfates et parfois acides. Avant de couler une fondation ou un bassin, on analyse l'eau et le sol : une eau souterraine à 1 500 mg/L de sulfates et pH 6 relèverait de la classe **{xa2.classe}** (sulfates : {xa2.sulfates}, pH : {xa2.pH}) <AVerifier note="A_VERIFIER.md n° 37" />, avec les exigences de béton correspondantes.
+</Encadre>
+
+**Le climat tropical accélère.** Les réactions chimiques vont plus vite à chaud : carbonatation, alcali-réaction, attaques sulfatiques progressent plus vite qu'en climat tempéré, à béton égal. Les règles de durabilité doivent donc être appliquées sans rabais.
+
+**Le diagnostic.** Phénolphtaléine sur cassure fraîche, détecteur d'armatures pour l'enrobage, carottes pour les analyses chimiques et l'examen au microscope : ces outils simples permettent de relier une dégradation à sa cause (mini-projet).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : agressions chimiques du béton">
+
+### Carbonatation
+
+Ca(OH)₂ + CO₂ → CaCO₃ + H₂O · pH vers {nombre(PH_DEPASSIVATION, 0)} · $x = K\sqrt t$ · $t = (c/K)^2$ · phénolphtaléine : incolore = carbonaté
+
+### Chlorures
+
+mer, sable marin, accélérateurs chlorés · piqûres même à pH élevé · classes XD, XS
+
+### Sulfates
+
+ettringite et gypse expansifs · classes XA (EN 206) · béton compact, ciment pauvre en C₃A · béton jeune pas trop chaud
+
+### Alcali-réaction
+
+granulat réactif + alcalis + eau · Na₂Oéq = Na₂O + {nombre(COEF_K2O, 3)} K₂O · fissures en réseau
+
+### Parades
+
+compacité et cure · enrobage · ciment adapté · granulats contrôlés · drainage · diagnostic par essais
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trente ans de carbonatation">
+
+Un béton se carbonate selon x = 4 √t (mm, années ; donnée de l'énoncé). Quelle est la profondeur carbonatée à 30 ans ?
+
+<Indice>x = K √t avec t = 30.</Indice>
+
+<Corrige>
+x = 4 × √30 = **{grandeur(x30, 1, 'mm')}**. Un enrobage de 20 mm serait dépassé ; un enrobage de 30 mm, pas encore.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une eau souterraine sulfatée">
+
+Une eau souterraine contient 1 500 mg/L de sulfates et a un pH de 6,0. Quelle classe d'exposition XA retenir pour une fondation qui y baigne ?
+
+<Indice>Classe chaque critère séparément, puis retiens la plus sévère.</Indice>
+
+<Corrige>
+Sulfates : **{xa2.sulfates}** ; pH : **{xa2.pH}** ; on retient **{xa2.classe}** <AVerifier note="A_VERIFIER.md n° 37" />. Le béton de la fondation devra respecter les exigences de cette classe (rapport eau/ciment, dosage, type de ciment), précisées en L2.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Les alcalis d'un béton">
+
+Un ciment contient 0,2 % de Na₂O et 0,8 % de K₂O. Calcule son alcalin équivalent, puis la masse d'alcalis apportée par 400 kg de ce ciment par m³ de béton.
+
+<Indice>Na₂Oéq = Na₂O + {nombre(COEF_K2O, 3)} K₂O ; puis la masse de ciment × teneur.</Indice>
+
+<Corrige>
+Na₂Oéq = 0,2 + {nombre(COEF_K2O, 3)} × 0,8 = **{grandeur(na, 3, '%')}** ; par m³ : 400 × {nombre(na, 3)} % = **{grandeur(alcalisM3, 2, 'kg/m³')}**. Avec un granulat potentiellement réactif et un ouvrage humide, cette teneur se compare aux limites des recommandations nationales <AVerifier note="A_VERIFIER.md n° 38" />.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.5.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La carbonatation du béton consomme :" choix={['les granulats', 'la portlandite', 'les armatures', 'l’ettringite']} bonne={1} colonnes={4}>
+Ca(OH)₂ + CO₂ → CaCO₃ + H₂O.
+</QCM>
+
+<QCM n={2} question="Le principal danger de la carbonatation est :" choix={['la perte de résistance du béton', 'la perte de protection des armatures', 'le gonflement', 'la couleur']} bonne={1} colonnes={2}>
+Le pH baisse : l'acier n'est plus passivé.
+</QCM>
+
+<QCM n={3} question="Si l'enrobage double, le temps pour que le front l'atteigne :" choix={['double', 'est multiplié par quatre', 'ne change pas', 'diminue']} bonne={1} colonnes={4}>
+t = (c / K)² : il varie comme le carré de c.
+</QCM>
+
+<QCM n={4} question="Les sulfates détruisent le béton en formant :" choix={['de la calcite', 'de l’ettringite et du gypse expansifs', 'de la rouille', 'du quartz']} bonne={1} colonnes={2}>
+Ces produits volumineux fissurent un béton déjà rigide.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="L'alcali-réaction demande à la fois :" choix={['un granulat réactif, des alcalis et de l’eau', 'du CO₂ et du sel', 'de l’acier et de l’eau', 'des sulfates et de la chaleur']} bonne={0} colonnes={2}>
+Supprimer une condition suffit à l'éviter.
+</QCM>
+
+<QCM n={6} question="Dans l'exemple du parking, le coefficient K vaut :" choix={[`${nombre(d0.K, 2)} mm/√an`, `${nombre(depart.x / depart.age, 2)} mm/an`, `${nombre(depart.c / Math.sqrt(depart.age), 2)} mm/√an`, '12 mm']} bonne={0} colonnes={2}>
+K = x / √t = 12 / √15.
+</QCM>
+
+<QCM n={7} question="Sur une cassure fraîche, la phénolphtaléine reste incolore sur 15 mm. Cela signifie :" choix={['15 mm de béton carbonaté', '15 mm de béton sain', 'des chlorures sur 15 mm', 'un enrobage de 15 mm']} bonne={0} colonnes={2}>
+Le béton sain, très basique, devient rose.
+</QCM>
+
+<QCM n={8} question="La voûte d'un regard d'égout se ronge au-dessus de l'eau à cause :" choix={['du gel', 'de l’acide sulfurique produit par des bactéries', 'de la carbonatation', 'de l’alcali-réaction']} bonne={1} colonnes={2}>
+L'hydrogène sulfuré des eaux usées s'oxyde en acide sur les parois humides.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

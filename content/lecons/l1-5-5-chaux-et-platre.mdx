@@ -1,0 +1,304 @@
+---
+id: L1.5.5
+titre: Chaux et plâtre
+objectifs:
+  - Décrire le cycle de la chaux, de la cuisson à la prise à l'air
+  - Distinguer chaux aérienne et chaux hydraulique
+  - Décrire la cuisson du gypse et la prise du plâtre
+  - Comparer la prise de la chaux et du plâtre à celle du ciment
+relecture: false
+normes:
+  - "EN 459-1 : chaux de construction (désignations CL pour les chaux calciques aériennes, NHL pour les chaux hydrauliques naturelles)"
+glossaire:
+  - terme: Chaux vive
+    definition: Oxyde de calcium CaO, obtenu par cuisson du calcaire ; il réagit violemment avec l'eau.
+  - terme: Chaux éteinte
+    definition: Hydroxyde de calcium Ca(OH)₂, obtenu en ajoutant de l'eau à la chaux vive (extinction).
+  - terme: Chaux aérienne
+    definition: Chaux qui durcit en reprenant le CO₂ de l'air (carbonatation) ; elle ne prend pas sous l'eau.
+  - terme: Chaux hydraulique
+    definition: Chaux tirée d'un calcaire argileux, qui contient des silicates et durcit en partie au contact de l'eau.
+  - terme: Plâtre
+    definition: Sulfate de calcium semi-hydraté CaSO₄·½H₂O, obtenu en cuisant le gypse ; gâché, il redevient gypse en quelques minutes.
+symboles:
+  - { symbole: 'm', signification: 'masse', unite: 't ou kg' }
+  - { symbole: 'p', signification: 'teneur en CaCO₃ du calcaire', unite: '%' }
+formules:
+  - { nom: 'Cuisson du calcaire', tex: '\mathrm{CaCO_3 \rightarrow CaO + CO_2}', domaine: 'Vers 900 °C' }
+  - { nom: 'Extinction', tex: '\mathrm{CaO + H_2O \rightarrow Ca(OH)_2}', domaine: 'Réaction exothermique' }
+  - { nom: 'Prise aérienne', tex: '\mathrm{Ca(OH)_2 + CO_2 \rightarrow CaCO_3 + H_2O}', domaine: 'Au contact de l’air' }
+  - { nom: 'Plâtre', tex: '\mathrm{CaSO_4{\cdot}2H_2O \rightleftharpoons CaSO_4{\cdot}\tfrac12 H_2O + \tfrac32 H_2O}', domaine: 'Cuisson vers 150 °C ; gâchage' }
+---
+
+import { cyclePlatre, cycleChaux, EXEMPLE_CYCLE_CHAUX, massesReaction, reaction, TEMPERATURES_CUISSON } from '@/lib/calc/chimie'
+import { grandeur, nombre } from '@/lib/format'
+import { CyclesLiants } from '@/components/schemas/Chimie'
+
+export const c0 = cycleChaux(EXEMPLE_CYCLE_CHAUX)
+export const p0 = cyclePlatre(1000)
+export const ex1 = massesReaction(reaction('calcination'), 0, 1000)
+export const ex2 = massesReaction(reaction('extinction'), 0, 1000)
+export const p2 = cyclePlatre(2000)
+export const T = TEMPERATURES_CUISSON
+
+<Page etape="intuition" titre="L'intuition : un cycle qui revient à la pierre">
+
+Avant le ciment, on bâtissait à la chaux. On cuit une pierre calcaire : elle perd son gaz carbonique et devient de la chaux vive. On l'arrose : elle fume, chauffe et tombe en poudre, c'est la chaux éteinte. Mélangée à du sable, elle fait un mortier qui, lentement, reprend le gaz carbonique de l'air et **redevient du calcaire**. La boucle est bouclée : on a fabriqué une pierre artificielle.
+
+Le plâtre suit une boucle semblable, avec le gypse et l'eau au lieu du calcaire et du CO₂. Elle est beaucoup plus rapide : un plâtre gâché durcit en quelques minutes.
+
+Ces deux liants restent très utiles : enduits respirants sur les murs en terre, traitement des sols argileux, plâtres d'intérieur. Mais ils ne se comportent pas comme le ciment, et l'erreur de les confondre coûte cher.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment la chaux et le plâtre durcissent-ils, et en quoi leur prise diffère-t-elle de celle du ciment ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Trois liants, trois prises" sousTitre="Chaux, plâtre et ciment" etape="cours">
+
+<Panneau n={1} titre="Chaux aérienne" icone="materiaux" couleur="terre">
+Calcaire cuit vers {nombre(T.chaux, 0)} °C → chaux vive CaO → chaux éteinte Ca(OH)₂ → calcaire. La prise reprend le CO₂ de l'air : elle est lente et avance de la surface vers le cœur.
+</Panneau>
+
+<Panneau n={2} titre="Chaux hydraulique" icone="regle" couleur="brique">
+Tirée d'un calcaire argileux : la cuisson forme aussi des silicates de calcium. Elle durcit en partie avec l'eau, puis continue à l'air. Désignée NHL dans l'EN 459-1.
+</Panneau>
+
+<Panneau n={3} titre="Plâtre" icone="quantites" couleur="acier">
+Gypse cuit vers {nombre(T.platre, 0)} °C : il perd une partie de son eau et devient semi-hydrate. Gâché, il reprend cette eau et redevient gypse, en quelques minutes.
+</Panneau>
+
+<Panneau n={4} titre="Ciment" icone="calcul" couleur="encre">
+Liant **hydraulique** : il réagit avec l'eau (L1.5.4), prend en quelques heures et durcit même sous l'eau. Il n'a pas besoin d'air.
+</Panneau>
+
+<Panneau n={5} titre="Usages" icone="terrain" couleur="validation">
+Chaux : enduits et mortiers souples et respirants, badigeons, traitement des sols argileux. Plâtre : enduits intérieurs, plaques et faux plafonds, moulages.
+</Panneau>
+
+<Panneau n={6} titre="Précautions" icone="attention" couleur="correction">
+La chaux vive brûle : lunettes et gants. La chaux aérienne ne prend pas enterrée ni noyée. Le plâtre craint l'humidité. Plâtre et ciment ne se mélangent pas : ils forment de l'ettringite qui gonfle (L1.5.7).
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : la chimie des deux cycles">
+
+### Le cycle de la chaux
+
+1. **Cuisson** : CaCO₃ → CaO + CO₂. Près de la moitié de la masse part en CO₂.
+2. **Extinction** : CaO + H₂O → Ca(OH)₂. La réaction dégage beaucoup de chaleur : la chaux « fuse ».
+3. **Prise à l'air** : Ca(OH)₂ + CO₂ → CaCO₃ + H₂O. Le CO₂ de l'air entre par les pores ; la prise avance lentement, en semaines ou en mois. Les enduits de chaux se posent donc en couches minces.
+
+La prise à l'air est exactement la **carbonatation** qui, dans le béton, fait baisser le pH autour des armatures (L1.5.7).
+
+### Chaux aérienne ou hydraulique
+
+Une chaux tirée d'un calcaire pur est **aérienne** : sans air, elle ne durcit pas. Un calcaire contenant de l'argile donne une chaux **hydraulique** : la cuisson forme du silicate bicalcique, qui s'hydrate comme celui du ciment. Elle durcit plus vite et résiste mieux à l'humidité, tout en restant plus souple qu'un mortier de ciment.
+
+### Le plâtre
+
+Le gypse CaSO₄·2H₂O perd vers {nombre(T.platre, 0)} °C les trois quarts de son eau : il devient semi-hydrate CaSO₄·½H₂O. Au gâchage, le semi-hydrate se dissout, et le gypse, moins soluble, cristallise en fines aiguilles enchevêtrées : c'est la prise. Pour 1 kg de plâtre, la chimie ne demande que {grandeur(p0.eauSurPlatre, 3, 'kg')} d'eau ; on en met davantage pour qu'il soit maniable.
+
+<Regle type="simplification">
+On présente des chaux et des gypses purs. Les produits commerciaux contiennent de la magnésie, des argiles ou des additifs (retardateurs de prise pour le plâtre) : leur fiche technique et l'EN 459-1 (chaux) en précisent la composition et l'emploi.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : les cycles de la chaux et du plâtre">
+
+<CyclesLiants chaux={c0} platre={{ gypse: 1000, platre: p0.platre, vapeur: p0.vapeur }} prefixe="cy-sch" />
+
+À gauche, le cycle de la chaux pour {grandeur(EXEMPLE_CYCLE_CHAUX.calcaire, 0, 't')} de calcaire à {nombre(EXEMPLE_CYCLE_CHAUX.purete, 0)} % : le CO₂ chassé à la cuisson ({grandeur(c0.co2, 2, 't')}) est repris par la prise à l'air. À droite, le cycle du plâtre pour une tonne de gypse : la vapeur chassée à la cuisson ({grandeur(p0.vapeur, 0, 'kg')}) correspond à l'eau reprise au gâchage.
+
+Les deux liants reviennent à leur minéral de départ : c'est ce qui les rend si compatibles avec la pierre et la terre.
+
+</Page>
+
+<FicheCalcul calcul="cycleChaux">
+
+<Cahier titre="Exemple résolu : une fournée de chaux">
+
+**Énoncé.** Un chaufournier du Kongo-Central cuit {grandeur(EXEMPLE_CYCLE_CHAUX.calcaire, 0, 't')} de calcaire titrant {nombre(EXEMPLE_CYCLE_CHAUX.purete, 0)} % de CaCO₃ (données de l'énoncé). Calcule la chaux vive produite, le CO₂ rejeté, l'eau d'extinction et la chaux éteinte obtenue, puis le CO₂ que la chaux reprendra en durcissant.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi la teneur en CaCO₃ ? Seul le carbonate de calcium donne de la chaux ; le reste (argile, sable) reste inerte ou forme des silicates.</Note>
+</Etape>
+
+<Etape n={2} titre="La cuisson">
+<AN k="pur" />
+<AN k="cuisson" />
+</Etape>
+
+<Etape n={3} titre="L'extinction">
+<AN k="extinction" />
+<Note>Pourquoi tant de précautions ? Cette eau réagit en dégageant beaucoup de chaleur : elle peut bouillir et projeter de la chaux.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la prise et le bilan">
+
+<Etape n={4} titre="La prise à l'air">
+<AN k="prise" />
+</Etape>
+
+<Etape n={5} titre="Le bilan de CO₂">
+<AN k="bilan" />
+<Resultat k="caO" libelle="Chaux vive produite" />
+<Note couleur="vert">Contrôle : le CO₂ repris égale le CO₂ rejeté par la décarbonatation ; seul le combustible du four laisse un bilan positif.</Note>
+</Etape>
+
+<Etape n={6} titre="Les cycles">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre chaux vive et chaux éteinte.">
+La chaux vive CaO réagit violemment avec l'eau et brûle la peau et les yeux ; la chaux éteinte Ca(OH)₂ est déjà hydratée. On ne gâche jamais un mortier avec de la chaux vive sans l'avoir éteinte.
+</Piege>
+
+<Piege erreur="employer une chaux aérienne là où l'air n'arrive pas.">
+En fondation, sous l'eau ou dans une maçonnerie très épaisse, la chaux aérienne reste molle des années : il faut une chaux hydraulique ou du ciment.
+</Piege>
+
+<Piege erreur="mettre du plâtre en extérieur ou en pièce humide.">
+Le gypse est un peu soluble : à la pluie ou dans une douche, il se ramollit et se dégrade. On le réserve aux intérieurs secs, ou l'on choisit un produit adapté.
+</Piege>
+
+<Piege erreur="mélanger plâtre et ciment.">
+Le sulfate du plâtre réagit avec l'aluminate du ciment : il se forme de l'ettringite qui gonfle et fait éclater l'ouvrage. Un enduit de ciment sur un fond plâtré, ou l'inverse, est à proscrire.
+</Piege>
+
+<Piege erreur="attendre d'un mortier de chaux la prise rapide du ciment.">
+La chaux aérienne durcit en semaines et en mois. On la protège du soleil et de la pluie battante pendant ce temps, et l'on charge la maçonnerie progressivement.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le traitement des sols à la chaux.** Mélangée à un sol argileux, la chaux fait floculer l'argile et absorbe une partie de l'eau : le sol devient moins plastique et plus portant. On traite ainsi les plateformes et les couches de routes en terre (L3). Le dosage se fixe par des essais de laboratoire.
+
+<Encadre type="terrain" titre="Les maisons en terre et en brique">
+Sur un mur en briques de terre ou en adobe, un enduit de ciment, rigide et peu perméable, retient l'humidité dans le mur et finit par se décoller. Un enduit à la chaux, plus souple et respirant, laisse sécher le mur. Le badigeon de chaux, lui, protège et assainit les murs à faible coût.
+</Encadre>
+
+**Le plâtre en intérieur.** Plaques de plâtre, faux plafonds, enduits lisses : le plâtre se pose vite et se répare facilement. On le protège de l'humidité et l'on vérifie qu'il n'est jamais au contact d'un mortier de ciment encore humide.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : chaux et plâtre">
+
+### Cycle de la chaux
+
+CaCO₃ → (cuisson ≈ {nombre(T.chaux, 0)} °C) CaO + CO₂ · CaO + H₂O → Ca(OH)₂ (chaleur) · Ca(OH)₂ + CO₂ → CaCO₃
+
+### Deux chaux
+
+aérienne : prise lente à l'air (CO₂) · hydraulique (NHL) : silicates, prise en partie à l'eau
+
+### Plâtre
+
+gypse → (≈ {nombre(T.platre, 0)} °C) semi-hydrate + eau · gâchage : redevient gypse en minutes · craint l'humidité
+
+### Comparaison
+
+ciment : hydraulique, prise en heures, durcit sous l'eau · chaux : souple et respirante · plâtre : rapide, intérieur
+
+### Interdits
+
+chaux vive sans protection · chaux aérienne enterrée · plâtre au contact du ciment
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La chaux d'une tonne de calcaire pur">
+
+Quelle masse de chaux vive donne une tonne de calcaire pur ?
+
+<Indice>Une mole de CaCO₃ donne une mole de CaO.</Indice>
+
+<Corrige>
+1 000 kg × M(CaO) / M(CaCO₃) = **{grandeur(ex1.lignes[1].m, 1, 'kg')}** ; le reste, {grandeur(ex1.lignes[2].m, 1, 'kg')}, part en CO₂.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Éteindre une tonne de chaux vive">
+
+Quelle masse d'eau faut-il pour éteindre une tonne de chaux vive, et quelle masse de chaux éteinte obtient-on ?
+
+<Indice>CaO + H₂O → Ca(OH)₂ : une mole d'eau par mole de chaux.</Indice>
+
+<Corrige>
+Eau : **{grandeur(ex2.lignes[1].m, 1, 'kg')}** ; chaux éteinte : **{grandeur(ex2.lignes[2].m, 1, 'kg')}**. En pratique, on ajoute plus d'eau : une partie s'évapore sous l'effet de la chaleur dégagée.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le plâtre de deux tonnes de gypse">
+
+On cuit deux tonnes de gypse pur. Quelle masse de plâtre obtient-on, et quelle masse de vapeur quitte le four ? Quelle masse d'eau la prise de ce plâtre fixera-t-elle ?
+
+<Indice>CaSO₄·2H₂O → CaSO₄·½H₂O + 1,5 H₂O, puis la réaction inverse au gâchage.</Indice>
+
+<Corrige>
+Plâtre : **{grandeur(p2.platre, 0, 'kg')}** ; vapeur : **{grandeur(p2.vapeur, 0, 'kg')}**. La prise fixe exactement la même masse d'eau, {grandeur(p2.eauPrise, 0, 'kg')}, et redonne {grandeur(p2.gypseReforme, 0, 'kg')} de gypse. Toute l'eau de gâchage au-delà s'évapore et laisse des pores.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.5.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La cuisson du calcaire produit :" choix={['de la chaux éteinte', 'de la chaux vive et du CO₂', 'du plâtre', 'du ciment']} bonne={1} colonnes={2}>
+CaCO₃ → CaO + CO₂.
+</QCM>
+
+<QCM n={2} question="L'extinction de la chaux vive est une réaction :" choix={['qui absorbe de la chaleur', 'qui dégage beaucoup de chaleur', 'sans effet thermique', 'qui produit du CO₂']} bonne={1} colonnes={2}>
+La chaux « fuse » : prudence avec l'eau.
+</QCM>
+
+<QCM n={3} question="Une chaux aérienne durcit grâce :" choix={['à l’eau de gâchage seule', 'au CO₂ de l’air', 'à la chaleur du soleil', 'au sable']} bonne={1} colonnes={4}>
+Elle se recarbonate et redevient du calcaire.
+</QCM>
+
+<QCM n={4} question="Le plâtre s'obtient en cuisant le gypse vers :" choix={['50 °C', `${nombre(T.platre, 0)} °C`, `${nombre(T.chaux, 0)} °C`, `${nombre(T.clinker, 0)} °C`]} bonne={1} colonnes={4}>
+Il perd une partie de son eau de cristallisation.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pourquoi ne mélange-t-on pas plâtre et ciment ?" choix={['parce qu’ils n’ont pas la même couleur', 'parce qu’ils forment de l’ettringite qui gonfle', 'parce que le plâtre est trop lourd', 'parce que le ciment dissout le plâtre']} bonne={1} colonnes={2}>
+Sulfate du plâtre + aluminate du ciment + eau : gonflement destructeur.
+</QCM>
+
+<QCM n={6} question="Pour une fondation enterrée et humide, on choisit :" choix={['une chaux aérienne', 'un plâtre', 'un liant hydraulique (ciment ou chaux hydraulique)', 'un badigeon']} bonne={2} colonnes={2}>
+Sans air, la chaux aérienne ne durcit pas.
+</QCM>
+
+<QCM n={7} question="Pour 10 t de calcaire à 95 %, la chaux vive produite vaut :" choix={[grandeur(c0.caO, 2, 't'), grandeur(c0.caco3, 2, 't'), grandeur(c0.co2, 2, 't'), grandeur(c0.chauxEteinte, 2, 't')]} bonne={0} colonnes={4}>
+CaCO₃ pur × M(CaO) / M(CaCO₃).
+</QCM>
+
+<QCM n={8} question="Sur un mur en terre, on préfère un enduit à la chaux car il est :" choix={['plus rigide', 'souple et respirant', 'plus rapide à prendre', 'étanche à la vapeur']} bonne={1} colonnes={2}>
+Il laisse sécher le mur au lieu d'emprisonner l'humidité.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

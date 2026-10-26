@@ -1,0 +1,336 @@
+---
+id: L1.5.6
+titre: Corrosion des aciers
+objectifs:
+  - Expliquer la corrosion comme une pile électrochimique (anode, cathode, électrolyte)
+  - Expliquer pourquoi le béton protège l'acier et comment cette protection disparaît
+  - Calculer une vitesse de corrosion et une perte de section par la loi de Faraday
+  - Choisir une protection adaptée (enrobage, peinture, galvanisation, protection cathodique)
+relecture: false
+normes:
+  - "EN 1992-1-1 tableau 4.4N : enrobage minimal de durabilité selon la classe d'exposition"
+  - "EN 1993-1-1 §3.2.6 : masse volumique de l'acier ρ = 7 850 kg/m³"
+glossaire:
+  - terme: Corrosion
+    definition: Dégradation d'un métal par réaction avec son milieu ; pour le fer, oxydation en rouille.
+  - terme: Anode
+    definition: Zone où le métal s'oxyde et se dissout en libérant des électrons.
+  - terme: Cathode
+    definition: Zone où les électrons sont consommés, en général par la réduction de l'oxygène dissous.
+  - terme: Électrolyte
+    definition: Milieu conducteur par ses ions, ici l'eau des pores du béton ou un film d'eau sur l'acier.
+  - terme: Passivation
+    definition: Formation d'une couche d'oxyde très mince et protectrice sur l'acier, en milieu fortement basique.
+  - terme: Piqûre
+    definition: Corrosion très localisée, provoquée surtout par les chlorures ; elle perce l'acier plus vite qu'une corrosion uniforme.
+symboles:
+  - { symbole: 'i_corr', signification: 'densité de courant de corrosion', unite: 'µA/cm²' }
+  - { symbole: 'F', signification: 'constante de Faraday', unite: 'C/mol' }
+  - { symbole: 'v', signification: 'vitesse de pénétration', unite: 'µm/an' }
+  - { symbole: 'φ', signification: 'diamètre de la barre', unite: 'mm' }
+  - { symbole: 'ρ', signification: 'masse volumique de l’acier', unite: 'kg/m³' }
+formules:
+  - { nom: 'Loi de Faraday', tex: 'v = \frac{M\, i_{corr}}{n\, F\, \rho}', domaine: 'Corrosion uniforme, Fe → Fe²⁺ (n = 2)' }
+  - { nom: 'Diamètre restant', tex: '\varphi'' = \varphi - 2\,v\,t', domaine: 'Barre corrodée sur tout son pourtour' }
+  - { nom: 'Réactions', tex: '\mathrm{Fe \rightarrow Fe^{2+} + 2e^-}, \quad \mathrm{O_2 + 2H_2O + 4e^- \rightarrow 4OH^-}', domaine: 'Anode, cathode' }
+---
+
+import { EXEMPLE_CORROSION, FARADAY, perteSection, PH_DEPASSIVATION, PH_PASSIVATION, RAPPORT_VOLUME_ROUILLE, vitessePenetration, dureeCarbonatation } from '@/lib/calc/chimie'
+import { CMIN_DUR_S4, enrobageNominal } from '@/lib/calc/ba/enrobage'
+import { grandeur, nombre } from '@/lib/format'
+import { PileCorrosion, PoteauCorrosionIso } from '@/components/schemas/Chimie'
+
+export const d0 = EXEMPLE_CORROSION
+export const r0 = perteSection(d0)
+export const v05 = vitessePenetration(0.5)
+export const d2 = { phi: 10, icorr: 2, duree: 30 }
+export const r2 = perteSection(d2)
+export const e4 = enrobageNominal('XC4', 8)
+export const e1 = enrobageNominal('XC1', 8)
+export const K3 = 5
+export const t4 = dureeCarbonatation(e4.cnom, K3)
+export const t1 = dureeCarbonatation(e1.cnom, K3)
+
+<Page etape="intuition" titre="L'intuition : une pile qui ronge l'acier">
+
+Laisse un clou dehors : en quelques semaines, il se couvre de rouille. Enferme le même clou dans un béton sain : des dizaines d'années plus tard, il est encore brillant. Le béton protège l'acier, mais pas pour toujours.
+
+La rouille n'est pas une simple « saleté » : c'est une **pile électrique** qui fonctionne à la surface du métal. À un endroit, le fer se dissout et libère des électrons ; à un autre, l'oxygène les consomme. Il suffit d'un peu d'eau pour fermer le circuit.
+
+La rouille occupe bien plus de place que l'acier qu'elle remplace : elle pousse sur le béton, le fissure, le fait éclater. Les balcons dont l'enrobage tombe en morceaux en sont la preuve visible.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Pourquoi l'acier rouille-t-il, pourquoi le béton le protège-t-il, et à quelle vitesse une barre perd-elle sa section ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La pile de corrosion" sousTitre="Trois conditions, une parade pour chacune" etape="cours">
+
+<Panneau n={1} titre="L'anode" icone="attention" couleur="correction">
+Le fer se dissout : Fe → Fe²⁺ + 2 e⁻. Les ions fer réagissent ensuite avec l'eau et l'oxygène pour former la rouille.
+</Panneau>
+
+<Panneau n={2} titre="La cathode" icone="regle" couleur="validation">
+Ailleurs sur l'acier, l'oxygène dissous consomme les électrons : O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻. Sans oxygène, la pile s'arrête.
+</Panneau>
+
+<Panneau n={3} titre="Le circuit" icone="calcul" couleur="encre">
+Les électrons courent dans l'acier, les ions dans l'eau des pores (l'électrolyte). Sans eau, pas de circuit : un béton toujours sec rouille très peu.
+</Panneau>
+
+<Panneau n={4} titre="Le béton protège" icone="materiaux" couleur="acier">
+Dans l'eau des pores, très basique, l'acier se couvre d'une couche d'oxyde très mince et étanche : il est **passivé**, au-dessus d'un pH voisin de {nombre(PH_PASSIVATION, 0)}.
+</Panneau>
+
+<Panneau n={5} titre="Ce qui dépassive" icone="erreur" couleur="brique">
+La **carbonatation** fait tomber le pH sous {nombre(PH_DEPASSIVATION, 0)} environ (L1.5.7). Les **chlorures** (mer, sable marin, accélérateurs chlorés) percent localement la couche passive : corrosion par piqûres.
+</Panneau>
+
+<Panneau n={6} titre="Les protections" icone="retenir" couleur="terre">
+Enrobage épais et béton compact ; peinture sur l'acier nu ; galvanisation (le zinc se corrode à la place du fer) ; protection cathodique pour les grands ouvrages.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours : vitesse de corrosion et protections">
+
+### La loi de Faraday
+
+Chaque atome de fer dissous libère deux électrons : le courant de corrosion mesure donc la masse de fer perdue. Pour une corrosion **uniforme**, la vitesse de pénétration vaut :
+
+$$v = \frac{M\, i_{corr}}{n\, F\, \rho}$$
+
+avec M = masse molaire du fer, n = 2, F = {nombre(FARADAY, 2)} C/mol et ρ la masse volumique de l'acier. Une densité de courant de 1 µA/cm² fait perdre {grandeur(vitessePenetration(1), 2, 'µm')} d'acier par an, sur toute la surface corrodée.
+
+### Uniforme ou par piqûres
+
+La carbonatation provoque une corrosion assez **uniforme**. Les chlorures provoquent des **piqûres** : la perte moyenne est faible, mais localement la barre peut être percée bien plus vite. Une barre piquée est plus dangereuse qu'elle n'en a l'air.
+
+### Le volume de la rouille
+
+La rouille occupe {nombre(RAPPORT_VOLUME_ROUILLE.min, 0)} à {nombre(RAPPORT_VOLUME_ROUILLE.max, 0)} fois le volume du fer consommé. Quelques dizaines de micromètres de corrosion suffisent à fissurer l'enrobage : la fissure le long de l'armature est souvent le premier signe visible.
+
+### Les couples galvaniques
+
+Deux métaux différents en contact, dans l'eau, forment une pile : le plus actif se corrode. Le **zinc** protège ainsi l'acier galvanisé, même rayé ; le **cuivre**, au contraire, accélère la corrosion de l'acier qui le touche.
+
+### L'enrobage
+
+L'EN 1992-1-1 (tableau 4.4N) fixe un enrobage minimal de durabilité selon l'exposition : {nombre(CMIN_DUR_S4.XC1, 0)} mm à l'intérieur sec (XC1), {nombre(CMIN_DUR_S4.XC4, 0)} mm à l'extérieur soumis aux cycles d'humidité (XC4), {nombre(CMIN_DUR_S4.XS1, 0)} mm à l'air marin (XS1), pour une durée d'utilisation de 50 ans. On y ajoute la tolérance d'exécution.
+
+<Regle type="simplification">
+La loi de Faraday suppose une corrosion uniforme et un courant constant. Sur un ouvrage, le courant varie avec l'humidité et la température ; il se mesure en plusieurs points et à plusieurs saisons.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la pile dans le béton armé">
+
+<PileCorrosion prefixe="pc-sch" />
+
+À gauche, le béton a perdu sa protection : l'acier y devient **anode** et se dissout. La rouille formée gonfle et fissure l'enrobage. À droite, l'acier encore passivé sert de **cathode** : l'oxygène qui arrive par les pores y consomme les électrons. Le circuit se ferme par les électrons dans l'acier et par les ions dans l'eau des pores.
+
+Supprimer l'une des trois conditions arrête la pile : garder le béton sain et compact (pas d'anode), empêcher l'eau d'entrer (pas d'électrolyte), ou forcer l'acier à rester cathode (protection cathodique).
+
+</Page>
+
+<Vue3D titre="L'angle d'un poteau qui rouille" calques={[{ id: 'beton', libelle: 'Béton' }, { id: 'carbonatation', libelle: 'Zone carbonatée' }, { id: 'armatures', libelle: 'Armatures' }, { id: 'corrosion', libelle: 'Corrosion' }]}>
+
+Le poteau est coupé en tête pour montrer sa section. Active les calques un par un : la zone carbonatée progresse depuis les deux faces exposées ; l'armature d'angle, attaquée des deux côtés, est atteinte la première. Sa rouille fissure l'enrobage le long de la barre et coule sur le parement.
+
+<PoteauCorrosionIso />
+
+<Encadre type="retenir">
+Les angles sont les points faibles : le front y arrive par deux faces. C'est là qu'on inspecte en premier, et là que l'enrobage doit être respecté avec le plus de soin.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="corrosionBarre">
+
+<Cahier titre="Exemple résolu : une poutre de quai à Muanda">
+
+**Énoncé.** Sur un quai en béton armé à Muanda, au bord de l'océan, un bureau de contrôle mesure sur une barre HA {nombre(d0.phi, 0)} un courant de corrosion de {grandeur(d0.icorr, 0, 'µA/cm²')}. On estime que la corrosion est active depuis {grandeur(d0.duree, 0, 'ans')} (données de l'énoncé). Calcule la perte de diamètre et de section, en supposant la corrosion uniforme.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi mesurer un courant ? La corrosion est une pile : son courant dit combien de fer se dissout chaque seconde.</Note>
+</Etape>
+
+<Etape n={2} titre="La vitesse de corrosion">
+<AN k="faraday" />
+</Etape>
+
+<Etape n={3} titre="La pénétration et le diamètre">
+<AN k="penetration" />
+<AN k="diametre" />
+<Note>Pourquoi deux fois p ? La barre est attaquée sur tout son pourtour : son diamètre perd p de chaque côté.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la section perdue">
+
+<Etape n={4} titre="La section">
+<AN k="section" />
+<Resultat k="perte" libelle="Perte de section" />
+</Etape>
+
+<Etape n={5} titre="La rouille">
+<AN k="rouille" />
+<Note couleur="vert">Contrôle : une perte de section modeste suffit à fissurer l'enrobage. En bord de mer, les chlorures donnent souvent des piqûres : la perte locale peut être bien plus forte que ce calcul uniforme.</Note>
+</Etape>
+
+<Etape n={6} titre="La barre avant et après">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire que la rouille protège l'acier.">
+La rouille est poreuse et gonflante : elle retient l'eau et laisse passer l'oxygène. Elle entretient la corrosion au lieu de l'arrêter.
+</Piege>
+
+<Piege erreur="peindre sur la rouille.">
+Une peinture posée sur de la rouille non éliminée se décolle et emprisonne l'humidité. On décape jusqu'au métal sain, puis on applique un primaire anticorrosion.
+</Piege>
+
+<Piege erreur="relier cuivre et acier sans isolant.">
+Le contact crée une pile où l'acier se corrode à la place du cuivre. Il faut un raccord isolant entre les deux métaux.
+</Piege>
+
+<Piege erreur="gâcher le béton avec du sable de mer non lavé.">
+Les chlorures apportés dès la fabrication dépassivent l'acier de l'intérieur. Le sable marin se lave à l'eau douce et se contrôle avant emploi (L1.5.9).
+</Piege>
+
+<Piege erreur="négliger l'enrobage des angles et des sous-faces.">
+Un enrobage de quelques millimètres en sous-face de balcon suffit pour que le front de carbonatation atteigne l'acier en quelques années. Les cales d'enrobage ne sont pas une option.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le littoral.** Sur la côte, à Muanda et Banana, l'air chargé de sel apporte des chlorures jusqu'à plusieurs centaines de mètres du rivage. Les ouvrages y relèvent des classes d'exposition XS : enrobage plus épais, béton plus compact, et surveillance régulière.
+
+<Encadre type="terrain" titre="Les tôles galvanisées">
+Les toitures en tôles galvanisées sont partout en RDC. Le zinc protège l'acier tant qu'il en reste : il s'use plus vite aux découpes, aux trous de fixation et là où l'eau stagne. Une vis en acier non protégé ou un contact avec du cuivre crée un point de corrosion. On choisit des fixations adaptées et l'on évite les eaux stagnantes.
+</Encadre>
+
+**Les armatures sur chantier.** Une fine rouille superficielle, qui s'essuie, ne gêne pas l'adhérence. Une rouille écailleuse, qui fait perdre de la matière, ne s'accepte pas : on nettoie ou l'on refuse les barres. On stocke l'acier sur cales, hors de la boue.
+
+**Les ponts métalliques.** Un pont en acier vit par sa peinture : elle se contrôle et se renouvelle selon un programme d'entretien. Un défaut de peinture négligé devient, en quelques saisons des pluies, une perte de section.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : corrosion des aciers">
+
+### La pile
+
+anode : Fe → Fe²⁺ + 2 e⁻ · cathode : O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻ · électrolyte : eau
+
+### Dans le béton
+
+pH ≈ 13 : acier passivé (au-dessus de ≈ {nombre(PH_PASSIVATION, 0)}) · carbonatation (pH sous ≈ {nombre(PH_DEPASSIVATION, 0)}) ou chlorures (piqûres) : dépassivé
+
+### Faraday
+
+$v = M i / (n F \rho)$ · 1 µA/cm² ≈ {nombre(vitessePenetration(1), 1)} µm/an · φ′ = φ − 2 v t
+
+### Rouille
+
+volume × {nombre(RAPPORT_VOLUME_ROUILLE.min, 0)} à {nombre(RAPPORT_VOLUME_ROUILLE.max, 0)} → fissures le long des barres, éclats
+
+### Protections
+
+enrobage (EC2 tableau 4.4N) et compacité · peinture sur acier décapé · galvanisation · protection cathodique · pas de contact cuivre-acier
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une vitesse de corrosion">
+
+Quelle épaisseur d'acier perd-on par an pour une densité de courant de 0,5 µA/cm² ?
+
+<Indice>La vitesse est proportionnelle au courant.</Indice>
+
+<Corrige>
+v = {nombre(vitessePenetration(1), 2)} × 0,5 = **{grandeur(v05, 2, 'µm/an')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une barre HA 10 très corrodée">
+
+Une barre HA 10 subit {grandeur(d2.icorr, 0, 'µA/cm²')} pendant {grandeur(d2.duree, 0, 'ans')}. Calcule son diamètre restant et sa perte de section.
+
+<Indice>p = v t, puis φ′ = φ − 2p, puis le rapport des sections.</Indice>
+
+<Corrige>
+v = {grandeur(r2.vitesse, 2, 'µm/an')} ; p = {grandeur(r2.penetration, 3, 'mm')} ; φ′ = **{grandeur(r2.phiRestant, 2, 'mm')}** ; perte de section **{grandeur(r2.perte * 100, 0, '%')}**. Un quart de l'acier perdu : la poutre doit être réparée ou renforcée.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="L'enrobage fait gagner des années">
+
+Avec des cadres de 8 mm, compare l'enrobage nominal d'un poteau intérieur sec (XC1) et d'un poteau extérieur soumis à la pluie (XC4), selon l'EC2. Si le front de carbonatation avance selon x = 5 √t (mm, années, donnée de l'énoncé), dans combien de temps atteint-il l'acier dans chaque cas ?
+
+<Indice>c<sub>nom</sub> = max(φ ; c<sub>min,dur</sub> ; 10 mm) + 10 mm ; puis t = (c / K)².</Indice>
+
+<Corrige>
+XC1 : c<sub>min,dur</sub> = {nombre(e1.cminDur, 0)} mm, c<sub>nom</sub> = **{grandeur(e1.cnom, 0, 'mm')}**, front aux armatures vers **{grandeur(t1, 0, 'ans')}**. XC4 : c<sub>min,dur</sub> = {nombre(e4.cminDur, 0)} mm, c<sub>nom</sub> = **{grandeur(e4.cnom, 0, 'mm')}**, vers **{grandeur(t4, 0, 'ans')}**. Le front avance comme la racine du temps : un enrobage plus épais fait gagner beaucoup plus que les quelques millimètres ajoutés. À l'intérieur sec, un front atteint plus vite fait moins de dégâts, car il manque l'eau pour fermer la pile.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.5.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="À l'anode d'une pile de corrosion :" choix={['l’oxygène est réduit', 'le fer se dissout en libérant des électrons', 'la rouille disparaît', 'le béton durcit']} bonne={1} colonnes={2}>
+Fe → Fe²⁺ + 2 e⁻.
+</QCM>
+
+<QCM n={2} question="Pour que la corrosion fonctionne, il faut :" choix={['de l’eau seulement', 'de l’eau, de l’oxygène et un acier dépassivé', 'de la chaleur', 'du ciment']} bonne={1} colonnes={2}>
+Supprimer l'une des conditions arrête la pile.
+</QCM>
+
+<QCM n={3} question="L'acier est protégé dans un béton sain parce que :" choix={['le béton est étanche à l’eau', 'le milieu très basique le passive', 'le ciment contient du zinc', 'le béton est isolant']} bonne={1} colonnes={2}>
+Une couche d'oxyde très mince et étanche se forme à pH élevé.
+</QCM>
+
+<QCM n={4} question="Les chlorures provoquent surtout :" choix={['une corrosion uniforme lente', 'une corrosion par piqûres', 'un durcissement de l’acier', 'la carbonatation']} bonne={1} colonnes={2}>
+Ils percent localement la couche passive, même à pH élevé.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une densité de courant de 1 µA/cm² correspond à une perte d'environ :" choix={[grandeur(vitessePenetration(1), 1, 'µm/an'), '1 mm/an', '0,1 µm/an', '1 cm/an']} bonne={0} colonnes={4}>
+Loi de Faraday avec M = 55,845 g/mol, n = 2, ρ = 7 850 kg/m³.
+</QCM>
+
+<QCM n={6} question="L'acier galvanisé est protégé même rayé parce que :" choix={['le zinc se corrode à sa place', 'le zinc est plus dur', 'la rayure se referme', 'le zinc est un isolant']} bonne={0} colonnes={2}>
+Le zinc, plus actif, devient l'anode : il se sacrifie.
+</QCM>
+
+<QCM n={7} question="Dans l'exemple de Muanda, la perte de section vaut :" choix={[grandeur(r0.perte * 100, 1, '%'), grandeur(r0.penetration * 100, 1, '%'), '50 %', '0,7 %']} bonne={0} colonnes={4}>
+1 − (φ′ / φ)².
+</QCM>
+
+<QCM n={8} question="La rouille fait éclater l'enrobage parce que :" choix={['elle est plus lourde', 'elle occupe plusieurs fois le volume de l’acier perdu', 'elle est acide', 'elle chauffe']} bonne={1} colonnes={2}>
+De {nombre(RAPPORT_VOLUME_ROUILLE.min, 0)} à {nombre(RAPPORT_VOLUME_ROUILLE.max, 0)} fois selon l'oxyde.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,316 @@
+---
+id: L1.5.2
+titre: Réactions chimiques et stœchiométrie
+objectifs:
+  - Écrire et équilibrer l'équation d'une réaction chimique
+  - Calculer une masse molaire et une quantité de matière
+  - Calculer les masses des réactifs et des produits à partir des coefficients
+  - Vérifier la conservation de la masse
+relecture: false
+normes: []
+glossaire:
+  - terme: Réaction chimique
+    definition: Transformation au cours de laquelle des liaisons se rompent et se forment ; les atomes, eux, se conservent.
+  - terme: Équation équilibrée
+    definition: Écriture d'une réaction où chaque élément compte le même nombre d'atomes à gauche et à droite.
+  - terme: Coefficient stœchiométrique
+    definition: Nombre placé devant une formule ; il fixe les proportions en moles entre réactifs et produits.
+  - terme: Mole
+    definition: "Paquet de 6,022 × 10²³ entités (atomes, molécules, ions) : l'unité de quantité de matière."
+  - terme: Masse molaire
+    definition: Masse d'une mole, en g/mol ; elle se calcule en additionnant les masses atomiques.
+symboles:
+  - { symbole: 'n', signification: 'quantité de matière', unite: 'mol (ou kmol)' }
+  - { symbole: 'm', signification: 'masse', unite: 'g (ou kg)' }
+  - { symbole: 'M', signification: 'masse molaire', unite: 'g/mol = kg/kmol' }
+  - { symbole: 'ν', signification: 'coefficient stœchiométrique', unite: '—' }
+  - { symbole: 'N_A', signification: 'nombre d’Avogadro', unite: 'mol⁻¹' }
+formules:
+  - { nom: 'Quantité de matière', tex: 'n = \frac{m}{M}', domaine: 'Toute espèce' }
+  - { nom: 'Proportions', tex: '\frac{n_i}{\nu_i} = \frac{n_j}{\nu_j}', domaine: 'Réaction complète, sans excès' }
+  - { nom: 'Conservation de la masse', tex: '\sum m_{réactifs} = \sum m_{produits}', domaine: 'Toute réaction' }
+---
+
+import { AVOGADRO, detailMasseMolaire, equilibrer, massesReaction, masseMolaire, reaction, co2Decarbonatation, TEMPERATURES_CUISSON } from '@/lib/calc/chimie'
+import { grandeur, nombre, scientifique } from '@/lib/format'
+import { BilanMasseReaction } from '@/components/schemas/Chimie'
+
+export const calc = massesReaction(reaction('calcination'), 0, 1000)
+export const propane = equilibrer(['C3H8', 'O2'], ['CO2', 'H2O'])
+export const rouille = equilibrer(['Fe', 'O2', 'H2O'], ['Fe(OH)3'])
+export const mRouille = massesReaction(reaction('rouille'), 0, 1)
+export const gypse = detailMasseMolaire('CaSO4·2H2O')
+export const co2Clinker = co2Decarbonatation(65)
+export const co2Chaux = masseMolaire('CO2') / masseMolaire('CaO')
+export const mm = (f) => grandeur(masseMolaire(f), 3, 'g/mol')
+
+<Page etape="intuition" titre="L'intuition : une recette qui compte les pièces">
+
+Sur un chantier, une gâchée de mortier suit une recette : tant de sacs de ciment pour tant de brouettes de sable. Si l'on double le sable sans doubler le ciment, le mortier n'est plus le même.
+
+Une réaction chimique est aussi une recette, mais elle compte des **pièces** : des atomes et des molécules. Pour cuire du calcaire en chaux, chaque « pièce » de calcaire CaCO₃ donne exactement une pièce de chaux vive CaO et une pièce de dioxyde de carbone CO₂. Comme ces pièces sont minuscules, on les compte par paquets géants : les **moles**.
+
+Ce comptage permet de prévoir, avant d'allumer le four, combien de chaux on obtiendra et combien de CO₂ partira dans l'air. Pour une tonne de calcaire, ce CO₂ pèse {grandeur(calc.lignes[2].m, 0, 'kg')} : presque la moitié.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer d'une équation chimique à des masses en kilogrammes, utilisables sur un chantier ou dans une usine ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : écrire et équilibrer une équation">
+
+### L'équation
+
+Une réaction s'écrit **réactifs → produits**. Pendant la réaction, des liaisons se rompent et d'autres se forment, mais **aucun atome n'apparaît ni ne disparaît** : c'est la loi de conservation de Lavoisier.
+
+### Équilibrer
+
+On place devant chaque formule un **coefficient** pour que chaque élément compte le même nombre d'atomes des deux côtés. On ne touche jamais aux indices des formules : ce serait changer de substance.
+
+Méthode : on commence par l'élément qui apparaît dans le moins de formules, on finit par l'oxygène et l'hydrogène, on accepte une fraction provisoire, puis on multiplie pour n'avoir que des entiers.
+
+<Encadre type="exemple" titre="La combustion du propane d'un chalumeau">
+C₃H₈ + O₂ → CO₂ + H₂O. Carbone : 3 CO₂. Hydrogène : 4 H₂O. Oxygène à droite : 3 × 2 + 4 = 10 atomes, donc 5 O₂. Résultat : {propane.map((c) => nombre(c, 0)).join(', ')}, soit C₃H₈ + 5 O₂ → 3 CO₂ + 4 H₂O.
+</Encadre>
+
+### Contrôler
+
+On dresse le tableau des atomes, élément par élément : même nombre à gauche et à droite. C'est rapide et sans appel.
+
+<Regle type="simplification">
+Les équations de ce module décrivent le bilan global. Les réactions réelles passent par des étapes intermédiaires, et certains produits, comme les silicates de calcium hydratés du ciment, n'ont pas de formule fixe : on en retient une formule simplifiée.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : moles et masses">
+
+### La mole
+
+Une mole contient N<sub>A</sub> = {scientifique(AVOGADRO, 4)} entités. La **masse molaire** M est la masse d'une mole : on additionne les masses atomiques. Pour le gypse, M(CaSO₄·2H₂O) = {gypse.lignes.map((l) => `${l.nombre === 1 ? '' : `${nombre(l.nombre, 0)} × `}${nombre(l.masseAtomique, 3)}`).join(' + ')} = {grandeur(gypse.M, 3, 'g/mol')} : l'eau de cristallisation compte.
+
+### De la masse aux moles, et retour
+
+$$n = \frac{m}{M}$$
+
+Les mêmes nombres servent en grammes et en moles, ou en **kilogrammes et en kilomoles** : M = 100 g/mol, c'est aussi 100 kg/kmol. Sur un chantier, on travaille donc directement en kg et en kmol.
+
+### Les proportions
+
+Les coefficients donnent les proportions **en moles**, jamais en masses : pour aA + bB → cC, on a n<sub>A</sub>/a = n<sub>B</sub>/b = n<sub>C</sub>/c. On calcule donc :
+
+1. n du réactif connu = m / M ;
+2. n de chaque autre espèce, par les coefficients ;
+3. m = n × M pour chacune.
+
+### La conservation de la masse
+
+La masse totale des réactifs égale celle des produits. C'est le contrôle de fin de calcul. S'il manque un réactif, la réaction s'arrête quand il est épuisé : c'est le **réactif limitant**.
+
+<Encadre type="retenir">
+Équilibrer en atomes, calculer en moles, convertir en masses. n = m / M ; les coefficients relient les moles ; la masse totale se conserve.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : rien ne se perd">
+
+<BilanMasseReaction lignes={calc.lignes} />
+
+Une tonne de calcaire pur cuite vers {nombre(TEMPERATURES_CUISSON.chaux, 0)} °C donne {grandeur(calc.lignes[1].m, 1, 'kg')} de chaux vive et {grandeur(calc.lignes[2].m, 1, 'kg')} de CO₂. Les deux piles ont la même hauteur : la masse se conserve.
+
+Les masses ne sont pas dans le rapport des coefficients (tous égaux à 1) : chaque mole de CaO pèse {mm('CaO')}, chaque mole de CO₂ {mm('CO2')}. C'est pourquoi on calcule toujours en moles avant de revenir aux masses.
+
+<Encadre type="attention">
+Le CO₂ est invisible, mais il pèse : près de la moitié du calcaire part dans l'air. C'est l'une des grandes sources de CO₂ de l'industrie de la chaux et du ciment.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="stoechiometrie">
+
+<Cahier titre="Exemple résolu : la fournée d'un four à chaux">
+
+**Énoncé.** Dans le Kongo-Central, région riche en calcaire, un four à chaux artisanal cuit une tonne de calcaire pur par fournée (donnée de l'énoncé). Écris l'équation, vérifie qu'elle est équilibrée, puis calcule les masses de chaux vive et de CO₂. Change ensuite de réaction pour retrouver les autres transformations du module.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi le premier réactif comme référence ? C'est la masse que l'on connaît : celle qu'on met dans le four.</Note>
+</Etape>
+
+<Etape n={2} titre="L'équation et le bilan des atomes">
+<AN k="equation" />
+<AN k="atomes" />
+</Etape>
+
+<Etape n={3} titre="La masse molaire et les moles">
+<AN k="masseMolaire" />
+<AN k="moles" />
+<Note>Pourquoi des kilomoles ? Une masse en kg divisée par M en kg/kmol donne des kmol : pas de conversion.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les masses et le contrôle">
+
+<Etape n={4} titre="Les masses de chaque espèce">
+<AN k="masses" />
+</Etape>
+
+<Etape n={5} titre="Le contrôle">
+<AN k="conservation" />
+<Resultat k="produit" libelle="Premier produit" />
+<Note couleur="vert">Contrôle : la masse se conserve. Choisis l'extinction de la chaux : pour la même masse de chaux vive, combien d'eau faut-il ?</Note>
+</Etape>
+
+<Etape n={6} titre="Le bilan en image">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer avec une équation non équilibrée.">
+Toutes les proportions seraient fausses. Le tableau des atomes prend une minute et évite tout le reste.
+</Piege>
+
+<Piege erreur="appliquer les coefficients aux masses.">
+« 1 CaCO₃ donne 1 CaO » veut dire une mole pour une mole, pas un kilogramme pour un kilogramme : une tonne de calcaire donne {grandeur(calc.lignes[1].m, 0, 'kg')} de chaux vive, pas une tonne.
+</Piege>
+
+<Piege erreur="changer un indice pour équilibrer.">
+Écrire CaO₂ au lieu de CaO pour « équilibrer » l'oxygène invente une autre substance. On ne modifie que les coefficients.
+</Piege>
+
+<Piege erreur="oublier l'eau de cristallisation.">
+M(CaSO₄) = {mm('CaSO4')} mais M(CaSO₄·2H₂O) = {mm('CaSO4·2H2O')} : confondre le gypse et le sulfate anhydre fausse les masses de {nombre((masseMolaire('CaSO4·2H2O') / masseMolaire('CaSO4') - 1) * 100, 0)} %.
+</Piege>
+
+<Piege erreur="mélanger les unités.">
+Masse en kg et masse molaire en g/mol donnent des kilomoles : garde la même échelle du début à la fin.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le CO₂ du ciment.** Un clinker contient environ 65 % de CaO, tiré du calcaire : sa seule décarbonatation libère {grandeur(co2Clinker, 2, 't')} de CO₂ par tonne de clinker, avant même de compter le combustible du four. C'est pourquoi on cherche à remplacer une partie du clinker par des laitiers, des cendres volantes ou des pouzzolanes (ciments CEM II à CEM V, L2.6).
+
+<Encadre type="terrain" titre="Doser un réactif">
+Traiter une eau acide à la chaux (L1.5.3), stabiliser un sol à la chaux (L1.5.5), préparer une solution de laboratoire : chaque fois, la stœchiométrie donne la quantité minimale. Sur le terrain, on ajoute une marge, car les produits ne sont pas purs et les réactions ne sont pas complètes.
+</Encadre>
+
+**La masse qui « disparaît ».** Un four à chaux perd près de la moitié de la masse enfournée : ce n'est ni un vol ni une erreur de pesée, c'est le CO₂ parti par la cheminée. Le rendement d'un four se contrôle par ce calcul.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : stœchiométrie">
+
+### Équation
+
+réactifs → produits · on équilibre les coefficients, jamais les indices · tableau des atomes pour contrôler
+
+### Moles
+
+$n = m/M$ · N<sub>A</sub> = {scientifique(AVOGADRO, 4)} mol⁻¹ · g/mol = kg/kmol
+
+### Proportions
+
+les coefficients relient les **moles** : $n_i/\nu_i = n_j/\nu_j$
+
+### Méthode
+
+n connu = m/M → n de chaque espèce → m = n M → contrôle : masse conservée
+
+### Repères
+
+1 t de CaCO₃ → {grandeur(calc.lignes[1].m, 0, 'kg')} de CaO + {grandeur(calc.lignes[2].m, 0, 'kg')} de CO₂
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La masse molaire du gypse">
+
+Calcule la masse molaire du gypse CaSO₄·2H₂O.
+
+<Indice>Additionne les masses atomiques, sans oublier les deux molécules d'eau.</Indice>
+
+<Corrige>
+M = {gypse.lignes.map((l) => `${l.nombre === 1 ? '' : `${nombre(l.nombre, 0)} × `}${nombre(l.masseAtomique, 3)}`).join(' + ')} = **{grandeur(gypse.M, 3, 'g/mol')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La rouille d'un kilogramme de fer">
+
+Équilibre Fe + O₂ + H₂O → Fe(OH)₃, puis calcule la masse de rouille formée par 1 kg de fer.
+
+<Indice>Commence par le fer, puis l'hydrogène, puis l'oxygène ; une fraction provisoire est permise.</Indice>
+
+<Corrige>
+Coefficients : **{rouille.map((c) => nombre(c, 0)).join(', ')}**, soit 4 Fe + 3 O₂ + 6 H₂O → 4 Fe(OH)₃. Pour 1 kg de fer : n = 1 / {nombre(masseMolaire('Fe'), 3)} = {nombre(mRouille.nRef * 1000, 2)} mol, d'où **{grandeur(mRouille.lignes[3].m, 2, 'kg')}** de rouille. La rouille pèse presque deux fois l'acier qu'elle remplace, et elle est bien plus volumineuse (L1.5.6).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le CO₂ de la chaux et du clinker">
+
+Calcule le CO₂ de décarbonatation par tonne de chaux vive (CaO pur), puis par tonne de clinker à 65 % de CaO. Pourquoi la chaux émet-elle plus, par tonne, que le clinker ?
+
+<Indice>Une mole de CaO s'accompagne d'une mole de CO₂ : rapport des masses molaires.</Indice>
+
+<Corrige>
+Chaux vive : {nombre(masseMolaire('CO2'), 3)} / {nombre(masseMolaire('CaO'), 3)} = **{grandeur(co2Chaux, 3, 't')}** de CO₂ par tonne. Clinker : 0,65 × {nombre(co2Chaux, 3)} = **{grandeur(co2Clinker, 3, 't')}** par tonne. La chaux est presque entièrement faite de CaO venu du calcaire, alors que le clinker contient aussi de la silice et de l'alumine, apportées par l'argile sans CO₂.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.5.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Pour équilibrer une équation, on modifie :" choix={['les indices des formules', 'les coefficients devant les formules', 'les masses atomiques', 'les deux côtés au hasard']} bonne={1} colonnes={2}>
+Changer un indice, c'est changer de substance.
+</QCM>
+
+<QCM n={2} question="Les coefficients d'une équation donnent les proportions :" choix={['en masses', 'en moles', 'en volumes de solides', 'en prix']} bonne={1} colonnes={4}>
+On passe ensuite aux masses par m = n × M.
+</QCM>
+
+<QCM n={3} question="La masse molaire de CO₂ vaut :" choix={[mm('CO2'), mm('CO'), mm('CaO'), mm('O2')]} bonne={0} colonnes={4}>
+12,011 + 2 × 15,999.
+</QCM>
+
+<QCM n={4} question="Une masse de 1 000 kg de CaCO₃ correspond à :" choix={[`${nombre(calc.nRef, 2)} kmol`, '1 000 kmol', `${nombre(calc.nRef * 100, 0)} kmol`, '1 kmol']} bonne={0} colonnes={4}>
+n = m / M = 1 000 / {nombre(masseMolaire('CaCO3'), 3)}.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="La combustion du propane s'écrit C₃H₈ + a O₂ → 3 CO₂ + 4 H₂O. Que vaut a ?" choix={['3', '4', nombre(propane[1], 0), '10']} bonne={2} colonnes={4}>
+Oxygène à droite : 3 × 2 + 4 = 10 atomes, soit 5 molécules d'O₂.
+</QCM>
+
+<QCM n={6} question="Lors d'une réaction, la masse totale :" choix={['diminue', 'augmente', 'se conserve', 'dépend de la température']} bonne={2} colonnes={4}>
+Loi de Lavoisier : les atomes se conservent.
+</QCM>
+
+<QCM n={7} question="Une tonne de calcaire pur cuite donne une masse de chaux vive de :" choix={[grandeur(calc.lignes[1].m, 0, 'kg'), '1 000 kg', grandeur(calc.lignes[2].m, 0, 'kg'), '500 kg']} bonne={0} colonnes={4}>
+Le reste part en CO₂.
+</QCM>
+
+<QCM n={8} question="Le réactif limitant est :" choix={['le plus lourd', 'celui qui est épuisé le premier', 'toujours l’eau', 'le produit principal']} bonne={1} colonnes={2}>
+Quand il est épuisé, la réaction s'arrête, même s'il reste des autres réactifs.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
