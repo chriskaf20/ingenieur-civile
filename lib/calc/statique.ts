@@ -354,10 +354,16 @@ export function resoudreLineaire(A: readonly (readonly number[])[], b: readonly 
  * Méthode des nœuds : en chaque nœud, Σ N (vecteur unitaire vers l'autre extrémité) + réactions + charges = 0.
  * 2n équations, b efforts et r réactions inconnus : on résout le système complet (treillis isostatique).
  */
-export function treillis(d: DonneesTreillis): ResultatTreillis {
+export type InconnueTreillis = { type: 'barre'; id: string } | { type: 'R'; noeud: string; dir: 'x' | 'y' };
+
+/**
+ * Assemblage du système A s = B de la méthode des nœuds : deux équations par nœud (ΣFx puis ΣFy, dans l'ordre des nœuds),
+ * une inconnue par barre (effort normal, traction positive) puis par composante de réaction.
+ */
+export function systemeTreillis(d: DonneesTreillis) {
   const index = new Map(d.noeuds.map((n, i) => [n.id, i]));
   const n = d.noeuds.length;
-  const inconnues: Array<{ type: 'barre'; id: string } | { type: 'R'; noeud: string; dir: 'x' | 'y' }> = [
+  const inconnues: InconnueTreillis[] = [
     ...d.barres.map((b) => ({ type: 'barre' as const, id: b.id })),
     ...d.appuis.flatMap((a) => (a.type === 'articulation' ? [{ type: 'R' as const, noeud: a.noeud, dir: 'x' as const }, { type: 'R' as const, noeud: a.noeud, dir: 'y' as const }] : [{ type: 'R' as const, noeud: a.noeud, dir: 'y' as const }])),
   ];
@@ -389,6 +395,11 @@ export function treillis(d: DonneesTreillis): ResultatTreillis {
     B[2 * i] = B[2 * i]! - c.Fx;
     B[2 * i + 1] = B[2 * i + 1]! - c.Fy;
   }
+  return { A, B, inconnues, longueurs, degre };
+}
+
+export function treillis(d: DonneesTreillis): ResultatTreillis {
+  const { A, B, inconnues, longueurs, degre } = systemeTreillis(d);
   const vide = { efforts: {}, longueurs, reactions: [], degre, valide: false };
   if (degre !== 0) return vide;
   const s = resoudreLineaire(A, B);

@@ -10,6 +10,7 @@ import { CALCULS_ALGEBRE } from './algebre';
 import { CALCULS_ANALYSE } from './analyse';
 import { CALCULS_METHODE } from './methode';
 import { CALCULS_GEOMETRIE } from './geometrie';
+import { CALCULS_LINEAIRE } from './lineaire';
 import { CALCULS_TRIGO } from './trigo';
 import { CALCULS_PHYSIQUE } from './physique';
 import { CALCULS_PROJET } from './projet';
@@ -403,6 +404,6 @@ export const REGISTRE = fusion(
     ),
     CALCULS_PROJET,
   ),
-  fusion(CALCULS_ANALYSE, CALCULS_STATIQUE),
+  fusion(fusion(CALCULS_ANALYSE, CALCULS_STATIQUE), CALCULS_LINEAIRE),
 );
 export type NomCalcul = keyof typeof REGISTRE;

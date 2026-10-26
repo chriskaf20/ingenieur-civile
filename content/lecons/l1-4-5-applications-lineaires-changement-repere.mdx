@@ -1,0 +1,327 @@
+---
+id: L1.4.5
+titre: Applications linéaires et changement de repère
+objectifs:
+  - Reconnaître une application linéaire et écrire sa matrice
+  - Construire la matrice de rotation d'angle θ dans le plan et dans l'espace
+  - Passer des composantes globales aux composantes locales d'une force, et inversement
+  - Décomposer la charge d'une panne posée sur un versant de toiture
+relecture: false
+normes: []
+glossaire:
+  - terme: Application linéaire
+    definition: Transformation f qui respecte les sommes et les produits par un nombre ; f(u + v) = f(u) + f(v) et f(k u) = k f(u).
+  - terme: Matrice de rotation
+    definition: Matrice qui fait tourner les vecteurs d'un angle θ sans changer leur longueur.
+  - terme: Repère global
+    definition: Repère commun à toute la structure, en général axes horizontaux et vertical.
+  - terme: Repère local
+    definition: Repère propre à un élément (barre, panne, versant), dont un axe suit l'élément.
+  - terme: Matrice orthogonale
+    definition: Matrice dont la transposée est l'inverse (Rᵀ R = I) ; elle conserve les longueurs et les angles.
+symboles:
+  - { symbole: 'R(θ)', signification: 'matrice de rotation d’angle θ', unite: '—' }
+  - { symbole: 'α', signification: 'pente du versant (angle avec l’horizontale)', unite: '°' }
+  - { symbole: 'q', signification: 'charge linéique verticale sur la panne', unite: 'kN/m' }
+  - { symbole: 'q′', signification: 'composantes de la charge dans le repère local', unite: 'kN/m' }
+formules:
+  - { nom: 'Rotation plane', tex: 'R(\theta) = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}', domaine: 'θ dans le sens trigonométrique' }
+  - { nom: 'Changement de repère', tex: 'v_{local} = R(\alpha)^T\, v_{global}, \quad v_{global} = R(\alpha)\, v_{local}', domaine: 'Repère local tourné de α' }
+  - { nom: 'Panne sur un versant', tex: 'q_{\parallel} = q \sin\alpha, \quad q_{\perp} = q \cos\alpha', domaine: 'Charge verticale q, pente α' }
+  - { nom: 'Orthogonalité', tex: 'R^T R = I, \quad R^{-1} = R^T = R(-\theta), \quad \det R = 1', domaine: 'Toute rotation' }
+---
+
+import { chargeVersant, EXEMPLE_REPERE, produit, produitVecteur, rotation2, rotation3, transposee, versGlobal, versLocal } from '@/lib/calc/lineaire'
+import { grandeur, nombre } from '@/lib/format'
+import { PanneVersant, VersantIso } from '@/components/schemas/Lineaire'
+
+export const q0 = -EXEMPLE_REPERE.Fy
+export const a0 = EXEMPLE_REPERE.alpha
+export const c0 = chargeVersant(q0, a0)
+export const R90 = rotation2(90)
+export const r90 = produitVecteur(R90, [1, 0])
+export const F45 = versGlobal([10, 0], 45)
+export const ex2 = versLocal(F45, 30)
+export const vent = versGlobal([0, 0.8], 20)
+export const Rz = rotation3('z', 90)
+export const raide = chargeVersant(q0, 45)
+export const plat = chargeVersant(q0, 10)
+
+<Page etape="intuition" titre="L'intuition : la même force, deux regards">
+
+Sur le chantier d'un hangar, l'architecte dit : « la toiture pèse sur la panne, verticalement ». Le charpentier, debout sur le versant, voit autre chose : une partie de la charge **plaque** la panne contre la toiture, une autre partie la fait **glisser** vers le bas de la pente.
+
+Les deux ont raison. La force est la même ; ils la décrivent dans **deux repères** différents : l'un horizontal et vertical, l'autre tourné avec la pente. Passer d'une description à l'autre, c'est **changer de repère**, et cela se fait par un produit matriciel.
+
+Tous les logiciels de calcul le font en permanence : chaque barre a son repère local, la structure a son repère global.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer des composantes horizontale et verticale d'une force à ses composantes le long d'un élément incliné, et revenir ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : applications linéaires">
+
+### Définition
+
+Une application f est **linéaire** si elle respecte les sommes et les multiples :
+
+$$f(u + v) = f(u) + f(v), \qquad f(k\,u) = k\, f(u)$$
+
+Dans le plan, elle s'écrit f(u) = A u, avec une matrice A 2 × 2. **Les colonnes de A sont les images des vecteurs de base** : la première colonne est f(1 ; 0), la seconde f(0 ; 1). Pour écrire la matrice, il suffit donc de regarder ce que deviennent ces deux vecteurs.
+
+### Exemples
+
+- **homothétie** de rapport k : A = k I, tout est agrandi k fois ;
+- **projection** sur l'axe x : A = (1 0 ; 0 0). Son déterminant est nul : on perd la composante y, on ne peut pas revenir (L1.4.3) ;
+- **rotation** d'angle θ : les vecteurs tournent sans changer de longueur.
+
+### Composition
+
+Appliquer A puis B revient à appliquer le produit **B A** : la première transformation s'écrit à droite. L'ordre compte, comme pour tout produit matriciel.
+
+<Regle type="simplification">
+On se limite aux applications linéaires du plan et de l'espace, écrites dans des repères orthonormés (axes perpendiculaires, mêmes unités). Une translation, comme le passage d'une origine à une autre, s'ajoute à part.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : rotations et changement de repère">
+
+### La matrice de rotation
+
+L'image de (1 ; 0) est (cos θ ; sin θ), celle de (0 ; 1) est (−sin θ ; cos θ). D'où :
+
+$$R(\theta) = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$$
+
+Ses colonnes sont unitaires et perpendiculaires : **Rᵀ R = I**. L'inverse d'une rotation est donc sa transposée, qui est la rotation d'angle −θ. Son déterminant vaut 1 : elle conserve les longueurs et les aires.
+
+### Le changement de repère
+
+Si le repère local (x′, y′) est tourné de α par rapport au repère global (x, y), un même vecteur v a deux jeux de composantes, reliés par :
+
+$$v_{local} = R(\alpha)^T\, v_{global}, \qquad v_{global} = R(\alpha)\, v_{local}$$
+
+Pour la panne : une charge verticale q, sur un versant de pente α, se décompose en **q sin α le long de la pente** et **q cos α perpendiculairement au versant**.
+
+### Dans l'espace
+
+On tourne autour d'un des trois axes : autour de z, la matrice est R(θ) complétée par un 1 pour l'axe z. Ainsi, une rotation de 90° autour de z envoie (1 ; 0 ; 0) sur ({produitVecteur(Rz, [1, 0, 0]).map((v) => nombre(v, 0)).join(' ; ')}). Composer deux rotations autour d'axes différents dépend de l'ordre.
+
+<Encadre type="retenir">
+Colonnes de la matrice = images des vecteurs de base. R(θ) : Rᵀ = R⁻¹. Local = Rᵀ × global ; global = R × local. La longueur du vecteur ne change pas.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la panne sur le versant">
+
+<PanneVersant q={q0} alpha={a0} local={c0.local} />
+
+À gauche, la situation réelle : la panne repose sur l'arbalétrier incliné de {nombre(a0, 0)}°. Le repère global (x, y) est horizontal et vertical ; le repère local (x′, y′), en bleu, suit le versant.
+
+À droite, la même charge q = {grandeur(q0, 2, 'kN/m')}, décomposée dans le repère local : {grandeur(c0.qPente, 2, 'kN/m')} le long de la pente et {grandeur(c0.qNormale, 2, 'kN/m')} perpendiculairement au versant. Les deux composantes sont perpendiculaires et la charge totale ne change pas.
+
+<Encadre type="attention">
+L'angle entre la charge verticale et la composante normale au versant est α, le même que la pente : c'est pourquoi la composante normale vaut q cos α. Vérifie toujours avec un cas limite : toiture plate, α = 0, tout est normal au versant.
+</Encadre>
+
+</Page>
+
+<Vue3D titre="Le versant de toiture en perspective" calques={[{ id: 'structure', libelle: 'Structure' }, { id: 'global', libelle: 'Repère global' }, { id: 'local', libelle: 'Repère local' }, { id: 'charges', libelle: 'Charges' }]}>
+
+Deux arbalétriers portent trois pannes ; la panne du milieu est étudiée. Active les calques un par un : le repère global (X, Y, Z) est celui du bâtiment ; le repère local de la panne a son axe x′ le long de la panne, y′ dans la pente et z′ perpendiculaire au versant. La charge verticale se décompose dans le plan (y′, z′).
+
+<VersantIso q={q0} alpha={a0} local={c0.local} />
+
+<Encadre type="retenir">
+La composante selon z′ fléchit la panne dans sa grande hauteur ; la composante selon y′ la fléchit sur le côté, là où elle est le moins raide.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="changementRepere">
+
+<Cahier titre="Exemple résolu : la panne d'un hangar à Lubumbashi">
+
+**Énoncé.** Les versants d'un hangar sont inclinés à {nombre(a0, 0)}°. Une panne reçoit une charge verticale de {grandeur(q0, 2, 'kN/m')} : tôles, panne et entretien (donnée de l'énoncé). Pour la vérifier, il faut la charge perpendiculaire au versant, qui la fléchit dans sa grande hauteur, et la charge parallèle au versant, qui la fléchit sur le côté. Calcule-les par la matrice de rotation.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi un repère local ? La panne résiste différemment selon ses deux axes : il faut les charges selon ces axes, pas selon l'horizontale et la verticale.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la rotation et le contrôle">
+
+<Etape n={3} titre="La matrice de rotation">
+<AN k="rotation" />
+<Note>Pourquoi Rᵀ ? On cherche les composantes dans le repère tourné : on « défait » la rotation, c'est-à-dire qu'on applique R(−α) = Rᵀ.</Note>
+</Etape>
+
+<Etape n={4} titre="Les composantes locales">
+<AN k="local" />
+</Etape>
+
+<Etape n={5} titre="Le sens des composantes">
+<AN k="sens" />
+</Etape>
+
+<Etape n={6} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="qNormale" libelle="Charge perpendiculaire au versant" />
+<Note couleur="vert">Contrôle : la longueur du vecteur est conservée. Mets α = 0 : toute la charge devient perpendiculaire au versant.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="appliquer R au lieu de Rᵀ.">
+R(α) fait tourner le vecteur, Rᵀ donne ses composantes dans le repère tourné. Avec R, la composante le long de la pente change de signe : la charge semblerait remonter la pente.
+</Piege>
+
+<Piege erreur="mettre la calculatrice en radians.">
+cos 30 en radians vaut environ {nombre(Math.cos(30), 2)} : la composante normale serait absurde. Vérifie le mode degrés, ou contrôle que cos 30° ≈ {nombre(c0.R[0][0], 3)}.
+</Piege>
+
+<Piege erreur="mesurer l'angle depuis la verticale.">
+Si l'on prend l'angle entre le versant et la verticale, sinus et cosinus s'échangent. Dessine toujours l'angle sur le schéma avant d'écrire la formule.
+</Piege>
+
+<Piege erreur="croire que la charge change avec le repère.">
+Seules les composantes changent. √(q′ₓ² + q′ᵧ²) doit redonner q : c'est le contrôle le plus rapide.
+</Piege>
+
+<Piege erreur="composer deux rotations dans le désordre.">
+Dans l'espace, tourner autour de x puis de z ne donne pas la même chose que l'inverse. On écrit le produit dans l'ordre : la première rotation à droite.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Pannes et liernes.** Plus la toiture est raide, plus la composante le long de la pente grandit : {grandeur(raide.qPente, 2, 'kN/m')} à 45° contre {grandeur(plat.qPente, 2, 'kN/m')} à 10°, pour la même charge. Cette composante fléchit la panne selon son axe faible. On ajoute alors des **liernes**, de petits tirants qui relient les pannes au faîtage et coupent leur portée sur le côté : c'est une règle de l'art des charpentes métalliques.
+
+<Encadre type="terrain" titre="Les axes locaux dans les logiciels">
+Dans un logiciel de structure, chaque barre a son repère local. Une poutre IPE mal orientée est calculée avec son axe faible là où l'on attendait son axe fort : les flèches et les contraintes sont fausses, sans aucun message d'erreur. Avant d'exploiter les résultats, on affiche et l'on vérifie les axes locaux.
+</Encadre>
+
+**Implantation topographique.** Sur un chantier, on travaille souvent dans un repère local aligné sur le bâtiment, tourné par rapport au repère cartographique. Le géomètre passe de l'un à l'autre par une rotation, suivie d'une translation de l'origine.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : changement de repère">
+
+### Application linéaire
+
+f(u + v) = f(u) + f(v) · f(k u) = k f(u) · colonnes de A = images des vecteurs de base
+
+### Rotation
+
+$R(\theta) = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$ · $R^T R = I$ · det R = 1
+
+### Changement de repère (repère local tourné de α)
+
+$v_{local} = R^T v_{global}$ · $v_{global} = R\, v_{local}$ · la norme est conservée
+
+### Panne sur un versant
+
+le long de la pente : q sin α · perpendiculaire au versant : q cos α
+
+### Pièges
+
+degrés et radians · angle depuis l'horizontale · ordre des rotations dans l'espace
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un quart de tour">
+
+Écris R(90°) et calcule l'image du vecteur (1 ; 0).
+
+<Indice>cos 90° = 0 et sin 90° = 1.</Indice>
+
+<Corrige>
+<Matrice nom="R(90°)" M={R90} dec={0} /> et R(90°) (1 ; 0) = **({r90.map((v) => nombre(v, 0)).join(' ; ')})** : l'axe x tourne sur l'axe y.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une force dans l'axe d'une barre">
+
+Une force de 10 kN est inclinée à 45° sur l'horizontale. Calcule ses composantes dans le repère d'une barre inclinée à 30° (x′ le long de la barre).
+
+<Indice>Composantes globales : (10 cos 45° ; 10 sin 45°). Puis v′ = R(30°)ᵀ v.</Indice>
+
+<Corrige>
+v = ({F45.map((v) => nombre(v, 3)).join(' ; ')}) kN, puis v′ = R(30°)ᵀ v = **({ex2.map((v) => nombre(v, 3)).join(' ; ')}) kN**. Contrôle : la force fait 15° avec la barre, et 10 cos 15° = {nombre(ex2[0], 3)} kN.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le vent qui soulève">
+
+Pendant un orage, le vent exerce sur un versant incliné à 20° une succion de 0,8 kN/m, perpendiculaire au versant et dirigée vers l'extérieur (donnée de l'énoncé). Calcule ses composantes horizontale et verticale.
+
+<Indice>Dans le repère local, la succion vaut (0 ; 0,8). Revenir au global : v = R(20°) v′.</Indice>
+
+<Corrige>
+v = R(20°) (0 ; 0,8) = **({vent.map((v) => nombre(v, 3)).join(' ; ')}) kN/m** : le vent **soulève** la toiture de {grandeur(vent[1], 3, 'kN/m')} et la pousse horizontalement. Si cette succion dépasse le poids de la couverture, les tôles s'arrachent : les fixations doivent être calculées pour ce cas (actions du vent, L3).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.4.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Les colonnes de la matrice d'une application linéaire sont :" choix={['les images des vecteurs de base', 'des vecteurs quelconques', 'les valeurs propres', 'toujours unitaires']} bonne={0} colonnes={2}>
+La première colonne est f(1 ; 0), la seconde f(0 ; 1).
+</QCM>
+
+<QCM n={2} question="L'inverse d'une matrice de rotation R est :" choix={['−R', 'Rᵀ', '1/R case par case', 'R elle-même']} bonne={1} colonnes={4}>
+Rᵀ R = I : la transposée défait la rotation.
+</QCM>
+
+<QCM n={3} question="Le déterminant d'une matrice de rotation vaut :" choix={['0', '1', 'cos θ', '−1']} bonne={1} colonnes={4}>
+Une rotation conserve les aires.
+</QCM>
+
+<QCM n={4} question="Pour une projection sur l'axe x, le déterminant vaut 0. Cela signifie :" choix={['qu’on peut revenir en arrière', 'qu’on perd une information', 'que la projection est une rotation', 'que les longueurs sont conservées']} bonne={1} colonnes={2}>
+La composante y est effacée.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une charge verticale q sur un versant de pente α a pour composante perpendiculaire au versant :" choix={['q sin α', 'q cos α', 'q tan α', 'q']} bonne={1} colonnes={4}>
+Pour α = 0, toute la charge est perpendiculaire au versant : c'est bien q cos α.
+</QCM>
+
+<QCM n={6} question="Les composantes locales d'un vecteur s'obtiennent par :" choix={['v′ = R v', 'v′ = Rᵀ v', 'v′ = v + R', 'v′ = det R × v']} bonne={1} colonnes={4}>
+On défait la rotation du repère.
+</QCM>
+
+<QCM n={7} question="Dans l'exemple (q = 2 kN/m, α = 30°), la composante le long de la pente vaut :" choix={[grandeur(c0.qPente, 2, 'kN/m'), grandeur(c0.qNormale, 2, 'kN/m'), grandeur(q0, 2, 'kN/m'), grandeur(0, 2, 'kN/m')]} bonne={0} colonnes={4}>
+q sin 30° = 2 × 0,5.
+</QCM>
+
+<QCM n={8} question="Plus la pente augmente, la composante le long de la pente :" choix={['diminue', 'augmente', 'reste constante', 's’annule']} bonne={1} colonnes={4}>
+Elle vaut q sin α : d'où l'intérêt des liernes sur les toitures raides.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

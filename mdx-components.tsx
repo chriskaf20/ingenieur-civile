@@ -8,6 +8,7 @@ import { PlancheTechnique, Vue } from '@/components/gabarits/PlancheTechnique';
 import { Calque, Vue3D } from '@/components/gabarits/Vue3D';
 import { Page } from '@/components/page/Feuille';
 import { Corrige, Exercice, Indice } from '@/components/pedago/Exercice';
+import { Matrice } from '@/components/pedago/Matrice';
 import { QCM, Quiz, ScoreQuiz } from '@/components/pedago/Quiz';
 import { AVerifier, Encadre, Piege, Regle } from '@/components/pedago/Regles';
 
@@ -23,6 +24,7 @@ const composants: MDXComponents = {
   Regle, AVerifier, Encadre, Piege,
   Exercice, Indice, Corrige,
   Quiz, QCM, ScoreQuiz,
+  Matrice,
   table: (props) => (
     <div className="tableau">
       <table {...props} />

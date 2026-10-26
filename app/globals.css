@@ -245,6 +245,108 @@ body {
   overflow-y: hidden;
 }
 
+/* Matrices (L1.4) : tableau CSS en éléments en ligne, crochets dessinés par bordures, lignes de hauteur fixe pour aligner en-têtes et opérations */
+.mx {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  vertical-align: middle;
+  margin: 0.15rem 0.2rem;
+  font-family: var(--font-technique);
+  font-size: 0.95rem;
+  color: inherit;
+  font-style: normal;
+}
+.mx-nom {
+  align-self: center;
+  white-space: nowrap;
+}
+.mx-t {
+  display: inline-table;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.mx-l {
+  display: table-row;
+}
+.mx-c {
+  display: table-cell;
+  height: 1.4rem;
+  line-height: 1.4rem;
+  padding: 0 0.45rem;
+  text-align: right;
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mx-compacte {
+  font-size: 0.8rem;
+}
+.mx-compacte .mx-c {
+  height: 1.15rem;
+  line-height: 1.15rem;
+  padding: 0 0.3rem;
+}
+.mx-corps {
+  position: relative;
+  display: inline-block;
+  padding: 0 5px;
+}
+.mx-corps::before,
+.mx-corps::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  border: 1.5px solid currentColor;
+}
+.mx-corps::before {
+  left: 0;
+  border-right: 0;
+}
+.mx-corps::after {
+  right: 0;
+  border-left: 0;
+}
+.mx-corps.mx-avec-entetes::before,
+.mx-corps.mx-avec-entetes::after {
+  top: 1.4rem;
+}
+.mx-compacte .mx-corps.mx-avec-entetes::before,
+.mx-compacte .mx-corps.mx-avec-entetes::after {
+  top: 1.15rem;
+}
+.mx-second {
+  border-left: 1px solid currentColor;
+}
+.mx-pivot {
+  background: var(--color-encre-clair);
+  color: var(--color-encre);
+  font-weight: 700;
+}
+.mx-zero {
+  color: var(--color-validation);
+  font-weight: 700;
+}
+.mx-entete,
+.mx-entete-ligne {
+  font-size: 0.78rem;
+  color: var(--color-beton);
+}
+.mx-entete {
+  text-align: center;
+}
+.mx-entete-ligne {
+  text-align: left;
+}
+.mx-op {
+  padding-left: 0.6rem;
+  text-align: left;
+  font-family: var(--font-manuscrite);
+  color: var(--color-correction);
+}
+
 /* Écriture manuscrite (cahier) */
 .manuscrit {
   font-family: var(--font-manuscrite);

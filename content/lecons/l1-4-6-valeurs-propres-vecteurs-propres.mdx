@@ -1,0 +1,341 @@
+---
+id: L1.4.6
+titre: Valeurs propres et vecteurs propres
+objectifs:
+  - Définir une valeur propre et un vecteur propre par la relation A v = λ v
+  - Calculer les valeurs propres d'une matrice 2 × 2 par l'équation caractéristique
+  - Calculer les vecteurs propres associés et vérifier leurs propriétés
+  - Interpréter les contraintes principales comme les valeurs propres du tenseur des contraintes
+relecture: false
+normes:
+  - "EN 1992-1-1 tableau 3.1 : résistance moyenne à la traction fctm du béton C25/30"
+glossaire:
+  - terme: Vecteur propre
+    definition: Vecteur non nul v dont la direction ne change pas quand on lui applique la matrice ; A v = λ v.
+  - terme: Valeur propre
+    definition: Nombre λ par lequel la matrice multiplie un vecteur propre.
+  - terme: Équation caractéristique
+    definition: Équation det(A − λ I) = 0 dont les solutions sont les valeurs propres.
+  - terme: Contraintes principales
+    definition: Contraintes normales maximale et minimale en un point, sur des facettes où le cisaillement est nul.
+  - terme: Directions principales
+    definition: Directions des facettes qui ne subissent que des contraintes principales ; ce sont les vecteurs propres du tenseur des contraintes.
+symboles:
+  - { symbole: 'λ', signification: 'valeur propre', unite: 'selon la matrice' }
+  - { symbole: 'v', signification: 'vecteur propre (unitaire)', unite: '—' }
+  - { symbole: 'σx, σy', signification: 'contraintes normales, traction positive', unite: 'MPa' }
+  - { symbole: 'τ', signification: 'contrainte de cisaillement', unite: 'MPa' }
+  - { symbole: 'σ1, σ2', signification: 'contraintes principales', unite: 'MPa' }
+  - { symbole: 'θ1', signification: 'direction de σ1 depuis l’axe x', unite: '°' }
+formules:
+  - { nom: 'Définition', tex: 'A\,v = \lambda\, v, \quad v \neq 0', domaine: 'Matrice carrée' }
+  - { nom: 'Équation caractéristique 2 × 2', tex: '\lambda^2 - (\operatorname{tr} A)\,\lambda + \det A = 0', domaine: 'Matrice 2 × 2' }
+  - { nom: 'Contraintes principales', tex: '\sigma_{1,2} = \frac{\sigma_x + \sigma_y}{2} \pm \sqrt{\Big(\frac{\sigma_x - \sigma_y}{2}\Big)^2 + \tau^2}', domaine: 'État plan de contraintes' }
+  - { nom: 'Direction principale', tex: '\tan 2\theta_1 = \frac{2\tau}{\sigma_x - \sigma_y}', domaine: 'État plan, θ1 direction de σ1' }
+---
+
+import { contraintesPrincipales, EXEMPLE_CONTRAINTES, jacobiSym3, valeursPropres2 } from '@/lib/calc/lineaire'
+import { MATERIAUX_THERMIQUES } from '@/lib/calc/physique'
+import { grandeur, nombre } from '@/lib/format'
+import { ContraintesElements } from '@/components/schemas/Lineaire'
+
+export const d0 = EXEMPLE_CONTRAINTES
+export const c0 = contraintesPrincipales(d0)
+export const fctm = MATERIAUX_THERMIQUES.beton.limite
+export const A2 = [[4, 1], [2, 3]]
+export const vp2 = valeursPropres2(A2)
+export const diag = valeursPropres2([[3, 0], [0, 1]])
+export const rot = valeursPropres2([[0, -1], [1, 0]])
+export const cis = contraintesPrincipales({ sx: 0, sy: 0, txy: 1.5 })
+export const T3 = [[4, 1, 0], [1, 3, 0], [0, 0, 2]]
+export const j3 = jacobiSym3(T3)
+
+<Page etape="intuition" titre="L'intuition : les directions qui ne tournent pas">
+
+Dessine des flèches dans toutes les directions sur une feuille de caoutchouc, puis tire plus fort dans un sens que dans l'autre. Presque toutes les flèches **tournent** en s'allongeant. Mais deux directions perpendiculaires restent fixes : leurs flèches s'allongent ou raccourcissent, sans tourner. Ce sont les **directions propres** de la déformation.
+
+Dans une poutre en charge, chaque point est tiré, comprimé et cisaillé. Pourtant, en tout point, il existe deux directions perpendiculaires où la matière est **seulement tirée ou comprimée**, sans cisaillement : les **directions principales**. Le béton, qui résiste mal à la traction, se fissure perpendiculairement à la plus forte traction. C'est pourquoi les fissures d'effort tranchant sont **inclinées** près des appuis.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment trouver les directions qu'une matrice ne fait pas tourner, et que nous disent-elles sur la fissuration du béton ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : définition et calcul">
+
+### Définition
+
+Un vecteur **non nul** v est un vecteur propre de A, de valeur propre λ, si :
+
+$$A\,v = \lambda\, v$$
+
+A ne fait pas tourner v : elle le multiplie seulement par λ.
+
+### L'équation caractéristique
+
+A v = λ v s'écrit (A − λ I) v = 0. Ce système a une solution non nulle seulement si sa matrice n'est pas inversible (L1.4.3) :
+
+$$\det(A - \lambda I) = 0 \quad\Longleftrightarrow\quad \lambda^2 - (\operatorname{tr} A)\,\lambda + \det A = 0 \quad (2 \times 2)$$
+
+où tr A est la **trace**, somme des coefficients de la diagonale.
+
+### Les vecteurs propres
+
+Pour chaque λ, on résout (A − λ I) v = 0. Ce système a une infinité de solutions (son rang vaut 1, L1.4.4) : toutes sur une même droite. On en choisit une, souvent de longueur 1.
+
+<Encadre type="exemple" titre="Une matrice 2 × 2">
+A = (4 1 ; 2 3) : tr A = {nombre(vp2.trace, 0)}, det A = {nombre(vp2.det, 0)}, donc λ² − {nombre(vp2.trace, 0)} λ + {nombre(vp2.det, 0)} = 0, soit λ = {nombre(vp2.lambda[0], 0)} et λ = {nombre(vp2.lambda[1], 0)}. Pour λ = {nombre(vp2.lambda[0], 0)}, v = ({nombre(vp2.vecteurs[0][0], 3)} ; {nombre(vp2.vecteurs[0][1], 3)}) ; pour λ = {nombre(vp2.lambda[1], 0)}, v = ({nombre(vp2.vecteurs[1][0], 3)} ; {nombre(vp2.vecteurs[1][1], 3)}).
+</Encadre>
+
+### Les propriétés
+
+- λ₁ + λ₂ = tr A et λ₁ λ₂ = det A : deux contrôles rapides ;
+- une matrice **symétrique** a des valeurs propres réelles et des vecteurs propres **perpendiculaires** ;
+- une rotation de 90° ne laisse aucune direction fixe : ses valeurs propres ne sont pas réelles.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : les contraintes principales">
+
+### Le tenseur des contraintes
+
+En un point d'une pièce plane, l'état de contrainte se range dans une matrice **symétrique** :
+
+$$T = \begin{pmatrix} \sigma_x & \tau \\ \tau & \sigma_y \end{pmatrix}$$
+
+σ<sub>x</sub> et σ<sub>y</sub> sont les contraintes normales (traction positive), τ le cisaillement, en MPa.
+
+### Valeurs propres = contraintes principales
+
+Les valeurs propres de T sont les **contraintes principales** σ<sub>1</sub> ≥ σ<sub>2</sub> ; ses vecteurs propres sont les **directions principales**. Sur les facettes perpendiculaires à ces directions, le cisaillement est nul. Le cisaillement maximal vaut (σ<sub>1</sub> − σ<sub>2</sub>) / 2, sur des facettes à 45°.
+
+$$\sigma_{1,2} = \frac{\sigma_x + \sigma_y}{2} \pm \sqrt{\Big(\frac{\sigma_x - \sigma_y}{2}\Big)^2 + \tau^2}$$
+
+Le **cercle de Mohr** (exemple résolu) est une construction graphique des mêmes valeurs. En cisaillement pur (σ<sub>x</sub> = σ<sub>y</sub> = 0), les directions principales sont à **45°** : σ<sub>1</sub> = τ et σ<sub>2</sub> = −τ.
+
+### En trois dimensions
+
+Le tenseur devient 3 × 3, avec trois contraintes principales. Les logiciels les calculent par des méthodes itératives, comme la méthode de Jacobi : pour la matrice (4 1 0 ; 1 3 0 ; 0 0 2), elle donne {j3.valeurs.map((v) => nombre(v, 3)).join(', ')}.
+
+<Regle type="simplification">
+Les contraintes de l'exemple sont des données de l'énoncé ; leur calcul à partir des efforts dans une poutre relève de la résistance des matériaux (L2). On suppose le béton non fissuré et élastique jusqu'à f<sub>ctm</sub>.
+</Regle>
+
+<Encadre type="retenir">
+A v = λ v ; det(A − λ I) = 0 ; λ₁ + λ₂ = tr A, λ₁ λ₂ = det A. Contraintes principales = valeurs propres du tenseur ; directions principales = vecteurs propres.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : un point, deux façons de le regarder">
+
+<ContraintesElements d={d0} s1={c0.s1} s2={c0.s2} theta1={c0.theta1} />
+
+À gauche, un petit carré de matière pris dans l'âme d'une poutre, près d'un appui, dans le repère de la poutre : il est tiré selon x (σ<sub>x</sub> = {grandeur(d0.sx, 1, 'MPa')}) et cisaillé (τ = {grandeur(d0.txy, 1, 'MPa')}).
+
+À droite, le **même point**, regardé dans un carré tourné de θ<sub>1</sub> = {nombre(c0.theta1, 1)}° : le cisaillement a disparu. Il ne reste qu'une traction σ<sub>1</sub> = {grandeur(c0.s1, 2, 'MPa')} et une compression σ<sub>2</sub> = {grandeur(c0.s2, 2, 'MPa')}. La traction principale dépasse la traction σ<sub>x</sub> appliquée : c'est elle qui ouvre la fissure, perpendiculairement à sa direction (trait pointillé rouge).
+
+</Page>
+
+<FicheCalcul calcul="contraintesPrincipales">
+
+<Cahier titre="Exemple résolu : un point de l'âme d'une poutre">
+
+**Énoncé.** Un point de l'âme d'une poutre en béton C25/30, près d'un appui, subit σ<sub>x</sub> = {grandeur(d0.sx, 1, 'MPa')}, σ<sub>y</sub> = {grandeur(d0.sy, 1, 'MPa')} et τ = {grandeur(d0.txy, 1, 'MPa')} (données de l'énoncé, issues d'un calcul de résistance des matériaux). Calcule les contraintes principales et leurs directions, puis dis si le béton risque de se fissurer.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le tenseur et le schéma">
+<AN k="tenseur" />
+<Schema k="elements" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : valeurs et vecteurs propres">
+
+<Etape n={3} titre="L'équation caractéristique">
+<AN k="caracteristique" />
+<Note>Pourquoi un déterminant nul ? On cherche v non nul tel que (T − λ I) v = 0 : la matrice T − λ I ne doit pas être inversible.</Note>
+</Etape>
+
+<Etape n={4} titre="Les valeurs propres">
+<AN k="lambdas" />
+</Etape>
+
+<Etape n={5} titre="Le vecteur propre de σ1">
+<AN k="vecteur" />
+<Note>Pourquoi une seule direction ? (T − σ₁ I) v = 0 a une infinité de solutions, toutes alignées : on garde le vecteur de longueur 1.</Note>
+</Etape>
+
+<Etape n={6} titre="Les contrôles">
+<AN k="controle" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (fin) : le béton et le cercle de Mohr">
+
+<Etape n={7} titre="Le béton se fissure-t-il ?">
+<AN k="beton" />
+<AN k="tau" />
+<Resultat k="s1" libelle="Contrainte principale de traction" />
+<Note couleur="vert">Contrôle : σ₁ et σ₂ encadrent σx et σy. Mets τ = 0 : les contraintes principales redeviennent σx et σy, et θ₁ = 0.</Note>
+</Etape>
+
+<Etape n={8} titre="Le cercle de Mohr">
+<Schema k="mohr" />
+<Note couleur="bleu">Le cercle passe par X (σx ; τ) et Y (σy ; −τ) ; ses intersections avec l'axe σ sont σ₁ et σ₂, les valeurs propres.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre les coefficients de la diagonale pour les valeurs propres.">
+C'est vrai seulement si τ = 0. Ici, σ<sub>x</sub> = {nombre(d0.sx, 1)} MPa mais σ<sub>1</sub> = {grandeur(c0.s1, 2, 'MPa')} : le cisaillement augmente la traction principale.
+</Piege>
+
+<Piege erreur="accepter v = 0 comme vecteur propre.">
+Le vecteur nul vérifie A v = λ v pour tout λ : il ne dit rien. Un vecteur propre est non nul par définition.
+</Piege>
+
+<Piege erreur="oublier la moitié dans tan 2θ.">
+La formule donne 2θ<sub>1</sub>, pas θ<sub>1</sub>. Pour l'exemple, 2θ<sub>1</sub> = {nombre(2 * c0.theta1, 1)}° et θ<sub>1</sub> = {nombre(c0.theta1, 1)}°. Contrôle avec le vecteur propre.
+</Piege>
+
+<Piege erreur="dessiner la fissure dans la direction de σ1.">
+La traction ouvre la fissure **perpendiculairement** à sa direction, comme on déchire une feuille en tirant de part et d'autre.
+</Piege>
+
+<Piege erreur="négliger le signe de τ.">
+Changer le signe de τ change le côté vers lequel tournent les directions principales, donc l'inclinaison des fissures.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les fissures d'effort tranchant.** Près des appuis d'une poutre en béton armé, le cisaillement est fort : les directions principales s'inclinent et les fissures apparaissent en biais, vers 45°. Les **cadres** et les **étriers** cousent ces fissures ; leur calcul relève de l'Eurocode 2 (EN 1992-1-1 §6.2, traité en L3). Une fissure inclinée qui s'ouvre près d'un appui est un signal d'alerte à signaler.
+
+<Encadre type="terrain" titre="Lire les fissures pendant une visite">
+Fissures verticales au milieu de la portée : flexion. Fissures inclinées près des appuis : effort tranchant. L'orientation d'une fissure indique la direction de la traction principale qui l'a ouverte : c'est le premier indice d'un diagnostic.
+</Encadre>
+
+**Les modes propres de vibration.** Pour le calcul sismique, on cherche les valeurs propres d'un système (K − ω² M) φ = 0 : elles donnent les fréquences propres de la structure, et les vecteurs propres ses formes de vibration (analyse modale de l'Eurocode 8). Dans l'est de la RDC, région du rift où les séismes sont fréquents, cette analyse concerne les ouvrages importants.
+
+**Les axes principaux d'une section.** Pour une cornière ou une section non symétrique, les axes autour desquels elle fléchit « proprement » sont les vecteurs propres de sa matrice d'inertie.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : valeurs et vecteurs propres">
+
+### Définition
+
+$A v = \lambda v$, v ≠ 0 · v ne tourne pas, il est multiplié par λ
+
+### Calcul 2 × 2
+
+$\lambda^2 - (\operatorname{tr} A)\lambda + \det A = 0$ · puis $(A - \lambda I) v = 0$
+
+### Contrôles
+
+λ₁ + λ₂ = tr A · λ₁ λ₂ = det A · symétrique : vecteurs propres perpendiculaires
+
+### Contraintes principales
+
+$\sigma_{1,2} = \frac{\sigma_x + \sigma_y}{2} \pm \sqrt{(\frac{\sigma_x - \sigma_y}{2})^2 + \tau^2}$ · τ<sub>max</sub> = (σ₁ − σ₂)/2
+
+### Béton
+
+fissure perpendiculaire à σ₁ si σ₁ > f<sub>ctm</sub> (C25/30 : {nombre(fctm, 1)} MPa, EN 1992-1-1 tableau 3.1)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une matrice diagonale">
+
+Quelles sont les valeurs propres et les vecteurs propres de la matrice (3 0 ; 0 1) ?
+
+<Indice>Applique la matrice aux vecteurs (1 ; 0) et (0 ; 1).</Indice>
+
+<Corrige>
+λ = **{nombre(diag.lambda[0], 0)}** pour v = ({diag.vecteurs[0].map((v) => nombre(v, 0)).join(' ; ')}) et λ = **{nombre(diag.lambda[1], 0)}** pour v = ({diag.vecteurs[1].map((v) => nombre(v, 0)).join(' ; ')}). Pour une matrice diagonale, les valeurs propres se lisent sur la diagonale et les vecteurs propres sont les axes.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le calcul complet">
+
+Calcule les valeurs propres et les vecteurs propres de A = (4 1 ; 2 3), puis vérifie les deux contrôles.
+
+<Indice>tr A = 4 + 3 et det A = 4 × 3 − 1 × 2. Pour chaque λ, la première ligne de (A − λ I) v = 0 suffit.</Indice>
+
+<Corrige>
+λ² − {nombre(vp2.trace, 0)} λ + {nombre(vp2.det, 0)} = 0 : λ₁ = **{nombre(vp2.lambda[0], 0)}**, λ₂ = **{nombre(vp2.lambda[1], 0)}**. Pour λ₁ : −v₁ + v₂ = 0, v = ({vp2.vecteurs[0].map((v) => nombre(v, 3)).join(' ; ')}). Pour λ₂ : 2 v₁ + v₂ = 0, v = ({vp2.vecteurs[1].map((v) => nombre(v, 3)).join(' ; ')}). Contrôles : {nombre(vp2.lambda[0], 0)} + {nombre(vp2.lambda[1], 0)} = {nombre(vp2.trace, 0)} = tr A et {nombre(vp2.lambda[0], 0)} × {nombre(vp2.lambda[1], 0)} = {nombre(vp2.det, 0)} = det A. A n'est pas symétrique : ses vecteurs propres ne sont pas perpendiculaires.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le cisaillement pur">
+
+Au niveau de l'axe neutre d'une poutre, σ<sub>x</sub> = σ<sub>y</sub> = 0 et τ = 1,5 MPa (donnée de l'énoncé). Calcule les contraintes principales et leur direction. Le béton C25/30 se fissure-t-il ? Dans quelle direction se fissurerait-il si τ augmentait ?
+
+<Indice>T = (0 τ ; τ 0) : tr T = 0 et det T = −τ².</Indice>
+
+<Corrige>
+λ² − τ² = 0 : σ<sub>1</sub> = **{grandeur(cis.s1, 2, 'MPa')}**, σ<sub>2</sub> = **{grandeur(cis.s2, 2, 'MPa')}**, à θ<sub>1</sub> = **{nombre(cis.theta1, 0)}°**. σ<sub>1</sub> &lt; f<sub>ctm</sub> = {nombre(fctm, 1)} MPa : pas de fissure à ce niveau de contrainte. Si τ dépassait f<sub>ctm</sub>, la fissure s'ouvrirait perpendiculairement à σ<sub>1</sub>, donc à 45° de l'axe de la poutre : c'est la fissure d'effort tranchant typique.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.4.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un vecteur propre v d'une matrice A vérifie :" choix={['A v = 0', 'A v = λ v avec v ≠ 0', 'A v = v + λ', 'det v = λ']} bonne={1} colonnes={2}>
+A ne fait pas tourner v, elle le multiplie par λ.
+</QCM>
+
+<QCM n={2} question="Les valeurs propres sont les solutions de :" choix={['A = λ', 'det(A − λ I) = 0', 'tr A = λ', 'A v = 0']} bonne={1} colonnes={2}>
+Il faut que A − λ I ne soit pas inversible.
+</QCM>
+
+<QCM n={3} question="Pour une matrice 2 × 2, la somme des valeurs propres vaut :" choix={['det A', 'la trace de A', '0', 'le plus grand coefficient']} bonne={1} colonnes={2}>
+λ₁ + λ₂ = tr A ; le produit vaut det A.
+</QCM>
+
+<QCM n={4} question="Les vecteurs propres d'une matrice symétrique sont :" choix={['parallèles', 'perpendiculaires', 'nuls', 'complexes']} bonne={1} colonnes={4}>
+C'est pourquoi les deux directions principales d'un point sont perpendiculaires.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Les contraintes principales sont :" choix={['les coefficients diagonaux du tenseur', 'les valeurs propres du tenseur des contraintes', 'toujours positives', 'égales à τ']} bonne={1} colonnes={2}>
+Sur les facettes principales, le cisaillement est nul.
+</QCM>
+
+<QCM n={6} question="Pour σx = 2 MPa, σy = 0 et τ = 1,5 MPa, σ1 vaut :" choix={[grandeur(c0.s1, 2, 'MPa'), grandeur(d0.sx, 2, 'MPa'), grandeur(d0.sx + d0.txy, 2, 'MPa'), grandeur(c0.tauMax, 2, 'MPa')]} bonne={0} colonnes={4}>
+σ₁ = 1 + √(1 + 2,25).
+</QCM>
+
+<QCM n={7} question="En cisaillement pur, les directions principales sont à :" choix={['0°', '30°', '45°', '90°']} bonne={2} colonnes={4}>
+σ₁ = τ et σ₂ = −τ, à 45° des axes.
+</QCM>
+
+<QCM n={8} question="Une fissure de traction dans le béton s'ouvre :" choix={['dans la direction de σ1', 'perpendiculairement à σ1', 'dans la direction de σ2', 'toujours verticalement']} bonne={1} colonnes={2}>
+La traction écarte les deux lèvres de la fissure.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

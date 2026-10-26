@@ -1,0 +1,326 @@
+---
+id: L1.4.2
+titre: Systèmes linéaires et pivot de Gauss
+objectifs:
+  - Écrire un système d'équations linéaires sous la forme A x = b
+  - Appliquer les opérations élémentaires sur les lignes d'un système
+  - Triangulariser un système par le pivot de Gauss, puis le résoudre par remontée
+  - Contrôler une solution en la reportant dans le système
+relecture: false
+normes: []
+glossaire:
+  - terme: Système linéaire
+    definition: Ensemble d'équations du premier degré par rapport aux inconnues, écrit A x = b.
+  - terme: Matrice augmentée
+    definition: Tableau [A | b] qui regroupe les coefficients et le second membre d'un système.
+  - terme: Pivot
+    definition: Coefficient de la diagonale qui sert à annuler les coefficients situés en dessous de lui.
+  - terme: Système triangulaire
+    definition: Système dont tous les coefficients sous la diagonale sont nuls ; il se résout de la dernière inconnue à la première.
+  - terme: Remontée
+    definition: Calcul des inconnues d'un système triangulaire, en partant de la dernière équation.
+symboles:
+  - { symbole: 'A', signification: 'matrice des coefficients (n × n)', unite: 'selon le problème' }
+  - { symbole: 'x', signification: 'vecteur des inconnues', unite: 'selon le problème' }
+  - { symbole: 'b', signification: 'second membre', unite: 'selon le problème' }
+  - { symbole: 'L_i', signification: 'ligne (équation) numéro i', unite: '—' }
+  - { symbole: 'k', signification: 'multiplicateur d’une élimination : a_ij / a_jj', unite: '—' }
+formules:
+  - { nom: 'Élimination', tex: 'L_i \leftarrow L_i - \frac{a_{ij}}{a_{jj}}\, L_j', domaine: 'Pivot a_jj non nul, lignes i sous j' }
+  - { nom: 'Remontée', tex: 'x_i = \frac{1}{a_{ii}} \Big( b_i - \sum_{j > i} a_{ij}\, x_j \Big)', domaine: 'Système triangulaire supérieur' }
+---
+
+import { EXEMPLE_MELANGE, GRANULATS, melangeGranulats, pivotGauss } from '@/lib/calc/lineaire'
+import { grandeur, nombre, scientifique } from '@/lib/format'
+import { MelangeColonnes } from '@/components/schemas/Lineaire'
+
+export const mel = melangeGranulats(EXEMPLE_MELANGE.cible5, EXEMPLE_MELANGE.cible15)
+export const recu = pivotGauss([[2, 1], [1, 1]], [25, 15])
+export const swap = pivotGauss([[0, 1], [1, 1]], [2, 3])
+export const ex1 = pivotGauss([[1, 1], [1, -1]], [10, 2])
+export const ex2 = pivotGauss([[1, 2, 1], [2, 1, 1], [1, 1, 3]], [8, 7, 12])
+export const ex3 = pivotGauss([[0, 2, 1], [1, 1, 1], [2, 1, 3]], [7, 6, 13])
+export const pc = (v) => grandeur(v * 100, 1, '%')
+
+<Page etape="intuition" titre="L'intuition : deux tickets de caisse">
+
+Un chef de chantier retrouve deux tickets de la quincaillerie, sans le détail des prix. Premier ticket : 2 sacs de ciment et 1 sac de chaux, 25 USD. Second ticket : 1 sac de ciment et 1 sac de chaux, 15 USD (données de l'exemple).
+
+Il compare les deux tickets. La différence, c'est **un sac de ciment** de plus pour 10 USD de plus : le ciment coûte {grandeur(recu.x[0], 0, 'USD')}. Il remplace dans le second ticket : la chaux coûte {grandeur(recu.x[1], 0, 'USD')}.
+
+Sans le savoir, il vient d'appliquer le **pivot de Gauss** : il a **retranché une équation à une autre** pour faire disparaître une inconnue, puis il est **remonté** vers l'autre. Avec trois inconnues ou mille, la méthode est la même ; seule la patience change, et c'est pourquoi on la confie aux ordinateurs.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment résoudre, sans se perdre, un système de plusieurs équations à plusieurs inconnues ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : la méthode du pivot">
+
+### L'écriture matricielle
+
+Un système de n équations linéaires à n inconnues s'écrit **A x = b** : A rassemble les coefficients, x les inconnues, b le second membre. Pour calculer, on travaille sur la **matrice augmentée** [A | b] : chaque ligne est une équation.
+
+### Les opérations élémentaires
+
+Trois opérations ne changent pas les solutions du système :
+
+1. **échanger** deux lignes : L<sub>i</sub> ↔ L<sub>j</sub> ;
+2. **multiplier** une ligne par un nombre **non nul** ;
+3. **retrancher** à une ligne un multiple d'une autre : L<sub>i</sub> ← L<sub>i</sub> − k L<sub>j</sub>.
+
+### La méthode
+
+1. On prend le premier coefficient de la diagonale, le **pivot**.
+2. Sous lui, on annule chaque coefficient par L<sub>i</sub> ← L<sub>i</sub> − k L<sub>1</sub>, avec k = a<sub>i1</sub> / a<sub>11</sub>.
+3. On recommence avec le pivot suivant, sur les lignes du dessous.
+4. Le système devient **triangulaire** : on le résout par **remontée**, de la dernière inconnue à la première.
+
+<Encadre type="exemple" titre="Le premier pas sur les tickets">
+[2 1 | 25] et [1 1 | 15] : pivot 2, k = 1/2. L<sub>2</sub> ← L<sub>2</sub> − ½ L<sub>1</sub> donne [0 ½ | 2,5]. Donc y = 2,5 / 0,5 = {nombre(recu.x[1], 0)}, puis 2 x = 25 − {nombre(recu.x[1], 0)} et x = {nombre(recu.x[0], 0)}.
+</Encadre>
+
+<Regle type="simplification">
+On traite ici des systèmes carrés (autant d'équations que d'inconnues) qui ont une solution unique. Les autres cas, sans solution ou avec une infinité de solutions, sont l'objet de L1.4.4.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : pivots nuls, arrondis, contrôle">
+
+### Un pivot nul
+
+Si le pivot est nul, on ne peut pas diviser par lui. On **échange** sa ligne avec une ligne du dessous dont le coefficient n'est pas nul. Pour 0 x + y = 2 et x + y = 3, on échange les deux lignes ; le système est alors déjà triangulaire : y = {nombre(swap.x[1], 0)}, puis x = {nombre(swap.x[0], 0)}.
+
+### Le pivot partiel
+
+Un pivot très petit fait exploser les multiplicateurs k, et avec eux les erreurs d'arrondi. Les logiciels choisissent donc, dans chaque colonne, le coefficient **le plus grand en valeur absolue** comme pivot : c'est le **pivot partiel**.
+
+<Regle type="art">
+À la main, garde au moins quatre chiffres significatifs dans les étapes intermédiaires et n'arrondis qu'à la fin. Un arrondi trop tôt dans la première élimination se propage dans toutes les inconnues.
+</Regle>
+
+### Le contrôle
+
+On **reporte** la solution dans les équations de départ : chaque équation doit être vérifiée, aux arrondis près. Ce contrôle prend une minute et détecte presque toutes les erreurs de signe.
+
+### Le coût du calcul
+
+Pour n inconnues, la triangulation demande environ n³ / 3 multiplications : quelques dizaines pour n = 3, mais {scientifique(1000 ** 3 / 3, 2)} pour n = 1 000. C'est rien pour un ordinateur, impossible à la main : on résout à la main les systèmes 2 × 2 et 3 × 3, et l'on comprend ainsi ce que fait le logiciel.
+
+<Encadre type="retenir">
+Pivot, élimination sous le pivot (sans oublier le second membre), système triangulaire, remontée, contrôle. Pivot nul : on échange les lignes.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : un système vu en colonnes">
+
+<MelangeColonnes x={mel.x} cible5={EXEMPLE_MELANGE.cible5} cible15={EXEMPLE_MELANGE.cible15} />
+
+Chaque barre est **une équation** du mélange de l'exemple résolu. La première dit que les proportions font 100 %. Les deux autres disent que le mélange doit laisser passer {pc(EXEMPLE_MELANGE.cible5)} au tamis de 5 mm et {pc(EXEMPLE_MELANGE.cible15)} au tamis de 15 mm.
+
+Chaque couleur est **un granulat** : sa part dans une barre vaut sa proportion multipliée par son passant. Résoudre le système, c'est trouver les trois proportions qui font monter les trois barres exactement jusqu'à leur objectif.
+
+<Encadre type="attention">
+Une solution du calcul n'est pas forcément un mélange réel : une proportion négative signifie que ces granulats ne permettent pas d'atteindre les objectifs.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="melangeGranulats">
+
+<Cahier titre="Exemple résolu : le mélange de trois granulats">
+
+**Énoncé.** La centrale à béton d'un chantier de pont, près de Kisangani, dispose de trois granulats : {GRANULATS.map((g) => g.nom).join(', ')}. Le laboratoire a mesuré leurs passants : {GRANULATS.map((g) => `${g.nom} : ${pc(g.p5)} à 5 mm et ${pc(g.p15)} à 15 mm`).join(' ; ')}. Il demande un mélange qui laisse passer {pc(EXEMPLE_MELANGE.cible5)} au tamis de 5 mm et {pc(EXEMPLE_MELANGE.cible15)} au tamis de 15 mm (données de l'énoncé). Trouve les proportions x, y, z de sable, de gravillon et de gravier.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi trois équations ? Il y a trois inconnues. La première condition, x + y + z = 1, dit simplement que le mélange est complet.</Note>
+</Etape>
+
+<Etape n={2} titre="Le système">
+<AN k="systeme" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'élimination et la remontée">
+
+<Etape n={3} titre="Élimination dans la première colonne">
+<AN k="etape1" />
+<Note>Pourquoi 0,95 ? C'est k = a₂₁ / a₁₁ : il faut retrancher 0,95 fois la ligne 1 pour annuler le 0,95 de la ligne 2. Le second membre suit la même opération.</Note>
+</Etape>
+
+<Etape n={4} titre="Élimination dans la deuxième colonne">
+<AN k="etape2" />
+</Etape>
+
+<Etape n={5} titre="La remontée">
+<AN k="remontee" />
+<Note>Pourquoi commencer par z ? La dernière ligne ne contient plus que z : une seule inconnue, une seule division.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (fin) : le contrôle et le mélange">
+
+<Etape n={6} titre="Le contrôle">
+<AN k="verification" />
+<Resultat k="melange" libelle="Mélange" />
+<Note couleur="vert">Contrôle : les trois équations sont vérifiées. Demande 60 % à 5 mm : le gravier devient négatif, le mélange est impossible avec ces granulats.</Note>
+</Etape>
+
+<Etape n={7} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le second membre.">
+L'opération L<sub>2</sub> ← L<sub>2</sub> − 0,95 L<sub>1</sub> s'applique à toute la ligne, second membre compris : {nombre(EXEMPLE_MELANGE.cible5, 2)} − 0,95 × 1 = {nombre(mel.etapes[1].M[1][3], 2)}. Sinon la solution est fausse, et le contrôle le montre.
+</Piege>
+
+<Piege erreur="diviser par un pivot nul.">
+Un zéro sur la diagonale ne se divise pas : on échange d'abord la ligne avec une ligne du dessous (exercice 3).
+</Piege>
+
+<Piege erreur="arrondir dès la première étape.">
+Les erreurs d'arrondi se propagent à chaque élimination. Garde au moins quatre chiffres significatifs jusqu'à la fin.
+</Piege>
+
+<Piege erreur="se tromper de signe.">
+Retrancher un nombre négatif revient à ajouter : L<sub>i</sub> − (−0,1) L<sub>j</sub> = L<sub>i</sub> + 0,1 L<sub>j</sub>. Écris l'opération à côté de chaque ligne.
+</Piege>
+
+<Piege erreur="ne pas reporter la solution.">
+Une erreur de calcul donne quand même trois nombres. Seul le report dans les équations de départ dit s'ils sont justes.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**La composition des bétons.** Une méthode de composition (L2.6) fixe une courbe granulométrique de référence. Ajuster les proportions de plusieurs granulats pour s'en approcher est un système linéaire ; avec plus de tamis que de granulats, on cherche le meilleur compromis (moindres carrés), toujours par des calculs matriciels.
+
+<Encadre type="terrain" titre="À la cimenterie">
+Dans une cimenterie, comme celles du Kongo-Central, le cru est un mélange de calcaire, d'argile et de correctifs. Chaque matière apporte sa part de chaux, de silice, d'alumine et d'oxyde de fer : trouver les proportions qui donnent la composition visée est le même problème que notre mélange de granulats, avec plus d'équations.
+</Encadre>
+
+**Les logiciels de calcul.** Un logiciel de structure, de réseau d'eau ou de topographie résout des systèmes de milliers d'équations. Les méthodes qu'il emploie (Gauss avec pivot, Cholesky, méthodes itératives, L2.3.5) sont des variantes de ce que tu viens de faire à la main.
+
+**La topographie.** Les mesures d'un cheminement ou d'un nivellement sont plus nombreuses que les inconnues. Leur compensation conduit à un système linéaire, résolu de la même façon.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : pivot de Gauss">
+
+### Écriture
+
+A x = b · matrice augmentée [A | b] · une ligne = une équation
+
+### Opérations permises
+
+L<sub>i</sub> ↔ L<sub>j</sub> · L<sub>i</sub> × k (k ≠ 0) · L<sub>i</sub> ← L<sub>i</sub> − k L<sub>j</sub>
+
+### Élimination
+
+k = a<sub>ij</sub> / a<sub>jj</sub> · toute la ligne, second membre compris · pivot nul → échange
+
+### Remontée
+
+$x_n = b_n / a_{nn}$, puis on remonte ligne par ligne
+
+### Contrôle
+
+report dans les équations de départ · 4 chiffres significatifs minimum
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Deux équations">
+
+Résous par le pivot de Gauss : x + y = 10 et x − y = 2.
+
+<Indice>L<sub>2</sub> ← L<sub>2</sub> − L<sub>1</sub> élimine x.</Indice>
+
+<Corrige>
+L<sub>2</sub> ← L<sub>2</sub> − L<sub>1</sub> donne −2 y = −8, donc y = **{nombre(ex1.x[1], 0)}** ; puis x = 10 − {nombre(ex1.x[1], 0)} = **{nombre(ex1.x[0], 0)}**. Contrôle : {nombre(ex1.x[0], 0)} − {nombre(ex1.x[1], 0)} = 2.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Trois équations">
+
+Résous : x + 2 y + z = 8 ; 2 x + y + z = 7 ; x + y + 3 z = 12.
+
+<Indice>Pivot 1 : L<sub>2</sub> ← L<sub>2</sub> − 2 L<sub>1</sub> et L<sub>3</sub> ← L<sub>3</sub> − L<sub>1</sub>. Puis élimine y de la ligne 3 avec la nouvelle ligne 2.</Indice>
+
+<Corrige>
+Après la première colonne : −3 y − z = −9 et −y + 2 z = 4. Puis L<sub>3</sub> ← L<sub>3</sub> − ⅓ L<sub>2</sub> : (7/3) z = 7, donc z = **{nombre(ex2.x[2], 0)}**, y = **{nombre(ex2.x[1], 0)}**, x = **{nombre(ex2.x[0], 0)}**. Contrôle dans la troisième équation : {nombre(ex2.x[0], 0)} + {nombre(ex2.x[1], 0)} + 3 × {nombre(ex2.x[2], 0)} = 12.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un pivot nul">
+
+Résous : 2 y + z = 7 ; x + y + z = 6 ; 2 x + y + 3 z = 13.
+
+<Indice>Le premier pivot est nul : échange les lignes 1 et 2 avant d'éliminer.</Indice>
+
+<Corrige>
+L<sub>1</sub> ↔ L<sub>2</sub>, puis L<sub>3</sub> ← L<sub>3</sub> − 2 L<sub>1</sub> : −y + z = 1. Avec 2 y + z = 7 : L<sub>3</sub> ← L<sub>3</sub> + ½ L<sub>2</sub> donne (3/2) z = 4,5, donc z = **{nombre(ex3.x[2], 0)}**, y = **{nombre(ex3.x[1], 0)}**, x = **{nombre(ex3.x[0], 0)}**. Sans l'échange, la première division était impossible.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.4.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Laquelle de ces opérations est interdite, car elle change les solutions ?" choix={['échanger deux lignes', 'multiplier une ligne par 0', 'retrancher à une ligne 3 fois une autre', 'multiplier une ligne par −2']} bonne={1} colonnes={2}>
+Multiplier par 0 efface une équation : on perd une information.
+</QCM>
+
+<QCM n={2} question="Pour [2 1 | 5] et [4 3 | 11], l'opération qui annule le 4 est :" choix={['L₂ ← L₂ − 2 L₁', 'L₂ ← L₂ − 4 L₁', 'L₂ ← L₂ + 2 L₁', 'L₁ ← L₁ − 2 L₂']} bonne={0} colonnes={2}>
+k = 4 / 2 = 2.
+</QCM>
+
+<QCM n={3} question="Après la triangulation, la remontée commence par :" choix={['la première inconnue', 'la dernière inconnue', 'la plus grande inconnue', 'le second membre']} bonne={1} colonnes={2}>
+La dernière ligne ne contient plus qu'une inconnue.
+</QCM>
+
+<QCM n={4} question="Si le pivot est nul :" choix={['le système n’a pas de solution', 'on échange sa ligne avec une ligne du dessous', 'on le remplace par 1', 'on passe à la colonne suivante sans rien faire']} bonne={1} colonnes={2}>
+On cherche plus bas un coefficient non nul dans la même colonne.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="2 sacs de ciment et 1 sac de chaux coûtent 25 USD ; 1 sac de ciment et 1 sac de chaux, 15 USD. Un sac de ciment coûte :" choix={[grandeur(recu.x[0], 0, 'USD'), grandeur(recu.x[1], 0, 'USD'), '12,50 USD', '15 USD']} bonne={0} colonnes={4}>
+L<sub>1</sub> − L<sub>2</sub> : un sac de ciment = 25 − 15.
+</QCM>
+
+<QCM n={6} question="Pourquoi les logiciels choisissent-ils le plus grand pivot de la colonne (pivot partiel) ?" choix={['pour aller plus vite', 'pour limiter les erreurs d’arrondi', 'pour obtenir des nombres entiers', 'parce que la norme l’impose']} bonne={1} colonnes={2}>
+Un petit pivot donne de grands multiplicateurs, qui amplifient les arrondis.
+</QCM>
+
+<QCM n={7} question="Comment contrôler une solution ?" choix={['en refaisant le calcul de la même façon', 'en la reportant dans les équations de départ', 'en vérifiant qu’elle est positive', 'en arrondissant']} bonne={1} colonnes={2}>
+Chaque équation de départ doit être vérifiée.
+</QCM>
+
+<QCM n={8} question="Dans le mélange de l'exemple, la proportion de sable vaut :" choix={[pc(mel.x[0]), pc(mel.x[1]), pc(mel.x[2]), '40,0 %']} bonne={0} colonnes={4}>
+x = {nombre(mel.x[0], 4)} ; 40 % est le passant visé à 5 mm, pas la proportion de sable.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

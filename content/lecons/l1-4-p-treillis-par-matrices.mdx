@@ -1,0 +1,152 @@
+---
+id: L1.4.P
+titre: "Mini-projet : un treillis résolu par matrices"
+objectifs:
+  - Écrire les équations d'équilibre de tous les nœuds d'un treillis
+  - Assembler le système matriciel A s = B et le contrôler par son déterminant
+  - Résoudre le système par le pivot de Gauss et interpréter les efforts
+  - Utiliser la linéarité pour combiner des cas de charge
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { EXEMPLE_TRIANGLE, geometrieTriangle, treillisMatriciel } from '@/lib/calc/lineaire'
+import { grandeur, nombre } from '@/lib/format'
+import { TriangleInconnues } from '@/components/schemas/Lineaire'
+
+export const d = EXEMPLE_TRIANGLE
+export const t = treillisMatriciel(d)
+export const s = t.s
+export const Lb = t.longueurs
+export const pente = (Math.atan2(d.h, d.L / 2) * 180) / Math.PI
+export const tInv = treillisMatriciel({ ...d, W: -d.W })
+export const tSans = treillisMatriciel({ ...d, W: 0 })
+export const nature = (v) => (Math.abs(v) < 1e-6 ? 'nul' : v > 0 ? 'traction' : 'compression')
+export const noms = ['Entrait AB', 'Arbalétrier AC', 'Arbalétrier BC']
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+À Kananga, une association construit un abri de marché. La couverture en tôles repose sur des **fermes triangulaires** légères en acier : portée L = {grandeur(d.L, 1, 'm')}, hauteur au faîtage h = {grandeur(d.h, 1, 'm')}. En L1.3, tu aurais résolu cette ferme nœud par nœud. Ici, tu écris **tout le treillis d'un coup**, sous la forme d'un système matriciel, comme le ferait un logiciel.
+
+### Les données
+
+- nœuds A (0 ; 0), B ({nombre(d.L, 0)} ; 0) et C ({nombre(d.L / 2, 0)} ; {nombre(d.h, 0)}), en mètres ; barres AB (entrait), AC et BC (arbalétriers) ;
+- appuis : articulation en A, appui simple en B ;
+- au faîtage C : une charge verticale P = {grandeur(d.P, 1, 'kN')} (couverture et entretien, à l'ELU) et une poussée horizontale du vent W = {grandeur(d.W, 1, 'kN')}, vers la droite. Ces deux valeurs sont des données de l'énoncé, pas des valeurs tirées d'une norme.
+
+### Ce que tu rends
+
+1. La liste des inconnues et des équations, avec leur numérotation.
+2. La matrice A et le second membre B du système A s = B.
+3. Le déterminant de A et ta conclusion.
+4. La solution par le pivot de Gauss, contrôlée par une équation de moments.
+5. Les efforts pour P seul et pour W seul (P = 1 kN, W = 1 kN), puis la combinaison pour un vent soufflant dans l'autre sens.
+
+<Regle type="simplification">
+Nœuds articulés, charges appliquées aux nœuds, poids propre compris dans P. La ferme est vérifiée pour ce seul jeu de charges ; les combinaisons réglementaires des actions (EC0) et le vent réel sur la toiture (EC1) seront traités en L3. Les barres comprimées devront aussi être vérifiées au flambement.
+</Regle>
+
+</Page>
+
+<FicheCalcul calcul="treillisMatriciel">
+
+<Cahier titre="Étape 1 : les inconnues et les équations" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La numérotation">
+<Schema k="inconnues" />
+<AN k="comptage" />
+<Note>Pourquoi supposer toutes les barres tendues ? C'est une convention : un résultat négatif signale une compression, sans avoir à deviner le sens à l'avance.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : le système matriciel" etape="projet">
+
+<Etape n={3} titre="La matrice augmentée [A | B]">
+<AN k="matrice" />
+<Note>Comment lire une ligne ? « A : ΣFx » dit : N(AB) × 1 + N(AC) × cos α + RAx = 0, avec cos α = {nombre(Math.cos((pente * Math.PI) / 180), 3)} pour une pente de {nombre(pente, 1)}°. Le second membre contient les charges, changées de signe.</Note>
+</Etape>
+
+<Etape n={4} titre="Le déterminant">
+<AN k="det" />
+<Note>Pourquoi le déterminant d'abord ? S'il était nul, la ferme serait un mécanisme et aucun calcul ne donnerait d'efforts.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 : la solution, le contrôle, la superposition" etape="projet">
+
+<Etape n={5} titre="La solution">
+<AN k="solution" />
+</Etape>
+
+<Etape n={6} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="NBC" libelle="Effort dans l’arbalétrier BC" />
+</Etape>
+
+<Etape n={7} titre="La superposition">
+<AN k="superposition" />
+<Note couleur="vert">Les équations sont linéaires : doubler P double sa part des efforts. Inverse le vent (W négatif) : les arbalétriers échangent leurs efforts.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le récapitulatif : exemple corrigé">
+
+<TriangleInconnues d={d} s={s} prefixe="rc-ti" />
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Inconnue</th><th>Vent vers la droite</th><th>Sans vent</th><th>Vent vers la gauche</th></tr></thead>
+    <tbody>
+      <tr><td>{noms[0]} ({grandeur(Lb.AB, 2, 'm')})</td><td>{grandeur(s[0], 2, 'kN')} ({nature(s[0])})</td><td>{grandeur(tSans.s[0], 2, 'kN')}</td><td>{grandeur(tInv.s[0], 2, 'kN')}</td></tr>
+      <tr><td>{noms[1]} ({grandeur(Lb.AC, 2, 'm')})</td><td>{grandeur(s[1], 2, 'kN')} ({nature(s[1])})</td><td>{grandeur(tSans.s[1], 2, 'kN')}</td><td>{grandeur(tInv.s[1], 2, 'kN')}</td></tr>
+      <tr><td>{noms[2]} ({grandeur(Lb.BC, 2, 'm')})</td><td>{grandeur(s[2], 2, 'kN')} ({nature(s[2])})</td><td>{grandeur(tSans.s[2], 2, 'kN')}</td><td>{grandeur(tInv.s[2], 2, 'kN')}</td></tr>
+      <tr><td>Réactions RAx, RAy, RBy</td><td>{[s[3], s[4], s[5]].map((v) => nombre(v, 2)).join(' ; ')} kN</td><td>{[tSans.s[3], tSans.s[4], tSans.s[5]].map((v) => nombre(v, 2)).join(' ; ')} kN</td><td>{[tInv.s[3], tInv.s[4], tInv.s[5]].map((v) => nombre(v, 2)).join(' ; ')} kN</td></tr>
+    </tbody>
+  </table>
+</div>
+
+### Ce qu'il faut en retenir
+
+- L'**entrait est tendu** et les **arbalétriers comprimés** : comme en L1.3, la ferme travaille comme un arc dont l'entrait retient la poussée.
+- Le vent modifie tous les efforts. Soufflant vers la droite, il comprime davantage l'arbalétrier **sous le vent**, BC ({grandeur(s[2], 2, 'kN')} contre {grandeur(tSans.s[2], 2, 'kN')} sans vent), et tend davantage l'entrait ({grandeur(s[0], 2, 'kN')} contre {grandeur(tSans.s[0], 2, 'kN')}). Pour dimensionner, on retient le plus défavorable des deux sens du vent : chaque arbalétrier doit porter {grandeur(Math.min(s[2], tInv.s[1]), 2, 'kN')}.
+- La matrice A ne dépend que de la **géométrie** : changer les charges ne change que B. Un logiciel factorise A une fois et traite des dizaines de cas de charge.
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Inconnues | Réactions oubliées | 6 inconnues listées | Numérotation et conventions de signe écrites |
+| Système | Équations au hasard | Matrice A et vecteur B complets | Chaque ligne relue sur le schéma du nœud |
+| Déterminant | Non calculé | Calculé, non nul | Conclusion : isostatique et stable |
+| Solution | Valeurs sans signe | Efforts avec leur nature | Contrôle par les moments en A |
+| Superposition | Absente | s₁ et s₂ calculés | Vent inversé obtenu par combinaison, sans nouveau calcul |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Remplace l'appui simple B par une articulation : il y a alors 7 inconnues pour 6 équations. La matrice A n'est plus carrée et la statique ne suffit plus : la ferme est hyperstatique. Pour la résoudre, il faut la méthode des déplacements K u = F de L1.4.7. Que devient alors l'effort dans l'entrait, et pourquoi dépend-il de la raideur des appuis ?
+</Encadre>
+
+<Quiz id="L1.4.P">
+
+<QCM n={1} question="Mon rendu donne-t-il la numérotation des inconnues, la matrice A et le vecteur B, le déterminant, la solution contrôlée et la combinaison pour le vent inversé ?" choix={['Oui, tout y est', 'Il manque le contrôle ou la superposition', 'Je n’ai fait qu’une partie du système']} bonne={0}>
+Sinon, complète-le : c'est exactement la démarche d'un logiciel de calcul, que tu sauras ainsi contrôler.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

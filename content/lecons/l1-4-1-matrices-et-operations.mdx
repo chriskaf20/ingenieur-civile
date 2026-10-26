@@ -1,0 +1,332 @@
+---
+id: L1.4.1
+titre: Matrices et opérations
+objectifs:
+  - Lire une matrice, ses dimensions et ses coefficients
+  - Additionner deux matrices et multiplier une matrice par un nombre
+  - Multiplier deux matrices après avoir vérifié leurs dimensions
+  - Transposer une matrice et reconnaître une matrice symétrique
+  - Organiser un métré sous la forme d'un produit matriciel
+relecture: false
+normes: []
+glossaire:
+  - terme: Matrice
+    definition: Tableau rectangulaire de nombres rangés en lignes et en colonnes.
+  - terme: Dimensions d'une matrice
+    definition: Nombre de lignes puis nombre de colonnes, noté m × n.
+  - terme: Produit matriciel
+    definition: "Opération qui associe à A (m × n) et B (n × p) la matrice C (m × p) : chaque case combine une ligne de A et une colonne de B."
+  - terme: Transposée
+    definition: Matrice obtenue en échangeant les lignes et les colonnes, notée Aᵀ.
+  - terme: Matrice symétrique
+    definition: Matrice carrée égale à sa transposée ; ses coefficients vérifient a_ij = a_ji.
+symboles:
+  - { symbole: 'A, B, C', signification: 'matrices', unite: '—' }
+  - { symbole: 'a_ij', signification: 'coefficient de la ligne i et de la colonne j', unite: 'selon le problème' }
+  - { symbole: 'm × n', signification: 'dimensions : m lignes, n colonnes', unite: '—' }
+  - { symbole: 'I', signification: 'matrice identité', unite: '—' }
+  - { symbole: 'Aᵀ', signification: 'transposée de A', unite: '—' }
+formules:
+  - { nom: 'Somme', tex: '(A + B)_{ij} = a_{ij} + b_{ij}', domaine: 'A et B de mêmes dimensions' }
+  - { nom: 'Produit', tex: 'c_{ij} = \sum_{k=1}^{n} a_{ik}\, b_{kj}', domaine: 'A (m × n) et B (n × p)' }
+  - { nom: 'Transposée d’un produit', tex: '(AB)^T = B^T A^T', domaine: 'Dimensions compatibles' }
+---
+
+import { EXEMPLE_METRE, foisScalaire, metre, PRIX_METRE, produit, QUANTITES_UNITAIRES, somme, transposee } from '@/lib/calc/lineaire'
+import { grandeur, nombre } from '@/lib/format'
+import { ProduitMetre } from '@/components/schemas/Lineaire'
+
+export const Q = QUANTITES_UNITAIRES
+export const m0 = metre(EXEMPLE_METRE.n)
+export const A = [[1, 2], [3, 4]]
+export const B = [[5, 6], [7, 8]]
+export const AB = produit(A, B)
+export const BA = produit(B, A)
+export const deuxQ = foisScalaire(2, Q)
+export const ex1 = [[2, 0, 1], [3, 5, 4]]
+export const C = [[2, 1], [0, 3]]
+export const D = [[1, 4], [2, 0]]
+export const CD = produit(C, D)
+export const DC = produit(D, C)
+export const bloc2 = [12, 12, 10]
+export const m2 = metre(bloc2)
+export const nTot = somme([EXEMPLE_METRE.n], [bloc2])[0]
+export const mTot = metre(nTot)
+export const lignesQ = ['semelle', 'poteau', 'poutre']
+export const colonnesQ = ['béton (m³)', 'acier (kg)', 'coffrage (m²)']
+
+<Page etape="intuition" titre="L'intuition : le tableau du métreur">
+
+Un métreur prépare le devis d'un petit bâtiment de bureaux à Kolwezi : {EXEMPLE_METRE.n[0]} semelles, {EXEMPLE_METRE.n[1]} poteaux et {EXEMPLE_METRE.n[2]} poutres. Pour chaque type d'élément, le bureau d'études lui donne trois quantités : le volume de béton, la masse d'acier, la surface de coffrage. Il range tout dans un tableau : **une ligne par élément, une colonne par matériau**.
+
+Ce tableau, c'est une **matrice**. Pour trouver le béton total, le métreur descend la colonne « béton » : il multiplie chaque case par le nombre d'éléments, puis il additionne. Ce geste « une ligne de nombres contre une colonne », répété pour chaque matériau, s'appelle le **produit matriciel**.
+
+Un tableur fait ce calcul avec une seule fonction. Un logiciel de calcul de structures fait le même calcul sur des matrices de plusieurs milliers de lignes. La règle reste celle du métreur.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment ranger des nombres dans un tableau pour calculer vite, sans oubli, et toujours de la même façon ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : vocabulaire et opérations simples">
+
+### Une matrice
+
+Une matrice **m × n** est un tableau de m lignes et n colonnes. Le coefficient a<sub>ij</sub> se trouve à la ligne i et à la colonne j : **la ligne d'abord**.
+
+$$A = \begin{pmatrix} a_{11} & a_{12} & a_{13} \\ a_{21} & a_{22} & a_{23} \end{pmatrix} \qquad \text{matrice } 2 \times 3$$
+
+La matrice du métreur est une matrice 3 × 3 ; chaque colonne porte une seule grandeur, avec son unité :
+
+<Matrice nom="Q" M={Q} dec={[2, 0, 1]} lignes={lignesQ} colonnes={colonnesQ} />
+
+Le coefficient q<sub>23</sub> (ligne 2, colonne 3) vaut {grandeur(Q[1][2], 1, 'm²')} : le coffrage d'un poteau.
+
+### Les matrices particulières
+
+- **ligne** (1 × n) ou **colonne** (n × 1) : une matrice colonne est un vecteur ;
+- **carrée** (n × n), avec sa **diagonale** a<sub>11</sub>, a<sub>22</sub>, … ;
+- **identité** I : des 1 sur la diagonale, des 0 ailleurs ; **nulle** : que des 0.
+
+### Somme et produit par un nombre
+
+- **A + B** : on additionne case par case. A et B doivent avoir les **mêmes dimensions**.
+- **k A** : on multiplie chaque case par le nombre k.
+
+Pour deux bâtiments identiques, les quantités par bâtiment-type doublent : <Matrice nom="2Q" M={deuxQ} dec={[2, 0, 1]} />
+
+<Regle type="simplification">
+Les quantités de Q sont des données de l'énoncé : béton et coffrage calculés sur les dimensions des éléments, acier estimé. Un vrai métré suit les plans de coffrage et de ferraillage, élément par élément.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : produit et transposée">
+
+### Le produit matriciel
+
+Pour multiplier A (m × n) par B (n × p), on combine chaque **ligne** de A avec chaque **colonne** de B : on multiplie terme à terme, puis on additionne.
+
+$$c_{ij} = a_{i1}\, b_{1j} + a_{i2}\, b_{2j} + \dots + a_{in}\, b_{nj} = \sum_{k=1}^{n} a_{ik}\, b_{kj}$$
+
+**Règle des dimensions** : (m × **n**) · (**n** × p) donne (m × p). Les deux nombres du milieu doivent être égaux, sinon le produit n'existe pas.
+
+<Matrice nom="AB" M={A} dec={0} /> <Matrice M={B} dec={0} /> = <Matrice M={AB} dec={0} />, mais <Matrice nom="BA" M={B} dec={0} /> <Matrice M={A} dec={0} /> = <Matrice M={BA} dec={0} />
+
+Le produit **n'est pas commutatif** : en général AB ≠ BA, l'ordre compte. La matrice identité ne change rien : A I = I A = A.
+
+### La transposée
+
+La transposée Aᵀ échange lignes et colonnes : (Aᵀ)<sub>ij</sub> = a<sub>ji</sub>. Une matrice m × n devient n × m. Pour un produit, l'ordre s'inverse : (AB)ᵀ = Bᵀ Aᵀ.
+
+Une matrice carrée est **symétrique** si A = Aᵀ. On en rencontrera deux en génie civil : le tableau des contraintes en un point (L1.4.6) et la matrice de rigidité d'une structure (L1.4.7).
+
+<Encadre type="retenir">
+Ligne d'abord, colonne ensuite. Produit : ligne × colonne, avec la règle (m × n)(n × p) = (m × p). AB ≠ BA en général ; (AB)ᵀ = Bᵀ Aᵀ.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le métré, ligne × colonne">
+
+<ProduitMetre n={EXEMPLE_METRE.n} totaux={m0.totaux} />
+
+Chaque case de la ligne des totaux combine **toute la colonne n** avec **une colonne de Q**. La colonne surlignée en bleu, celle du béton, donne {grandeur(m0.totaux[0], 2, 'm³')} ; les deux autres colonnes donnent l'acier et le coffrage de la même façon.
+
+En écriture matricielle, n est une ligne (1 × 3) et Q une matrice (3 × 3) : les totaux forment la ligne nᵀ Q (1 × 3). Pour le coût, on multiplie encore cette ligne par la colonne des prix : une seule case, un seul nombre.
+
+<Encadre type="attention">
+Une colonne = une grandeur, une unité. Le produit n'additionne jamais des m³ avec des kg : il additionne les termes d'une même colonne.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="metreMatriciel">
+
+<Cahier titre="Exemple résolu : le métré d'un bâtiment de bureaux">
+
+**Énoncé.** Le bâtiment compte {EXEMPLE_METRE.n[0]} semelles, {EXEMPLE_METRE.n[1]} poteaux et {EXEMPLE_METRE.n[2]} poutres. Par élément, le bureau d'études donne : semelle {grandeur(Q[0][0], 2, 'm³')} de béton, {grandeur(Q[0][1], 0, 'kg')} d'acier, {grandeur(Q[0][2], 1, 'm²')} de coffrage ; poteau {grandeur(Q[1][0], 2, 'm³')}, {grandeur(Q[1][1], 0, 'kg')}, {grandeur(Q[1][2], 1, 'm²')} ; poutre {grandeur(Q[2][0], 2, 'm³')}, {grandeur(Q[2][1], 0, 'kg')}, {grandeur(Q[2][2], 1, 'm²')}. Prix indicatifs de l'énoncé : {nombre(PRIX_METRE[0], 0)} USD/m³ de béton, {nombre(PRIX_METRE[1], 2)} USD/kg d'acier, {nombre(PRIX_METRE[2], 0)} USD/m² de coffrage. Calcule les quantités totales et le coût des matériaux.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi une matrice ? Les quantités par élément ne changent pas d'un devis à l'autre pour un même modèle : seule la ligne n change.</Note>
+</Etape>
+
+<Etape n={2} titre="Le tableau">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le produit et le coût">
+
+<Etape n={3} titre="Les dimensions">
+<AN k="dimensions" />
+</Etape>
+
+<Etape n={4} titre="Le produit nᵀ Q">
+<AN k="produit" />
+<Note>Pourquoi n à gauche ? Chaque total est une somme sur les éléments : il faut que la ligne n rencontre les colonnes de Q, une par matériau.</Note>
+</Etape>
+
+<Etape n={5} titre="Le détail, matériau par matériau">
+<AN k="beton" />
+<AN k="acier" />
+<AN k="coffrage" />
+</Etape>
+
+<Etape n={6} titre="Le coût">
+<AN k="cout" />
+<Resultat k="cout" libelle="Coût des matériaux" />
+<Note couleur="vert">Contrôle : chaque total a l'unité de sa colonne. Ajoute une poutre : seuls les totaux augmentent de la troisième ligne de Q.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="multiplier case par case.">
+Le produit matriciel combine une ligne entière et une colonne entière. Pour A et B du cours, la première case de AB vaut {nombre(AB[0][0], 0)} (1 × 5 + 2 × 7), pas 1 × 5.
+</Piege>
+
+<Piege erreur="croire que AB = BA.">
+L'ordre compte : AB commence par {nombre(AB[0][0], 0)}, BA par {nombre(BA[0][0], 0)}. On écrit toujours le produit dans l'ordre imposé par le problème.
+</Piege>
+
+<Piege erreur="oublier de vérifier les dimensions.">
+(2 × 3) · (2 × 3) n'existe pas : 3 colonnes à gauche, 2 lignes à droite. Vérifier les dimensions avant de calculer évite de longues erreurs.
+</Piege>
+
+<Piege erreur="lire a_ij colonne d'abord.">
+L'indice i est la ligne, j la colonne. Dans Q, q<sub>23</sub> = {nombre(Q[1][2], 1)} (poteau, coffrage), alors que q<sub>32</sub> = {nombre(Q[2][1], 0)} (poutre, acier).
+</Piege>
+
+<Piege erreur="mélanger les unités dans une colonne.">
+Un tableau où une colonne contient des m³ et des m² donne des totaux absurdes. Une colonne, une grandeur, une unité.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le devis quantitatif et estimatif.** Le devis d'un projet est un grand produit matriciel : des quantités, multipliées par des prix unitaires, puis additionnées. Le métré donne les quantités, le bordereau des prix donne la colonne des prix.
+
+<Encadre type="terrain" titre="Des prix qui changent d'une ville à l'autre">
+En RDC, le prix rendu chantier du ciment ou de l'acier dépend beaucoup du transport : il n'est pas le même à Kinshasa, à Kolwezi ou à Kananga. Avec l'écriture matricielle, on garde la matrice des quantités et l'on remplace seulement la colonne des prix. Les prix de cette leçon sont indicatifs : un devis réel utilise le bordereau local et sa date.
+</Encadre>
+
+**Les tableurs.** Les fonctions PRODUITMAT et SOMMEPROD d'un tableur font exactement ce produit. Bien poser les dimensions du tableau évite les erreurs de recopie de formules.
+
+**Les logiciels de structure.** Un calcul de bâtiment met en jeu des matrices de milliers de lignes : la matrice de rigidité (L1.4.7) relie les déplacements des nœuds aux forces. Comprendre le produit ligne × colonne, c'est comprendre ce que fait le logiciel.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : matrices et opérations">
+
+### Vocabulaire
+
+matrice m × n : m lignes, n colonnes · a<sub>ij</sub> : ligne i, colonne j · carrée, diagonale, identité I
+
+### Opérations simples
+
+somme case par case (mêmes dimensions) · k A : chaque case × k
+
+### Produit
+
+$c_{ij} = \sum_k a_{ik} b_{kj}$ · (m × n)(n × p) = (m × p) · AB ≠ BA · A I = A
+
+### Transposée
+
+$(A^T)_{ij} = a_{ji}$ · $(AB)^T = B^T A^T$ · symétrique : A = Aᵀ
+
+### Métré
+
+totaux = nᵀ Q · coût = totaux · prix · une colonne = une unité
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Lire une matrice">
+
+Soit <Matrice nom="E" M={ex1} dec={0} />. Donne ses dimensions, les coefficients e<sub>12</sub> et e<sub>23</sub>, puis sa transposée.
+
+<Indice>Ligne d'abord, colonne ensuite. La transposée a autant de lignes que E a de colonnes.</Indice>
+
+<Corrige>
+E est une matrice **2 × 3** ; e<sub>12</sub> = **{nombre(ex1[0][1], 0)}** et e<sub>23</sub> = **{nombre(ex1[1][2], 0)}**. Sa transposée est 3 × 2 : <Matrice nom="Eᵀ" M={transposee(ex1)} dec={0} />
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un produit dans les deux sens">
+
+Calcule CD et DC pour <Matrice nom="C" M={C} dec={0} /> et <Matrice nom="D" M={D} dec={0} />. Que constates-tu ?
+
+<Indice>Première case de CD : première ligne de C contre première colonne de D, soit 2 × 1 + 1 × 2.</Indice>
+
+<Corrige>
+<Matrice nom="CD" M={CD} dec={0} /> et <Matrice nom="DC" M={DC} dec={0} /> : les deux produits sont **différents**, le produit matriciel n'est pas commutatif.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Deux bâtiments, deux méthodes">
+
+Un second bâtiment compte {bloc2[0]} semelles, {bloc2[1]} poteaux et {bloc2[2]} poutres, du même modèle. Calcule le béton total des deux bâtiments de deux façons : (n₁ + n₂)ᵀ Q, puis n₁ᵀ Q + n₂ᵀ Q. Pourquoi trouve-t-on le même résultat ?
+
+<Indice>Additionne d'abord les deux lignes n, puis fais un seul produit ; compare avec la somme des deux métrés.</Indice>
+
+<Corrige>
+n₁ + n₂ = ({nTot.map((v) => nombre(v, 0)).join(' ; ')}), d'où un béton total de **{grandeur(mTot.totaux[0], 2, 'm³')}**. Séparément : {grandeur(m0.totaux[0], 2, 'm³')} + {grandeur(m2.totaux[0], 2, 'm³')}, la même valeur. Le produit est **distributif** : (n₁ + n₂)ᵀ Q = n₁ᵀ Q + n₂ᵀ Q. C'est ce qui permet de cumuler les métrés de plusieurs bâtiments.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.4.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une matrice de 3 lignes et 4 colonnes a pour dimensions :" choix={['4 × 3', '3 × 4', '12', '7']} bonne={1} colonnes={4}>
+On écrit le nombre de lignes, puis le nombre de colonnes.
+</QCM>
+
+<QCM n={2} question="Le coefficient a₂₁ se trouve :" choix={['ligne 1, colonne 2', 'ligne 2, colonne 1', 'sur la diagonale', 'en dernière ligne']} bonne={1} colonnes={2}>
+Le premier indice est la ligne, le second la colonne.
+</QCM>
+
+<QCM n={3} question="Le produit d'une matrice 2 × 3 par une matrice 3 × 5 est une matrice :" choix={['2 × 5', '3 × 3', '5 × 2', 'il n’existe pas']} bonne={0} colonnes={4}>
+(2 × 3)(3 × 5) = (2 × 5) : les nombres du milieu sont égaux.
+</QCM>
+
+<QCM n={4} question="Lequel de ces produits n'existe pas ?" choix={['(2 × 3)(3 × 1)', '(1 × 3)(3 × 3)', '(2 × 3)(2 × 3)', '(3 × 3)(3 × 3)']} bonne={2} colonnes={2}>
+3 colonnes à gauche, 2 lignes à droite : impossible de combiner lignes et colonnes.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour deux matrices carrées A et B quelconques :" choix={['AB = BA toujours', 'AB ≠ BA en général', 'AB = 0', 'AB = A + B']} bonne={1} colonnes={2}>
+Le produit matriciel n'est pas commutatif ; l'exemple du cours le montre.
+</QCM>
+
+<QCM n={6} question="La transposée d'un produit vaut :" choix={['Aᵀ Bᵀ', 'Bᵀ Aᵀ', 'AB', '(BA)ᵀ']} bonne={1} colonnes={4}>
+L'ordre s'inverse : (AB)ᵀ = Bᵀ Aᵀ.
+</QCM>
+
+<QCM n={7} question="Une matrice est symétrique si :" choix={['tous ses coefficients sont égaux', 'elle est égale à sa transposée', 'elle a autant de lignes que de colonnes', 'sa diagonale est nulle']} bonne={1} colonnes={2}>
+A = Aᵀ, c'est-à-dire a<sub>ij</sub> = a<sub>ji</sub> ; elle est forcément carrée.
+</QCM>
+
+<QCM n={8} question="Pour le métré de l'exemple, le béton total vaut :" choix={[grandeur(m0.totaux[0], 2, 'm³'), grandeur(Q[0][0] + Q[1][0] + Q[2][0], 2, 'm³'), grandeur(m0.totaux[2], 1, 'm²'), grandeur(m0.totaux[0] * 2, 2, 'm³')]} bonne={0} colonnes={4}>
+Il faut multiplier chaque quantité par le nombre d'éléments avant d'additionner.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

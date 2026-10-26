@@ -1,0 +1,354 @@
+---
+id: L1.4.7
+titre: "Aperçu : une structure comme système K·u = F"
+objectifs:
+  - Relier force, raideur et déplacement pour un ressort et pour une barre (k = E A / L)
+  - Écrire la matrice de rigidité d'une barre inclinée et l'assembler à un nœud
+  - Résoudre K u = F et en déduire les efforts dans les barres
+  - Contrôler le résultat par l'équilibre du nœud et repérer un mécanisme
+relecture: false
+normes:
+  - "EN 1993-1-1 §3.2.6 : module d'élasticité de l'acier E = 210 000 N/mm²"
+glossaire:
+  - terme: Raideur
+    definition: Force qu'il faut appliquer pour obtenir un déplacement unité ; k = F / u, en kN/m.
+  - terme: Matrice de rigidité
+    definition: Matrice K qui relie les déplacements des nœuds aux forces qui leur sont appliquées, K u = F ; elle est symétrique.
+  - terme: Assemblage
+    definition: Construction de la matrice de rigidité d'une structure en additionnant les contributions de chaque élément.
+  - terme: Méthode des déplacements
+    definition: Méthode de calcul des structures qui prend les déplacements des nœuds comme inconnues ; c'est celle des logiciels.
+symboles:
+  - { symbole: 'k', signification: 'raideur d’un ressort ou d’une barre', unite: 'kN/m' }
+  - { symbole: 'E', signification: 'module d’Young', unite: 'GPa = 10⁶ kN/m²' }
+  - { symbole: 'A', signification: 'section de la barre', unite: 'cm² = 10⁻⁴ m²' }
+  - { symbole: 'L', signification: 'longueur de la barre', unite: 'm' }
+  - { symbole: 'e = (c ; s)', signification: 'vecteur unitaire de la barre, de l’appui vers le nœud', unite: '—' }
+  - { symbole: 'u', signification: 'déplacement du nœud', unite: 'm (affiché en mm)' }
+  - { symbole: 'K', signification: 'matrice de rigidité', unite: 'kN/m' }
+formules:
+  - { nom: 'Raideur d’une barre', tex: 'k = \frac{E A}{L}', domaine: 'Barre élastique, effort normal' }
+  - { nom: 'Matrice d’une barre inclinée', tex: 'K_e = k\, e\, e^T = k \begin{pmatrix} c^2 & c s \\ c s & s^2 \end{pmatrix}', domaine: 'Nœud libre, appui fixe' }
+  - { nom: 'Équilibre', tex: 'K\, u = F, \quad K = \sum K_e', domaine: 'Petits déplacements' }
+  - { nom: 'Effort dans une barre', tex: 'N = k\,(u \cdot e)', domaine: 'Traction positive' }
+---
+
+import { deuxBarres, EXEMPLE_DEUX_BARRES, noeudBarres, raideurBarre, TROISIEME_BARRE } from '@/lib/calc/lineaire'
+import { grandeur, nombre } from '@/lib/format'
+import { NoeudBarresSchema } from '@/components/schemas/Lineaire'
+import { NoeudIsole } from '@/components/schemas/Statique'
+
+export const d = EXEMPLE_DEUX_BARRES
+export const r0 = deuxBarres(d)
+export const barres2 = [{ x: d.xA, y: d.yA, A: d.A1 }, { x: d.xB, y: d.yB, A: d.A2 }]
+export const r3 = noeudBarres(d.E, [...barres2, TROISIEME_BARRE], d.Fx, d.Fy)
+export const kEx = raideurBarre(210, 3, 3)
+export const b45 = noeudBarres(210, [{ x: -2, y: 2, A: 3 }], 0, -10)
+export const angle1 = (Math.atan2(d.yA, d.xA) * 180) / Math.PI
+export const angle2 = (Math.atan2(d.yB, d.xB) * 180) / Math.PI
+export const F = Math.hypot(d.Fx, d.Fy)
+export const part3 = r3.N[2] / F
+
+<Page etape="intuition" titre="L'intuition : une structure est un ensemble de ressorts">
+
+Accroche un poids à un ressort : il s'allonge. Double le poids, l'allongement double. C'est la loi du ressort, **F = k u**, où k est sa **raideur**.
+
+Une barre d'acier est un ressort très raide. Sous la charge d'un palan, les deux tirants qui le suspendent sous la charpente d'un atelier, à Likasi, s'allongent de quelques dixièmes de millimètre. Le nœud où ils se rejoignent descend un peu, jusqu'à ce que les efforts des tirants équilibrent la charge.
+
+Pour une vraie structure, chaque nœud est relié à plusieurs barres et chaque barre relie deux nœuds : les raideurs se combinent dans une **matrice de rigidité** K, et l'équilibre devient **K u = F**. C'est exactement le système que résolvent les logiciels de calcul.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment écrire l'équilibre d'une structure sous la forme K u = F, et pourquoi cette écriture marche même quand la statique ne suffit plus ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : du ressort à la matrice de rigidité">
+
+### Le ressort et la barre
+
+Un ressort de raideur k soumis à F s'allonge de u = F / k. Une barre de longueur L, de section A et de module d'Young E se comporte comme un ressort :
+
+$$N = \frac{E A}{L}\, \Delta L \qquad\Longrightarrow\qquad k = \frac{E A}{L}$$
+
+Les unités : E en kN/m² (1 GPa = 10⁶ kN/m²), A en m² (1 cm² = 10⁻⁴ m²), L en m, k en kN/m. Pour l'acier de construction, E = 210 GPa (EN 1993-1-1 §3.2.6).
+
+### Une barre inclinée
+
+Le nœud se déplace de u = (u<sub>x</sub> ; u<sub>y</sub>). La barre ne s'allonge que de la **projection** de u sur son axe : ΔL = u · e = u<sub>x</sub> c + u<sub>y</sub> s, avec e = (c ; s) son vecteur unitaire. Elle exerce alors sur le nœud une force k ΔL dirigée le long de son axe. En matrice :
+
+$$K_e = k\, e\, e^T = k \begin{pmatrix} c^2 & c\,s \\ c\,s & s^2 \end{pmatrix}$$
+
+### L'assemblage
+
+Les forces des barres qui arrivent au nœud s'additionnent, donc leurs matrices aussi : **K = K₁ + K₂ + …**. L'équilibre du nœud s'écrit :
+
+$$K\, u = F$$
+
+<Regle type="simplification">
+Barres articulées, matériau élastique, petits déplacements (on écrit l'équilibre dans la position initiale), poids propre des barres négligé. Ce sont les hypothèses du calcul linéaire des structures, valables pour les charges de service courantes.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : résoudre et interpréter">
+
+### Résoudre
+
+On résout K u = F par le pivot de Gauss, puis on revient aux efforts : **N = k (u · e)**, positif en traction.
+
+### Les propriétés de K
+
+- K est **symétrique** (L1.4.1) ;
+- pour une structure stable, det K > 0 ;
+- si les barres sont alignées, det K = 0 : le nœud est un **mécanisme** pour une charge perpendiculaire (L1.4.3, L1.4.4).
+
+### Pourquoi cette méthode est puissante
+
+Avec deux barres, la statique suffit : deux équations, deux efforts. Ajoutons une troisième barre verticale au même nœud : trois efforts, toujours deux équations, la structure est **hyperstatique** et la statique seule ne conclut pas. Mais **K u = F** reste un système 2 × 2 : on trouve u, puis les trois efforts.
+
+<Encadre type="exemple" titre="Trois barres pour un nœud">
+La barre verticale ajoutée, plus courte donc plus raide, reprend {grandeur(r3.N[2], 2, 'kN')} sur les {grandeur(F, 0, 'kN')}, soit {nombre(part3 * 100, 0)} % ; les deux tirants inclinés n'en portent plus que {grandeur(r3.N[0], 2, 'kN')} chacun. Le nœud ne descend plus que de {grandeur(-r3.u[1] * 1000, 3, 'mm')} au lieu de {grandeur(-r0.u[1] * 1000, 3, 'mm')}. **La charge va vers la raideur.**
+</Encadre>
+
+### Ce que font les logiciels
+
+Un bâtiment compte des milliers de nœuds. Le logiciel calcule la matrice de chaque élément, l'assemble dans une immense matrice K, résout K u = F, puis calcule les efforts de chaque élément. C'est la **méthode des déplacements**, à la base de la méthode des éléments finis (L2, L3).
+
+<Encadre type="retenir">
+k = E A / L ; K<sub>e</sub> = k e eᵀ ; K = Σ K<sub>e</sub> ; K u = F ; N = k (u · e). det K = 0 : mécanisme. La méthode marche aussi pour les structures hyperstatiques.
+</Encadre>
+
+</Page>
+
+<PlancheTechnique
+  titre="Suspente à deux tirants : rigidité et efforts"
+  projet="Atelier de mécanique, palan suspendu, exemple L1.4.7"
+  numero="KU-01"
+  echelle="sans échelle"
+  date="10/2026"
+  indice="A"
+  notes={[
+    `Tirants en acier, E = ${nombre(d.E, 0)} GPa (EN 1993-1-1 §3.2.6), sections ${nombre(d.A1, 0)} cm² ; charge de ${nombre(F, 0)} kN au nœud N (donnée de l'énoncé).`,
+    `Raideurs k = E A / L = ${nombre(r0.barres[0].k, 0)} kN/m ; déplacement du nœud ${nombre(-r0.u[1] * 1000, 3)} mm vers le bas.`,
+    'Efforts en kN, positifs en traction (bleu) ; déformée dessinée en pointillés, déplacements amplifiés 300 fois.',
+    'Calcul élastique au premier ordre ; assemblages et ancrages à vérifier séparément (L3).',
+  ]}
+>
+
+<Vue titre="Élévation, efforts et déformée" pleineLargeur>
+<NoeudBarresSchema barres={barres2} u={r0.u} N={r0.N} Fx={d.Fx} Fy={d.Fy} prefixe="pl-ku" />
+</Vue>
+
+<Vue titre="Nœud N isolé">
+<NoeudIsole compact titre="Nœud N" forces={[{ nom: 'N1', angle: angle1, valeur: r0.N[0], type: 'barre' }, { nom: 'N2', angle: angle2, valeur: r0.N[1], type: 'barre' }, { nom: 'F', angle: -90, valeur: F, type: 'charge' }]} />
+</Vue>
+
+<Vue titre="Matrice de rigidité (kN/m)">
+<p className="mt-2"><Matrice nom="K" M={r0.K} dec={0} zeroSimple /></p>
+<p className="mt-2 font-technique text-[0.9rem]">K = K₁ + K₂ ; les termes croisés s'annulent par symétrie. u = K⁻¹ F = ({nombre(r0.u[0] * 1000, 3)} ; {nombre(r0.u[1] * 1000, 3)}) mm ; N₁ = N₂ = {grandeur(r0.N[0], 2, 'kN')}.</p>
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="rigiditeBarres">
+
+<Cahier titre="Exemple résolu : le palan suspendu à deux tirants">
+
+**Énoncé.** Un palan de {grandeur(F, 0, 'kN')} est accroché au nœud N, suspendu par deux tirants en acier (E = {nombre(d.E, 0)} GPa, EN 1993-1-1 §3.2.6) de {nombre(d.A1, 0)} cm² de section. Leurs ancrages sont à {nombre(d.yA, 0)} m au-dessus du nœud, à {nombre(-d.xA, 0)} m à gauche et à {nombre(d.xB, 0)} m à droite. Calcule le déplacement du nœud et les efforts dans les tirants par la méthode K u = F, puis contrôle par la statique.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi E dans un calcul d'efforts ? La statique suffirait ici, mais le déplacement du nœud, lui, dépend de la raideur des tirants.</Note>
+</Etape>
+
+<Etape n={2} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : raideurs et assemblage">
+
+<Etape n={3} titre="La géométrie">
+<AN k="geometrie" />
+</Etape>
+
+<Etape n={4} titre="Les raideurs">
+<AN k="raideurs" />
+<Note>Pourquoi 10⁶ et 10⁻⁴ ? Pour passer des GPa aux kN/m² et des cm² aux m² : k sort en kN/m.</Note>
+</Etape>
+
+<Etape n={5} titre="Les matrices des barres">
+<AN k="elementaires" />
+</Etape>
+
+<Etape n={6} titre="L'assemblage">
+<AN k="assemblage" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (fin) : déplacement, efforts, contrôle">
+
+<Etape n={7} titre="Le déplacement du nœud">
+<AN k="resolution" />
+<Note>Pourquoi si petit ? Les tirants sont très raides : quelques dixièmes de millimètre suffisent à mobiliser des efforts de l'ordre de la charge.</Note>
+</Etape>
+
+<Etape n={8} titre="Les efforts">
+<AN k="efforts" />
+</Etape>
+
+<Etape n={9} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="N1" libelle="Effort dans le tirant 1" />
+<Note couleur="vert">Contrôle : même résultat par la statique. Mets h = 0 : les barres sont alignées, K devient singulière, le nœud est un mécanisme.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="mélanger les unités dans k = E A / L.">
+Avec E en GPa et A en cm² sans conversion, k est faux d'un facteur 100. Convertis toujours : E en kN/m², A en m², L en m.
+</Piege>
+
+<Piege erreur="prendre la longueur du déplacement pour l'allongement.">
+La barre ne s'allonge que de la projection u · e. Un déplacement perpendiculaire à la barre ne l'allonge pas, au premier ordre.
+</Piege>
+
+<Piege erreur="additionner les raideurs k au lieu des matrices.">
+Deux barres inclinées ne travaillent pas dans la même direction : on additionne leurs matrices k e eᵀ, pas leurs raideurs.
+</Piege>
+
+<Piege erreur="se tromper de sens pour e.">
+Si e va du nœud vers l'appui au lieu de l'appui vers le nœud, le signe de u · e s'inverse et la traction devient une compression. Fixe la convention et garde-la.
+</Piege>
+
+<Piege erreur="croire qu'une barre seule tient un nœud.">
+Une seule barre donne une matrice de déterminant nul : le nœud peut tourner autour de l'appui. Il faut au moins deux barres non alignées dans le plan (exercice 2).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les logiciels de calcul.** Tous les logiciels de structure appliquent cette méthode. Les erreurs les plus fréquentes viennent des données : un module d'Young dans la mauvaise unité, un appui oublié (matrice singulière), une section mal saisie. Un ordre de grandeur calculé à la main reste le meilleur contrôle.
+
+<Encadre type="terrain" titre="La charge va vers la raideur">
+Dans un bâtiment, les éléments les plus raides attirent les efforts. Une cage d'escalier en béton armé, très raide, reprend l'essentiel du vent ou du séisme, bien plus que les poteaux voisins. Si elle est excentrée, le bâtiment tourne autour d'elle. On place donc les éléments raides avec soin, et l'on vérifie qu'ils peuvent porter ce qu'ils attirent.
+</Encadre>
+
+**Les passerelles suspendues.** Dans les zones rurales, des passerelles piétonnes suspendues franchissent les rivières. Les suspentes, les câbles porteurs et le tablier forment un réseau de « ressorts » : leur calcul suit la même logique, avec des câbles qui ne travaillent qu'en traction.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : K u = F">
+
+### Raideur
+
+ressort : F = k u · barre : $k = EA/L$ · E en kN/m², A en m², L en m → k en kN/m
+
+### Barre inclinée
+
+e = (c ; s) de l'appui vers le nœud · allongement u · e · $K_e = k \begin{pmatrix} c^2 & cs \\ cs & s^2 \end{pmatrix}$
+
+### Assemblage et résolution
+
+K = Σ K<sub>e</sub> · K u = F (Gauss) · N = k (u · e), traction positive
+
+### Propriétés
+
+K symétrique · det K > 0 si stable · det K = 0 : mécanisme
+
+### Pourquoi c'est puissant
+
+marche aussi en hyperstatique · la charge va vers la raideur · méthode des logiciels
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La raideur d'un tirant">
+
+Un tirant en acier (E = 210 GPa) de 3 cm² de section et 3 m de long porte 10 kN. Calcule sa raideur et son allongement.
+
+<Indice>k = E A / L avec E = 210 × 10⁶ kN/m² et A = 3 × 10⁻⁴ m².</Indice>
+
+<Corrige>
+k = 210 × 10⁶ × 3 × 10⁻⁴ / 3 = **{grandeur(kEx, 0, 'kN/m')}** ; ΔL = 10 / {nombre(kEx, 0)} = **{grandeur((10 / kEx) * 1000, 3, 'mm')}**. Moins d'un demi-millimètre : l'acier est très raide.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une seule barre">
+
+Un nœud est tenu par une seule barre inclinée à 45° (appui à 2 m à gauche et 2 m au-dessus, A = 3 cm², E = 210 GPa). Écris sa matrice de rigidité et calcule son déterminant. Que se passe-t-il sous une charge verticale ?
+
+<Indice>c = s = √2 / 2, donc c² = s² = c s = ½.</Indice>
+
+<Corrige>
+<Matrice nom="K" M={b45.K} dec={0} /> kN/m, de déterminant **{nombre(b45.det, 0)}** : K n'est pas inversible. Le nœud peut tourner autour de l'appui sans allonger la barre : c'est un mécanisme. Sous une charge verticale, il pivote jusqu'à ce que la barre soit verticale. Il faut une deuxième barre non alignée.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le troisième tirant">
+
+On ajoute au palan de l'exemple un troisième tirant vertical, de même section, ancré {nombre(TROISIEME_BARRE.y, 0)} m au-dessus du nœud. La statique permet-elle encore de calculer les efforts ? Calcule-les par K u = F et commente leur répartition.
+
+<Indice>Trois efforts inconnus, deux équations : hyperstatique. La barre verticale ajoute k₃ = E A / 2 au terme K₂₂.</Indice>
+
+<Corrige>
+La statique ne suffit plus (3 inconnues, 2 équations). K<sub>22</sub> = {nombre(r0.K[1][1], 0)} + {nombre(r3.barres[2].k, 0)} = {nombre(r3.K[1][1], 0)} kN/m, d'où u<sub>y</sub> = **{grandeur(r3.u[1] * 1000, 3, 'mm')}**. Efforts : N₃ = **{grandeur(r3.N[2], 2, 'kN')}** et N₁ = N₂ = **{grandeur(r3.N[0], 2, 'kN')}**. Le tirant vertical, plus court et mieux orienté, est le plus raide : il porte {nombre(part3 * 100, 0)} % de la charge.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.4.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La raideur axiale d'une barre vaut :" choix={['E L / A', 'E A / L', 'A L / E', 'E / (A L)']} bonne={1} colonnes={4}>
+Plus la barre est longue, plus elle est souple ; plus elle est épaisse, plus elle est raide.
+</QCM>
+
+<QCM n={2} question="E = 210 GPa, A = 3 cm², L = 3 m : k vaut :" choix={[grandeur(kEx, 0, 'kN/m'), grandeur(kEx / 100, 0, 'kN/m'), grandeur(kEx * 9, 0, 'kN/m'), grandeur(210, 0, 'kN/m')]} bonne={0} colonnes={4}>
+210 × 10⁶ × 3 × 10⁻⁴ / 3.
+</QCM>
+
+<QCM n={3} question="Une barre inclinée s'allonge de :" choix={['la longueur du déplacement du nœud', 'la projection du déplacement sur son axe', 'zéro', 'la somme ux + uy']} bonne={1} colonnes={2}>
+ΔL = u · e.
+</QCM>
+
+<QCM n={4} question="La matrice de rigidité d'un nœud s'obtient :" choix={['en multipliant les matrices des barres', 'en additionnant les matrices des barres', 'en additionnant les raideurs k', 'en inversant chaque barre']} bonne={1} colonnes={2}>
+Les forces des barres s'additionnent au nœud, leurs matrices aussi.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Si det K = 0 :" choix={['la structure est très raide', 'la structure est un mécanisme', 'les efforts sont nuls', 'le calcul est plus précis']} bonne={1} colonnes={2}>
+K n'est pas inversible : aucun équilibre n'est déterminé.
+</QCM>
+
+<QCM n={6} question="Pour une structure hyperstatique, la méthode K u = F :" choix={['ne s’applique pas', 's’applique toujours', 'demande d’enlever des barres', 'donne des efforts nuls']} bonne={1} colonnes={2}>
+Les inconnues sont les déplacements des nœuds, pas les efforts.
+</QCM>
+
+<QCM n={7} question="Dans l'exemple, chaque tirant porte :" choix={[grandeur(r0.N[0], 2, 'kN'), grandeur(F / 2, 2, 'kN'), grandeur(F, 2, 'kN'), grandeur(r3.N[0], 2, 'kN')]} bonne={0} colonnes={4}>
+Les tirants sont inclinés : chacun porte plus que la moitié de la charge.
+</QCM>
+
+<QCM n={8} question="« La charge va vers la raideur » signifie que :" choix={['les éléments raides attirent les efforts', 'les éléments souples portent tout', 'la charge se répartit toujours également', 'la raideur ne compte pas']} bonne={0} colonnes={2}>
+Dans l'exemple à trois tirants, le tirant vertical, le plus raide, porte l'essentiel de la charge.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,317 @@
+---
+id: L1.4.4
+titre: Espaces vectoriels, bases et rang
+objectifs:
+  - Reconnaître une combinaison linéaire et une famille de vecteurs libre ou liée
+  - Vérifier qu'une famille de vecteurs forme une base et y lire des coordonnées
+  - Calculer le rang d'une matrice par échelonnement
+  - Prévoir l'existence et l'unicité des solutions d'un système par le rang
+relecture: false
+normes: []
+glossaire:
+  - terme: Combinaison linéaire
+    definition: Somme de vecteurs multipliés par des nombres, λ₁ u₁ + λ₂ u₂ + …
+  - terme: Famille libre
+    definition: Famille dont aucun vecteur n'est combinaison linéaire des autres ; on dit aussi que ses vecteurs sont indépendants.
+  - terme: Base
+    definition: Famille libre qui permet d'écrire tout vecteur de l'espace ; le nombre de ses vecteurs est la dimension de l'espace.
+  - terme: Rang
+    definition: Nombre de lignes (ou de colonnes) indépendantes d'une matrice ; c'est le nombre de lignes non nulles après échelonnement.
+  - terme: Théorème de Rouché-Fontené
+    definition: "Règle qui compare le rang de A à celui de [A | b] : égaux et égaux au nombre d'inconnues, une solution ; égaux et plus petits, une infinité ; différents, aucune."
+symboles:
+  - { symbole: 'u, v, w', signification: 'vecteurs', unite: 'selon le problème' }
+  - { symbole: 'λ', signification: 'coefficient d’une combinaison linéaire', unite: '—' }
+  - { symbole: 'rg A', signification: 'rang de la matrice A', unite: '—' }
+  - { symbole: 'n', signification: 'nombre d’inconnues', unite: '—' }
+formules:
+  - { nom: 'Deux vecteurs du plan', tex: '(u, v) \text{ base} \iff \det(u, v) \neq 0', domaine: 'Plan, deux vecteurs' }
+  - { nom: 'Rouché-Fontené', tex: '\operatorname{rg} A = \operatorname{rg}[A \mid b] = n \Rightarrow \text{solution unique}', domaine: 'Système de n inconnues' }
+  - { nom: 'Solutions multiples', tex: '\operatorname{rg} A = \operatorname{rg}[A \mid b] < n \Rightarrow \text{infinité}, \quad \operatorname{rg} A < \operatorname{rg}[A \mid b] \Rightarrow \text{aucune}', domaine: 'Système de n inconnues' }
+---
+
+import { CAS_RANG, determinant, echelonne, natureSysteme, plateauRang } from '@/lib/calc/lineaire'
+import { grandeur, nombre } from '@/lib/format'
+import { TroisCasDroites } from '@/components/schemas/Lineaire'
+
+export const natures = CAS_RANG.map((c) => ({ ...c, ...natureSysteme(c.A, c.b) }))
+export const dUV = determinant([[1, 2], [2, 4]])
+export const dUW = determinant([[1, 3], [2, 1]])
+export const R1 = [[1, 2, 3], [2, 4, 6], [1, 0, 1]]
+export const e1 = echelonne(R1)
+export const noeud = natureSysteme([[-1, 1], [0, 0]], [0, 10])
+export const p0 = plateauRang(0, 100, 1.5, 0.8)
+export const pSur = plateauRang(0, 100, 1.5, 0)
+export const pTri = plateauRang(3.5, 100, 1.5, 0.8)
+export const libelle = { unique: 'une seule', infinite: 'une infinité', aucune: 'aucune' }
+export const ePar = echelonne([[1, 1, 3], [1, 1, 1]]).E
+
+<Page etape="intuition" titre="L'intuition : deux directions pour aller partout">
+
+Sur un terrain plat, un géomètre peut atteindre n'importe quel point en marchant selon **deux directions** qui ne sont pas parallèles : tant de pas vers l'est, tant de pas vers le nord. S'il n'a droit qu'à deux directions parallèles, il reste prisonnier d'une ligne.
+
+Un nœud de charpente fonctionne pareil. Deux barres non alignées peuvent équilibrer **n'importe quelle** charge : on la décompose selon leurs deux directions. Deux barres alignées ne retiennent rien perpendiculairement à leur axe : le nœud descend jusqu'à ce que les barres ne soient plus alignées. C'est pourquoi un fil à linge tendu fléchit toujours sous le linge.
+
+Le **rang** compte le nombre de directions, ou d'équations, vraiment indépendantes. Il dit si un système a une solution, une infinité, ou aucune, avant même de le résoudre.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Trois équations à trois inconnues ont-elles toujours une solution unique ? Comment le savoir ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : combinaisons, indépendance, bases">
+
+### Vecteurs et combinaisons linéaires
+
+Un vecteur de ℝⁿ est une liste de n nombres : une force (F<sub>x</sub> ; F<sub>y</sub>), les trois réactions d'un plateau, les quantités d'un métré. On les additionne et on les multiplie par des nombres. Une **combinaison linéaire** de u et v est un vecteur λ u + μ v.
+
+### Famille libre, famille liée
+
+Une famille est **libre** si aucun de ses vecteurs n'est une combinaison des autres. Sinon elle est **liée**. Dans le plan :
+
+- u = (1 ; 2) et v = (2 ; 4) sont liés : v = 2 u, et det(u, v) = {nombre(dUV, 0)} ;
+- u = (1 ; 2) et w = (3 ; 1) sont libres : det(u, w) = {nombre(dUW, 0)} ≠ 0.
+
+### Base et dimension
+
+Une **base** est une famille libre qui permet d'écrire tout vecteur. Dans le plan, toute base a **deux** vecteurs ; dans l'espace, **trois** : c'est la **dimension**. Trois vecteurs du plan sont donc toujours liés.
+
+Les nombres λ et μ tels que F = λ u + μ w sont les **coordonnées** de F dans la base (u, w). Il y a une seule façon de les trouver : c'est un système 2 × 2 de déterminant non nul.
+
+<Encadre type="exemple" titre="L'équilibre d'un nœud est un changement de base">
+À un nœud de treillis, les deux barres donnent deux directions e<sub>1</sub> et e<sub>2</sub>. Équilibrer la charge F, c'est l'écrire F = λ e<sub>1</sub> + μ e<sub>2</sub> : les efforts dans les barres sont, au signe près, les coordonnées de F dans la base des barres. Si les barres sont alignées, ce n'est plus une base.
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le rang et les solutions d'un système">
+
+### Le rang
+
+Le **rang** d'une matrice est le nombre de ses lignes indépendantes ; c'est aussi le nombre de ses colonnes indépendantes. Pour le calculer, on échelonne la matrice par le pivot de Gauss et l'on **compte les lignes non nulles**. Par exemple, la matrice (1 2 3 ; 2 4 6 ; 1 0 1) a pour rang {e1.rang} : sa deuxième ligne est le double de la première.
+
+### Le théorème de Rouché-Fontené
+
+Pour un système A x = b à n inconnues, on compare rg A et rg [A | b] :
+
+| Rangs | Solutions | Ce que cela veut dire |
+|---|---|---|
+| rg A = rg [A \| b] = n | une seule | équations indépendantes et compatibles |
+| rg A = rg [A \| b] < n | une infinité | une équation est la conséquence des autres |
+| rg A < rg [A \| b] | aucune | une ligne dit « 0 = un nombre non nul » |
+
+### En structures
+
+Pour les réactions d'un plateau sur trois appuis (système M R = F de L1.4.3) :
+
+- appuis en triangle : {libelle[natures[0].nature]} solution, la structure est **isostatique** ;
+- appuis alignés, charge sur leur ligne : {libelle[natures[1].nature]} de solutions ; la statique ne suffit pas, il faut les déformations (structure **hyperstatique**, L2) ;
+- appuis alignés, charge hors de leur ligne : {libelle[natures[2].nature]} solution ; le plateau bascule (**mécanisme**).
+
+<Encadre type="retenir">
+Rang = lignes non nulles après échelonnement. rg A = rg [A | b] = n : une solution ; rg A = rg [A | b] &lt; n : une infinité ; rg A &lt; rg [A | b] : aucune.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : trois systèmes, trois positions de droites">
+
+<TroisCasDroites />
+
+Chaque équation à deux inconnues est une **droite** ; une solution est un point commun aux deux droites.
+
+**1.** Droites sécantes : un seul point commun. Les lignes de A sont indépendantes, rg A = 2.
+
+**2.** Droites confondues : la seconde équation est le double de la première ; elle n'apporte rien. Tous les points de la droite sont solutions : rg A = rg [A | b] = 1 &lt; 2.
+
+**3.** Droites parallèles : mêmes coefficients, seconds membres différents. Aucun point commun : l'échelonnement donne « 0 = {nombre(ePar[1][2], 0)} », et rg A = 1 &lt; rg [A | b] = 2.
+
+</Page>
+
+<FicheCalcul calcul="rangPlateau">
+
+<Cahier titre="Exemple résolu : le plateau dont on aligne les appuis">
+
+**Énoncé.** Le plateau de L1.4.3 repose sur A (0 ; 0), B (4 ; 0) et un troisième appui C (2 ; y<sub>C</sub>). Le chef de chantier propose, pour gagner de la place, de poser C sur la droite AB (y<sub>C</sub> = 0). Une charge de {grandeur(p0.b[0], 0, 'kN')} est placée en (1,5 ; 0,8). Le système M R = F a-t-il une solution ? Étudie aussi une charge sur la droite AB, puis C remis à y<sub>C</sub> = 3,5 m.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi le rang ? Avec y<sub>C</sub> = 0, det M = 0 : la matrice n'a pas d'inverse. Le rang dit s'il n'y a aucune solution ou une infinité.</Note>
+</Etape>
+
+<Etape n={2} titre="Le plan">
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'échelonnement et la conclusion">
+
+<Etape n={3} titre="La matrice augmentée">
+<AN k="augmentee" />
+</Etape>
+
+<Etape n={4} titre="L'échelonnement">
+<AN k="echelon" />
+<Note>Pourquoi cette dernière ligne ? Avec y<sub>C</sub> = 0, la troisième ligne de M est nulle : elle dit 0 × R = F y<sub>F</sub>.</Note>
+</Etape>
+
+<Etape n={5} titre="Les rangs">
+<AN k="rangs" />
+</Etape>
+
+<Etape n={6} titre="La conclusion">
+<AN k="conclusion" />
+<Resultat k="nature" libelle="Le système a" />
+<Note couleur="vert">Essaie : y<sub>F</sub> = 0 (charge sur la ligne) donne une infinité de solutions ; y<sub>C</sub> = 3,5 m redonne une solution unique.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire que n équations à n inconnues ont toujours une solution unique.">
+Avec les appuis alignés, le plateau a trois équations et trois inconnues, mais rg M = {p0.rangA} : selon la charge, {libelle[p0.nature]} solution ou {libelle[pSur.nature]}.
+</Piege>
+
+<Piege erreur="confondre « aucune solution » et « une infinité ».">
+Le rang de A seul ne suffit pas : il faut comparer avec le rang de [A | b]. Le second membre décide.
+</Piege>
+
+<Piege erreur="compter les lignes non nulles avant d'échelonner.">
+La matrice (1 2 3 ; 2 4 6 ; 1 0 1) n'a aucune ligne nulle, mais son rang vaut {e1.rang} : il faut éliminer d'abord.
+</Piege>
+
+<Piege erreur="chercher trois vecteurs libres dans le plan.">
+Le plan est de dimension 2 : trois forces coplanaires sont toujours liées. C'est pourquoi un nœud plan n'offre que deux équations d'équilibre.
+</Piege>
+
+<Piege erreur="lire « 0 = 80 » comme une erreur de calcul.">
+C'est le résultat : une contradiction, donc aucune solution. Physiquement, le plateau bascule.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le contreventement.** Un cadre rectangulaire aux nœuds articulés est un mécanisme : ses équations d'équilibre n'ont pas de solution pour une charge horizontale, il se couche comme un parallélogramme. Une diagonale le transforme en deux triangles : les équations deviennent indépendantes et le cadre devient rigide.
+
+<Encadre type="terrain" titre="Les hangars sans contreventement">
+En RDC, des hangars et des abris de marché en bois ou en acier léger s'effondrent sous les rafales des orages tropicaux, parce qu'il manque des diagonales de contreventement dans la toiture ou les longs pans. Le calcul le dit avant l'accident : la structure est un mécanisme, son système d'équilibre n'a pas de solution.
+</Encadre>
+
+**Les messages des logiciels.** « Mécanisme », « structure instable », « matrice singulière » : ces messages signalent un défaut de rang. On cherche l'appui ou la barre manquante.
+
+**Isostatique ou hyperstatique.** Quand il y a plus d'inconnues que d'équations indépendantes, la statique laisse une infinité de solutions : la bonne est celle qui respecte aussi les déformations. C'est le sujet du calcul des structures hyperstatiques (L2).
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : bases et rang">
+
+### Indépendance
+
+libre : aucun vecteur n'est combinaison des autres · deux vecteurs du plan libres ⇔ det ≠ 0
+
+### Base
+
+libre + génératrice · plan : 2 vecteurs · espace : 3 · coordonnées uniques
+
+### Rang
+
+nombre de lignes non nulles après échelonnement · lignes indépendantes = colonnes indépendantes
+
+### Rouché-Fontené (n inconnues)
+
+$\operatorname{rg} A = \operatorname{rg}[A|b] = n$ : une solution · $= \ldots < n$ : une infinité · $\operatorname{rg} A < \operatorname{rg}[A|b]$ : aucune
+
+### Structures
+
+isostatique : une solution · hyperstatique : statique insuffisante · mécanisme : aucune
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Libres ou liés ?">
+
+Les vecteurs u = (1 ; 2) et v = (2 ; 4) forment-ils une base du plan ? Et u et w = (3 ; 1) ?
+
+<Indice>Calcule le déterminant des deux vecteurs placés en colonnes.</Indice>
+
+<Corrige>
+det(u, v) = 1 × 4 − 2 × 2 = **{nombre(dUV, 0)}** : u et v sont liés (v = 2 u), ce n'est pas une base. det(u, w) = 1 × 1 − 3 × 2 = **{nombre(dUW, 0)}** ≠ 0 : u et w forment une base.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un rang">
+
+Calcule le rang de <Matrice M={R1} dec={0} />.
+
+<Indice>L<sub>2</sub> ← L<sub>2</sub> − 2 L<sub>1</sub>, L<sub>3</sub> ← L<sub>3</sub> − L<sub>1</sub>, puis compte les lignes non nulles.</Indice>
+
+<Corrige>
+Après élimination : <Matrice M={e1.E} dec={0} />. Deux lignes non nulles : rang **{e1.rang}**. La deuxième ligne de départ était le double de la première.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le fil tendu">
+
+Un nœud N est tenu par deux barres horizontales alignées, l'une vers la gauche, l'autre vers la droite. On y accroche une charge verticale de 10 kN. Écris les deux équations d'équilibre en fonction des efforts N₁ et N₂, puis discute avec les rangs.
+
+<Indice>ΣF<sub>x</sub> : −N₁ + N₂ = 0. ΣF<sub>y</sub> : les barres n'ont aucune composante verticale.</Indice>
+
+<Corrige>
+ΣF<sub>x</sub> : −N₁ + N₂ = 0 ; ΣF<sub>y</sub> : 0 × N₁ + 0 × N₂ = 10. rg A = **{noeud.rangA}** et rg [A | b] = **{noeud.rangAb}** : **aucune solution**. Deux barres alignées ne portent pas une charge perpendiculaire : le nœud descend jusqu'à ce que les barres s'inclinent. C'est pourquoi un câble chargé prend toujours une flèche.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.4.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Les vecteurs (1 ; 2) et (2 ; 4) sont :" choix={['libres', 'liés', 'perpendiculaires', 'une base du plan']} bonne={1} colonnes={4}>
+Le second est le double du premier.
+</QCM>
+
+<QCM n={2} question="Dans le plan, une base contient :" choix={['1 vecteur', '2 vecteurs', '3 vecteurs', 'autant de vecteurs qu’on veut']} bonne={1} colonnes={4}>
+Le plan est de dimension 2.
+</QCM>
+
+<QCM n={3} question="Le rang d'une matrice se lit, après échelonnement, comme :" choix={['le nombre de colonnes', 'le nombre de lignes non nulles', 'le plus grand coefficient', 'le déterminant']} bonne={1} colonnes={2}>
+Chaque ligne non nulle est une équation indépendante.
+</QCM>
+
+<QCM n={4} question="Si rg A = rg [A | b] = n (nombre d'inconnues), le système a :" choix={['aucune solution', 'une solution unique', 'une infinité de solutions', 'deux solutions']} bonne={1} colonnes={2}>
+Équations indépendantes et compatibles.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Si rg A < rg [A | b], le système :" choix={['a une solution unique', 'a une infinité de solutions', 'n’a aucune solution', 'est mal écrit']} bonne={2} colonnes={2}>
+L'échelonnement fait apparaître une ligne « 0 = un nombre non nul ».
+</QCM>
+
+<QCM n={6} question="Deux droites parallèles et distinctes correspondent à un système :" choix={['à une solution', 'sans solution', 'à une infinité de solutions', 'de rang 2']} bonne={1} colonnes={2}>
+Aucun point commun.
+</QCM>
+
+<QCM n={7} question="Un plateau sur trois appuis alignés, chargé hors de leur ligne :" choix={['est isostatique', 'est hyperstatique', 'bascule : aucune solution', 'a des réactions nulles']} bonne={2} colonnes={2}>
+Le moment autour de la ligne des appuis ne peut pas être équilibré.
+</QCM>
+
+<QCM n={8} question="Un cadre rectangulaire articulé devient rigide quand on ajoute :" choix={['un poteau', 'une diagonale', 'une charge', 'une articulation']} bonne={1} colonnes={4}>
+La diagonale forme deux triangles : les équations deviennent indépendantes.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

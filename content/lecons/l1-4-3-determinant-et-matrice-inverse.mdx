@@ -1,0 +1,319 @@
+---
+id: L1.4.3
+titre: Déterminant et matrice inverse
+objectifs:
+  - Calculer le déterminant d'une matrice 2 × 2 et 3 × 3
+  - Interpréter le déterminant comme une aire ou un volume
+  - Décider si une matrice est inversible
+  - Calculer l'inverse d'une matrice et résoudre A x = b par x = A⁻¹ b
+relecture: false
+normes: []
+glossaire:
+  - terme: Déterminant
+    definition: Nombre associé à une matrice carrée ; il mesure le facteur par lequel la matrice multiplie les aires (ou les volumes).
+  - terme: Règle de Sarrus
+    definition: Calcul du déterminant d'une matrice 3 × 3 par trois produits descendants moins trois produits montants ; elle ne vaut que pour les matrices 3 × 3.
+  - terme: Matrice inversible
+    definition: Matrice carrée A pour laquelle il existe A⁻¹ telle que A A⁻¹ = A⁻¹ A = I ; c'est le cas si et seulement si det A ≠ 0.
+  - terme: Matrice singulière
+    definition: Matrice de déterminant nul, donc sans inverse.
+symboles:
+  - { symbole: 'det A', signification: 'déterminant de la matrice A', unite: 'selon le problème' }
+  - { symbole: 'A⁻¹', signification: 'matrice inverse de A', unite: 'selon le problème' }
+  - { symbole: 'M', signification: 'matrice du plateau sur trois appuis', unite: '1, m' }
+  - { symbole: 'R_A, R_B, R_C', signification: 'réactions des appuis', unite: 'kN' }
+formules:
+  - { nom: 'Déterminant 2 × 2', tex: '\det \begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc', domaine: 'Matrice 2 × 2' }
+  - { nom: 'Inverse 2 × 2', tex: 'A^{-1} = \frac{1}{ad - bc} \begin{pmatrix} d & -b \\ -c & a \end{pmatrix}', domaine: 'ad − bc ≠ 0' }
+  - { nom: 'Développement selon la première ligne', tex: '\det A = a_{11} (a_{22} a_{33} - a_{23} a_{32}) - a_{12} (a_{21} a_{33} - a_{23} a_{31}) + a_{13} (a_{21} a_{32} - a_{22} a_{31})', domaine: 'Matrice 3 × 3' }
+  - { nom: 'Produit', tex: '\det(AB) = \det A \cdot \det B, \quad (AB)^{-1} = B^{-1} A^{-1}', domaine: 'Matrices carrées de même taille' }
+---
+
+import { determinant, EXEMPLE_APPUIS_TRIANGLE, EXEMPLE_CHARGE_PLATEAU, inverse, inverseTroisAppuis, pivotGauss, produitVecteur, sarrus } from '@/lib/calc/lineaire'
+import { grandeur, nombre } from '@/lib/format'
+import { AireDeterminant } from '@/components/schemas/Lineaire'
+
+export const M2 = [[3, 1], [1, 2]]
+export const d2 = determinant(M2)
+export const P2 = [[2, 4], [1, 2]]
+export const dP = determinant(P2)
+export const ch = EXEMPLE_CHARGE_PLATEAU
+export const t0 = inverseTroisAppuis(EXEMPLE_APPUIS_TRIANGLE, ch.F, ch.xF, ch.yF)
+export const alignes = [{ nom: 'A', x: 0, y: 0 }, { nom: 'C', x: 2, y: 0 }, { nom: 'B', x: 4, y: 0 }]
+export const S = [[2, 1, 0], [1, 3, 1], [0, 1, 2]]
+export const sS = sarrus(S)
+export const gS = pivotGauss(S, [1, 1, 1]).etapes
+export const TS = gS[gS.length - 1].M
+export const A4 = [[4, 7], [2, 6]]
+export const iA4 = inverse(A4)
+export const xA4 = produitVecteur(iA4, [15, 10])
+export const presque = [{ nom: 'A', x: 0, y: 0 }, { nom: 'B', x: 4, y: 0 }, { nom: 'C', x: 2, y: 0.2 }]
+export const pr1 = inverseTroisAppuis(presque, ch.F, 2, 0.15)
+export const pr2 = inverseTroisAppuis(presque, ch.F, 2, 0.1)
+
+<Page etape="intuition" titre="L'intuition : une ombre ne rend pas l'objet">
+
+À midi, sous le soleil de l'équateur, l'ombre d'un poteau est presque un point : elle ne dit plus rien de sa hauteur. On ne peut pas reconstruire le poteau à partir de son ombre, car l'information de hauteur a été **écrasée**.
+
+Une matrice transforme des vecteurs. Le **déterminant** dit par combien elle multiplie les aires. S'il vaut 2, les surfaces doublent. S'il vaut **0**, la matrice écrase tout sur une ligne, comme le soleil de midi : on ne peut plus revenir en arrière, la matrice n'a **pas d'inverse**.
+
+En génie civil, un déterminant nul a souvent un sens physique très concret : trois pieds alignés sous un plateau, deux barres alignées à un nœud, un appui oublié. La structure ne tient pas, et le calcul refuse de donner une réponse.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment savoir, avant de résoudre, si un système a une solution unique, puis la calculer d'un seul coup pour plusieurs cas de charge ?
+</Encadre>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (1/2) : le déterminant">
+
+### Matrice 2 × 2
+
+$$\det \begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc$$
+
+C'est l'**aire signée** du parallélogramme construit sur les deux colonnes. Pour M = (3 1 ; 1 2), det M = 3 × 2 − 1 × 1 = {nombre(d2, 0)} : le parallélogramme couvre {nombre(d2, 0)} carreaux (schéma). Le signe indique l'orientation des deux colonnes ; un déterminant nul veut dire que les colonnes sont alignées.
+
+### Matrice 3 × 3
+
+On développe selon la première ligne, en alternant les signes + − + :
+
+$$\det A = a_{11} \begin{vmatrix} a_{22} & a_{23} \\ a_{32} & a_{33} \end{vmatrix} - a_{12} \begin{vmatrix} a_{21} & a_{23} \\ a_{31} & a_{33} \end{vmatrix} + a_{13} \begin{vmatrix} a_{21} & a_{22} \\ a_{31} & a_{32} \end{vmatrix}$$
+
+La **règle de Sarrus** donne le même résultat : trois produits « descendants » moins trois produits « montants ». Elle ne vaut **que** pour les matrices 3 × 3. En trois dimensions, le déterminant est le **volume** signé construit sur les trois colonnes.
+
+### Les propriétés utiles
+
+- échanger deux lignes change le signe ; une ligne nulle, ou deux lignes proportionnelles, donnent det = 0 ;
+- det(Aᵀ) = det A et det(AB) = det A × det B ;
+- pour une matrice triangulaire, le déterminant est le produit des coefficients de la diagonale. Le pivot de Gauss donne donc le déterminant : c'est le **produit des pivots**, au signe des échanges près.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la matrice inverse">
+
+### Définition
+
+L'inverse de A est la matrice A⁻¹ telle que A A⁻¹ = A⁻¹ A = I. Elle existe **si et seulement si det A ≠ 0** : on dit alors que A est inversible (ou régulière).
+
+### Matrice 2 × 2
+
+$$A^{-1} = \frac{1}{ad - bc} \begin{pmatrix} d & -b \\ -c & a \end{pmatrix}$$
+
+On échange a et d, on change le signe de b et c, on divise par le déterminant. Pour A = (4 7 ; 2 6) : det A = 4 × 6 − 7 × 2 = {nombre(determinant(A4), 0)} et <Matrice nom="A⁻¹" M={iA4} dec={1} />
+
+### Cas général : Gauss-Jordan
+
+On écrit [A | I] et l'on fait des opérations sur les lignes jusqu'à obtenir [I | A⁻¹]. C'est le pivot de Gauss poussé jusqu'au bout, au-dessus comme au-dessous de la diagonale.
+
+### Résoudre avec l'inverse
+
+Si A est inversible, A x = b a une solution unique : **x = A⁻¹ b**. Pour un produit, l'ordre s'inverse : (AB)⁻¹ = B⁻¹ A⁻¹.
+
+<Regle type="art">
+Pour résoudre un seul système, le pivot de Gauss est plus rapide et plus précis que le calcul de A⁻¹. L'inverse devient intéressante quand la même matrice sert pour beaucoup de seconds membres, par exemple plusieurs cas de charge sur la même structure : chaque colonne de A⁻¹ est alors la réponse à une « charge unité ».
+</Regle>
+
+<Encadre type="retenir">
+det 2 × 2 = ad − bc ; 3 × 3 : développement ou Sarrus. det = 0 : colonnes liées, pas d'inverse. det ≠ 0 : x = A⁻¹ b, solution unique.
+</Encadre>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le déterminant, une aire">
+
+<AireDeterminant M2={M2} appuis={EXEMPLE_APPUIS_TRIANGLE} alignes={alignes} />
+
+**1.** Les colonnes de M construisent un parallélogramme : son aire, comptée en carreaux, est det M = {nombre(d2, 0)}.
+
+**2.** Pour un plateau sur trois appuis (L1.3.12), la matrice M du système a pour colonnes (1 ; x ; y) de chaque appui. Son déterminant vaut le **double de l'aire** du triangle des appuis : {nombre(t0.det, 0)} pour un triangle de {grandeur(t0.aire, 0, 'm²')}.
+
+**3.** Si les trois appuis sont alignés, le triangle s'aplatit : son aire est nulle, det M = 0, et M n'a pas d'inverse. Physiquement, le plateau bascule autour de la ligne des appuis.
+
+</Page>
+
+<FicheCalcul calcul="inverseAppuis">
+
+<Cahier titre="Exemple résolu : la cuve sur son plateau triangulaire">
+
+**Énoncé.** Le plateau de L1.3.12 repose sur trois pieds : A en (0 ; 0), B en (4 ; 0) et C en (2 ; 3,5), en mètres. Il porte la cuve pleine, {grandeur(ch.F, 0, 'kN')} en ({nombre(ch.xF, 0)} ; {nombre(ch.yF, 1)}). Écris le système M R = F, calcule det M par la règle de Sarrus, puis M⁻¹, et déduis-en les réactions.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi une matrice ? Les trois équations (forces verticales, moments autour de deux axes) ont les mêmes coefficients quelle que soit la charge : seules les positions des appuis les fixent.</Note>
+</Etape>
+
+<Etape n={2} titre="Le système et le plan">
+<AN k="systeme" />
+<Schema />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : déterminant, inverse, réactions">
+
+<Etape n={3} titre="Le déterminant">
+<AN k="det" />
+<Note>Pourquoi commencer par det M ? Il dit, avant tout calcul, si la solution existe et si elle est unique.</Note>
+</Etape>
+
+<Etape n={4} titre="La matrice inverse">
+<AN k="inverse" />
+<Note>Pourquoi l'inverse ? La cuve sera vide, pleine, ou accompagnée d'une pompe : M ne change pas, seul le second membre change. M⁻¹ calculée une fois sert pour tous ces cas.</Note>
+</Etape>
+
+<Etape n={5} titre="Les réactions">
+<AN k="R" />
+</Etape>
+
+<Etape n={6} titre="Le contrôle">
+<AN k="controle" />
+<Resultat k="RC" libelle="Réaction en C" />
+<Note couleur="vert">Contrôle : même résultat qu'en L1.3.12. Rapproche C de la droite AB (y<sub>C</sub> petit) : det M diminue et les réactions deviennent très sensibles à la position de la charge.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer ad + bc.">
+Le déterminant 2 × 2 est une **différence** : ad − bc. Pour M = (3 1 ; 1 2), on trouve {nombre(d2, 0)}, pas 7.
+</Piege>
+
+<Piege erreur="appliquer la règle de Sarrus à une matrice 4 × 4.">
+Sarrus ne vaut que pour les matrices 3 × 3. Au-delà, on développe selon une ligne ou l'on utilise le pivot de Gauss (produit des pivots).
+</Piege>
+
+<Piege erreur="oublier une étape de l'inverse 2 × 2.">
+On échange a et d, **et** l'on change le signe de b et c, **et** l'on divise par le déterminant. Contrôle toujours : A A⁻¹ doit donner I.
+</Piege>
+
+<Piege erreur="inverser case par case.">
+L'inverse de (4 7 ; 2 6) n'est pas (1/4 1/7 ; 1/2 1/6). Seule la définition A A⁻¹ = I compte.
+</Piege>
+
+<Piege erreur="écrire (AB)⁻¹ = A⁻¹ B⁻¹.">
+L'ordre s'inverse : (AB)⁻¹ = B⁻¹ A⁻¹, comme on retire ses chaussures avant ses chaussettes.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**« Matrice singulière » dans un logiciel.** Quand un logiciel de calcul de structure s'arrête sur une matrice singulière, ce n'est presque jamais un défaut du logiciel : la structure modélisée est un **mécanisme**. Un appui oublié, une articulation de trop, des barres alignées : le déterminant est nul, aucune position d'équilibre n'est déterminée. On cherche le mécanisme, pas un réglage.
+
+<Encadre type="terrain" titre="Trois appuis presque alignés">
+Si C n'est qu'à 20 cm de la droite AB, det M = {nombre(determinant([[1, 1, 1], [0, 4, 2], [0, 0, 0.2]]), 1)} au lieu de {nombre(t0.det, 0)}. La cuve de {grandeur(ch.F, 0, 'kN')} placée à 15 cm de la droite AB donne R<sub>C</sub> = {grandeur(pr1.R[2], 0, 'kN')} ; placée à 10 cm, R<sub>C</sub> = {grandeur(pr2.R[2], 0, 'kN')}. Cinq centimètres d'écart changent la réaction de {grandeur(pr1.R[2] - pr2.R[2], 0, 'kN')} : un petit déterminant rend le résultat très sensible aux imprécisions de chantier. On écarte les appuis.
+</Encadre>
+
+**Plusieurs cas de charge.** Pour un réservoir, un plancher ou un pont, on étudie de nombreux cas de charge sur la même structure. La matrice ne change pas : les logiciels la factorisent une seule fois, puis traitent chaque cas très vite. C'est l'idée de l'inverse, appliquée à grande échelle.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : déterminant et inverse">
+
+### Déterminant
+
+2 × 2 : $ad - bc$ · 3 × 3 : développement selon une ligne, ou Sarrus (3 × 3 seulement)
+
+### Sens
+
+aire (2D) ou volume (3D) signé construit sur les colonnes · det = 0 : colonnes liées
+
+### Propriétés
+
+échange de lignes : signe opposé · $\det(AB) = \det A \det B$ · triangulaire : produit de la diagonale = produit des pivots
+
+### Inverse
+
+existe ⇔ det ≠ 0 · 2 × 2 : $\frac{1}{ad - bc} \begin{pmatrix} d & -b \\ -c & a \end{pmatrix}$ · $(AB)^{-1} = B^{-1} A^{-1}$
+
+### Résolution
+
+x = A⁻¹ b · un seul système : préférer Gauss · plusieurs cas de charge : l'inverse sert à chaque fois
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Inversible ou non ?">
+
+Calcule les déterminants de <Matrice nom="M" M={M2} dec={0} /> et de <Matrice nom="P" M={P2} dec={0} />. Laquelle est inversible ?
+
+<Indice>ad − bc. Regarde aussi les colonnes de P : l'une est-elle un multiple de l'autre ?</Indice>
+
+<Corrige>
+det M = 3 × 2 − 1 × 1 = **{nombre(d2, 0)}** : M est inversible. det P = 2 × 2 − 4 × 1 = **{nombre(dP, 0)}** : la deuxième colonne de P vaut deux fois la première, P n'a pas d'inverse.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Résoudre par l'inverse">
+
+Avec l'inverse de A = (4 7 ; 2 6) calculée dans le cours, résous 4 x + 7 y = 15 et 2 x + 6 y = 10.
+
+<Indice>x = A⁻¹ b, avec b = (15 ; 10).</Indice>
+
+<Corrige>
+x = {nombre(iA4[0][0], 1)} × 15 + ({nombre(iA4[0][1], 1)}) × 10 = **{nombre(xA4[0], 0)}** et y = ({nombre(iA4[1][0], 1)}) × 15 + {nombre(iA4[1][1], 1)} × 10 = **{nombre(xA4[1], 0)}**. Contrôle : 4 × {nombre(xA4[0], 0)} + 7 × {nombre(xA4[1], 0)} = 15.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Trois méthodes, un seul déterminant">
+
+Calcule le déterminant de <Matrice nom="S" M={S} dec={0} /> par la règle de Sarrus, par le développement selon la première ligne, puis par le produit des pivots de Gauss.
+
+<Indice>Gauss : L<sub>2</sub> ← L<sub>2</sub> − ½ L<sub>1</sub>, puis L<sub>3</sub> ← L<sub>3</sub> − 0,4 L<sub>2</sub>.</Indice>
+
+<Corrige>
+Sarrus : ({sS.plus.map((v) => nombre(v, 0)).join(' + ')}) − ({sS.moins.map((v) => nombre(v, 0)).join(' + ')}) = **{nombre(sS.det, 0)}**. Développement : 2 × (6 − 1) − 1 × (2 − 0) + 0 = {nombre(sS.det, 0)}. Gauss : pivots {nombre(TS[0][0], 1)}, {nombre(TS[1][1], 1)} et {nombre(TS[2][2], 1)}, de produit {nombre(TS[0][0] * TS[1][1] * TS[2][2], 0)}. Les trois méthodes concordent.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.4.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le déterminant de la matrice (a b ; c d) vaut :" choix={['ad + bc', 'ad − bc', 'ab − cd', 'ac − bd']} bonne={1} colonnes={4}>
+Produit de la diagonale moins produit de l'autre diagonale.
+</QCM>
+
+<QCM n={2} question="Le déterminant de (3 1 ; 1 2) vaut :" choix={[nombre(d2, 0), '7', '6', '0']} bonne={0} colonnes={4}>
+3 × 2 − 1 × 1.
+</QCM>
+
+<QCM n={3} question="Si det A = 0 :" choix={['A est l’identité', 'A n’a pas d’inverse', 'A x = b a toujours une solution unique', 'A est symétrique']} bonne={1} colonnes={2}>
+Les colonnes sont liées : la matrice écrase l'espace, on ne peut pas revenir en arrière.
+</QCM>
+
+<QCM n={4} question="En deux dimensions, |det A| représente :" choix={['la longueur de la première colonne', 'l’aire du parallélogramme construit sur les colonnes', 'la somme des coefficients', 'le plus grand coefficient']} bonne={1} colonnes={2}>
+C'est le facteur par lequel A multiplie les aires.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Échanger deux lignes d'une matrice :" choix={['ne change pas le déterminant', 'change le signe du déterminant', 'double le déterminant', 'annule le déterminant']} bonne={1} colonnes={2}>
+C'est pourquoi on compte les échanges quand on calcule le déterminant par Gauss.
+</QCM>
+
+<QCM n={6} question="Trois appuis alignés sous un plateau donnent :" choix={['det M > 0', 'det M = 0', 'det M < 0', 'det M = 1']} bonne={1} colonnes={4}>
+Le triangle des appuis a une aire nulle : M n'a pas d'inverse, le plateau bascule.
+</QCM>
+
+<QCM n={7} question="L'inverse d'un produit AB vaut :" choix={['A⁻¹ B⁻¹', 'B⁻¹ A⁻¹', '(BA)⁻¹ A', 'A B⁻¹']} bonne={1} colonnes={4}>
+L'ordre s'inverse.
+</QCM>
+
+<QCM n={8} question="Dans l'exemple de la cuve, la réaction en C vaut :" choix={[grandeur(t0.R[2], 2, 'kN'), grandeur(t0.R[0], 2, 'kN'), grandeur(ch.F / 3, 2, 'kN'), grandeur(ch.F, 2, 'kN')]} bonne={0} colonnes={4}>
+R<sub>C</sub> = F y<sub>F</sub> / y<sub>C</sub> : la troisième ligne de M⁻¹ ne contient que le moment autour de l'axe x.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

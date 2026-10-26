@@ -63,7 +63,7 @@ export function Diagramme({
 }
 
 /** Cercle de Mohr d'un état plan de contraintes (MPa). Convention : τ positif vers le bas. */
-export function CercleMohr({ sx: sxx, sy: syy, txy, x = 40, y = 30, taille = 420 }: { sx: number; sy: number; txy: number; x?: number; y?: number; taille?: number }) {
+export function CercleMohr({ sx: sxx, sy: syy, txy, x = 40, y = 30, taille = 420, dec = 0 }: { sx: number; sy: number; txy: number; x?: number; y?: number; taille?: number; dec?: number }) {
   const m = cercleMohr(sxx, syy, txy);
   const etendue = Math.max(Math.abs(m.s1), Math.abs(m.s2), m.rayon) * 1.25;
   const k = taille / 2 / etendue;
@@ -82,13 +82,13 @@ export function CercleMohr({ sx: sxx, sy: syy, txy, x = 40, y = 30, taille = 420
       <line x1={X[0]} y1={X[1]} x2={Y[0]} y2={Y[1]} className="t-fin" />
       <circle cx={X[0]} cy={X[1]} r={3} fill="var(--color-correction)" />
       <circle cx={Y[0]} cy={Y[1]} r={3} fill="var(--color-correction)" />
-      <Etiquette x={X[0] + 6} y={X[1] + 4} taille={11.5}>X ({nombre(sxx, 0)} ; {nombre(txy, 0)})</Etiquette>
-      <Etiquette x={Y[0] + 6} y={Y[1] - 4} taille={11.5}>Y ({nombre(syy, 0)} ; {nombre(-txy, 0)})</Etiquette>
+      <Etiquette x={X[0] + 6} y={X[1] + 4} taille={11.5}>X ({nombre(sxx, dec)} ; {nombre(txy, dec)})</Etiquette>
+      <Etiquette x={Y[0] + 6} y={Y[1] - 4} taille={11.5}>Y ({nombre(syy, dec)} ; {nombre(-txy, dec)})</Etiquette>
       {[m.s1, m.s2].map((s, i) => (
         <g key={i}>
           <circle cx={P(s, 0)[0]} cy={o[1]} r={3} fill="var(--color-validation)" />
           <Etiquette x={P(s, 0)[0]} y={o[1] + 16} ancre="middle" taille={11.5} gras>
-            σ{i + 1} = {nombre(s, 1)}
+            σ{i + 1} = {nombre(s, Math.max(1, dec))}
           </Etiquette>
         </g>
       ))}
