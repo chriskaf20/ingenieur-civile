@@ -1,0 +1,367 @@
+---
+id: L1.6.1
+titre: Formats, traits et écritures
+objectifs:
+  - Choisir le format de papier adapté à un dessin et à son échelle
+  - Distinguer les types de traits et dire ce que chacun représente
+  - Choisir un couple d'épaisseurs de traits, fort et fin
+  - Écrire cotes et textes à une hauteur normalisée et lisible
+  - Disposer le cadre, les marges et le cartouche d'une feuille
+relecture: false
+normes:
+  - "ISO 216 : formats de papier de la série A"
+  - "ISO 5457 : formats et présentation des feuilles de dessin (cadre, marges)"
+  - "ISO 128-20 : types et épaisseurs de traits"
+  - "ISO 3098 : écriture des dessins techniques"
+  - "ISO 7200 : champs du cartouche"
+glossaire:
+  - terme: Format A
+    definition: Taille normalisée de feuille ; l'A0 vaut 1 m², chaque format suivant est la moitié du précédent.
+  - terme: Cadre
+    definition: Rectangle en trait fort tracé à l'intérieur de la feuille ; il limite la zone de dessin.
+  - terme: Cartouche
+    definition: Tableau placé en bas à droite de la feuille, qui identifie le plan (projet, titre, échelle, date, indice).
+  - terme: Trait fort
+    definition: Trait épais réservé aux contours vus et aux parties coupées.
+  - terme: Trait fin
+    definition: Trait mince des cotes, des lignes de rappel, des hachures et des axes ; il vaut la moitié du trait fort.
+symboles:
+  - { symbole: 'A n', signification: 'format de la série A', unite: 'mm' }
+  - { symbole: 'h', signification: 'hauteur nominale d''écriture', unite: 'mm' }
+  - { symbole: 'd', signification: 'épaisseur du trait d''écriture', unite: 'mm' }
+  - { symbole: 'E', signification: 'dénominateur de l''échelle', unite: '—' }
+formules:
+  - { nom: 'Surface des formats', tex: 'S_{A(n+1)} = \frac{S_{A(n)}}{2}', domaine: 'Série A' }
+  - { nom: 'Rapport des côtés', tex: '\frac{\text{grand côté}}{\text{petit côté}} = \sqrt{2}', domaine: 'Série A' }
+  - { nom: 'Trait d''écriture', tex: 'd = \frac{h}{10}', domaine: 'Écriture de type B' }
+---
+
+import { A0, choisirFormat, EPAISSEURS_TRAITS, epaisseurEcriture, HAUTEURS_ECRITURE, EXEMPLE_FORMAT, facteurImpression, feuillesDans, formatA, MARGES_CADRE, traitFin, zoneUtile } from '@/lib/calc/dessin'
+import { grandeur, nombre, nombreCourt } from '@/lib/format'
+import { DeuxTraits, EssaiFormats, FeuilleCadre, FormatsA, HauteursEcriture, PliageA4, ReductionImpression, SerieTraits, TypesTraits } from '@/components/schemas/DessinCours1'
+
+export const d0 = EXEMPLE_FORMAT
+export const r0 = choisirFormat(d0)
+export const a1 = formatA(1)
+export const a2 = formatA(2)
+export const a3 = formatA(3)
+export const a4 = formatA(4)
+export const z3 = zoneUtile(3)
+export const z4 = zoneUtile(4)
+export const f13 = facteurImpression(1, 3)
+export const hMin = HAUTEURS_ECRITURE[1]
+export const fort = 0.5
+export const fin = traitFin(fort)
+export const ex3 = { L: 30, H: 18, E: 100, reserve: 20, cartouche: 40 }
+export const r3 = choisirFormat(ex3)
+
+<Page etape="intuition" titre="L'intuition : une feuille, des traits, une écriture">
+
+Une lettre importante s'écrit sur une feuille propre, avec des marges, un titre, des lettres régulières et une signature. On la lit sans effort, et l'on sait qui l'a écrite. Un plan obéit aux mêmes règles, en plus strict : il sera lu par des dizaines de personnes, souvent sous le soleil d'un chantier.
+
+Trois choix rendent un dessin lisible avant même qu'on regarde ce qu'il représente : **le format** de la feuille, **les traits** et **l'écriture**. Le même angle de murs, dessiné avec un seul trait puis avec des traits hiérarchisés, ne se lit pas du tout de la même façon :
+
+<DeuxTraits />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Sur quelle feuille dessiner, avec quels traits et quelle écriture, pour qu'un plan soit lu juste par tous ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Une feuille de dessin en six points" sousTitre="Ce qu'on prépare avant le premier trait" etape="cours">
+
+<Panneau n={1} titre="Le format" icone="plan" couleur="encre">
+Série A : l'A0 vaut 1 m², l'A1 en est la moitié, et ainsi de suite jusqu'à l'A4 ({a4.court} × {a4.long} mm). Les côtés sont toujours dans le rapport √2.
+</Panneau>
+
+<Panneau n={2} titre="Le cadre" icone="regle" couleur="acier">
+Un rectangle en trait fort, à {MARGES_CADRE.gauche} mm du bord gauche, pour la reliure, et à {MARGES_CADRE.autres} mm des autres bords. On ne dessine qu'à l'intérieur.
+</Panneau>
+
+<Panneau n={3} titre="Le cartouche" icone="verification" couleur="validation">
+En bas à droite, dans le cadre : projet, titre, échelle, date, indice, auteur. Il reste visible quand on plie le plan.
+</Panneau>
+
+<Panneau n={4} titre="Les types de traits" icone="idee" couleur="brique">
+Continu pour ce qui est vu, interrompu pour ce qui est caché, mixte pour les axes. Chaque type a un sens.
+</Panneau>
+
+<Panneau n={5} titre="Les épaisseurs" icone="calcul" couleur="terre">
+Une série de raison √2, de {nombreCourt(EPAISSEURS_TRAITS[0], 2)} à {nombreCourt(EPAISSEURS_TRAITS[EPAISSEURS_TRAITS.length - 1], 2)} mm. Un dessin courant associe un trait fort et un trait fin deux fois plus mince.
+</Panneau>
+
+<Panneau n={6} titre="Les écritures" icone="retenir" couleur="correction">
+Des hauteurs normalisées, au moins {nombreCourt(hMin, 1)} mm pour les cotes ; un trait d'écriture égal au dixième de la hauteur ; des caractères droits et réguliers.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les formats">
+
+### La série A
+
+On part d'une feuille de **1 m²** dont les côtés sont dans le rapport √2 : c'est l'**A0**, de {A0.court} × {nombre(A0.long, 0)} mm. Coupée en deux par le milieu de son grand côté, elle donne deux **A1** ; un A1 coupé en deux donne deux **A2**, et ainsi de suite. Le rapport √2 a une propriété précieuse : la moitié d'une feuille a **la même forme** que la feuille entière. On peut donc réduire ou agrandir un plan d'un format à l'autre sans le déformer.
+
+<FormatsA />
+
+### Quel format pour quel dessin ?
+
+Le format se choisit **après** l'échelle : on calcule la taille du dessin, on ajoute la place des cotes et du cartouche, puis on prend le plus petit format qui convient. L'**A4** ({a4.court} × {a4.long} mm) sert aux détails, aux notes et aux pièces écrites ; l'**A3** ({a3.long} × {a3.court} mm) aux petits plans ; les **A1** et **A0** aux plans d'ensemble des bureaux d'études. Un grand plan se plie ensuite au format A4 pour être classé.
+
+Une A1 contient {feuillesDans(1, 4)} feuilles A4, une A0 en contient {feuillesDans(0, 4)} : chaque cran divise la surface par deux.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : les traits">
+
+### Les types de traits
+
+Chaque type de trait a un **sens** : le **continu** montre ce que l'on voit, l'**interrompu** (des tirets) ce qui est caché, le **mixte** (tiret long et point) les axes et les plans de symétrie. Sur une même élévation, on trouve souvent les quatre :
+
+<TypesTraits />
+
+### Les épaisseurs
+
+Les épaisseurs forment une série où chaque valeur vaut environ √2 fois la précédente. On ne prend pas n'importe lesquelles : un dessin associe un **trait fort** et un **trait fin** dont l'épaisseur est **la moitié**, soit deux crans plus bas. Avec un trait fort de {nombreCourt(fort, 2)} mm, le trait fin vaut {nombreCourt(fin, 2)} mm.
+
+<SerieTraits />
+
+<Regle type="norme" source="ISO 128-20 ; ISO 5457">
+La série des épaisseurs et le rapport 2 entre trait fort et trait fin viennent de l'ISO 128-20 ; les bords du cadre, de l'ISO 5457 <AVerifier note="A_VERIFIER.md n° 41 : valeurs de l'ISO 128-20, de l'ISO 3098 et de l'ISO 5457 à contrôler sur les textes" />.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : les écritures">
+
+### Des hauteurs normalisées
+
+Les textes d'un dessin s'écrivent à des **hauteurs normalisées** qui suivent, elles aussi, une série de raison √2 : {HAUTEURS_ECRITURE.slice(1, 5).map((h) => nombreCourt(h, 1)).join(' ; ')} mm. L'épaisseur du trait d'écriture vaut le **dixième** de la hauteur : {nombreCourt(epaisseurEcriture(3.5), 2)} mm pour une écriture de 3,5 mm. Les caractères sont droits ou légèrement inclinés, tous identiques, sans fioritures.
+
+<HauteursEcriture />
+
+### Où écrire ?
+
+Les **cotes** et les notes courantes s'écrivent en 2,5 ou 3,5 mm ; les **titres des vues** (« PLAN DU REZ-DE-CHAUSSÉE », « COUPE A-A ») en 5 mm, soulignés ; le **titre du plan**, dans le cartouche, en 7 mm. On ne descend jamais sous {nombreCourt(hMin, 1)} mm : un plan est souvent réduit à l'impression, et une écriture trop petite devient illisible.
+
+<Regle type="art">
+Les usages par taille d'écriture sont une règle de l'art des bureaux d'études. La seule exigence absolue est la lisibilité, une fois le plan imprimé à son format réel.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : une feuille A3 prête à dessiner">
+
+Avant de tracer le premier trait, on prépare la feuille. Voici une A3 posée en paysage, avec tout ce qu'elle doit porter :
+
+<FeuilleCadre />
+
+- le **bord** de la feuille, en trait fin : c'est le bord de coupe ;
+- le **cadre**, en trait fort, à {MARGES_CADRE.gauche} mm du bord gauche et à {MARGES_CADRE.autres} mm des autres bords : la zone utile mesure {z3.largeur} × {z3.hauteur} mm ;
+- les **repères de centrage**, au milieu de chaque côté : ils servent à reproduire et à plier le plan ;
+- le **cartouche**, en bas à droite, contre le cadre ;
+- la **zone de dessin**, où l'on centre les vues, avec leurs cotes et leurs titres.
+
+<Encadre type="retenir">
+Format, cadre, cartouche : on prépare la feuille d'abord. Puis on choisit l'échelle pour que le dessin et ses cotes tiennent dans la zone utile, sans toucher le cartouche.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="formatPlan">
+
+<Cahier titre="Exemple résolu : la façade d'une école à Mbuji-Mayi">
+
+**Énoncé.** On doit dessiner au 1/{d0.E} la façade d'une école de {grandeur(d0.L, 2, 'm')} de long et {grandeur(d0.H, 2, 'm')} de haut. On garde {d0.reserve} mm autour du dessin pour les cotes et les titres, et une bande de {d0.cartouche} mm en bas pour le cartouche (données de l'énoncé). Quel est le plus petit format qui convient ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi des données en mètres et un dessin en millimètres ? On mesure l'ouvrage en mètres, la feuille en millimètres : on convertit une seule fois, au moment de dessiner.</Note>
+</Etape>
+
+<Etape n={2} titre="La taille du dessin">
+<AN k="dessin" />
+<Note>Pourquoi diviser par E ? Au 1/{d0.E}, chaque longueur réelle est divisée par {d0.E} sur le papier.</Note>
+</Etape>
+
+<Etape n={3} titre="L'encombrement, cotes comprises">
+<AN k="encombrement" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : on essaie les formats">
+
+<Etape n={4} titre="Du plus petit au plus grand">
+<AN k="essais" />
+<Note>Pourquoi commencer par l'A4 ? Le plus petit format qui convient est le plus facile à manier et à imprimer ; on ne passe au format suivant que si le dessin déborde.</Note>
+</Etape>
+
+<Etape n={5} titre="Le résultat">
+<Resultat k="format" libelle="Format retenu" />
+<Note couleur="vert">Contrôle : il reste <Val k="marge" /> ; le dessin n'est pas collé au cadre. Passe l'échelle au 1/20 : la façade ne tient plus que sur un grand format.</Note>
+</Etape>
+
+<Etape n={6} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="tout dessiner avec le même trait.">
+Le mur coupé, l'axe et la cote se confondent : le lecteur ne sait plus ce qui est construit et ce qui aide à lire. Un trait fort pour le coupé et le vu, un trait fin pour le reste.
+</Piege>
+
+<Piege erreur="écrire trop petit « pour que ça rentre ».">
+Un plan A1 écrit en 3,5 mm et imprimé sur une A3 n'a plus que des textes de {nombreCourt(3.5 * f13, 2)} mm : illisibles. On agrandit le format, pas l'économie de place.
+</Piege>
+
+<ReductionImpression />
+
+<Piege erreur="oublier que l'échelle change avec l'impression.">
+Le même plan imprimé sur une A3 n'est plus au 1/50 mais au 1/{nombre(50 / f13, 0)}, alors que le cartouche dit toujours 1/50. On l'écrit sur le tirage, ou l'on ajoute une échelle graphique (L1.6.2).
+</Piege>
+
+<Piege erreur="dessiner jusqu'au bord de la feuille.">
+Le bord s'abîme, la reliure mange la marge gauche et l'imprimante coupe ce qui dépasse. On reste dans le cadre.
+</Piege>
+
+<Piege erreur="plier un plan cartouche à l'intérieur.">
+Il faut le déplier pour savoir de quoi il s'agit. On le plie au format A4, cartouche dessus.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Au bureau d'études**, les formats et les épaisseurs sont réglés une fois pour toutes dans le logiciel de dessin (L2.10) : chaque calque a son épaisseur et son type de trait. Le dessinateur choisit le format au moment d'imprimer, en vérifiant l'échelle sur le tirage.
+
+**Sur le chantier**, les plans voyagent pliés. On les plie au format A4, le cartouche dessus, pour les ranger dans un classeur ou une pochette :
+
+<PliageA4 />
+
+<Encadre type="terrain" titre="Les tirages en ville">
+À Kinshasa comme ailleurs, beaucoup de plans sont tirés chez un reprographe, sur le format disponible. Avant de mesurer quoi que ce soit, on vérifie sur le tirage le format réel et l'échelle annoncée : un A1 tiré sur une A3 a toutes ses longueurs divisées par deux.
+</Encadre>
+
+**Un réflexe** : à la réception d'un plan, on lit le cartouche (format, échelle, indice) avant le dessin lui-même.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : formats, traits et écritures">
+
+### Formats (ISO 216)
+
+A0 = 1 m² · A(n+1) = A(n) ÷ 2 · côtés dans le rapport √2 · A4 {a4.court} × {a4.long} · A3 {a3.long} × {a3.court} mm
+
+### Feuille (ISO 5457)
+
+cadre en trait fort · {MARGES_CADRE.gauche} mm à gauche, {MARGES_CADRE.autres} mm ailleurs · cartouche en bas à droite · repères de centrage
+
+### Traits
+
+continu : vu · interrompu : caché · mixte : axe · fort = coupé et vu · fin = moitié du fort (cotes, hachures, rappels)
+
+### Écritures
+
+{HAUTEURS_ECRITURE.slice(1, 5).map((h) => nombreCourt(h, 1)).join(' · ')} mm · trait d'écriture h/10 · jamais sous {nombreCourt(hMin, 1)} mm
+
+### Pièges
+
+un seul trait · écriture trop petite · échelle changée à l'impression · plan plié cartouche dedans
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Du grand au petit format">
+
+Quelles sont les dimensions d'un format A2 ? Combien de feuilles A4 contient une feuille A1 ?
+
+<Indice>Chaque format est la moitié du précédent : on coupe le grand côté en deux.</Indice>
+
+<Corrige>
+A1 = {a1.court} × {a1.long} mm ; en coupant le grand côté : A2 = **{a2.court} × {a2.long} mm**. De l'A1 à l'A4, on descend de trois crans : 2 × 2 × 2 = **{feuillesDans(1, 4)} feuilles A4**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un plan réduit">
+
+Un plan A1 au 1/50, dont les cotes sont écrites en 3,5 mm, est imprimé sur une feuille A3. Quelle hauteur ont les cotes sur le tirage ? À quelle échelle est le dessin imprimé ? Que faut-il faire ?
+
+<Indice>De l'A1 à l'A3, deux crans : chaque longueur est multipliée par (1/√2)², soit ½.</Indice>
+
+<Corrige>
+Facteur : {nombreCourt(f13, 2)}. Cotes : 3,5 × {nombreCourt(f13, 2)} = **{nombreCourt(3.5 * f13, 2)} mm**, sous le minimum de {nombreCourt(hMin, 1)} mm. Échelle : 50 / {nombreCourt(f13, 2)} = **1/{nombre(50 / f13, 0)}**. Il faut l'écrire sur le tirage, et ne jamais construire avec des mesures prises à la règle sur ce tirage.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le plan d'un hangar">
+
+On veut dessiner au 1/{ex3.E} le plan d'un hangar de {grandeur(ex3.L, 2, 'm')} × {grandeur(ex3.H, 2, 'm')}, avec {ex3.reserve} mm de réserve pour les cotes et une bande de {ex3.cartouche} mm pour le cartouche. Quel format choisir ?
+
+<Indice>Calcule la taille du dessin, ajoute deux fois la réserve, puis essaie l'A4, l'A3, l'A2…</Indice>
+
+<Corrige>
+
+- Dessin : {nombre(ex3.L * 1000 / ex3.E, 0)} × {nombre(ex3.H * 1000 / ex3.E, 0)} mm ; avec les cotes : **{nombre(r3.encombrement.largeur, 0)} × {nombre(r3.encombrement.hauteur, 0)} mm**.
+- A4 : zone {z4.largeur} × {z4.hauteur} mm, trop étroite. A3 : zone {z3.largeur} × {z3.hauteur - ex3.cartouche} mm au-dessus du cartouche : {r3.n === 3 ? 'le dessin tient' : 'trop petit'}.
+- Format retenu : **A{r3.n} {r3.orientation}**.
+
+<EssaiFormats choix={r3} cartouche={ex3.cartouche} />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Quelle est la surface d'une feuille A0 ?" choix={['0,5 m²', '1 m²', '2 m²', '0,25 m²']} bonne={1} colonnes={4}>
+L'A0 est définie par 1 m² et des côtés dans le rapport √2.
+</QCM>
+
+<QCM n={2} question="Les dimensions d'un format A4 sont :" choix={[`${a4.court} × ${a4.long} mm`, `${a3.court} × ${a3.long} mm`, '200 × 300 mm', '216 × 279 mm']} bonne={0} colonnes={2}>
+A3 coupée en deux : {a4.court} × {a4.long} mm.
+</QCM>
+
+<QCM n={3} question="Une arête cachée se dessine en :" choix={['trait continu fort', 'trait interrompu', 'trait mixte', 'trait continu fin']} bonne={1} colonnes={2}>
+Des tirets réguliers ; le trait mixte est réservé aux axes.
+</QCM>
+
+<QCM n={4} question={<>Avec un trait fort de {nombreCourt(fort, 2)} mm, le trait fin vaut :</>} choix={[`${nombreCourt(fin, 2)} mm`, '0,35 mm', '0,13 mm', '0,7 mm']} bonne={0} colonnes={4}>
+La moitié du trait fort, deux crans plus bas dans la série.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Le trait d'une écriture de 5 mm a une épaisseur de :" choix={['0,25 mm', `${nombreCourt(epaisseurEcriture(5), 2)} mm`, '1 mm', '0,05 mm']} bonne={1} colonnes={4}>
+Le dixième de la hauteur.
+</QCM>
+
+<QCM n={6} question="Le cartouche se place :" choix={['en haut à gauche', 'en bas à droite, dans le cadre', 'au dos de la feuille', 'n’importe où']} bonne={1} colonnes={2}>
+Il reste ainsi visible sur le plan plié au format A4.
+</QCM>
+
+<QCM n={7} question={<>La façade de l'exemple, dessinée au 1/{d0.E} avec ses cotes, demande le format :</>} choix={['A4 portrait', `A${r0.n} ${r0.orientation}`, 'A1 paysage', 'A0 paysage']} bonne={1} colonnes={2}>
+{nombre(r0.encombrement.largeur, 0)} mm de large : trop pour l'A4, assez pour l'A3.
+</QCM>
+
+<QCM n={8} question="Un plan A1 imprimé sur une A3 est à une échelle :" choix={['inchangée', 'deux fois plus petite', 'deux fois plus grande', 'quatre fois plus petite']} bonne={1} colonnes={2}>
+Toutes les longueurs sont multipliées par {nombreCourt(f13, 2)} : un 1/50 devient un 1/{nombre(50 / f13, 0)}.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

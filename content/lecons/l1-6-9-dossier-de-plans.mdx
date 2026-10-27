@@ -1,0 +1,307 @@
+---
+id: L1.6.9
+titre: Le dossier de plans d'un bâtiment
+objectifs:
+  - Citer les pièces d'un dossier de plans et le rôle de chacune
+  - Distinguer plans d'architecture, de structure et de réseaux
+  - Situer les plans dans les phases d'un projet, de l'esquisse à l'exécution
+  - Choisir l'échelle de chaque pièce du dossier
+relecture: false
+normes: []
+glossaire:
+  - terme: Plan de situation
+    definition: Plan à petite échelle qui situe la parcelle dans son quartier.
+  - terme: Plan de masse
+    definition: Plan de la parcelle entière, avec l'implantation du bâtiment, les accès, les réseaux et les altitudes du terrain.
+  - terme: Plans d'exécution
+    definition: Plans détaillés et cotés avec lesquels on construit ; on les reconnaît à la phase EXE et à la mention « bon pour exécution ».
+  - terme: Plan de récolement
+    definition: Plan de ce qui a réellement été construit, remis en fin de chantier avec le dossier des ouvrages exécutés.
+symboles:
+  - { symbole: 'ESQ … DOE', signification: 'phases d''un projet, de l''esquisse au dossier des ouvrages exécutés', unite: '—' }
+  - { symbole: 'EXE', signification: 'phase d''exécution', unite: '—' }
+formules: []
+---
+
+import { echellesDossier, EXEMPLE_DOSSIER } from '@/lib/calc/plans'
+import { longueurPapier } from '@/lib/calc/dessin'
+import { grandeur, nombre } from '@/lib/format'
+import { ArborescenceDossier, DossierFeuilles, PhasesProjet, PlanMasse, PlanSituation, QuiLitQuoi, SuperpositionPlans, Tampons } from '@/components/schemas/DessinCours4'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const d0 = EXEMPLE_DOSSIER
+export const e0 = echellesDossier(d0)
+export const ex2 = { ...EXEMPLE_DOSSIER, parcelle: { L: 40, l: 25 }, batiment: { L: 16, l: 10 } }
+export const e2 = echellesDossier(ex2)
+
+<Page etape="intuition" titre="L'intuition : un bâtiment, une bibliothèque de plans">
+
+Une maison ne tient pas sur un seul plan. Le géomètre veut savoir où la placer sur la parcelle ; le maçon, où monter les murs ; le ferrailleur, quelles barres couper ; le plombier, où passent les tuyaux ; le client, à quoi ressemblera la façade. Chacun a **ses** plans, mais tous décrivent le **même** bâtiment, avec les mêmes axes et les mêmes niveaux.
+
+<QuiLitQuoi />
+
+Ce jeu de plans s'appelle le **dossier de plans**. Il grandit avec le projet : quelques croquis au début, plusieurs dizaines de plans cotés au moment de construire.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelles pièces composent un dossier de plans, à quoi sert chacune, et à quel moment du projet ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les pièces du dossier" sousTitre="Du quartier au détail" etape="cours">
+
+<Panneau n={1} titre="Situation" icone="terrain" couleur="terre">
+Le quartier, les rues, la parcelle repérée, le nord ; au 1/1 000 à 1/5 000.
+</Panneau>
+
+<Panneau n={2} titre="Masse" icone="plan" couleur="validation">
+La parcelle entière : implantation, reculs, accès, réseaux, altitudes du terrain ; au 1/200 à 1/500.
+</Panneau>
+
+<Panneau n={3} titre="Niveaux" icone="regle" couleur="encre">
+Un plan par étage : murs, cloisons, baies, pièces, cotes, surfaces ; au 1/50 ou 1/100.
+</Panneau>
+
+<Panneau n={4} titre="Façades et coupes" icone="idee" couleur="acier">
+L'aspect extérieur et les hauteurs : niveaux, baies, toiture, fondations.
+</Panneau>
+
+<Panneau n={5} titre="Structure" icone="ferraillage" couleur="correction">
+Fondations, coffrage, ferraillage, nomenclatures d'aciers : les plans de l'ingénieur.
+</Panneau>
+
+<Panneau n={6} titre="Réseaux" icone="quantites" couleur="brique">
+Eau, assainissement, électricité, voirie et réseaux divers : les plans des corps d'état techniques.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : les plans d'architecture">
+
+### Situer le projet
+
+Le **plan de situation** montre la parcelle dans son quartier : les rues, les repères, le nord, une échelle graphique. Il sert à trouver le terrain et à l'administration pour instruire la demande d'autorisation de construire.
+
+<PlanSituation />
+
+### Implanter le bâtiment
+
+Le **plan de masse** dessine toute la parcelle : ses limites, le bâtiment et ses **reculs** par rapport aux limites, les accès, les réseaux (eau, électricité, assainissement : fosse septique et puisard quand il n'y a pas d'égout), les altitudes du terrain. C'est le plan du géomètre et du terrassier.
+
+<PlanMasse d={d0} />
+
+### Décrire le bâtiment
+
+Viennent ensuite les **plans de niveaux**, un par étage, les **façades**, les **coupes** et les **détails** : ce sont eux que l'on étudie dans les leçons suivantes.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : structure, réseaux et phases">
+
+### Les plans des autres métiers
+
+L'ingénieur structure produit les plans de **fondations**, de **coffrage** et de **ferraillage** (L1.6.11) ; les bureaux techniques, les plans de **réseaux**. Tous utilisent les axes et les niveaux de l'architecte. En les superposant, on découvre les **conflits** : un tuyau qui traverse une poutre, une gaine qui passe dans un poteau.
+
+<SuperpositionPlans />
+
+### Les phases du projet
+
+Le dossier se construit par étapes : **esquisse**, **avant-projets** (sommaire puis définitif), **projet**, **consultation des entreprises**, **exécution**, **dossier des ouvrages exécutés**. À chaque phase, les plans se précisent et l'échelle grandit <AVerifier note="A_VERIFIER.md n° 43 : phases de la loi MOP (France) et pratiques équivalentes en RDC" />.
+
+<PhasesProjet />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'arborescence d'un dossier">
+
+Un dossier bien rangé se lit comme un arbre : trois familles de plans, chacune avec ses pièces.
+
+<ArborescenceDossier />
+
+Chaque plan porte un **numéro** et un **indice** de révision dans son cartouche (L1.6.12) ; une **liste des plans** tient l'inventaire du dossier, avec l'indice en vigueur de chacun.
+
+<Encadre type="retenir">
+Architecture, structure, réseaux : trois familles, un seul bâtiment. Mêmes axes, mêmes niveaux, même cartouche.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="dossierEchelles">
+
+<Cahier titre="Exemple résolu : les échelles d'un dossier sur A3">
+
+**Énoncé.** Une maison de {grandeur(d0.batiment.L, 2, 'm')} × {grandeur(d0.batiment.l, 2, 'm')} est construite sur une parcelle de {grandeur(d0.parcelle.L, 2, 'm')} × {grandeur(d0.parcelle.l, 2, 'm')}. Toutes les planches du dossier sont au format A{d0.n}, avec {d0.reserve} mm de réserve pour les cotes et {d0.cartouche} mm pour le cartouche (données de l'énoncé). À quelles échelles dessiner le plan de masse et les plans de niveaux ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La place utile">
+<AN k="dispo" />
+</Etape>
+
+<Etape n={3} titre="Les deux échelles">
+<AN k="masse" />
+<AN k="niveau" />
+<Note>Pourquoi deux échelles ? Le plan de masse doit montrer toute la parcelle, les plans de niveaux seulement le bâtiment : ils n'ont pas la même taille.</Note>
+<Resultat k="niveau" libelle="Plans de niveaux" />
+<Note couleur="vert">Contrôle : on retrouve les usages, 1/200 à 1/500 pour la masse, 1/50 à 1/100 pour les niveaux. Agrandis la parcelle : le plan de masse change-t-il d'échelle ?</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les deux planches">
+
+<Etape n={4} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="construire avec un plan d'avant-projet.">
+Un plan APS ou APD n'est pas fait pour construire : ses cotes peuvent encore changer. On ne construit qu'avec les plans d'exécution, visés « bon pour exécution ».
+
+<Tampons />
+
+</Piege>
+
+<Piege erreur="lire le plan de masse comme un plan de niveau.">
+Au 1/200, une cote de recul de 4,00 m mesure {nombre(longueurPapier(4, 200), 0)} mm : le plan de masse sert à implanter, pas à construire les murs.
+</Piege>
+
+<Piege erreur="ignorer les plans de réseaux.">
+Le tuyau qui traverse une poutre se prévoit avant de couler, par une réservation ; après, on casse le béton et les aciers.
+</Piege>
+
+<Piege erreur="laisser l'architecture et la structure se contredire.">
+Si un poteau de l'ingénieur tombe au milieu d'une porte de l'architecte, on arrête et l'on fait trancher les deux bureaux d'études.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Du permis au récolement.** Le dossier suit le chantier du début à la fin :
+
+<DiagrammeFlux alt="Le dossier de plans au fil du chantier : plans du dossier d'autorisation de construire ; plans d'exécution visés, seuls utilisés sur le chantier ; mises à jour par indices pendant les travaux ; plans de récolement de ce qui a été réellement construit, remis au maître d'ouvrage." etapes={[{ titre: 'Autorisation', texte: 'situation, masse, façades', teinte: 'terre' }, { titre: 'Exécution', texte: 'plans visés « bon pour exécution »', teinte: 'validation' }, { titre: 'Révisions', texte: 'indices B, C… diffusés', teinte: 'encre' }, { titre: 'Récolement', texte: 'ce qui a été construit', teinte: 'acier' }]} />
+
+<Encadre type="terrain" titre="Le classeur du chantier">
+Sur le chantier, les plans d'exécution en vigueur sont rangés par famille dans un classeur ou affichés au bureau de chantier, avec la liste des plans. Les plans périmés sont barrés et retirés. Le plan de masse et les plans de fondations sortent les premiers ; les plans de réseaux et de finitions, plus tard.
+</Encadre>
+
+**Le dossier administratif.** L'autorisation de construire s'obtient sur un dossier réduit (situation, masse, niveaux, façades, coupes) ; ses exigences varient selon la commune <AVerifier note="A_VERIFIER.md n° 43 : pièces exigées pour l'autorisation de bâtir en RDC" />. Le dossier d'exécution, lui, est bien plus complet.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : le dossier de plans">
+
+### Architecture
+
+situation (1/1 000 à 1/5 000) · masse (1/200 à 1/500) · niveaux, façades, coupes (1/50 à 1/100) · détails (1/20 à 1/5)
+
+### Structure et réseaux
+
+fondations · coffrage · ferraillage · nomenclatures · eau, assainissement, électricité, VRD
+
+### Phases
+
+ESQ → APS → APD → PRO → DCE → **EXE** → DOE · on ne construit qu'avec l'EXE
+
+### Règles
+
+mêmes axes, mêmes niveaux · conflits repérés en superposant · liste des plans et indices
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le bon plan">
+
+Quel plan consulte-t-on pour : a) la distance entre la maison et la limite de la rue ; b) la hauteur d'une allège ; c) le diamètre des barres d'une poutre ; d) le trajet de l'évacuation de la douche ?
+
+<Indice>Masse, façade ou coupe, ferraillage, réseaux.</Indice>
+
+<Corrige>
+a) le **plan de masse** ; b) une **façade** ou une **coupe** ; c) le **plan de ferraillage** ; d) le **plan de plomberie et d'assainissement**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Les échelles d'un autre dossier">
+
+Parcelle de {grandeur(ex2.parcelle.L, 2, 'm')} × {grandeur(ex2.parcelle.l, 2, 'm')}, bâtiment de {grandeur(ex2.batiment.L, 2, 'm')} × {grandeur(ex2.batiment.l, 2, 'm')}, planches A3 (mêmes réserves que l'exemple). Quelles échelles choisir ?
+
+<Indice>La place utile est la même que dans l'exemple : {nombre(e2.dispo.largeur, 0)} × {nombre(e2.dispo.hauteur, 0)} mm.</Indice>
+
+<Corrige>
+Plan de masse : **1/{e2.masse}** ({nombre(longueurPapier(ex2.parcelle.L, e2.masse), 0)} × {nombre(longueurPapier(ex2.parcelle.l, e2.masse), 0)} mm). Plans de niveaux : **1/{e2.niveau}** ({nombre(longueurPapier(ex2.batiment.L, e2.niveau), 0)} × {nombre(longueurPapier(ex2.batiment.l, e2.niveau), 0)} mm).
+
+<DossierFeuilles d={ex2} masse={e2.masse} niveau={e2.niveau} />
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Remettre les phases dans l'ordre">
+
+Remets dans l'ordre : DCE, ESQ, EXE, APD, DOE, APS, PRO. À quelle phase le chef de chantier reçoit-il ses plans ? Lesquels remet-on au client à la fin ?
+
+<Indice>De l'idée au bâtiment livré.</Indice>
+
+<Corrige>
+**ESQ → APS → APD → PRO → DCE → EXE → DOE**. Le chef de chantier construit avec les plans **EXE** ; à la fin, on remet au client le **DOE**, avec les plans de récolement.
+
+<PhasesProjet />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le plan qui montre la parcelle dans son quartier est le plan :" choix={['de masse', 'de situation', 'de niveau', 'de coffrage']} bonne={1} colonnes={4}>
+À petite échelle, avec les rues et le nord.
+</QCM>
+
+<QCM n={2} question="Les reculs du bâtiment par rapport aux limites se lisent sur le plan :" choix={['de masse', 'de ferraillage', 'électrique', 'de façade']} bonne={0} colonnes={4}>
+Il dessine toute la parcelle.
+</QCM>
+
+<QCM n={3} question="Un plan de ferraillage appartient à la famille :" choix={['architecture', 'structure', 'réseaux', 'administration']} bonne={1} colonnes={4}>
+Il vient de l'ingénieur structure.
+</QCM>
+
+<QCM n={4} question="On construit avec les plans de la phase :" choix={['APS', 'APD', 'EXE', 'DOE']} bonne={2} colonnes={4}>
+Les plans d'exécution, visés.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, le plan de masse est dessiné au :</>} choix={[`1/${e0.masse}`, `1/${e0.niveau}`, '1/1 000', '1/20']} bonne={0} colonnes={4}>
+La parcelle de {nombre(d0.parcelle.L, 0)} × {nombre(d0.parcelle.l, 0)} m doit tenir dans {nombre(e0.dispo.largeur, 0)} × {nombre(e0.dispo.hauteur, 0)} mm.
+</QCM>
+
+<QCM n={6} question="Superposer les plans d'architecture, de structure et de réseaux permet :" choix={['de gagner du papier', 'de repérer les conflits avant de construire', 'de changer d’échelle', 'de remplacer les coupes']} bonne={1} colonnes={2}>
+Tuyau dans une poutre, gaine dans un poteau…
+</QCM>
+
+<QCM n={7} question="Les plans de récolement montrent :" choix={['le projet rêvé', 'ce qui a été réellement construit', 'les plans d’esquisse', 'la parcelle voisine']} bonne={1} colonnes={2}>
+Ils font partie du dossier des ouvrages exécutés.
+</QCM>
+
+<QCM n={8} question="Ce qui relie tous les plans d'un dossier :" choix={['la couleur', 'les mêmes axes et les mêmes niveaux', 'le même format', 'le même dessinateur']} bonne={1} colonnes={2}>
+C'est ce qui permet de les superposer.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

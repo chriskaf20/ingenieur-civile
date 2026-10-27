@@ -1,0 +1,328 @@
+---
+id: L1.6.7
+titre: Coupes, sections et hachures
+objectifs:
+  - Distinguer une coupe d'une section
+  - "Lire un repère de coupe : position du plan de coupe et sens d'observation"
+  - Tracer une coupe simple avec les traits et les hachures conventionnels
+  - Reconnaître les matériaux coupés à leurs hachures
+  - Lire les épaisseurs d'un plancher sur une coupe et en déduire la hauteur sous plafond
+relecture: false
+normes:
+  - "ISO 128 (série) : coupes, sections et hachures"
+glossaire:
+  - terme: Coupe
+    definition: Vue de l'objet tranché par un plan ; on dessine la partie tranchée, hachurée, et tout ce que l'on voit au-delà.
+  - terme: Section
+    definition: Dessin de la seule surface tranchée par le plan de coupe, sans ce qui se trouve au-delà.
+  - terme: Repère de coupe
+    definition: Trait mixte fort, flèches et lettres placés sur un plan pour indiquer où passe le plan de coupe et dans quel sens on regarde.
+  - terme: Hauteur sous plafond
+    definition: Distance verticale entre le sol fini et le dessous du plafond d'une pièce.
+symboles:
+  - { symbole: 'A-A', signification: 'nom d''une coupe et de son repère', unite: '—' }
+  - { symbole: 'hé', signification: 'hauteur d''étage, de sol fini à sol fini', unite: 'm' }
+  - { symbole: 'HSP', signification: 'hauteur sous plafond', unite: 'm' }
+formules:
+  - { nom: 'Hauteur sous plafond', tex: 'HSP = h_é - (e_r + e_d + e_p)', domaine: 'Revêtement, dalle, enduit' }
+---
+
+import { EXEMPLE_PLANCHER, EXEMPLE_STUDIO, hauteurSousPlafond, studio } from '@/lib/calc/plans'
+import { grandeur, nombre } from '@/lib/format'
+import { CinqHachures, CoupeIntuition, CoupeOuSection, DallageTerrePlein, FlechesInversees, HachuresContact, PlancherCoupe, QuoiHachurer, ReglesHachures, RepereEtCoupe, TypesCoupes } from '@/components/schemas/DessinCours3'
+import { CoupeLogement } from '@/components/schemas/Logement'
+import { TYPES_HACHURES } from '@/components/drawing/Hachures'
+
+export const p0 = EXEMPLE_PLANCHER
+export const h0 = hauteurSousPlafond(p0)
+export const st = studio(EXEMPLE_STUDIO)
+export const ex3 = { hEtage: 3.06, dalle: 0.2, revetement: 0.06, plafond: 0.02 }
+export const h3 = hauteurSousPlafond(ex3)
+
+<Page etape="intuition" titre="L'intuition : couper pour voir dedans">
+
+Pour savoir comment est fait un gâteau à étages, on le coupe : la tranche montre chaque couche et son épaisseur. Un plan ne peut pas montrer l'intérieur d'un mur ou d'un plancher ; une **coupe** le peut. On tranche l'ouvrage par un plan imaginaire, on retire la partie avant, et l'on dessine ce qui reste.
+
+<CoupeIntuition />
+
+La surface tranchée est **hachurée** : son motif dit le matériau. Tout ce que l'on voit plus loin, derrière le plan de coupe, est dessiné sans hachures.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment lire et tracer une coupe : où passe le plan, dans quel sens regarde-t-on, que hachure-t-on ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Lire une coupe" sousTitre="Trancher, regarder, hachurer" etape="cours">
+
+<Panneau n={1} titre="Le plan de coupe" icone="idee" couleur="encre">
+Un plan imaginaire tranche l'ouvrage. Sur le plan, son repère est un trait mixte fort terminé par deux lettres.
+</Panneau>
+
+<Panneau n={2} titre="Le sens" icone="plan" couleur="acier">
+Les flèches du repère disent de quel côté on regarde. Les inverser, c'est dessiner l'autre côté.
+</Panneau>
+
+<Panneau n={3} titre="Coupe ou section" icone="regle" couleur="brique">
+La coupe montre le tranché et ce qui est vu au-delà ; la section, le tranché seulement.
+</Panneau>
+
+<Panneau n={4} titre="Les hachures" icone="materiaux" couleur="terre">
+Seule la partie tranchée est hachurée ; un motif par matériau, selon la légende du plan.
+</Panneau>
+
+<Panneau n={5} titre="Les coupes de bâtiment" icone="terrain" couleur="validation">
+Elles montrent fondations, dallage, murs, baies, planchers et toiture, avec leurs niveaux.
+</Panneau>
+
+<Panneau n={6} titre="Ce qu'on y lit" icone="calcul" couleur="correction">
+Les épaisseurs, les hauteurs : hauteur d'étage, épaisseur de plancher, hauteur sous plafond.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : coupe, section, repère">
+
+### Coupe ou section
+
+Une **coupe** dessine la partie tranchée, hachurée, **et** tout ce que l'on voit au-delà du plan de coupe, en trait continu. Une **section** ne dessine que la surface tranchée. Pour une poutre, la section suffit à montrer sa forme ; pour un bâtiment, on veut aussi voir ce qui est derrière : on fait une coupe.
+
+<CoupeOuSection />
+
+### Le repère de coupe
+
+Sur le plan, le **repère** indique où passe le plan de coupe : un trait mixte fort à chaque extrémité, deux **flèches** qui montrent le sens d'observation, deux **lettres** identiques. La vue obtenue porte le même nom : « coupe A-A ».
+
+<RepereEtCoupe />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : coupes particulières et hachures">
+
+### Coupes particulières
+
+Pour un objet symétrique, une **demi-coupe** montre la moitié extérieure et la moitié intérieure. Une **coupe partielle** n'ouvre qu'une zone, limitée par un trait ondulé. Une **coupe brisée** suit un plan qui change de direction pour passer par plusieurs détails.
+
+<TypesCoupes />
+
+### Les règles des hachures
+
+On ne hachure que **ce que le plan de coupe tranche**. Deux matériaux en contact ont deux motifs différents ; deux pièces voisines du même matériau, des hachures de sens opposés ; une partie trop mince est **noircie**. En bâtiment, chaque matériau a son motif, rappelé dans la légende.
+
+<ReglesHachures />
+
+<Regle type="norme" source="ISO 128 (série)">
+Les principes des coupes et des hachures sont normalisés ; les motifs propres à chaque matériau varient selon les bureaux d'études. La légende du plan fait foi.
+</Regle>
+
+</Page>
+
+<PlancheTechnique
+  titre="Studio : coupe A-A"
+  projet="Studio, exemple L1.6.7"
+  numero="ST-03"
+  echelle="1/50"
+  date="10/2026"
+  indice="A"
+  hachures={['ba', 'maconnerie', 'terre', 'gravier']}
+  notes={[
+    `Hauteur sous plafond : ${nombre(st.hsp, 2)} m ; dalle de ${nombre(st.dalle, 2)} m.`,
+    'Murs en blocs de ciment enduits ; dalle, chaînages, linteaux et semelles en béton armé.',
+    'Dallage sur hérisson ; épaisseurs de principe, à fixer par l’étude.',
+    'Niveaux en mètres, rapportés au sol fini ±0,00.',
+  ]}
+>
+
+<Vue titre="Coupe A-A" echelle="1/50" pleineLargeur>
+<CoupeLogement lg={st} prefixe="cs-st" />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="plancherHSP">
+
+<Cahier titre="Exemple résolu : la hauteur sous plafond d'un appartement">
+
+**Énoncé.** Sur la coupe d'un petit immeuble de Goma, on lit une hauteur d'étage de {grandeur(p0.hEtage, 2, 'm')}, de sol fini à sol fini. Le plancher comprend une dalle de {nombre(p0.dalle * 100, 0)} cm, {nombre(p0.revetement * 100, 0)} cm de chape et carrelage et {nombre(p0.plafond * 100, 1)} cm d'enduit sous la dalle (données de l'énoncé). Quelle est la hauteur sous plafond des pièces ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi « de sol fini à sol fini » ? La hauteur d'étage se mesure entre deux surfaces où l'on marche ; elle contient donc un plancher complet.</Note>
+</Etape>
+
+<Etape n={2} titre="Le plancher fini">
+<AN k="plancher" />
+</Etape>
+
+<Etape n={3} titre="La hauteur sous plafond">
+<AN k="hsp" />
+<Resultat k="hsp" libelle="Hauteur sous plafond" />
+<Note couleur="vert">Contrôle : l'écart entre hauteur d'étage et hauteur sous plafond est exactement l'épaisseur du plancher fini. Épaissis la dalle de 4 cm : la pièce perd 4 cm.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la coupe du plancher">
+
+<Etape n={4} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="regarder du mauvais côté.">
+Les flèches du repère commandent tout : inversées, elles montrent l'autre moitié du bâtiment.
+
+<FlechesInversees />
+
+</Piege>
+
+<Piege erreur="hachurer ce qui est vu au-delà.">
+Seul ce que le plan tranche est hachuré. Un mur vu au fond se dessine en trait continu, sans hachures.
+</Piege>
+
+<Piege erreur="donner le même motif à deux matériaux en contact.">
+<HachuresContact />
+</Piege>
+
+<Piege erreur="oublier le repère de coupe sur le plan.">
+Une coupe sans repère ne dit pas où elle passe : on ne peut ni la vérifier, ni la relier au plan.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Lire la coupe avant de terrasser.** La coupe donne l'ordre des couches sous le sol fini. Pour un dallage sur terre-plein, du bas vers le haut :
+
+<DallageTerrePlein />
+
+<Encadre type="terrain" titre="Sols argileux">
+Sur les argiles gonflantes de certaines zones de RDC, un dallage posé directement sur le sol peut se soulever et se fissurer à la saison des pluies (L1.5.1). La coupe montre alors une autre solution : vide sanitaire, ou dallage désolidarisé des murs <AVerifier note="A_VERIFIER.md n° 46 : dispositions sur sols gonflants, à préciser en géotechnique (L3.4)" />. On lit la coupe avant de commander les matériaux.
+</Encadre>
+
+**Les épaisseurs se cumulent.** Chape, isolant, carrelage : chaque couche ajoutée sur une dalle mange la hauteur sous plafond, et décale le seuil des portes. On contrôle sur la coupe avant de poser les huisseries.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : coupes et hachures">
+
+### Coupe et section
+
+coupe : tranché (hachuré) + vu au-delà · section : tranché seulement
+
+### Repère
+
+trait mixte fort aux extrémités · flèches = sens d'observation · lettres : coupe A-A
+
+### Hachures
+
+seulement le tranché · un motif par matériau (légende) · voisins en sens opposés · parties minces noircies
+
+<LegendeHachures types={TYPES_HACHURES} prefixe="memo-coupe" />
+
+### Hauteur sous plafond
+
+HSP = hauteur d'étage − (revêtement + dalle + enduit)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices (1/2)">
+
+<Exercice n={1} niveau="facile" titre="Que faut-il hachurer ?">
+
+Voici la coupe d'un mur percé d'une fenêtre, sans hachures :
+
+<QuoiHachurer />
+
+Quelles zones faut-il hachurer ?
+
+<Indice>Seulement ce que le plan de coupe tranche.</Indice>
+
+<Corrige>
+**1, 2 et 3** : l'allège, le linteau et la dalle sont tranchés. Le mur du fond (4) est vu au-delà : pas de hachures. La fenêtre (5) est une menuiserie tranchée : on la dessine par ses traits, sans motif de maçonnerie.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Reconnaître les matériaux">
+
+Nomme le matériau de chaque motif, selon la légende de la fiche mémo :
+
+<CinqHachures />
+
+<Indice>Compare avec la légende des hachures.</Indice>
+
+<Corrige>
+1 : maçonnerie de blocs ; 2 : terrain en place ; 3 : béton armé ; 4 : gravier, hérisson ; 5 : béton non armé (propreté).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Page etape="exercices" titre="Les exercices (2/2)">
+
+<Exercice n={3} niveau="difficile" titre="Un étage plus haut, une pièce plus basse ?">
+
+Dans un autre immeuble, la hauteur d'étage vaut {grandeur(ex3.hEtage, 2, 'm')}, avec une dalle de {nombre(ex3.dalle * 100, 0)} cm, {nombre(ex3.revetement * 100, 0)} cm de revêtement et {nombre(ex3.plafond * 100, 0)} cm d'enduit. Calcule la hauteur sous plafond et compare-la à celle de l'exemple.
+
+<Indice>HSP = hauteur d'étage − épaisseur totale du plancher.</Indice>
+
+<Corrige>
+Plancher : {nombre(ex3.dalle, 2)} + {nombre(ex3.revetement, 2)} + {nombre(ex3.plafond, 2)} = {nombre(h3.plancher, 2)} m ; HSP = {nombre(ex3.hEtage, 2)} − {nombre(h3.plancher, 2)} = **{grandeur(h3.hsp, 2, 'm')}**, contre {grandeur(h0.hsp, 3, 'm')} dans l'exemple. L'étage est plus haut de {nombre((ex3.hEtage - p0.hEtage) * 100, 0)} cm, mais le plancher plus épais en reprend {nombre((h3.plancher - h0.plancher) * 100, 1)} cm.
+
+<PlancherCoupe d={ex3} prefixe="plc-ex3" />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sur une coupe, on hachure :" choix={['tout ce que l’on voit', 'seulement ce que le plan de coupe tranche', 'ce qui est caché', 'les menuiseries']} bonne={1} colonnes={2}>
+Ce qui est vu au-delà reste sans hachures.
+</QCM>
+
+<QCM n={2} question="Une section montre :" choix={['le tranché et ce qui est vu au-delà', 'le tranché seulement', 'les arêtes cachées', 'une perspective']} bonne={1} colonnes={2}>
+La coupe montre aussi ce qui est au-delà.
+</QCM>
+
+<QCM n={3} question="Les flèches d'un repère de coupe indiquent :" choix={['la longueur de la coupe', 'le sens d’observation', 'le nord', 'la pente']} bonne={1} colonnes={2}>
+Elles disent de quel côté on regarde.
+</QCM>
+
+<QCM n={4} question="Deux pièces voisines du même matériau se hachurent :" choix={['de la même façon', 'en sens opposés', 'en noir', 'pas du tout']} bonne={1} colonnes={2}>
+Pour voir leur limite.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une platine d'acier de quelques millimètres, sur une coupe au 1/20, se dessine :" choix={['hachurée', 'noircie', 'en tirets', 'en blanc']} bonne={1} colonnes={4}>
+Trop mince pour être hachurée.
+</QCM>
+
+<QCM n={6} question={<>Dans l'exemple, la hauteur sous plafond vaut :</>} choix={[grandeur(h0.hsp, 3, 'm'), grandeur(p0.hEtage, 2, 'm'), grandeur(p0.hEtage - p0.dalle, 2, 'm'), grandeur(h0.plancher, 3, 'm')]} bonne={0} colonnes={4}>
+{nombre(p0.hEtage, 2)} − {nombre(h0.plancher, 3)} m.
+</QCM>
+
+<QCM n={7} question="La hauteur d'étage se mesure :" choix={['du sol au plafond', 'de sol fini à sol fini', 'de dalle brute à dalle brute', 'du terrain au toit']} bonne={1} colonnes={2}>
+Elle contient un plancher complet.
+</QCM>
+
+<QCM n={8} question="Sur argile gonflante, la coupe d'un dallage doit être :" choix={['ignorée', 'lue avant de construire : elle peut prévoir un vide sanitaire', 'remplacée par une perspective', 'cotée en pouces']} bonne={1} colonnes={2}>
+Le sol peut soulever un dallage posé à même la terre.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

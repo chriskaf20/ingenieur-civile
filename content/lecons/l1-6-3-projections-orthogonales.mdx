@@ -1,0 +1,337 @@
+---
+id: L1.6.3
+titre: Projections orthogonales
+objectifs:
+  - Expliquer le principe de la projection orthogonale sur un plan
+  - Construire la vue de face, la vue de dessus et la vue de gauche d'un objet simple
+  - Disposer les vues selon la méthode européenne
+  - Représenter les arêtes cachées en trait interrompu
+  - Retrouver une vue manquante à partir des deux autres
+relecture: false
+normes:
+  - "ISO 5456-2 : projections orthogonales, méthode du premier dièdre (dite européenne)"
+  - "ISO 128 (série) : présentation des vues"
+glossaire:
+  - terme: Projection orthogonale
+    definition: Image d'un objet obtenue par des rayons parallèles, perpendiculaires au plan sur lequel on dessine.
+  - terme: Vue
+    definition: Projection de l'objet vu d'une direction (face, dessus, gauche…) ; chaque vue montre deux des trois dimensions.
+  - terme: Méthode européenne
+    definition: Disposition des vues dite du premier dièdre ; la vue de dessus se place sous la vue de face, la vue de gauche à sa droite.
+  - terme: Arête cachée
+    definition: Arête masquée par une autre partie de l'objet ; on la dessine en trait interrompu.
+symboles:
+  - { symbole: 'L', signification: 'largeur, commune aux vues de face et de dessus', unite: 'm' }
+  - { symbole: 'H', signification: 'hauteur, commune aux vues de face et de gauche', unite: 'm' }
+  - { symbole: 'P', signification: 'profondeur, commune aux vues de dessus et de gauche', unite: 'm' }
+formules:
+  - { nom: 'Section d''un caniveau en U', tex: 'S = W H - (W - 2t)(H - t)', domaine: 'Parois et radier d''épaisseur t' }
+---
+
+import { caniveau, EXEMPLE_CANIVEAU, profilMarches, vuesExtrusion } from '@/lib/calc/dessin'
+import { grandeur, nombre } from '@/lib/format'
+import { VuesProjetees } from '@/components/drawing/Projections'
+import { BlocEnLIso, BoiteProjectionIso, CorrespondancesVues, DeuxDispositions, DeuxObjetsMemesVues, DepliageVues, MAISON_VUES, MaisonIso, PROFIL_L, QuelleVueDessus, RegardTroisVues, SymboleDiedre, TroisRegards } from '@/components/schemas/DessinCours2'
+
+export const d0 = EXEMPLE_CANIVEAU
+export const c0 = caniveau(d0)
+export const vL = vuesExtrusion(PROFIL_L, 1)
+export const vM = vuesExtrusion(profilMarches({ n: 2, g: 0.3, h: 0.2 }), 0.8)
+
+<Page etape="intuition" titre="L'intuition : un objet, trois regards">
+
+Décris un objet par téléphone : tu diras comment il est de face, de dessus, de côté. Une seule photo ne suffit pas toujours : un bloc de deux marches vu de face montre un escalier, vu de dessus deux rectangles côte à côte, vu de gauche un simple rectangle.
+
+Le dessin technique fait la même chose, avec rigueur : il montre l'objet vu de **plusieurs directions**, chaque fois **à plat**, sans perspective. Chaque vue donne de vraies longueurs, que l'on peut coter et mesurer.
+
+<TroisRegards />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment dessiner un objet en trois vues à plat, les placer au bon endroit et les lire ensemble ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Des vues aux plans" sousTitre="Projeter, disposer, relier" etape="cours">
+
+<Panneau n={1} titre="Projeter" icone="idee" couleur="encre">
+Des rayons parallèles, perpendiculaires au plan de dessin : l'objet s'y imprime en vraie grandeur, comme une ombre sous un soleil au zénith.
+</Panneau>
+
+<Panneau n={2} titre="Trois vues" icone="plan" couleur="acier">
+Face, dessus, gauche. La vue de face est la plus parlante ; les deux autres complètent.
+</Panneau>
+
+<Panneau n={3} titre="Méthode européenne" icone="regle" couleur="validation">
+Dessus sous la face, gauche à droite de la face. Le symbole du cartouche le rappelle.
+</Panneau>
+
+<Panneau n={4} titre="Arêtes cachées" icone="attention" couleur="correction">
+Ce qui est derrière se dessine en traits interrompus : sans eux, deux objets différents peuvent avoir les mêmes vues.
+</Panneau>
+
+<Panneau n={5} titre="Correspondances" icone="calcul" couleur="brique">
+Face et dessus ont la même largeur, face et gauche la même hauteur, dessus et gauche la même profondeur.
+</Panneau>
+
+<Panneau n={6} titre="Au bâtiment" icone="terrain" couleur="terre">
+Un plan de niveau est une vue de dessus en coupe, une façade une vue de face : un dossier de plans est un ensemble de vues.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : projeter et disposer">
+
+### La projection orthogonale
+
+On place l'objet devant un plan et on l'éclaire par des **rayons parallèles**, **perpendiculaires** au plan. Chaque point de l'objet donne un point de l'image : c'est la **projection orthogonale**. Une face parallèle au plan s'y retrouve en **vraie grandeur** ; une face perpendiculaire s'y réduit à un trait.
+
+### Trois plans, trois vues
+
+En méthode européenne, l'objet est posé dans le coin formé par trois plans : un plan **frontal** derrière lui, un plan **horizontal** en dessous, un plan de **profil** à sa droite. On projette : la vue de face sur le plan frontal, la vue de dessus sur le plan horizontal, la **vue de gauche** sur le plan de profil, car on regarde l'objet depuis sa gauche. Puis on **déplie** les plans à plat :
+
+<DepliageVues />
+
+Résultat : la vue de dessus se retrouve **sous** la vue de face, la vue de gauche **à droite** de la vue de face. C'est la disposition européenne, utilisée en France, en RDC et dans la plupart des pays.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : relier les vues, montrer le caché">
+
+### Les correspondances
+
+Les vues ne sont pas indépendantes : la vue de face et la vue de dessus ont la même **largeur** et sont alignées verticalement ; la vue de face et la vue de gauche ont la même **hauteur** et sont alignées horizontalement ; la vue de dessus et la vue de gauche ont la même **profondeur**, reportée par une ligne à 45°.
+
+<CorrespondancesVues v={c0} />
+
+### Les arêtes cachées
+
+Une arête que l'on ne voit pas, parce qu'une autre partie la masque, se dessine en **trait interrompu**. Sur la vue de gauche du caniveau, le fond intérieur est caché par la paroi : il apparaît en tirets.
+
+<SymboleDiedre />
+
+</Page>
+
+<Vue3D titre="La boîte de projection, en perspective" calques={[{ id: 'plans', libelle: 'Plans' }, { id: 'objet', libelle: 'Objet' }, { id: 'rayons', libelle: 'Rayons' }, { id: 'vues', libelle: 'Vues' }]}>
+
+Un bloc de deux marches flotte dans le coin des trois plans. Active les rayons : ils partent de l'objet, perpendiculaires à chaque plan. Active les vues : chacune est l'image de l'objet sur son plan. Désactive l'objet : il ne reste que ce que le dessinateur trace.
+
+<BoiteProjectionIso />
+
+<Encadre type="retenir">
+En méthode européenne, l'objet est entre l'observateur et le plan de projection. C'est pourquoi la vue de gauche s'imprime sur le plan situé à droite de l'objet.
+</Encadre>
+
+</Vue3D>
+
+<Page etape="schemas" titre="Le schéma : d'un bloc à une maison">
+
+Les plans de bâtiment sont des vues. Une maison simple à deux pentes, vue en perspective :
+
+<MaisonIso />
+
+et ses trois vues : la vue de face montre le **pignon**, la vue de dessus la **toiture** et son faîtage, la vue de gauche le **long pan** avec la ligne d'égout :
+
+<VuesProjetees v={MAISON_VUES} alt="Les trois vues de la maison à deux pentes : de face, le pignon triangulaire ; de dessus, la toiture partagée par la ligne de faîtage ; de gauche, le long pan avec la ligne d'égout du toit." echelle={17} cotes />
+
+</Page>
+
+<FicheCalcul calcul="vuesCaniveau">
+
+<Cahier titre="Exemple résolu : un caniveau préfabriqué à Kinshasa">
+
+**Énoncé.** Pour drainer une rue de Kinshasa, une entreprise pose des éléments de caniveau en U préfabriqués : {grandeur(d0.W, 2, 'm')} de large, {grandeur(d0.H, 2, 'm')} de haut, parois et radier de {grandeur(d0.t, 2, 'm')}, éléments de {grandeur(d0.L, 2, 'm')} (données de l'énoncé). Dessine les trois vues d'un élément, calcule ses dimensions intérieures et son volume de béton.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les dimensions intérieures">
+<AN k="interieur" />
+<Note>Pourquoi 2t pour la largeur et t seulement pour la profondeur ? Il y a deux parois, mais un seul radier : le U est ouvert en haut.</Note>
+</Etape>
+
+<Etape n={3} titre="Le béton d'un élément">
+<AN k="section" />
+<AN k="volume" />
+<Resultat k="volume" libelle="Béton par élément" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les trois vues">
+
+<Etape n={4} titre="Les vues, disposées à l'européenne">
+<Schema />
+<Note>Pourquoi un trait interrompu sur la vue de gauche (<Val k="cachee" />) ? De la gauche, la paroi cache le fond intérieur du U.</Note>
+<Note couleur="vert">Contrôle : la vue de face et la vue de dessus ont la même largeur ; la vue de dessus et la vue de gauche, la même profondeur. Change l'épaisseur des parois : les trois vues suivent.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="placer la vue de dessus au-dessus de la vue de face.">
+C'est la disposition américaine. En méthode européenne, la vue de dessus va **dessous**, la vue de gauche **à droite**. Le symbole du cartouche dit quelle méthode est utilisée.
+</Piege>
+
+<DeuxDispositions />
+
+<Piege erreur="oublier les arêtes cachées.">
+Sans traits interrompus, un bloc plein et un bloc percé ont les mêmes vues :
+
+<DeuxObjetsMemesVues />
+
+</Piege>
+
+<Piege erreur="décaler les vues.">
+Les vues doivent rester alignées : on reporte les largeurs à la verticale, les hauteurs à l'horizontale, les profondeurs par la ligne à 45°.
+</Piege>
+
+<Piege erreur="dessiner une vue de trop.">
+Trois vues suffisent presque toujours ; deux parfois. Une vue inutile ajoute du travail et des risques d'incohérence.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les petits ouvrages** — regards, caniveaux, dalots, fosses — sont souvent livrés au chantier sous forme de trois vues cotées. Le coffreur y lit les dimensions extérieures sur les vues, les parois cachées en tirets, la position des canalisations. Voici un regard de visite en béton :
+
+<RegardTroisVues />
+
+<Encadre type="terrain" titre="Lire avant de coffrer">
+Sur la vue de face, le cercle est la canalisation d'arrivée, vue en bout ; sur la vue de dessus, deux tirets montrent qu'elle traverse la paroi. Avant de coffrer, on repère sur les trois vues chaque réservation : un trou oublié se perce ensuite au burin, en affaiblissant l'ouvrage.
+</Encadre>
+
+**Un réflexe** : quand un détail n'est clair sur aucune vue, on demande une coupe ou une perspective au bureau d'études.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : projections orthogonales">
+
+### Principe
+
+rayons parallèles, perpendiculaires au plan · les faces parallèles au plan sont en vraie grandeur
+
+### Méthode européenne (1er dièdre)
+
+face au centre · dessus **sous** la face · gauche **à droite** de la face · symbole : cercles à droite du tronc de cône
+
+### Correspondances
+
+face et dessus : même largeur · face et gauche : même hauteur · dessus et gauche : même profondeur (ligne à 45°)
+
+### Traits
+
+vu : continu fort · caché : interrompu · axes : mixte
+
+### Pièges
+
+disposition américaine · arêtes cachées oubliées · vues décalées · vues inutiles
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices (1/2)">
+
+<Exercice n={1} niveau="facile" titre="La bonne vue de dessus">
+
+Voici un bloc de deux marches et trois vues de dessus proposées :
+
+<QuelleVueDessus />
+
+Laquelle est juste ?
+
+<Indice>Vu d'en haut, on voit les deux girons ; leur limite est-elle visible ou cachée ?</Indice>
+
+<Corrige>
+**A.** Vue de dessus, on voit les deux girons côte à côte, séparés par l'arête de la contremarche, qui est **vue** : trait continu. B la dessine cachée, C invente une arête de trop.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un bloc en L">
+
+Dessine les trois vues de ce bloc en L, disposées à l'européenne :
+
+<BlocEnLIso />
+
+<Indice>La vue de face montre le L ; de dessus, on voit la semelle et le dessus du voile ; de gauche, un rectangle et une arête : vue ou cachée ?</Indice>
+
+<Corrige>
+
+De gauche, le voile cache le dessus de la semelle : son arête est en **trait interrompu**.
+
+<VuesProjetees v={vL} alt="Les trois vues du bloc en L : de face, le L ; de dessus, deux rectangles, le voile et la semelle ; de gauche, un rectangle partagé par l'arête du dessus de la semelle, cachée derrière le voile, en trait interrompu." echelle={150} cotes />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Page etape="exercices" titre="Les exercices (2/2)">
+
+<Exercice n={3} niveau="difficile" titre="La vue manquante">
+
+On donne la vue de face et la vue de dessus d'un objet. Trace sa vue de gauche, dans le cadre rouge :
+
+<VuesProjetees v={vM} alt="Vue de face et vue de dessus d'un bloc de deux marches ; la vue de gauche est à trouver, dans le cadre rouge." echelle={170} rappels masquer={['gauche']} />
+
+<Indice>Reporte les hauteurs depuis la vue de face, les profondeurs depuis la vue de dessus par la ligne à 45°. Puis demande-toi quelles arêtes on voit depuis la gauche.</Indice>
+
+<Corrige>
+Depuis la gauche, on voit la face haute du bloc, sur toute la hauteur : un rectangle. L'arête du premier giron est derrière : **trait interrompu**.
+
+<VuesProjetees v={vM} alt="Les trois vues complètes : la vue de gauche est un rectangle partagé par un trait interrompu, l'arête cachée du premier giron." echelle={170} rappels />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="En projection orthogonale, les rayons sont :" choix={['concourants en un point', 'parallèles et perpendiculaires au plan', 'parallèles et inclinés', 'quelconques']} bonne={1} colonnes={2}>
+C'est ce qui donne de vraies longueurs, mesurables.
+</QCM>
+
+<QCM n={2} question="En méthode européenne, la vue de dessus se place :" choix={['au-dessus de la vue de face', 'sous la vue de face', 'à gauche de la vue de face', 'n’importe où']} bonne={1} colonnes={2}>
+On déplie le plan horizontal vers le bas.
+</QCM>
+
+<QCM n={3} question="En méthode européenne, la vue de gauche se place :" choix={['à gauche de la vue de face', 'à droite de la vue de face', 'sous la vue de dessus', 'au-dessus de la vue de face']} bonne={1} colonnes={2}>
+L'objet est entre l'observateur et le plan de profil, placé à droite.
+</QCM>
+
+<QCM n={4} question="Quelles vues ont la même hauteur ?" choix={['face et dessus', 'face et gauche', 'dessus et gauche', 'aucune']} bonne={1} colonnes={2}>
+Elles sont alignées horizontalement.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une arête cachée se dessine en :" choix={['continu fort', 'continu fin', 'trait interrompu', 'trait mixte']} bonne={2} colonnes={4}>
+Des tirets réguliers.
+</QCM>
+
+<QCM n={6} question={<>Le caniveau de l'exemple a une largeur intérieure de :</>} choix={[grandeur(c0.largeurInterieure, 2, 'm'), grandeur(d0.W, 2, 'm'), grandeur(d0.W - d0.t, 2, 'm'), grandeur(c0.profondeurInterieure + d0.t, 2, 'm')]} bonne={0} colonnes={4}>
+W − 2t : deux parois.
+</QCM>
+
+<QCM n={7} question="Sur la vue de gauche du caniveau, le fond intérieur est :" choix={['vu, en continu', 'caché, en tirets', 'absent', 'en trait mixte']} bonne={1} colonnes={2}>
+La paroi gauche le masque.
+</QCM>
+
+<QCM n={8} question="La façade d'un bâtiment est :" choix={['une vue', 'une coupe', 'une perspective', 'un détail']} bonne={0} colonnes={4}>
+Une projection orthogonale sur un plan vertical : une vue.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

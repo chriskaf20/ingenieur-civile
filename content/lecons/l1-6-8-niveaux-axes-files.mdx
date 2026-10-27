@@ -1,0 +1,338 @@
+---
+id: L1.6.8
+titre: Niveaux, axes et repères de files
+objectifs:
+  - Lire un niveau relatif et le convertir en altitude
+  - Distinguer niveau brut et niveau fini
+  - Calculer une différence de niveaux et une pente
+  - Repérer un élément grâce au quadrillage des files
+relecture: false
+normes: []
+glossaire:
+  - terme: Niveau ±0,00
+    definition: Niveau de référence d'un bâtiment, le plus souvent le sol fini du rez-de-chaussée ; tous les niveaux du projet s'y rapportent.
+  - terme: Altitude
+    definition: Hauteur d'un point au-dessus du niveau de la mer, donnée par le géomètre dans le système de référence du pays.
+  - terme: Niveau brut
+    definition: Niveau du dessus de la structure (dalle brute), avant les revêtements.
+  - terme: Niveau fini
+    definition: Niveau de la surface finie, là où l'on marche (carrelage, chape).
+  - terme: File
+    definition: Ligne d'axes du quadrillage d'un bâtiment, repérée par une lettre ou un chiffre.
+symboles:
+  - { symbole: '±0,00', signification: 'niveau de référence du bâtiment', unite: 'm' }
+  - { symbole: 'Z₀', signification: 'altitude du ±0,00', unite: 'm' }
+  - { symbole: 'p', signification: 'pente', unite: '%' }
+  - { symbole: 'eᵣ', signification: 'épaisseur des revêtements de sol', unite: 'm' }
+formules:
+  - { nom: 'Altitude', tex: 'Z = Z_0 + N', domaine: 'N : niveau relatif' }
+  - { nom: 'Niveau brut', tex: 'N_{brut} = N_{fini} - e_r', domaine: 'Plancher revêtu' }
+  - { nom: 'Pente', tex: 'p = \frac{\Delta z}{L} \times 100', domaine: 'En %, L horizontale' }
+---
+
+import { altitude, angleDePente, deniveleDePente, EXEMPLE_MAISON, EXEMPLE_NIVEAUX, maison, niveauBrut, niveaux, positionsFiles } from '@/lib/calc/plans'
+import { grandeur, nombre } from '@/lib/format'
+import { BrutFini, ChaisesImplantation, PenteTriangle, PourcentDegres, QuadrillageFiles, SigneNiveau, TraitDeNiveau, ZeroDuBatiment } from '@/components/schemas/DessinCours3'
+import { CoupeLogement, FacadeLogement, niv } from '@/components/schemas/Logement'
+
+export const d0 = EXEMPLE_NIVEAUX
+export const n0 = niveaux(d0)
+export const ma = maison(EXEMPLE_MAISON)
+export const fx = [4.2, 3.6, 4.2]
+export const fy = [5, 4.5]
+export const px = positionsFiles(fx)
+export const py = positionsFiles(fy)
+export const ex1 = { niveau: 2.86 }
+export const ex2 = { p: 1.5, L: 6, fini: 3.06, rev: 0.06 }
+export const ex2dz = deniveleDePente(ex2.p, ex2.L)
+
+<Page etape="intuition" titre="L'intuition : un zéro pour tout le bâtiment">
+
+Pour dire la hauteur d'une montagne, on part du niveau de la mer. Pour un bâtiment, on choisit un zéro plus commode : le **sol fini du rez-de-chaussée**, noté **±0,00**. Le terrain devant l'entrée est « à {niv(d0.tn)} », le plancher de l'étage « à {niv(d0.etage)} » : tout le monde parle à partir du même repère.
+
+Le géomètre, lui, rattache ce ±0,00 à l'**altitude** : ici, il se trouve à {grandeur(d0.altitudeZero, 2, 'm')} au-dessus de la mer.
+
+<ZeroDuBatiment d={d0} />
+
+De la même façon, pour se repérer **en plan**, on quadrille le bâtiment par des **axes** nommés A, B, C… et 1, 2, 3… Un poteau se désigne comme une case de jeu d'échecs : « le poteau C-2 ».
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment lire les niveaux et les axes d'un bâtiment, et passer d'un niveau à une altitude, d'un axe à une position ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Se repérer dans un bâtiment" sousTitre="En hauteur : les niveaux ; en plan : les files" etape="cours">
+
+<Panneau n={1} titre="Le ±0,00" icone="idee" couleur="encre">
+Le zéro du bâtiment, souvent le sol fini du rez-de-chaussée. Au-dessus : +, en dessous : −.
+</Panneau>
+
+<Panneau n={2} titre="L'altitude" icone="terrain" couleur="terre">
+Le géomètre donne l'altitude du ±0,00 ; altitude d'un point = altitude du zéro + niveau relatif.
+</Panneau>
+
+<Panneau n={3} titre="Brut et fini" icone="materiaux" couleur="acier">
+Le niveau fini est celui du carrelage ; le niveau brut, celui de la dalle. Le coffreur règle au brut.
+</Panneau>
+
+<Panneau n={4} titre="Les pentes" icone="calcul" couleur="brique">
+En %, dénivelé ÷ longueur horizontale × 100. Terrasses, caniveaux et rampes en ont toujours une.
+</Panneau>
+
+<Panneau n={5} titre="Les files" icone="plan" couleur="validation">
+Lettres dans un sens, chiffres dans l'autre ; les entraxes cotés d'axe en axe.
+</Panneau>
+
+<Panneau n={6} titre="Les mêmes partout" icone="retenir" couleur="correction">
+Axes et niveaux sont identiques sur tous les plans : architecture, structure, réseaux.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : niveaux et pentes">
+
+### Niveau relatif et altitude
+
+Un **niveau** se lit en mètres, avec son signe, par rapport au ±0,00 : +3,06, −0,40. Sur une coupe ou une façade, il est porté par un petit triangle posé sur un trait ; en plan, il est encadré. Pour obtenir une **altitude**, on ajoute le niveau à l'altitude du ±0,00 : $Z = Z_0 + N$.
+
+### Brut et fini
+
+Un plancher porte deux niveaux : le **niveau fini**, dessus du carrelage, et le **niveau brut**, dessus de la dalle, plus bas de l'épaisseur des revêtements. Les plans d'architecture donnent les niveaux finis ; les plans de structure, les niveaux bruts.
+
+<BrutFini fini={d0.etage} revetement={d0.revetement} />
+
+### Les pentes
+
+Une **pente** s'exprime en pourcentage : dénivelé divisé par la longueur horizontale, fois 100. Une terrasse à {nombre(2, 0)} % descend de {grandeur(deniveleDePente(2, 5), 2, 'm')} sur 5 m.
+
+<PenteTriangle p={2} L={5} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : axes et files">
+
+### Le quadrillage
+
+Les poteaux et les murs porteurs sont posés sur des **axes**, en trait mixte fin, repérés dans des bulles : des **lettres** dans un sens, des **chiffres** dans l'autre. Les distances entre axes, les **entraxes**, sont cotées d'axe en axe. Chaque élément se repère par ses deux files : le poteau C-2 est au croisement de la file C et de la file 2.
+
+<QuadrillageFiles entraxesX={fx} entraxesY={fy} />
+
+### Positions cumulées
+
+Les positions des files se calculent en cumulant les entraxes depuis la première : ici, les files A à D sont à {px.map((p) => nombre(p, 2)).join(' ; ')} m de la file A, les files 1 à 3 à {py.map((p) => nombre(p, 2)).join(' ; ')} m de la file 1.
+
+<Regle type="art">
+Les axes sont les mêmes sur tous les plans du dossier : architecture, structure, réseaux. On les implante en premier sur le terrain, et ils servent de référence à toutes les mesures.
+</Regle>
+
+</Page>
+
+<PlancheTechnique
+  titre="Maison : façade sud et coupe A-A"
+  projet="Maison de deux pièces, exemple L1.6.8"
+  numero="MA-04"
+  echelle="1/50"
+  date="10/2026"
+  indice="A"
+  hachures={['ba', 'maconnerie', 'terre', 'gravier']}
+  notes={[
+    'Niveaux en mètres, rapportés au sol fini ±0,00.',
+    `Terrain naturel à ${niv(ma.tn)} ; dessus de dalle à ${niv(ma.hsp + ma.dalle)}.`,
+    'Niveaux bruts de la structure : voir les plans de coffrage.',
+  ]}
+>
+
+<Vue titre="Façade sud" echelle="1/50" pleineLargeur>
+<FacadeLogement lg={ma} prefixe="nv-fac" />
+</Vue>
+
+<Vue titre="Coupe A-A" echelle="1/50" pleineLargeur>
+<CoupeLogement lg={ma} prefixe="nv-cou" />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="niveauxBatiment">
+
+<Cahier titre="Exemple résolu : les niveaux d'une maison à étage à Bukavu">
+
+**Énoncé.** Le géomètre a donné l'altitude du ±0,00 : {grandeur(d0.altitudeZero, 2, 'm')}. Devant l'entrée, le terrain est à {niv(d0.tn)} ; le sol fini de l'étage est à {niv(d0.etage)}, avec {nombre(d0.revetement * 100, 0)} cm de revêtements. Une rampe de {grandeur(d0.rampe, 2, 'm')} monte du terrain à l'entrée (données de l'énoncé). Calcule les altitudes, le niveau brut de la dalle de l'étage et la pente de la rampe.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les altitudes">
+<AN k="altitudes" />
+<Note>Pourquoi ajouter un niveau négatif ? Le terrain est sous le ±0,00 : son altitude est plus petite que celle du zéro.</Note>
+</Etape>
+
+<Etape n={3} titre="Le niveau brut">
+<AN k="brut" />
+<Note>Pourquoi le brut ? Le coffreur règle le dessus de sa dalle avant la chape et le carrelage : il lui faut le niveau brut.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la rampe d'accès">
+
+<Etape n={4} titre="La rampe">
+<AN k="pente" />
+<Resultat k="pente" libelle="Pente de la rampe" />
+<Note couleur="vert">Contrôle : une rampe plus longue est moins raide. Allonge-la à 8 m : la pente diminue.</Note>
+</Etape>
+
+<Etape n={5} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le signe d'un niveau.">
+<SigneNiveau />
+</Piege>
+
+<Piege erreur="confondre niveau fini et niveau brut.">
+Coffrer la dalle au niveau fini, c'est la faire trop haute de l'épaisseur des revêtements : le carrelage dépassera de {nombre(d0.revetement * 100, 0)} cm, les portes ne s'ouvriront plus.
+</Piege>
+
+<Piege erreur="confondre une pente en % et un angle en degrés.">
+<PourcentDegres />
+</Piege>
+
+<Piege erreur="mesurer depuis un nu au lieu d'un axe.">
+Les entraxes partent des axes. Mesurer depuis la face d'un poteau décale tout de sa demi-épaisseur.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le trait de niveau.** Dès que les murs montent, on trace sur chacun un trait à +1,00, au niveau à eau ou au laser. Ensuite, on ne cherche plus le ±0,00 : pour régler un sol, une allège, une huisserie, on mesure depuis ce trait.
+
+<TraitDeNiveau />
+
+**Les chaises d'implantation.** Pour garder les axes pendant les terrassements, on les reporte sur des **chaises**, planches clouées sur des piquets, hors de la zone de fouille. Des cordeaux tendus d'un clou à l'autre matérialisent chaque file :
+
+<ChaisesImplantation />
+
+<Encadre type="terrain" titre="Le repère du géomètre">
+Le géomètre laisse un repère de nivellement fixe, borne ou clou dans un ouvrage existant, avec son altitude. On le protège jusqu'à la fin du chantier : c'est lui qui permet de vérifier les niveaux.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : niveaux et axes">
+
+### Niveaux
+
+±0,00 = sol fini du rez-de-chaussée · + au-dessus, − en dessous · altitude Z = Z₀ + N
+
+### Brut et fini
+
+N brut = N fini − revêtements · archi : fini · structure : brut
+
+### Pentes
+
+p = Δz ÷ L × 100 (en %) · 100 % = {nombre(angleDePente(100), 0)}° · dénivelé = p × L
+
+### Files
+
+lettres et chiffres · entraxes d'axe en axe · poteau C-2 · axes identiques sur tous les plans
+
+### Pièges
+
+signe oublié · brut et fini · % et degrés · mesure depuis un nu
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une altitude">
+
+Le ±0,00 d'un bâtiment est à l'altitude {grandeur(d0.altitudeZero, 2, 'm')}. Quelle est l'altitude d'un palier à {niv(ex1.niveau)} ? Et d'un fond de fouille à −1,20 ?
+
+<Indice>Z = Z₀ + N, avec le signe de N.</Indice>
+
+<Corrige>
+Palier : {nombre(d0.altitudeZero, 2)} + {nombre(ex1.niveau, 2)} = **{grandeur(altitude(ex1.niveau, d0.altitudeZero), 2, 'm')}**. Fond de fouille : {nombre(d0.altitudeZero, 2)} − 1,20 = **{grandeur(altitude(-1.2, d0.altitudeZero), 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une terrasse en pente">
+
+Une terrasse de {grandeur(ex2.L, 2, 'm')} doit avoir une pente de {nombre(ex2.p, 1)} % vers sa gargouille. Son point haut est au niveau fini {niv(ex2.fini)}. Quel est le niveau fini du point bas ? Quel est le niveau brut du point haut, avec {nombre(ex2.rev * 100, 0)} cm de revêtement ?
+
+<Indice>Dénivelé = p × L ; niveau brut = fini − revêtement.</Indice>
+
+<Corrige>
+Dénivelé : {nombre(ex2.p / 100, 3)} × {nombre(ex2.L, 2)} = {grandeur(ex2dz, 2, 'm')} ; point bas : **{niv(ex2.fini - ex2dz)}**. Point haut brut : **{niv(niveauBrut(ex2.fini, ex2.rev))}**.
+
+<PenteTriangle p={ex2.p} L={ex2.L} />
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Retrouver un poteau">
+
+Dans le quadrillage du cours, entraxes {fx.map((e) => nombre(e, 2)).join(' ; ')} m (files A à D) et {fy.map((e) => nombre(e, 2)).join(' ; ')} m (files 1 à 3) : à quelle distance de la file A et de la file 1 se trouve le poteau D-3 ? Quelle est la distance en ligne droite entre les poteaux A-1 et D-3 ?
+
+<Indice>Cumule les entraxes, puis Pythagore.</Indice>
+
+<Corrige>
+D-3 est à **{grandeur(px[3], 2, 'm')}** de la file A et à **{grandeur(py[2], 2, 'm')}** de la file 1. Distance A-1 – D-3 : √({nombre(px[3], 2)}² + {nombre(py[2], 2)}²) = **{grandeur(Math.hypot(px[3], py[2]), 2, 'm')}** ; c'est la diagonale que l'on mesure pour vérifier qu'une implantation est d'équerre.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le ±0,00 d'un bâtiment est le plus souvent :" choix={['le niveau de la mer', 'le sol fini du rez-de-chaussée', 'le fond de fouille', 'le terrain naturel']} bonne={1} colonnes={2}>
+Un zéro commode pour tout le projet.
+</QCM>
+
+<QCM n={2} question={<>Le ±0,00 est à {grandeur(d0.altitudeZero, 2, 'm')}. Le terrain à {niv(d0.tn)} est à l'altitude :</>} choix={[grandeur(n0.altTN, 2, 'm'), grandeur(d0.altitudeZero - d0.tn, 2, 'm'), grandeur(d0.altitudeZero, 2, 'm'), grandeur(-d0.tn, 2, 'm')]} bonne={0} colonnes={4}>
+Z = Z₀ + N, avec N négatif.
+</QCM>
+
+<QCM n={3} question="Le coffreur règle sa dalle au niveau :" choix={['fini', 'brut', 'du terrain', 'de la mer']} bonne={1} colonnes={4}>
+Les revêtements viennent après.
+</QCM>
+
+<QCM n={4} question="Une pente de 100 % correspond à un angle de :" choix={['90°', '100°', `${nombre(angleDePente(100), 0)}°`, '10°']} bonne={2} colonnes={4}>
+Autant de montée que de longueur.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>La rampe de l'exemple a une pente de :</>} choix={[`${nombre(n0.pente, 2)} %`, `${nombre(n0.angle, 2)} %`, `${nombre(-d0.tn * 100, 0)} %`, '15 %']} bonne={0} colonnes={4}>
+{nombre(n0.denivele, 2)} ÷ {nombre(d0.rampe, 2)} × 100.
+</QCM>
+
+<QCM n={6} question="Le poteau B-3 est au croisement :" choix={['de la file B et de la file 3', 'de la troisième poutre', 'des files B et C', 'du niveau +3']} bonne={0} colonnes={2}>
+Une lettre, un chiffre.
+</QCM>
+
+<QCM n={7} question="Les entraxes se cotent :" choix={['de nu à nu', 'd’axe en axe', 'depuis le terrain', 'en degrés']} bonne={1} colonnes={4}>
+Les axes sont la référence.
+</QCM>
+
+<QCM n={8} question="Le trait de niveau tracé sur les murs sert à :" choix={['décorer', 'régler sols et ouvertures sans chercher le ±0,00', 'repérer les axes', 'mesurer les pentes']} bonne={1} colonnes={2}>
+On mesure depuis le trait.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

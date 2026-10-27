@@ -1,0 +1,328 @@
+---
+id: L1.6.4
+titre: Perspectives isométrique et cavalière
+objectifs:
+  - Distinguer perspective isométrique et perspective cavalière
+  - Tracer les trois axes de l'isométrie et y reporter les longueurs
+  - Dessiner un objet en cavalière avec son angle de fuite et son coefficient de réduction
+  - Passer des vues d'un objet à sa perspective, et inversement
+relecture: false
+normes:
+  - "ISO 5456-3 : représentations axonométriques (isométrie, perspectives obliques dont la cavalière)"
+glossaire:
+  - terme: Perspective isométrique
+    definition: Représentation où les trois axes de l'objet font entre eux 120° sur le dessin ; on y porte les longueurs en vraie grandeur sur les axes.
+  - terme: Perspective cavalière
+    definition: Représentation où la face avant est dessinée en vraie grandeur et les arêtes en profondeur, les fuyantes, tracées à un angle et réduites.
+  - terme: Fuyante
+    definition: Arête qui s'enfonce en profondeur ; en cavalière, elle est tracée à l'angle α et réduite par k.
+  - terme: Coefficient de réduction
+    definition: Rapport k entre la longueur dessinée d'une fuyante et sa longueur réelle (souvent 0,5).
+symboles:
+  - { symbole: 'α', signification: 'angle des fuyantes de la cavalière', unite: '°' }
+  - { symbole: 'k', signification: 'coefficient de réduction des fuyantes', unite: '—' }
+  - { symbole: 'L', signification: 'longueur réelle d''une fuyante', unite: 'm' }
+formules:
+  - { nom: 'Fuyante dessinée', tex: 'l = k \times L', domaine: 'Perspective cavalière' }
+  - { nom: 'Projection isométrique vraie', tex: 'k = \sqrt{2/3} \approx 0{,}816', domaine: 'Le dessin isométrique prend k = 1' }
+---
+
+import { COEF_ISOMETRIQUE, EXEMPLE_MARCHES, cavaliere, longueurFuyante, longueurIso, perspectiveMarches, profilMarches, vuesExtrusion } from '@/lib/calc/dessin'
+import { grandeur, nombre } from '@/lib/format'
+import { PerspectivePrisme, VuesProjetees } from '@/components/drawing/Projections'
+import { AxesIsometriques, BlocEnLIso, CageArmaturesIso, CavaliereCoefficients, CerclesPerspective, DiagonaleIso, ErreurFuyantes, GrilleIso, MethodeBoite, PROFIL_L, TroisFacesIso } from '@/components/schemas/DessinCours2'
+
+export const d0 = EXEMPLE_MARCHES
+export const m0 = perspectiveMarches(d0)
+export const vM = vuesExtrusion(profilMarches(d0), d0.L)
+export const diag = longueurIso([0, 0, 0], [1, 1, 0])
+export const ex2 = { L: 1.2, alpha: 45, k: 0.5 }
+export const ex2p = cavaliere([0, ex2.L, 0], ex2.alpha, ex2.k)
+
+<Page etape="intuition" titre="L'intuition : trois faces sur une image">
+
+Les vues de la leçon précédente sont exactes, mais il faut de l'habitude pour imaginer l'objet à partir de trois dessins. Une **perspective** montre au contraire l'objet d'un coup d'œil : on y voit à la fois la face avant, le dessus et un côté.
+
+<TroisFacesIso />
+
+Le dessin technique utilise des perspectives simples, sans point de fuite : toutes les arêtes parallèles restent parallèles, et l'on peut encore y reporter des longueurs. Les deux plus courantes sont l'**isométrie** et la **cavalière**.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment dessiner un objet en perspective, en reportant des longueurs justes ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Deux perspectives de dessinateur" sousTitre="Isométrie et cavalière" etape="cours">
+
+<Panneau n={1} titre="L'isométrie" icone="idee" couleur="encre">
+Trois axes à 120° : un vertical, deux inclinés à 30° sur l'horizontale. Les trois faces visibles sont également déformées.
+</Panneau>
+
+<Panneau n={2} titre="La cavalière" icone="plan" couleur="acier">
+La face avant en vraie grandeur ; les fuyantes tracées à l'angle α et réduites par k (souvent 45° et 0,5).
+</Panneau>
+
+<Panneau n={3} titre="La méthode de la boîte" icone="regle" couleur="validation">
+On trace d'abord la boîte qui enveloppe l'objet, puis on y taille les entailles, et l'on repasse l'objet.
+</Panneau>
+
+<Panneau n={4} titre="Les longueurs" icone="calcul" couleur="terre">
+Seules les arêtes parallèles aux axes se mesurent. Une diagonale n'est jamais en vraie grandeur.
+</Panneau>
+
+<Panneau n={5} titre="Les cercles" icone="attention" couleur="correction">
+En cavalière, un cercle de la face avant reste un cercle. En isométrie, tous les cercles deviennent des ellipses.
+</Panneau>
+
+<Panneau n={6} titre="Les usages" icone="terrain" couleur="brique">
+Croquis de chantier, notices de montage, schémas de ferraillage, présentation d'un projet au client.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : l'isométrie">
+
+### Les trois axes
+
+En isométrie, les trois directions de l'objet (longueur, profondeur, hauteur) sont dessinées à **120°** l'une de l'autre : la hauteur reste **verticale**, les deux autres font **30°** avec l'horizontale. On reporte sur ces axes les **vraies longueurs** : c'est le dessin isométrique. La vraie projection réduirait toutes les longueurs par {nombre(COEF_ISOMETRIQUE, 3)} ; on ne s'en soucie pas, le dessin est simplement un peu plus grand.
+
+<AxesIsometriques />
+
+### La méthode de la boîte
+
+On ne dessine pas l'objet d'un trait : on trace d'abord, en trait fin, la **boîte** qui l'enveloppe, avec ses trois dimensions hors tout. On y reporte ensuite les entailles, toujours parallèlement aux axes, puis on repasse l'objet en trait fort.
+
+<MethodeBoite />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la cavalière et les cercles">
+
+### La cavalière
+
+On dessine la face la plus intéressante **de face**, en vraie grandeur. Les arêtes qui s'enfoncent, les **fuyantes**, sont tracées parallèles entre elles, à un angle α (le plus souvent 45°), et **réduites** par un coefficient k. Avec k = 0,5, une fuyante de 1 m est dessinée {grandeur(longueurFuyante(1, 0.5), 2, 'm')} : l'objet paraît juste. Avec k = 1, il paraît trop profond.
+
+<CavaliereCoefficients />
+
+### Les cercles
+
+Un cercle dessiné sur la face avant d'une cavalière reste un **vrai cercle** : c'est pourquoi on la préfère pour les tuyaux et les buses. En isométrie, aucune face n'est de face : tous les cercles deviennent des **ellipses**.
+
+<CerclesPerspective />
+
+<Regle type="art">
+Les valeurs α = 45° et k = 0,5 sont l'usage courant en France ; l'ISO 5456-3 décrit plusieurs perspectives obliques <AVerifier note="A_VERIFIER.md n° 41 : angles et coefficients des perspectives obliques de l'ISO 5456-3" />. Le dessin doit indiquer ses choix s'il sert à mesurer.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : des vues à la perspective">
+
+Les vues et la perspective décrivent le même objet. Pour passer des unes à l'autre, on lit les trois dimensions hors tout sur les vues, on trace la boîte, puis on y reporte chaque arête. Voici les vues du bloc de marches de l'exemple :
+
+<VuesProjetees v={vM} alt="Les trois vues du bloc de marches de l'exemple : de face, le profil en escalier ; de dessus, deux girons séparés par une arête visible ; de gauche, un rectangle avec l'arête cachée du premier giron." echelle={150} cotes />
+
+Sur papier isométrique, un réseau de points à 30°, on trace la boîte sans rapporteur, en comptant les points :
+
+<GrilleIso bloc={{ l: 3, p: 2, h: 1 }} />
+
+<Encadre type="retenir">
+Perspective = vue d'ensemble pour comprendre. Vues cotées = document pour construire. On ne cote presque jamais une perspective.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="perspectiveMarches">
+
+<Cahier titre="Exemple résolu : deux marches d'accès en perspective">
+
+**Énoncé.** Devant l'entrée d'une maison, on construit {d0.n} marches de {grandeur(d0.g, 2, 'm')} de giron et {grandeur(d0.h, 2, 'm')} de hauteur, sur {grandeur(d0.L, 2, 'm')} d'emmarchement (données de l'énoncé). Dessine-les en cavalière à {d0.alpha}° avec k = {nombre(d0.k, 1)}, puis en isométrie. Quelles longueurs porte-t-on sur le dessin ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La boîte englobante">
+<AN k="boite" />
+<Note>Pourquoi commencer par la boîte ? Toutes les arêtes de l'objet sont parallèles à ses côtés : une fois la boîte juste, on n'a plus qu'à la tailler.</Note>
+</Etape>
+
+<Etape n={3} titre="Les longueurs portées">
+<AN k="fuyante" />
+<AN k="iso" />
+<Resultat k="fuyante" libelle="Fuyante en cavalière" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les deux dessins">
+
+<Etape n={4} titre="Les deux perspectives">
+<Schema />
+<Note couleur="vert">Contrôle : en cavalière, le profil des marches est en vraie grandeur ; en isométrie, aucune face n'est vraie, mais toutes les arêtes parallèles aux axes le sont. Passe k à 1 : les marches paraissent trop profondes.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="faire converger les fuyantes.">
+Ce n'est plus une cavalière, mais une perspective conique, que l'on ne peut ni coter ni mesurer :
+
+<ErreurFuyantes />
+
+</Piege>
+
+<Piege erreur="mesurer une oblique en isométrie.">
+Seules les arêtes parallèles aux axes sont en vraie grandeur. La diagonale d'un carré de 1 m mesure {nombre(Math.SQRT2, 2)} m en vrai, mais {nombre(diag, 2)} m ou {nombre(longueurIso([1, 0, 0], [0, 1, 0]), 2)} m sur le dessin :
+
+<DiagonaleIso />
+
+</Piege>
+
+<Piege erreur="oublier le coefficient de réduction.">
+En cavalière, on réduit les fuyantes ; sinon l'objet paraît deux fois trop profond.
+</Piege>
+
+<Piege erreur="dessiner un cercle rond en isométrie.">
+Sur une face isométrique, un cercle devient une ellipse ; dessiné rond, il paraît posé de travers.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le croquis de chantier.** Pour expliquer un assemblage à un ouvrier, quelques traits en perspective valent mieux qu'un long discours. Le ferrailleur, par exemple, comprend tout de suite une cage d'armatures dessinée en perspective, alors que le plan la donne en vues séparées :
+
+<CageArmaturesIso />
+
+<Encadre type="terrain" titre="Un carnet quadrillé dans la poche">
+Sur le chantier, on dessine à main levée, sur un carnet à petits carreaux ou à points isométriques. On dessine d'abord la boîte, puis les détails, et l'on écrit les cotes à côté, jamais mesurées sur le croquis.
+</Encadre>
+
+**Les notices et les présentations.** Les notices de montage (coffrages, échafaudages) et les présentations aux clients utilisent des perspectives ; les plans d'exécution, des vues cotées.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : perspectives">
+
+### Isométrie
+
+axes à 120° · hauteur verticale · longueur et profondeur à 30° de l'horizontale · vraies longueurs sur les axes (le dessin ignore le facteur {nombre(COEF_ISOMETRIQUE, 3)})
+
+### Cavalière
+
+face avant en vraie grandeur · fuyantes parallèles, à α (45°) · réduites par k (0,5) : l = k × L
+
+### Méthode
+
+boîte englobante → entailles → objet repassé en trait fort
+
+### Pièges
+
+fuyantes qui convergent · obliques mesurées · k oublié · cercles ronds en isométrie
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices (1/2)">
+
+<Exercice n={1} niveau="facile" titre="Sur papier isométrique">
+
+Sur ce réseau de points, dessine un pavé de 3 carreaux de long, 2 de profondeur et 1 de haut :
+
+<GrilleIso />
+
+<Indice>Commence par l'arête verticale la plus proche de toi, puis trace les deux arêtes du bas à 30°, en suivant les points.</Indice>
+
+<Corrige>
+
+<GrilleIso bloc={{ l: 3, p: 2, h: 1 }} />
+
+On voit trois faces : l'avant (3 × 1), le côté (2 × 1) et le dessus (3 × 2).
+
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une fuyante en cavalière">
+
+Une buse en béton mesure {grandeur(ex2.L, 2, 'm')} de long. On la dessine en cavalière à {ex2.alpha}°, k = {nombre(ex2.k, 1)}, sa face circulaire de face. Quelle longueur dessine-t-on pour la fuyante ? De combien le cercle du fond est-il décalé à droite et vers le haut ?
+
+<Indice>l = k × L, puis l × cos α et l × sin α.</Indice>
+
+<Corrige>
+l = {nombre(ex2.k, 1)} × {nombre(ex2.L, 2)} = **{grandeur(longueurFuyante(ex2.L, ex2.k), 2, 'm')}** ; décalage : {nombre(ex2p[0], 3)} m vers la droite et **{nombre(ex2p[1], 3)} m** vers le haut, à l'échelle du dessin.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Page etape="exercices" titre="Les exercices (2/2)">
+
+<Exercice n={3} niveau="difficile" titre="De l'isométrie à la cavalière">
+
+Voici un bloc en L en isométrie (semelle 0,80 × 0,20 m, voile de 0,20 m d'épaisseur, hauteur totale 0,70 m, longueur 1,00 m) :
+
+<BlocEnLIso />
+
+Redessine-le en cavalière à 45°, k = 0,5, la face en L de face. Quelle longueur porte-t-on pour la profondeur ?
+
+<Indice>La face en L se dessine en vraie grandeur ; seule la longueur de 1,00 m est une fuyante.</Indice>
+
+<Corrige>
+Fuyante : 0,5 × 1,00 = **{grandeur(longueurFuyante(1, 0.5), 2, 'm')}**.
+
+<PerspectivePrisme profil={PROFIL_L} profondeur={1} vue={{ mode: 'cavaliere', alpha: 45, k: 0.5 }} alt="Le bloc en L en perspective cavalière à 45° : la face en L de face, en vraie grandeur ; les fuyantes réduites de moitié, vers la droite et vers le haut." hauteurMax={220} />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="En isométrie, les axes font entre eux :" choix={['90°', '120°', '45°', '60°']} bonne={1} colonnes={4}>
+Un axe vertical et deux axes à 30° sur l'horizontale.
+</QCM>
+
+<QCM n={2} question="En cavalière, la face avant est dessinée :" choix={['réduite de moitié', 'en vraie grandeur', 'en ellipse', 'en tirets']} bonne={1} colonnes={2}>
+Seules les fuyantes sont inclinées et réduites.
+</QCM>
+
+<QCM n={3} question="Avec k = 0,5, une fuyante de 2 m se dessine :" choix={[grandeur(longueurFuyante(2, 0.5), 2, 'm'), '2 m', '0,5 m', '4 m']} bonne={0} colonnes={4}>
+l = k × L.
+</QCM>
+
+<QCM n={4} question="Les fuyantes d'une cavalière sont :" choix={['concourantes', 'parallèles entre elles', 'verticales', 'en pointillés']} bonne={1} colonnes={2}>
+Sinon ce serait une perspective conique.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="En isométrie, un cercle dessiné sur une face devient :" choix={['un cercle', 'une ellipse', 'un carré', 'un trait']} bonne={1} colonnes={4}>
+Aucune face n'est de face.
+</QCM>
+
+<QCM n={6} question="Sur un dessin isométrique, quelles longueurs peut-on mesurer ?" choix={['toutes', 'celles parallèles aux trois axes', 'les diagonales seulement', 'aucune']} bonne={1} colonnes={2}>
+Les obliques sont déformées.
+</QCM>
+
+<QCM n={7} question={<>Dans l'exemple, la fuyante de {grandeur(d0.L, 2, 'm')} se dessine en cavalière :</>} choix={[grandeur(m0.fuyante, 2, 'm'), grandeur(d0.L, 2, 'm'), grandeur(d0.L * 2, 2, 'm'), grandeur(m0.profondeur, 2, 'm')]} bonne={0} colonnes={4}>
+k × L = {nombre(d0.k, 1)} × {nombre(d0.L, 2)}.
+</QCM>
+
+<QCM n={8} question="Pour construire, on utilise surtout :" choix={['une perspective cavalière', 'des vues cotées', 'une perspective conique', 'une photo']} bonne={1} colonnes={2}>
+La perspective sert à comprendre ; les vues cotées, à construire.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,320 @@
+---
+id: L1.6.11
+titre: Lire un plan de coffrage et de ferraillage (initiation)
+objectifs:
+  - Lire un plan de coffrage, ses éléments, sections, niveaux et réservations
+  - Lire la désignation des armatures, nombre, diamètre, espacement, repère
+  - Associer les vues d'un plan de ferraillage, élévation et coupes
+  - Établir une nomenclature simple d'armatures, longueurs et masses
+relecture: false
+normes:
+  - "ISO 3766 : représentation simplifiée des armatures de béton"
+  - "EN 1992-1-1 §3.2.7 : masse volumique de l'acier de béton armé, 7 850 kg/m³"
+glossaire:
+  - terme: Coffrage
+    definition: Moule, en bois ou en métal, qui donne sa forme au béton frais ; le plan de coffrage décrit les formes et les dimensions du béton.
+  - terme: Ferraillage
+    definition: Ensemble des armatures d'acier placées dans le béton ; le plan de ferraillage les décrit barre par barre.
+  - terme: Cadre
+    definition: Armature fermée qui entoure les barres longitudinales d'une poutre ou d'un poteau.
+  - terme: Nomenclature
+    definition: Tableau qui liste chaque repère d'armature avec son nombre, son diamètre, sa forme, sa longueur et sa masse.
+  - terme: Réservation
+    definition: Trou ou passage prévu dans le béton avant de couler (gaine, tuyau, trémie).
+symboles:
+  - { symbole: 'HA φ', signification: 'barre à haute adhérence de diamètre φ', unite: 'mm' }
+  - { symbole: 'e', signification: 'espacement des cadres ou des barres réparties', unite: 'cm' }
+  - { symbole: 'c', signification: 'enrobage', unite: 'cm' }
+  - { symbole: 'b × h', signification: 'largeur × hauteur d''une poutre', unite: 'cm' }
+formules:
+  - { nom: 'Nombre de barres réparties', tex: 'n = \left\lfloor \frac{L}{e} \right\rfloor + 1', domaine: 'Une barre à chaque extrémité' }
+  - { nom: 'Masse linéique', tex: 'm = 7\,850 \times \frac{\pi \phi^2}{4}', domaine: 'kg/m, φ en m' }
+---
+
+import { EXEMPLE_POUTRE_FER, nombreBarresReparties, nomenclaturePoutre } from '@/lib/calc/plans'
+import { masseLineique } from '@/lib/calc/acier'
+import { grandeur, nombre } from '@/lib/format'
+import { BxH, CalesEnrobage, ConsoleAciers, FerraillagePoutre, FormesBarres, MouleEtCage, PlanCoffrage, PoutreCageIso } from '@/components/schemas/DessinCours4'
+
+export const d0 = EXEMPLE_POUTRE_FER
+export const n0 = nomenclaturePoutre(d0)
+export const ex2 = { L: 3.5, e: 0.2, premier: 0.05 }
+export const ex2n = nombreBarresReparties(ex2.L - 2 * ex2.premier, ex2.e)
+export const lint = { ...EXEMPLE_POUTRE_FER, L: 1.8, b: 0.15, h: 0.2, nInf: 2, phiInf: 10, nSup: 2, phiSup: 8, phiT: 6, e: 0.15 }
+export const nl = nomenclaturePoutre(lint)
+
+<Page etape="intuition" titre="L'intuition : le moule et le squelette">
+
+Pour faire un gâteau, il faut un **moule** et une **recette**. Pour une poutre en béton armé, il faut un **coffrage**, le moule en planches qui donne la forme, et un **ferraillage**, le squelette d'acier caché dans le béton, qui lui permet de résister à la traction.
+
+<MouleEtCage />
+
+Le **plan de coffrage** décrit le moule : formes, dimensions, niveaux, trous à réserver. Le **plan de ferraillage** décrit le squelette : chaque barre, son diamètre, sa forme, sa position.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment lire un plan de coffrage et un plan de ferraillage, et en tirer la liste des aciers à couper ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les plans de structure" sousTitre="Coffrage et ferraillage" etape="cours">
+
+<Panneau n={1} titre="Le plan de coffrage" icone="cadre" couleur="encre">
+Le plancher vu de dessus : poteaux, poutres sous la dalle en tirets, épaisseurs, niveaux bruts, réservations.
+</Panneau>
+
+<Panneau n={2} titre="Les désignations" icone="regle" couleur="acier">
+Poutre P1 (20 × 40) : largeur × hauteur en cm. Dalle : épaisseur dans un cercle, sens de portée par une double flèche.
+</Panneau>
+
+<Panneau n={3} titre="Le plan de ferraillage" icone="ferraillage" couleur="correction">
+Une élévation de l'élément et des coupes : chaque barre y porte un repère dans un cercle.
+</Panneau>
+
+<Panneau n={4} titre="Les notations" icone="idee" couleur="brique">
+« 3 HA 12 » : trois barres de 12 mm. « cadres HA 6 e = 15 » : un cadre tous les 15 cm.
+</Panneau>
+
+<Panneau n={5} titre="La nomenclature" icone="quantites" couleur="terre">
+Repère, nombre, diamètre, longueur, forme, masse : la liste de coupe et de commande.
+</Panneau>
+
+<Panneau n={6} titre="Le chantier" icone="verification" couleur="validation">
+Enrobage tenu par des cales, armatures contrôlées avant de couler : c'est la durabilité de l'ouvrage.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : le plan de coffrage">
+
+### Ce qu'il montre
+
+Le plan de coffrage d'un plancher le montre **vu de dessus** : les **poteaux**, coupés juste sous la dalle ; les **poutres**, sous la dalle, en traits interrompus ; la **dalle**, son épaisseur dans un cercle et une double flèche pour son **sens de portée** ; les **trémies** et réservations, barrées d'une croix ; les **niveaux bruts** (arase de la dalle). Certains bureaux d'études dessinent la vue de dessous : une note du cartouche le précise.
+
+<PlanCoffrage />
+
+### Les désignations
+
+Une poutre se désigne par un nom et sa section **largeur × hauteur**, en centimètres : « P1 (20 × 40) » est une poutre de 20 cm de large et 40 cm de haut. Un poteau, de même : « Po1 (25 × 25) ». L'ordre compte : le premier nombre est la largeur.
+
+<Regle type="art">
+Les conventions de dessin des plans de coffrage varient d'un bureau d'études à l'autre (vue de dessus ou de dessous, repérage des éléments). Le cartouche et la légende font foi.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le plan de ferraillage">
+
+### Élévation et coupes
+
+Une poutre se dessine en **élévation**, avec ses barres longitudinales et ses cadres, et en **coupe** transversale, qui montre la position de chaque barre. Chaque type de barre porte un **repère** dans un cercle, et une **désignation** : nombre, diamètre, espacement.
+
+<FerraillagePoutre d={d0} prefixe="fp-cours" />
+
+### Les formes
+
+Les barres sont **façonnées** avant d'être posées : droites, à crochets, coudées, en cadres fermés, en étriers, en épingles.
+
+<FormesBarres />
+
+### La nomenclature
+
+Pour chaque repère, on calcule la longueur d'une barre et la longueur totale, puis la **masse** : un acier de diamètre φ pèse $7\,850 \times \pi \phi^2 / 4$ kg par mètre, soit {grandeur(masseLineique(12), 3, 'kg/m')} pour un HA 12 <AVerifier note="A_VERIFIER.md n° 45 : longueurs forfaitaires de crochets et position du premier cadre, simplifications à remplacer par le calcul de béton armé (L3.3)" />.
+
+</Page>
+
+<Vue3D titre="La poutre et sa cage d'armatures" calques={[{ id: 'coffrage', libelle: 'Coffrage' }, { id: 'barres', libelle: 'Barres' }, { id: 'cadres', libelle: 'Cadres' }, { id: 'reperes', libelle: 'Repères' }]}>
+
+La poutre de l'exemple, en perspective. Désactive le coffrage : il reste la cage. Désactive les cadres : les barres filantes apparaissent, trois en bas, deux en haut. Les repères ①, ②, ③ sont ceux du plan de ferraillage et de la nomenclature.
+
+<PoutreCageIso d={d0} />
+
+<Encadre type="retenir">
+Le plan de ferraillage décrit chaque barre une fois, avec son repère ; la nomenclature les compte et les pèse ; le ferrailleur coupe, façonne et pose barre par barre.
+</Encadre>
+
+</Vue3D>
+
+<FicheCalcul calcul="ferraillagePoutre">
+
+<Cahier titre="Exemple résolu : la nomenclature d'une poutre">
+
+**Énoncé.** Une poutre de {grandeur(d0.L, 2, 'm')}, de section {nombre(d0.b * 100, 0)} × {nombre(d0.h * 100, 0)} cm, est armée de {d0.nInf} HA {d0.phiInf} en bas, {d0.nSup} HA {d0.phiSup} en haut, et de cadres HA {d0.phiT} tous les {nombre(d0.e * 100, 0)} cm. Enrobage {nombre(d0.c * 100, 0)} cm ; premier cadre à {nombre(d0.premier * 100, 0)} cm de chaque about ; crochets des cadres comptés {nombre(d0.crochet * 100, 0)} cm chacun (données de l'énoncé). Établis la nomenclature et la masse d'acier.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les longueurs">
+<AN k="filante" />
+<AN k="cadres" />
+<Note>Pourquoi « + 1 » ? Il y a un cadre à chaque bout : sur 3 intervalles, on pose 4 cadres.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les masses et le plan">
+
+<Etape n={3} titre="Les masses">
+<AN k="masses" />
+<AN k="total" />
+<Resultat k="masse" libelle="Masse d'acier de la poutre" />
+<Note couleur="vert">Contrôle : la masse totale est la somme des trois lignes ; les cadres, nombreux mais fins, pèsent moins que les barres filantes. Passe les cadres à 10 cm : leur masse augmente nettement.</Note>
+</Etape>
+
+<Etape n={4} titre="Le plan">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="inverser largeur et hauteur.">
+« 20 × 40 » se lit largeur × hauteur. Posée à plat, la poutre perd l'essentiel de sa résistance :
+
+<BxH b={d0.b} h={d0.h} />
+
+</Piege>
+
+<Piege erreur="mettre les aciers d'une console en bas.">
+Une console, un balcon, est tendue en haut : ses aciers principaux vont en haut.
+
+<ConsoleAciers />
+
+</Piege>
+
+<Piege erreur="compter les cadres sans le « + 1 ».">
+Sur {nombre(d0.L - 2 * d0.premier, 2)} m à {nombre(d0.e * 100, 0)} cm, il y a {n0.nCadres - 1} intervalles mais **{n0.nCadres} cadres**.
+</Piege>
+
+<Piege erreur="lire « HA 8 e = 20 » comme « 20 barres ».">
+« e » est l'espacement ; le nombre se calcule à partir de la longueur à couvrir.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les cales d'enrobage.** Les armatures ne doivent jamais toucher le coffrage : sans béton autour, elles rouillent (L1.5.6). On les pose sur des **cales** en béton ou en plastique, de l'épaisseur de l'enrobage :
+
+<CalesEnrobage c={d0.c} />
+
+<Encadre type="terrain" titre="La réception des armatures">
+Avant chaque coulage, le chef de chantier, et si possible le bureau de contrôle, vérifie le ferraillage avec le plan : nombre et diamètre des barres, espacement des cadres, enrobage, longueurs de recouvrement. Ce qui est coulé ne se contrôle plus.
+</Encadre>
+
+**La liste de coupe.** Le ferrailleur travaille avec la nomenclature : il coupe les barres par repère, les façonne, les étiquette, puis les assemble. Une nomenclature fausse, c'est de l'acier gaspillé ou une poutre sous-armée.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : coffrage et ferraillage">
+
+### Coffrage
+
+le moule · poutres sous dalle en tirets · section b × h en cm · épaisseur de dalle dans un cercle · sens de portée · réservations barrées
+
+### Ferraillage
+
+élévation + coupes · repère dans un cercle · « 3 HA 12 » = 3 barres de 12 mm · « HA 6 e = 15 » = tous les 15 cm
+
+### Nomenclature
+
+n = ⌊L/e⌋ + 1 · longueur × nombre · masse = 7 850 × πφ²/4 kg/m (HA 12 : {nombre(masseLineique(12), 3)} kg/m)
+
+### Pièges
+
+b et h inversés · console armée en bas · « + 1 » oublié · « e » lu comme un nombre · enrobage sans cales
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Lire des désignations">
+
+Que signifient : a) « P2 (25 × 50) » ; b) « ① 4 HA 14 » ; c) « ③ cadres HA 8 e = 20 » ?
+
+<Indice>Largeur × hauteur ; nombre et diamètre ; espacement.</Indice>
+
+<Corrige>
+a) une poutre P2 de **25 cm de large et 50 cm de haut** ; b) le repère ① : **4 barres HA de 14 mm** ; c) le repère ③ : des **cadres HA 8 espacés de 20 cm**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Combien de cadres ?">
+
+Une poutre de {grandeur(ex2.L, 2, 'm')} reçoit des cadres tous les {nombre(ex2.e * 100, 0)} cm, le premier et le dernier à {nombre(ex2.premier * 100, 0)} cm des abouts. Combien en faut-il ?
+
+<Indice>Longueur couverte = L − 2 × 5 cm ; n = ⌊longueur / e⌋ + 1.</Indice>
+
+<Corrige>
+Longueur couverte : {nombre(ex2.L, 2)} − 2 × {nombre(ex2.premier, 2)} = {nombre(ex2.L - 2 * ex2.premier, 2)} m ; n = ⌊{nombre(ex2.L - 2 * ex2.premier, 2)} / {nombre(ex2.e, 2)}⌋ + 1 = **{ex2n} cadres**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="La nomenclature d'un linteau">
+
+Un linteau de {grandeur(lint.L, 2, 'm')}, section {nombre(lint.b * 100, 0)} × {nombre(lint.h * 100, 0)} cm, est armé de {lint.nInf} HA {lint.phiInf} en bas, {lint.nSup} HA {lint.phiSup} en haut et de cadres HA {lint.phiT} tous les {nombre(lint.e * 100, 0)} cm (mêmes conventions que l'exemple). Établis sa nomenclature.
+
+<Indice>Même méthode que l'exemple : longueurs filantes, nombre et longueur des cadres, masses.</Indice>
+
+<Corrige>
+
+- Filantes : {nombre(lint.L, 2)} − 2 × {nombre(lint.c, 2)} = {nombre(nl.filante, 2)} m ; cadres : **{nl.nCadres}** de {nombre(nl.cadre, 2)} m.
+- {nl.lignes.map((l) => `repère ${l.repere} : ${l.nombre} HA ${l.phi}, ${nombre(l.masse, 2)} kg`).join(' ; ')}.
+- Masse totale : **{grandeur(nl.masse, 1, 'kg')}**.
+
+<FerraillagePoutre d={lint} prefixe="fp-ex3" />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.11">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le plan de coffrage décrit :" choix={['les armatures', 'les formes et dimensions du béton', 'les réseaux', 'le terrain']} bonne={1} colonnes={2}>
+C'est le plan du moule.
+</QCM>
+
+<QCM n={2} question="« P1 (20 × 40) » désigne une poutre de :" choix={['20 cm de haut et 40 cm de large', '20 cm de large et 40 cm de haut', '20 m de long', '20 barres de 40 mm']} bonne={1} colonnes={2}>
+Largeur × hauteur, en centimètres.
+</QCM>
+
+<QCM n={3} question="Sur un plan de coffrage vu de dessus, les poutres sous la dalle sont en :" choix={['trait fort', 'traits interrompus', 'trait mixte', 'rouge']} bonne={1} colonnes={4}>
+Elles sont cachées par la dalle.
+</QCM>
+
+<QCM n={4} question="« 3 HA 12 » signifie :" choix={['3 barres de 12 mm', '12 barres de 3 mm', 'une barre tous les 12 cm', '3 cadres de 12 cm']} bonne={0} colonnes={2}>
+Nombre, puis diamètre en mm.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, le nombre de cadres vaut :</>} choix={[String(n0.nCadres), String(n0.nCadres - 1), String(n0.nCadres + 1), String(2 * n0.nCadres)]} bonne={0} colonnes={4}>
+⌊({nombre(d0.L, 2)} − 2 × {nombre(d0.premier, 2)}) / {nombre(d0.e, 2)}⌋ + 1.
+</QCM>
+
+<QCM n={6} question="Un HA 12 pèse environ :" choix={[grandeur(masseLineique(12), 3, 'kg/m'), grandeur(masseLineique(6), 3, 'kg/m'), '12 kg/m', '1,2 kg/m']} bonne={0} colonnes={4}>
+7 850 × π × 0,012² / 4.
+</QCM>
+
+<QCM n={7} question="Les aciers principaux d'un balcon en console sont placés :" choix={['en bas', 'en haut', 'au milieu', 'n’importe où']} bonne={1} colonnes={4}>
+La console est tendue en haut.
+</QCM>
+
+<QCM n={8} question="Les cales d'enrobage servent à :" choix={['décorer', 'tenir les aciers à distance du coffrage', 'remplacer les cadres', 'accélérer la prise']} bonne={1} colonnes={2}>
+Pour que le béton enrobe et protège l'acier.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

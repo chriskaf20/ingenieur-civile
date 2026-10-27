@@ -1,0 +1,348 @@
+---
+id: L1.6.2
+titre: Échelles
+objectifs:
+  - Lire une longueur réelle sur un plan à partir de son échelle
+  - Calculer la longueur à dessiner pour une échelle donnée
+  - Choisir l'échelle normalisée adaptée au dessin et au format
+  - Retrouver l'échelle d'un plan à partir d'une cote connue ou d'une échelle graphique
+  - Convertir une surface mesurée sur un plan
+relecture: false
+normes:
+  - "ISO 5455 : échelles des dessins techniques"
+glossaire:
+  - terme: Échelle
+    definition: Rapport entre une longueur sur le dessin et la longueur réelle ; 1/50 signifie que 1 cm sur le plan vaut 50 cm en vrai.
+  - terme: Échelle graphique
+    definition: Barre graduée en mètres dessinée sur le plan ; elle se réduit avec le plan et reste donc juste après une photocopie.
+  - terme: Scalimètre
+    definition: Réglet à plusieurs arêtes, chacune graduée pour une échelle ; on y lit directement des mètres.
+symboles:
+  - { symbole: '1/E', signification: 'échelle du dessin', unite: '—' }
+  - { symbole: 'm', signification: 'longueur mesurée sur le plan', unite: 'mm' }
+  - { symbole: 'L', signification: 'longueur réelle', unite: 'm' }
+  - { symbole: 'S', signification: 'surface réelle', unite: 'm²' }
+formules:
+  - { nom: 'Lire à l''échelle', tex: 'L = m \times E', domaine: 'Dessin technique' }
+  - { nom: 'Dessiner à l''échelle', tex: 'm = \frac{L}{E}', domaine: 'Dessin technique' }
+  - { nom: 'Retrouver l''échelle', tex: 'E = \frac{L}{m}', domaine: 'Plan d''échelle inconnue' }
+  - { nom: 'Surfaces', tex: 'S = s \times E^2', domaine: 'Surface s mesurée sur le plan' }
+---
+
+import { ECHELLES_ISO, echelleDepuisCote, echelleMaximale, facteurImpression, longueurPapier, longueurReelle, surfaceReelle, zoneUtile } from '@/lib/calc/dessin'
+import { grandeur, nombre, nombreCourt } from '@/lib/format'
+import { CarreSurface, CoteConnue, EchelleGraphiqueSchema, PersonneEchelle, PhotocopieEchelle, RegleSurPlan, Scalimetre, SurfaceErreur, TroisEchelles, UsagesEchelles } from '@/components/schemas/DessinCours1'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const ex1 = { mesure: 63, E: 100 }
+export const ex1r = longueurReelle(ex1.mesure, ex1.E)
+export const ex2 = { L: 24, reserve: 20 }
+export const ex2dispo = zoneUtile(3).largeur - 2 * ex2.reserve
+export const ex2E = echelleMaximale(ex2.L, ex2dispo)
+export const ex3 = { mesure: 13, cote: 0.9, a: 46, b: 38 }
+export const ex3E = echelleDepuisCote(ex3.mesure, ex3.cote)
+export const ex3S = surfaceReelle(ex3.a * ex3.b, ex3E)
+export const fCopie = facteurImpression(3, 4)
+
+<Page etape="intuition" titre="L'intuition : tout est réduit dans le même rapport">
+
+Une petite voiture de collection au 1/43 ressemble exactement à la vraie : chaque longueur est simplement divisée par 43. Une carte routière fait de même avec un pays entier. Un plan de bâtiment aussi : au **1/50**, chaque longueur réelle est divisée par 50 sur le papier.
+
+Une porte de 2,10 m devient un rectangle de {nombre(longueurPapier(2.1, 50), 0)} mm ; une personne de 1,80 m, un trait de {nombre(longueurPapier(1.8, 50), 0)} mm. Les proportions restent les mêmes : c'est ce qui permet de **lire** un plan comme une image fidèle de l'ouvrage.
+
+<PersonneEchelle />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer d'une longueur dessinée à une longueur réelle, et choisir l'échelle qui fait tenir un ouvrage sur une feuille ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Lire, dessiner, choisir une échelle" sousTitre="Une seule idée : tout est divisé par E" etape="cours">
+
+<Panneau n={1} titre="La définition" icone="idee" couleur="encre">
+1/E = longueur dessinée ÷ longueur réelle. Au 1/50, 1 cm de plan vaut 50 cm en vrai.
+</Panneau>
+
+<Panneau n={2} titre="Lire" icone="calcul" couleur="acier">
+L = m × E : on mesure en millimètres, on multiplie, on convertit en mètres.
+</Panneau>
+
+<Panneau n={3} titre="Dessiner" icone="plan" couleur="brique">
+m = L ÷ E : on convertit la longueur réelle en millimètres, puis on divise.
+</Panneau>
+
+<Panneau n={4} titre="Choisir" icone="regle" couleur="terre">
+La plus grande échelle normalisée (le plus petit E) pour laquelle le dessin et ses cotes tiennent sur la feuille.
+</Panneau>
+
+<Panneau n={5} titre="L'échelle graphique" icone="verification" couleur="validation">
+Une barre graduée en mètres : photocopiée ou réduite, elle change avec le dessin et reste juste.
+</Panneau>
+
+<Panneau n={6} titre="Les surfaces" icone="attention" couleur="correction">
+Une surface se multiplie par E², pas par E : au 1/100, 1 cm² de plan vaut 1 m².
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : définition et échelles normalisées">
+
+### Réduction, vraie grandeur, agrandissement
+
+L'échelle est le rapport **longueur dessinée / longueur réelle**, toujours écrit avec un 1 : **1/50** (ou 1:50) signifie « 1 sur le plan pour 50 en vrai ». En bâtiment, presque tout est en **réduction** (1/2 à 1/5 000) ; le **1/1** est la vraie grandeur ; un petit détail mécanique peut être dessiné en **agrandissement** (2/1, 5/1).
+
+### Les échelles normalisées
+
+On ne choisit pas n'importe quel nombre : l'ISO 5455 recommande les échelles 1, 2 et 5 fois une puissance de dix : {ECHELLES_ISO.slice(2, 11).map((e) => `1/${e}`).join(', ')}… Avec elles, un réglet d'architecte permet de lire directement, et les calculs se font de tête.
+
+Plus le dénominateur est **petit**, plus le dessin est **grand** et détaillé : une porte de 0,90 m mesure {nombre(longueurPapier(0.9, 100), 0)} mm au 1/100, mais {nombre(longueurPapier(0.9, 20), 0)} mm au 1/20, assez pour dessiner son cadre et sa serrure.
+
+<TroisEchelles />
+
+<Regle type="norme" source="ISO 5455">
+Les échelles recommandées sont {ECHELLES_ISO.slice(1, 12).map((e) => `1/${nombre(e, 0)}`).join(', ')} <AVerifier note="A_VERIFIER.md n° 41 : liste de l'ISO 5455 à contrôler sur le texte" />. Le 1/25 et le 1/75 se rencontrent encore, mais compliquent la lecture.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : lire, dessiner, convertir">
+
+### Les deux formules
+
+Pour **lire** : $L = m \times E$, avec $m$ mesurée en mm. Pour **dessiner** : $m = L \div E$, avec $L$ convertie en mm. On travaille tout en millimètres et l'on ne convertit qu'à la fin. Exemple : {ex1.mesure} mm au 1/{ex1.E} donnent {nombre(ex1.mesure * ex1.E, 0)} mm, soit {grandeur(ex1r, 2, 'm')}.
+
+### L'échelle graphique
+
+Un plan peut être photocopié, réduit, affiché sur un écran : l'échelle écrite devient alors fausse. L'**échelle graphique**, une barre graduée en mètres, est réduite **avec** le dessin : elle reste juste. On l'ajoute à tout plan destiné à être reproduit.
+
+<EchelleGraphiqueSchema />
+
+### Les surfaces
+
+Une surface a deux dimensions : chacune est multipliée par E, la surface par **E²**. Au 1/100, un carré de 1 cm de côté représente {nombreCourt(surfaceReelle(100, 100), 2)} m².
+
+<CarreSurface />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : quelle échelle pour quel plan">
+
+Chaque pièce d'un dossier a son échelle usuelle : on passe du quartier entier au détail d'une fenêtre en allant vers les grandes échelles.
+
+<UsagesEchelles />
+
+<Regle type="art">
+Ces plages sont des usages de bureau d'études, pas des règles absolues : on choisit d'abord l'échelle qui montre ce qu'il faut montrer, puis on vérifie qu'elle tient sur le format.
+</Regle>
+
+Pour lire sans calculer, on utilise un **scalimètre** : chaque arête porte la graduation d'une échelle, en mètres. On choisit l'arête de l'échelle du plan et on lit directement la longueur réelle.
+
+<Scalimetre />
+
+</Page>
+
+<FicheCalcul calcul="echelleChoix">
+
+<Cahier titre="Exemple résolu : un dispensaire de 18,60 m sur une feuille A3">
+
+**Énoncé.** Le plan d'un dispensaire de quartier mesure 18,60 m de long. On veut le dessiner sur une feuille A3 posée en paysage, en gardant 20 mm de chaque côté pour les cotes (données de l'énoncé). Quelle est la plus grande échelle normalisée possible, et quelle longueur aura le dessin ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La place disponible">
+<AN k="dispo" />
+<Note>Pourquoi retirer les réserves ? Les cotes et les titres se placent autour du dessin : s'il touche le cadre, ils n'ont plus de place.</Note>
+</Etape>
+
+<Etape n={3} titre="On essaie les échelles">
+<AN k="essai" />
+<AN k="retenue" />
+<Note>Pourquoi la plus grande échelle ? Plus le dessin est grand, plus il est lisible et détaillé ; on prend donc le plus petit dénominateur qui tient.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'échelle retenue">
+
+<Etape n={4} titre="Le résultat">
+<Resultat k="echelle" libelle="Échelle retenue" />
+<Note couleur="vert">Contrôle : le dessin mesure <Val k="papier" /> pour <Val k="dispo" /> disponibles. Passe la longueur à 30 m : l'échelle tombe d'un cran.</Note>
+</Etape>
+
+<Etape n={5} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="diviser au lieu de multiplier.">
+Pour lire, on **multiplie** la mesure par E ; pour dessiner, on **divise**. Un contrôle d'ordre de grandeur évite l'erreur : une pièce de 50 mm au 1/100 fait {grandeur(longueurReelle(50, 100), 0, 'm')}, pas {nombre(50 / 100, 1)} mm.
+</Piege>
+
+<Piege erreur="mélanger les millimètres et les mètres.">
+On mesure en mm, on calcule en mm, on convertit à la fin : {ex1.mesure} × {ex1.E} = {nombre(ex1.mesure * ex1.E, 0)} mm = {grandeur(ex1r, 2, 'm')}.
+</Piege>
+
+<Piege erreur="multiplier une surface par E.">
+Il faut multiplier par E² :
+
+<SurfaceErreur />
+
+</Piege>
+
+<Piege erreur="mesurer à la règle sur une copie réduite.">
+Une copie A3 tirée sur une A4 multiplie les longueurs par {nombreCourt(fCopie, 2)} : la mesure à la règle trompe, la cote écrite et l'échelle graphique non.
+
+<PhotocopieEchelle />
+
+</Piege>
+
+<Piege erreur="choisir une échelle trop petite pour un détail.">
+Au 1/100, une fenêtre de 1,20 m mesure {nombre(longueurPapier(1.2, 100), 0)} mm : impossible d'y dessiner un appui ou un linteau. Les détails se dessinent au 1/20 ou plus grand.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**On lit les cotes, on ne mesure pas.** Sur le chantier, on construit à partir des **cotes écrites**. La mesure à l'échelle sert seulement à se faire une idée, ou à retrouver une dimension oubliée, en la confirmant ensuite avec le bureau d'études.
+
+**Les tirages de reprographie.** Un plan reçu par courriel est souvent imprimé « ajusté à la page » : son échelle n'est plus celle du cartouche. Avant de mesurer, on vérifie l'échelle du tirage :
+
+<DiagrammeFlux alt="Vérifier l'échelle d'un tirage en quatre temps : lire l'échelle annoncée dans le cartouche ; mesurer à la règle une cote connue ; calculer l'échelle réelle E = L / m ; si elle diffère, l'écrire sur le tirage et ne mesurer qu'avec l'échelle graphique." etapes={[{ titre: 'Lire', texte: 'l’échelle du cartouche', teinte: 'encre' }, { titre: 'Mesurer', texte: 'une cote connue, à la règle', teinte: 'acier' }, { titre: 'Calculer', texte: 'E = L / m', teinte: 'terre' }, { titre: 'Noter', texte: 'l’échelle réelle sur le tirage', teinte: 'validation' }]} />
+
+<Encadre type="terrain" titre="Les plans de lotissement">
+En RDC, beaucoup de parcelles sont repérées sur des plans de lotissement ou des extraits cadastraux au 1/1 000 ou au 1/2 000, souvent photocopiés plusieurs fois. Les distances s'y lisent à l'échelle graphique, et l'on fait confirmer les limites par un géomètre avant de construire.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : échelles">
+
+### Définition
+
+1/E = dessin ÷ réel · réduction (1/50), vraie grandeur (1/1), agrandissement (2/1)
+
+### Formules
+
+lire : L = m × E · dessiner : m = L ÷ E · retrouver : E = L ÷ m · surfaces : × E²
+
+### Échelles normalisées (ISO 5455)
+
+{ECHELLES_ISO.slice(2, 11).map((e) => `1/${e}`).join(' · ')}
+
+### Usages
+
+détails 1/20 à 1/5 · exécution 1/50 · niveaux 1/50 à 1/100 · masse 1/200 à 1/500 · situation 1/1 000 à 1/5 000
+
+### Pièges
+
+× ou ÷ · mm et m · surfaces × E² · copies réduites · échelle trop petite pour un détail
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices (1/2)">
+
+<Exercice n={1} niveau="facile" titre="Lire une longueur">
+
+Sur un plan au 1/{ex1.E}, tu poses la règle le long d'un mur :
+
+<RegleSurPlan mesure={ex1.mesure} E={ex1.E} />
+
+Quelle est la longueur réelle du mur ?
+
+<Indice>Multiplie la mesure en mm par le dénominateur, puis convertis.</Indice>
+
+<Corrige>
+$L = m \times E$ = {ex1.mesure} × {ex1.E} = {nombre(ex1.mesure * ex1.E, 0)} mm = **{grandeur(ex1r, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Choisir l'échelle d'une façade">
+
+Une façade de {grandeur(ex2.L, 2, 'm')} doit tenir sur une feuille A3 en paysage, avec {ex2.reserve} mm de réserve de chaque côté. Quelle est la plus grande échelle normalisée possible ?
+
+<Indice>La zone utile d'une A3 en paysage mesure {zoneUtile(3).largeur} mm de large.</Indice>
+
+<Corrige>
+Place disponible : {zoneUtile(3).largeur} − 2 × {ex2.reserve} = {nombre(ex2dispo, 0)} mm. Au 1/50 : {nombre(longueurPapier(ex2.L, 50), 0)} mm, trop long. Au 1/{ex2E} : {nombre(longueurPapier(ex2.L, ex2E), 0)} mm, qui tient. Échelle retenue : **1/{ex2E}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Page etape="exercices" titre="Les exercices (2/2)">
+
+<Exercice n={3} niveau="difficile" titre="Une copie d'échelle inconnue">
+
+Sur une vieille copie de plan, l'échelle est illisible. Une porte cotée {grandeur(ex3.cote, 2, 'm')} mesure {ex3.mesure} mm à la règle :
+
+<CoteConnue mesure={ex3.mesure} cote={ex3.cote} />
+
+Retrouve l'échelle de la copie. Une chambre y mesure {ex3.a} × {ex3.b} mm : quelle est sa surface réelle ?
+
+<Indice>E = L ÷ m, avec L en mm. Puis la surface : s × E², en mm², à convertir en m².</Indice>
+
+<Corrige>
+
+- E = {nombre(ex3.cote * 1000, 0)} ÷ {ex3.mesure} ≈ **{nombre(ex3E, 0)}** : une échelle non normalisée, signe d'une copie réduite (un 1/50 réduit à {nombre((50 / ex3E) * 100, 0)} % environ).
+- s = {ex3.a} × {ex3.b} = {nombre(ex3.a * ex3.b, 0)} mm² ; S = {nombre(ex3.a * ex3.b, 0)} × {nombre(ex3E, 1)}² ≈ **{grandeur(ex3S, 1, 'm²')}**.
+- Avec une seule cote de référence, la précision reste faible : on confirme sur le plan original.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Au 1/50, 1 cm sur le plan représente :" choix={['50 cm', '5 cm', '50 m', '0,5 cm']} bonne={0} colonnes={4}>
+Toutes les longueurs réelles sont divisées par 50 sur le plan.
+</QCM>
+
+<QCM n={2} question={<>Sur un plan au 1/{ex1.E}, on mesure {ex1.mesure} mm. La longueur réelle vaut :</>} choix={[grandeur(ex1r, 2, 'm'), grandeur(ex1r / 10, 2, 'm'), grandeur(ex1r * 10, 2, 'm'), grandeur(ex1.mesure / ex1.E, 2, 'm')]} bonne={0} colonnes={4}>
+{ex1.mesure} × {ex1.E} = {nombre(ex1.mesure * ex1.E, 0)} mm.
+</QCM>
+
+<QCM n={3} question="Quelle échelle est la plus grande (dessin le plus détaillé) ?" choix={['1/200', '1/100', '1/50', '1/20']} bonne={3} colonnes={4}>
+Plus le dénominateur est petit, plus le dessin est grand.
+</QCM>
+
+<QCM n={4} question="Quelle échelle n'est pas recommandée par l'ISO 5455 ?" choix={['1/20', '1/50', '1/75', '1/200']} bonne={2} colonnes={4}>
+Les échelles recommandées sont 1, 2 et 5 fois une puissance de dix.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Au 1/100, une surface de 1 cm² sur le plan vaut :" choix={['100 cm²', '1 m²', '100 m²', '0,01 m²']} bonne={1} colonnes={4}>
+1 cm × 1 cm devient 1 m × 1 m : facteur {nombre(100 * 100, 0)}.
+</QCM>
+
+<QCM n={6} question="Pourquoi ajouter une échelle graphique ?" choix={['Pour décorer', 'Parce qu’elle reste juste quand le plan est réduit', 'Pour remplacer les cotes', 'Parce qu’elle est obligatoire sur les détails']} bonne={1} colonnes={2}>
+Elle se réduit avec le dessin.
+</QCM>
+
+<QCM n={7} question="Une porte cotée 0,90 m mesure 18 mm sur une copie. L'échelle de la copie est :" choix={['1/18', `1/${nombre(echelleDepuisCote(18, 0.9), 0)}`, '1/90', '1/100']} bonne={1} colonnes={4}>
+E = 900 ÷ 18.
+</QCM>
+
+<QCM n={8} question="Pour construire, on se fie :" choix={['à la mesure à la règle', 'aux cotes écrites', 'à la taille de la feuille', 'au scalimètre seul']} bonne={1} colonnes={2}>
+Les cotes donnent la vraie dimension, quelle que soit l'impression.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,129 @@
+---
+id: L1.6.EX
+titre: "Examen du module L1.6 : dessin technique et lecture de plans"
+objectifs:
+  - Choisir un format, des traits et une échelle
+  - Lire et construire des vues et des perspectives
+  - Lire et contrôler les cotes, les coupes et les niveaux d'un plan
+  - Lire un dossier de plans, un plan de ferraillage et un cartouche
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { coteManquante, formatA, longueurFuyante, longueurReelle, surfaceReelle } from '@/lib/calc/dessin'
+import { altitude, hauteurSousPlafond, nombreBarresReparties, retardIndice } from '@/lib/calc/plans'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+import { RegleSurPlan } from '@/components/schemas/DessinCours1'
+import { QuoiHachurer } from '@/components/schemas/DessinCours3'
+
+export const a3 = formatA(3)
+export const q2 = longueurReelle(45, 200)
+export const q3 = surfaceReelle(20 * 30, 50)
+export const q5 = longueurFuyante(1.6, 0.5)
+export const q7 = coteManquante([1, 1.2, 2.4, 0.9], 7.2)
+export const q9 = hauteurSousPlafond({ hEtage: 3, dalle: 0.2, revetement: 0.05, plafond: 0.015 })
+export const q10 = altitude(-0.65, 450.2)
+export const q11 = 3.4 * 2.8
+export const q12 = retardIndice('C', 'F')
+export const q14 = nombreBarresReparties(3 - 2 * 0.05, 0.2)
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 2 h.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une règle graduée, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Pour chaque calcul : convertis d'abord les unités (mm sur le papier, m en vrai), vérifie l'ordre de grandeur.
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="L1.6.EX">
+
+<Page etape="examen" titre="Les questions (1/4)">
+
+<QCM n={1} question="Les dimensions d'un format A3 sont :" choix={[`${a3.court} × ${a3.long} mm`, '210 × 297 mm', '420 × 594 mm', '300 × 400 mm']} bonne={0} colonnes={4}>
+Une A2 coupée en deux (L1.6.1).
+</QCM>
+
+<RegleSurPlan mesure={45} E={200} />
+
+<QCM n={2} question="Sur un plan au 1/200, la règle indique 45 mm le long d'un mur. Le mur mesure :" choix={[grandeur(q2, 2, 'm'), grandeur(q2 / 10, 2, 'm'), grandeur(q2 * 10, 2, 'm'), '0,23 m']} bonne={0} colonnes={4}>
+45 × 200 = {nombre(45 * 200, 0)} mm (L1.6.2).
+</QCM>
+
+<QCM n={3} question="Au 1/50, une pièce mesure 20 × 30 mm sur le plan. Sa surface réelle est :" choix={[grandeur(q3, 2, 'm²'), grandeur((600 * 50) / 1e6, 2, 'm²'), grandeur(q3 * 10, 2, 'm²'), '600 m²']} bonne={0} colonnes={4}>
+600 mm² × 50² : les surfaces se multiplient par E² (L1.6.2).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/4)">
+
+<QCM n={4} question="En méthode européenne, la vue de dessus se place :" choix={['au-dessus de la vue de face', 'sous la vue de face', 'à droite de la vue de face', 'à gauche de la vue de face']} bonne={1} colonnes={2}>
+Le plan horizontal est rabattu vers le bas (L1.6.3).
+</QCM>
+
+<QCM n={5} question="En cavalière avec k = 0,5, une fuyante de 1,60 m se dessine :" choix={[grandeur(q5, 2, 'm'), '1,60 m', '0,50 m', '3,20 m']} bonne={0} colonnes={4}>
+l = k × L (L1.6.4).
+</QCM>
+
+<QCM n={6} question="« HA 10 e = 20 » signifie :" choix={['20 barres de 10 mm', 'des barres de 10 mm espacées de 20 cm', '10 barres de 20 mm', 'une barre de 10 m']} bonne={1} colonnes={2}>
+« e » est l'espacement (L1.6.5).
+</QCM>
+
+<QCM n={7} question="Une façade de 7,20 m est cotée 1,00 ; 1,20 ; 2,40 ; 0,90 ; ? Le dernier trumeau mesure :" choix={[grandeur(q7, 2, 'm'), '1,20 m', '2,70 m', '5,50 m']} bonne={0} colonnes={4}>
+7,20 − (1,00 + 1,20 + 2,40 + 0,90) (L1.6.6).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/4)">
+
+<QuoiHachurer />
+
+<QCM n={8} question="Sur cette coupe, quelles zones hachure-t-on ?" choix={['1, 2 et 3', 'toutes', '4 seulement', '1 et 4']} bonne={0} colonnes={4}>
+Seulement ce que le plan de coupe tranche ; le mur du fond est vu (L1.6.7).
+</QCM>
+
+<QCM n={9} question="Hauteur d'étage 3,00 m ; dalle 20 cm, revêtement 5 cm, enduit 1,5 cm. La hauteur sous plafond vaut :" choix={[grandeur(q9.hsp, 3, 'm'), '3,00 m', grandeur(3 - 0.2, 2, 'm'), grandeur(q9.plancher, 3, 'm')]} bonne={0} colonnes={4}>
+3,00 − {nombre(q9.plancher, 3)} (L1.6.7).
+</QCM>
+
+<QCM n={10} question="Le ±0,00 est à l'altitude 450,20 m. Un fond de fouille à −0,65 est à :" choix={[grandeur(q10, 2, 'm'), grandeur(450.2 + 0.65, 2, 'm'), '0,65 m', '450,20 m']} bonne={0} colonnes={4}>
+Z = Z₀ + N, N négatif (L1.6.8).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (4/4)">
+
+<QCM n={11} question="Une chambre est cotée 3,40 × 2,80 m de nu à nu. Sa surface est :" choix={[grandeur(q11, 2, 'm²'), grandeur(3.6 * 3, 2, 'm²'), grandeur((3.4 + 2.8) * 2, 2, 'm²'), '6,20 m²']} bonne={0} colonnes={4}>
+Longueur × largeur intérieures (L1.6.10).
+</QCM>
+
+<QCM n={12} question="Le chantier a le plan à l'indice C ; le bureau d'études a diffusé l'indice F. Il manque :" choix={[`${q12} révisions`, '1 révision', '2 révisions', '6 révisions']} bonne={0} colonnes={4}>
+D, E et F (L1.6.12).
+</QCM>
+
+<QCM n={13} question="Les reculs du bâtiment par rapport aux limites de la parcelle se lisent sur :" choix={['le plan de masse', 'le plan de ferraillage', 'la coupe', 'le plan de situation']} bonne={0} colonnes={2}>
+Il dessine toute la parcelle (L1.6.9).
+</QCM>
+
+<QCM n={14} question="Une poutre de 3,00 m reçoit des cadres tous les 20 cm, le premier et le dernier à 5 cm des abouts. Il en faut :" choix={[String(q14), String(q14 - 1), String(q14 + 1), '20']} bonne={0} colonnes={4}>
+⌊2,90 / 0,20⌋ + 1 (L1.6.11).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

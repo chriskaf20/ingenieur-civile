@@ -1,0 +1,245 @@
+---
+id: L1.6.P
+titre: "Mini-projet : plan, façade et coupe d'un studio"
+objectifs:
+  - Choisir le format et l'échelle d'un petit dossier de plans
+  - Dessiner à la main le plan coté d'un studio, avec ses surfaces
+  - Tirer la façade et la coupe du plan par correspondance des vues
+  - Compléter un cartouche et contrôler cotes, niveaux et surfaces
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { analyseLogement, EXEMPLE_STUDIO, studio } from '@/lib/calc/plans'
+import { choisirFormat, longueurPapier } from '@/lib/calc/dessin'
+import { grandeur, nombre } from '@/lib/format'
+import { CoupeLogement, FacadeLogement, niv, PlanLogement } from '@/components/schemas/Logement'
+
+export const d = EXEMPLE_STUDIO
+export const st = studio(d)
+export const a = analyseLogement(st)
+export const fmt = choisirFormat({ L: a.exterieur.L, H: a.exterieur.l, E: 50, reserve: 30, cartouche: 40 })
+export const b = (id) => st.baies.find((x) => x.id === id)
+
+<Page etape="projet" titre="L'énoncé (1/2) : le croquis et les données">
+
+Une coopérative d'enseignants veut construire, près d'une école de Lubumbashi, une série de **studios** identiques pour loger ses jeunes collègues. L'architecte a fait un croquis et fixé les dimensions ; tu dois dessiner à la main le **dossier simple** du studio type.
+
+<PlanLogement lg={st} prefixe="pj-croquis" cotes="aucune" surfaces={false} alt="Croquis du studio fourni par l'architecte : une pièce principale en L, une salle d'eau dans l'angle nord-est, la porte d'entrée P1 et la fenêtre F1 au sud, la fenêtre F2 à l'ouest, la petite fenêtre F3 de la salle d'eau au nord, la porte P2 de la salle d'eau ; sans cotes." />
+
+### Les données de l'architecte
+
+- Dimensions intérieures : **{nombre(d.L, 2)} × {nombre(d.l, 2)} m** ; murs extérieurs de {nombre(d.mur, 2)} m, enduits compris ; cloisons de {nombre(d.cloison, 2)} m.
+- Salle d'eau dans l'angle nord-est : {nombre(d.a, 2)} × {nombre(d.s, 2)} m intérieurs, sol à {niv(st.pieces[1].niveau)}.
+- Baies : P1 {nombre(b('P1').largeur, 2)} × {nombre(b('P1').hauteur, 2)} ; F1 {nombre(b('F1').largeur, 2)} × {nombre(b('F1').hauteur, 2)}, allège {nombre(b('F1').allege, 2)} ; F2 {nombre(b('F2').largeur, 2)} × {nombre(b('F2').hauteur, 2)} ; F3 {nombre(b('F3').largeur, 2)} × {nombre(b('F3').hauteur, 2)}, allège {nombre(b('F3').allege, 2)} ; positions sur le croquis.
+- Hauteur sous plafond {nombre(d.hsp, 2)} m ; dalle de {nombre(d.dalle, 2)} m ; acrotère de {nombre(d.acrotere, 2)} m ; terrain naturel à {niv(d.tn)} ; semelles filantes {nombre(st.semelle.largeur, 2)} × {nombre(st.semelle.hauteur, 2)} m, fond de fouille à {niv(st.semelle.fond)}.
+
+</Page>
+
+<Page etape="projet" titre="L'énoncé (2/2) : les livrables">
+
+### Ce que tu rends
+
+1. Le **plan** du studio au 1/50 : murs, baies, cotes sur deux lignes au sud et à l'ouest, cotes intérieures, surfaces des pièces, repère de coupe A-A, nord.
+2. La **façade sud** au 1/50 et la **coupe A-A** au 1/50, avec leurs niveaux.
+3. Un **cartouche** complet et une **note de calcul** : surfaces, chaîne de cotes, niveaux, format.
+
+<Regle type="simplification">
+Les épaisseurs et les dimensions sont données sans calcul de structure ni étude de sol <AVerifier note="A_VERIFIER.md n° 44 : épaisseurs et fondations du studio, hypothèses d'énoncé à justifier par le calcul" />. Le mini-projet entraîne à dessiner et à contrôler un dossier, pas à dimensionner l'ouvrage.
+</Regle>
+
+</Page>
+
+<Infographie titre="La démarche" sousTitre="Du croquis au dossier coté" etape="projet">
+
+<Panneau n={1} titre="Lire le programme" icone="verification" couleur="encre">
+Toutes les données d'abord : dimensions, épaisseurs, baies, niveaux. On repère ce qui manque.
+</Panneau>
+
+<Panneau n={2} titre="Format et échelle" icone="plan" couleur="acier">
+On calcule la taille du dessin au 1/50, on ajoute les cotes et le cartouche, on choisit la feuille.
+</Panneau>
+
+<Panneau n={3} titre="Axes et murs" icone="regle" couleur="terre">
+Le contour extérieur, puis l'intérieur, puis les cloisons, en trait fin ; on ne repasse en fort qu'à la fin.
+</Panneau>
+
+<Panneau n={4} titre="Baies et cotes" icone="calcul" couleur="brique">
+On place les baies à leurs cotes, puis les chaînes de cotes ; chaque chaîne se ferme sur le hors tout.
+</Panneau>
+
+<Panneau n={5} titre="Façade et coupe" icone="idee" couleur="validation">
+Les largeurs viennent du plan, par lignes de rappel ; les hauteurs, des niveaux.
+</Panneau>
+
+<Panneau n={6} titre="Cartouche et contrôle" icone="retenir" couleur="correction">
+Titre, numéro, échelle, date, indice A ; puis on relit tout : cotes, surfaces, niveaux.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="studioProjet">
+
+<Cahier titre="Étape 1 : les dimensions et les surfaces" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi tout calculer avant de dessiner ? Les cotes hors tout et les surfaces servent de contrôle : si le dessin ne les retrouve pas, il est faux.</Note>
+</Etape>
+
+<Etape n={2} titre="Hors tout et surfaces">
+<AN k="exterieur" />
+<AN k="surfaces" />
+<Resultat k="total" libelle="Surface des pièces" />
+</Etape>
+
+<Etape n={3} titre="La chaîne de la façade sud">
+<AN k="facade" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : les niveaux, le format et le plan" etape="projet">
+
+<Etape n={4} titre="Les niveaux">
+<AN k="niveaux" />
+</Etape>
+
+<Etape n={5} titre="Le format">
+<AN k="format" />
+<Note>Pourquoi 30 mm de réserve ? Deux lignes de cotes de chaque côté, plus les bulles et le nord.</Note>
+</Etape>
+
+<Etape n={6} titre="Le plan">
+<Schema k="plan" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 : la façade et la coupe" etape="projet">
+
+<Etape n={7} titre="La façade sud">
+<Schema k="facade" />
+<Note>Pourquoi la façade a-t-elle la même largeur que le plan ? Ce sont deux vues du même mur sud : on reporte les largeurs par lignes de rappel.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 4 : la coupe" etape="projet">
+
+<Etape n={8} titre="La coupe A-A">
+<Schema k="coupe" />
+<Note couleur="vert">Contrôle : la coupe coupe la fenêtre F1, comme l'indique le repère A-A du plan ; les niveaux de la coupe et de la façade sont les mêmes.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<PlancheTechnique
+  titre="Studio type : plan"
+  projet="Studios de la coopérative, Lubumbashi"
+  numero="STU-EXE-ARC-101"
+  echelle="1/50"
+  date="10/2026"
+  indice="A"
+  hachures={['maconnerie']}
+  notes={[
+    `Surfaces : ${a.pieces.map((p) => `${p.nom} ${nombre(p.surface, 2)} m²`).join(' ; ')} ; total ${nombre(a.surfaceTotale, 2)} m².`,
+    `Hors tout ${nombre(a.exterieur.L, 2)} × ${nombre(a.exterieur.l, 2)} m ; murs de ${nombre(d.mur, 2)} m, cloisons de ${nombre(d.cloison, 2)} m.`,
+    'Cotes en mètres ; cotes intérieures de nu à nu.',
+  ]}
+>
+
+<Vue titre="Plan" echelle="1/50" pleineLargeur>
+<PlanLogement lg={st} prefixe="pj-plan" />
+</Vue>
+
+</PlancheTechnique>
+
+<PlancheTechnique
+  titre="Studio type : façade sud"
+  projet="Studios de la coopérative, Lubumbashi"
+  numero="STU-EXE-ARC-201"
+  echelle="1/50"
+  date="10/2026"
+  indice="A"
+  hachures={['ba', 'maconnerie', 'terre', 'gravier']}
+  notes={[
+    `Niveaux : terrain ${niv(d.tn)} ; sol fini ±0,00 ; dessus de dalle ${niv(a.niveaux.dessusDalle)} ; acrotère ${niv(a.niveaux.acrotere)}.`,
+    `Hauteur sous plafond ${nombre(d.hsp, 2)} m ; hauteur hors sol ${nombre(a.hauteurHorsSol, 2)} m.`,
+  ]}
+>
+
+<Vue titre="Façade sud" echelle="1/50" pleineLargeur>
+<FacadeLogement lg={st} prefixe="pj-fac" />
+</Vue>
+
+</PlancheTechnique>
+
+<PlancheTechnique
+  titre="Studio type : coupe A-A"
+  projet="Studios de la coopérative, Lubumbashi"
+  numero="STU-EXE-ARC-301"
+  echelle="1/50"
+  date="10/2026"
+  indice="A"
+  hachures={['ba', 'maconnerie', 'terre', 'gravier']}
+  notes={[
+    `Semelles filantes ${nombre(st.semelle.largeur, 2)} × ${nombre(st.semelle.hauteur, 2)} m, fond de fouille à ${niv(st.semelle.fond)}.`,
+    'Dallage sur hérisson ; épaisseurs de principe, à fixer par l’étude.',
+  ]}
+>
+
+<Vue titre="Coupe A-A" echelle="1/50" pleineLargeur>
+<CoupeLogement lg={st} prefixe="pj-cou" />
+</Vue>
+
+</PlancheTechnique>
+
+<Page etape="projet" titre="Le corrigé : les points de contrôle">
+
+| Contrôle | Valeur attendue |
+|---|---|
+| Hors tout | {nombre(a.exterieur.L, 2)} × {nombre(a.exterieur.l, 2)} m |
+| Pièce principale | {grandeur(a.pieces[0].surface, 2, 'm²')} |
+| Salle d'eau | {grandeur(a.pieces[1].surface, 2, 'm²')} |
+| Chaîne sud | {a.facades.sud.partielles.map((p) => nombre(p, 2)).join(' + ')} = {nombre(a.facades.sud.total, 2)} m |
+| Chaîne ouest | {a.facades.ouest.partielles.map((p) => nombre(p, 2)).join(' + ')} = {nombre(a.facades.ouest.total, 2)} m |
+| Dessus de dalle, acrotère | {niv(a.niveaux.dessusDalle)} ; {niv(a.niveaux.acrotere)} |
+| Format du plan au 1/50 | A{fmt.n} {fmt.orientation} : dessin {nombre(longueurPapier(a.exterieur.L, 50), 0)} × {nombre(longueurPapier(a.exterieur.l, 50), 0)} mm |
+
+<Encadre type="attention">
+Les erreurs les plus fréquentes : une chaîne qui ne se ferme pas (on a oublié l'épaisseur d'un mur), une surface calculée avec les cotes extérieures, une façade dont les baies ne tombent pas en face de celles du plan, une coupe dont les flèches regardent du mauvais côté.
+</Encadre>
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Présentation | Pas de cadre ni de cartouche | Format, cadre et cartouche justes | Traits fort et fin hiérarchisés, écritures régulières |
+| Plan | Murs sans épaisseur | Murs, cloisons, baies, sens d'ouverture | Surfaces, repère de coupe, nord, niveaux |
+| Cotes | Absentes ou mesurées | Chaînes sud et ouest, hors tout | Chaînes contrôlées, cotes intérieures, aucune en double |
+| Façade et coupe | Dessinées au jugé | Largeurs reportées du plan | Niveaux justes, hachures conformes, repères concordants |
+| Note de calcul | Absente | Surfaces et format | Chaînes, niveaux et surfaces vérifiés sur le dessin |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+La coopérative veut une version « accessible » du studio : porte de 0,90 m sans marche, salle d'eau plus grande. Que changes-tu sur le plan, la façade et la coupe ? Où le terrain naturel pose-t-il problème ?
+</Encadre>
+
+<Quiz id="L1.6.P">
+
+<QCM n={1} question="Mon dossier contient-il le plan coté avec surfaces, la façade sud, la coupe A-A, un cartouche complet, et mes chaînes de cotes se ferment-elles ?" choix={['Oui, tout y est et tout se ferme', 'Il manque une vue ou le cartouche', 'Une chaîne ne se ferme pas']} bonne={0}>
+Sinon, reprends la démarche : on ne livre pas un plan dont les cotes se contredisent.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

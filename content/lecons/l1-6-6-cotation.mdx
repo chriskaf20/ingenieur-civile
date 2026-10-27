@@ -1,0 +1,338 @@
+---
+id: L1.6.6
+titre: Cotation
+objectifs:
+  - Nommer les éléments d'une cote et les tracer correctement
+  - Coter une façade en chaîne, en parallèle ou en cotes cumulées
+  - Vérifier qu'une chaîne de cotes se ferme sur la cote totale
+  - Placer les cotes d'un plan de bâtiment sans ambiguïté ni doublon
+relecture: false
+normes:
+  - "ISO 129-1 : présentation des cotes, principes généraux"
+glossaire:
+  - terme: Cote
+    definition: Dimension réelle écrite sur le dessin, quelle que soit l'échelle ; elle prime sur toute mesure à la règle.
+  - terme: Ligne d'attache
+    definition: Trait fin qui prolonge l'élément coté jusqu'à la ligne de cote.
+  - terme: Chaîne de cotes
+    definition: Suite de cotes placées bout à bout, dont la somme doit égaler la cote totale.
+  - terme: Cote cumulée
+    definition: Distance d'un point à une origine commune, écrite sur une seule ligne de cote.
+  - terme: Cote de nu à nu
+    definition: Dimension entre deux faces (les nus) de murs, par opposition à la cote d'axe en axe.
+symboles:
+  - { symbole: 'cᵢ', signification: 'cote partielle d''une chaîne', unite: 'm' }
+  - { symbole: 'T', signification: 'cote totale hors tout', unite: 'm' }
+  - { symbole: 'Δ', signification: 'écart de fermeture d''une chaîne', unite: 'm' }
+formules:
+  - { nom: 'Fermeture d''une chaîne', tex: '\sum c_i = T', domaine: 'Cotation en chaîne' }
+  - { nom: 'Cote manquante', tex: 'c_k = T - \sum_{i \neq k} c_i', domaine: 'Une seule cote inconnue' }
+  - { nom: 'Écart de fermeture', tex: '\Delta = \sum c_i - T', domaine: 'Contrôle d''une chaîne' }
+---
+
+import { chaineCotes, controleFacade, coteManquante, ecartFermeture, EXEMPLE_FACADE } from '@/lib/calc/dessin'
+import { analyseLogement, EXEMPLE_MAISON, EXEMPLE_STUDIO, maison, studio } from '@/lib/calc/plans'
+import { grandeur, nombre } from '@/lib/format'
+import { AnatomieCote, AxeOuNu, CoteResiste, CotesCroisees, CoteSurabondante, FacadeCotee, ImplantationCumulee, SensLecture, TroisLignesCotes, TroisModes } from '@/components/schemas/DessinCours3'
+import { PlanLogement } from '@/components/schemas/Logement'
+
+export const F = EXEMPLE_FACADE
+export const c0 = controleFacade(F)
+export const st = studio(EXEMPLE_STUDIO)
+export const sa = analyseLogement(st)
+export const ex1 = { ...sa.facades.sud, inconnue: 2 }
+export const ex1c = coteManquante(ex1.partielles.filter((_, i) => i !== ex1.inconnue), ex1.total)
+export const ma = analyseLogement(maison(EXEMPLE_MAISON)).facades.sud
+export const ma2 = chaineCotes(ma.partielles)
+export const ex3 = { partielles: [1.2, 1.2, 2.4, 0.9, 3.6], totale: F.totale }
+export const ex3e = ecartFermeture(ex3.partielles, ex3.totale)
+
+<Page etape="intuition" titre="L'intuition : une cote est une promesse">
+
+Une recette dit « 500 g de farine » : peu importe la taille de la photo du gâteau. Un plan fait de même. Le dessin montre la **forme** ; la **cote** dit la **dimension réelle**, en toutes lettres. On peut agrandir, réduire, photocopier le plan : la cote ne change pas.
+
+<CoteResiste />
+
+C'est pourquoi on construit avec les cotes, jamais en mesurant le dessin. Encore faut-il qu'elles soient claires, complètes, et qu'elles ne se contredisent pas.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment coter un plan pour que chacun lise la même dimension, sans calcul ni doute ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Coter un plan" sousTitre="Clair, complet, une seule fois" etape="cours">
+
+<Panneau n={1} titre="Les éléments" icone="regle" couleur="encre">
+Lignes d'attache, ligne de cote en trait fin, extrémités obliques (bâtiment) ou flèches, chiffre au-dessus.
+</Panneau>
+
+<Panneau n={2} titre="Les unités" icone="calcul" couleur="acier">
+En bâtiment, cotes en mètres (3,60) ou en centimètres (360) ; l'unité est dite une fois, dans le cartouche ou une note.
+</Panneau>
+
+<Panneau n={3} titre="Trois modes" icone="plan" couleur="brique">
+En chaîne, en parallèle, en cotes cumulées depuis une origine. Chacun a ses forces.
+</Panneau>
+
+<Panneau n={4} titre="Trois lignes" icone="idee" couleur="terre">
+Autour d'un plan : les baies, puis les axes, puis le hors tout, du plus près au plus loin.
+</Panneau>
+
+<Panneau n={5} titre="Le contrôle" icone="verification" couleur="validation">
+La somme d'une chaîne égale la cote totale ; une chaîne qui ne se ferme pas cache une erreur.
+</Panneau>
+
+<Panneau n={6} titre="Une seule fois" icone="attention" couleur="correction">
+Chaque dimension est cotée une fois : deux cotes pour une même longueur finissent toujours par se contredire.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : les éléments d'une cote">
+
+### Tracer une cote
+
+Une cote de bâtiment comprend : deux **lignes d'attache** qui prolongent l'élément sans le toucher et dépassent un peu ; une **ligne de cote** en trait fin, parallèle à l'élément ; deux **extrémités**, petits traits obliques en bâtiment, flèches en mécanique ; le **chiffre**, au-dessus de la ligne, au milieu.
+
+<AnatomieCote />
+
+### Écrire et lire les chiffres
+
+Les chiffres se lisent **d'en bas** ou **de la droite** : on lit tout le plan en le tournant au plus d'un quart de tour. On écrit en mètres avec deux décimales (3,60) ou en centimètres (360), jamais les deux sur le même plan, et l'on précise l'unité une seule fois.
+
+<SensLecture />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : modes et lignes de cotes">
+
+### Trois modes de cotation
+
+- **En chaîne** : chaque cote part de la fin de la précédente. Pratique pour le maçon, mais les erreurs s'additionnent.
+- **En parallèle** : toutes les cotes partent d'une même origine, sur des lignes superposées. Précis, mais encombrant.
+- **En cotes cumulées** : une seule ligne, l'origine marquée d'un petit cercle, la distance depuis l'origine écrite à chaque repère. Précis et compact.
+
+<TroisModes partielles={F.partielles} />
+
+### Les trois lignes d'un plan de bâtiment
+
+Autour d'un plan, on range les cotes extérieures sur trois lignes parallèles, du détail vers l'ensemble : les **baies et trumeaux**, puis les **axes**, enfin le **hors tout**. À l'intérieur, on cote les pièces **de nu à nu**.
+
+<TroisLignesCotes />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le plan coté d'un studio">
+
+Voici le plan d'un studio coté selon ces règles. Au sud, deux lignes : les baies et trumeaux, puis le hors tout ; à l'ouest, la fenêtre et le hors tout ; à l'intérieur, les dimensions des pièces de nu à nu.
+
+<PlanLogement lg={st} prefixe="cot-st" />
+
+- La chaîne sud se ferme : {sa.facades.sud.partielles.map((p) => nombre(p, 2)).join(' + ')} = {nombre(sa.facades.sud.total, 2)} m, la longueur hors tout.
+- Les cotes intérieures (de nu à nu) donnent directement les surfaces des pièces.
+- Aucune dimension n'est cotée deux fois.
+
+<Encadre type="retenir">
+Dehors : baies, axes, hors tout. Dedans : de nu à nu. Chaque chaîne se ferme sur sa cote totale.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="chaineFacade">
+
+<Cahier titre="Exemple résolu : la cote qui manque">
+
+**Énoncé.** La façade d'une petite école de Lubumbashi mesure {grandeur(F.totale, 2, 'm')} hors tout. Sur le plan, on lit de gauche à droite : un trumeau de {nombre(F.partielles[0], 2)}, une fenêtre de {nombre(F.partielles[1], 2)}, un trumeau de {nombre(F.partielles[2], 2)}, une porte de {nombre(F.partielles[3], 2)} ; la cote du dernier trumeau est effacée (données de l'énoncé). Retrouve-la, contrôle la chaîne, puis donne les cotes cumulées pour l'implantation.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La cote manquante">
+<AN k="connues" />
+<AN k="manquante" />
+<Note>Pourquoi a-t-on le droit de la calculer ? Une chaîne de cotes se ferme sur la cote totale : s'il manque une seule cote, elle est déterminée.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : contrôler et implanter">
+
+<Etape n={3} titre="Le contrôle et les cotes cumulées">
+<AN k="controle" />
+<AN k="cumulees" />
+<Resultat k="manquante" libelle="Dernier trumeau" />
+<Note couleur="vert">Contrôle : la dernière cote cumulée égale la cote totale. Diminue la porte de 10 cm : le dernier trumeau grandit d'autant.</Note>
+</Etape>
+
+<Etape n={4} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes (1/2)">
+
+<Piege erreur="coter deux fois la même longueur.">
+Une chaîne, une cote totale… et une troisième cote qui couvre la même longueur : tôt ou tard, l'une d'elles change sans les autres.
+
+<CoteSurabondante partielles={F.partielles} totale={F.totale} autre={9.45} />
+
+</Piege>
+
+<Piege erreur="croiser les cotes, les placer dans le dessin.">
+Les lignes se mélangent, les chiffres flottent. On range les cotes dehors, sur des lignes parallèles :
+
+<CotesCroisees />
+
+</Piege>
+
+</Page>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes (2/2)">
+
+<Piege erreur="confondre cote d'axe et cote de nu.">
+<AxeOuNu />
+</Piege>
+
+<Piege erreur="mesurer le plan au lieu de lire la cote.">
+Si une cote manque, on la calcule à partir des autres ou on la demande ; on ne la mesure pas à la règle.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**L'implantation.** Pour placer les baies d'un mur, le chef d'équipe tend un décamètre depuis l'angle et marque chaque repère à sa **cote cumulée**. S'il reportait chaque cote à partir du repère précédent, une petite erreur à chaque mesure s'ajouterait jusqu'au bout du mur :
+
+<ImplantationCumulee partielles={F.partielles} />
+
+<Encadre type="terrain" titre="Un plan coté se contrôle avant d'être construit">
+Avant de commencer un mur, on additionne la chaîne et on la compare à la cote totale. Une chaîne qui ne se ferme pas se signale au bureau d'études ; on ne « rattrape » pas l'écart sur le dernier trumeau sans le dire.
+</Encadre>
+
+**Les unités.** Un maçon habitué aux centimètres lira « 120 » ; un dessinateur écrira « 1,20 ». Le cartouche dit l'unité : on vérifie avant de couper le premier bloc.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : cotation">
+
+### Tracer
+
+lignes d'attache · ligne de cote fine · extrémités obliques (bâtiment) · chiffre au-dessus, lu d'en bas ou de la droite
+
+### Modes
+
+chaîne (erreurs cumulées) · parallèle (origine commune) · cumulées (une ligne, origine ○)
+
+### Plan de bâtiment
+
+dehors : baies → axes → hors tout · dedans : de nu à nu · unité dite une fois
+
+### Contrôle
+
+Σ cᵢ = T · cote manquante = T − Σ des autres · écart Δ = Σ cᵢ − T
+
+### Pièges
+
+cote en double · cotes croisées · axe ou nu · mesure à la règle
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le trumeau effacé">
+
+Sur la façade sud du studio, une cote est effacée :
+
+<FacadeCotee partielles={ex1.partielles} noms={ex1.noms} totale={ex1.total} inconnue={ex1.inconnue} prefixe="cot-ex1" />
+
+Retrouve-la.
+
+<Indice>La chaîne se ferme sur la cote totale.</Indice>
+
+<Corrige>
+{nombre(ex1.total, 2)} − ({ex1.partielles.filter((_, i) => i !== ex1.inconnue).map((p) => nombre(p, 2)).join(' + ')}) = **{grandeur(ex1c, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="De la chaîne aux cotes cumulées">
+
+La façade sud d'une maison est cotée en chaîne : {ma.partielles.map((p) => nombre(p, 2)).join(' ; ')} m. Écris les cotes cumulées depuis l'angle gauche.
+
+<Indice>Chaque cote cumulée est la précédente plus la cote partielle suivante.</Indice>
+
+<Corrige>
+**{ma2.cumulees.map((v) => nombre(v, 2)).join(' ; ')}** : la dernière, {nombre(ma2.total, 2)} m, est la longueur hors tout.
+
+<FacadeCotee partielles={ma.partielles} noms={ma.noms} totale={ma.total} cumul prefixe="cot-ex2" />
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une chaîne qui ne se ferme pas">
+
+Un plan porte la chaîne {ex3.partielles.map((p) => nombre(p, 2)).join(' ; ')} et la cote totale {nombre(ex3.totale, 2)}. Que constates-tu ? Que fais-tu ?
+
+<Indice>Additionne la chaîne et compare.</Indice>
+
+<Corrige>
+
+<FacadeCotee partielles={ex3.partielles} noms={F.noms} totale={ex3.totale} prefixe="cot-ex3" />
+
+- Somme : {nombre(chaineCotes(ex3.partielles).total, 2)} m ; écart : **{nombre(ex3e, 2)} m**. La chaîne ne se ferme pas.
+- Une des cotes est fausse, ou la cote totale. On ne choisit pas au hasard : on mesure sur place ce qui existe déjà, et l'on demande la correction au bureau d'études, par écrit.
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sur un plan imprimé en réduction, la cote :" choix={['est réduite aussi', 'ne change pas', 'doublée', 'disparaît']} bonne={1} colonnes={4}>
+Elle donne la dimension réelle, écrite.
+</QCM>
+
+<QCM n={2} question="En bâtiment, les extrémités d'une ligne de cote sont le plus souvent :" choix={['des flèches', 'de petits traits obliques', 'des points', 'des cercles']} bonne={1} colonnes={2}>
+Les flèches sont l'usage de la mécanique.
+</QCM>
+
+<QCM n={3} question="Une cote verticale se lit :" choix={['d’en haut', 'de la droite', 'de la gauche', 'à l’envers']} bonne={1} colonnes={4}>
+On lit le plan d'en bas ou de la droite.
+</QCM>
+
+<QCM n={4} question="Dans une cotation en chaîne :" choix={['les erreurs s’annulent', 'les erreurs s’additionnent', 'il n’y a pas d’erreur', 'on cote depuis une origine']} bonne={1} colonnes={2}>
+Chaque cote part de la précédente.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>La façade de l'exemple : cotes connues {F.partielles.slice(0, 4).map((p) => nombre(p, 2)).join(' ; ')}, total {nombre(F.totale, 2)}. Le dernier trumeau mesure :</>} choix={[grandeur(coteManquante(F.partielles.slice(0, 4), F.totale), 2, 'm'), grandeur(F.totale, 2, 'm'), grandeur(chaineCotes(F.partielles.slice(0, 4)).total, 2, 'm'), '1,20 m']} bonne={0} colonnes={4}>
+T − Σ des autres.
+</QCM>
+
+<QCM n={6} question="Autour d'un plan, la ligne de cotes la plus proche du dessin donne :" choix={['le hors tout', 'les baies et trumeaux', 'les axes', 'les niveaux']} bonne={1} colonnes={2}>
+On va du détail vers l'ensemble en s'éloignant.
+</QCM>
+
+<QCM n={7} question="Deux murs de 0,20 m axés à 4,20 m. La cote de nu à nu vaut :" choix={[grandeur(4.2, 2, 'm'), grandeur(4.2 + 0.2, 2, 'm'), grandeur(4.2 - 0.2, 2, 'm'), grandeur(4.2 - 0.4, 2, 'm')]} bonne={2} colonnes={4}>
+4,20 − 2 × 0,10 = {grandeur(4.2 - 0.2, 2, 'm')} : on retire deux demi-épaisseurs.
+</QCM>
+
+<QCM n={8} question="Pour implanter des baies avec précision, on reporte de préférence :" choix={['les cotes en chaîne', 'les cotes cumulées depuis l’origine', 'des mesures à la règle', 'les cotes d’un autre plan']} bonne={1} colonnes={2}>
+Les erreurs ne s'additionnent pas.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

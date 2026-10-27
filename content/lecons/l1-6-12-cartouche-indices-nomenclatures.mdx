@@ -1,0 +1,316 @@
+---
+id: L1.6.12
+titre: Cartouche, indices et nomenclatures
+objectifs:
+  - Lire les informations d'un cartouche
+  - Décoder le numéro d'un plan
+  - Suivre les révisions d'un plan par ses indices et vérifier qu'on a la dernière version
+  - Tirer des quantités d'une nomenclature de menuiseries
+relecture: false
+normes:
+  - "ISO 7200 : champs de données des cartouches"
+glossaire:
+  - terme: Indice de révision
+    definition: Lettre (A, B, C…) qui identifie la version d'un plan ; elle change à chaque modification diffusée.
+  - terme: Tableau des révisions
+    definition: Liste, au-dessus du cartouche, des indices successifs avec leur date et ce qui a changé.
+  - terme: Nuage de révision
+    definition: Contour en festons tracé autour d'une modification, avec un triangle portant l'indice.
+  - terme: Liste des plans
+    definition: "Inventaire du dossier : chaque plan avec son numéro, son titre, son indice et sa date en vigueur."
+symboles:
+  - { symbole: 'ind. C', signification: 'indice de révision du plan', unite: '—' }
+  - { symbole: 'P1, F1', signification: 'repères de menuiseries', unite: '—' }
+formules:
+  - { nom: 'Surface d''un type de menuiserie', tex: 'S = n \times l \times h', domaine: 'Nomenclature' }
+---
+
+import { EXEMPLE_MAISON, EXEMPLE_MENUISERIES, maison, nomenclatureMenuiseries, rangIndice, retardIndice } from '@/lib/calc/plans'
+import { grandeur, nombre } from '@/lib/format'
+import { CarteIdentite, CartoucheAnnote, CodePlan, IndicePerime, ListePlans, MenuiseriesSchema, NuageRevision } from '@/components/schemas/DessinCours4'
+import { PlanLogement } from '@/components/schemas/Logement'
+
+export const ma = maison(EXEMPLE_MAISON)
+export const m0 = nomenclatureMenuiseries(EXEMPLE_MENUISERIES)
+export const ex2 = { chantier: 'B', actuel: 'E' }
+export const ex3 = EXEMPLE_MENUISERIES.map((m) => (m.repere === 'F1' ? { ...m, largeur: 1.4 } : m))
+export const m3 = nomenclatureMenuiseries(ex3)
+export const liste = [
+  { code: 'MAI-EXE-ARC-101', titre: 'plan du rez-de-chaussée', indice: 'B', date: '08/2026', perime: true },
+  { code: 'MAI-EXE-ARC-101', titre: 'plan du rez-de-chaussée', indice: 'C', date: '10/2026' },
+  { code: 'MAI-EXE-ARC-201', titre: 'façades et coupe', indice: 'A', date: '08/2026' },
+  { code: 'MAI-EXE-STR-301', titre: 'fondations', indice: 'B', date: '09/2026' },
+]
+
+<Page etape="intuition" titre="L'intuition : la carte d'identité du plan">
+
+Une carte d'identité dit qui tu es : ton nom, ton numéro, la date. Le **cartouche** dit la même chose d'un plan : de quel bâtiment il s'agit, quel dessin, quel numéro, quelle date, qui l'a dessiné et vérifié. Il ajoute deux informations vitales : l'**échelle**, et l'**indice**, qui dit de quelle **version** du plan il s'agit.
+
+<CarteIdentite />
+
+Un plan sans cartouche est un dessin anonyme : on ne sait ni d'où il vient, ni s'il est à jour.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que lit-on dans un cartouche, et comment être sûr de travailler avec la dernière version d'un plan ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Identifier et suivre un plan" sousTitre="Cartouche, indices, nomenclatures" etape="cours">
+
+<Panneau n={1} titre="Identifier" icone="verification" couleur="encre">
+Maître d'ouvrage, projet, titre du plan, numéro : de quel bâtiment, quel dessin.
+</Panneau>
+
+<Panneau n={2} titre="Responsabilités" icone="regle" couleur="acier">
+Dessiné par, vérifié par, visa : qui répond du contenu.
+</Panneau>
+
+<Panneau n={3} titre="Échelle et format" icone="plan" couleur="terre">
+Indispensables pour mesurer ; le symbole de projection rappelle la méthode européenne.
+</Panneau>
+
+<Panneau n={4} titre="Indices" icone="attention" couleur="correction">
+A, B, C… à chaque modification ; un tableau dit ce qui a changé ; un nuage le montre sur le dessin.
+</Panneau>
+
+<Panneau n={5} titre="Diffusion" icone="terrain" couleur="validation">
+Chaque nouvel indice est envoyé à tous ; les anciens sont barrés et retirés du chantier.
+</Panneau>
+
+<Panneau n={6} titre="Nomenclatures" icone="quantites" couleur="brique">
+Menuiseries, aciers : des tableaux qui comptent et dimensionnent, d'où l'on tire les quantités.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : le cartouche et le numéro du plan">
+
+### Les champs du cartouche
+
+Un cartouche complet répond à quatre questions : **quel bâtiment** (maître d'ouvrage, projet, adresse) ; **quel dessin** (titre, numéro, échelle, format) ; **quelle version** (indice, date) ; **qui en répond** (dessinateur, vérificateur, bureau d'études).
+
+<CartoucheAnnote />
+
+### Le numéro du plan
+
+Dans un grand dossier, le numéro est **codifié** : chaque morceau a un sens. On le lit morceau par morceau :
+
+<CodePlan />
+
+<Regle type="norme" source="ISO 7200">
+L'ISO 7200 fixe les champs d'un cartouche (identification, titre, propriétaire, date, révision…). La codification des numéros est propre à chaque projet : elle est expliquée dans la liste des plans.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : indices, révisions et nomenclatures">
+
+### Les indices
+
+Le premier plan diffusé porte l'indice **A**. À chaque modification diffusée, on passe à la lettre suivante : B, C… Sur le dessin, un **nuage** entoure ce qui a changé, avec un triangle portant le nouvel indice ; au-dessus du cartouche, le **tableau des révisions** dit quand et quoi.
+
+<NuageRevision />
+
+### Les nomenclatures
+
+Une **nomenclature** est un tableau joint au plan : pour les menuiseries, chaque repère avec sa désignation, son nombre et ses dimensions ; pour les aciers, chaque repère de barre (L1.6.11). On en tire directement les quantités à commander : ici, {m0.nombre} baies pour {grandeur(m0.total, 2, 'm²')} d'ouvertures.
+
+</Page>
+
+<PlancheTechnique
+  titre="Maison : plan du rez-de-chaussée"
+  projet="Maison de deux pièces, parcelle 1245, Kinshasa"
+  numero="MAI-EXE-ARC-101"
+  echelle="1/50"
+  date="10/2026"
+  indice="C"
+  hachures={['maconnerie']}
+  notes={[
+    'Indice A, 06/2026 : première diffusion.',
+    'Indice B, 08/2026 : cotes des cloisons.',
+    'Indice C, 10/2026 : nomenclature des menuiseries mise à jour.',
+    `Menuiseries : ${m0.lignes.map((m) => `${m.repere} × ${m.nombre}`).join(', ')}.`,
+  ]}
+>
+
+<Vue titre="Plan du rez-de-chaussée" echelle="1/50" pleineLargeur>
+<PlanLogement lg={ma} prefixe="ci-plan" />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="menuiseries">
+
+<Cahier titre="Exemple résolu : les menuiseries de la maison">
+
+**Énoncé.** La nomenclature des menuiseries extérieures de la maison donne : {m0.lignes.map((m) => `${m.repere}, ${m.designation}, ${m.nombre} × ${nombre(m.largeur, 2)} × ${nombre(m.hauteur, 2)} m`).join(' ; ')} (données de l'énoncé). Calcule la surface de chaque type et la surface totale d'ouvertures, pour commander les menuiseries et les grilles de protection.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Type par type">
+<AN k="lignes" />
+<Note>Pourquoi multiplier par le nombre ? Une ligne de nomenclature décrit un type ; on commande autant de pièces que le nombre indiqué.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le total et la nomenclature dessinée">
+
+<Etape n={3} titre="Le total">
+<AN k="total" />
+<Resultat k="total" libelle="Surface totale d'ouvertures" />
+<Note couleur="vert">Contrôle : le nombre de baies du tableau doit correspondre aux repères comptés sur le plan. Ajoute une fenêtre F1 : la surface augmente d'une fenêtre.</Note>
+</Etape>
+
+<Etape n={4} titre="La nomenclature dessinée">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="construire avec un indice périmé.">
+<IndicePerime chantier="B" actuel="D" />
+</Piege>
+
+<Piege erreur="ignorer le nuage de révision.">
+Le nuage montre précisément ce qui a changé ; un regard rapide sur un plan « presque pareil » laisse passer la modification.
+</Piege>
+
+<Piege erreur="confondre numéro de plan et indice.">
+Le numéro reste le même d'une version à l'autre ; seul l'indice change. « MAI-EXE-ARC-101 indice C » remplace « MAI-EXE-ARC-101 indice B ».
+</Piege>
+
+<Piege erreur="recopier une nomenclature sans la recompter.">
+Les repères comptés sur le plan doivent correspondre au tableau ; une baie ajoutée sur le plan et oubliée dans la nomenclature ne sera pas commandée.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**La liste des plans.** Au bureau de chantier, on affiche la liste des plans en vigueur, mise à jour à chaque envoi du bureau d'études. Les versions remplacées sont barrées et retirées des classeurs :
+
+<ListePlans lignes={liste} />
+
+<Encadre type="terrain" titre="Le bordereau d'envoi">
+Chaque diffusion de plans est accompagnée d'un bordereau : liste des plans envoyés, indices, date, destinataires. Le chef de chantier le signe à la réception et met à jour la liste. En cas de litige, c'est la preuve de ce que chacun a reçu, et quand.
+</Encadre>
+
+**Les plans annotés.** Une modification décidée sur le chantier, en réunion, n'est valable qu'une fois portée sur un nouvel indice ; en attendant, on l'écrit sur le compte rendu de réunion.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : cartouche, indices et nomenclatures">
+
+### Cartouche
+
+quel bâtiment · quel dessin (titre, numéro, échelle, format) · quelle version (indice, date) · qui en répond
+
+### Numéro
+
+codifié : projet-phase-lot-type-numéro-indice · le numéro ne change pas, l'indice si
+
+### Révisions
+
+A → B → C… · nuage + triangle sur le dessin · tableau des révisions au-dessus du cartouche · anciens indices barrés et retirés
+
+### Nomenclatures
+
+une ligne par type · surface = nombre × largeur × hauteur · recompter sur le plan
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Lire un cartouche">
+
+Dans le cartouche du cours, quel est le titre du plan, son numéro, son échelle et son indice ? Qui l'a vérifié ?
+
+<CartoucheAnnote />
+
+<Indice>Champs 3, 4, 5, 7 et 10.</Indice>
+
+<Corrige>
+Titre : **plan du rez-de-chaussée** ; numéro : **MAI-EXE-ARC-101** ; échelle : **1/50** ; indice : **C** ; vérifié par **A. L.**
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le chantier est-il à jour ?">
+
+Le chef de chantier travaille avec le plan des fondations à l'indice {ex2.chantier}. Le bureau d'études vient de diffuser l'indice {ex2.actuel}. Combien de révisions lui manque-t-il ? Que doit-il faire ?
+
+<Indice>Rang de la lettre : A = 1, B = 2…</Indice>
+
+<Corrige>
+{ex2.actuel} est la {rangIndice(ex2.actuel)}e lettre, {ex2.chantier} la {rangIndice(ex2.chantier)}e : il manque **{retardIndice(ex2.chantier, ex2.actuel)} révisions**. Il arrête les travaux concernés, récupère l'indice {ex2.actuel}, lit les tableaux de révisions pour voir ce qui a changé depuis {ex2.chantier}, puis barre et retire l'ancien plan.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une révision de la nomenclature">
+
+À l'indice suivant, les trois fenêtres F1 sont élargies de {nombre(1.2, 2)} à {nombre(1.4, 2)} m. Recalcule la nomenclature des menuiseries. De combien augmente la surface d'ouvertures ?
+
+<Indice>Seule la ligne F1 change.</Indice>
+
+<Corrige>
+F1 : 3 × {nombre(1.4, 2)} × {nombre(1.2, 2)} = {grandeur(m3.lignes[1].surface, 2, 'm²')} ; total : **{grandeur(m3.total, 2, 'm²')}**, soit {grandeur(m3.total - m0.total, 2, 'm²')} de plus. On porte la modification avec un nuage et un nouvel indice.
+
+<MenuiseriesSchema lignes={ex3} />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.12">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le cartouche d'un plan se trouve :" choix={['en haut à gauche', 'en bas à droite', 'au dos', 'sur un document séparé']} bonne={1} colonnes={2}>
+Visible quand le plan est plié au format A4.
+</QCM>
+
+<QCM n={2} question="L'indice d'un plan dit :" choix={['son échelle', 'sa version', 'son format', 'son auteur']} bonne={1} colonnes={4}>
+A, B, C… à chaque modification diffusée.
+</QCM>
+
+<QCM n={3} question="Sur le dessin, une modification est signalée par :" choix={['un trait rouge', 'un nuage et un triangle portant l’indice', 'des hachures', 'rien']} bonne={1} colonnes={2}>
+Le tableau des révisions dit ce qui a changé.
+</QCM>
+
+<QCM n={4} question="Quand l'indice change, le numéro du plan :" choix={['change aussi', 'reste le même', 'disparaît', 'double']} bonne={1} colonnes={4}>
+C'est le même plan, dans une nouvelle version.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Le chantier a l'indice B, le bureau d'études a diffusé le D. Il manque :" choix={['0 révision', '1 révision', `${retardIndice('B', 'D')} révisions`, '4 révisions']} bonne={2} colonnes={4}>
+C puis D.
+</QCM>
+
+<QCM n={6} question={<>Dans l'exemple, la surface totale d'ouvertures vaut :</>} choix={[grandeur(m0.total, 2, 'm²'), grandeur(m0.lignes[1].surface, 2, 'm²'), grandeur(m0.lignes[0].unitaire, 2, 'm²'), grandeur(m0.total * 2, 2, 'm²')]} bonne={0} colonnes={4}>
+Somme des lignes : nombre × largeur × hauteur.
+</QCM>
+
+<QCM n={7} question="Un plan d'indice périmé doit être :" choix={['gardé au cas où', 'barré et retiré du chantier', 'donné aux ouvriers', 'agrandi']} bonne={1} colonnes={2}>
+Pour qu'on ne construise pas avec.
+</QCM>
+
+<QCM n={8} question="« MAI-EXE-STR-301 » est un plan :" choix={['d’architecture, en esquisse', 'de structure, en phase d’exécution', 'de réseaux', 'de situation']} bonne={1} colonnes={2}>
+EXE : exécution ; STR : structure.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

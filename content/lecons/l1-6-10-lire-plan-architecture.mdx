@@ -1,0 +1,351 @@
+---
+id: L1.6.10
+titre: Lire un plan d'architecture
+objectifs:
+  - Lire un plan de niveau, ses murs, cloisons, baies et sens d'ouverture
+  - Calculer les surfaces des pièces à partir des cotes intérieures
+  - Relier un plan, une façade et une coupe par leurs repères
+  - Lire les hauteurs d'une baie, allège, hauteur et linteau
+relecture: false
+normes: []
+glossaire:
+  - terme: Plan de niveau
+    definition: Coupe horizontale d'un étage, faite à environ un mètre du sol, vue de dessus.
+  - terme: Baie
+    definition: Ouverture dans un mur, fermée par une porte ou une fenêtre.
+  - terme: Allège
+    definition: Partie de mur sous une fenêtre ; sa hauteur se mesure depuis le sol fini.
+  - terme: Linteau
+    definition: Élément, souvent en béton armé, qui porte le mur au-dessus d'une baie.
+  - terme: Trumeau
+    definition: Partie pleine de mur entre deux baies.
+symboles:
+  - { symbole: 'F1, P1', signification: 'repères des fenêtres et des portes', unite: '—' }
+  - { symbole: 'S', signification: 'surface d''une pièce', unite: 'm²' }
+formules:
+  - { nom: 'Surface d''une pièce rectangulaire', tex: 'S = L \times l', domaine: 'Cotes de nu à nu' }
+---
+
+import { analyseLogement, EXEMPLE_MAISON, EXEMPLE_STUDIO, maison, studio } from '@/lib/calc/plans'
+import { grandeur, nombre } from '@/lib/format'
+import { BaieTroisVues, EscalierPlan, MaisonCoupeeIso, MurOuCloison, SensOuverture, SymbolesSanitaires, TableauBaie } from '@/components/schemas/DessinCours4'
+import { CoupeLogement, FacadeLogement, PlanLogement, niv } from '@/components/schemas/Logement'
+
+export const ma = maison(EXEMPLE_MAISON)
+export const am = analyseLogement(ma)
+export const st = studio(EXEMPLE_STUDIO)
+export const sa = analyseLogement(st)
+export const f1 = st.baies.find((b) => b.id === 'F1')
+export const f3 = st.baies.find((b) => b.id === 'F3')
+
+<Page etape="intuition" titre="L'intuition : une maison de poupée vue d'en haut">
+
+Imagine une maison de poupée dont on a scié les murs à hauteur de hanches et retiré le haut : vue d'en haut, on voit l'épaisseur des murs tranchés, les cloisons, les portes ouvertes jusqu'au sol, les allèges sous les fenêtres. C'est exactement ce que montre un **plan de niveau**.
+
+<MaisonCoupeeIso lg={ma} />
+
+Le plan de niveau est donc une **coupe horizontale**, faite à environ un mètre du sol, vue de dessus. La façade et la coupe complètent la lecture : elles donnent les hauteurs.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que lit-on sur un plan de niveau, une façade et une coupe, et comment relier les trois ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Lire un plan d'architecture" sousTitre="Plan, façade, coupe" etape="cours">
+
+<Panneau n={1} titre="Murs et cloisons" icone="materiaux" couleur="encre">
+Murs épais en trait fort, hachurés ; cloisons plus minces. L'épaisseur renseigne, le plan de structure confirme qui porte.
+</Panneau>
+
+<Panneau n={2} titre="Baies" icone="plan" couleur="acier">
+Fenêtres : trois traits fins dans l'épaisseur du mur. Portes : vantail et arc d'ouverture. Chacune a son repère, F1, P1…
+</Panneau>
+
+<Panneau n={3} titre="Pièces" icone="calcul" couleur="validation">
+Nom, surface, parfois niveau du sol. Surface = longueur × largeur, cotes de nu à nu.
+</Panneau>
+
+<Panneau n={4} titre="Équipements" icone="quantites" couleur="terre">
+WC, lavabo, douche, évier : ils disent où arrivent l'eau et où partent les évacuations.
+</Panneau>
+
+<Panneau n={5} titre="Façades" icone="idee" couleur="brique">
+Les baies en élévation, avec allèges et hauteurs ; les niveaux du terrain, du sol et de l'acrotère.
+</Panneau>
+
+<Panneau n={6} titre="Coupes" icone="regle" couleur="correction">
+Les hauteurs : sous plafond, épaisseur des dalles, linteaux, fondations. Le repère A-A les relie au plan.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : le plan de niveau">
+
+### Ce qu'on y voit
+
+Les **murs** tranchés, en trait fort, hachurés ; les **cloisons**, plus minces ; les **fenêtres**, trois traits fins dans l'épaisseur du mur ; les **portes**, avec leur vantail ouvert et l'arc décrit en s'ouvrant ; le **nom** et la **surface** de chaque pièce ; les **cotes** extérieures et intérieures (L1.6.6). On y voit aussi les appareils sanitaires et de cuisine :
+
+<SymbolesSanitaires />
+
+### L'escalier
+
+Un escalier est coupé, lui aussi, à environ un mètre : on dessine les marches jusqu'à la ligne de coupe, puis en tirets au-delà. Une flèche, partant d'un point, indique le sens de la **montée**.
+
+<EscalierPlan />
+
+<Regle type="art">
+La hauteur du plan de coupe, environ un mètre, est une convention de dessin : elle traverse les fenêtres et montre les allèges. Une baie haute, au-dessus du plan de coupe, se dessine en tirets.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : façade, coupe et baies">
+
+### Relier les vues
+
+Le plan donne les **largeurs** ; la **façade** et la **coupe** donnent les **hauteurs**. On passe de l'un à l'autre par les repères : la fenêtre F1 du plan est la F1 de la façade ; le repère de coupe A-A du plan dit où passe la coupe A-A.
+
+### Les hauteurs d'une baie
+
+Une fenêtre se lit sur trois vues : en plan, sa **largeur** ; en façade, son **allège** (hauteur du mur sous la fenêtre, depuis le sol fini) et sa **hauteur** ; en coupe, l'**appui** qui rejette l'eau, le **linteau** qui porte le mur au-dessus.
+
+<BaieTroisVues />
+
+### Les surfaces
+
+La surface d'une pièce se calcule avec ses cotes **intérieures**, de nu à nu : pour le séjour de la maison, {nombre(EXEMPLE_MAISON.sejour, 2)} × {nombre(EXEMPLE_MAISON.l, 2)} = {grandeur(am.pieces[0].surface, 2, 'm²')}. On ne compte ni les murs ni les cloisons.
+
+</Page>
+
+<PlancheTechnique
+  titre="Maison : plan du rez-de-chaussée"
+  projet="Maison de deux pièces, exemple L1.6.10"
+  numero="MA-01"
+  echelle="1/50"
+  date="10/2026"
+  indice="A"
+  hachures={['maconnerie']}
+  notes={[
+    `Surface des pièces : ${am.pieces.map((p) => `${p.nom} ${nombre(p.surface, 2)} m²`).join(' ; ')}.`,
+    `Hauteur sous plafond ${nombre(ma.hsp, 2)} m ; sol de la salle d’eau à ${niv(am.pieces[2].niveau)}.`,
+    'Cotes en mètres ; cotes intérieures de nu à nu.',
+  ]}
+>
+
+<Vue titre="Plan du rez-de-chaussée" echelle="1/50" pleineLargeur>
+<PlanLogement lg={ma} prefixe="ar-plan" />
+</Vue>
+
+</PlancheTechnique>
+
+<PlancheTechnique
+  titre="Maison : façade sud et coupe A-A"
+  projet="Maison de deux pièces, exemple L1.6.10"
+  numero="MA-02"
+  echelle="1/50"
+  date="10/2026"
+  indice="A"
+  hachures={['ba', 'maconnerie', 'terre', 'gravier']}
+  notes={[
+    `Fenêtres F1 : allège ${nombre(ma.baies[0].allege, 2)} m, hauteur ${nombre(ma.baies[0].hauteur, 2)} m.`,
+    'Niveaux en mètres, rapportés au sol fini ±0,00.',
+  ]}
+>
+
+<Vue titre="Façade sud" echelle="1/50" pleineLargeur>
+<FacadeLogement lg={ma} prefixe="ar-fac" />
+</Vue>
+
+<Vue titre="Coupe A-A" echelle="1/50" pleineLargeur>
+<CoupeLogement lg={ma} prefixe="ar-cou" />
+</Vue>
+
+</PlancheTechnique>
+
+<FicheCalcul calcul="surfacesMaison">
+
+<Cahier titre="Exemple résolu : les surfaces d'une maison à Kisangani">
+
+**Énoncé.** Sur le plan de la maison ci-dessus, on lit : longueur intérieure {grandeur(EXEMPLE_MAISON.L, 2, 'm')}, largeur intérieure {grandeur(EXEMPLE_MAISON.l, 2, 'm')}, séjour de {grandeur(EXEMPLE_MAISON.sejour, 2, 'm')} de large, chambre de {grandeur(EXEMPLE_MAISON.chambre, 2, 'm')} de profondeur, cloisons de {nombre(EXEMPLE_MAISON.cloison * 100, 0)} cm (données de l'énoncé). Calcule la surface de chaque pièce et la surface totale.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Pièce par pièce">
+<AN k="sejour" />
+<AN k="chambre" />
+<AN k="sdb" />
+<Note>Pourquoi retirer la cloison ? Elle occupe de la place au sol, mais elle n'appartient à aucune pièce : on mesure de nu à nu.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le total et le plan">
+
+<Etape n={3} titre="Le total">
+<AN k="total" />
+<Resultat k="total" libelle="Surface totale des pièces" />
+<Note couleur="vert">Contrôle : la surface des pièces est plus petite que l'emprise hors tout (<Val k="emprise" />) ; la différence, ce sont les murs et les cloisons.</Note>
+</Etape>
+
+<Etape n={4} titre="Le plan">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre une cloison pour un mur porteur, ou l'inverse.">
+<MurOuCloison />
+</Piege>
+
+<Piege erreur="lire le sens d'ouverture à l'envers.">
+L'arc montre où passe le vantail ; les paumelles sont du côté du centre de l'arc. On laisse cet espace libre de tout meuble.
+
+<SensOuverture />
+
+</Piege>
+
+<Piege erreur="calculer une surface avec les cotes extérieures.">
+On inclurait les murs : la surface serait trop grande. Les cotes intérieures, de nu à nu, donnent la surface utile.
+</Piege>
+
+<Piege erreur="confondre allège et hauteur de baie.">
+L'allège est sous la fenêtre ; la hauteur est celle de l'ouverture. Une fenêtre de 1,20 m sur une allège de 0,90 m a son linteau à {niv(0.9 + 1.2)}.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Monter les baies.** Le maçon laisse dans le mur des **réservations** un peu plus grandes que la menuiserie, pour la poser et la caler. Il lit sur le plan la largeur et la position de chaque baie, sur la façade et la coupe sa hauteur et son allège :
+
+<TableauBaie />
+
+<Encadre type="terrain" titre="Contre les pluies tropicales">
+L'appui d'une fenêtre doit avoir une pente vers l'extérieur et un larmier sous son nez : sous les fortes pluies, l'eau qui ruisselle ne doit pas revenir vers le mur. La coupe le montre ; on le vérifie avant de couler les appuis.
+</Encadre>
+
+**Les surfaces vendues ou louées** se calculent sur les cotes intérieures ; un acheteur ou un locataire attentif refait le calcul pièce par pièce.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : lire un plan d'architecture">
+
+### Plan de niveau
+
+coupe horizontale à environ 1 m, vue de dessus · murs forts et hachurés · cloisons minces · fenêtres : 3 traits · portes : vantail et arc
+
+### Baies
+
+largeur en plan · allège et hauteur en façade · appui et linteau en coupe · repères F1, P1…
+
+### Surfaces
+
+S = L × l, cotes de nu à nu · sans les murs ni les cloisons
+
+### Liens
+
+mêmes repères de baies · repère de coupe A-A · niveaux finis
+
+### Pièges
+
+mur ou cloison · sens d'ouverture · cotes extérieures pour les surfaces · allège et hauteur
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices (1/2)">
+
+<Exercice n={1} niveau="facile" titre="Lire le plan du studio">
+
+<PlanLogement lg={st} prefixe="ar-ex1" cotes="aucune" surfaces={false} />
+
+Combien de pièces, de portes et de fenêtres compte ce studio ? Quelle fenêtre éclaire la salle d'eau ?
+
+<Indice>Compte les arcs de porte et les baies à trois traits.</Indice>
+
+<Corrige>
+**{st.pieces.length} pièces**, **{st.baies.filter((b) => b.type === 'porte').length + st.portes.length} portes** (P1 d'entrée, P2 de la salle d'eau), **{st.baies.filter((b) => b.type === 'fenetre').length} fenêtres** (F1, F2, F3). La salle d'eau est éclairée par **F3**, en façade nord, petite et haute.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Les surfaces du studio">
+
+Avec les cotes du studio ({grandeur(EXEMPLE_STUDIO.L, 2, 'm')} × {grandeur(EXEMPLE_STUDIO.l, 2, 'm')} intérieurs, salle d'eau de {nombre(EXEMPLE_STUDIO.a, 2)} × {nombre(EXEMPLE_STUDIO.s, 2)} m, cloisons de {nombre(EXEMPLE_STUDIO.cloison * 100, 0)} cm), calcule la surface de chaque pièce.
+
+<Indice>La pièce principale est en L : surface totale intérieure moins l'emprise de la salle d'eau et de ses cloisons.</Indice>
+
+<Corrige>
+Salle d'eau : {nombre(EXEMPLE_STUDIO.a, 2)} × {nombre(EXEMPLE_STUDIO.s, 2)} = **{grandeur(sa.pieces[1].surface, 2, 'm²')}**. Pièce principale : {nombre(EXEMPLE_STUDIO.L, 2)} × {nombre(EXEMPLE_STUDIO.l, 2)} − ({nombre(EXEMPLE_STUDIO.a, 2)} + {nombre(EXEMPLE_STUDIO.cloison, 2)}) × ({nombre(EXEMPLE_STUDIO.s, 2)} + {nombre(EXEMPLE_STUDIO.cloison, 2)}) = **{grandeur(sa.pieces[0].surface, 2, 'm²')}**. Total : {grandeur(sa.surfaceTotale, 2, 'm²')}.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Page etape="exercices" titre="Les exercices (2/2)">
+
+<Exercice n={3} niveau="difficile" titre="Les hauteurs des fenêtres">
+
+<FacadeLogement lg={st} prefixe="ar-ex3" />
+
+La fenêtre F1 a une allège de {nombre(f1.allege, 2)} m et une hauteur de {nombre(f1.hauteur, 2)} m. À quel niveau est le haut de F1 ? Combien de mur reste-t-il au-dessus, jusqu'à la sous-face de la dalle à {niv(st.hsp)} ? Pourquoi la fenêtre F3 de la salle d'eau a-t-elle une allège de {nombre(f3.allege, 2)} m ?
+
+<Indice>Haut de baie = allège + hauteur ; la sous-face de dalle est à la hauteur sous plafond.</Indice>
+
+<Corrige>
+Haut de F1 : {nombre(f1.allege, 2)} + {nombre(f1.hauteur, 2)} = **{niv(f1.allege + f1.hauteur)}** ; il reste **{grandeur(st.hsp - f1.allege - f1.hauteur, 2, 'm')}** de mur jusqu'à la dalle, où se loge le linteau. F3 est **haute** pour l'intimité de la salle d'eau et pour laisser la place des appareils dessous.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.6.10">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un plan de niveau est :" choix={['une façade', 'une coupe horizontale vue de dessus', 'une perspective', 'un plan de masse']} bonne={1} colonnes={2}>
+Faite à environ un mètre du sol.
+</QCM>
+
+<QCM n={2} question="En plan, une fenêtre se dessine :" choix={['par un arc', 'par trois traits fins dans le mur', 'par une croix', 'en tirets']} bonne={1} colonnes={2}>
+L'arc est réservé aux portes.
+</QCM>
+
+<QCM n={3} question="Les paumelles d'une porte sont :" choix={['du côté du centre de l’arc', 'à l’opposé de l’arc', 'au milieu', 'invisibles']} bonne={0} colonnes={2}>
+Le vantail tourne autour d'elles.
+</QCM>
+
+<QCM n={4} question="On calcule la surface d'une pièce avec les cotes :" choix={['extérieures', 'de nu à nu', 'd’axe en axe', 'de façade']} bonne={1} colonnes={4}>
+Sans les murs ni les cloisons.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, la chambre mesure :</>} choix={[grandeur(am.pieces[1].surface, 2, 'm²'), grandeur(am.pieces[0].surface, 2, 'm²'), grandeur(am.pieces[2].surface, 2, 'm²'), grandeur(am.surfaceTotale, 2, 'm²')]} bonne={0} colonnes={4}>
+({nombre(EXEMPLE_MAISON.L, 2)} − {nombre(EXEMPLE_MAISON.sejour, 2)} − {nombre(EXEMPLE_MAISON.cloison, 2)}) × {nombre(EXEMPLE_MAISON.chambre, 2)}.
+</QCM>
+
+<QCM n={6} question="L'allège d'une fenêtre se lit :" choix={['en plan', 'en façade ou en coupe', 'sur le plan de masse', 'sur le plan de situation']} bonne={1} colonnes={2}>
+C'est une hauteur.
+</QCM>
+
+<QCM n={7} question="Au-dessus d'une baie, le mur est porté par :" choix={['l’appui', 'le linteau', 'l’allège', 'le tableau']} bonne={1} colonnes={4}>
+Souvent une poutre courte en béton armé.
+</QCM>
+
+<QCM n={8} question="Sur un plan de niveau, une marche au-delà de la ligne de coupe se dessine :" choix={['en trait fort', 'en tirets', 'en rouge', 'pas du tout']} bonne={1} colonnes={4}>
+Elle passe au-dessus du plan de coupe.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
