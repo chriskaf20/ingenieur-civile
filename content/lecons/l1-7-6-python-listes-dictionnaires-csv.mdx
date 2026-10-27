@@ -1,0 +1,307 @@
+---
+id: L1.7.6
+titre: "Python : listes, dictionnaires, fichiers CSV"
+objectifs:
+  - Ranger des mesures dans une liste et les parcourir
+  - Associer des valeurs à des clés avec un dictionnaire
+  - Lire un fichier CSV de mesures et convertir ses valeurs
+  - Calculer des statistiques simples et repérer les valeurs hors seuil
+relecture: false
+normes:
+  - "EN 206 : conformité de la résistance du béton (critères statistiques, traités en L2.6)"
+glossaire:
+  - terme: Liste
+    definition: Suite ordonnée de valeurs entre crochets ; chaque valeur a un indice qui commence à 0.
+  - terme: Dictionnaire
+    definition: Ensemble de couples clé → valeur entre accolades ; on lit une valeur par sa clé.
+  - terme: CSV
+    definition: Fichier texte de tableau, une ligne par enregistrement, les colonnes séparées par un caractère (souvent « ; » en français).
+symboles:
+  - { symbole: 'fc', signification: 'résistance à la compression d''une éprouvette', unite: 'MPa' }
+  - { symbole: 'n', signification: 'nombre de valeurs', unite: '—' }
+formules:
+  - { nom: 'Moyenne', tex: '\bar{f} = \frac{1}{n} \sum f_i', domaine: 'sum(fc) / len(fc)' }
+---
+
+import { CSV_EPROUVETTES, lireEprouvettes, statsEprouvettes, formatF, reprFlottant } from '@/lib/calc/programmation'
+import { grandeur, nombre } from '@/lib/format'
+import { Console, CsvVersValeurs, DictionnaireSchema, ListeIndices } from '@/components/schemas/InfoCours2'
+import { DiagrammeBarres, DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const e0 = lireEprouvettes(CSV_EPROUVETTES)
+export const s0 = statsEprouvettes(e0, 25)
+export const fc = e0.map((x) => x.fc)
+export const s2 = statsEprouvettes(e0, 28)
+
+<Page etape="intuition" titre="L'intuition : un carnet de mesures">
+
+Le laboratoire a écrasé neuf éprouvettes de béton et envoie un fichier : une ligne par éprouvette, son nom, sa gâchée, sa résistance. Recopier ces nombres à la main, c'est risquer une faute à chaque ligne ; et le mois prochain, il y en aura cent. Python lit le fichier, range les valeurs, calcule la moyenne et repère les éprouvettes faibles.
+
+<DiagrammeBarres alt={`Les résistances des neuf éprouvettes : ${e0.map((x) => `${x.nom} ${nombre(x.fc, 1)} MPa`).join(', ')}.`} titre="résistances des éprouvettes à 28 jours (MPa)" barres={e0.map((x) => ({ libelle: x.nom, valeur: x.fc, texte: nombre(x.fc, 1), teinte: x.fc < 25 ? 'correction' : 'encre' }))} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment lire un fichier de mesures et en tirer des résultats fiables ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Ranger et lire des données" sousTitre="Listes, dictionnaires, fichiers" etape="cours">
+
+<Panneau n={1} titre="La liste" icone="quantites" couleur="encre">
+fc = [27.5, 29.1, …] : des valeurs dans l'ordre ; fc[0] est la première.
+</Panneau>
+
+<Panneau n={2} titre="Les fonctions de liste" icone="calcul" couleur="acier">
+len, sum, min, max ; append pour ajouter ; for v in fc pour parcourir.
+</Panneau>
+
+<Panneau n={3} titre="Le dictionnaire" icone="idee" couleur="brique">
+moyennes = {'{'}"G1": 27.7, …{'}'} : une valeur par clé.
+</Panneau>
+
+<Panneau n={4} titre="Le fichier CSV" icone="plan" couleur="terre">
+Une ligne par mesure ; split(";") découpe ; la première ligne est l'en-tête.
+</Panneau>
+
+<Panneau n={5} titre="Convertir" icone="attention" couleur="correction">
+Tout ce qu'on lit est du texte : float(texte.replace(",", ".")).
+</Panneau>
+
+<Panneau n={6} titre="Filtrer" icone="verification" couleur="validation">
+Garder les valeurs sous un seuil : une boucle et un if.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : listes et dictionnaires">
+
+### Les listes
+
+Une liste range des valeurs dans l'ordre : `fc = [27.5, 29.1, 26.4]`. Chaque valeur a un **indice** qui commence à **0** ; `fc[-1]` est la dernière. `len(fc)` donne le nombre de valeurs, `sum`, `min`, `max` font le reste ; `fc.append(30.1)` ajoute une valeur à la fin.
+
+<ListeIndices valeurs={fc} />
+
+### Les dictionnaires
+
+Un dictionnaire associe des **clés** à des **valeurs** : `moyennes["G2"]` donne la moyenne de la gâchée G2. On l'utilise pour regrouper des mesures par gâchée, par élément, par date.
+
+<DictionnaireSchema moyennes={s0.moyennes} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : lire un fichier CSV">
+
+### Le fichier
+
+```text
+eprouvette;gachee;fc_MPa
+E01;G1;27,5
+E02;G1;29,1
+…
+```
+
+### Le programme
+
+```python
+eprouvettes = []
+with open("eprouvettes.csv", encoding="utf-8") as fichier:
+    lignes = fichier.read().strip().split("\n")
+for ligne in lignes[1:]:                 # on saute l'en-tête
+    nom, gachee, texte = ligne.split(";")
+    fc = float(texte.replace(",", "."))  # virgule française → point
+    eprouvettes.append({"nom": nom, "gachee": gachee, "fc": fc})
+```
+
+Chaque ligne est découpée au point-virgule ; la résistance, lue comme un texte avec une virgule, est convertie en nombre.
+
+<CsvVersValeurs ligne="E01;G1;27,5" e={e0[0]} />
+
+<Regle type="art">
+Les fichiers des laboratoires et des appareils de mesure changent de format d'un fournisseur à l'autre : séparateur, virgule ou point, en-têtes. On ouvre toujours le fichier dans un éditeur de texte avant d'écrire le programme qui le lit.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : du fichier au résultat">
+
+<DiagrammeFlux alt="Le traitement d'un fichier de mesures : lire le fichier ; découper chaque ligne ; convertir les textes en nombres ; ranger dans une liste de dictionnaires ; calculer les statistiques et filtrer les valeurs hors seuil." etapes={[{ titre: 'Lire', texte: 'open, read', teinte: 'encre' }, { titre: 'Découper', texte: 'split(";")', teinte: 'acier' }, { titre: 'Convertir', texte: 'float(…)', teinte: 'terre' }, { titre: 'Ranger', texte: 'liste de dictionnaires', teinte: 'brique' }, { titre: 'Calculer', texte: 'moyenne, min, filtre', teinte: 'validation' }]} />
+
+Ce qu'imprime le programme complet :
+
+<Console lignes={[`n = ${s0.n}`, `moyenne = ${formatF(s0.moyenne, 2)} MPa`, `min = ${reprFlottant(s0.min)}  max = ${reprFlottant(s0.max)}`, `sous 25.0 MPa : ${JSON.stringify(s0.sousSeuil).replace(/"/g, "'")}`]} alt={`Sortie du programme : ${s0.n} éprouvettes, moyenne ${formatF(s0.moyenne, 2)} MPa, minimum ${reprFlottant(s0.min)}, maximum ${reprFlottant(s0.max)}, une éprouvette sous 25 MPa : ${s0.sousSeuil.join(', ')}.`} />
+
+</Page>
+
+<FicheCalcul calcul="pythonCsv">
+
+<Cahier titre="Exemple résolu : les éprouvettes d'un chantier à Mbandaka">
+
+**Énoncé.** Le laboratoire envoie le fichier des neuf éprouvettes de trois gâchées (données de l'énoncé). Calcule le nombre, la moyenne, le minimum et le maximum ; la moyenne de chaque gâchée ; et liste les éprouvettes sous la résistance minimale exigée.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les statistiques">
+<AN k="stats" />
+<AN k="gachees" />
+<Note>Pourquoi par gâchée ? Une gâchée faible se cache dans la moyenne générale ; le dictionnaire la fait apparaître.</Note>
+<Resultat k="moyenne" libelle="Moyenne" />
+</Etape>
+
+<Etape n={3} titre="La sortie">
+<Schema />
+<Note couleur="vert">Contrôle : le minimum de la liste est bien l'éprouvette signalée. Relève le seuil : la liste s'allonge.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier de convertir le texte en nombre.">
+`"27,5" > 25` provoque une erreur ; `float("27,5")` aussi : il faut d'abord remplacer la virgule par un point.
+
+<Console lignes={['>>> float("27,5")', "ValueError: could not convert string to float: '27,5'", '>>> float("27,5".replace(",", "."))', '27.5']} alt="Dans la console : convertir le texte 27,5 provoque une erreur de valeur ; après remplacement de la virgule par un point, on obtient le nombre 27.5." titre="console Python" />
+</Piege>
+
+<Piege erreur="compter l'en-tête comme une mesure.">
+La première ligne contient les noms des colonnes : on la saute avec `lignes[1:]`.
+</Piege>
+
+<Piege erreur="croire que fc[1] est la première valeur.">
+Les indices commencent à 0 : `fc[1]` est la **deuxième**.
+</Piege>
+
+<Piege erreur="tirer une conclusion de conformité d'une simple moyenne.">
+La conformité d'un béton suit des critères statistiques précis de l'EN 206 (L2.6) ; ce programme prépare les données, il ne décide pas seul.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les fichiers du chantier.** Résistances d'éprouvettes, relevés de températures du béton, mesures de tassement, carnets de nivellement : beaucoup d'appareils et de laboratoires exportent en CSV. Un petit programme les relit, les contrôle et prépare les tableaux du rapport.
+
+<Encadre type="terrain" titre="Garder la trace">
+On ne modifie jamais le fichier brut du laboratoire : on le garde tel quel, et le programme écrit ses résultats dans un autre fichier. En cas de litige, la donnée d'origine fait foi.
+</Encadre>
+
+<DiagrammeFlux alt="Le traitement des fichiers d'un chantier : le fichier brut du laboratoire est gardé intact ; le programme le lit et le contrôle ; il écrit ses résultats dans un nouveau fichier ; le rapport reprend ces résultats." etapes={[{ titre: 'Fichier brut', texte: 'gardé intact', teinte: 'acier' }, { titre: 'Programme', texte: 'lit, contrôle', teinte: 'encre' }, { titre: 'Résultats', texte: 'nouveau fichier', teinte: 'terre' }, { titre: 'Rapport', texte: 'tableaux, courbes', teinte: 'validation' }]} />
+
+**Un tableur ou Python ?** Pour une feuille consultée par tous, le tableur ; pour un traitement répété sur beaucoup de fichiers, Python.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : listes, dictionnaires, CSV">
+
+### Listes
+
+[a, b, c] · indices 0 à n − 1, −1 = dernier · len, sum, min, max · append · for v in liste
+
+### Dictionnaires
+
+{'{'}"clé": valeur{'}'} · d["clé"] · for cle, v in d.items()
+
+### CSV
+
+open(…, encoding="utf-8") · read().split("\n") · lignes[1:] saute l'en-tête · split(";") · float(t.replace(",", "."))
+
+### Pièges
+
+texte non converti · en-tête comptée · indice 1 ≠ premier · moyenne ≠ conformité
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Les indices">
+
+Avec la liste fc des neuf résistances, que valent `fc[0]`, `fc[-1]` et `len(fc)` ?
+
+<Indice>0 pour la première, −1 pour la dernière.</Indice>
+
+<Corrige>
+`fc[0]` = **{reprFlottant(fc[0])}** ; `fc[-1]` = **{reprFlottant(fc[fc.length - 1])}** ; `len(fc)` = **{fc.length}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un autre seuil">
+
+Quelles éprouvettes sont sous 28 MPa ?
+
+<Indice>Une boucle, un if, une liste qui se remplit.</Indice>
+
+<Corrige>
+```python
+faibles = [e["nom"] for e in eprouvettes if e["fc"] < 28]
+```
+→ **{s2.sousSeuil.join(', ')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Moyenne par gâchée">
+
+Écris le code qui construit le dictionnaire des moyennes par gâchée, et donne ses valeurs.
+
+<Indice>Un dictionnaire de listes : on ajoute chaque fc à la liste de sa gâchée, puis on moyenne.</Indice>
+
+<Corrige>
+```python
+par_gachee = {}
+for e in eprouvettes:
+    par_gachee.setdefault(e["gachee"], []).append(e["fc"])
+moyennes = {g: sum(v) / len(v) for g, v in par_gachee.items()}
+```
+→ {Object.entries(s0.moyennes).map(([g, m]) => `${g} : **${grandeur(m, 2, 'MPa')}**`).join(' ; ')}.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.7.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le premier élément d'une liste L est :" choix={['L[0]', 'L[1]', 'L[-1]', 'L.premier']} bonne={0} colonnes={4}>
+Les indices commencent à 0.
+</QCM>
+
+<QCM n={2} question="len([3, 5, 8]) vaut :" choix={['3', '8', '16', '2']} bonne={0} colonnes={4}>
+Le nombre d'éléments.
+</QCM>
+
+<QCM n={3} question='Dans d = {"G1": 27.7}, d["G1"] vaut :' choix={['27.7', '"G1"', 'une erreur', '1']} bonne={0} colonnes={4}>
+On lit la valeur par sa clé.
+</QCM>
+
+<QCM n={4} question={'"E01;G1;27,5".split(";") donne :'} choix={["['E01', 'G1', '27,5']", "['E01;G1;27,5']", '27.5', "['E01', 'G1', 27.5]"]} bonne={0} colonnes={2}>
+Des textes : il faut encore convertir.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={'float("27,5") :'} choix={['provoque une erreur', 'vaut 27.5', 'vaut 275', 'vaut 27']} bonne={0} colonnes={2}>
+Il faut un point décimal : replace d'abord.
+</QCM>
+
+<QCM n={6} question={<>La moyenne des neuf éprouvettes vaut :</>} choix={[grandeur(s0.moyenne, 2, 'MPa'), grandeur(s0.max, 2, 'MPa'), grandeur(s0.min, 2, 'MPa'), grandeur(s0.moyenne + 2, 2, 'MPa')]} bonne={0} colonnes={4}>
+sum(fc) / len(fc).
+</QCM>
+
+<QCM n={7} question="lignes[1:] sert à :" choix={['sauter l’en-tête', 'prendre la première ligne', 'inverser le fichier', 'compter les lignes']} bonne={0} colonnes={2}>
+Toutes les lignes sauf la première.
+</QCM>
+
+<QCM n={8} question="Le fichier brut du laboratoire :" choix={['se garde tel quel', 'se corrige à la main', 'se supprime après lecture', 'se recopie dans le programme']} bonne={0} colonnes={2}>
+La donnée d'origine fait foi.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

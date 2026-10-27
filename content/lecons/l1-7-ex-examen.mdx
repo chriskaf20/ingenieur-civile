@@ -1,0 +1,116 @@
+---
+id: L1.7.EX
+titre: "Examen du module L1.7 : informatique de l'ingénieur"
+objectifs:
+  - Écrire et recopier des formules de tableur
+  - Utiliser les fonctions SI, RECHERCHEV et SOMMEPROD
+  - Lire et écrire des programmes Python simples
+  - Tester un calcul et interpréter ses résultats
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { afficherValeur, evaluerFeuille, recopierFormule } from '@/lib/calc/tableur'
+import { linspace, reactionsPonctuelle, reprFlottant, sacsCiment } from '@/lib/calc/programmation'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+
+export const q1 = evaluerFeuille({ A1: '=3+4*2^2' }).A1
+export const q5 = evaluerFeuille({ A1: 2, A2: 3, B1: 5, B2: 4, C1: '=SOMMEPROD(A1:A2;B1:B2)' }).C1
+export const q8 = sacsCiment(350, 1.5, 50)
+export const q10 = reactionsPonctuelle(8, 2, 40)
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 2 h.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet, un ordinateur.
+- Pour chaque question de code : exécute-le à la main, ligne par ligne.
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="L1.7.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="=3+4*2^2 vaut :" choix={[afficherValeur(q1), '28', '67', '19']} bonne={0} colonnes={4}>
+Puissance, puis multiplication, puis addition (L1.7.1).
+</QCM>
+
+<QCM n={2} question="=B3*$C$1 recopiée deux lignes plus bas devient :" choix={[recopierFormule('=B3*$C$1', 2, 0), '=B5*$C$3', '=B3*$C$1', '=D3*$C$1']} bonne={0} colonnes={2}>
+Seule la référence relative se décale (L1.7.1).
+</QCM>
+
+<QCM n={3} question="#DIV/0! signale :" choix={['une division par zéro', 'une fonction inconnue', 'une valeur introuvable', 'une référence circulaire']} bonne={0} colonnes={2}>
+Souvent une cellule vide au dénominateur (L1.7.1).
+</QCM>
+
+<QCM n={4} question="RECHERCHEV(12;$A$2:$B$6;2;FAUX) renvoie :" choix={['la valeur de la colonne B sur la ligne où A vaut 12', 'la somme de la colonne B', '12', 'la ligne 12']} bonne={0} colonnes={2}>
+Recherche exacte dans la première colonne (L1.7.2).
+</QCM>
+
+<QCM n={5} question="A1 = 2, A2 = 3, B1 = 5, B2 = 4. =SOMMEPROD(A1:A2;B1:B2) vaut :" choix={[afficherValeur(q5), '14', '45', '10']} bonne={0} colonnes={4}>
+2 × 5 + 3 × 4 (L1.7.2).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={6} question="Pour tracer M en fonction de x, le bon graphique est :" choix={['un nuage de points', 'un camembert', 'un histogramme', 'des barres empilées']} bonne={0} colonnes={2}>
+Il respecte les abscisses (L1.7.3).
+</QCM>
+
+<QCM n={7} question="Le type de 2.5 en Python est :" choix={['float', 'int', 'str', 'bool']} bonne={0} colonnes={4}>
+Un décimal (L1.7.4).
+</QCM>
+
+<QCM n={8} question="masse = 350 * 1.5 ; math.ceil(masse / 50) vaut :" choix={[String(q8.sacs), reprFlottant(q8.quotient), String(q8.entiers), '525']} bonne={0} colonnes={4}>
+On arrondit vers le haut le nombre de sacs (L1.7.4).
+</QCM>
+
+<QCM n={9} question="Combien de fois s'exécute le bloc de for i in range(5) ?" choix={['5', '4', '6', '0']} bonne={0} colonnes={4}>
+i = 0, 1, 2, 3, 4 (L1.7.5).
+</QCM>
+
+<QCM n={10} question="reactions(8, 2, 40), avec RA = P(L − a)/L et RB = P a/L, renvoie :" choix={[`(${q10.join(', ')})`, '(10, 30)', '(20, 20)', '(40, 0)']} bonne={0} colonnes={4}>
+40 × 6 / 8 et 40 × 2 / 8 (L1.7.5).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={11} question="Avec fc = [27.5, 29.1, 26.4], fc[-1] vaut :" choix={['26.4', '27.5', '29.1', 'une erreur']} bonne={0} colonnes={4}>
+−1 désigne le dernier (L1.7.6).
+</QCM>
+
+<QCM n={12} question={'float("31,2") :'} choix={['provoque une erreur', 'vaut 31.2', 'vaut 312', 'vaut 31']} bonne={0} colonnes={2}>
+Il faut remplacer la virgule par un point (L1.7.6).
+</QCM>
+
+<QCM n={13} question="np.linspace(0, 4, 5) donne :" choix={[`[${linspace(0, 4, 5).map(reprFlottant).join(', ')}]`, '[0, 1, 2, 3]', '[0.0, 0.8, 1.6, 2.4, 3.2]', '[0, 4]']} bonne={0} colonnes={2}>
+Cinq valeurs, bornes comprises (L1.7.7).
+</QCM>
+
+<QCM n={14} question="Pour vérifier qu'un résultat flottant vaut 10, on écrit :" choix={['assert math.isclose(G, 10)', 'assert G == 10', 'print(G == 10)', 'if G: pass']} bonne={0} colonnes={2}>
+Avec une tolérance (L1.7.8).
+</QCM>
+
+<QCM n={15} question="Un test de la charge au milieu passe avec une formule boguée. On en conclut :" choix={['qu’il faut d’autres cas, non symétriques', 'que la fonction est juste', 'qu’il faut supprimer le test', 'que pytest est faux']} bonne={0} colonnes={2}>
+Un seul cas symétrique cache les inversions (L1.7.8).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

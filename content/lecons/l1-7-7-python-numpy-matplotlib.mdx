@@ -1,0 +1,313 @@
+---
+id: L1.7.7
+titre: "Python : NumPy et Matplotlib"
+objectifs:
+  - Créer un tableau NumPy de valeurs régulières avec linspace
+  - Calculer sur un tableau entier sans boucle
+  - Tracer une courbe avec Matplotlib, titre, axes et unités compris
+  - Lire un maximum et sa position sur un tableau de résultats
+relecture: false
+normes: []
+glossaire:
+  - terme: NumPy
+    definition: Bibliothèque Python de calcul sur des tableaux de nombres ; une opération s'applique à tous les éléments d'un coup.
+  - terme: linspace
+    definition: Fonction NumPy qui crée n valeurs régulièrement espacées entre deux bornes, bornes comprises.
+  - terme: Matplotlib
+    definition: Bibliothèque Python de tracé de graphiques.
+  - terme: Bibliothèque
+    definition: Ensemble de fonctions prêtes à l'emploi, que l'on charge avec import.
+symboles:
+  - { symbole: 'M(x)', signification: 'moment fléchissant', unite: 'kN·m' }
+  - { symbole: 'V(x)', signification: 'effort tranchant', unite: 'kN' }
+formules:
+  - { nom: 'Moment', tex: 'M(x) = \frac{q\,x\,(L - x)}{2}', domaine: 'Poutre sur deux appuis, charge uniforme' }
+  - { nom: 'Effort tranchant', tex: 'V(x) = q\left(\frac{L}{2} - x\right)', domaine: 'Même poutre' }
+---
+
+import { effortsPoutre, linspace, reprFlottant } from '@/lib/calc/programmation'
+import { momentMaxTheorique } from '@/lib/calc/tableur'
+import { grandeur, nombre } from '@/lib/format'
+import { Console, FigureMatplotlib, NumpyVectorise } from '@/components/schemas/InfoCours2'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const e0 = effortsPoutre(5, 12, 11)
+export const e8 = effortsPoutre(5, 12, 8)
+export const ex2 = effortsPoutre(6, 10, 13)
+
+<Page etape="intuition" titre="L'intuition : calculer toute une colonne d'un coup">
+
+Dans un tableur, on écrit la formule une fois et on la recopie sur toute la colonne. **NumPy** fait mieux : on écrit la formule une fois, et elle s'applique d'un coup à tout un tableau de valeurs, sans boucle. **Matplotlib** dessine ensuite la courbe.
+
+<PoutreModele alt="Poutre de 5 m sur deux appuis, chargée uniformément par 12 kN/m." L={5} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: 5, type: 'simple', nom: 'B' }]} charges={[{ type: 'repartie', nom: 'q', q1: 12, q2: 12, a: 0, b: 5 }]} cotes={[0, 5]} dec={0} prefixe="np-pm" />
+
+Avec trois lignes de calcul et quelques lignes de tracé, on obtient les diagrammes de moment et d'effort tranchant de cette poutre :
+
+<FigureMatplotlib x={e0.x} M={e0.M} V={e0.V} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer sur des tableaux de valeurs et tracer des courbes propres en Python ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Calculer et tracer" sousTitre="NumPy et Matplotlib" etape="cours">
+
+<Panneau n={1} titre="Importer" icone="idee" couleur="encre">
+On écrit import numpy as np et import matplotlib.pyplot as plt : les deux bibliothèques, sous leurs noms courts.
+</Panneau>
+
+<Panneau n={2} titre="linspace" icone="regle" couleur="acier">
+np.linspace(0, L, 11) : 11 valeurs de 0 à L, bornes comprises.
+</Panneau>
+
+<Panneau n={3} titre="Vectoriser" icone="calcul" couleur="validation">
+M = q * x * (L - x) / 2 calcule tout le tableau d'un coup.
+</Panneau>
+
+<Panneau n={4} titre="Max et position" icone="quantites" couleur="terre">
+M.max() et x[M.argmax()] : la valeur et l'endroit.
+</Panneau>
+
+<Panneau n={5} titre="Tracer" icone="plan" couleur="brique">
+plt.plot(x, M), titre, axes nommés avec unités, grille, plt.show().
+</Panneau>
+
+<Panneau n={6} titre="Le pas" icone="attention" couleur="correction">
+Le maximum calculé dépend des points : trop peu de points, et l'on peut le manquer.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : les tableaux NumPy">
+
+### Créer un tableau
+
+```python
+import numpy as np
+L, q = 5.0, 12.0          # m, kN/m
+x = np.linspace(0, L, 11) # 11 abscisses de 0 à 5 m
+```
+
+`linspace(a, b, n)` crée **n** valeurs régulières de a à b, **bornes comprises** : le pas vaut (b − a) / (n − 1), ici {reprFlottant((5 - 0) / 10)} m.
+
+### Calculer sans boucle
+
+```python
+M = q * x * (L - x) / 2   # tableau de 11 moments (kN.m)
+V = q * (L / 2 - x)       # tableau de 11 efforts tranchants (kN)
+```
+
+Chaque opération s'applique **élément par élément** : c'est la vectorisation.
+
+<NumpyVectorise x={e0.x} M={e0.M} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : tracer avec Matplotlib">
+
+### Le maximum et sa position
+
+`M.max()` donne la plus grande valeur, {reprFlottant(e0.Mmax)} kN·m, et `x[M.argmax()]` l'abscisse où elle se trouve, {reprFlottant(e0.xMax)} m.
+
+### Le tracé
+
+```python
+import matplotlib.pyplot as plt
+plt.plot(x, M)
+plt.title("Moment fléchissant")
+plt.xlabel("x (m)")
+plt.ylabel("M (kN.m)")
+plt.grid(True)
+plt.show()
+```
+
+<Console lignes={['>>> plt.plot(x, M)', '>>> plt.xlabel("x (m)")', '>>> plt.ylabel("M (kN.m)")', '>>> plt.savefig("moment.png", dpi=200)', '>>> plt.show()']} alt="Les commandes Matplotlib dans l'ordre : tracer, nommer les axes avec leurs unités, enregistrer l'image à 200 points par pouce pour le rapport, puis afficher la fenêtre." titre="console Python" />
+
+Un graphique technique a toujours un **titre**, des **axes nommés avec leurs unités** et une **grille** légère. `plt.subplot` place plusieurs graphiques côte à côte ; `plt.savefig("moment.png")` enregistre la figure pour le rapport.
+
+<Regle type="art">
+NumPy et Matplotlib sont les bibliothèques de référence du calcul scientifique en Python ; elles s'installent avec la commande pip install numpy matplotlib.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la chaîne de calcul">
+
+<DiagrammeFlux alt="La chaîne d'un calcul NumPy : les données, puis le tableau des abscisses par linspace, puis les tableaux de résultats calculés d'un coup, puis le maximum et sa position, enfin les graphiques." etapes={[{ titre: 'Données', texte: 'L, q', teinte: 'encre' }, { titre: 'Abscisses', texte: 'x = np.linspace(…)', teinte: 'acier' }, { titre: 'Résultats', texte: 'M, V en une ligne', teinte: 'terre' }, { titre: 'Extremums', texte: 'max, argmax', teinte: 'brique' }, { titre: 'Graphiques', texte: 'plt.plot', teinte: 'validation' }]} />
+
+<Console lignes={[`>>> x[:4]`, `array([${e0.x.slice(0, 4).map(reprFlottant).join(', ')}])`, `>>> M.max()`, reprFlottant(e0.Mmax), `>>> x[M.argmax()]`, reprFlottant(e0.xMax)]} alt={`Session Python : les quatre premières abscisses, le moment maximal ${reprFlottant(e0.Mmax)} kN·m et sa position ${reprFlottant(e0.xMax)} m.`} titre="console Python" />
+
+</Page>
+
+<FicheCalcul calcul="pythonNumpy">
+
+<Cahier titre="Exemple résolu : les diagrammes d'une poutre de salle de classe">
+
+**Énoncé.** Une poutre de salle de classe repose sur deux appuis et porte une charge uniforme (données de l'énoncé). Calcule M et V avec NumPy, trouve le moment maximal et sa position, et trace les deux diagrammes.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le maximum">
+<AN k="max" />
+<Note>Pourquoi comparer à q L²/8 ? C'est un contrôle indépendant : si le programme est faux, l'écart le montre.</Note>
+<Resultat k="Mmax" libelle="Moment maximal calculé" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les graphiques">
+
+<Etape n={3} titre="Les diagrammes">
+<Schema />
+<Note couleur="vert">Contrôle : M est nul aux appuis, V change de signe au milieu, là où M est maximal. Mets un nombre pair de points : le milieu n'est plus calculé et le maximum baisse un peu.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre trop peu de points.">
+Avec 8 points au lieu de 11, aucun ne tombe au milieu : le maximum trouvé vaut {reprFlottant(e8.Mmax)} kN·m au lieu de {nombre(momentMaxTheorique(5, 12), 2)}. On prend assez de points, et un nombre impair pour avoir le milieu.
+</Piege>
+
+<Piege erreur="oublier les unités des axes.">
+Le graphique d'un rapport sans unités ne se lit pas : xlabel et ylabel les portent.
+</Piege>
+
+<Piege erreur="utiliser une liste Python au lieu d'un tableau NumPy.">
+`[0, 1, 2] * 2` répète la liste, il ne multiplie pas : `[0, 1, 2, 0, 1, 2]`. Il faut `np.array`.
+
+<Console lignes={['>>> [0, 1, 2] * 2', '[0, 1, 2, 0, 1, 2]', '>>> np.array([0, 1, 2]) * 2', 'array([0, 2, 4])']} alt="La même multiplication par 2 : sur une liste Python, elle répète la liste ; sur un tableau NumPy, elle double chaque élément." titre="console Python" />
+</Piege>
+
+<Piege erreur="confondre linspace et arange.">
+`np.arange(0, 5, 0.5)` s'arrête **avant** 5 ; `np.linspace(0, 5, 11)` inclut 5.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les courbes du rapport.** Diagrammes d'efforts, courbes granulométriques, profils en long, tassements dans le temps : Matplotlib les trace à partir des calculs ou des mesures, et les enregistre en image pour le rapport.
+
+<Encadre type="terrain" titre="Un ordinateur modeste suffit">
+NumPy et Matplotlib tournent sur un ordinateur portable ordinaire, sans connexion une fois installés : un atout pour un bureau de chantier loin des villes.
+</Encadre>
+
+<DiagrammeFlux alt="Les courbes d'un rapport technique tracées par Matplotlib : diagrammes d'efforts, courbes granulométriques, profils en long, tassements dans le temps, toutes enregistrées en image." etapes={[{ titre: 'Efforts', texte: 'M et V des poutres', teinte: 'encre' }, { titre: 'Granulométrie', texte: 'courbes des sables', teinte: 'terre' }, { titre: 'Profils', texte: 'routes, terrain', teinte: 'acier' }, { titre: 'Tassements', texte: 'mesures dans le temps', teinte: 'validation' }]} />
+
+**Un tracé ne remplace pas la compréhension.** On sait d'avance qu'un moment est maximal au milieu : la courbe doit le confirmer. Si elle surprend, on cherche l'erreur avant de l'imprimer.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : NumPy et Matplotlib">
+
+### NumPy
+
+On écrit import numpy as np · np.linspace(a, b, n) bornes comprises · opérations élément par élément · M.max(), x[M.argmax()]
+
+### Matplotlib
+
+On écrit import matplotlib.pyplot as plt · plt.plot(x, y) · title, xlabel, ylabel avec unités · grid · savefig · show
+
+### Contrôles
+
+assez de points, nombre impair pour le milieu · comparer à une formule connue
+
+### Pièges
+
+liste ≠ tableau · arange exclut la borne · axes sans unités
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="linspace">
+
+Que donne `np.linspace(0, 2, 5)` ?
+
+<Indice>5 valeurs, bornes comprises : 4 intervalles.</Indice>
+
+<Corrige>
+**[{linspace(0, 2, 5).map(reprFlottant).join(', ')}]**, pas de {reprFlottant(0.5)}.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une autre poutre">
+
+Poutre de 6 m, q = 10 kN/m, 13 points. Que valent M.max() et sa position ? Contrôle.
+
+<Indice>q L² / 8.</Indice>
+
+<Corrige>
+M.max() = **{reprFlottant(ex2.Mmax)} kN·m** en x = **{reprFlottant(ex2.xMax)} m** ; q L²/8 = {nombre(momentMaxTheorique(6, 10), 1)} kN·m : concordant.
+
+<FigureMatplotlib x={ex2.x} M={ex2.M} V={ex2.V} />
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le maximum manqué">
+
+Avec `np.linspace(0, 5, 8)`, pourquoi M.max() ne vaut-il pas q L²/8 ? Que faire ?
+
+<Indice>Le pas vaut 5/7 : un point tombe-t-il au milieu ?</Indice>
+
+<Corrige>
+Aucun point ne tombe en x = 2,5 m : M.max() = {reprFlottant(e8.Mmax)} kN·m, en x = {reprFlottant(e8.xMax)} m, un peu moins que {nombre(momentMaxTheorique(5, 12), 2)}. On prend un nombre **impair** de points, ou plus de points, ou l'on calcule le maximum par la formule.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.7.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="np.linspace(0, 10, 11) donne :" choix={['0, 1, 2, … 10', '0 à 9', '11 valeurs aléatoires', '0 et 10']} bonne={0} colonnes={2}>
+11 valeurs, bornes comprises, pas de 1.
+</QCM>
+
+<QCM n={2} question="Avec x un tableau NumPy, 2 * x :" choix={['double chaque élément', 'répète le tableau', 'provoque une erreur', 'donne la somme']} bonne={0} colonnes={2}>
+Calcul élément par élément.
+</QCM>
+
+<QCM n={3} question="x[M.argmax()] donne :" choix={['l’abscisse du maximum', 'le maximum', 'le nombre de points', 'la moyenne']} bonne={0} colonnes={2}>
+argmax renvoie l'indice du maximum.
+</QCM>
+
+<QCM n={4} question={'plt.xlabel("x (m)") sert à :'} choix={['nommer l’axe horizontal avec son unité', 'tracer la courbe', 'enregistrer', 'changer d’échelle']} bonne={0} colonnes={2}>
+Un axe sans unité ne se lit pas.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour la poutre de l'exemple, M.max() vaut :</>} choix={[grandeur(e0.Mmax, 1, 'kN·m'), grandeur(e0.Mmax * 2, 1, 'kN·m'), grandeur(12 * 5, 1, 'kN·m'), grandeur(e0.V[0], 1, 'kN·m')]} bonne={0} colonnes={4}>
+q L²/8, au milieu.
+</QCM>
+
+<QCM n={6} question="L'effort tranchant de la même poutre est nul :" choix={['au milieu', 'aux appuis', 'partout', 'nulle part']} bonne={0} colonnes={4}>
+Là où le moment est maximal.
+</QCM>
+
+<QCM n={7} question="np.arange(0, 5, 0.5) :" choix={['s’arrête avant 5', 'inclut 5', 'donne 5 valeurs', 'donne une erreur']} bonne={0} colonnes={2}>
+La borne de fin est exclue.
+</QCM>
+
+<QCM n={8} question="Pour être sûr d'avoir le milieu d'une poutre dans linspace, on prend un nombre de points :" choix={['impair', 'pair', 'premier', 'égal à 2']} bonne={0} colonnes={4}>
+Un nombre pair d'intervalles.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

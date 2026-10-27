@@ -1,0 +1,295 @@
+---
+id: L1.7.4
+titre: "Python : variables, types et opérations"
+objectifs:
+  - Créer des variables et leur donner des noms clairs
+  - Reconnaître les types int, float, str et bool
+  - Calculer avec les opérateurs, dont la division entière et le reste
+  - Afficher un résultat arrondi avec son unité
+relecture: false
+normes: []
+glossaire:
+  - terme: Variable
+    definition: Nom donné à une valeur pour la réutiliser ; on l'affecte avec le signe =.
+  - terme: Type
+    definition: Nature d'une valeur (entier, décimal, texte, logique), qui fixe les opérations possibles.
+  - terme: Flottant
+    definition: Nombre décimal (float), stocké en binaire avec une petite erreur d'arrondi.
+  - terme: f-string
+    definition: Texte précédé de f où l'on insère des valeurs entre accolades, avec un format, par exemple {G:.2f}.
+symboles:
+  - { symbole: '//', signification: 'division entière', unite: '—' }
+  - { symbole: '%', signification: 'reste de la division entière', unite: '—' }
+  - { symbole: '**', signification: 'puissance', unite: '—' }
+formules:
+  - { nom: 'Poids propre d''une poutre', tex: 'G = b\,h\,L\,\gamma', domaine: 'kN, γ en kN/m³' }
+---
+
+import { arrondiPython, EXEMPLE_POIDS, formatF, poidsPropre, reprFlottant, sacsCiment } from '@/lib/calc/programmation'
+import { grandeur, nombre } from '@/lib/format'
+import { Console, FlottantBinaire, SacsCiment, TypesPython, VariablesBoites } from '@/components/schemas/InfoCours2'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const G0 = poidsPropre(EXEMPLE_POIDS)
+export const s0 = sacsCiment(350, 2.4, 50)
+export const ex2 = sacsCiment(300, 3.5, 50)
+
+<Page etape="intuition" titre="L'intuition : donner un nom aux nombres">
+
+Sur une feuille de brouillon, on écrit « b = 0,20 m », « h = 0,40 m », puis on calcule avec les lettres. Python fait pareil : on donne un **nom** à chaque valeur, et l'on écrit les calculs avec les noms. Le programme se relit comme une note de calcul, et il refait le calcul à volonté.
+
+<VariablesBoites />
+
+Pourquoi Python ? Il est gratuit, lisible, et très utilisé en ingénierie pour automatiser des calculs, traiter des mesures et tracer des courbes.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment écrire ses premiers calculs en Python, avec des noms clairs et des résultats bien affichés ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Premiers pas en Python" sousTitre="Nommer, calculer, afficher" etape="cours">
+
+<Panneau n={1} titre="Affecter" icone="idee" couleur="encre">
+b = 0.2 : le nom à gauche, la valeur à droite. Le point est le séparateur décimal.
+</Panneau>
+
+<Panneau n={2} titre="Les types" icone="materiaux" couleur="acier">
+int, float, str, bool. type(b) donne le type d'une valeur.
+</Panneau>
+
+<Panneau n={3} titre="Calculer" icone="calcul" couleur="brique">
++ − * / ** et les priorités habituelles ; // et % pour la division entière.
+</Panneau>
+
+<Panneau n={4} titre="Afficher" icone="plan" couleur="terre">
+print(…) ; f"G = {'{'}G:.2f{'}'} kN" pour deux décimales et l'unité.
+</Panneau>
+
+<Panneau n={5} titre="Les flottants" icone="attention" couleur="correction">
+0.1 + 0.2 ne vaut pas exactement 0.3 : on arrondit à l'affichage, on compare avec une tolérance.
+</Panneau>
+
+<Panneau n={6} titre="Les noms" icone="retenir" couleur="validation">
+b_poutre, gamma_beton : clairs, sans accents ni espaces, l'unité en commentaire.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : variables et types">
+
+### Affecter une valeur
+
+`b = 0.2` range la valeur 0,2 sous le nom `b`. Le signe `=` n'est pas une égalité mathématique : il **range**. On peut ensuite écrire `G = b * h * L * gamma`. Ce qui suit `#` est un **commentaire**, ignoré par Python : on y écrit l'unité.
+
+```python
+b = 0.2       # largeur (m)
+h = 0.4       # hauteur (m)
+L = 5.0       # portée (m)
+gamma = 25    # poids volumique du béton armé (kN/m3)
+G = b * h * L * gamma
+print(G)
+```
+
+### Les quatre types de base
+
+<TypesPython />
+
+Un nombre avec un point est un `float`, sans point un `int`. Un texte entre guillemets est un `str` : `"25"` n'est pas le nombre 25.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : opérations et affichage">
+
+### Les opérations
+
+`+ - * /` et `**` (puissance) suivent les priorités habituelles. Deux opérations utiles aux quantités : `//`, la **division entière**, et `%`, le **reste**. `math.ceil` arrondit vers le haut : pour {nombre(s0.masse, 0)} kg de ciment en sacs de 50 kg, il faut {s0.sacs} sacs.
+
+<SacsCiment dosage={350} volume={2.4} sac={50} />
+
+### Afficher proprement
+
+`print(G)` affiche la valeur brute : **{reprFlottant(G0)}**. Les flottants sont des approximations binaires :
+
+<FlottantBinaire />
+
+On arrondit **à l'affichage**, avec une f-string : `print(f"G = {G:.2f} kN")` affiche `G = {formatF(G0, 2)} kN`. Le calcul garde toute sa précision.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : du programme à l'écran">
+
+Python lit le programme de haut en bas, une ligne après l'autre. Chaque affectation range une valeur ; chaque `print` écrit une ligne à l'écran :
+
+<DiagrammeFlux alt="L'exécution d'un programme : on écrit le code dans un fichier .py ; Python le lit ligne par ligne ; chaque affectation range une valeur en mémoire ; chaque print écrit une ligne dans la console." etapes={[{ titre: 'Écrire', texte: 'poids.py', teinte: 'encre' }, { titre: 'Lire', texte: 'ligne après ligne', teinte: 'acier' }, { titre: 'Ranger', texte: 'b, h, L, G en mémoire', teinte: 'terre' }, { titre: 'Afficher', texte: 'print → console', teinte: 'validation' }]} />
+
+<Console lignes={['>>> b = 0.2', '>>> type(b)', "<class 'float'>", '>>> n = 6', '>>> type(n)', "<class 'int'>", '>>> "25" + "5"', "'255'", '>>> 25 + 5', '30']} alt="Une session interactive : type(0.2) est float, type(6) est int ; deux textes « 25 » et « 5 » se collent en « 255 », alors que deux nombres s'additionnent en 30." titre="console Python" />
+
+</Page>
+
+<FicheCalcul calcul="pythonPoids">
+
+<Cahier titre="Exemple résolu : le poids propre d'une poutre">
+
+**Énoncé.** Une poutre en béton armé de {nombre(EXEMPLE_POIDS.b, 2)} × {nombre(EXEMPLE_POIDS.h, 2)} m sur {nombre(EXEMPLE_POIDS.L, 1)} m, poids volumique {EXEMPLE_POIDS.gamma} kN/m³ (données de l'énoncé). Écris le programme qui calcule et affiche son poids propre.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le calcul">
+<AN k="calcul" />
+<Note>Pourquoi des variables plutôt que les nombres directement ? Pour relire le calcul comme une formule, et le refaire en changeant une seule ligne.</Note>
+<Resultat k="G" libelle="Poids propre" />
+</Etape>
+
+<Etape n={3} titre="Ce qu'imprime Python">
+<Schema />
+<Note couleur="vert">Contrôle : print(G) montre la petite erreur binaire ; l'affichage formaté donne le résultat propre. Change la portée : tout suit.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="écrire 0,2 au lieu de 0.2.">
+`b = 0,2` fabrique un couple (0, 2), pas un nombre : la suite du calcul échoue ou donne n'importe quoi. Le séparateur décimal est le **point**.
+
+<Console lignes={['>>> b = 0,2', '>>> print(b)', '(0, 2)', '>>> "25" + 5', 'TypeError: can only concatenate str (not "int") to str']} alt="Deux erreurs dans la console : 0,2 avec une virgule donne le couple (0, 2) ; additionner le texte 25 et le nombre 5 provoque une erreur de type." titre="console Python" />
+</Piege>
+
+<Piege erreur="mélanger texte et nombre.">
+`"25" + 5` provoque une erreur de type. Un nombre lu au clavier ou dans un fichier est un texte : on le convertit avec `float(…)`.
+</Piege>
+
+<Piege erreur="comparer deux flottants avec ==.">
+`0.1 + 0.2 == 0.3` vaut `False`. On compare avec `math.isclose` (L1.7.8).
+</Piege>
+
+<Piege erreur="choisir des noms obscurs.">
+`x1`, `a`, `t` : dans un mois, plus personne ne sait ce qu'ils représentent. `b_poutre`, `gamma_beton`, avec l'unité en commentaire.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Un outil gratuit.** Python s'installe gratuitement sur un ordinateur, et des éditeurs en ligne permettent même de l'utiliser depuis un téléphone. Pour un bureau d'études qui démarre, c'est un outil puissant sans licence.
+
+<Encadre type="terrain" titre="Le petit programme qui fait gagner des heures">
+Calculer le poids propre de cinquante poutres, commander les sacs de ciment de dix gâchées, convertir des mesures : dès qu'un calcul se répète, quelques lignes de Python le font sans erreur de recopie. On garde les programmes, commentés, avec le projet.
+</Encadre>
+
+<DiagrammeFlux alt="Un petit programme qui fait gagner des heures : les dimensions de toutes les poutres dans une liste, une seule formule, les poids propres de toutes les poutres affichés avec leurs unités." etapes={[{ titre: 'Données', texte: 'b, h, L de chaque poutre', teinte: 'encre' }, { titre: 'Formule', texte: 'G = b h L γ', teinte: 'terre' }, { titre: 'Répéter', texte: 'pour chaque poutre (L1.7.5)', teinte: 'acier' }, { titre: 'Afficher', texte: 'G en kN, arrondi', teinte: 'validation' }]} />
+
+**Un programme se relit.** Comme une note de calcul, un programme doit se comprendre sans son auteur : noms clairs, unités en commentaires, résultats affichés avec leurs unités.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : variables, types, opérations">
+
+### Variables
+
+nom = valeur · point décimal · # commentaire (unité) · noms clairs, sans accents
+
+### Types
+
+int (6) · float (0.2) · str ("P1") · bool (True) · type(x)
+
+### Opérations
+
++ − * / ** · // division entière · % reste · math.ceil vers le haut
+
+### Afficher
+
+print(x) · f"{'{'}x:.2f{'}'} kN" · arrondir à l'affichage, pas dans le calcul
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Les types">
+
+Quel est le type de `25`, `25.0`, `"25"` et `25 > 3` ?
+
+<Indice>Point, guillemets, comparaison.</Indice>
+
+<Corrige>
+`int`, `float`, `str` et `bool`.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Les sacs d'une gâchée">
+
+Un béton dosé à 300 kg/m³, pour 3,5 m³, en sacs de 50 kg. Que donnent `masse / 50`, `masse // 50`, `masse % 50` et `math.ceil(masse / 50)` ?
+
+<Indice>masse = 300 * 3.5.</Indice>
+
+<Corrige>
+masse = {reprFlottant(ex2.masse)} kg ; `/` → {reprFlottant(ex2.quotient)} ; `//` → {reprFlottant(ex2.entiers)} ; `%` → {reprFlottant(ex2.reste)} ; on commande **{ex2.sacs} sacs**.
+
+<SacsCiment dosage={300} volume={3.5} sac={50} />
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le flottant têtu">
+
+Pourquoi `print(0.2 * 0.4 * 5.0 * 25)` affiche-t-il {reprFlottant(G0)} et non 10.0 ? Que fais-tu pour afficher 10.00 ?
+
+<Indice>0,2 et 0,4 ne s'écrivent pas exactement en binaire.</Indice>
+
+<Corrige>
+Les flottants sont des approximations binaires : la petite erreur de 0,2 × 0,4 se propage. On garde la valeur et on **formate l'affichage** : `f"{G:.2f}"` donne `{formatF(G0, 2)}`, et `round(G, 2)` donne {reprFlottant(arrondiPython(G0, 2))}.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.7.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="b = 0.2 :" choix={['range 0,2 sous le nom b', 'teste si b vaut 0,2', 'affiche 0,2', 'crée un texte']} bonne={0} colonnes={2}>
+Le signe = affecte.
+</QCM>
+
+<QCM n={2} question="Le type de 3.0 est :" choix={['float', 'int', 'str', 'bool']} bonne={0} colonnes={4}>
+Le point en fait un décimal.
+</QCM>
+
+<QCM n={3} question="17 // 5 vaut :" choix={['3', '3.4', '2', '85']} bonne={0} colonnes={4}>
+La division entière.
+</QCM>
+
+<QCM n={4} question="17 % 5 vaut :" choix={['2', '3', '3.4', '0']} bonne={0} colonnes={4}>
+Le reste : 17 = 3 × 5 + 2.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour 840 kg de ciment en sacs de 50 kg, on commande :" choix={[`${s0.sacs} sacs`, `${s0.entiers} sacs`, '16,8 sacs', '15 sacs']} bonne={0} colonnes={4}>
+math.ceil, vers le haut.
+</QCM>
+
+<QCM n={6} question="0.1 + 0.2 == 0.3 vaut :" choix={['False', 'True', 'une erreur', '0.3']} bonne={0} colonnes={4}>
+Erreur d'arrondi binaire.
+</QCM>
+
+<QCM n={7} question={'f"{G:.2f}" affiche G :'} choix={['avec deux décimales', 'arrondi à l’entier', 'en texte brut', 'multiplié par 2']} bonne={0} colonnes={2}>
+.2f : deux chiffres après la virgule.
+</QCM>
+
+<QCM n={8} question={<>Le poids propre de la poutre de l'exemple vaut :</>} choix={[grandeur(G0, 2, 'kN'), grandeur(G0 / 25, 2, 'kN'), grandeur(G0 * 2, 2, 'kN'), '25 kN']} bonne={0} colonnes={4}>
+b × h × L × γ.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

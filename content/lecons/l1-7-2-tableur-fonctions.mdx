@@ -1,0 +1,295 @@
+---
+id: L1.7.2
+titre: "Tableur : fonctions utiles"
+objectifs:
+  - Utiliser SOMME, MOYENNE, MIN, MAX et ARRONDI
+  - Écrire un test avec SI, ET et OU
+  - Chercher une valeur dans une table avec RECHERCHEV
+  - Calculer une somme de produits avec SOMMEPROD
+relecture: false
+normes:
+  - "EN 1992-1-1 §3.2.7 : masse volumique de l'acier, 7 850 kg/m³"
+glossaire:
+  - terme: Fonction
+    definition: Calcul prêt à l'emploi du tableur, appelé par son nom suivi d'arguments entre parenthèses, séparés par « ; ».
+  - terme: Plage
+    definition: Bloc de cellules désigné par ses deux coins, par exemple A2:B6.
+  - terme: RECHERCHEV
+    definition: Fonction qui cherche une valeur dans la première colonne d'une table et renvoie la valeur d'une autre colonne sur la même ligne.
+  - terme: SOMMEPROD
+    definition: Fonction qui multiplie des plages ligne à ligne puis additionne les produits.
+symboles:
+  - { symbole: 'A2:B6', signification: 'plage de cellules', unite: '—' }
+  - { symbole: 'φ', signification: 'diamètre d''une barre', unite: 'mm' }
+formules:
+  - { nom: 'Masse linéique', tex: 'm = 7\,850 \times \frac{\pi \phi^2}{4}', domaine: 'kg/m, φ en m' }
+  - { nom: 'Masse totale', tex: 'M = \sum n_i\, L_i\, m_i', domaine: 'SOMMEPROD' }
+---
+
+import { afficherValeur, evaluerFeuille, FEUILLE_ACIERS } from '@/lib/calc/tableur'
+import { masseLineique } from '@/lib/calc/acier'
+import { nombre } from '@/lib/format'
+import { FeuilleTableur, RechercheVSchema, SiOrganigramme, SommeProdSchema } from '@/components/schemas/InfoCours1'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const v0 = evaluerFeuille(FEUILLE_ACIERS)
+export const ex1 = evaluerFeuille({ A1: 27.5, A2: 29.1, A3: 26.4, A4: 31.2, B1: '=MOYENNE(A1:A4)', B2: '=MIN(A1:A4)', B3: '=ARRONDI(B1;1)' })
+export const ex2 = evaluerFeuille({ A1: 0.86, A2: 1.12, B1: '=SI(A1<=1;"OK";"NON")', B2: '=SI(A2<=1;"OK";"NON")' })
+export const ex3 = evaluerFeuille({ A1: 0.42, B1: 'flexion', A2: 0.95, B2: 'effort tranchant', C1: '=SI(ET(A1<=1;A2<=1);"poutre OK";"à renforcer")' })
+
+<Page etape="intuition" titre="L'intuition : des outils tout faits">
+
+Dans une caisse à outils, on ne fabrique pas un marteau à chaque fois : on le prend. Les **fonctions** du tableur sont des outils tout faits : additionner une colonne, prendre le maximum, décider « OK ou pas », chercher une valeur dans une table.
+
+Pour peser le ferraillage d'une poutre, il faut trois gestes : trouver la masse au mètre de chaque diamètre, multiplier par le nombre et la longueur des barres, additionner. Trois fonctions suffisent : **RECHERCHEV**, **SOMMEPROD** et **SI**.
+
+<FeuilleTableur feuille={FEUILLE_ACIERS} plage="D1:H7" alt={`La feuille du ferraillage : trois repères de barres, leurs diamètres, nombres et longueurs ; la masse au mètre est cherchée dans une table ; la masse totale, ${afficherValeur(v0.H6, 2)} kg, est contrôlée par SI.`} decimales={{ H: 3 }} largeurs={{ D: 64, E: 64, F: 80, G: 96, H: 90 }} actif="H6" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelles fonctions utiliser pour chercher, décider et totaliser dans un calcul technique ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Six fonctions à connaître" sousTitre="Additionner, décider, chercher" etape="cours">
+
+<Panneau n={1} titre="SOMME, MOYENNE" icone="calcul" couleur="encre">
+=SOMME(F4:F7), =MOYENNE(A1:A9) : sur une plage entière.
+</Panneau>
+
+<Panneau n={2} titre="MIN, MAX" icone="quantites" couleur="acier">
+Le plus petit et le plus grand : la résistance la plus faible, le moment le plus fort.
+</Panneau>
+
+<Panneau n={3} titre="ARRONDI" icone="regle" couleur="terre">
+=ARRONDI(x;2), ARRONDI.SUP pour commander : on ne commande pas 16,8 sacs.
+</Panneau>
+
+<Panneau n={4} titre="SI, ET, OU" icone="verification" couleur="validation">
+=SI(test;si vrai;si faux) : la décision automatique d'une vérification.
+</Panneau>
+
+<Panneau n={5} titre="RECHERCHEV" icone="idee" couleur="brique">
+Chercher dans une table : la masse d'un HA 12, la classe d'un béton.
+</Panneau>
+
+<Panneau n={6} titre="SOMMEPROD" icone="ferraillage" couleur="correction">
+Σ des produits ligne à ligne : masses, devis, moments.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : statistiques et décisions">
+
+### Les fonctions de base
+
+Une fonction s'écrit `=NOM(arguments)`, les arguments séparés par `;`. `SOMME`, `MOYENNE`, `MIN`, `MAX` et `NB` travaillent sur une **plage** : `=MOYENNE(A1:A4)`. `ARRONDI(x;n)` arrondit à n décimales ; `ARRONDI.SUP` et `ARRONDI.INF` arrondissent toujours vers le haut ou vers le bas.
+
+### Décider avec SI
+
+`=SI(condition;valeur si vrai;valeur si faux)`. La condition compare deux valeurs avec `= <> < > <= >=`. On combine plusieurs conditions avec `ET(…)` (toutes vraies) et `OU(…)` (au moins une).
+
+<SiOrganigramme condition="H6<30" vrai="OK" faux="à revoir" resultat={afficherValeur(v0.H7)} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : chercher et sommer des produits">
+
+### RECHERCHEV
+
+`=RECHERCHEV(valeur;table;colonne;FAUX)` cherche la valeur dans la **première colonne** de la table, puis renvoie la valeur de la colonne demandée sur la même ligne. Avec **FAUX**, la recherche est exacte : si la valeur n'existe pas, on obtient `#N/A`. Avec **VRAI**, la table doit être triée et l'on prend la ligne immédiatement inférieure.
+
+<RechercheVSchema feuille={FEUILLE_ACIERS} table="A2:B6" cherche={12} colonne={2} resultat={afficherValeur(v0.H2)} />
+
+### SOMMEPROD
+
+`=SOMMEPROD(plage1;plage2;…)` multiplie les plages ligne à ligne puis additionne. C'est la formule de toutes les masses, de tous les devis : nombre × longueur × masse au mètre.
+
+<SommeProdSchema feuille={FEUILLE_ACIERS} colonnes={['F', 'G', 'H']} lignes={[2, 3, 4]} noms={['nombre', 'longueur (m)', 'kg/m']} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la table des masses linéiques">
+
+La table de recherche est elle-même calculée : chaque masse au mètre vient de la formule $7\,850 \times \pi \phi^2 / 4$, arrondie au gramme. Pour un HA 12, on retrouve {nombre(masseLineique(12), 3)} kg/m.
+
+<FeuilleTableur feuille={FEUILLE_ACIERS} plage="A1:B6" afficher="formules" alt="La table des masses linéiques : en colonne A, les diamètres de 6 à 14 mm ; en colonne B, la formule qui calcule la masse au mètre à partir du diamètre." largeurs={{ A: 70, B: 280 }} />
+
+<FeuilleTableur feuille={FEUILLE_ACIERS} plage="A1:B6" alt={`Les valeurs de la table : ${[2, 3, 4, 5, 6].map((l) => `HA ${afficherValeur(v0[`A${l}`])} : ${afficherValeur(v0[`B${l}`], 3)} kg/m`).join(' ; ')}.`} decimales={{ B: 3 }} largeurs={{ A: 70, B: 100 }} />
+
+<Encadre type="retenir">
+Une table de référence, une seule fois dans le classeur ; toutes les feuilles la consultent par RECHERCHEV.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="feuilleAciers">
+
+<Cahier titre="Exemple résolu : la masse d'acier d'une poutre">
+
+**Énoncé.** La poutre de L1.6.11 est armée de trois repères : barres inférieures, barres supérieures HA 10, cadres HA 6 (longueurs dans la feuille ; données de l'énoncé). Calcule sa masse d'acier avec RECHERCHEV et SOMMEPROD, et vérifie qu'elle reste sous 30 kg, la limite fixée par l'énoncé.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Chercher la masse au mètre">
+<AN k="recherche" />
+<Note>Pourquoi FAUX ? On veut exactement le HA 12 ; une recherche approchée renverrait le diamètre inférieur sans prévenir.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : totaliser et décider">
+
+<Etape n={3} titre="La masse totale">
+<AN k="sommeprod" />
+<Resultat k="masse" libelle="Masse d'acier" />
+</Etape>
+
+<Etape n={4} titre="Le contrôle">
+<AN k="si" />
+<Note couleur="vert">Contrôle : on retrouve la masse de la nomenclature de L1.6.11. Passe les barres en HA 14 : la masse augmente.</Note>
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier FAUX dans RECHERCHEV.">
+En recherche approchée, un HA 11 inexistant renverrait la masse du HA 10, sans erreur affichée.
+
+<FeuilleTableur feuille={{ A1: 10, B1: 0.617, A2: 12, B2: 0.888, C1: '=RECHERCHEV(11;A1:B2;2)', C2: '=RECHERCHEV(11;A1:B2;2;FAUX)' }} plage="A1:C2" alt="Avec une table des HA 10 et HA 12, chercher 11 en recherche approchée renvoie sans prévenir la masse du HA 10, 0,617 ; avec FAUX, on obtient #N/A, qui signale l'erreur." decimales={{ B: 3, C: 3 }} largeurs={{ A: 60, B: 80, C: 110 }} actif="C1" />
+</Piege>
+
+<Piege erreur="donner à SOMMEPROD des plages de tailles différentes.">
+Le tableur renvoie #VALEUR! : chaque plage doit avoir le même nombre de lignes.
+</Piege>
+
+<Piege erreur="mettre une plage relative dans RECHERCHEV recopié.">
+La table glisse vers le bas à chaque ligne et finit par ne plus contenir la valeur : on bloque la table, `$A$2:$B$6`.
+</Piege>
+
+<Piege erreur="écrire les nombres d'un SI entre guillemets.">
+`"30"` est un texte : la comparaison avec un nombre devient fausse. Les textes entre guillemets, les nombres sans.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les bordereaux.** Un devis quantitatif estimatif est une grande SOMMEPROD : quantités × prix unitaires. Une note d'aciers, une RECHERCHEV dans la table des masses suivie d'une SOMMEPROD.
+
+<DiagrammeFlux alt="Une feuille de chantier type en quatre temps : une table de référence (prix, masses, classes) ; des lignes de quantités ; RECHERCHEV pour aller chercher le bon prix ou la bonne masse ; SOMMEPROD pour le total et SI pour le contrôle." etapes={[{ titre: 'Table', texte: 'prix, masses', teinte: 'acier' }, { titre: 'Quantités', texte: 'une ligne par poste', teinte: 'encre' }, { titre: 'RECHERCHEV', texte: 'le bon prix', teinte: 'terre' }, { titre: 'SOMMEPROD, SI', texte: 'total et contrôle', teinte: 'validation' }]} />
+
+<Encadre type="terrain" titre="Une table par chantier">
+Les prix des barres et du ciment varient entre Kinshasa, Lubumbashi et l'intérieur du pays. On garde une table de prix propre à chaque chantier, datée, et toutes les feuilles la consultent : on la met à jour une seule fois.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : fonctions utiles">
+
+### Statistiques
+
+SOMME · MOYENNE · MIN · MAX · NB · ARRONDI(x;n) · ARRONDI.SUP pour commander
+
+### Décider
+
+=SI(test;vrai;faux) · ET(…) toutes · OU(…) au moins une · textes entre guillemets
+
+### Chercher
+
+=RECHERCHEV(valeur;$table$;colonne;FAUX) · première colonne = clé · #N/A si absent
+
+### Sommer des produits
+
+=SOMMEPROD(n;L;m) · plages de même taille
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Quatre éprouvettes">
+
+Quatre éprouvettes donnent 27,5 ; 29,1 ; 26,4 et 31,2 MPa (en A1:A4). Que valent `=MOYENNE(A1:A4)`, `=MIN(A1:A4)` et la moyenne arrondie à une décimale ?
+
+<Indice>MOYENNE, MIN, ARRONDI(…;1).</Indice>
+
+<Corrige>
+Moyenne **{afficherValeur(ex1.B1, 3)}** MPa ; minimum **{afficherValeur(ex1.B2)}** MPa ; arrondie : **{afficherValeur(ex1.B3)}** MPa.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le verdict">
+
+Les taux de travail de deux poutres valent 0,86 et 1,12 (A1, A2). Écris la formule qui affiche « OK » ou « NON » et donne les résultats.
+
+<Indice>Un taux est admis s'il vaut au plus 1.</Indice>
+
+<Corrige>
+`=SI(A1<=1;"OK";"NON")` → **{afficherValeur(ex2.B1)}** ; recopiée : **{afficherValeur(ex2.B2)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Deux vérifications à la fois">
+
+Une poutre est vérifiée en flexion (taux 0,42) et à l'effort tranchant (taux 0,95). Écris une seule formule qui affiche « poutre OK » si les deux taux sont au plus 1, « à renforcer » sinon.
+
+<Indice>ET(…) à l'intérieur de SI.</Indice>
+
+<Corrige>
+`=SI(ET(A1<=1;A2<=1);"poutre OK";"à renforcer")` → **{afficherValeur(ex3.C1)}**. Avec OU, une seule vérification suffirait : ce serait faux.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.7.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Dans un tableur réglé en français, les arguments se séparent par :" choix={['« ; »', '« , »', '« . »', '« : »']} bonne={0} colonnes={4}>
+La virgule est réservée aux décimales.
+</QCM>
+
+<QCM n={2} question={'=SI(5>3;"oui";"non") affiche :'} choix={['oui', 'non', 'VRAI', '#NOM?']} bonne={0} colonnes={4}>
+La condition est vraie.
+</QCM>
+
+<QCM n={3} question="RECHERCHEV cherche la valeur :" choix={['dans la première colonne de la table', 'dans toute la table', 'dans la dernière colonne', 'dans la ligne 1']} bonne={0} colonnes={2}>
+Puis lit la colonne demandée sur la même ligne.
+</QCM>
+
+<QCM n={4} question="Avec FAUX, si la valeur cherchée n'existe pas, RECHERCHEV renvoie :" choix={['#N/A', '0', 'la valeur la plus proche', '#DIV/0!']} bonne={0} colonnes={4}>
+Recherche exacte.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="SOMMEPROD(A1:A3;B1:B3) calcule :" choix={['A1×B1 + A2×B2 + A3×B3', '(A1+A2+A3)×(B1+B2+B3)', 'A1×A2×A3', 'la moyenne']} bonne={0} colonnes={2}>
+Produits ligne à ligne, puis somme.
+</QCM>
+
+<QCM n={6} question={<>Dans l'exemple, la masse au mètre d'un HA 12 vaut :</>} choix={[`${afficherValeur(v0.H2, 3)} kg/m`, `${afficherValeur(v0.B4, 3)} kg/m`, '12 kg/m', `${afficherValeur(v0.B6, 3)} kg/m`]} bonne={0} colonnes={4}>
+7 850 × π × 0,012² / 4.
+</QCM>
+
+<QCM n={7} question="Pour commander des sacs entiers, on utilise :" choix={['ARRONDI.SUP', 'ARRONDI.INF', 'ARRONDI(x;0)', 'MIN']} bonne={0} colonnes={4}>
+On arrondit toujours vers le haut.
+</QCM>
+
+<QCM n={8} question="ET(A1<=1;A2<=1) est vrai si :" choix={['les deux conditions sont vraies', 'au moins une est vraie', 'aucune n’est vraie', 'A1 = A2']} bonne={0} colonnes={2}>
+OU demanderait au moins une.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

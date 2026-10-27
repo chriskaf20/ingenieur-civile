@@ -1,0 +1,192 @@
+---
+id: L1.7.P
+titre: "Mini-projet : calculateur de réactions d'appui"
+objectifs:
+  - Programmer le calcul des réactions d'une poutre en tableur et en Python
+  - Organiser les données, les calculs et les contrôles
+  - Tester le programme sur des cas vérifiés à la main
+  - Comparer les deux outils et livrer une note claire
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { calculateurReactions, EXEMPLE_CALCULATEUR, formatF } from '@/lib/calc/programmation'
+import { afficherValeur, evaluerFeuille, feuilleCalculateur } from '@/lib/calc/tableur'
+import { grandeur, nombre } from '@/lib/format'
+import { FeuilleTableur } from '@/components/schemas/InfoCours1'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
+
+export const d = EXEMPLE_CALCULATEUR
+export const r = calculateurReactions(d)
+export const f = feuilleCalculateur(d.L, d.q, d.charges)
+export const v = evaluerFeuille(f)
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Un bureau d'études de Kinshasa vérifie chaque semaine des dizaines de poutres de bâtiments scolaires. Le calcul des réactions d'appui (L1.3.6) est toujours le même : on te demande de l'**automatiser** deux fois, en tableur et en Python, pour que les deux outils se contrôlent l'un l'autre.
+
+<PoutreModele alt={`La poutre de référence : ${nombre(d.L, 2)} m entre appuis, charge uniforme de ${nombre(d.q, 0)} kN/m, charges ponctuelles de ${d.charges.map((c) => `${nombre(c.F, 0)} kN à ${nombre(c.a, 2)} m`).join(' et ')}.`} L={d.L} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: d.L, type: 'simple', nom: 'B' }]} charges={[{ type: 'repartie', nom: 'q', q1: d.q, q2: d.q, a: 0, b: d.L }, ...d.charges.map((c, i) => ({ type: 'ponctuelle', nom: `P${i + 1}`, F: c.F, a: c.a }))]} cotes={[0, ...d.charges.map((c) => c.a), d.L]} dec={0} prefixe="pj7-pm" />
+
+### Ce que tu rends
+
+1. Une **feuille de calcul** : données en bleu en haut, tableau des charges (F, a, F × a), totaux, RB puis RA, une cellule de contrôle avec SI.
+2. Un **programme Python** : une fonction `reactions(L, q, charges)` documentée, qui renvoie RA et RB, et un programme principal qui affiche les résultats formatés.
+3. Un fichier de **tests** : au moins trois cas vérifiés à la main, dont la poutre de référence.
+4. Une courte **note** : les deux résultats, leur comparaison, les limites de l'outil.
+
+<Regle type="simplification">
+L'outil traite une poutre sur deux appuis simples, sans porte-à-faux, avec des charges verticales. Il ne remplace ni l'étude des combinaisons de charges (L3.2) ni le dimensionnement.
+</Regle>
+
+</Page>
+
+<Infographie titre="La démarche" sousTitre="Deux outils, un même calcul" etape="projet">
+
+<Panneau n={1} titre="La méthode à la main" icone="calcul" couleur="encre">
+ΣM/A = 0 donne RB ; ΣFy = 0 donne RA. On fait d'abord la poutre de référence à la main.
+</Panneau>
+
+<Panneau n={2} titre="La feuille" icone="plan" couleur="acier">
+Données en bleu, une ligne par charge, SOMME des forces et des moments, références absolues pour L.
+</Panneau>
+
+<Panneau n={3} titre="Le programme" icone="idee" couleur="brique">
+Une fonction, une boucle sur les charges, un affichage formaté avec unités.
+</Panneau>
+
+<Panneau n={4} titre="Les tests" icone="verification" couleur="validation">
+Charge au milieu, charge sur un appui, poutre de référence : assert avec math.isclose.
+</Panneau>
+
+<Panneau n={5} titre="Le contrôle croisé" icone="regle" couleur="terre">
+Tableur et Python doivent donner les mêmes réactions ; RA + RB = ΣF.
+</Panneau>
+
+<Panneau n={6} titre="La note" icone="retenir" couleur="correction">
+Résultats, comparaison, limites : un collègue doit pouvoir la refaire.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="calculateurReactions">
+
+<Cahier titre="Étape 1 : le calcul à la main" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi commencer à la main ? Ce calcul servira de cas de test : il doit être sûr avant d'écrire la moindre formule.</Note>
+</Etape>
+
+<Etape n={2} titre="Forces et moments">
+<AN k="somme" />
+<AN k="moment" />
+<AN k="reactions" />
+<Resultat k="RA" libelle="Réaction en A" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : la feuille de calcul" etape="projet">
+
+<Etape n={3} titre="La feuille">
+<Schema k="tableur" />
+<Note>Pourquoi une colonne F × a ? Chaque charge apporte son moment par rapport à A : la SOMME de la colonne donne ΣM/A.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 : le programme et le contrôle" etape="projet">
+
+<Etape n={4} titre="Ce qu'imprime Python">
+<Schema k="python" />
+</Etape>
+
+<Etape n={5} titre="Le contrôle croisé">
+<AN k="controle" />
+<Note couleur="vert">Contrôle : déplace P2 sur l'appui B ; il ne charge plus que B. Mets q à zéro et une seule charge au milieu : RA = RB.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le corrigé (1/2) : le programme">
+
+```python
+import math
+
+def reactions(L, q, charges):
+    """Réactions RA, RB (kN) d'une poutre sur deux appuis de portée L (m),
+    sous une charge uniforme q (kN/m) et des charges ponctuelles (F en kN, a en m)."""
+    somme = q * L
+    moment = q * L * L / 2          # moment de q L par rapport à A
+    for F, a in charges:
+        somme += F
+        moment += F * a
+    RB = moment / L
+    RA = somme - RB
+    return RA, RB
+
+RA, RB = reactions(6.0, 8.0, [(20.0, 2.0), (15.0, 4.5)])
+print(f"RA = {RA:.2f} kN")
+print(f"RB = {RB:.2f} kN")
+```
+
+Il affiche RA = {formatF(r.RA, 2)} kN et RB = {formatF(r.RB, 2)} kN, comme la feuille : RA = {afficherValeur(v.B11, 2)} kN, RB = {afficherValeur(v.B10, 2)} kN.
+
+</Page>
+
+<Page etape="projet" titre="Le corrigé (2/2) : les tests">
+
+```python
+import math
+from reactions import reactions
+
+def test_charge_au_milieu():
+    RA, RB = reactions(6.0, 0.0, [(20.0, 3.0)])
+    assert math.isclose(RA, 10.0) and math.isclose(RB, 10.0)
+
+def test_charge_sur_appui_B():
+    RA, RB = reactions(6.0, 0.0, [(20.0, 6.0)])
+    assert math.isclose(RA, 0.0, abs_tol=1e-12) and math.isclose(RB, 20.0)
+
+def test_poutre_de_reference():
+    RA, RB = reactions(6.0, 8.0, [(20.0, 2.0), (15.0, 4.5)])
+    assert math.isclose(RA + RB, 83.0)
+    assert math.isclose(RB, 251.5 / 6)
+```
+
+Les valeurs attendues viennent du calcul à la main de l'étape 1 : ΣF = {grandeur(r.somme, 2, 'kN')}, ΣM/A = {grandeur(r.moment, 2, 'kN·m')}.
+
+<FeuilleTableur feuille={f} plage="A1:D12" afficher="formules" alt="Les formules de la feuille du calculateur : produits F × a, SOMME des forces et des moments, RB = ΣM / L, RA = ΣF − RB, et la cellule de contrôle avec SI et ABS." largeurs={{ A: 110, B: 230, C: 70, D: 130 }} />
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Calcul à la main | Absent | Juste | Détaillé, avec unités, servant de test |
+| Feuille | Nombres tapés dans les formules | Données séparées, formules justes | Données en bleu, références absolues, contrôle SI |
+| Programme | Ne s'exécute pas | Juste, affichage clair | Fonction documentée, unités, réutilisable |
+| Tests | Aucun | Un cas | Trois cas variés, tolérances adaptées |
+| Note | Absente | Résultats | Comparaison des outils, limites signalées |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Ajoute un porte-à-faux : l'appui B n'est plus au bout de la poutre. Que changes-tu dans la formule de RB ? Contrôle avec la fonction de L1.3.6.
+</Encadre>
+
+<Quiz id="L1.7.P">
+
+<QCM n={1} question="Ma feuille et mon programme donnent-ils les mêmes réactions, et mes tests passent-ils tous ?" choix={['Oui, tout concorde', 'Les deux outils diffèrent', 'Un test échoue']} bonne={0}>
+Sinon, cherche l'erreur : un outil qui ne passe pas ses tests ne se livre pas.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

@@ -1,0 +1,297 @@
+---
+id: L1.7.3
+titre: "Tableur : graphiques et note de calcul"
+objectifs:
+  - Tabuler une grandeur le long d'un ouvrage
+  - Tracer un graphique lisible, axes titrés avec leurs unités
+  - Organiser une note de calcul tabulée lisible et vérifiable
+  - Contrôler un résultat de tableur par un calcul indépendant
+relecture: false
+normes: []
+glossaire:
+  - terme: Note de calcul
+    definition: Document qui expose les données, les hypothèses, les calculs et les vérifications d'un ouvrage, pour qu'un autre ingénieur puisse les refaire.
+  - terme: Tabuler
+    definition: Calculer une grandeur pour une suite de valeurs régulières d'une variable, une par ligne.
+  - terme: Nuage de points
+    definition: Graphique qui place chaque couple (x, y) de deux colonnes ; le seul qui respecte les vraies abscisses.
+symboles:
+  - { symbole: 'M(x)', signification: 'moment fléchissant à l''abscisse x', unite: 'kN·m' }
+  - { symbole: 'q', signification: 'charge uniforme', unite: 'kN/m' }
+  - { symbole: 'L', signification: 'portée', unite: 'm' }
+formules:
+  - { nom: 'Moment d''une poutre sur deux appuis', tex: 'M(x) = \frac{q\,x\,(L - x)}{2}', domaine: 'Charge uniforme' }
+  - { nom: 'Moment maximal', tex: 'M_{max} = \frac{q L^2}{8}', domaine: 'Au milieu' }
+---
+
+import { afficherValeur, evaluerFeuille, feuilleMoment, momentMaxTheorique } from '@/lib/calc/tableur'
+import { grandeur, nombre } from '@/lib/format'
+import { FeuilleTableur, GrapheMomentTableur, NoteDeCalculSchema } from '@/components/schemas/InfoCours1'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
+
+export const f0 = feuilleMoment(5, 12, 0.5)
+export const v0 = evaluerFeuille(f0)
+export const ex2 = { L: 4, q: 15 }
+export const f2 = feuilleMoment(ex2.L, ex2.q, 0.5)
+export const v2 = evaluerFeuille(f2)
+
+<Page etape="intuition" titre="L'intuition : un tableau qui se lit d'un coup d'œil">
+
+Une colonne de onze nombres ne dit pas grand-chose. Les mêmes nombres en **courbe** montrent tout de suite où la poutre travaille le plus : au milieu.
+
+<GrapheMomentTableur feuille={f0} n={10} />
+
+Un calcul technique n'est pas fini quand il est juste : il doit être **lisible** par un autre, qui le vérifiera. C'est le rôle de la **note de calcul**.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment présenter un calcul tabulé, avec son graphique, pour qu'un autre puisse le lire et le vérifier ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Une feuille présentable" sousTitre="Tabuler, tracer, vérifier" etape="cours">
+
+<Panneau n={1} titre="Tabuler" icone="calcul" couleur="encre">
+Une colonne pour la variable, pas régulier ; une colonne pour le résultat, formule recopiée.
+</Panneau>
+
+<Panneau n={2} titre="Tracer" icone="plan" couleur="acier">
+Nuage de points reliés : les abscisses sont respectées. Titre, axes nommés, unités.
+</Panneau>
+
+<Panneau n={3} titre="Données en bleu" icone="idee" couleur="brique">
+On distingue d'un coup d'œil ce qu'on saisit de ce qu'on calcule.
+</Panneau>
+
+<Panneau n={4} titre="Unités partout" icone="regle" couleur="terre">
+Dans l'en-tête de chaque colonne : x (m), M (kN·m).
+</Panneau>
+
+<Panneau n={5} titre="Vérifier" icone="verification" couleur="validation">
+Un contrôle indépendant : formule connue, ordre de grandeur, symétrie.
+</Panneau>
+
+<Panneau n={6} titre="Identifier" icone="retenir" couleur="correction">
+Titre, auteur, date, version : une note de calcul se signe.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : tabuler et tracer">
+
+### Tabuler une grandeur
+
+On place la variable dans une colonne avec un **pas régulier** (`=A5+0,5` recopié) et la formule dans la colonne voisine, avec les données en **références absolues**. Ici, le moment d'une poutre sur deux appuis : `=$B$2*A5*($B$1-A5)/2`.
+
+<FeuilleTableur feuille={f0} plage="A1:B10" afficher="formules" alt="Les premières lignes de la feuille du moment : la portée en B1, la charge en B2 ; en colonne A, les abscisses de 0 en 0,5 m ; en colonne B, la formule du moment recopiée." largeurs={{ A: 110, B: 220 }} />
+
+### Le bon graphique
+
+Pour une grandeur fonction d'une autre, on choisit le **nuage de points** (points reliés) : il place chaque point à sa vraie abscisse. Le « graphique en courbes » met les catégories à intervalles égaux, quelle que soit leur valeur : il déforme la courbe dès que le pas varie.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la note de calcul">
+
+### Les zones
+
+Une note de calcul tabulée se lit de haut en bas, toujours dans le même ordre :
+
+<NoteDeCalculSchema />
+
+### Vérifiable
+
+Chaque résultat doit pouvoir être refait à la main. On écrit à côté la formule utilisée, on garde les formules visibles (pas de valeurs collées), et l'on ajoute au moins un **contrôle indépendant** : pour cette poutre, le moment maximal vaut $q L^2 / 8$, soit {grandeur(momentMaxTheorique(5, 12), 2, 'kN·m')}.
+
+<Regle type="art">
+Les zones d'une note de calcul sont une règle de l'art des bureaux d'études ; le contenu exigé par un maître d'ouvrage ou un bureau de contrôle est fixé par son cahier des charges.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la poutre et sa feuille">
+
+La poutre calculée, sur deux appuis, chargée uniformément :
+
+<PoutreModele alt="Poutre de 5 m sur deux appuis, chargée uniformément par 12 kN/m." L={5} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: 5, type: 'simple', nom: 'B' }]} charges={[{ type: 'repartie', nom: 'q', q1: 12, q2: 12, a: 0, b: 5 }]} cotes={[0, 5]} dec={0} prefixe="tg-pm" />
+
+et la feuille complète, valeurs calculées, avec le maximum en bas :
+
+<FeuilleTableur feuille={f0} plage="A4:B16" alt={`La feuille du moment : onze abscisses de 0 à 5 m, le moment en chaque point, et le maximum, ${afficherValeur(v0.B16, 2)} kN·m.`} decimales={{ A: 1, B: 2 }} largeurs={{ A: 90, B: 110 }} />
+
+</Page>
+
+<FicheCalcul calcul="feuilleMoment">
+
+<Cahier titre="Exemple résolu : le moment d'une poutre de dispensaire">
+
+**Énoncé.** Une poutre de dispensaire repose sur deux appuis et porte une charge uniforme (données dans la feuille ; données de l'énoncé). Tabule le moment tous les 0,5 m, trace-le et contrôle le maximum.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La formule tabulée">
+<AN k="formule" />
+<AN k="max" />
+<Note>Pourquoi $B$1 et $B$2 ? La portée et la charge sont les mêmes pour toutes les lignes.</Note>
+</Etape>
+
+<Etape n={3} titre="Le contrôle indépendant">
+<AN k="controle" />
+<Resultat k="theorie" libelle="Moment maximal" />
+<Note couleur="vert">Contrôle : le maximum du tableau et la formule q L²/8 coïncident ; la courbe est symétrique. Change la portée : les deux suivent.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le graphique">
+
+<Etape n={4} titre="Le graphique">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="choisir un graphique « en courbes » au lieu d'un nuage de points.">
+Les abscisses deviennent de simples étiquettes équidistantes : avec un pas irrégulier, la courbe est fausse.
+</Piege>
+
+<Piege erreur="oublier les unités des axes.">
+« M » sans unité : kN·m ? N·m ? On écrit l'unité dans le titre de chaque axe et de chaque colonne.
+</Piege>
+
+<Piege erreur="coller des valeurs à la place des formules.">
+La note n'est plus vérifiable, et elle ne suit plus les données.
+</Piege>
+
+<Piege erreur="se fier au tableau sans contrôle.">
+Une parenthèse oubliée donne une courbe plausible et fausse ; un contrôle indépendant (q L²/8) la démasque.
+
+<FeuilleTableur feuille={{ ...f0, C4: 'M faux', C5: '=$B$2*A5*$B$1-A5/2', C7: '=$B$2*A7*$B$1-A7/2', C10: '=$B$2*A10*$B$1-A10/2' }} plage="A4:C10" alt="À côté de la colonne juste, une colonne où la formule a perdu ses parenthèses : les valeurs sont très différentes, et le maximum ne vaut plus q L² / 8." decimales={{ A: 1, B: 2, C: 2 }} largeurs={{ A: 80, B: 100, C: 100 }} />
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**La note qui voyage.** Une note de calcul est relue par le chef de projet, le bureau de contrôle, parfois l'administration. Elle doit se comprendre sans son auteur :
+
+<DiagrammeFlux alt="Le chemin d'une note de calcul : rédigée par l'ingénieur, vérifiée par un collègue qui refait les points clés, visée par le bureau de contrôle, archivée avec son indice." etapes={[{ titre: 'Rédiger', texte: 'données, calculs, contrôles', teinte: 'encre' }, { titre: 'Vérifier', texte: 'un collègue refait à la main', teinte: 'terre' }, { titre: 'Viser', texte: 'bureau de contrôle', teinte: 'validation' }, { titre: 'Archiver', texte: 'avec son indice', teinte: 'acier' }]} />
+
+<Encadre type="terrain" titre="Imprimée et signée">
+Sur bien des chantiers, la note est imprimée et signée : réglez la zone d'impression, les en-têtes et le pied de page (nom du fichier, date, page) avant de l'envoyer.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : graphiques et note de calcul">
+
+### Tabuler
+
+variable à pas régulier (=A5+0,5) · formule recopiée · données en absolu
+
+### Tracer
+
+nuage de points reliés · titre · axes nommés avec unités · grille légère
+
+### Note de calcul
+
+titre → hypothèses → calculs → résultats → vérifications · formules visibles · données en bleu
+
+### Contrôle
+
+une formule connue (M max = q L²/8) · symétrie · ordre de grandeur
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le pas">
+
+Quelle formule écrire en A6 pour que la colonne A avance de 0,5 m à chaque ligne, à partir de 0 en A5 ?
+
+<Indice>La cellule du dessus, plus le pas.</Indice>
+
+<Corrige>
+`=A5+0,5`, recopiée vers le bas.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une autre poutre">
+
+Poutre de {grandeur(ex2.L, 1, 'm')} chargée à {grandeur(ex2.q, 0, 'kN/m')}. Que donne la feuille pour le moment à 1 m et pour le maximum ? Contrôle le maximum.
+
+<Indice>M(1) = q × 1 × (L − 1) / 2 ; M max = q L² / 8.</Indice>
+
+<Corrige>
+M(1) = **{afficherValeur(v2.B7, 2)} kN·m** ; maximum **{afficherValeur(v2.B14, 2)} kN·m** = q L²/8 = {nombre(momentMaxTheorique(ex2.L, ex2.q), 2)} kN·m.
+
+<GrapheMomentTableur feuille={f2} n={8} />
+
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Relire une note">
+
+Un collègue t'envoie une feuille où la colonne M vaut partout `=$B$2*A5*$B$1-A5/2`. Que vaut cette formule au milieu de la poutre de l'exemple ? Quelle erreur a-t-il faite ? Comment l'aurait-il vue ?
+
+<Indice>Les priorités : la division s'applique à quoi ?</Indice>
+
+<Corrige>
+Elle calcule q x L − x/2 : au milieu, **{afficherValeur(evaluerFeuille({ ...f0, C10: '=$B$2*A10*$B$1-A10/2' }).C10, 2)} kN·m** au lieu de {afficherValeur(v0.B10, 2)}. Il manque les parenthèses autour de (L − x) et de tout le produit. Le contrôle q L²/8 = {nombre(momentMaxTheorique(5, 12), 2)} kN·m l'aurait démasqué.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.7.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Pour tracer M en fonction de x, on choisit :" choix={['un nuage de points', 'un camembert', 'un histogramme', 'un graphique en barres']} bonne={0} colonnes={2}>
+Il respecte les vraies abscisses.
+</QCM>
+
+<QCM n={2} question="Un axe de graphique doit porter :" choix={['un titre et son unité', 'une couleur', 'rien', 'le nom de l’auteur']} bonne={0} colonnes={2}>
+Sinon on ne sait pas ce qu'on lit.
+</QCM>
+
+<QCM n={3} question="Dans une note, les données saisies s'écrivent souvent :" choix={['en bleu, à part', 'mélangées aux formules', 'en blanc', 'cachées']} bonne={0} colonnes={2}>
+On distingue saisie et calcul.
+</QCM>
+
+<QCM n={4} question={<>Poutre de 5 m, q = 12 kN/m : le moment maximal vaut :</>} choix={[grandeur(momentMaxTheorique(5, 12), 2, 'kN·m'), grandeur(12 * 25, 2, 'kN·m'), grandeur(12 * 5, 2, 'kN·m'), grandeur(momentMaxTheorique(5, 12) * 2, 2, 'kN·m')]} bonne={0} colonnes={2}>
+q L² / 8.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pourquoi garder les formules visibles dans une note ?" choix={['pour qu’on puisse la vérifier', 'pour faire joli', 'parce que c’est obligatoire', 'pour gagner de la place']} bonne={0} colonnes={2}>
+Une valeur collée ne se vérifie pas.
+</QCM>
+
+<QCM n={6} question="L'ordre des zones d'une note de calcul :" choix={['titre, hypothèses, calculs, résultats, vérifications', 'résultats, titre, calculs', 'calculs seuls', 'vérifications, titre']} bonne={0} colonnes={2}>
+Du contexte au verdict.
+</QCM>
+
+<QCM n={7} question="La courbe du moment d'une poutre sur deux appuis chargée uniformément est :" choix={['symétrique, maximale au milieu', 'maximale aux appuis', 'droite', 'nulle partout']} bonne={0} colonnes={2}>
+Une parabole.
+</QCM>
+
+<QCM n={8} question="Un contrôle indépendant, c'est :" choix={['refaire un point clé par une autre méthode', 'relancer le même calcul', 'changer la couleur', 'arrondir']} bonne={0} colonnes={2}>
+Une autre méthode attrape d'autres erreurs.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

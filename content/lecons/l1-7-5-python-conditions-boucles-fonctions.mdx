@@ -1,0 +1,318 @@
+---
+id: L1.7.5
+titre: "Python : conditions, boucles et fonctions"
+objectifs:
+  - Écrire une condition avec if, elif et else
+  - Répéter un calcul avec une boucle for
+  - Écrire une fonction avec paramètres et valeur de retour
+  - Structurer un calcul en fonctions réutilisables
+relecture: false
+normes: []
+glossaire:
+  - terme: Condition
+    definition: Test dont le résultat est vrai ou faux ; if exécute un bloc seulement si le test est vrai.
+  - terme: Boucle for
+    definition: Instruction qui répète un bloc pour chaque valeur d'une liste ou d'un intervalle.
+  - terme: Fonction
+    definition: Bloc de code nommé, défini par def, qui reçoit des paramètres et renvoie un résultat par return.
+  - terme: Indentation
+    definition: Décalage des lignes d'un bloc (quatre espaces) ; en Python, c'est lui qui délimite les blocs.
+symboles:
+  - { symbole: 'RA, RB', signification: 'réactions d''appui', unite: 'kN' }
+  - { symbole: 'a', signification: 'position de la charge', unite: 'm' }
+formules:
+  - { nom: 'Réactions sous charge ponctuelle', tex: 'R_A = \frac{P(L-a)}{L},\quad R_B = \frac{P\,a}{L}', domaine: 'Poutre sur deux appuis' }
+  - { nom: 'Taux de travail', tex: '\tau = \frac{M_{Ed}}{M_{Rd}} \le 1', domaine: 'Vérification' }
+---
+
+import { reactionsPonctuelle, tableauReactions, verificationFlexion, formatF } from '@/lib/calc/programmation'
+import { grandeur, nombre } from '@/lib/format'
+import { BoucleFor, Console, FonctionMachine, IfOrganigramme } from '@/components/schemas/InfoCours2'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const pos = [0, 1, 2, 2.5, 4, 5]
+export const t0 = tableauReactions(5, 20, pos)
+export const v0 = verificationFlexion(25, 30)
+export const ex2 = [0.6, 0.95, 1.08].map((t) => ({ t, ...verificationFlexion(t, 1) }))
+export const r3 = reactionsPonctuelle(6, 1.5, 40)
+
+<Page etape="intuition" titre="L'intuition : décider, répéter, ranger">
+
+Un chef de chantier suit trois gestes toute la journée : il **décide** (« si le béton est trop sec, on n'ajoute pas d'eau »), il **répète** (« pour chaque poteau, vérifier l'aplomb »), et il **range** ses méthodes pour ne pas les réinventer. Un programme fait exactement cela, avec trois outils : la **condition**, la **boucle** et la **fonction**.
+
+<PoutreModele alt="Poutre de 5 m sur deux appuis A et B, portant une charge ponctuelle P de 20 kN à 2 m de A." L={5} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: 5, type: 'simple', nom: 'B' }]} charges={[{ type: 'ponctuelle', nom: 'P', F: 20, a: 2 }]} cotes={[0, 2, 5]} dec={0} prefixe="py5-pm" />
+
+Fil rouge de la leçon : cette poutre et sa charge, que l'on promène d'un appui à l'autre.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment structurer un calcul répétitif en fonctions réutilisables ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Trois outils pour structurer" sousTitre="if, for, def" etape="cours">
+
+<Panneau n={1} titre="if, elif, else" icone="verification" couleur="encre">
+Exécuter un bloc seulement si un test est vrai ; elif pour d'autres cas ; else pour le reste.
+</Panneau>
+
+<Panneau n={2} titre="for" icone="calcul" couleur="acier">
+Répéter un bloc pour chaque valeur d'une liste, ou de range(n).
+</Panneau>
+
+<Panneau n={3} titre="def … return" icone="idee" couleur="validation">
+Ranger un calcul sous un nom ; l'appeler avec des valeurs ; il renvoie le résultat.
+</Panneau>
+
+<Panneau n={4} titre="L'indentation" icone="regle" couleur="brique">
+Quatre espaces après les deux-points : c'est elle qui dit ce qui est dans le bloc.
+</Panneau>
+
+<Panneau n={5} titre="Composer" icone="plan" couleur="terre">
+Une fonction en appelle d'autres ; une boucle appelle une fonction : le programme se lit comme une méthode.
+</Panneau>
+
+<Panneau n={6} titre="Nommer" icone="retenir" couleur="correction">
+reactions, verifier_flexion : un verbe ou une grandeur ; un rôle par fonction.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : conditions et boucles">
+
+### Décider
+
+```python
+taux = M_Ed / M_Rd
+if taux <= 1:
+    print("OK")
+else:
+    print("NON")
+```
+
+Le bloc indenté sous `if` ne s'exécute que si le test est vrai. On ajoute `elif` pour un cas intermédiaire. Avec un moment de 25 kN·m pour 30 kN·m résistants, le taux vaut {formatF(v0.taux, 2)} :
+
+<IfOrganigramme taux={v0.taux} verdict={v0.verdict} />
+
+### Répéter
+
+```python
+for a in [0, 1, 2, 2.5, 4, 5]:
+    RA, RB = reactions(L, a, P)
+    print(f"{a:4.1f} {RA:7.2f} {RB:7.2f}")
+```
+
+La variable `a` prend tour à tour chaque valeur de la liste ; le bloc s'exécute une fois par valeur. `range(n)` donne les entiers de 0 à n − 1.
+
+<BoucleFor positions={pos} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : les fonctions">
+
+### Définir une fonction
+
+```python
+def reactions(L, a, P):
+    """Réactions (kN) d'une poutre de portée L (m) sous une charge P (kN) en x = a (m)."""
+    RA = P * (L - a) / L
+    RB = P * a / L
+    return RA, RB
+```
+
+`def` donne un **nom** au calcul ; `L, a, P` sont ses **paramètres** ; `return` renvoie le **résultat**. La phrase entre triples guillemets, la *docstring*, dit ce que fait la fonction et dans quelles unités.
+
+<FonctionMachine />
+
+### L'appeler
+
+`RA, RB = reactions(5, 2, 20)` donne RA = {grandeur(reactionsPonctuelle(5, 2, 20)[0], 2, 'kN')} et RB = {grandeur(reactionsPonctuelle(5, 2, 20)[1], 2, 'kN')}. On écrit la fonction une fois, on l'appelle autant de fois qu'il faut : dans la boucle, dans un autre programme, dans un test.
+
+<Regle type="art">
+Une fonction fait une seule chose, porte un nom clair et documente ses unités : c'est la règle de l'art qui rend un programme vérifiable.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : un programme bien rangé">
+
+Le programme complet se lit de haut en bas comme une méthode : les fonctions d'abord, puis le programme principal qui les appelle.
+
+<DiagrammeFlux alt="Structure d'un programme de calcul : les données en tête ; les fonctions de calcul, reactions et verifier ; la boucle principale qui appelle les fonctions pour chaque cas ; l'affichage des résultats." etapes={[{ titre: 'Données', texte: 'L, P, liste des positions', teinte: 'encre' }, { titre: 'Fonctions', texte: 'def reactions, def verifier', teinte: 'acier' }, { titre: 'Boucle', texte: 'for a in positions', teinte: 'terre' }, { titre: 'Résultats', texte: 'print formaté', teinte: 'validation' }]} />
+
+<Console lignes={['     a      RA      RB', ...t0]} alt={`Sortie de la boucle : pour chaque position de la charge de 20 kN sur la poutre de 5 m, les deux réactions ; quand la charge est sur un appui, il la reprend entièrement ; au milieu, chacun en prend la moitié.`} />
+
+</Page>
+
+<FicheCalcul calcul="pythonBoucle">
+
+<Cahier titre="Exemple résolu : promener une charge sur une poutre">
+
+**Énoncé.** Une charge ponctuelle P se déplace sur une poutre de portée L (données de l'énoncé). Écris la fonction des réactions, imprime-les pour chaque mètre et au milieu, puis vérifie la poutre quand la charge est au milieu, avec le moment résistant donné.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La fonction, appelée au milieu">
+<AN k="milieu" />
+<Note>Pourquoi une fonction ? La même formule servira pour chaque position : on l'écrit une fois, sans risque de recopie fausse.</Note>
+</Etape>
+
+<Etape n={3} titre="La décision">
+<AN k="taux" />
+<Resultat k="verdict" libelle="Verdict" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la sortie du programme">
+
+<Etape n={4} titre="Ce qu'imprime la boucle">
+<Schema />
+<Note couleur="vert">Contrôle : sur chaque ligne, RA + RB = P ; la charge sur un appui est reprise entièrement par lui. Augmente P : le verdict peut basculer.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier les deux-points ou l'indentation.">
+`if taux <= 1` sans `:`, ou un bloc mal décalé : erreur de syntaxe, ou pire, une ligne qui sort du bloc sans prévenir.
+
+<Console lignes={['  File "verif.py", line 2', '    if taux <= 1', '                ^', "SyntaxError: expected ':'", '  File "verif.py", line 4', '      print("NON")', 'IndentationError: unexpected indent']} alt="Les messages de Python pour deux erreurs de syntaxe : les deux-points oubliés après le if, et une ligne mal indentée. Le message donne le fichier, le numéro de ligne et la nature de l'erreur." titre="console Python" />
+</Piege>
+
+<Piege erreur="confondre = et ==.">
+`=` range une valeur, `==` compare. `if taux = 1:` est une erreur de syntaxe.
+</Piege>
+
+<Piege erreur="oublier return.">
+La fonction calcule, mais ne renvoie rien : `RA, RB = reactions(…)` échoue, car la fonction renvoie `None`.
+</Piege>
+
+<Piege erreur="tester les cas dans le mauvais ordre.">
+Avec `if taux <= 1.1: … elif taux <= 1:`, le second cas n'est jamais atteint. On teste du plus strict au plus large.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les cas de charge.** Un pont, une passerelle, un pont roulant d'atelier : la charge roulante se promène et l'on cherche la position la plus défavorable. Une boucle sur les positions et une fonction de calcul le font en quelques lignes, là où le calcul à la main prend des heures.
+
+<Encadre type="terrain" titre="Une bibliothèque de fonctions">
+Au fil des projets, un bureau d'études constitue sa propre bibliothèque : réactions, poids propres, sections d'acier, volumes de terrassement. Chaque fonction est documentée et testée (L1.7.8) ; on ne la réécrit plus, on l'importe.
+</Encadre>
+
+<Console lignes={['     a      RA      RB', ...tableauReactions(10, 60, [0, 2.5, 5, 7.5, 10])]} alt="Une charge roulante de 60 kN promenée sur une passerelle de 10 m : la boucle imprime les réactions pour chaque position ; chaque appui atteint 60 kN quand la charge est sur lui, c'est le cas le plus défavorable pour l'appui." />
+
+**Un programme n'est pas une norme.** Il applique les formules qu'on lui donne : la responsabilité du résultat reste à l'ingénieur qui l'a écrit et vérifié.
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : conditions, boucles, fonctions">
+
+### Condition
+
+if test: … elif test: … else: … · == compare, = affecte · du plus strict au plus large
+
+### Boucle
+
+for x in liste: … · range(n) : 0 à n − 1 · le bloc indenté est répété
+
+### Fonction
+
+def nom(paramètres): """docstring""" … return résultat · un rôle, un nom clair, les unités
+
+### Syntaxe
+
+« : » en fin de ligne · quatre espaces d'indentation
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trois verdicts">
+
+Avec `if taux <= 1: print("OK") else: print("NON")`, qu'affiche le programme pour des taux de {ex2.map((e) => nombre(e.t, 2)).join(', ')} ?
+
+<Indice>Le seuil est 1, compris.</Indice>
+
+<Corrige>
+{ex2.map((e) => `${nombre(e.t, 2)} → **${e.verdict}**`).join(' ; ')}.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Combien de tours ?">
+
+Combien de fois s'exécute le bloc de `for i in range(4):` ? Quelles valeurs prend `i` ?
+
+<Indice>range(n) commence à 0.</Indice>
+
+<Corrige>
+**4 fois**, avec i = 0, 1, 2, 3.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Utiliser la fonction">
+
+Avec la fonction `reactions`, calcule les réactions d'une poutre de 6 m portant 40 kN à 1,5 m de A. Écris l'appel et le résultat. Comment vérifier sans recalculer ?
+
+<Indice>reactions(6, 1.5, 40).</Indice>
+
+<Corrige>
+`RA, RB = reactions(6, 1.5, 40)` → RA = **{grandeur(r3[0], 2, 'kN')}**, RB = **{grandeur(r3[1], 2, 'kN')}**. Vérification : RA + RB = 40 kN, et la charge, plus près de A, charge davantage A.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.7.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Ce qui délimite un bloc en Python :" choix={['l’indentation', 'des accolades', 'des points-virgules', 'des parenthèses']} bonne={0} colonnes={2}>
+Quatre espaces après les deux-points.
+</QCM>
+
+<QCM n={2} question="Pour comparer deux valeurs, on écrit :" choix={['==', '=', ':=', '=>']} bonne={0} colonnes={4}>
+= affecte, == compare.
+</QCM>
+
+<QCM n={3} question="range(3) donne :" choix={['0, 1, 2', '1, 2, 3', '0, 1, 2, 3', '3']} bonne={0} colonnes={4}>
+De 0 à n − 1.
+</QCM>
+
+<QCM n={4} question="Une fonction renvoie son résultat par :" choix={['return', 'print', 'def', 'for']} bonne={0} colonnes={4}>
+print affiche seulement.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>reactions(5, 2, 20) renvoie :</>} choix={[`(${reactionsPonctuelle(5, 2, 20).join(', ')})`, '(8, 12)', '(10, 10)', '(20, 0)']} bonne={0} colonnes={4}>
+RA = 20 × 3 / 5, RB = 20 × 2 / 5.
+</QCM>
+
+<QCM n={6} question="Une fonction sans return renvoie :" choix={['None', '0', 'une erreur immédiate', 'le dernier calcul']} bonne={0} colonnes={4}>
+Rien d'utile.
+</QCM>
+
+<QCM n={7} question="La docstring d'une fonction sert à :" choix={['dire ce qu’elle fait et ses unités', 'accélérer le calcul', 'rien', 'l’appeler']} bonne={0} colonnes={2}>
+C'est la note de calcul de la fonction.
+</QCM>
+
+<QCM n={8} question="Sur chaque ligne du tableau des réactions, on doit avoir :" choix={['RA + RB = P', 'RA = RB', 'RA > RB', 'RA × RB = P']} bonne={0} colonnes={2}>
+L'équilibre vertical.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

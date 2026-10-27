@@ -1,0 +1,307 @@
+---
+id: L1.7.8
+titre: "Fiabiliser un calcul : tests et vérification"
+objectifs:
+  - Choisir des cas de test vérifiés à la main
+  - Écrire un test avec assert et une tolérance
+  - Lancer une série de tests avec pytest et lire le compte rendu
+  - Trouver une erreur grâce à un test qui échoue
+relecture: false
+normes: []
+glossaire:
+  - terme: Test
+    definition: Petit programme qui appelle une fonction sur un cas dont on connaît le résultat, et vérifie qu'elle le retrouve.
+  - terme: assert
+    definition: Instruction Python qui provoque une erreur si la condition qui la suit est fausse.
+  - terme: Tolérance
+    definition: Écart admis entre la valeur calculée et la valeur attendue, à cause des arrondis des flottants.
+  - terme: pytest
+    definition: Outil qui trouve et exécute toutes les fonctions dont le nom commence par test_, et résume les réussites et les échecs.
+symboles:
+  - { symbole: 'rel_tol, abs_tol', signification: 'tolérances relative et absolue', unite: '—' }
+formules:
+  - { nom: 'Comparaison avec tolérance', tex: '|a - b| \le \max(\text{rel} \cdot \max(|a|,|b|),\ \text{abs})', domaine: 'math.isclose' }
+---
+
+import { CAS_REACTIONS, executerTests, isclose, poidsPropre, reactionsBoguees, reactionsPonctuelle, reprFlottant } from '@/lib/calc/programmation'
+import { grandeur, nombre } from '@/lib/format'
+import { BandeTolerance, Console, FlottantBinaire, ResultatsTests } from '@/components/schemas/InfoCours2'
+import { DiagrammeFlux, DiagrammeCycle } from '@/components/drawing/Diagrammes'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
+
+export const ok = executerTests(reactionsPonctuelle)
+export const ko = executerTests(reactionsBoguees)
+export const G0 = poidsPropre({ b: 0.2, h: 0.4, L: 5, gamma: 25 })
+
+<Page etape="intuition" titre="L'intuition : on ne croit pas un calcul sur parole">
+
+Avant de livrer une balance à un marché, on la vérifie avec une masse étalon d'un kilogramme : si elle affiche 1,000 kg, on lui fait confiance pour le reste. Un programme de calcul se vérifie pareil : on lui donne des **cas dont on connaît la réponse**, calculés à la main. S'il les retrouve, on peut lui confier les autres.
+
+<PoutreModele alt="Cas de test simple : une poutre de 6 m, une charge de 20 kN au milieu ; chaque appui doit reprendre 10 kN." L={6} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: 6, type: 'simple', nom: 'B' }]} charges={[{ type: 'ponctuelle', nom: 'P', F: 20, a: 3 }]} reactions={[{ x: 0, R: 10, nom: 'RA' }, { x: 6, R: 10, nom: 'RB' }]} cotes={[0, 3, 6]} dec={0} prefixe="ts-pm" />
+
+Une charge au milieu se partage en deux moitiés égales : tout le monde le sait sans calculer. C'est un cas de test parfait.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment prouver qu'une fonction de calcul est juste, et la garder juste quand on la modifie ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Tester un calcul" sousTitre="Cas connus, tolérance, automatisation" etape="cours">
+
+<Panneau n={1} titre="Des cas connus" icone="verification" couleur="encre">
+Calculés à la main, ou évidents : charge au milieu, charge sur un appui.
+</Panneau>
+
+<Panneau n={2} titre="assert" icone="regle" couleur="acier">
+assert condition : rien si c'est vrai, une erreur si c'est faux.
+</Panneau>
+
+<Panneau n={3} titre="Tolérance" icone="calcul" couleur="terre">
+math.isclose(a, b) : les flottants ne sont jamais exactement égaux.
+</Panneau>
+
+<Panneau n={4} titre="pytest" icone="plan" couleur="validation">
+Toutes les fonctions test_… lancées d'un coup, avec un compte rendu.
+</Panneau>
+
+<Panneau n={5} titre="Les propriétés" icone="idee" couleur="brique">
+Ce qui doit toujours être vrai : RA + RB = P, symétrie, signe.
+</Panneau>
+
+<Panneau n={6} titre="À chaque modification" icone="attention" couleur="correction">
+On relance les tests : une correction ne doit rien casser ailleurs.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : assert et tolérance">
+
+### assert
+
+`assert RA == 10` ne fait rien si la condition est vraie, et arrête le programme avec une `AssertionError` si elle est fausse. Un test, c'est une fonction dont le nom commence par `test_` et qui contient des `assert` :
+
+```python
+def test_charge_au_milieu():
+    RA, RB = reactions(6, 3, 20)
+    assert math.isclose(RA, 10)
+    assert math.isclose(RB, 10)
+```
+
+### Pourquoi une tolérance
+
+Les flottants sont des approximations : `0.2 * 0.4 * 5.0 * 25` donne {reprFlottant(G0)}, pas 10.0. On compare donc avec `math.isclose(a, b, rel_tol=1e-9)`, ou une tolérance absolue adaptée à la grandeur.
+
+<FlottantBinaire />
+
+<BandeTolerance attendu={10} obtenu={G0} tol={1e-6} unite="kN" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : choisir les cas et lancer pytest">
+
+### Choisir les cas
+
+On choisit des cas **simples**, vérifiables de tête ou à la main, et qui couvrent les situations différentes : la charge au milieu (symétrie), sur un appui (cas limite), au tiers (cas quelconque). On ajoute une **propriété** toujours vraie : RA + RB = P.
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Test</th><th>L (m)</th><th>a (m)</th><th>P (kN)</th><th>RA attendu</th><th>RB attendu</th></tr></thead>
+    <tbody>
+      {CAS_REACTIONS.map((c) => <tr key={c.nom}><td>{c.nom}</td><td>{nombre(c.L, 2)}</td><td>{nombre(c.a, 2)}</td><td>{nombre(c.P, 0)}</td><td>{nombre(c.RA, 2)}</td><td>{nombre(c.RB, 2)}</td></tr>)}
+    </tbody>
+  </table>
+</div>
+
+### Lancer pytest
+
+On range les tests dans un fichier `test_reactions.py` et l'on tape `pytest` : l'outil trouve toutes les fonctions `test_…`, les exécute et résume. Vert, tout passe ; rouge, il dit quel test échoue et pourquoi.
+
+<ResultatsTests resultats={ok} titre="pytest test_reactions.py" />
+
+<Regle type="art">
+Tester chaque fonction de calcul sur un cas vérifié à la main est une règle de l'art du développement ; c'est aussi la règle de ce site : chaque calcul affiché a ses tests.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le cycle écrire, tester, corriger">
+
+<DiagrammeCycle alt="Le cycle de développement d'un calcul : écrire la fonction, écrire ses tests sur des cas connus, lancer les tests, corriger si un test échoue, puis relancer à chaque modification." etapes={[{ titre: 'Écrire', texte: 'la fonction', teinte: 'encre' }, { titre: 'Tester', texte: 'cas connus', teinte: 'acier' }, { titre: 'Lancer', texte: 'pytest', teinte: 'terre' }, { titre: 'Corriger', texte: 'si rouge', teinte: 'correction' }]} centre="à chaque modification" />
+
+Un test qui échoue n'est pas un échec : c'est une erreur trouvée **avant** qu'elle n'arrive sur le chantier. Voici la sortie de pytest sur une version boguée de la fonction :
+
+<Console lignes={['FAILED test_reactions.py::test_charge_sur_appui_A', `  assert math.isclose(RB, 0)`, `  où RB = ${reprFlottant(reactionsBoguees(6, 0, 20)[1])}`, `1 passed, ${ko.filter((c) => !c.ok).length} failed`]} alt={`Compte rendu de pytest sur la version boguée : le test de la charge sur l'appui A échoue, RB vaut ${reprFlottant(reactionsBoguees(6, 0, 20)[1])} au lieu de 0 ; un test passe, deux échouent.`} />
+
+</Page>
+
+<FicheCalcul calcul="pythonTests">
+
+<Cahier titre="Exemple résolu : démasquer une fonction boguée">
+
+**Énoncé.** Un collègue a modifié la fonction `reactions` et pense avoir écrit RB = P × (L − a) / L. Lance les trois tests sur sa version et sur la version juste, et explique.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les cas">
+<AN k="cas" />
+<Note>Pourquoi le test au milieu passe-t-il quand même avec le bug ? Au milieu, L − a = a : la formule fausse donne la bonne valeur. C'est pourquoi on teste plusieurs cas différents.</Note>
+<Resultat k="bilan" libelle="Bilan" />
+</Etape>
+
+<Etape n={3} titre="Le compte rendu">
+<Schema />
+<Note couleur="vert">Contrôle : choisis la version juste, tout passe ; la version boguée échoue dès que la charge n'est plus au milieu.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="tester avec == sur des flottants.">
+`assert 0.1 + 0.2 == 0.3` échoue alors que le calcul est juste. On utilise `math.isclose` ou `pytest.approx`.
+
+<Console lignes={['>>> assert 0.1 + 0.2 == 0.3', 'AssertionError', '>>> assert math.isclose(0.1 + 0.2, 0.3)', '>>>']} alt="Dans la console : l'égalité stricte entre 0.1 + 0.2 et 0.3 fait échouer l'assert ; avec math.isclose, il passe sans rien dire." titre="console Python" />
+</Piege>
+
+<Piege erreur="tester un seul cas, symétrique.">
+La charge au milieu cache les erreurs d'inversion : le bug de l'exemple y passe. On varie les cas.
+</Piege>
+
+<Piege erreur="calculer la valeur attendue avec la fonction testée.">
+Le test ne prouve alors rien : il compare la fonction à elle-même. La valeur attendue vient d'un calcul à la main ou d'une autre méthode.
+</Piege>
+
+<Piege erreur="supprimer un test qui échoue « parce qu'il gêne ».">
+Il signale une erreur réelle, dans le calcul ou dans le test : on cherche laquelle.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**La responsabilité.** Une feuille ou un programme qui dimensionne un ouvrage engage l'ingénieur qui le signe. Un logiciel commercial a été validé par son éditeur ; un programme maison doit l'être par son auteur, et les tests en sont la preuve.
+
+<DiagrammeFlux alt="Fiabiliser un outil maison : des cas tests vérifiés à la main, une comparaison avec un logiciel reconnu ou une méthode indépendante, une relecture par un collègue, puis l'archivage des tests avec l'outil." etapes={[{ titre: 'Cas à la main', texte: 'résultats connus', teinte: 'encre' }, { titre: 'Autre méthode', texte: 'logiciel, abaque', teinte: 'acier' }, { titre: 'Relecture', texte: 'par un collègue', teinte: 'terre' }, { titre: 'Archiver', texte: 'tests avec l’outil', teinte: 'validation' }]} />
+
+<Encadre type="terrain" titre="La feuille qui circule">
+Une feuille de calcul passe de main en main sur un chantier ; quelqu'un modifie une formule, sans le dire. Un onglet « contrôle », avec quelques cas connus et leur résultat attendu, montre aussitôt si la feuille est encore juste.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : tests et vérification">
+
+### Écrire un test
+
+def test_nom(): … assert condition · un cas vérifié à la main · valeur attendue écrite en dur
+
+### Comparer
+
+math.isclose(a, b, rel_tol=…, abs_tol=…) · jamais == sur des flottants
+
+### Choisir les cas
+
+symétrique · cas limite (sur appui) · cas quelconque · propriété (RA + RB = P)
+
+### Lancer
+
+pytest · vert : tout passe · rouge : lire le test et la valeur obtenue · relancer à chaque modification
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Vrai ou faux ?">
+
+Que fait `assert 2 + 2 == 4` ? et `assert 2 + 2 == 5` ?
+
+<Indice>assert ne dit rien quand tout va bien.</Indice>
+
+<Corrige>
+Le premier ne fait **rien** ; le second provoque une **AssertionError**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un test pour la charge sur l'appui B">
+
+Écris un test pour une charge de 20 kN posée sur l'appui B d'une poutre de 6 m. Quelles valeurs attends-tu ?
+
+<Indice>La charge est entièrement reprise par l'appui où elle est posée.</Indice>
+
+<Corrige>
+```python
+def test_charge_sur_appui_B():
+    RA, RB = reactions(6, 6, 20)
+    assert math.isclose(RA, 0, abs_tol=1e-12)
+    assert math.isclose(RB, 20)
+```
+Avec la fonction juste : RA = {reprFlottant(reactionsPonctuelle(6, 6, 20)[0])}, RB = {reprFlottant(reactionsPonctuelle(6, 6, 20)[1])} → **réussi**. Le `abs_tol` est nécessaire : une tolérance relative autour de 0 n'admet aucun écart.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le test trompeur">
+
+Pourquoi le test de la charge au milieu passe-t-il avec la version boguée ? Quel test ajouter pour qu'une **seule** propriété démasque le bug, quelle que soit la position ?
+
+<Indice>Que vaut RA + RB avec la formule fausse ?</Indice>
+
+<Corrige>
+Au milieu, L − a = a : les deux formules coïncident. La propriété **RA + RB = P** démasque le bug partout ailleurs : avec la charge au tiers, la version boguée donne RA + RB = {reprFlottant(reactionsBoguees(6, 2, 30).reduce((s, x) => s + x, 0))} kN au lieu de 30. Résultats sur les trois cas :
+
+<ResultatsTests resultats={ko} titre="pytest, version boguée" />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.7.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un bon cas de test :" choix={['a un résultat connu, vérifié à la main', 'est calculé par la fonction testée', 'est choisi au hasard', 'est le plus compliqué possible']} bonne={0} colonnes={2}>
+Sinon le test ne prouve rien.
+</QCM>
+
+<QCM n={2} question="assert x > 0 quand x vaut 3 :" choix={['ne fait rien', 'affiche True', 'arrête le programme', 'renvoie 3']} bonne={0} colonnes={2}>
+Rien ne se passe quand la condition est vraie.
+</QCM>
+
+<QCM n={3} question="Pour comparer deux flottants, on utilise :" choix={['math.isclose', '==', 'is', 'round seul']} bonne={0} colonnes={4}>
+Avec une tolérance.
+</QCM>
+
+<QCM n={4} question="pytest exécute les fonctions dont le nom commence par :" choix={['test_', 'def_', 'check', 'main']} bonne={0} colonnes={4}>
+C'est ainsi qu'il les trouve.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Avec la fonction boguée, combien de tests sur trois passent ?</>} choix={[String(ko.filter((c) => c.ok).length), '0', '3', '2']} bonne={0} colonnes={4}>
+Seul le cas symétrique passe.
+</QCM>
+
+<QCM n={6} question="Une propriété utile pour tester les réactions :" choix={['RA + RB = P', 'RA = RB toujours', 'RA > 0 toujours', 'RB = P']} bonne={0} colonnes={2}>
+L'équilibre vertical, vrai pour toute position.
+</QCM>
+
+<QCM n={7} question="Quand on modifie une fonction, on :" choix={['relance tous les tests', 'supprime les anciens tests', 'teste seulement le nouveau cas', 'ne teste plus']} bonne={0} colonnes={2}>
+Une correction peut casser autre chose.
+</QCM>
+
+<QCM n={8} question="Autour d'une valeur attendue nulle, on prend :" choix={['une tolérance absolue', 'une tolérance relative seule', 'aucune tolérance', '==']} bonne={0} colonnes={2}>
+Une tolérance relative de 0 n'admet aucun écart.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

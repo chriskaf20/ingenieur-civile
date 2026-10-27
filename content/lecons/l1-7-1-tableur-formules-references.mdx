@@ -1,0 +1,302 @@
+---
+id: L1.7.1
+titre: "Tableur : formules et références"
+objectifs:
+  - Repérer une cellule par son adresse et lire sa formule
+  - Écrire une formule avec les bonnes priorités d'opérations
+  - Distinguer références relatives, absolues et mixtes
+  - Recopier une formule sans fausser le calcul
+relecture: false
+normes: []
+glossaire:
+  - terme: Cellule
+    definition: Case d'une feuille de calcul, repérée par sa colonne (lettre) et sa ligne (numéro), par exemple B4.
+  - terme: Formule
+    definition: Calcul saisi dans une cellule, qui commence par le signe égal ; la cellule affiche le résultat.
+  - terme: Référence relative
+    definition: Adresse qui se décale quand on recopie la formule (B4 devient B5 une ligne plus bas).
+  - terme: Référence absolue
+    definition: Adresse bloquée par des dollars ($B$1) ; elle ne change pas à la recopie.
+symboles:
+  - { symbole: 'B4', signification: 'cellule colonne B, ligne 4', unite: '—' }
+  - { symbole: '$B$1', signification: 'référence absolue', unite: '—' }
+formules:
+  - { nom: 'Volume d''un élément', tex: 'V = n \times L \times l \times h', domaine: 'Colonne F' }
+  - { nom: 'Coût', tex: 'C = V \times p', domaine: 'Prix p en $B$1' }
+---
+
+import { evaluerFeuille, FEUILLE_BETON, recopierFormule, afficherValeur } from '@/lib/calc/tableur'
+import { nombre } from '@/lib/format'
+import { AnatomieCellule, ErreursTableur, FeuilleTableur, PoigneeRecopie, PrioriteArbre, QuatreReferences, RecopieRelativeAbsolue } from '@/components/schemas/InfoCours1'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const v0 = evaluerFeuille(FEUILLE_BETON)
+export const ex1 = evaluerFeuille({ A1: '=10-4/2', A2: '=(10-4)/2', A3: '=2*3^2' })
+export const ex3 = evaluerFeuille({ A1: 0.5, A2: 1, A3: 1.5, B1: 2, C1: 3, B2: '=$A2*B$1', C2: '=$A2*C$1', B3: '=$A3*B$1', C3: '=$A3*C$1' })
+
+<Page etape="intuition" titre="L'intuition : une calculatrice qui se souvient">
+
+Un métreur calcule le béton de vingt semelles identiques. À la calculatrice, il refait vingt fois la même opération ; s'il se trompe de dimension, il recommence tout. Dans un **tableur**, il écrit la formule une fois, la recopie, et chaque résultat se met à jour dès qu'une donnée change.
+
+<FeuilleTableur feuille={FEUILLE_BETON} plage="A3:G8" alt={`Une feuille de calcul de métré : quatre éléments de béton, leurs dimensions, leurs volumes et leurs coûts ; total ${afficherValeur(v0.F8, 3)} m³ pour ${afficherValeur(v0.G8, 2)} $.`} decimales={{ F: 3, G: 2 }} largeurs={{ A: 80, B: 60, C: 56, D: 56, E: 56, F: 70, G: 80 }} actif="G4" />
+
+Toute la puissance du tableur tient en deux idées : la **formule** qui calcule à partir d'autres cellules, et la **recopie** qui l'applique à toute une colonne.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment écrire une formule qu'on peut recopier sans fausser le calcul ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Le tableur en six idées" sousTitre="Cellules, formules, références" etape="cours">
+
+<Panneau n={1} titre="La cellule" icone="plan" couleur="encre">
+Une adresse : colonne + ligne. B4 est en colonne B, ligne 4.
+</Panneau>
+
+<Panneau n={2} titre="La formule" icone="calcul" couleur="acier">
+Elle commence par =. La barre de formule montre le calcul, la cellule le résultat.
+</Panneau>
+
+<Panneau n={3} titre="Les priorités" icone="regle" couleur="brique">
+Puissance, puis × et /, puis + et −. Les parenthèses passent avant tout.
+</Panneau>
+
+<Panneau n={4} titre="Relative" icone="idee" couleur="terre">
+B4 se décale à la recopie : c'est ce qu'on veut pour les données de chaque ligne.
+</Panneau>
+
+<Panneau n={5} titre="Absolue" icone="verification" couleur="validation">
+$B$1 reste fixe : c'est ce qu'on veut pour un prix ou un coefficient commun.
+</Panneau>
+
+<Panneau n={6} titre="Les erreurs" icone="attention" couleur="correction">
+#DIV/0!, #N/A, #NOM?, #REF! : elles disent ce qui ne va pas, il faut les lire.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : cellules et formules">
+
+### Adresse, contenu, valeur
+
+Une cellule contient soit une **donnée** (un nombre, un texte), soit une **formule** qui commence par `=`. La barre de formule montre ce qu'on a tapé ; la cellule affiche le **résultat**.
+
+<AnatomieCellule feuille={FEUILLE_BETON} cellule="F4" />
+
+### Les opérations et leur ordre
+
+Les opérateurs sont `+ - * / ^`. Le tableur respecte les priorités des mathématiques : d'abord les **puissances**, puis **multiplications et divisions**, enfin **additions et soustractions**, de gauche à droite. Les parenthèses forcent un autre ordre. Les nombres s'écrivent avec la virgule décimale et les arguments des fonctions se séparent par un point-virgule, dans un tableur réglé en français.
+
+<PrioriteArbre />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : recopier une formule">
+
+### Relatif ou absolu
+
+Quand on recopie une formule d'une ligne vers le bas, ses **références relatives** se décalent d'une ligne : `=B4*C4` devient `=B5*C5`. C'est exactement ce qu'il faut pour les données propres à chaque ligne. Mais le prix du béton est **unique**, en B1 : sa référence doit rester fixe. On la bloque avec des **dollars** : `$B$1`. Un seul dollar bloque seulement la colonne (`$B1`) ou seulement la ligne (`B$1`) : ce sont les références **mixtes**.
+
+<QuatreReferences />
+
+<PoigneeRecopie />
+
+<Regle type="art">
+On met les données communes (prix, coefficients, poids volumiques) dans des cellules à part, en haut de la feuille, et l'on s'y réfère en absolu : changer le prix change alors tous les coûts.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : relatif ou absolu, la même recopie">
+
+La formule de coût, écrite en G4 puis recopiée vers le bas. À gauche, le prix est en référence relative ; à droite, en absolue :
+
+<RecopieRelativeAbsolue feuille={FEUILLE_BETON} />
+
+La feuille ne signale pas toujours l'erreur : la dernière ligne de gauche affiche un nombre **vraisemblable mais faux**. C'est le piège le plus dangereux.
+
+<FeuilleTableur feuille={FEUILLE_BETON} plage="E3:G8" afficher="formules" alt="Les formules des colonnes F et G : le volume multiplie quatre cellules de la même ligne ; le coût multiplie le volume de la ligne par le prix bloqué en $B$1 ; les totaux utilisent SOMME." largeurs={{ E: 56, F: 130, G: 130 }} />
+
+<Encadre type="retenir">
+Données de la ligne : référence relative. Donnée commune : référence absolue, avec $.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="feuilleBeton">
+
+<Cahier titre="Exemple résolu : le béton d'une petite école à Kananga">
+
+**Énoncé.** Un métreur chiffre le béton d'une école : semelles, poteaux, poutres et dalle (dimensions dans la feuille ; données de l'énoncé). Le béton livré coûte le prix indiqué en B1. Écris les formules de volume et de coût, recopie-les, et lis le total.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+<Note>Pourquoi le prix en B1, à part ? Il est commun à toutes les lignes : en un seul endroit, on le change une seule fois.</Note>
+</Etape>
+
+<Etape n={2} titre="La première ligne">
+<AN k="semelles" />
+<AN k="cout" />
+<Note>Pourquoi $B$1 ? La formule sera recopiée vers le bas : sans dollars, elle chercherait le prix en B2, B3…</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : recopier et totaliser">
+
+<Etape n={3} titre="Les totaux">
+<AN k="total" />
+<Resultat k="cout" libelle="Coût du béton" />
+<Note couleur="vert">Contrôle : change le prix en B1, tous les coûts suivent ; change l'épaisseur de la dalle, son volume et le total suivent.</Note>
+</Etape>
+
+<Etape n={4} titre="La feuille">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier les dollars d'une donnée commune.">
+La recopie fait glisser la référence vers des cellules vides ou des textes : zéros, erreurs, ou pire, un nombre faux mais vraisemblable.
+</Piege>
+
+<Piege erreur="taper un résultat à la main dans une colonne de formules.">
+La cellule ne suit plus les données : le jour où une dimension change, la feuille ment. On ne remplace jamais une formule par sa valeur.
+</Piege>
+
+<Piege erreur="ignorer un message d'erreur.">
+Chaque code a une cause précise :
+
+<ErreursTableur />
+
+</Piege>
+
+<Piege erreur="oublier les parenthèses.">
+`=10-4/2` donne {afficherValeur(ex1.A1)}, `=(10-4)/2` donne {afficherValeur(ex1.A2)}.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Au bureau d'études**, le tableur sert partout : métrés, devis, plannings, petites notes de calcul. Une feuille bien construite se relit et se contrôle :
+
+<DiagrammeFlux alt="Construire une feuille fiable en quatre temps : séparer les données, en bleu, des formules ; mettre les constantes communes en haut et les appeler en absolu ; recopier les formules plutôt que les retaper ; contrôler un résultat à la main." etapes={[{ titre: 'Données', texte: 'à part, en bleu', teinte: 'encre' }, { titre: 'Constantes', texte: 'en haut, en absolu ($B$1)', teinte: 'acier' }, { titre: 'Recopier', texte: 'ne pas retaper', teinte: 'terre' }, { titre: 'Contrôler', texte: 'une ligne à la main', teinte: 'validation' }]} />
+
+<Encadre type="terrain" titre="Le prix qui change">
+Sur un chantier en RDC, le prix du ciment ou du béton livré peut varier d'un mois à l'autre. Une feuille où le prix est en une seule cellule absolue se met à jour en une seconde ; une feuille où il est recopié dans chaque formule demande des heures, et laisse passer des oublis.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : formules et références">
+
+### Formules
+
+commencent par = · priorités : ^ puis × / puis + − · parenthèses d'abord · virgule décimale, « ; » entre arguments
+
+### Références
+
+B4 relative (se décale) · $B$1 absolue (fixe) · $B4 colonne bloquée · B$4 ligne bloquée · touche F4 pour faire tourner les dollars
+
+### Erreurs
+
+#DIV/0! division par zéro · #N/A introuvable · #NOM? fonction mal écrite · #REF! référence perdue
+
+### Bonnes pratiques
+
+données en bleu, à part · constantes en absolu · recopier, ne pas retaper · contrôler une ligne à la main
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Les priorités">
+
+Que valent `=10-4/2`, `=(10-4)/2` et `=2*3^2` ?
+
+<Indice>Puissance, puis division et multiplication, puis soustraction.</Indice>
+
+<Corrige>
+**{afficherValeur(ex1.A1)}**, **{afficherValeur(ex1.A2)}** et **{afficherValeur(ex1.A3)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="La recopie">
+
+La formule `=F4*$B$1` est recopiée trois lignes plus bas, puis `=SOMME(F4:F7)` une colonne à droite. Que deviennent-elles ?
+
+<Indice>Seules les parties sans dollar se décalent.</Indice>
+
+<Corrige>
+**{recopierFormule('=F4*$B$1', 3, 0)}** et **{recopierFormule('=SOMME(F4:F7)', 0, 1)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une table à double entrée">
+
+On veut une table de produits : des longueurs en colonne A (A2, A3), des largeurs en ligne 1 (B1, C1). Quelle formule unique écrire en B2 pour la recopier à droite **et** vers le bas ?
+
+<Indice>La longueur est toujours en colonne A ; la largeur toujours en ligne 1.</Indice>
+
+<Corrige>
+`=$A2*B$1` : la colonne A et la ligne 1 sont bloquées.
+
+<FeuilleTableur feuille={{ A1: 0.5, A2: 1, A3: 1.5, B1: 2, C1: 3, B2: '=$A2*B$1', C2: '=$A2*C$1', B3: '=$A3*B$1', C3: '=$A3*C$1' }} plage="A1:C3" afficher="formules" alt="La table recopiée : chaque cellule multiplie la valeur de sa ligne en colonne A par celle de sa colonne en ligne 1." largeurs={{ A: 60, B: 110, C: 110 }} />
+
+Les résultats : {[ex3.B2, ex3.C2, ex3.B3, ex3.C3].map((v) => afficherValeur(v)).join(' ; ')}.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.7.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une formule commence par :" choix={['=', '+', '$', '#']} bonne={0} colonnes={4}>
+Sans =, le tableur prend la saisie pour un texte.
+</QCM>
+
+<QCM n={2} question="La cellule D7 est :" choix={['colonne D, ligne 7', 'ligne D, colonne 7', 'la 47e cellule', 'une plage']} bonne={0} colonnes={2}>
+Lettre de colonne, puis numéro de ligne.
+</QCM>
+
+<QCM n={3} question={<>=2+3*4 vaut :</>} choix={[afficherValeur(evaluerFeuille({ A1: '=2+3*4' }).A1), '20', '24', '9']} bonne={0} colonnes={4}>
+La multiplication d'abord.
+</QCM>
+
+<QCM n={4} question="Recopiée d'une ligne vers le bas, =B4*$B$1 devient :" choix={['=B5*$B$1', '=B5*$B$2', '=B4*$B$1', '=C4*$C$1']} bonne={0} colonnes={2}>
+Seule la référence relative se décale.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour un prix commun à toutes les lignes, on utilise :" choix={['une référence absolue', 'une référence relative', 'une valeur tapée dans chaque formule', 'un texte']} bonne={0} colonnes={2}>
+$B$1, que la recopie ne change pas.
+</QCM>
+
+<QCM n={6} question="#DIV/0! signale :" choix={['une division par zéro', 'une fonction inconnue', 'une valeur introuvable', 'une référence perdue']} bonne={0} colonnes={2}>
+Souvent une cellule vide au dénominateur.
+</QCM>
+
+<QCM n={7} question="Dans =$A2*B$1, ce qui est bloqué :" choix={['la colonne A et la ligne 1', 'tout', 'rien', 'la ligne 2']} bonne={0} colonnes={2}>
+Un dollar bloque la partie qu'il précède.
+</QCM>
+
+<QCM n={8} question={<>Dans l'exemple, le volume total de béton vaut :</>} choix={[`${afficherValeur(v0.F8, 3)} m³`, `${afficherValeur(v0.F7, 3)} m³`, `${nombre(Number(v0.F8) * 2, 3)} m³`, `${afficherValeur(v0.G8, 2)} m³`]} bonne={0} colonnes={2}>
+SOMME(F4:F7).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
