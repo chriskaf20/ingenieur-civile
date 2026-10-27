@@ -1,0 +1,312 @@
+---
+id: L1.8.5
+titre: Carnet de nivellement et fermeture
+objectifs:
+  - Tenir un carnet de nivellement par cheminement
+  - Contrôler les calculs par la somme des lectures
+  - Calculer la fermeture d'un cheminement et la comparer à la tolérance
+  - Compenser une fermeture admissible
+relecture: false
+normes: []
+glossaire:
+  - terme: Cheminement
+    definition: Suite de stations de nivellement qui relie un repère de départ à un repère d'arrivée d'altitude connue.
+  - terme: Point de changement
+    definition: Point où l'on lit d'abord en avant, puis, après avoir déplacé le niveau, en arrière ; il relie deux stations.
+  - terme: Fermeture
+    definition: Écart entre l'altitude calculée du repère d'arrivée et son altitude connue.
+  - terme: Compensation
+    definition: Répartition de la fermeture admissible entre les points du cheminement.
+symboles:
+  - { symbole: 'f', signification: 'fermeture', unite: 'mm' }
+  - { symbole: 'n', signification: 'nombre de stations', unite: '—' }
+  - { symbole: 'T', signification: 'tolérance', unite: 'mm' }
+formules:
+  - { nom: 'Contrôle du carnet', tex: '\sum AR - \sum AV = Z_{arr,calc} - Z_{dép}', domaine: 'Cheminement' }
+  - { nom: 'Fermeture', tex: 'f = Z_{arr,calc} - Z_{arr,connu}', domaine: 'Cheminement' }
+  - { nom: 'Tolérance', tex: 'T = k\sqrt{n}', domaine: 'k donné par le cahier des charges' }
+---
+
+import { carnetNivellement, EXEMPLE_CHEMINEMENT } from '@/lib/calc/topographie'
+import { grandeur, nombre } from '@/lib/format'
+import { FermetureTolerance, NivellementDirect, ProfilCheminement } from '@/components/schemas/Topographie'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const d0 = EXEMPLE_CHEMINEMENT
+export const c0 = carnetNivellement(d0)
+export const pts = [{ nom: d0.depart, Z: d0.Zdepart }, ...c0.lignes.map((l) => ({ nom: l.vers, Z: l.Z }))]
+export const ex2 = carnetNivellement({ ...d0, stations: d0.stations.map((s, i) => (i === 2 ? { ...s, AV: 2.398 } : s)) })
+export const ex3 = carnetNivellement({ ...d0, k: 2 })
+
+<Page etape="intuition" titre="L'intuition : faire le tour et revenir au point de départ">
+
+Pour vérifier qu'on a bien compté son argent, on recompte dans l'autre sens. En nivellement, on part d'un repère connu, on avance de station en station, puis on **revient sur un repère connu**. Si les calculs ramènent exactement l'altitude connue, tout va bien ; sinon, l'écart, la **fermeture**, dit combien on s'est trompé.
+
+<ProfilCheminement points={pts} />
+
+Une petite fermeture est normale : on la répartit. Une grande trahit une faute : on recommence.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment noter, contrôler et corriger un nivellement de plusieurs stations ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Le cheminement de nivellement" sousTitre="Noter, contrôler, fermer, compenser" etape="cours">
+
+<Panneau n={1} titre="Le carnet" icone="plan" couleur="encre">
+Une ligne par station : point arrière, point avant, AR, AV, dénivelée, altitude.
+</Panneau>
+
+<Panneau n={2} titre="Les points de changement" icone="idee" couleur="acier">
+Lus en avant, puis en arrière depuis la station suivante : la mire ne bouge pas.
+</Panneau>
+
+<Panneau n={3} titre="Le contrôle" icone="calcul" couleur="terre">
+ΣAR − ΣAV = altitude d'arrivée calculée − altitude de départ.
+</Panneau>
+
+<Panneau n={4} titre="La fermeture" icone="verification" couleur="brique">
+Écart entre l'arrivée calculée et l'arrivée connue.
+</Panneau>
+
+<Panneau n={5} titre="La tolérance" icone="attention" couleur="correction">
+T = k √n : si |f| &gt; T, on refait les mesures.
+</Panneau>
+
+<Panneau n={6} titre="La compensation" icone="retenir" couleur="validation">
+−f / n par station, cumulé : les altitudes ferment exactement.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : le carnet">
+
+### Une ligne par station
+
+À chaque station, on note le point arrière et le point avant, les deux lectures, la dénivelée, l'altitude du point avant. Le point avant d'une station devient le point arrière de la suivante : c'est un **point de changement**, sur lequel la mire reste posée pendant qu'on déplace le niveau.
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>de</th><th>vers</th><th>AR (m)</th><th>AV (m)</th><th>Δh (m)</th><th>Z provisoire (m)</th></tr></thead>
+    <tbody>
+      <tr><td>{d0.depart}</td><td></td><td></td><td></td><td></td><td>{nombre(d0.Zdepart, 3)}</td></tr>
+      {c0.lignes.map((l) => <tr key={l.vers}><td>{l.de}</td><td>{l.vers}</td><td>{nombre(l.AR, 3)}</td><td>{nombre(l.AV, 3)}</td><td>{nombre(l.dh, 3)}</td><td>{nombre(l.Zprov, 3)}</td></tr>)}
+      <tr><td colSpan={2}><strong>sommes</strong></td><td><strong>{nombre(c0.sommeAR, 3)}</strong></td><td><strong>{nombre(c0.sommeAV, 3)}</strong></td><td><strong>{nombre(c0.controle, 3)}</strong></td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<NivellementDirect AR={d0.stations[0].AR} AV={d0.stations[0].AV} ZA={d0.Zdepart} />
+
+### Le contrôle arithmétique
+
+La somme des dénivelées vaut ΣAR − ΣAV : elle doit égaler l'altitude d'arrivée calculée moins l'altitude de départ. Ce contrôle détecte les **fautes de calcul**, pas les fautes de lecture.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : fermeture et compensation">
+
+### La fermeture
+
+On compare l'altitude calculée du repère d'arrivée à son altitude connue : $f = Z_{arr,calc} - Z_{arr,connu}$. Ici, le cheminement revient sur {d0.depart} : f = {nombre(c0.fermeture * 1000, 1)} mm.
+
+### La tolérance
+
+On admet une fermeture qui croît avec le nombre de stations : $T = k\sqrt{n}$. Avec k = {d0.k} mm et n = {c0.n} stations, T = {nombre(c0.tolerance * 1000, 1)} mm.
+
+<FermetureTolerance f={c0.fermeture} T={c0.tolerance} />
+
+<Regle type="hypothese">
+Le coefficient k dépend de la précision exigée et du matériel ; il est fixé par le cahier des charges du lever. La valeur k = 10 mm de l'exemple est une hypothèse d'énoncé pour un nivellement ordinaire <AVerifier note="A_VERIFIER.md n° 49 : tolérances de fermeture des nivellements (k √n, ou en fonction de la longueur en km), selon les cahiers des charges et les textes en vigueur" />.
+</Regle>
+
+### La compensation
+
+Si |f| ≤ T, on répartit −f à parts égales entre les stations : le point de la station i reçoit i × (−f / n). Le dernier point retrouve exactement son altitude connue.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : un cheminement fermé">
+
+<ProfilCheminement points={pts} />
+
+<NivellementDirect AR={d0.stations[2].AR} AV={d0.stations[2].AV} ZA={c0.lignes[1].Z} />
+
+La troisième station : la mire reste sur B (point de changement), le niveau avance, et l'on lit en avant sur C.
+
+<DiagrammeFlux alt="Le traitement d'un carnet : calcul des dénivelées et des altitudes provisoires ; contrôle par les sommes ; calcul de la fermeture ; comparaison à la tolérance ; compensation si elle est admissible, nouvelle mesure sinon." etapes={[{ titre: 'Dénivelées', texte: 'AR − AV', teinte: 'encre' }, { titre: 'Contrôle', texte: 'ΣAR − ΣAV', teinte: 'acier' }, { titre: 'Fermeture', texte: 'f', teinte: 'terre' }, { titre: 'Tolérance', texte: '|f| ≤ k√n ?', teinte: 'correction' }, { titre: 'Compenser', texte: '−f/n par station', teinte: 'validation' }]} />
+
+</Page>
+
+<FicheCalcul calcul="carnetNivellement">
+
+<Cahier titre="Exemple résolu : un cheminement fermé à Lubumbashi">
+
+**Énoncé.** Un cheminement part du repère {d0.depart} ({grandeur(d0.Zdepart, 3, 'm')}), passe par A, B et C et revient sur {d0.depart} (lectures dans le carnet ; données de l'énoncé). Calcule les altitudes, la fermeture, vérifie la tolérance avec k = {d0.k} mm, puis compense.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le carnet">
+<AN k="carnet" />
+<AN k="controle" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : fermeture et compensation">
+
+<Etape n={3} titre="La fermeture">
+<AN k="fermeture" />
+<Resultat k="verdict" libelle="Fermeture" />
+<Note>Pourquoi √n ? Les erreurs accidentelles de chaque station se compensent en partie : leur effet total croît comme la racine du nombre de stations (L1.8.7).</Note>
+</Etape>
+
+<Etape n={4} titre="La compensation">
+<AN k="compensation" />
+<Schema />
+<Note couleur="vert">Contrôle : après compensation, le dernier point retrouve exactement l'altitude du repère. Fausse une lecture de 2 cm : la fermeture sort de la tolérance.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="déplacer la mire sur un point de changement.">
+Le lien entre les deux stations est perdu : tout le reste du cheminement est décalé. Le porte-mire ne bouge pas tant que l'opérateur n'a pas lu l'arrière.
+</Piege>
+
+<Piege erreur="compenser une fermeture hors tolérance.">
+Une grosse fermeture cache une faute (lecture, recopie) : la répartir la cache partout. On recommence.
+</Piege>
+
+<FermetureTolerance f={ex2.fermeture} T={ex2.tolerance} />
+
+<Piege erreur="croire que le contrôle des sommes prouve les mesures.">
+Il ne vérifie que les calculs ; seule la fermeture sur un repère connu contrôle les lectures.
+</Piege>
+
+<Piege erreur="effacer et réécrire dans le carnet.">
+Le carnet est une pièce de preuve : on barre d'un trait, on récrit à côté, on ne gomme jamais.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les repères du chantier.** Avant les terrassements, le géomètre pose des repères de nivellement hors de l'emprise, rattachés au réseau d'altitudes. Tous les niveaux du chantier en partent, et l'on y referme les cheminements.
+
+<ProfilCheminement points={pts} />
+
+<Encadre type="terrain" titre="Le carnet électronique">
+Les niveaux numériques lisent une mire à code-barres et enregistrent tout : moins de fautes de lecture, mais le principe et le contrôle de fermeture restent les mêmes. On garde une copie papier ou une sauvegarde le soir même.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : carnet et fermeture">
+
+### Carnet
+
+de · vers · AR · AV · Δh = AR − AV · Z · points de changement : la mire ne bouge pas
+
+### Contrôles
+
+ΣAR − ΣAV = Z arrivée calculée − Z départ (calculs) · fermeture sur un repère connu (mesures)
+
+### Fermeture
+
+f = Z calc − Z connu · tolérance T = k √n (k du cahier des charges) · |f| &gt; T : on refait
+
+### Compensation
+
+−f / n par station, cumulée · le dernier point ferme exactement
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La tolérance">
+
+Combien vaut la tolérance d'un cheminement de 9 stations avec k = 10 mm ?
+
+<Indice>T = k √n.</Indice>
+
+<Corrige>
+T = 10 × √9 = **{nombre(10 * Math.sqrt(9), 0)} mm**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une lecture fausse">
+
+Dans le cheminement de l'exemple, on a noté 2,398 au lieu de 2,338 sur C. Que devient la fermeture ? Que faire ?
+
+<Indice>Une lecture avant trop grande abaisse tout ce qui suit.</Indice>
+
+<Corrige>
+f = **{nombre(ex2.fermeture * 1000, 1)} mm** pour une tolérance de {nombre(ex2.tolerance * 1000, 1)} mm : **{ex2.admissible ? 'admissible' : 'hors tolérance'}**. On ne compense pas ; on relit la station B-C.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une tolérance sévère">
+
+Le cahier des charges impose k = 2 mm. La fermeture de l'exemple est-elle admissible ?
+
+<Indice>Recalcule T.</Indice>
+
+<Corrige>
+T = 2 √{ex3.n} = {nombre(ex3.tolerance * 1000, 1)} mm ; |f| = {nombre(Math.abs(ex3.fermeture) * 1000, 1)} mm : **{ex3.admissible ? 'admissible' : 'hors tolérance'}**. Il faut un matériel et une méthode plus précis.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.8.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sur un point de changement, la mire :" choix={['ne bouge pas', 'est déplacée', 'est retournée', 'est retirée']} bonne={0} colonnes={4}>
+Elle relie les deux stations.
+</QCM>
+
+<QCM n={2} question="ΣAR − ΣAV contrôle :" choix={['les calculs du carnet', 'les lectures', 'la tolérance', 'l’instrument']} bonne={0} colonnes={2}>
+Seule la fermeture contrôle les lectures.
+</QCM>
+
+<QCM n={3} question="La fermeture est :" choix={['Z arrivée calculée − Z arrivée connue', 'ΣAR', 'la dernière lecture', 'la tolérance']} bonne={0} colonnes={2}>
+L'écart sur le repère d'arrivée.
+</QCM>
+
+<QCM n={4} question="Si la fermeture dépasse la tolérance :" choix={['on refait les mesures', 'on compense quand même', 'on l’ignore', 'on change k']} bonne={0} colonnes={2}>
+Elle cache une faute.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, la fermeture vaut :</>} choix={[`${nombre(c0.fermeture * 1000, 1)} mm`, `${nombre(c0.tolerance * 1000, 1)} mm`, '0 mm', `${nombre(c0.sommeAR * 1000, 0)} mm`]} bonne={0} colonnes={4}>
+Altitude calculée de {d0.depart} moins sa valeur connue.
+</QCM>
+
+<QCM n={6} question={<>La correction de la première station vaut :</>} choix={[`${nombre(c0.lignes[0].comp * 1000, 1)} mm`, `${nombre(-c0.fermeture * 1000, 1)} mm`, '0 mm', `${nombre(c0.fermeture * 1000, 1)} mm`]} bonne={0} colonnes={4}>
+−f / n.
+</QCM>
+
+<QCM n={7} question="La tolérance croît comme √n parce que :" choix={['les erreurs accidentelles se compensent en partie', 'les erreurs s’ajoutent toutes', 'c’est plus simple', 'n est petit']} bonne={0} colonnes={2}>
+Voir L1.8.7.
+</QCM>
+
+<QCM n={8} question="Dans un carnet, une valeur fausse :" choix={['se barre et se récrit à côté', 'se gomme', 'se laisse', 'se recopie ailleurs']} bonne={0} colonnes={2}>
+Le carnet est une pièce de preuve.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

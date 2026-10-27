@@ -1,0 +1,295 @@
+---
+id: L1.8.7
+titre: Erreurs et tolérances
+objectifs:
+  - Distinguer faute, erreur systématique et erreur accidentelle
+  - Calculer la moyenne et l'écart-type d'une série de mesures
+  - Fixer une tolérance et repérer une mesure aberrante
+  - Expliquer pourquoi une erreur cumulée croît comme la racine du nombre de mesures
+relecture: false
+normes: []
+glossaire:
+  - terme: Faute
+    definition: Erreur grossière (lecture, recopie, mauvais point) ; elle se détecte par un contrôle et s'élimine.
+  - terme: Erreur systématique
+    definition: Erreur de même sens à chaque mesure (ruban trop long, instrument déréglé) ; elle se corrige ou s'élimine par la méthode.
+  - terme: Erreur accidentelle
+    definition: Petite erreur aléatoire, tantôt positive, tantôt négative ; elle se réduit en multipliant les mesures.
+  - terme: Écart-type
+    definition: Mesure de la dispersion d'une série autour de sa moyenne.
+  - terme: Tolérance
+    definition: Écart maximal admis ; au-delà, la mesure est rejetée.
+symboles:
+  - { symbole: 'σ', signification: 'écart-type', unite: 'mm' }
+  - { symbole: 'n', signification: 'nombre de mesures', unite: '—' }
+  - { symbole: 'T', signification: 'tolérance', unite: 'mm' }
+formules:
+  - { nom: 'Moyenne', tex: '\bar{m} = \frac{1}{n}\sum m_i', domaine: 'Série de mesures' }
+  - { nom: 'Écart-type', tex: '\sigma = \sqrt{\frac{\sum (m_i - \bar{m})^2}{n - 1}}', domaine: 'Série de mesures' }
+  - { nom: 'Écart-type de la moyenne', tex: '\sigma_{\bar m} = \frac{\sigma}{\sqrt{n}}', domaine: 'Série de mesures' }
+  - { nom: 'Tolérance', tex: 'T = 2{,}7\,\sigma', domaine: 'Usage topographique' }
+---
+
+import { EXEMPLE_SERIE, statistiquesMesures } from '@/lib/calc/topographie'
+import { grandeur, nombre } from '@/lib/format'
+import { CiblesErreurs, FermetureTolerance, SerieMesures } from '@/components/schemas/Topographie'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const s0 = statistiquesMesures(EXEMPLE_SERIE)
+export const ex2 = statistiquesMesures([...EXEMPLE_SERIE, 48.268])
+export const ex3 = [1, 4, 9, 16].map((n) => ({ n, T: 10 * Math.sqrt(n) }))
+
+<Page etape="intuition" titre="L'intuition : aucune mesure n'est parfaite">
+
+Mesure dix fois la même table au mètre ruban : tu ne trouveras pas dix fois exactement la même valeur. Des millimètres changent à chaque fois. Ce n'est pas grave, si l'on sait **combien** on peut se tromper, et si l'on reconnaît les vraies **fautes**.
+
+<CiblesErreurs />
+
+Le topographe ne cherche pas une mesure parfaite : il cherche une mesure dont il connaît la **précision**, et il la compare à la **tolérance** exigée.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment savoir si une mesure est assez précise, et reconnaître celle qu'il faut rejeter ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Trois sortes d'erreurs" sousTitre="Les reconnaître, les traiter" etape="cours">
+
+<Panneau n={1} titre="La faute" icone="erreur" couleur="correction">
+Un mètre oublié, deux chiffres inversés. Détectée par un contrôle, elle est éliminée.
+</Panneau>
+
+<Panneau n={2} titre="L'erreur systématique" icone="regle" couleur="brique">
+Toujours dans le même sens : ruban trop long, chaleur. On la corrige (L1.8.2) ou la méthode l'annule.
+</Panneau>
+
+<Panneau n={3} titre="L'erreur accidentelle" icone="calcul" couleur="encre">
+Petite, aléatoire, des deux signes. On la réduit en répétant les mesures.
+</Panneau>
+
+<Panneau n={4} titre="La moyenne" icone="quantites" couleur="acier">
+Meilleure estimation de la valeur ; plus précise que chaque mesure.
+</Panneau>
+
+<Panneau n={5} titre="L'écart-type" icone="idee" couleur="terre">
+σ mesure la dispersion ; σ/√n, la précision de la moyenne.
+</Panneau>
+
+<Panneau n={6} titre="La tolérance" icone="verification" couleur="validation">
+Écart maximal admis, souvent 2,7 σ : au-delà, faute probable.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : les sortes d'erreurs">
+
+### Faute, systématique, accidentelle
+
+Une **faute** se repère parce qu'elle est grosse et qu'un contrôle (aller-retour, fermeture) la révèle. Une **erreur systématique** décale toutes les mesures du même côté : elle n'est pas révélée par la répétition, il faut la corriger ou choisir une méthode qui l'annule (portées égales, double retournement). Une **erreur accidentelle** change de signe d'une mesure à l'autre : en moyenne, elle se compense en partie.
+
+### Justesse et fidélité
+
+<CiblesErreurs />
+
+Une série **fidèle** a des mesures groupées ; une série **juste** est centrée sur la vraie valeur. Les erreurs systématiques ôtent la justesse, les erreurs accidentelles la fidélité.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : moyenne, écart-type, tolérance">
+
+### Les calculs
+
+La **moyenne** $\bar m$ est la meilleure estimation. L'**écart-type** $\sigma = \sqrt{\sum (m_i - \bar m)^2/(n-1)}$ mesure la dispersion d'une mesure isolée. La moyenne est plus précise : $\sigma_{\bar m} = \sigma/\sqrt n$.
+
+### La tolérance
+
+On fixe une **tolérance** au-delà de laquelle un écart n'est plus attribué au hasard, souvent T = 2,7 σ. Une mesure hors tolérance est une faute probable : on l'écarte et on la refait.
+
+<SerieMesures valeurs={EXEMPLE_SERIE} moyenne={s0.moyenne} tol={s0.tolerance} />
+
+### Pourquoi √n ?
+
+Dans un cheminement de n stations, les erreurs accidentelles s'additionnent mais se compensent en partie : leur total croît comme $\sqrt n$, pas comme n. C'est l'origine des tolérances en $k\sqrt n$ (L1.8.5).
+
+<Regle type="hypothese">
+Le facteur 2,7 est un usage topographique (probabilité de dépassement très faible pour des erreurs normales) ; la tolérance d'un travail est fixée par son cahier des charges <AVerifier note="A_VERIFIER.md n° 49 : tolérances et facteur 2,7 σ, selon les cahiers des charges et les textes en vigueur" />.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la tolérance grandit moins vite que le nombre de stations">
+
+<DiagrammeBarres alt={`Tolérance k √n avec k = 10 mm : ${ex3.map((e) => `${e.n} stations, ${nombre(e.T, 0)} mm`).join(' ; ')}. Quatre fois plus de stations ne donnent que deux fois plus de tolérance.`} titre="tolérance 10 √n (mm)" barres={ex3.map((e) => ({ libelle: `${e.n} stations`, valeur: e.T, texte: nombre(e.T, 0), teinte: 'encre' }))} />
+
+<DiagrammeFlux alt="Traiter une série de mesures : calculer la moyenne ; calculer les écarts et l'écart-type ; fixer la tolérance ; écarter les mesures hors tolérance et les refaire ; retenir la moyenne et sa précision." etapes={[{ titre: 'Moyenne', texte: 'Σm / n', teinte: 'encre' }, { titre: 'Écart-type', texte: 'σ', teinte: 'acier' }, { titre: 'Tolérance', texte: '2,7 σ', teinte: 'terre' }, { titre: 'Écarter', texte: 'hors tolérance', teinte: 'correction' }, { titre: 'Retenir', texte: 'moyenne ± σ/√n', teinte: 'validation' }]} />
+
+</Page>
+
+<FicheCalcul calcul="serieMesures">
+
+<Cahier titre="Exemple résolu : six mesures d'une même distance">
+
+**Énoncé.** Une équipe mesure six fois la même distance au ruban, corrigé (valeurs dans le formulaire ; données de l'énoncé). Calcule la moyenne, l'écart-type, la précision de la moyenne et la tolérance ; une mesure doit-elle être écartée ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Moyenne et écarts">
+<AN k="moyenne" />
+<AN k="sigma" />
+<Note>Pourquoi n − 1 ? La moyenne a été tirée des mêmes mesures : il ne reste que n − 1 écarts indépendants.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la tolérance">
+
+<Etape n={3} titre="Tolérance et décision">
+<AN k="tol" />
+<Resultat k="moyenne" libelle="Distance retenue" />
+<Schema />
+<Note couleur="vert">Contrôle : toutes les mesures restent dans la bande. Change une mesure de 3 cm : elle en sort et devient une faute.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="moyenner une faute avec les bonnes mesures.">
+Une faute déplace la moyenne : on l'écarte d'abord.
+
+<SerieMesures valeurs={[...EXEMPLE_SERIE, 48.268]} moyenne={ex2.moyenne} tol={ex2.tolerance} />
+
+</Piege>
+
+<Piege erreur="croire que répéter les mesures supprime une erreur systématique.">
+Un ruban trop long donne six mesures trop courtes : la moyenne l'est aussi. Il faut corriger.
+</Piege>
+
+<Piege erreur="donner un résultat sans sa précision.">
+« 48,238 m » ne dit pas si l'on est sûr au millimètre ou au décimètre : on écrit aussi σ.
+</Piege>
+
+<Piege erreur="diviser par n au lieu de n − 1.">
+L'écart-type est sous-estimé, surtout pour une petite série.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les tolérances du marché.** Le cahier des charges d'un lever ou d'une implantation fixe les tolérances : par exemple quelques centimètres en plan pour un bâtiment, plus large pour un terrassement. Le géomètre choisit son matériel et sa méthode pour les tenir, et les prouve par ses fermetures.
+
+<FermetureTolerance f={0.006} T={0.02} />
+
+<Encadre type="terrain" titre="La faute la plus courante">
+La plus fréquente reste la faute de recopie : un 6 lu 9, deux chiffres inversés. On relit chaque valeur à voix haute, et un collègue la répète en l'écrivant.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : erreurs et tolérances">
+
+### Erreurs
+
+faute (éliminer) · systématique (corriger, méthode) · accidentelle (répéter, moyenner)
+
+### Calculs
+
+moyenne Σm/n · σ = √(Σe²/(n − 1)) · σ moyenne = σ/√n
+
+### Tolérance
+
+T ≈ 2,7 σ (usage) · cumul : k √n · hors tolérance : écarter et refaire
+
+### Pièges
+
+faute moyennée · systématique répétée · résultat sans précision · n au lieu de n − 1
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Classer">
+
+Classe : a) un ruban étalonné 8 mm trop long ; b) une lecture de 47,238 au lieu de 48,238 ; c) un écart de 2 mm entre deux visées identiques.
+
+<Indice>Même sens à chaque fois ? Grosse ? Aléatoire ?</Indice>
+
+<Corrige>
+a) **systématique** ; b) **faute** ; c) **accidentelle**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une septième mesure">
+
+On ajoute 48,268 m à la série. Que deviennent moyenne et écart-type ? La nouvelle mesure est-elle dans la tolérance de la série initiale ?
+
+<Indice>Compare son écart à la moyenne initiale avec 2,7 σ initial.</Indice>
+
+<Corrige>
+Écart : {nombre((48.268 - s0.moyenne) * 1000, 1)} mm pour une tolérance de {nombre(s0.tolerance * 1000, 1)} mm : **hors tolérance**, c'est une faute. Gardée, elle porterait la moyenne à {grandeur(ex2.moyenne, 4, 'm')} et σ à {nombre(ex2.sigma * 1000, 1)} mm : la série serait gâchée.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Quatre fois plus de stations">
+
+Avec k = 10 mm, quelle tolérance pour 4 stations ? pour 16 ? Pourquoi pas quatre fois plus ?
+
+<Indice>T = k √n.</Indice>
+
+<Corrige>
+{nombre(ex3[1].T, 0)} mm et {nombre(ex3[3].T, 0)} mm : **deux fois** plus seulement. Les erreurs accidentelles se compensent en partie : leur cumul croît comme √n.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.8.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un ruban trop long produit une erreur :" choix={['systématique', 'accidentelle', 'de recopie', 'nulle']} bonne={0} colonnes={4}>
+Toujours dans le même sens.
+</QCM>
+
+<QCM n={2} question="Répéter les mesures réduit :" choix={['les erreurs accidentelles', 'les erreurs systématiques', 'les fautes', 'rien']} bonne={0} colonnes={2}>
+Elles se compensent en moyenne.
+</QCM>
+
+<QCM n={3} question="Une série groupée mais décalée est :" choix={['fidèle mais pas juste', 'juste mais pas fidèle', 'juste et fidèle', 'ni l’un ni l’autre']} bonne={0} colonnes={2}>
+Signe d'une erreur systématique.
+</QCM>
+
+<QCM n={4} question="La précision de la moyenne de n mesures vaut :" choix={['σ/√n', 'σ × n', 'σ', 'σ/n²']} bonne={0} colonnes={4}>
+Elle s'améliore avec n.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, l'écart-type vaut :</>} choix={[`${nombre(s0.sigma * 1000, 1)} mm`, `${nombre(s0.tolerance * 1000, 1)} mm`, `${nombre(s0.sigmaMoyenne * 1000, 1)} mm`, '0 mm']} bonne={0} colonnes={4}>
+√(Σe² / (n − 1)).
+</QCM>
+
+<QCM n={6} question="Une mesure hors tolérance :" choix={['est écartée et refaite', 'est gardée', 'remplace la moyenne', 'est divisée par deux']} bonne={0} colonnes={2}>
+Faute probable.
+</QCM>
+
+<QCM n={7} question="La tolérance d'un cheminement croît comme :" choix={['√n', 'n', 'n²', 'constante']} bonne={0} colonnes={4}>
+Les erreurs se compensent en partie.
+</QCM>
+
+<QCM n={8} question="Un résultat de mesure s'écrit :" choix={['avec sa précision', 'sans décimales', 'en arrondissant au mètre', 'deux fois']} bonne={0} colonnes={2}>
+48,238 m ± σ.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

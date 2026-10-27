@@ -1,0 +1,286 @@
+---
+id: L1.8.8
+titre: Lever simple et plan topographique
+objectifs:
+  - Organiser le lever d'une parcelle par rayonnement depuis une station
+  - Calculer les coordonnées des points levés
+  - Calculer la surface et le périmètre d'une parcelle
+  - Dessiner un plan topographique avec points cotés et courbes de niveau
+relecture: false
+normes: []
+glossaire:
+  - terme: Rayonnement
+    definition: Méthode de lever où l'on mesure, depuis une station, l'angle et la distance de chaque point.
+  - terme: Orientation
+    definition: Visée sur un point de gisement connu, qui permet de transformer les lectures en gisements.
+  - terme: Point coté
+    definition: Point dessiné sur le plan avec son altitude écrite à côté.
+  - terme: Courbe de niveau
+    definition: Ligne qui relie les points de même altitude ; leur écartement montre la pente.
+  - terme: Croquis de lever
+    definition: Dessin à main levée fait sur le terrain, qui numérote les points et décrit ce qu'ils représentent.
+symboles:
+  - { symbole: 'G₀', signification: 'gisement du zéro du cercle (orientation)', unite: 'gon' }
+  - { symbole: 'S', signification: 'surface', unite: 'm²' }
+formules:
+  - { nom: 'Orientation', tex: 'G_0 = G_{réf} - Hz_{réf}', domaine: 'Station orientée' }
+  - { nom: 'Gisement d''une visée', tex: 'G = G_0 + Hz', domaine: 'Rayonnement' }
+  - { nom: 'Surface (Gauss)', tex: 'S = \frac{1}{2}\left|\sum (E_i N_{i+1} - E_{i+1} N_i)\right|', domaine: 'Polygone' }
+---
+
+import { EXEMPLE_GRILLE, EXEMPLE_LEVER, grilleNivellement, leverRayonnement, surfacePolygone } from '@/lib/calc/topographie'
+import { grandeur, nombre } from '@/lib/format'
+import { GisementSchema, LeverRayonnementSchema, PlanCote } from '@/components/schemas/Topographie'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const L = EXEMPLE_LEVER
+export const l0 = leverRayonnement(L.S, L.Gref, L.Hzref, L.visees)
+export const s0 = surfacePolygone(l0.points)
+export const g0 = grilleNivellement(EXEMPLE_GRILLE)
+export const tri = surfacePolygone([{ E: 0, N: 0 }, { E: 30, N: 0 }, { E: 0, N: 20 }])
+
+<Page etape="intuition" titre="L'intuition : photographier le terrain avec des nombres">
+
+Avant de dessiner une maison, l'architecte veut le portrait exact de la parcelle : ses limites, sa surface, ses pentes, l'arbre à garder, le caniveau existant. Le topographe **lève** le terrain : depuis une station, il vise chaque point, mesure angle et distance, et le calcul donne ses coordonnées. Puis il dessine le **plan topographique**.
+
+<LeverRayonnementSchema S={L.S} pts={l0.points} Gref={L.Gref} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment lever une parcelle et en dessiner le plan, avec sa surface et son relief ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Du lever au plan" sousTitre="Station, visées, calculs, dessin" etape="cours">
+
+<Panneau n={1} titre="Reconnaître" icone="terrain" couleur="terre">
+Parcourir le terrain, repérer bornes, limites, détails ; faire un croquis.
+</Panneau>
+
+<Panneau n={2} titre="Stationner" icone="regle" couleur="acier">
+Une station de coordonnées connues, d'où l'on voit le plus de points.
+</Panneau>
+
+<Panneau n={3} titre="Orienter" icone="idee" couleur="encre">
+Viser une référence de gisement connu : G₀ = G_réf − Hz_réf.
+</Panneau>
+
+<Panneau n={4} titre="Rayonner" icone="plan" couleur="brique">
+Pour chaque point : Hz, distance, altitude ; numéro reporté sur le croquis.
+</Panneau>
+
+<Panneau n={5} titre="Calculer" icone="calcul" couleur="validation">
+Problème direct pour chaque point ; surface par la formule de Gauss.
+</Panneau>
+
+<Panneau n={6} titre="Dessiner" icone="retenir" couleur="correction">
+Points, limites, détails, cotes d'altitude, courbes de niveau, nord, échelle, cartouche.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : lever par rayonnement">
+
+### Orienter la station
+
+La station S a des coordonnées connues. On vise une **référence** dont on connaît le gisement depuis S, et l'on lit Hz sur elle. Le gisement du zéro du cercle vaut $G_0 = G_{réf} - Hz_{réf}$. Ensuite, chaque visée donne son gisement : $G = G_0 + Hz$.
+
+### Calculer les points
+
+Avec le gisement et la distance horizontale, le **problème direct** (L1.8.6) donne les coordonnées de chaque point. L'altitude vient de la dénivelée mesurée par la station (L1.8.3).
+
+<GisementSchema A={L.S} B={l0.points[0]} nomA="S" nomB="B1" />
+
+<Regle type="art">
+On lève toujours un ou deux points de contrôle déjà connus depuis la station : s'ils sont retrouvés, l'orientation et la mise en station sont justes.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : surface et plan">
+
+### La surface
+
+Pour un polygone de sommets connus, la **formule de Gauss** donne la surface directement à partir des coordonnées : $S = \frac12 \left| \sum (E_i N_{i+1} - E_{i+1} N_i) \right|$, en parcourant les sommets dans l'ordre. Pour un triangle rectangle de 30 × 20 m, on retrouve {grandeur(tri.S, 0, 'm²')}.
+
+### Le plan topographique
+
+Il porte les limites et les bornes, les constructions et les détails (arbres, caniveaux, poteaux), les **points cotés** avec leur altitude, et les **courbes de niveau**, obtenues par interpolation entre les points cotés. Des courbes serrées signalent une forte pente.
+
+<PlanCote Z={g0.Z} pas={EXEMPLE_GRILLE.pas} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la chaîne du lever">
+
+<DiagrammeFlux alt="La chaîne d'un lever : croquis et numérotation des points ; mise en station et orientation ; mesures angle, distance et altitude ; calcul des coordonnées et de la surface ; plan dessiné et contrôlé." etapes={[{ titre: 'Croquis', texte: 'points numérotés', teinte: 'terre' }, { titre: 'Station', texte: 'orientée', teinte: 'acier' }, { titre: 'Mesures', texte: 'Hz, D, Δh', teinte: 'encre' }, { titre: 'Calculs', texte: 'E, N, Z, S', teinte: 'brique' }, { titre: 'Plan', texte: 'dessiné, contrôlé', teinte: 'validation' }]} />
+
+<LeverRayonnementSchema S={L.S} pts={l0.points} Gref={L.Gref} />
+
+</Page>
+
+<FicheCalcul calcul="leverParcelle">
+
+<Cahier titre="Exemple résolu : le lever d'une parcelle à Kinshasa">
+
+**Énoncé.** Depuis une station S de coordonnées connues, orientée sur une borne voisine de gisement {nombre(L.Gref, 4)} gon (lecture {nombre(L.Hzref, 4)} gon), on vise les quatre bornes d'une parcelle (lectures et distances dans le formulaire ; données de l'énoncé). Calcule leurs coordonnées, la surface et le périmètre de la parcelle.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="L'orientation et les points">
+<AN k="G0" />
+<AN k="points" />
+<Note>Pourquoi l'orientation d'abord ? La lecture Hz dépend de la façon dont on a posé l'instrument ; G₀ la transforme en direction absolue.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la surface">
+
+<Etape n={3} titre="Surface et périmètre">
+<AN k="S" />
+<Resultat k="S" libelle="Surface de la parcelle" />
+<Schema />
+<Note couleur="vert">Contrôle : surface ≈ produit de deux côtés voisins, la parcelle étant presque rectangulaire ; une borne déplacée change la surface.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier l'orientation.">
+Sans G₀, les lectures Hz ne sont pas des gisements : la parcelle tourne autour de la station.
+</Piege>
+
+<Piege erreur="parcourir les sommets dans le désordre.">
+La formule de Gauss suppose les sommets dans l'ordre du contour ; mélangés, le polygone se croise et la surface est fausse.
+</Piege>
+
+<Piege erreur="lever sans croquis.">
+Au bureau, le point 47 ne dit plus s'il est un angle de mur ou un arbre. Le croquis numéroté est indispensable.
+</Piege>
+
+<Piege erreur="tracer les courbes de niveau à vue.">
+On les interpole entre points cotés ; un point manquant au sommet d'une butte la fait disparaître du plan.
+</Piege>
+
+<PlanCote Z={g0.Z} pas={EXEMPLE_GRILLE.pas} />
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le plan de la parcelle.** Le plan topographique d'une parcelle sert au plan de masse (L1.6.9), à l'implantation, au calcul des terrassements (L3.8). En ville, il s'appuie sur les bornes cadastrales ; en zone rurale, le géomètre crée souvent ses propres repères.
+
+<LeverRayonnementSchema S={L.S} pts={l0.points} Gref={L.Gref} />
+
+<Encadre type="terrain" titre="Le lever des zones à risque">
+Sur les collines de Kinshasa ou de Bukavu, le plan topographique montre les ravines, les pentes fortes et les écoulements d'eau. On y lit où construire, où drainer, et où ne pas construire.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : lever et plan">
+
+### Lever par rayonnement
+
+station connue · orientation G₀ = G_réf − Hz_réf · G = G₀ + Hz · problème direct · points de contrôle
+
+### Surface
+
+Gauss : S = ½ |Σ (E_i N_(i+1) − E_(i+1) N_i)| · sommets dans l'ordre
+
+### Plan topographique
+
+limites, bornes, détails · points cotés · courbes de niveau interpolées · nord, échelle, cartouche
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Orienter">
+
+La référence a un gisement de 52,3184 gon et on lit 12,0000 gon dessus. Que vaut G₀ ? Quel est le gisement d'une visée lue 100,0000 gon ?
+
+<Indice>G₀ = G_réf − Hz_réf.</Indice>
+
+<Corrige>
+G₀ = **{nombre(52.3184 - 12, 4)} gon** ; G = {nombre(52.3184 - 12, 4)} + 100 = **{nombre(52.3184 - 12 + 100, 4)} gon**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un triangle">
+
+Calcule par la formule de Gauss la surface du triangle (0 ; 0), (30 ; 0), (0 ; 20).
+
+<Indice>Trois termes, puis la moitié de la valeur absolue.</Indice>
+
+<Corrige>
+S = **{grandeur(tri.S, 0, 'm²')}**, comme ½ × 30 × 20.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Lire le relief">
+
+Sur le plan coté du terrain, de quel côté le terrain descend-il ? De combien entre les deux coins extrêmes ?
+
+<PlanCote Z={g0.Z} pas={EXEMPLE_GRILLE.pas} />
+
+<Indice>Compare les altitudes des coins.</Indice>
+
+<Corrige>
+Il descend vers le **sud-est** : de {grandeur(g0.Zmax, 3, 'm')} à {grandeur(g0.Zmin, 3, 'm')}, soit {nombre((g0.Zmax - g0.Zmin) * 100, 1)} cm.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.8.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le lever par rayonnement mesure, pour chaque point :" choix={['un angle et une distance', 'deux distances', 'une altitude seulement', 'deux angles']} bonne={0} colonnes={2}>
+Depuis une même station.
+</QCM>
+
+<QCM n={2} question="G₀ vaut :" choix={['G_réf − Hz_réf', 'G_réf + Hz_réf', 'Hz_réf', '200 gon']} bonne={0} colonnes={4}>
+Le gisement du zéro du cercle.
+</QCM>
+
+<QCM n={3} question="La formule de Gauss demande les sommets :" choix={['dans l’ordre du contour', 'dans n’importe quel ordre', 'triés par E', 'deux fois']} bonne={0} colonnes={2}>
+Sinon le polygone se croise.
+</QCM>
+
+<QCM n={4} question="Des courbes de niveau serrées indiquent :" choix={['une forte pente', 'un terrain plat', 'une erreur', 'une route']} bonne={0} colonnes={2}>
+L'altitude change vite.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, la surface de la parcelle vaut :</>} choix={[grandeur(s0.S, 2, 'm²'), grandeur(s0.perimetre, 2, 'm²'), grandeur(s0.S * 2, 2, 'm²'), grandeur(s0.S / 2, 2, 'm²')]} bonne={0} colonnes={4}>
+Formule de Gauss.
+</QCM>
+
+<QCM n={6} question="Le croquis de lever sert à :" choix={['savoir ce que représente chaque point', 'décorer', 'remplacer les mesures', 'calculer la surface']} bonne={0} colonnes={2}>
+Au bureau, sans lui, les numéros sont muets.
+</QCM>
+
+<QCM n={7} question="Pour vérifier une station, on vise aussi :" choix={['un point déjà connu', 'le soleil', 'la station elle-même', 'rien']} bonne={0} colonnes={2}>
+Un point de contrôle.
+</QCM>
+
+<QCM n={8} question="Les courbes de niveau se tracent :" choix={['par interpolation entre points cotés', 'à vue', 'au compas', 'au hasard']} bonne={0} colonnes={2}>
+On cherche où passe chaque altitude entre deux points.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

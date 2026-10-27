@@ -1,0 +1,150 @@
+---
+id: L1.8.P
+titre: "Mini-projet : nivellement d'un terrain à bâtir"
+objectifs:
+  - Organiser le nivellement d'un terrain en grille depuis une station
+  - Calculer les altitudes des nœuds à partir d'un repère
+  - Dessiner un plan coté avec courbes de niveau
+  - Estimer le volume de terre à apporter ou à enlever pour une plateforme
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { EXEMPLE_GRILLE, grilleNivellement } from '@/lib/calc/topographie'
+import { grandeur, nombre } from '@/lib/format'
+import { NivellementDirect, PlanCote } from '@/components/schemas/Topographie'
+
+export const d = EXEMPLE_GRILLE
+export const g = grilleNivellement(d)
+export const L = (d.lectures[0].length - 1) * d.pas
+export const l = (d.lectures.length - 1) * d.pas
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Une famille de Lubumbashi veut construire sur un terrain de {nombre(L, 0)} × {nombre(l, 0)} m, légèrement en pente. Avant de dessiner la maison, l'architecte demande un **plan coté** du terrain et une estimation des **terrassements** pour une plateforme horizontale à la cote {grandeur(d.Zprojet, 2, 'm')}.
+
+Tu as piqueté une grille de {d.pas} m et nivelé chaque nœud depuis une seule station. Le repère voisin est à {grandeur(d.Zrepere, 3, 'm')} ; tu as lu {nombre(d.AR, 3)} m sur lui (données de l'énoncé).
+
+<NivellementDirect AR={d.AR} AV={d.lectures[0][0]} ZA={d.Zrepere} />
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>ligne</th>{d.lectures[0].map((_, j) => <th key={j}>{nombre(j * d.pas, 0)} m</th>)}</tr></thead>
+    <tbody>{d.lectures.map((r, i) => <tr key={i}><td>{nombre(i * d.pas, 0)} m</td>{r.map((x, j) => <td key={j}>{nombre(x, 3)}</td>)}</tr>)}</tbody>
+  </table>
+</div>
+
+### Ce que tu rends
+
+1. Le **carnet** : altitude du plan de visée, altitude de chaque nœud.
+2. Le **plan coté** au 1/200 : grille, altitudes, courbes de niveau tous les 10 cm, nord, cartouche.
+3. Les **hauteurs** de remblai (+) ou de déblai (−) en chaque nœud, et le **volume** net.
+
+<Regle type="simplification">
+Le volume par la méthode des prismes ne tient pas compte des talus, du foisonnement ni du compactage des terres (L3.8) ; c'est une première estimation.
+</Regle>
+
+</Page>
+
+<Infographie titre="La démarche" sousTitre="Du piquetage au volume" etape="projet">
+
+<Panneau n={1} titre="Piqueter" icone="terrain" couleur="terre">
+Une grille régulière, chaque nœud numéroté par ligne et colonne.
+</Panneau>
+
+<Panneau n={2} titre="Niveler" icone="regle" couleur="encre">
+Une station : AR sur le repère, une lecture par nœud ; refermer sur le repère.
+</Panneau>
+
+<Panneau n={3} titre="Calculer" icone="calcul" couleur="acier">
+Z_v = Z_R + AR ; Z = Z_v − lecture.
+</Panneau>
+
+<Panneau n={4} titre="Dessiner" icone="plan" couleur="brique">
+Points cotés, courbes de niveau par interpolation, nord, échelle.
+</Panneau>
+
+<Panneau n={5} titre="Hauteurs" icone="idee" couleur="validation">
+h = Z projet − Z : positive, remblai ; négative, déblai.
+</Panneau>
+
+<Panneau n={6} titre="Volume" icone="quantites" couleur="correction">
+Chaque maille : moyenne des quatre coins × surface de la maille.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="grilleTerrain">
+
+<Cahier titre="Étape 1 : les altitudes" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Plan de visée et nœuds">
+<AN k="Zv" />
+<AN k="Z" />
+<Note>Pourquoi une seule station suffit-elle ? Le terrain est petit et peu pentu : toutes les mires restent sous la visée.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : le plan et le volume" etape="projet">
+
+<Etape n={3} titre="Le plan coté">
+<Schema />
+</Etape>
+
+<Etape n={4} titre="Le volume">
+<AN k="V" />
+<Resultat k="V" libelle="Volume net" />
+<Note couleur="vert">Contrôle : la cote projet est voisine de l'altitude moyenne (<Val k="Zmoy" />) : déblais et remblais se compensent presque. Monte la cote projet de 20 cm : le volume de remblai augmente d'environ 0,20 × la surface.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le corrigé">
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>ligne</th>{g.Z[0].map((_, j) => <th key={j}>{nombre(j * d.pas, 0)} m</th>)}</tr></thead>
+    <tbody>{g.Z.map((r, i) => <tr key={i}><td>Z</td>{r.map((z, j) => <td key={j}>{nombre(z, 3)}<br />{g.h[i][j] >= 0 ? '+' : '−'}{nombre(Math.abs(g.h[i][j]) * 100, 1)} cm</td>)}</tr>)}</tbody>
+  </table>
+</div>
+
+<PlanCote Z={g.Z} pas={d.pas} Zprojet={d.Zprojet} />
+
+Altitudes de {grandeur(g.Zmin, 3, 'm')} à {grandeur(g.Zmax, 3, 'm')}, moyenne {grandeur(g.Zmoy, 3, 'm')} ; volume net {nombre(g.volume, 1)} m³ ({g.volume >= 0 ? 'remblai' : 'déblai'}). Le nord-ouest est en déblai, le sud-est en remblai.
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Carnet | Lectures sans calcul | Altitudes justes | Fermeture sur le repère, contrôle noté |
+| Plan coté | Points sans altitudes | Altitudes et grille | Courbes interpolées, nord, échelle, cartouche |
+| Hauteurs | Absentes | Signes justes | Zones de déblai et de remblai identifiées |
+| Volume | Absent | Calcul juste | Limites signalées (talus, foisonnement) |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Quelle cote projet équilibre exactement déblais et remblais ? Pourquoi, sur une latérite qui foisonne, faut-il quand même prévoir un peu plus de déblai ?
+</Encadre>
+
+<Quiz id="L1.8.P">
+
+<QCM n={1} question="Mon dossier contient-il le carnet, le plan coté avec courbes, les hauteurs de déblai et de remblai et le volume ?" choix={['Oui, tout y est', 'Il manque le plan ou les courbes', 'Le volume manque']} bonne={0}>
+Sinon, complète : l'architecte et l'entreprise de terrassement en ont besoin.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

@@ -1,0 +1,292 @@
+---
+id: L1.8.6
+titre: Gisements et coordonnées
+objectifs:
+  - Définir le gisement d'une direction
+  - Résoudre le problème inverse, gisement et distance entre deux points connus
+  - Résoudre le problème direct, coordonnées d'un point à partir d'un gisement et d'une distance
+  - Utiliser le gisement réciproque et les quadrants
+relecture: false
+normes: []
+glossaire:
+  - terme: Gisement
+    definition: Angle horizontal entre la direction du nord du quadrillage et une direction, compté dans le sens des aiguilles d'une montre, de 0 à 400 gon.
+  - terme: Problème inverse
+    definition: Calcul du gisement et de la distance entre deux points de coordonnées connues.
+  - terme: Problème direct
+    definition: Calcul des coordonnées d'un point à partir d'un point connu, d'un gisement et d'une distance.
+symboles:
+  - { symbole: 'G_AB', signification: 'gisement de A vers B', unite: 'gon' }
+  - { symbole: 'ΔE, ΔN', signification: 'écarts de coordonnées', unite: 'm' }
+formules:
+  - { nom: 'Problème inverse', tex: 'G_{AB} = \arctan\frac{\Delta E}{\Delta N},\ D = \sqrt{\Delta E^2 + \Delta N^2}', domaine: 'Quadrant selon les signes' }
+  - { nom: 'Problème direct', tex: 'E_B = E_A + D\sin G,\ N_B = N_A + D\cos G', domaine: 'G en gon' }
+  - { nom: 'Gisement réciproque', tex: 'G_{BA} = G_{AB} \pm 200', domaine: 'gon' }
+---
+
+import { gisementReciproque, problemeDirect, problemeInverse } from '@/lib/calc/topographie'
+import { grandeur, nombre } from '@/lib/format'
+import { GisementSchema, QuadrantsGisement, CercleGrades } from '@/components/schemas/Topographie'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const A = { E: 1000, N: 1000 }
+export const B = { E: 1086.42, N: 951.37 }
+export const r0 = problemeInverse(A, B)
+export const ex1 = problemeInverse({ E: 0, N: 0 }, { E: -40, N: -40 })
+export const ex3 = { G: 312.7, D: 25.6 }
+export const C3 = problemeDirect(A, ex3.G, ex3.D)
+
+<Page etape="intuition" titre="L'intuition : une boussole sur la carte">
+
+Un randonneur dit : « marche 300 m plein nord-est ». Il donne une **direction** et une **distance**. En topographie, la direction se mesure depuis le nord, dans le sens des aiguilles d'une montre, en grades : c'est le **gisement**. Avec un gisement et une distance, on passe d'un point connu à un autre ; avec deux points connus, on retrouve gisement et distance.
+
+<GisementSchema A={A} B={B} />
+
+C'est le calcul de base de l'implantation : le géomètre connaît les coordonnées du projet et celles de sa station ; il calcule où viser et à quelle distance.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer des coordonnées à une direction et une distance, et inversement ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Gisements et coordonnées" sousTitre="Deux problèmes, un même triangle" etape="cours">
+
+<Panneau n={1} titre="Le gisement" icone="idee" couleur="encre">
+Depuis le nord, sens horaire, de 0 à 400 gon.
+</Panneau>
+
+<Panneau n={2} titre="Les écarts" icone="calcul" couleur="acier">
+ΔE = E_B − E_A, ΔN = N_B − N_A : un triangle rectangle.
+</Panneau>
+
+<Panneau n={3} titre="Problème inverse" icone="regle" couleur="terre">
+G = arctan(ΔE/ΔN), corrigé du quadrant ; D = √(ΔE² + ΔN²).
+</Panneau>
+
+<Panneau n={4} titre="Problème direct" icone="plan" couleur="brique">
+E_B = E_A + D sin G ; N_B = N_A + D cos G.
+</Panneau>
+
+<Panneau n={5} titre="Les quadrants" icone="attention" couleur="correction">
+Les signes de ΔE et ΔN disent dans quel quart de tour on est.
+</Panneau>
+
+<Panneau n={6} titre="Le réciproque" icone="verification" couleur="validation">
+G_BA = G_AB ± 200 gon : la même droite, dans l'autre sens.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : le problème inverse">
+
+### Le gisement
+
+Le **gisement** G_AB est l'angle entre le nord du quadrillage et la direction AB, compté dans le **sens horaire**. Le gisement du nord vaut 0, de l'est 100, du sud 200, de l'ouest 300 gon.
+
+### Du triangle aux formules
+
+Les écarts ΔE et ΔN forment un triangle rectangle dont AB est l'hypoténuse. On en tire $D = \sqrt{\Delta E^2 + \Delta N^2}$ et $\tan G = \Delta E / \Delta N$. Mais la tangente ne distingue pas les quadrants : on regarde les **signes** de ΔE et ΔN.
+
+<QuadrantsGisement />
+
+Les calculatrices et les tableurs ont une fonction qui tient compte des signes (ATAN2) ; à la main, on ajoute 200 ou 400 gon selon le quadrant.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le problème direct">
+
+### D'un point connu à un point nouveau
+
+Connaissant A, un gisement G et une distance horizontale D, on obtient B : $E_B = E_A + D\sin G$ et $N_B = N_A + D\cos G$. Les signes du sinus et du cosinus placent automatiquement B dans le bon quadrant.
+
+### Le gisement réciproque
+
+La direction BA est la même droite parcourue dans l'autre sens : $G_{BA} = G_{AB} \pm 200$ gon. Exemple : {nombre(r0.G, 4)} gon donne {nombre(gisementReciproque(r0.G), 4)} gon.
+
+<CercleGrades />
+
+<Regle type="art">
+On calcule toujours avec plus de décimales qu'on n'en affiche (gisements à 0,0001 gon, coordonnées au millimètre) et l'on arrondit à la fin.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : implanter un point">
+
+<DiagrammeFlux alt="Implanter un point du projet depuis une station : coordonnées connues de la station et du point ; problème inverse pour le gisement et la distance ; orientation de l'instrument sur une référence ; visée selon le gisement et report de la distance ; contrôle depuis un autre point." etapes={[{ titre: 'Coordonnées', texte: 'station et point', teinte: 'encre' }, { titre: 'Inverse', texte: 'G et D', teinte: 'acier' }, { titre: 'Orienter', texte: 'sur une référence', teinte: 'terre' }, { titre: 'Reporter', texte: 'viser et mesurer', teinte: 'brique' }, { titre: 'Contrôler', texte: 'autre station', teinte: 'validation' }]} />
+
+<GisementSchema A={{ E: 0, N: 0 }} B={{ E: -40, N: -40 }} nomA="S" nomB="P" />
+
+</Page>
+
+<FicheCalcul calcul="gisements">
+
+<Cahier titre="Exemple résolu : orienter et implanter sur une parcelle">
+
+**Énoncé.** Sur un chantier en repère local, les bornes A et B ont des coordonnées connues. On veut le gisement et la distance AB, puis implanter un point C à partir de A, avec un gisement et une distance donnés par le projet (données de l'énoncé).
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le problème inverse">
+<AN k="ecarts" />
+<AN k="inverse" />
+<Note>Pourquoi regarder les signes ? ΔE &gt; 0 et ΔN &lt; 0 placent B au sud-est de A : le gisement est entre 100 et 200 gon, alors que l'arctangente seule donnerait un angle négatif.</Note>
+<Resultat k="G" libelle="Gisement AB" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : implanter C">
+
+<Etape n={3} titre="Le problème direct">
+<AN k="direct" />
+<Schema />
+<Note couleur="vert">Contrôle : recalcule le gisement et la distance de A vers C par le problème inverse : tu retrouves les données.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le quadrant.">
+arctan(ΔE/ΔN) ne donne qu'un angle entre −100 et +100 gon : on corrige selon les signes, ou l'on utilise ATAN2.
+</Piege>
+
+<Piege erreur="inverser sinus et cosinus.">
+E se calcule avec le **sinus**, N avec le **cosinus**, car le gisement part du nord, pas de l'axe des x des mathématiques.
+</Piege>
+
+<QuadrantsGisement />
+
+<Piege erreur="compter le gisement dans le sens trigonométrique.">
+Le gisement tourne dans le sens des aiguilles d'une montre, comme les instruments.
+</Piege>
+
+<Piege erreur="mélanger grades et degrés.">
+La calculatrice doit être en GRAD.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**L'implantation par coordonnées.** Les stations totales calculent elles-mêmes les problèmes inverse et direct : on charge les coordonnées du projet, l'instrument indique de combien tourner et avancer. Mais le géomètre doit savoir refaire le calcul à la main pour contrôler.
+
+<GisementSchema A={A} B={B} />
+
+<Encadre type="terrain" titre="Contrôler par une autre station">
+Un point implanté depuis une seule station n'est pas contrôlé. On le revise depuis une autre station, ou l'on mesure sa distance à un point déjà implanté, et l'on compare au calcul.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : gisements et coordonnées">
+
+### Gisement
+
+depuis le nord, sens horaire, 0 à 400 gon · G_BA = G_AB ± 200
+
+### Problème inverse
+
+ΔE, ΔN · D = √(ΔE² + ΔN²) · G = arctan(ΔE/ΔN) + correction de quadrant (ATAN2)
+
+### Problème direct
+
+E_B = E_A + D sin G · N_B = N_A + D cos G
+
+### Pièges
+
+quadrant · sin pour E, cos pour N · sens horaire · mode GRAD
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Sud-ouest">
+
+B est à 40 m à l'ouest et 40 m au sud de A. Quel est le gisement AB ?
+
+<Indice>ΔE &lt; 0, ΔN &lt; 0 : quadrant 200 à 300.</Indice>
+
+<Corrige>
+**{nombre(ex1.G, 0)} gon** ; distance {grandeur(ex1.D, 2, 'm')}.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le réciproque">
+
+G_AB = {nombre(r0.G, 4)} gon. Que vaut G_BA ?
+
+<Indice>± 200 gon.</Indice>
+
+<Corrige>
+G_BA = **{nombre(gisementReciproque(r0.G), 4)} gon**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Implanter un angle de bâtiment">
+
+Depuis A (E {nombre(A.E, 2)} ; N {nombre(A.N, 2)}), implanter C à {nombre(ex3.D, 2)} m, gisement {nombre(ex3.G, 4)} gon. Coordonnées de C ?
+
+<Indice>Quadrant 300 à 400 : C est au nord-ouest.</Indice>
+
+<Corrige>
+E_C = **{nombre(C3.E, 3)}** ; N_C = **{nombre(C3.N, 3)}**. Contrôle : ΔE &lt; 0, ΔN &gt; 0, cohérent avec le quadrant.
+
+<GisementSchema A={A} B={C3} nomB="C" />
+
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.8.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le gisement se compte :" choix={['depuis le nord, sens horaire', 'depuis l’est, sens trigonométrique', 'depuis le sud', 'depuis la verticale']} bonne={0} colonnes={2}>
+Comme les instruments.
+</QCM>
+
+<QCM n={2} question="Le gisement de l'ouest vaut :" choix={['300 gon', '100 gon', '200 gon', '0 gon']} bonne={0} colonnes={4}>
+Nord 0, est 100, sud 200, ouest 300.
+</QCM>
+
+<QCM n={3} question="ΔE > 0 et ΔN < 0 : le gisement est entre :" choix={['100 et 200 gon', '0 et 100 gon', '200 et 300 gon', '300 et 400 gon']} bonne={0} colonnes={2}>
+Au sud-est.
+</QCM>
+
+<QCM n={4} question="Dans le problème direct, E_B s'obtient avec :" choix={['D sin G', 'D cos G', 'D tan G', 'D / G']} bonne={0} colonnes={4}>
+Le gisement part du nord.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, la distance AB vaut :</>} choix={[grandeur(r0.D, 3, 'm'), grandeur(Math.abs(r0.dE) + Math.abs(r0.dN), 3, 'm'), grandeur(r0.dE, 3, 'm'), grandeur(r0.D / 2, 3, 'm')]} bonne={0} colonnes={4}>
+√(ΔE² + ΔN²).
+</QCM>
+
+<QCM n={6} question="G_AB = 50 gon. G_BA vaut :" choix={[`${nombre(gisementReciproque(50), 0)} gon`, '350 gon', '50 gon', '150 gon']} bonne={0} colonnes={4}>
+± 200 gon.
+</QCM>
+
+<QCM n={7} question="La fonction qui tient compte des quadrants s'appelle :" choix={['ATAN2', 'ATAN', 'SIN', 'RACINE']} bonne={0} colonnes={4}>
+Elle prend ΔE et ΔN séparément.
+</QCM>
+
+<QCM n={8} question="Un point implanté depuis une seule station :" choix={['doit être contrôlé depuis un autre point', 'est forcément juste', 'n’a pas besoin de coordonnées', 'se calcule en degrés']} bonne={0} colonnes={2}>
+Un contrôle indépendant.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

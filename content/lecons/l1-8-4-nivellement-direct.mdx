@@ -1,0 +1,288 @@
+---
+id: L1.8.4
+titre: Nivellement direct
+objectifs:
+  - Expliquer le principe du nivellement direct par visées horizontales
+  - Lire une mire au millimètre
+  - Calculer une dénivelée et une altitude à partir des lectures arrière et avant
+  - Placer le niveau pour limiter les erreurs
+relecture: false
+normes: []
+glossaire:
+  - terme: Niveau
+    definition: Instrument dont la lunette tourne dans un plan horizontal ; il donne une visée horizontale dans toutes les directions.
+  - terme: Mire
+    definition: Règle graduée, tenue verticale sur le point dont on veut l'altitude.
+  - terme: Lecture arrière
+    definition: Lecture sur la mire posée sur le point d'altitude connue (AR).
+  - terme: Lecture avant
+    definition: Lecture sur la mire posée sur le point dont on cherche l'altitude (AV).
+  - terme: Repère de nivellement
+    definition: Point fixe matérialisé dont l'altitude est connue.
+symboles:
+  - { symbole: 'AR', signification: 'lecture arrière', unite: 'm' }
+  - { symbole: 'AV', signification: 'lecture avant', unite: 'm' }
+  - { symbole: 'Δh', signification: 'dénivelée', unite: 'm' }
+formules:
+  - { nom: 'Dénivelée', tex: '\Delta h = AR - AV', domaine: 'Nivellement direct' }
+  - { nom: 'Altitude', tex: 'Z_B = Z_A + AR - AV', domaine: 'Nivellement direct' }
+  - { nom: 'Plan de visée', tex: 'Z_v = Z_A + AR', domaine: 'Rayonnement' }
+---
+
+import { denivelee } from '@/lib/calc/topographie'
+import { grandeur, nombre } from '@/lib/format'
+import { LectureMire, NivellementDirect, PorteesEgales } from '@/components/schemas/Topographie'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const ex = { ZA: 1243.567, AR: 1.524, AV: 0.876 }
+export const ex2 = { ZA: 312.45, AR: 0.873, AV: 2.416 }
+export const ex3 = { ZR: 412.35, AR: 1.426, lectures: [1.212, 1.664, 1.862] }
+
+<Page etape="intuition" titre="L'intuition : un plan d'eau imaginaire">
+
+Dans un tuyau transparent rempli d'eau, les deux niveaux d'eau sont toujours à la même hauteur : les maçons l'utilisent pour reporter un niveau d'un mur à l'autre. Le **niveau** du topographe fait la même chose avec une lunette : il crée un **plan horizontal** imaginaire, et l'on mesure, avec une règle verticale, la **mire**, à quelle distance le sol se trouve sous ce plan.
+
+<NivellementDirect AR={ex.AR} AV={ex.AV} ZA={ex.ZA} />
+
+Si le sol est plus bas sous la mire, la lecture est plus grande. La différence des lectures donne la **dénivelée**.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer la différence d'altitude entre deux points avec un niveau et une mire ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Le nivellement direct" sousTitre="Un niveau, une mire, deux lectures" etape="cours">
+
+<Panneau n={1} titre="Le niveau" icone="regle" couleur="encre">
+Calé, il vise horizontalement dans toutes les directions.
+</Panneau>
+
+<Panneau n={2} titre="La mire" icone="plan" couleur="acier">
+Graduée en centimètres, tenue bien verticale ; on lit au millimètre.
+</Panneau>
+
+<Panneau n={3} titre="Arrière" icone="idee" couleur="terre">
+AR : lecture sur le point d'altitude connue.
+</Panneau>
+
+<Panneau n={4} titre="Avant" icone="calcul" couleur="brique">
+AV : lecture sur le point cherché.
+</Panneau>
+
+<Panneau n={5} titre="La dénivelée" icone="verification" couleur="validation">
+Δh = AR − AV ; positive : le point avant est plus haut.
+</Panneau>
+
+<Panneau n={6} titre="Portées égales" icone="attention" couleur="correction">
+Niveau à mi-distance : l'erreur d'inclinaison s'annule.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : le principe">
+
+### Deux lectures
+
+On place la mire sur A, d'altitude connue, et l'on lit la **lecture arrière** AR ; on place la mire sur B et l'on lit la **lecture avant** AV. La visée est horizontale : la **dénivelée** de A vers B vaut $\Delta h = AR - AV$, et $Z_B = Z_A + AR - AV$.
+
+Avec AR = {nombre(ex.AR, 3)} m et AV = {nombre(ex.AV, 3)} m, Δh = {grandeur(denivelee(ex.AR, ex.AV), 3, 'm')} : B est plus haut que A. Une petite lecture avant veut dire un point haut : la mire « dépasse » moins sous la visée.
+
+### Lire la mire
+
+La mire est graduée en centimètres, en damier noir et blanc ; les décimètres sont chiffrés. On lit les mètres et les décimètres sur le chiffre, les centimètres en comptant les cases, et l'on **estime le millimètre**.
+
+<LectureMire lecture={ex.AR} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : le plan de visée et les portées">
+
+### Plusieurs points depuis une station
+
+Depuis une même station, on peut lire plusieurs points : c'est le **nivellement par rayonnement**. On calcule d'abord l'altitude du **plan de visée**, $Z_v = Z_A + AR$, puis chaque point : $Z = Z_v - \text{lecture}$.
+
+### Portées égales
+
+La visée d'un niveau n'est jamais parfaitement horizontale : l'erreur sur la lecture grandit avec la distance. En plaçant le niveau **à égale distance** des deux mires, l'erreur est la même à l'arrière et à l'avant et s'annule dans la différence.
+
+<PorteesEgales />
+
+<Regle type="art">
+Portées égales, portées limitées à quelques dizaines de mètres, mire bien verticale : ce sont les règles de l'art du nivellement ordinaire ; les nivellements de précision ont leurs propres procédures.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : une station de nivellement">
+
+<NivellementDirect AR={ex2.AR} AV={ex2.AV} ZA={ex2.ZA} />
+
+Ici la lecture avant est plus grande que la lecture arrière : la dénivelée {grandeur(denivelee(ex2.AR, ex2.AV), 3, 'm')} est **négative**, B est plus bas que A.
+
+<DiagrammeFlux alt="Une station de nivellement en cinq gestes : caler le niveau à mi-distance ; viser la mire sur le point connu et lire l'arrière ; viser la mire sur le point cherché et lire l'avant ; calculer la dénivelée ; calculer l'altitude." etapes={[{ titre: 'Caler', texte: 'à mi-distance', teinte: 'acier' }, { titre: 'Arrière', texte: 'lire AR', teinte: 'encre' }, { titre: 'Avant', texte: 'lire AV', teinte: 'terre' }, { titre: 'Δh', texte: 'AR − AV', teinte: 'brique' }, { titre: 'Z', texte: 'Z_A + Δh', teinte: 'validation' }]} />
+
+</Page>
+
+<FicheCalcul calcul="nivellementDirect">
+
+<Cahier titre="Exemple résolu : l'altitude d'un piquet à Lubumbashi">
+
+**Énoncé.** Le repère A, à {grandeur(ex.ZA, 3, 'm')}, sert à niveler un piquet B. Le niveau, à mi-distance, donne AR = {nombre(ex.AR, 3)} m sur A et AV = {nombre(ex.AV, 3)} m sur B (données de l'énoncé). Quelle est l'altitude de B ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La dénivelée">
+<AN k="dh" />
+<Note>Pourquoi AR − AV et pas l'inverse ? On part du point connu : la lecture arrière est la référence.</Note>
+</Etape>
+
+<Etape n={3} titre="L'altitude">
+<AN k="ZB" />
+<Resultat k="ZB" libelle="Altitude de B" />
+<Note couleur="vert">Contrôle : AV &lt; AR, donc B est plus haut que A. Inverse les lectures : la dénivelée change de signe.</Note>
+</Etape>
+
+<Etape n={4} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="inverser arrière et avant.">
+La dénivelée change de signe : le point haut devient bas. On écrit « AR » et « AV » dans le carnet à chaque lecture.
+</Piege>
+
+<Piege erreur="tenir la mire penchée.">
+Une mire inclinée donne une lecture trop **grande**. Le porte-mire la balance doucement d'avant en arrière ; on retient la plus petite lecture, ou l'on utilise la nivelle de la mire.
+</Piege>
+
+<Piege erreur="placer le niveau près d'une mire.">
+Les portées inégales laissent l'erreur de visée dans la dénivelée.
+
+<PorteesEgales />
+
+</Piege>
+
+<Piege erreur="lire au centimètre seulement.">
+On estime le millimètre : une altitude de plateforme se contrôle au centimètre près.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Niveler une plateforme.** Pour régler un fond de fouille ou une forme de dallage, le chef d'équipe calcule la lecture que doit donner la mire posée sur le fond : lecture cible = Z_v − Z projet. Il fait creuser ou remblayer jusqu'à la lire.
+
+<NivellementDirect AR={ex3.AR} AV={ex3.lectures[1]} ZA={ex3.ZR} />
+
+<Encadre type="terrain" titre="Le niveau laser">
+Sur les chantiers de bâtiment, le niveau laser tournant crée un plan lumineux horizontal ; un capteur sur la mire bipe à la bonne hauteur. Le principe est le même : un plan de référence et des lectures.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : nivellement direct">
+
+### Principe
+
+visée horizontale · Δh = AR − AV · Z_B = Z_A + AR − AV · AR sur le connu, AV sur le cherché
+
+### Rayonnement
+
+Z_v = Z_A + AR · Z = Z_v − lecture
+
+### Bonnes pratiques
+
+portées égales · mire verticale · lecture au mm · AR et AV notés à chaque lecture
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Monter ou descendre">
+
+AR = 0,873 m, AV = 2,416 m. Le point avant est-il plus haut ou plus bas ? De combien ?
+
+<Indice>Δh = AR − AV.</Indice>
+
+<Corrige>
+Δh = **{grandeur(denivelee(ex2.AR, ex2.AV), 3, 'm')}** : plus bas.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une altitude">
+
+A est à {grandeur(ex2.ZA, 2, 'm')}. Avec les lectures de l'exercice 1, quelle est l'altitude de B ?
+
+<Indice>Z_B = Z_A + Δh.</Indice>
+
+<Corrige>
+Z_B = {nombre(ex2.ZA, 2)} + ({nombre(denivelee(ex2.AR, ex2.AV), 3)}) = **{grandeur(ex2.ZA + denivelee(ex2.AR, ex2.AV), 3, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Trois points depuis une station">
+
+Repère à {grandeur(ex3.ZR, 3, 'm')}, AR = {nombre(ex3.AR, 3)} m. On lit ensuite {ex3.lectures.map((l) => nombre(l, 3)).join(', ')} m sur trois piquets. Leurs altitudes ?
+
+<Indice>Plan de visée d'abord.</Indice>
+
+<Corrige>
+Z_v = {nombre(ex3.ZR, 3)} + {nombre(ex3.AR, 3)} = {grandeur(ex3.ZR + ex3.AR, 3, 'm')} ; piquets : {ex3.lectures.map((l) => `**${nombre(ex3.ZR + ex3.AR - l, 3)} m**`).join(' ; ')}.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.8.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La dénivelée de A vers B vaut :" choix={['AR − AV', 'AV − AR', 'AR + AV', 'AR × AV']} bonne={0} colonnes={4}>
+On part du point connu.
+</QCM>
+
+<QCM n={2} question="Une lecture avant plus petite que la lecture arrière signifie :" choix={['B plus haut que A', 'B plus bas que A', 'même altitude', 'une erreur']} bonne={0} colonnes={2}>
+Moins de mire sous la visée.
+</QCM>
+
+<QCM n={3} question="Une mire penchée donne une lecture :" choix={['trop grande', 'trop petite', 'juste', 'nulle']} bonne={0} colonnes={4}>
+On retient la plus petite en balançant.
+</QCM>
+
+<QCM n={4} question="On place le niveau à égale distance des mires pour :" choix={['annuler l’erreur de visée', 'gagner du temps', 'mieux voir', 'mesurer les distances']} bonne={0} colonnes={2}>
+L'erreur est la même des deux côtés.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, l'altitude de B vaut :</>} choix={[grandeur(ex.ZA + ex.AR - ex.AV, 3, 'm'), grandeur(ex.ZA - ex.AR + ex.AV, 3, 'm'), grandeur(ex.ZA, 3, 'm'), grandeur(ex.ZA + ex.AR, 3, 'm')]} bonne={0} colonnes={2}>
+Z_A + AR − AV.
+</QCM>
+
+<QCM n={6} question="Z_A + AR est :" choix={['l’altitude du plan de visée', 'l’altitude de B', 'la dénivelée', 'la hauteur de la mire']} bonne={0} colonnes={2}>
+Elle sert à tous les points de la station.
+</QCM>
+
+<QCM n={7} question="On lit une mire :" choix={['au millimètre, en estimant', 'au mètre', 'au décimètre', 'au centimètre sans estimer']} bonne={0} colonnes={2}>
+Les centimètres se comptent, le millimètre s'estime.
+</QCM>
+
+<QCM n={8} question="Un niveau laser tournant crée :" choix={['un plan horizontal lumineux', 'une verticale', 'une distance', 'un angle']} bonne={0} colonnes={2}>
+Même principe que le niveau optique.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

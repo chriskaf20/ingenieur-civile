@@ -1,0 +1,290 @@
+---
+id: L1.8.3
+titre: "Mesure des angles : théodolite et station totale"
+objectifs:
+  - Convertir des angles entre grades et degrés
+  - Lire un angle horizontal entre deux directions
+  - Lire un angle zénithal et en déduire distance horizontale et dénivelée
+  - Éliminer les erreurs d'instrument par le double retournement
+relecture: false
+normes: []
+glossaire:
+  - terme: Grade (gon)
+    definition: Unité d'angle des topographes ; le tour complet vaut 400 gon, l'angle droit 100 gon.
+  - terme: Station totale
+    definition: Théodolite électronique avec distancemètre intégré ; il mesure angles et distances et enregistre les mesures.
+  - terme: Angle zénithal
+    definition: Angle vertical compté depuis la verticale du dessus (le zénith) ; une visée horizontale vaut 100 gon.
+  - terme: Double retournement
+    definition: Mesure d'une même direction en cercle gauche puis en cercle droit ; la moyenne élimine les principales erreurs de l'instrument.
+symboles:
+  - { symbole: 'Hz', signification: 'lecture horizontale', unite: 'gon' }
+  - { symbole: 'V', signification: 'angle zénithal', unite: 'gon' }
+  - { symbole: 'Di', signification: 'distance inclinée', unite: 'm' }
+  - { symbole: 'hi, hp', signification: 'hauteurs de l''instrument et du prisme', unite: 'm' }
+formules:
+  - { nom: 'Conversion', tex: '400\ \text{gon} = 360°', domaine: 'Angles' }
+  - { nom: 'Distance horizontale', tex: 'D_h = D_i \sin V', domaine: 'Station totale' }
+  - { nom: 'Dénivelée', tex: '\Delta h = D_i \cos V + h_i - h_p', domaine: 'Station totale' }
+---
+
+import { angleHorizontal, degresEnGrades, doubleRetournement, EXEMPLE_VISEE, gradEnDegres, viseeStation } from '@/lib/calc/topographie'
+import { grandeur, nombre } from '@/lib/format'
+import { AngleDeuxDirections, CercleGrades, StationTotale } from '@/components/schemas/Topographie'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const d0 = EXEMPLE_VISEE
+export const v0 = viseeStation(d0)
+export const dr = doubleRetournement(123.456, 323.458, 98.215, 301.787)
+export const ex2 = { g: 42.3518, d: 137.904 }
+export const ex3 = viseeStation({ Di: 52.18, V: 103.25, hi: 1.5, hp: 1.5 })
+
+<Page etape="intuition" titre="L'intuition : tourner la tête et compter">
+
+Debout au milieu d'un terrain, on montre un arbre, puis une borne : de combien a-t-on tourné ? C'est un **angle horizontal**. On lève les yeux vers le haut d'un pylône : de combien a-t-on levé la tête ? C'est un **angle vertical**. Le théodolite fait la même chose, avec une lunette et des cercles gradués au dix-millième de grade.
+
+<AngleDeuxDirections gauche={ex2.g} droite={ex2.d} />
+
+Avec un angle et une distance, on place un point : c'est la base de toute la topographie.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer des angles horizontaux et verticaux, et en tirer distances et dénivelées ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Mesurer des angles" sousTitre="Théodolite et station totale" etape="cours">
+
+<Panneau n={1} titre="Les grades" icone="calcul" couleur="encre">
+400 gon le tour, 100 gon l'angle droit. Les instruments affichent au 0,0001 gon.
+</Panneau>
+
+<Panneau n={2} titre="Mettre en station" icone="terrain" couleur="terre">
+Centrer l'instrument sur le point, le caler horizontal, mesurer sa hauteur hi.
+</Panneau>
+
+<Panneau n={3} titre="Angle horizontal" icone="plan" couleur="acier">
+Différence entre deux lectures Hz : droite moins gauche.
+</Panneau>
+
+<Panneau n={4} titre="Angle zénithal" icone="idee" couleur="brique">
+Compté depuis la verticale du dessus : 100 gon à l'horizontale.
+</Panneau>
+
+<Panneau n={5} titre="Distance et dénivelée" icone="regle" couleur="validation">
+Dh = Di sin V ; Δh = Di cos V + hi − hp.
+</Panneau>
+
+<Panneau n={6} titre="Double retournement" icone="verification" couleur="correction">
+Cercle gauche, cercle droit, moyenne : les erreurs de l'instrument s'éliminent.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : grades et angles horizontaux">
+
+### Les grades
+
+Les topographes comptent en **grades** (gon) : 400 gon pour un tour, 100 gon pour un angle droit. Un grade vaut {nombre(gradEnDegres(1), 1)}°. Les gisements et les lectures se comptent dans le sens des aiguilles d'une montre.
+
+<CercleGrades />
+
+### L'angle horizontal
+
+L'instrument mis en station, on vise un premier point et l'on lit Hz ; on vise le second et l'on relit. L'angle vaut **lecture de droite moins lecture de gauche**, ramené entre 0 et 400 gon : ici {nombre(angleHorizontal(ex2.g, ex2.d), 4)} gon.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : angle zénithal et station totale">
+
+### Distance horizontale et dénivelée
+
+La station totale mesure la **distance inclinée** Di jusqu'au prisme et l'**angle zénithal** V. On en tire $D_h = D_i \sin V$ et la dénivelée entre les points au sol, $\Delta h = D_i \cos V + h_i - h_p$, où hi et hp sont les hauteurs de l'instrument et du prisme.
+
+<StationTotale {...d0} Dh={v0.Dh} dh={v0.dh} />
+
+### Le double retournement
+
+Un instrument n'est jamais parfait : son axe de visée peut être un peu de travers (**collimation**), son cercle vertical décalé (**erreur d'index**). On vise en **cercle gauche**, on fait faire un demi-tour à la lunette et à l'instrument, on revise en **cercle droit** : la moyenne élimine ces erreurs. Exemple : Hz CG 123,4560 et CD 323,4580 donnent {nombre(dr.Hz, 4)} gon ; V CG 98,2150 et CD 301,7870 donnent {nombre(dr.V, 4)} gon.
+
+<Regle type="art">
+Le double retournement est une règle de l'art des mesures précises ; les stations totales modernes corrigent aussi par calcul une partie des erreurs, après un étalonnage de l'instrument.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la mise en station">
+
+<DiagrammeFlux alt="Mettre une station totale en station : planter le trépied au-dessus du point ; centrer l'instrument avec le plomb optique ou laser ; caler les nivelles ; mesurer la hauteur de l'instrument ; s'orienter sur une référence." etapes={[{ titre: 'Trépied', texte: 'au-dessus du point', teinte: 'terre' }, { titre: 'Centrer', texte: 'plomb laser', teinte: 'acier' }, { titre: 'Caler', texte: 'nivelles', teinte: 'encre' }, { titre: 'Mesurer hi', texte: 'au mètre ruban', teinte: 'brique' }, { titre: 'Orienter', texte: 'sur une référence', teinte: 'validation' }]} />
+
+<Encadre type="retenir">
+Mal centré ou mal calé, l'instrument fausse toutes les mesures de la station. On vérifie le centrage et le calage avant chaque série, et à la fin.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="viseeStation">
+
+<Cahier titre="Exemple résolu : viser un repère depuis une station">
+
+**Énoncé.** Depuis la station A, on vise un prisme placé sur le point B : distance inclinée {nombre(d0.Di, 3)} m, angle zénithal {nombre(d0.V, 4)} gon ; hauteur de l'instrument {nombre(d0.hi, 2)} m, du prisme {nombre(d0.hp, 2)} m (données de l'énoncé). Calcule la distance horizontale et la dénivelée de A à B.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La distance horizontale">
+<AN k="Dh" />
+<Note>Pourquoi le sinus ? V se compte depuis la verticale : la composante horizontale est le côté opposé à l'angle.</Note>
+</Etape>
+
+<Etape n={3} titre="La dénivelée">
+<AN k="dh" />
+<Resultat k="dh" libelle="Dénivelée de A à B" />
+<Note couleur="vert">Contrôle : V est un peu inférieur à 100 gon, on vise vers le haut : B est plus haut que A. Passe V à 102 gon : la dénivelée devient négative.</Note>
+</Etape>
+
+<Etape n={4} titre="Le schéma">
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer en degrés avec une calculatrice réglée en grades, ou l'inverse.">
+sin(97,385) n'a pas la même valeur en degrés et en grades : on règle la calculatrice sur GRAD.
+</Piege>
+
+<Piege erreur="oublier hi et hp.">
+La station mesure entre la lunette et le prisme, pas entre les points au sol. Sans hi − hp, la dénivelée est fausse de la différence des hauteurs.
+</Piege>
+
+<Piege erreur="prendre V pour une inclinaison depuis l'horizontale.">
+V se compte depuis la verticale : 100 gon, c'est horizontal.
+</Piege>
+
+<Piege erreur="mesurer en un seul cercle.">
+Les erreurs de l'instrument restent dans la mesure : on fait le double retournement.
+</Piege>
+
+<CercleGrades />
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**La station totale, outil universel.** Lever d'un terrain, implantation des axes, contrôle de la verticalité d'un poteau, suivi d'un remblai : elle mesure, enregistre et calcule les coordonnées sur place.
+
+<StationTotale Di={52.18} V={103.25} hi={1.5} hp={1.5} Dh={ex3.Dh} dh={ex3.dh} />
+
+<Encadre type="terrain" titre="Chaleur et poussière">
+La chaleur fait trembler l'air au ras du sol : les visées longues et rasantes deviennent imprécises en milieu de journée. On mesure le matin, on protège l'instrument du soleil avec un parasol, et l'on nettoie l'optique de la poussière latéritique.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : mesure des angles">
+
+### Grades
+
+400 gon = 360° · 100 gon = angle droit · 1 gon = 0,9° · calculatrice en GRAD
+
+### Horizontal
+
+angle = Hz droite − Hz gauche (mod 400)
+
+### Vertical
+
+V compté depuis le zénith · 100 gon = horizontal · Dh = Di sin V · Δh = Di cos V + hi − hp
+
+### Précision
+
+mise en station soignée · double retournement · mesures au frais
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Conversions">
+
+Convertis 150 gon en degrés et 45° en grades.
+
+<Indice>400 gon = 360°.</Indice>
+
+<Corrige>
+150 gon = **{nombre(gradEnDegres(150), 0)}°** ; 45° = **{nombre(degresEnGrades(45), 0)} gon**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un angle horizontal">
+
+On lit 380,1240 gon sur A puis 52,3360 gon sur B. Quel est l'angle AÔB ?
+
+<Indice>On passe par 0 : ajoute 400 si la différence est négative.</Indice>
+
+<Corrige>
+52,3360 − 380,1240 + 400 = **{nombre(angleHorizontal(380.124, 52.336), 4)} gon**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une visée plongeante">
+
+Di = 52,180 m, V = 103,2500 gon, hi = hp = 1,50 m. Calcule Dh et Δh. Le point visé est-il plus haut ou plus bas ?
+
+<Indice>V &gt; 100 gon : on vise vers le bas.</Indice>
+
+<Corrige>
+Dh = **{grandeur(ex3.Dh, 3, 'm')}** ; Δh = **{grandeur(ex3.dh, 3, 'm')}** : le point est plus bas. hi = hp : leurs effets s'annulent.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.8.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un angle droit vaut :" choix={['100 gon', '90 gon', '400 gon', '200 gon']} bonne={0} colonnes={4}>
+Le tour vaut 400 gon.
+</QCM>
+
+<QCM n={2} question="Un angle zénithal de 100 gon correspond à une visée :" choix={['horizontale', 'verticale vers le haut', 'verticale vers le bas', 'à 45°']} bonne={0} colonnes={2}>
+On compte depuis le zénith.
+</QCM>
+
+<QCM n={3} question="Dh = Di × sin V parce que V est compté :" choix={['depuis la verticale', 'depuis l’horizontale', 'depuis le nord', 'au hasard']} bonne={0} colonnes={2}>
+La composante horizontale est opposée à V.
+</QCM>
+
+<QCM n={4} question="Le double retournement sert à :" choix={['éliminer les erreurs de l’instrument', 'mesurer deux points', 'doubler la précision du ruban', 'tourner plus vite']} bonne={0} colonnes={2}>
+La moyenne CG / CD annule collimation et index.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, la distance horizontale vaut :</>} choix={[grandeur(v0.Dh, 3, 'm'), grandeur(d0.Di, 3, 'm'), grandeur(v0.dhInstrument, 3, 'm'), grandeur(d0.Di * 0.9, 3, 'm')]} bonne={0} colonnes={4}>
+Di × sin V.
+</QCM>
+
+<QCM n={6} question="Lectures 42,3518 sur A et 137,9040 sur B : l'angle vaut :" choix={[`${nombre(angleHorizontal(ex2.g, ex2.d), 4)} gon`, '180,2558 gon', '42,3518 gon', '400 gon']} bonne={0} colonnes={2}>
+Droite moins gauche.
+</QCM>
+
+<QCM n={7} question="Dans Δh = Di cos V + hi − hp, hi est :" choix={['la hauteur de l’instrument', 'la hauteur du prisme', 'l’altitude', 'l’angle']} bonne={0} colonnes={2}>
+Mesurée au-dessus du point de station.
+</QCM>
+
+<QCM n={8} question="Pour calculer sin(97,385 gon), la calculatrice doit être en mode :" choix={['GRAD', 'DEG', 'RAD', 'peu importe']} bonne={0} colonnes={4}>
+Sinon le résultat est faux.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,284 @@
+---
+id: L1.8.2
+titre: Mesure des distances
+objectifs:
+  - Choisir un moyen de mesure des distances adapté à la précision voulue
+  - Appliquer les corrections d'étalonnage et de température d'un ruban
+  - Réduire une distance inclinée à l'horizontale
+  - Contrôler une mesure par un aller et retour
+relecture: false
+normes: []
+glossaire:
+  - terme: Distance horizontale
+    definition: Distance projetée sur un plan horizontal ; c'est elle qu'on reporte sur un plan.
+  - terme: Étalonnage
+    definition: Comparaison d'un instrument à une référence ; elle donne sa longueur réelle.
+  - terme: Distancemètre
+    definition: Appareil qui mesure une distance par le temps de trajet ou le déphasage d'une onde lumineuse renvoyée par un prisme.
+symboles:
+  - { symbole: 'Lm', signification: 'longueur lue', unite: 'm' }
+  - { symbole: 'α', signification: 'coefficient de dilatation de l''acier', unite: '1/°C' }
+  - { symbole: 'Δh', signification: 'dénivelée entre les extrémités', unite: 'm' }
+  - { symbole: 'Dh', signification: 'distance horizontale', unite: 'm' }
+formules:
+  - { nom: 'Correction d''étalonnage', tex: 'c_e = L_m \frac{L_{réel} - L_{nom}}{L_{nom}}', domaine: 'Ruban' }
+  - { nom: 'Correction de température', tex: 'c_t = L_m\,\alpha\,(T - T_0)', domaine: 'α = 11,5 × 10⁻⁶ /°C' }
+  - { nom: 'Réduction à l''horizontale', tex: 'D_h = \sqrt{L^2 - \Delta h^2}', domaine: 'Mesure en pente' }
+---
+
+import { correctionsRuban, DILATATION_ACIER, EXEMPLE_RUBAN, T_ETALONNAGE } from '@/lib/calc/topographie'
+import { grandeur, nombre } from '@/lib/format'
+import { PenteRuban, RubanChaleur, TroisInstruments } from '@/components/schemas/Topographie'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d0 = EXEMPLE_RUBAN
+export const r0 = correctionsRuban(d0)
+export const ex2 = correctionsRuban({ ...EXEMPLE_RUBAN, Lm: 30, reel: 50, T: 20, dh: 2.5 })
+export const ex3 = correctionsRuban({ ...EXEMPLE_RUBAN, Lm: 49.62, reel: 49.995, T: 38, dh: 0 })
+
+<Page etape="intuition" titre="L'intuition : un mètre n'est pas toujours un mètre">
+
+Un ruban d'acier laissé au soleil de midi s'allonge, comme un rail de chemin de fer. Tendu en pente, il mesure la longueur du talus et non celle qu'on dessine sur le plan. Fabriqué un peu trop long ou trop court, il trompe à chaque mesure. Sur 50 m, ces petits écarts font plusieurs centimètres : assez pour qu'un mur ne tombe pas sur ses fondations.
+
+<PenteRuban Lcorr={r0.Lcorr} dh={d0.dh} Dh={r0.Dh} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer une distance et la corriger pour obtenir la vraie distance horizontale ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Mesurer une distance" sousTitre="Instrument, corrections, contrôle" etape="cours">
+
+<Panneau n={1} titre="Le ruban" icone="regle" couleur="terre">
+Acier de 20 à 50 m, tendu, à plat ou en pente. Simple, mais à corriger.
+</Panneau>
+
+<Panneau n={2} titre="Le distancemètre" icone="idee" couleur="encre">
+Une onde lumineuse, un prisme : quelques millimètres sur des centaines de mètres.
+</Panneau>
+
+<Panneau n={3} titre="L'étalonnage" icone="verification" couleur="acier">
+Le ruban comparé à une base connue : sa longueur réelle corrige chaque mesure.
+</Panneau>
+
+<Panneau n={4} titre="La température" icone="attention" couleur="correction">
+L'acier s'allonge de 11,5 µm par mètre et par °C au-dessus de 20 °C.
+</Panneau>
+
+<Panneau n={5} titre="La pente" icone="calcul" couleur="brique">
+On réduit à l'horizontale : Dh = √(L² − Δh²).
+</Panneau>
+
+<Panneau n={6} titre="Le contrôle" icone="retenir" couleur="validation">
+Aller et retour : deux mesures indépendantes qui doivent concorder.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : les instruments">
+
+### Trois moyens
+
+<TroisInstruments />
+
+Le **ruban** reste l'outil du chantier : implanter un mur, contrôler une travée. Le **distancemètre**, intégré à la station totale (L1.8.3), mesure en un instant des distances de plusieurs centaines de mètres. Le **GNSS** donne directement des coordonnées.
+
+### Mesurer au ruban
+
+On tend le ruban avec une **tension constante**, bien aligné, sans flèche. Une distance plus longue que le ruban se mesure en plusieurs portées, jalonnées en ligne droite. Toute mesure se fait **deux fois**, à l'aller et au retour.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : les corrections">
+
+### Étalonnage
+
+Un ruban dont la longueur nominale est {d0.nominal} m mesure peut-être {nombre(d0.reel, 3)} m en réalité. Chaque mesure se corrige dans la même proportion : $c_e = L_m (L_{réel} - L_{nom}) / L_{nom}$.
+
+### Température
+
+L'acier s'allonge de α = {nombre(DILATATION_ACIER * 1e6, 1)} × 10⁻⁶ par °C au-dessus de la température d'étalonnage, {T_ETALONNAGE} °C : $c_t = L_m\,\alpha\,(T - T_0)$. Un ruban plus long lit une valeur trop **courte** : la correction s'**ajoute**.
+
+<RubanChaleur cTemp={r0.cTemp} T={d0.T} />
+
+### Pente
+
+Le ruban tendu le long d'une pente mesure la distance **inclinée** L. Connaissant la dénivelée Δh (par un nivellement), la distance horizontale vaut $D_h = \sqrt{L^2 - \Delta h^2}$.
+
+<Regle type="norme" source="Coefficient de dilatation de l'acier">
+α = 11,5 × 10⁻⁶ /°C est une valeur usuelle pour l'acier des rubans ; le certificat d'étalonnage du ruban donne sa longueur réelle et sa température de référence <AVerifier note="A_VERIFIER.md n° 48 : coefficient de dilatation et température d'étalonnage des rubans, à lire sur le certificat du fabricant" />.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'ordre des corrections">
+
+<DiagrammeFlux alt="L'ordre des corrections d'une mesure au ruban : la longueur lue ; plus la correction d'étalonnage ; plus la correction de température ; puis la réduction à l'horizontale avec la dénivelée." etapes={[{ titre: 'Lue', texte: 'Lm', teinte: 'encre' }, { titre: 'Étalonnage', texte: '+ c_e', teinte: 'acier' }, { titre: 'Température', texte: '+ c_t', teinte: 'correction' }, { titre: 'Horizontale', texte: '√(L² − Δh²)', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Les trois corrections de l'exemple, en millimètres : étalonnage ${nombre(r0.cEtalon * 1000, 1)}, température ${nombre(r0.cTemp * 1000, 1)}, pente ${nombre(r0.cPente * 1000, 1)}. La pente donne la plus grande correction, et elle est négative.`} titre="corrections de l'exemple (mm)" barres={[{ libelle: 'étalonnage', valeur: Math.abs(r0.cEtalon * 1000), texte: nombre(r0.cEtalon * 1000, 1), teinte: 'acier' }, { libelle: 'température', valeur: Math.abs(r0.cTemp * 1000), texte: nombre(r0.cTemp * 1000, 1), teinte: 'correction' }, { libelle: 'pente', valeur: Math.abs(r0.cPente * 1000), texte: nombre(r0.cPente * 1000, 1), teinte: 'encre' }]} />
+
+</Page>
+
+<FicheCalcul calcul="correctionsRuban">
+
+<Cahier titre="Exemple résolu : une mesure au ruban sous le soleil de Kinshasa">
+
+**Énoncé.** On mesure au ruban d'acier de {d0.nominal} m (longueur réelle {nombre(d0.reel, 3)} m) la distance entre deux piquets, par {d0.T} °C ; on lit {nombre(d0.Lm, 3)} m ; le nivellement donne {nombre(d0.dh, 2)} m de dénivelée (données de l'énoncé). Quelle est la distance horizontale ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Étalonnage et température">
+<AN k="etalon" />
+<AN k="temp" />
+<Note>Pourquoi ces corrections s'ajoutent-elles ? Le ruban est trop long et dilaté : ses graduations sont trop espacées, il lit trop peu.</Note>
+</Etape>
+
+<Etape n={3} titre="La réduction à l'horizontale">
+<AN k="pente" />
+<Resultat k="Dh" libelle="Distance horizontale" />
+<Note couleur="vert">Contrôle : la distance horizontale est plus courte que la distance mesurée. Mets la dénivelée à zéro : seules restent les deux premières corrections.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="reporter la distance inclinée sur le plan.">
+Le plan est horizontal : une distance mesurée en pente est trop longue, l'écart grandit avec la pente.
+</Piege>
+
+<Piege erreur="se tromper de signe sur la correction de température.">
+Par forte chaleur, le ruban s'allonge et lit trop court : on **ajoute**. Par temps frais, on retranche.
+</Piege>
+
+<Piege erreur="laisser le ruban faire une flèche.">
+Un ruban mal tendu forme une courbe : la longueur lue est trop grande. On tend fort, avec une tension constante.
+</Piege>
+
+<Piege erreur="mesurer une seule fois.">
+Une faute de lecture (un mètre oublié) passe inaperçue. L'aller-retour la révèle.
+</Piege>
+
+<DiagrammeBarres alt="Ordres de grandeur sur 50 m : 15 °C d’écart de température donnent un peu moins d’un centimètre ; une pente de 2 m, environ 4 cm. Les deux comptent pour une implantation." titre="ordres de grandeur sur 50 m (mm)" barres={[{ libelle: 'température +15 °C', valeur: 50 * DILATATION_ACIER * 15 * 1000, texte: nombre(50 * DILATATION_ACIER * 15 * 1000, 1), teinte: 'correction' }, { libelle: 'pente de 2 m', valeur: (50 - Math.sqrt(50 * 50 - 4)) * 1000, texte: nombre((50 - Math.sqrt(50 * 50 - 4)) * 1000, 1), teinte: 'encre' }]} />
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Mesurer tôt le matin.** Sous le soleil, le sol et le ruban chauffent vite. Les géomètres mesurent de préférence tôt le matin, notent la température, et corrigent.
+
+<RubanChaleur cTemp={r0.cTemp} T={d0.T} />
+
+<Encadre type="terrain" titre="Le ruban qui a servi longtemps">
+Un ruban tordu puis redressé, ou réparé, n'a plus sa longueur d'origine. On l'étalonne sur une base connue, par exemple deux clous espacés précisément, avant tout travail d'implantation.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : mesure des distances">
+
+### Instruments
+
+ruban (chantier) · distancemètre (station totale) · GNSS
+
+### Corrections du ruban
+
+étalonnage c_e = Lm (L_réel − L_nom) / L_nom · température c_t = Lm α (T − 20) · α = 11,5 × 10⁻⁶ /°C
+
+### Pente
+
+Dh = √(L² − Δh²) · on reporte toujours l'horizontale
+
+### Bonnes pratiques
+
+tension constante · aller et retour · mesurer au frais · noter la température
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le signe">
+
+Par 38 °C, faut-il ajouter ou retrancher la correction de température ?
+
+<Indice>Le ruban s'allonge-t-il ou se raccourcit-il ?</Indice>
+
+<Corrige>
+Il s'allonge : il lit trop court, on **ajoute**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="En pente">
+
+On mesure 30,000 m en pente, ruban juste, à 20 °C ; la dénivelée vaut 2,50 m. Quelle est la distance horizontale ?
+
+<Indice>Seule la correction de pente compte.</Indice>
+
+<Corrige>
+Dh = √(30² − 2,5²) = **{grandeur(ex2.Dh, 3, 'm')}** ; correction {nombre(ex2.cPente * 1000, 0)} mm.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un ruban trop court">
+
+Un ruban de 50 m ne mesure que 49,995 m. On lit 49,620 m à plat, par 38 °C. Quelle est la distance vraie ?
+
+<Indice>La correction d'étalonnage est négative.</Indice>
+
+<Corrige>
+Étalonnage {nombre(ex3.cEtalon * 1000, 1)} mm ; température +{nombre(ex3.cTemp * 1000, 1)} mm ; distance **{grandeur(ex3.Dh, 3, 'm')}**. Les deux corrections se compensent en partie.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.8.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sur un plan, on reporte la distance :" choix={['horizontale', 'inclinée', 'mesurée sans correction', 'au sol']} bonne={0} colonnes={2}>
+Le plan est une projection horizontale.
+</QCM>
+
+<QCM n={2} question="Par forte chaleur, un ruban d'acier :" choix={['s’allonge et lit trop court', 'se raccourcit', 'ne change pas', 'lit trop long']} bonne={0} colonnes={2}>
+On ajoute la correction.
+</QCM>
+
+<QCM n={3} question="Le coefficient de dilatation de l'acier vaut environ :" choix={['11,5 × 10⁻⁶ /°C', '11,5 × 10⁻³ /°C', '1 /°C', '0,1 /°C']} bonne={0} colonnes={2}>
+Un peu plus de 1 mm par 100 m et par °C.
+</QCM>
+
+<QCM n={4} question="Dh = √(L² − Δh²) suppose qu'on connaît :" choix={['la dénivelée', 'la température', 'l’étalonnage', 'le gisement']} bonne={0} colonnes={4}>
+Donnée par un nivellement.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, la distance horizontale vaut :</>} choix={[grandeur(r0.Dh, 3, 'm'), grandeur(d0.Lm, 3, 'm'), grandeur(r0.Lcorr, 3, 'm'), grandeur(d0.Lm - d0.dh, 3, 'm')]} bonne={0} colonnes={4}>
+Lue, corrigée, puis réduite.
+</QCM>
+
+<QCM n={6} question="L'aller-retour sert à :" choix={['détecter les fautes', 'doubler la distance', 'remplacer l’étalonnage', 'mesurer la pente']} bonne={0} colonnes={2}>
+Deux mesures indépendantes doivent concorder.
+</QCM>
+
+<QCM n={7} question="Un ruban mal tendu qui fait une flèche lit :" choix={['trop long', 'trop court', 'juste', 'zéro']} bonne={0} colonnes={4}>
+La courbe est plus longue que la corde.
+</QCM>
+
+<QCM n={8} question="Le distancemètre mesure :" choix={['par une onde lumineuse renvoyée par un prisme', 'avec un ruban', 'par les satellites', 'au pas']} bonne={0} colonnes={2}>
+Précis et rapide sur de longues distances.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

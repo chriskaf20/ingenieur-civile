@@ -1,0 +1,286 @@
+---
+id: L1.8.1
+titre: "La topographie : rôle, référentiels, coordonnées"
+objectifs:
+  - Dire à quoi sert la topographie sur un projet de génie civil
+  - Situer un point par ses coordonnées E, N et son altitude Z
+  - Expliquer le principe de la projection UTM et trouver un fuseau
+  - Calculer une distance plane entre deux points de coordonnées connues
+relecture: false
+normes: []
+glossaire:
+  - terme: Topographie
+    definition: Science de la mesure et de la représentation du terrain ; elle fournit les plans et implante les ouvrages.
+  - terme: Référentiel
+    definition: "Système de référence choisi pour donner des coordonnées : une origine, des axes, une unité."
+  - terme: UTM
+    definition: Projection transverse universelle de Mercator ; la Terre est découpée en 60 fuseaux de 6°, chacun mis à plat.
+  - terme: Altitude
+    definition: Hauteur d'un point au-dessus d'une surface de référence proche du niveau moyen de la mer.
+  - terme: Borne
+    definition: Repère matérialisé au sol, de coordonnées connues, qui sert de point de départ aux mesures.
+symboles:
+  - { symbole: 'E', signification: 'abscisse, vers l''est', unite: 'm' }
+  - { symbole: 'N', signification: 'ordonnée, vers le nord', unite: 'm' }
+  - { symbole: 'Z', signification: 'altitude', unite: 'm' }
+formules:
+  - { nom: 'Distance plane', tex: 'D = \sqrt{\Delta E^2 + \Delta N^2}', domaine: 'Coordonnées planes' }
+  - { nom: 'Fuseau UTM', tex: 'n = \left\lfloor \frac{\lambda + 180}{6} \right\rfloor + 1', domaine: 'λ en degrés, positive à l''est' }
+---
+
+import { distancePlane, FAUX_EST, FAUX_NORD_SUD, fuseauUTM } from '@/lib/calc/topographie'
+import { grandeur, nombre } from '@/lib/format'
+import { FuseauxUTM, RepereLocal, TroisCoordonnees } from '@/components/schemas/Topographie'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const kin = fuseauUTM(15.3)
+export const lub = fuseauUTM(27.5)
+export const gom = fuseauUTM(29.2)
+export const ex3 = { A: { E: 312450.2, N: 8732118.6 }, B: { E: 312612.9, N: 8731987.4 } }
+
+<Page etape="intuition" titre="L'intuition : une adresse précise pour chaque point">
+
+Pour livrer un colis, une rue et un numéro suffisent. Pour construire, il faut mieux : chaque angle de bâtiment, chaque axe de route, chaque fond de fouille doit avoir une **adresse** au centimètre près. Cette adresse, ce sont ses **coordonnées** : deux nombres pour sa position en plan, un troisième pour son altitude.
+
+<TroisCoordonnees E={532418.25} N={9524672.4} Z={312.45} />
+
+La **topographie** mesure le terrain pour le dessiner (le **lever**), puis reporte le projet sur le terrain (l'**implantation**). Sans elle, ni plan de masse, ni route, ni réseau d'assainissement.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment repérer un point sur la Terre par des nombres que tout le monde comprend de la même façon ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La topographie sur un projet" sousTitre="Mesurer, représenter, implanter" etape="cours">
+
+<Panneau n={1} titre="Le lever" icone="plan" couleur="encre">
+On mesure le terrain existant : limites, bâtiments, arbres, altitudes. On en tire le plan topographique.
+</Panneau>
+
+<Panneau n={2} titre="Le projet" icone="idee" couleur="acier">
+L'ingénieur dessine l'ouvrage sur ce plan, dans les mêmes coordonnées.
+</Panneau>
+
+<Panneau n={3} titre="L'implantation" icone="terrain" couleur="terre">
+On reporte sur le terrain les axes et les niveaux du projet (L1.6.8).
+</Panneau>
+
+<Panneau n={4} titre="Le contrôle" icone="verification" couleur="validation">
+Pendant et après les travaux : verticalité, niveaux, tassements, récolement.
+</Panneau>
+
+<Panneau n={5} titre="Les coordonnées" icone="calcul" couleur="brique">
+E et N en plan, Z en altitude, dans un référentiel commun.
+</Panneau>
+
+<Panneau n={6} titre="UTM" icone="regle" couleur="correction">
+Une projection mondiale en 60 fuseaux ; la RDC est sur les fuseaux 33 à 35.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/2) : coordonnées et référentiels">
+
+### Trois nombres
+
+En plan, on repère un point par son **abscisse E** (vers l'est) et son **ordonnée N** (vers le nord), en mètres. En hauteur, par son **altitude Z**, au-dessus d'une surface de référence proche du niveau moyen de la mer. Toutes les mesures d'un projet doivent être dans **le même référentiel** : même origine, mêmes axes.
+
+### Repère local ou repère national
+
+Sur un petit chantier, on peut travailler dans un **repère local** : une origine proche, des nombres petits. Dès qu'il faut raccorder le projet au cadastre, à une route ou à un réseau, on le rattache au **système national**, par des bornes de coordonnées connues dans les deux systèmes.
+
+<RepereLocal />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : la projection UTM">
+
+### Mettre la Terre à plat
+
+La Terre est ronde ; une carte est plate. Toute mise à plat déforme un peu. La projection **UTM** limite les déformations en découpant la Terre en **60 fuseaux** de 6° de longitude, chacun mis à plat autour de son **méridien central**. Le fuseau d'une longitude λ (en degrés, positive à l'est) vaut $\lfloor(\lambda + 180)/6\rfloor + 1$ : Kinshasa (15,3° E) est dans le fuseau {kin.fuseau}, de méridien central {kin.meridienCentral}° ; Lubumbashi (27,5° E) dans le fuseau {lub.fuseau}.
+
+<FuseauxUTM />
+
+### Les grands nombres
+
+Dans chaque fuseau, on ajoute {nombre(FAUX_EST, 0)} m aux abscisses pour qu'elles restent positives ; dans l'hémisphère sud, {nombre(FAUX_NORD_SUD, 0)} m aux ordonnées. C'est pourquoi un point de Kinshasa a une ordonnée de plus de 9 millions de mètres.
+
+<Regle type="norme" source="Projection UTM">
+Le système géodésique et la projection officiels en RDC, et les bornes de référence, sont fixés par l'administration du cadastre et de la géodésie <AVerifier note="A_VERIFIER.md n° 47 : système géodésique de référence et projection officielle en RDC" />. Sur un projet, on écrit toujours le système utilisé dans le cartouche.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : du terrain au plan, et retour">
+
+<DiagrammeFlux alt="Le cycle topographique d'un projet : lever du terrain existant, plan topographique, projet dessiné dans les mêmes coordonnées, implantation sur le terrain, contrôle et plan de récolement." etapes={[{ titre: 'Lever', texte: 'mesurer l’existant', teinte: 'encre' }, { titre: 'Plan', texte: 'topographique', teinte: 'acier' }, { titre: 'Projet', texte: 'mêmes coordonnées', teinte: 'terre' }, { titre: 'Implanter', texte: 'reporter sur le terrain', teinte: 'brique' }, { titre: 'Contrôler', texte: 'récolement', teinte: 'validation' }]} />
+
+<Encadre type="retenir">
+Un seul référentiel pour tout le projet. Les bornes de départ sont connues, protégées, et leur système est écrit dans le cartouche.
+</Encadre>
+
+</Page>
+
+<FicheCalcul calcul="coordonneesUTM">
+
+<Cahier titre="Exemple résolu : deux bornes d'une parcelle à Kinshasa">
+
+**Énoncé.** Un géomètre donne les coordonnées UTM de deux bornes A et B d'une parcelle de Kinshasa (données de l'énoncé). Trouve le fuseau UTM du chantier et la distance entre les bornes.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le fuseau">
+<AN k="fuseau" />
+<Note>Pourquoi le fuseau compte-t-il ? Deux points de fuseaux différents n'ont pas des coordonnées comparables : on ne calcule pas une distance entre eux sans conversion.</Note>
+</Etape>
+
+<Etape n={3} titre="La distance">
+<AN k="ecarts" />
+<AN k="D" />
+<Resultat k="D" libelle="Distance AB" />
+<Note couleur="vert">Contrôle : la distance est quelques dizaines de mètres, cohérente avec une parcelle urbaine. Seuls les écarts comptent : les grands nombres s'annulent.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="mélanger deux référentiels.">
+Un plan en repère local et un autre en UTM ne se superposent pas : on rattache d'abord, par des bornes communes.
+</Piege>
+
+<Piege erreur="inverser E et N.">
+Le premier nombre est l'abscisse E (est), le second l'ordonnée N (nord). Inversés, le point part à des centaines de kilomètres.
+</Piege>
+
+<Piege erreur="arrondir les coordonnées au mètre.">
+On travaille au centimètre, parfois au millimètre : un arrondi au mètre fausse toutes les distances.
+</Piege>
+
+<Piege erreur="confondre altitude et niveau relatif.">
+Le ±0,00 d'un bâtiment (L1.6.8) est un niveau du projet ; l'altitude se rapporte au niveau de la mer.
+</Piege>
+
+<DiagrammeFlux alt="Avant de calculer avec des coordonnées : vérifier le référentiel, l'ordre E puis N, l'unité et la précision." etapes={[{ titre: 'Référentiel', texte: 'le même partout ?', teinte: 'encre' }, { titre: 'Ordre', texte: 'E puis N', teinte: 'acier' }, { titre: 'Unité', texte: 'mètres', teinte: 'terre' }, { titre: 'Précision', texte: 'au cm', teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les bornes.** Les parcelles sont délimitées par des bornes, en béton ou en métal, dont le cadastre connaît les coordonnées. Avant de construire, on fait **retrouver et contrôler** les bornes par un géomètre : beaucoup de litiges de voisinage viennent d'un mur construit à côté de sa limite.
+
+<RepereLocal />
+
+<Encadre type="terrain" titre="Le GPS du téléphone ne suffit pas">
+Un téléphone donne sa position à quelques mètres près : suffisant pour trouver un chantier, pas pour implanter un mur. Le géomètre utilise un GNSS différentiel ou une station totale, au centimètre.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : référentiels et coordonnées">
+
+### Coordonnées
+
+E vers l'est · N vers le nord · Z altitude · en mètres, au centimètre
+
+### Référentiels
+
+local (chantier) ou national (UTM) · rattachement par bornes communes · système écrit dans le cartouche
+
+### UTM
+
+60 fuseaux de 6° · n = ⌊(λ + 180)/6⌋ + 1 · RDC : fuseaux 33 à 35 · E + 500 000 m · N + 10 000 000 m au sud
+
+### Distance plane
+
+D = √(ΔE² + ΔN²)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le bon fuseau">
+
+Dans quel fuseau UTM se trouve Goma (29,2° E) ? Quel est son méridien central ?
+
+<Indice>n = ⌊(λ + 180)/6⌋ + 1.</Indice>
+
+<Corrige>
+⌊209,2 / 6⌋ + 1 = **{gom.fuseau}** ; méridien central **{gom.meridienCentral}°**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="L'ordre des nombres">
+
+Un plan donne « P : 532 418,25 ; 9 524 672,40 ». Quelle est l'abscisse ? Pourquoi l'ordonnée dépasse-t-elle 9 millions ?
+
+<Indice>Hémisphère sud.</Indice>
+
+<Corrige>
+Abscisse E = **532 418,25 m** ; ordonnée N = 9 524 672,40 m. Kinshasa est au sud de l'équateur : on a ajouté {nombre(FAUX_NORD_SUD, 0)} m pour que N reste positive.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Distance entre deux bornes">
+
+A (E {nombre(ex3.A.E, 2)} ; N {nombre(ex3.A.N, 2)}) et B (E {nombre(ex3.B.E, 2)} ; N {nombre(ex3.B.N, 2)}), dans le même fuseau. Quelle est la distance AB ?
+
+<Indice>Calcule d'abord ΔE et ΔN.</Indice>
+
+<Corrige>
+ΔE = {nombre(ex3.B.E - ex3.A.E, 2)} m ; ΔN = {nombre(ex3.B.N - ex3.A.N, 2)} m ; D = **{grandeur(distancePlane(ex3.A, ex3.B), 3, 'm')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L1.8.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le lever topographique consiste à :" choix={['mesurer le terrain existant', 'reporter le projet sur le terrain', 'calculer une poutre', 'dessiner une façade']} bonne={0} colonnes={2}>
+L'implantation fait l'inverse.
+</QCM>
+
+<QCM n={2} question="E désigne :" choix={['l’abscisse, vers l’est', 'l’altitude', 'l’ordonnée', 'l’échelle']} bonne={0} colonnes={2}>
+N est l'ordonnée, vers le nord.
+</QCM>
+
+<QCM n={3} question="La projection UTM découpe la Terre en :" choix={['60 fuseaux de 6°', '24 fuseaux de 15°', '360 fuseaux', '4 quarts']} bonne={0} colonnes={2}>
+Chacun mis à plat autour de son méridien central.
+</QCM>
+
+<QCM n={4} question={<>Kinshasa est dans le fuseau UTM :</>} choix={[String(kin.fuseau), '15', '35', '1']} bonne={0} colonnes={4}>
+⌊(15,3 + 180)/6⌋ + 1.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Une ordonnée UTM de 9 500 000 m dans l'hémisphère sud vient de :" choix={['l’ajout de 10 000 000 m', 'une erreur', 'l’altitude', 'la longitude']} bonne={0} colonnes={2}>
+Pour garder des ordonnées positives.
+</QCM>
+
+<QCM n={6} question="Deux plans dans des référentiels différents :" choix={['se rattachent par des bornes communes', 'se superposent directement', 'ne servent à rien', 's’additionnent']} bonne={0} colonnes={2}>
+Le rattachement est indispensable.
+</QCM>
+
+<QCM n={7} question="ΔE = 30 m, ΔN = 40 m. La distance vaut :" choix={[grandeur(distancePlane({ E: 0, N: 0 }, { E: 30, N: 40 }), 0, 'm'), '70 m', '10 m', '35 m']} bonne={0} colonnes={4}>
+√(30² + 40²).
+</QCM>
+
+<QCM n={8} question="Pour implanter un mur, la position GPS d'un téléphone est :" choix={['trop imprécise', 'suffisante', 'meilleure qu’une station totale', 'inutile partout']} bonne={0} colonnes={2}>
+Quelques mètres d'erreur.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

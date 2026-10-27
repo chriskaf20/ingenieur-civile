@@ -11,6 +11,7 @@ import { CALCULS_ANALYSE } from './analyse';
 import { CALCULS_CHIMIE } from './chimie';
 import { CALCULS_DESSIN } from './dessin';
 import { CALCULS_INFO } from './info';
+import { CALCULS_TOPO } from './topo';
 import { CALCULS_METHODE } from './methode';
 import { CALCULS_GEOMETRIE } from './geometrie';
 import { CALCULS_LINEAIRE } from './lineaire';
@@ -407,6 +408,6 @@ export const REGISTRE = fusion(
     ),
     CALCULS_PROJET,
   ),
-  fusion(fusion(fusion(fusion(CALCULS_ANALYSE, CALCULS_STATIQUE), CALCULS_LINEAIRE), CALCULS_CHIMIE), fusion(CALCULS_DESSIN, CALCULS_INFO)),
+  fusion(fusion(fusion(fusion(CALCULS_ANALYSE, CALCULS_STATIQUE), CALCULS_LINEAIRE), CALCULS_CHIMIE), fusion(fusion(CALCULS_DESSIN, CALCULS_INFO), CALCULS_TOPO)),
 );
 export type NomCalcul = keyof typeof REGISTRE;
