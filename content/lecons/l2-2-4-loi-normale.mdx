@@ -1,0 +1,316 @@
+---
+id: L2.2.4
+titre: "Loi normale et fractiles"
+objectifs:
+  - Décrire la loi normale par sa moyenne et son écart-type
+  - Centrer et réduire une variable pour utiliser la table de Φ
+  - Calculer la probabilité d'être sous un seuil ou entre deux bornes
+  - Calculer un fractile, en particulier le fractile 5 %
+relecture: false
+normes: []
+glossaire:
+  - terme: Loi normale
+    definition: Loi continue en cloche, symétrique, entièrement décrite par sa moyenne μ et son écart-type σ.
+  - terme: Variable centrée réduite
+    definition: "z = (x − μ)/σ : l'écart à la moyenne compté en écarts-types."
+  - terme: Fonction de répartition
+    definition: Φ(z), probabilité qu'une variable normale centrée réduite soit inférieure à z.
+  - terme: Fractile
+    definition: Valeur sous laquelle tombe une proportion donnée p des résultats.
+symboles:
+  - { symbole: 'μ', signification: 'moyenne de la loi', unite: 'unité de X' }
+  - { symbole: 'σ', signification: 'écart-type de la loi', unite: 'unité de X' }
+  - { symbole: 'z', signification: 'variable centrée réduite', unite: '—' }
+  - { symbole: 'u_p', signification: 'fractile p de la loi normale centrée réduite', unite: '—' }
+formules:
+  - { nom: 'Densité', tex: 'f(x) = \frac{1}{\sigma\sqrt{2\pi}}\, e^{-\frac{(x-\mu)^2}{2\sigma^2}}', domaine: 'Loi N(μ, σ)' }
+  - { nom: 'Centrer, réduire', tex: 'z = \frac{x - \mu}{\sigma},\quad P(X < x) = \Phi(z)', domaine: 'Usage de la table' }
+  - { nom: 'Fractile', tex: 'x_p = \mu + u_p\,\sigma,\quad u_{0,05} = -1{,}645', domaine: 'Fractile p' }
+---
+
+import { fractileNormal, normale, phi } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { Cloche, TableFractiles } from '@/components/schemas/Probas'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const N0 = normale(33, 4)
+export const p1 = phi(1) - phi(-1)
+export const p2 = phi(2) - phi(-2)
+export const p3 = phi(3) - phi(-3)
+export const ex1 = normale(50, 10).P(70)
+export const ex2 = normale(1.80, 0.02)
+export const ex3 = (30 - 22) / (-fractileNormal(0.05))
+
+<Page etape="intuition" titre="L'intuition : la cloche partout">
+
+Trace l'histogramme de mille résultats d'écrasement, de mille pesées de sacs de ciment, de mille mesures d'une même distance : il prend presque toujours la même forme de **cloche**, symétrique autour de la moyenne. Ce n'est pas un hasard : quand une grandeur résulte de nombreuses petites causes indépendantes (dosage, eau, température, vibrage…), elle suit approximativement la **loi normale**.
+
+<Cloche entre={[-1, 1]} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer la proportion de résultats sous un seuil, et le seuil sous lequel tombe une proportion donnée ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La loi normale en six idées" sousTitre="Deux paramètres, une table" etape="cours">
+
+<Panneau n={1} titre="Deux paramètres" icone="calcul" couleur="encre">
+μ place la cloche, σ fixe sa largeur.
+</Panneau>
+
+<Panneau n={2} titre="Surface = probabilité" icone="idee" couleur="acier">
+L'aire sous la courbe entre deux valeurs, c'est la probabilité.
+</Panneau>
+
+<Panneau n={3} titre="68 – 95 – 99,7" icone="regle" couleur="terre">
+À ± 1, ± 2, ± 3 écarts-types de la moyenne.
+</Panneau>
+
+<Panneau n={4} titre="Centrer, réduire" icone="plan" couleur="brique">
+z = (x − μ) / σ : une seule table pour toutes les lois.
+</Panneau>
+
+<Panneau n={5} titre="Φ(z)" icone="verification" couleur="validation">
+P(Z &lt; z) ; symétrie : Φ(−z) = 1 − Φ(z).
+</Panneau>
+
+<Panneau n={6} titre="Fractile 5 %" icone="attention" couleur="correction">
+x = μ − 1,645 σ : la base des valeurs caractéristiques.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la cloche et ses deux paramètres">
+
+### La densité
+
+$$f(x) = \frac{1}{\sigma\sqrt{2\pi}}\,e^{-\frac{(x-\mu)^2}{2\sigma^2}}$$
+
+La courbe est maximale en μ, symétrique, et d'aire totale 1. La probabilité que X tombe entre a et b est l'**aire** sous la courbe entre a et b.
+
+### La règle 68 – 95 – 99,7
+
+- entre μ − σ et μ + σ : {nombre(p1 * 100, 1)} % des valeurs ;
+- entre μ − 2σ et μ + 2σ : {nombre(p2 * 100, 1)} % ;
+- entre μ − 3σ et μ + 3σ : {nombre(p3 * 100, 1)} %.
+
+<DiagrammeBarres alt={`Proportion des valeurs à moins de 1, 2 et 3 écarts-types de la moyenne : ${nombre(p1 * 100, 1)} %, ${nombre(p2 * 100, 1)} %, ${nombre(p3 * 100, 1)} %.`} titre="part des valeurs à ± k écarts-types (%)" barres={[{ libelle: '± 1 σ', valeur: p1 * 100, texte: nombre(p1 * 100, 1), teinte: 'encre' }, { libelle: '± 2 σ', valeur: p2 * 100, texte: nombre(p2 * 100, 1), teinte: 'acier' }, { libelle: '± 3 σ', valeur: p3 * 100, texte: nombre(p3 * 100, 1), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : centrer, réduire, lire Φ">
+
+### Une seule table
+
+Toutes les lois normales se ramènent à la loi **centrée réduite** N(0, 1) par $z = (x - \mu)/\sigma$ : z compte l'écart à la moyenne en écarts-types. On lit alors $\Phi(z) = P(Z < z)$ dans une table, ou avec un tableur (LOI.NORMALE.STANDARD.N(z ; VRAI)).
+
+### Trois calculs types
+
+- sous un seuil : $P(X < x) = \Phi(z)$ ;
+- au-dessus : $P(X > x) = 1 - \Phi(z)$ ;
+- entre deux bornes : $P(a < X < b) = \Phi(z_b) - \Phi(z_a)$.
+
+Par symétrie, $\Phi(-z) = 1 - \Phi(z)$ : les tables ne donnent souvent que z ≥ 0.
+
+<Cloche mu={33} sigma={4} sous={28} unite="MPa" titreX="fc (MPa)" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : les fractiles">
+
+### Le problème inverse
+
+On cherche la valeur $x_p$ sous laquelle tombe une proportion p : $x_p = \mu + u_p\,\sigma$, où $u_p$ est le fractile de N(0, 1) (Φ(u_p) = p ; tableur : LOI.NORMALE.STANDARD.INVERSE.N(p)).
+
+<TableFractiles />
+
+### Le fractile 5 %
+
+$u_{0,05}$ = {nombre(fractileNormal(0.05), 3)} : 5 % des valeurs sont sous $\mu - 1{,}645\,\sigma$. Les Eurocodes définissent ainsi les **valeurs caractéristiques** des résistances (EN 1990 §4.2) : c'est l'objet de la leçon suivante.
+
+<Regle type="simplification">
+La loi normale admet des valeurs négatives et infinies : pour une résistance, c'est faux en toute rigueur, mais l'erreur est négligeable tant que le CV reste petit (moins de 20 % environ). Pour des grandeurs très dispersées, on préfère la loi log-normale.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la méthode">
+
+<DiagrammeFlux alt="Calculer avec la loi normale : identifier μ et σ ; centrer et réduire ; lire Φ dans la table ou le tableur ; ou, à l'inverse, lire le fractile u et revenir à x = μ + u σ." etapes={[{ titre: 'μ, σ', texte: 'données', teinte: 'encre' }, { titre: 'Centrer', texte: 'z = (x − μ)/σ', teinte: 'acier' }, { titre: 'Lire', texte: 'Φ(z)', teinte: 'terre' }, { titre: 'Inverse', texte: 'u_p', teinte: 'brique' }, { titre: 'Revenir', texte: 'x = μ + u σ', teinte: 'validation' }]} />
+
+<Cloche mu={33} sigma={4} sous={N0.fractile(0.05)} unite="MPa" titreX="fc (MPa)" />
+
+</Page>
+
+<FicheCalcul calcul="loiNormale">
+
+<Cahier titre="Exemple résolu : les résistances d'une centrale">
+
+**Énoncé.** Les résistances d'un béton suivent une loi normale de moyenne 33 MPa et d'écart-type 4 MPa (données de l'énoncé). Quelle proportion des éprouvettes est sous 28 MPa ? Sous quelle valeur tombent 5 % des éprouvettes ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Centrer et réduire">
+<AN k="z" />
+<Note>Pourquoi centrer et réduire ? Pour n'utiliser qu'une seule table, celle de N(0, 1).</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : probabilité et fractile">
+
+<Etape n={3} titre="La probabilité">
+<AN k="P" />
+<Resultat k="P" libelle="Part sous le seuil" />
+</Etape>
+
+<Etape n={4} titre="Le fractile 5 %">
+<AN k="f5" />
+<Resultat k="f5" libelle="Fractile 5 %" />
+<Schema />
+<Note couleur="vert">Contrôle : z est négatif car le seuil est sous la moyenne, donc P &lt; 50 %. Le fractile 5 % est à 1,645 écart-type sous la moyenne.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier de diviser par σ.">
+z = x − μ n'est pas réduit ; la table attend des écarts-types.
+</Piege>
+
+<Piege erreur="lire Φ(z) quand on cherche P(X > x).">
+Au-dessus du seuil : 1 − Φ(z).
+</Piege>
+
+<Piege erreur="confondre 1,645 et 1,96.">
+1,645 : 5 % d'un seul côté (fractile). 1,96 : 2,5 % de chaque côté (intervalle à 95 %, L2.2.6).
+</Piege>
+
+<Cloche entre={[-1.96, 1.96]} />
+
+<Piege erreur="appliquer la loi normale à n'importe quoi.">
+Un histogramme dissymétrique ou à deux bosses n'est pas normal : regarder d'abord les données.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Des sacs de ciment de 50 kg.** Une cimenterie remplit des sacs avec une moyenne réglée et un écart-type propre à la machine. Pour que très peu de sacs pèsent moins de 50 kg, elle règle la moyenne au-dessus : c'est un calcul de fractile. Le même raisonnement fixe la cote de réglage d'une machine de coupe, l'épaisseur moyenne d'une couche de chaussée, la teneur moyenne en ciment d'une grave traitée.
+
+<Cloche mu={50.5} sigma={0.3} sous={50} unite="kg" titreX="masse d'un sac (kg)" />
+
+<Encadre type="terrain" titre="Ciment local et ciment importé">
+En RDC, les ciments locaux (Lukala, Kimpese, Katanga) et importés n'ont pas tous la même régularité. Un fournisseur régulier (σ faible) permet de viser une moyenne plus basse pour la même sécurité : la régularité vaut de l'argent.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : loi normale">
+
+### Paramètres
+
+μ moyenne · σ écart-type · cloche symétrique, aire 1
+
+### Repères
+
+± 1σ : 68 % · ± 2σ : 95 % · ± 3σ : 99,7 %
+
+### Calculs
+
+z = (x − μ)/σ · P(X &lt; x) = Φ(z) · P(X &gt; x) = 1 − Φ(z) · Φ(−z) = 1 − Φ(z)
+
+### Fractiles
+
+x_p = μ + u_p σ · u(0,95) = 1,645 · u(0,975) = 1,960 · u(0,05) = −1,645
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Au-dessus d'un seuil">
+
+X ~ N(50 ; 10). Probabilité que X dépasse 70 ?
+
+<Indice>z = 2 ; P = 1 − Φ(2).</Indice>
+
+<Corrige>
+1 − {nombre(ex1, 4)} = **{nombre((1 - ex1) * 100, 1)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Hauteur sous plafond">
+
+Les hauteurs sous plafond d'un immeuble suivent N(1,80 m ; 0,02 m) pour les allèges. Quelle part est entre 1,77 et 1,83 m ?
+
+<Indice>z = ± 1,5.</Indice>
+
+<Corrige>
+Φ(1,5) − Φ(−1,5) = **{nombre((ex2.P(1.83) - ex2.P(1.77)) * 100, 1)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Écart-type maximal">
+
+On veut que 5 % au plus des résultats soient sous 22 MPa avec une moyenne de 30 MPa. Quel écart-type maximal ?
+
+<Indice>30 − 1,645 σ ≥ 22.</Indice>
+
+<Corrige>
+σ ≤ 8 / 1,645 = **{grandeur(ex3, 2, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.2.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une loi normale est entièrement décrite par :" choix={['μ et σ', 'μ seulement', 'son maximum', 'n et p']} bonne={0} colonnes={4}>
+Deux paramètres.
+</QCM>
+
+<QCM n={2} question="Environ 95 % des valeurs sont à moins de :" choix={['2 écarts-types de la moyenne', '1 écart-type', '3 écarts-types', '0,5 écart-type']} bonne={0} colonnes={2}>
+68 – 95 – 99,7.
+</QCM>
+
+<QCM n={3} question="Φ(0) vaut :" choix={['0,5', '0', '1', '0,68']} bonne={0} colonnes={4}>
+Symétrie.
+</QCM>
+
+<QCM n={4} question="Si Φ(1,2) = 0,885, Φ(−1,2) vaut :" choix={['0,115', '0,885', '−0,885', '0,5']} bonne={0} colonnes={4}>
+1 − Φ(z).
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>N(33 ; 4) : la part sous 28 MPa vaut environ :</>} choix={[`${nombre(N0.P(28) * 100, 1)} %`, '5 %', '50 %', '28 %']} bonne={0} colonnes={4}>
+z = −1,25.
+</QCM>
+
+<QCM n={6} question="Le fractile 5 % de N(μ, σ) vaut :" choix={['μ − 1,645 σ', 'μ − 1,96 σ', 'μ − σ', 'μ − 5 σ']} bonne={0} colonnes={2}>
+u(0,05) = −1,645.
+</QCM>
+
+<QCM n={7} question="P(X > x) se calcule par :" choix={['1 − Φ(z)', 'Φ(z)', 'Φ(−z) − 1', 'z']} bonne={0} colonnes={4}>
+Complément.
+</QCM>
+
+<QCM n={8} question="Pour une grandeur très dispersée et toujours positive, on préfère :" choix={['la loi log-normale', 'la loi normale', 'la loi binomiale', 'aucune loi']} bonne={0} colonnes={2}>
+Elle ne prend que des valeurs positives.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,315 @@
+---
+id: L2.2.9
+titre: "Fiabilité : l'origine des coefficients partiels"
+objectifs:
+  - Décrire la ruine comme l'événement « sollicitation supérieure à la résistance »
+  - Calculer l'indice de fiabilité β et la probabilité de ruine
+  - Expliquer pourquoi on majore les charges et on minore les résistances
+  - Situer les coefficients partiels de l'EN 1990 par rapport à l'ancien coefficient de sécurité global
+relecture: false
+normes:
+  - "EN 1990 annexe B : classes de fiabilité, β cible (3,8 sur 50 ans pour RC2)"
+  - "EN 1990 annexe C : bases de la méthode des coefficients partiels"
+  - "EN 1990 §6.4.3 et annexe A1 : combinaisons et coefficients γG, γQ"
+glossaire:
+  - terme: Fiabilité
+    definition: Aptitude d'un ouvrage à remplir sa fonction ; elle se mesure par une probabilité de ruine très faible.
+  - terme: Marge de sécurité
+    definition: M = R − S ; la ruine survient si M devient négative.
+  - terme: Indice de fiabilité
+    definition: β, distance entre la moyenne de la marge et zéro, comptée en écarts-types.
+  - terme: Coefficient partiel
+    definition: Coefficient qui majore une action (γ ≥ 1) ou minore une résistance (division par γ ≥ 1) pour couvrir les incertitudes.
+symboles:
+  - { symbole: 'R', signification: 'résistance', unite: 'kN·m' }
+  - { symbole: 'S', signification: 'sollicitation (effet des actions)', unite: 'kN·m' }
+  - { symbole: 'β', signification: 'indice de fiabilité', unite: '—' }
+  - { symbole: 'Pf', signification: 'probabilité de ruine', unite: '—' }
+formules:
+  - { nom: 'Marge', tex: 'M = R - S,\quad \text{ruine si } M < 0', domaine: 'État limite' }
+  - { nom: 'Indice de fiabilité', tex: '\beta = \frac{\mu_R - \mu_S}{\sqrt{\sigma_R^2 + \sigma_S^2}},\quad P_f = \Phi(-\beta)', domaine: 'R, S normales indépendantes' }
+  - { nom: 'Format semi-probabiliste', tex: '\gamma_G\,G_k + \gamma_Q\,Q_k \le \frac{R_k}{\gamma_M}', domaine: 'EN 1990' }
+---
+
+import { EXEMPLE_FIABILITE, fiabilite, phi } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { BetaPf, ChevauchementRS, FractileBeton } from '@/components/schemas/Probas'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const f0 = fiabilite(EXEMPLE_FIABILITE)
+export const fDisp = fiabilite({ muR: 300, sR: 60, muS: 150, sS: 25 })
+export const ex1 = fiabilite({ muR: 200, sR: 20, muS: 100, sS: 15 })
+export const ex3 = fiabilite({ muR: 250, sR: 25, muS: 150, sS: 20 })
+
+<Page etape="intuition" titre="L'intuition : deux incertitudes face à face">
+
+Une poutre résiste à un certain moment R ; on lui fait porter un moment S. Elle casse si S dépasse R. Si l'on connaissait exactement R et S, il suffirait de vérifier S &lt; R. Mais **les deux sont incertains** : la résistance dépend du béton coulé ce jour-là, de la position réelle des armatures ; la charge dépend de l'usage, du nombre de personnes, des sacs de ciment stockés sur la dalle.
+
+On ne peut donc jamais garantir « zéro risque ». On peut seulement rendre la probabilité de ruine **très faible**, et la même pour tous les ouvrages d'une même importance.
+
+<ChevauchementRS d={EXEMPLE_FIABILITE} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+D'où viennent les coefficients 1,35, 1,5 et 1,5 qu'on applique partout, et que garantissent-ils ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La fiabilité en six idées" sousTitre="Des lois aux coefficients" etape="cours">
+
+<Panneau n={1} titre="Ruine" icone="attention" couleur="correction">
+S &gt; R : la marge M = R − S devient négative.
+</Panneau>
+
+<Panneau n={2} titre="Indice β" icone="calcul" couleur="encre">
+Combien d'écarts-types séparent M moyen de zéro.
+</Panneau>
+
+<Panneau n={3} titre="Pf = Φ(−β)" icone="idee" couleur="acier">
+β = 3,8 : environ {nombre(f0.PfCible * 1e5, 0)} ruines sur 100 000.
+</Panneau>
+
+<Panneau n={4} titre="Valeurs caractéristiques" icone="regle" couleur="terre">
+Rk fractile 5 % ; Gk, Qk valeurs hautes.
+</Panneau>
+
+<Panneau n={5} titre="Coefficients partiels" icone="plan" couleur="brique">
+γ majorent S et minorent R jusqu'aux valeurs de calcul.
+</Panneau>
+
+<Panneau n={6} titre="Même fiabilité" icone="verification" couleur="validation">
+Calibrés pour viser β cible partout.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : marge et indice de fiabilité">
+
+### La marge de sécurité
+
+$M = R - S$. Si R et S sont normales et indépendantes, M est normale, de moyenne $\mu_R - \mu_S$ et d'écart-type $\sqrt{\sigma_R^2 + \sigma_S^2}$.
+
+### L'indice β
+
+La ruine, c'est M &lt; 0. En centrant et réduisant (L2.2.4) :
+
+$$P_f = P(M < 0) = \Phi(-\beta),\qquad \beta = \frac{\mu_R - \mu_S}{\sqrt{\sigma_R^2 + \sigma_S^2}}$$
+
+β mesure, en écarts-types, la distance entre la marge moyenne et la ruine. Plus β est grand, plus la ruine est improbable : chaque unité de β divise Pf par 10 à 100.
+
+<BetaPf beta={f0.beta} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : de β aux coefficients partiels">
+
+### L'objectif de l'EN 1990
+
+Pour un ouvrage courant (classe de fiabilité RC2), l'EN 1990 (annexe B) vise β = 3,8 sur 50 ans, soit $P_f$ ≈ {nombre(f0.PfCible * 1e5, 1)} × 10⁻⁵ <AVerifier note="A_VERIFIER.md n° 58 : β cible de l'EN 1990 annexe B (3,8 sur 50 ans, 4,7 sur 1 an pour RC2) et coefficients αR = 0,8, αS = −0,7 de l'annexe C" />.
+
+### Le point de calcul
+
+Pour atteindre β, on se place à un **point de calcul** : une résistance de calcul $R_d$ nettement sous la moyenne, une sollicitation de calcul $S_d$ nettement au-dessus. On vérifie $S_d \le R_d$.
+
+### Les coefficients partiels
+
+Plutôt que de manipuler moyennes et écarts-types, l'ingénieur part des **valeurs caractéristiques** (fractile 5 % pour R, valeurs hautes pour les charges) et applique des coefficients : $\gamma_M = R_k / R_d$ et $\gamma_F = S_d / S_k$. C'est le format **semi-probabiliste** des Eurocodes : $\gamma_G G_k + \gamma_Q Q_k \le R_k/\gamma_M$.
+
+<ChevauchementRS d={EXEMPLE_FIABILITE} Rd={f0.Rd} Sd={f0.Sd} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : les valeurs de l'EN 1990 et de l'EC2">
+
+### Les valeurs normatives
+
+<Regle type="norme">
+EN 1990 (tableau A1.2(B), valeurs recommandées) : γG = 1,35 pour les charges permanentes, γQ = 1,5 pour les charges variables. EN 1992-1-1 (§2.4.2.4, tableau 2.1N) : γc = 1,5 pour le béton, γs = 1,15 pour l'acier, en situation durable. Les annexes nationales peuvent les modifier.
+</Regle>
+
+### Pourquoi des valeurs différentes ?
+
+Le béton, coulé sur place, est plus incertain que l'acier, fabriqué en usine et contrôlé : γc &gt; γs. Les charges variables sont plus mal connues que le poids propre : γQ &gt; γG.
+
+<DiagrammeBarres alt="Coefficients partiels recommandés : béton 1,5 ; acier 1,15 ; charges permanentes 1,35 ; charges variables 1,5." titre="coefficients partiels (EN 1990, EN 1992-1-1)" barres={[{ libelle: 'γc béton', valeur: 1.5, texte: '1,5', teinte: 'beton' }, { libelle: 'γs acier', valeur: 1.15, texte: '1,15', teinte: 'acier' }, { libelle: 'γG permanentes', valeur: 1.35, texte: '1,35', teinte: 'terre' }, { libelle: 'γQ variables', valeur: 1.5, texte: '1,5', teinte: 'correction' }]} repere={{ valeur: 1, texte: '1' }} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : ancien et nouveau raisonnement">
+
+<DiagrammeComparaison alt="Comparaison : la contrainte admissible (ancien) divise la résistance par un coefficient global unique, sans tenir compte de la dispersion propre à chaque grandeur ; les états limites (Eurocodes, BAEL) appliquent des coefficients partiels calibrés sur chaque incertitude, pour une fiabilité homogène." gauche={{ titre: 'Coefficient global (ancien)', items: ['σ ≤ σ admissible = R / 3', 'un seul coefficient', 'fiabilité variable', 'méthode encore vue en Afrique'] }} droite={{ titre: 'Coefficients partiels', items: ['Sd ≤ Rd', 'γ par matériau et par action', 'β visé homogène', 'Eurocodes, BAEL 91 (états limites)'] }} />
+
+<DiagrammeFlux alt="Du probabiliste au semi-probabiliste : modéliser R et S ; fixer β cible ; trouver le point de calcul ; en déduire les coefficients partiels ; les appliquer aux valeurs caractéristiques." etapes={[{ titre: 'Lois', texte: 'R et S', teinte: 'encre' }, { titre: 'β cible', texte: '3,8 (RC2)', teinte: 'acier' }, { titre: 'Point', texte: 'Rd, Sd', teinte: 'terre' }, { titre: 'γ', texte: 'calibrés', teinte: 'brique' }, { titre: 'Projet', texte: 'Sd ≤ Rd', teinte: 'validation' }]} />
+
+</Page>
+
+<FicheCalcul calcul="fiabiliteBeta">
+
+<Cahier titre="Exemple résolu : la fiabilité d'une poutre">
+
+**Énoncé.** Une poutre a une résistance en flexion de moyenne 300 kN·m et d'écart-type 30 kN·m ; le moment qu'elle subit a une moyenne de 150 kN·m et un écart-type de 25 kN·m (données de l'énoncé). Calcule β et la probabilité de ruine, puis les coefficients partiels qui donneraient β = 3,8.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="L'indice de fiabilité">
+<AN k="beta" />
+<Note>Pourquoi additionner les variances ? Les incertitudes de R et de S s'ajoutent dans la marge, en carré.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : ruine et coefficients">
+
+<Etape n={3} titre="La probabilité de ruine">
+<AN k="Pf" />
+<Resultat k="beta" libelle="Indice β" />
+</Etape>
+
+<Etape n={4} titre="Les coefficients partiels">
+<AN k="gammas" />
+<Schema />
+<Note couleur="vert">Contrôle : le coefficient global μR/μS vaut 2, mais c'est β qui mesure la sécurité. Double σR : β chute alors que le coefficient global reste 2.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire qu'un coefficient global élevé suffit.">
+Avec μR/μS = 2 mais une résistance deux fois plus dispersée, β passe de {nombre(f0.beta, 2)} à {nombre(fDisp.beta, 2)}.
+</Piege>
+
+<DiagrammeBarres alt={`Même coefficient global 2, deux dispersions : β = ${nombre(f0.beta, 2)} si σR = 30 kN·m, β = ${nombre(fDisp.beta, 2)} si σR = 60 kN·m.`} titre="indice β pour μR/μS = 2" barres={[{ libelle: 'σR = 30 kN·m', valeur: f0.beta, texte: nombre(f0.beta, 2), teinte: 'validation' }, { libelle: 'σR = 60 kN·m', valeur: fDisp.beta, texte: nombre(fDisp.beta, 2), teinte: 'correction' }]} repere={{ valeur: 3.8, texte: 'β = 3,8' }} />
+
+<Piege erreur="appliquer γ deux fois.">
+On majore les actions **ou** on part de valeurs déjà majorées, pas les deux.
+</Piege>
+
+<Piege erreur="penser que « fiabilité » veut dire « zéro risque ».">
+Pf est très faible, jamais nulle.
+</Piege>
+
+<Piege erreur="utiliser fcm au lieu de fck dans le calcul.">
+Le coefficient γc = 1,5 s'applique à fck, déjà un fractile 5 % (L2.2.5).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Pourquoi les contrôles comptent.** Les coefficients partiels supposent que le béton atteint fck et que les charges ne dépassent pas les valeurs prévues. Un béton gâché à la main sans contrôle (σ grand), des sacs de ciment stockés sur une dalle fraîche, un étage ajouté sans étude : chaque écart consomme la marge et fait chuter β, sans que rien ne se voie.
+
+<FractileBeton fcm={28} s={6} fck={25} />
+
+<Encadre type="terrain" titre="BAEL 91 et anciennes règles">
+En Afrique francophone, beaucoup de bureaux d'études travaillent encore au BAEL 91. Il utilise déjà des états limites et des coefficients partiels (1,35 G + 1,5 Q ; γb = 1,5 ; γs = 1,15) très proches des Eurocodes. Les anciennes méthodes aux contraintes admissibles, avec un coefficient global, survivent pour la maçonnerie et les fondations : il faut savoir les reconnaître et ne pas mélanger les deux formats dans une même note.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : fiabilité">
+
+### Ruine
+
+M = R − S &lt; 0 · β = (μR − μS)/√(σR² + σS²) · Pf = Φ(−β)
+
+### Cible (à vérifier)
+
+RC2 : β = 3,8 sur 50 ans · Pf ≈ {nombre(f0.PfCible * 1e5, 1)} × 10⁻⁵
+
+### Coefficients partiels
+
+γG = 1,35 · γQ = 1,5 (EN 1990) · γc = 1,5 · γs = 1,15 (EC2) · valeurs recommandées
+
+### À retenir
+
+on majore les actions, on minore les résistances · la dispersion compte autant que la moyenne
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un calcul de β">
+
+μR = 200, σR = 20, μS = 100, σS = 15 kN·m. β et Pf ?
+
+<Indice>√(20² + 15²) = 25.</Indice>
+
+<Corrige>
+β = 100/25 = **{nombre(ex1.beta, 2)}** ; Pf = **{nombre(ex1.Pf * 1e5, 1)} × 10⁻⁵**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Pourquoi γc &gt; γs ?">
+
+Explique avec la notion de dispersion pourquoi l'EC2 prend 1,5 pour le béton et 1,15 pour l'acier.
+
+<Indice>Où le béton est-il fabriqué ? Et l'acier ?</Indice>
+
+<Corrige>
+Le béton, fabriqué sur chantier, est **plus dispersé** (et sa résistance en place dépend de la mise en œuvre) ; l'acier, produit et contrôlé en usine, l'est moins. Pour la même fiabilité, le béton demande une réduction plus forte.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une poutre à renforcer ?">
+
+μR = 250, σR = 25, μS = 150, σS = 20 kN·m. β atteint-il 3,8 ?
+
+<Indice>√(25² + 20²) ≈ 32.</Indice>
+
+<Corrige>
+β = **{nombre(ex3.beta, 2)}** &lt; 3,8 : fiabilité insuffisante pour un ouvrage courant ; Pf ≈ {nombre(ex3.Pf * 1e3, 2)} × 10⁻³.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.2.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La ruine correspond à :" choix={['S > R', 'R > S', 'R = 0', 'S = 0']} bonne={0} colonnes={4}>
+La sollicitation dépasse la résistance.
+</QCM>
+
+<QCM n={2} question="β = 3 correspond à une probabilité de ruine d'environ :" choix={[`${nombre(phi(-3) * 1000, 1)} × 10⁻³`, '3 %', '0,3', '10⁻¹⁰']} bonne={0} colonnes={4}>
+Φ(−3).
+</QCM>
+
+<QCM n={3} question="Si σR augmente, β :" choix={['diminue', 'augmente', 'ne change pas', 'devient négatif']} bonne={0} colonnes={4}>
+Le dénominateur grandit.
+</QCM>
+
+<QCM n={4} question="Le coefficient γQ recommandé par l'EN 1990 vaut :" choix={['1,5', '1,35', '1,15', '1']} bonne={0} colonnes={4}>
+Charges variables.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour la poutre de l'exemple, β vaut :</>} choix={[nombre(f0.beta, 2), nombre(f0.coefGlobal, 2), '6,00', '1,00']} bonne={0} colonnes={4}>
+150 / √1 525.
+</QCM>
+
+<QCM n={6} question="γs = 1,15 est plus petit que γc = 1,5 car l'acier est :" choix={['moins dispersé', 'plus résistant', 'plus lourd', 'moins cher']} bonne={0} colonnes={2}>
+Fabrication contrôlée.
+</QCM>
+
+<QCM n={7} question="Le format des Eurocodes est dit :" choix={['semi-probabiliste', 'déterministe pur', 'probabiliste complet', 'empirique']} bonne={0} colonnes={2}>
+Coefficients partiels calibrés.
+</QCM>
+
+<QCM n={8} question="Le BAEL 91 utilise :" choix={['des états limites et des coefficients partiels', 'un coefficient global unique', 'aucune sécurité', 'la loi de Poisson']} bonne={0} colonnes={2}>
+Proche des Eurocodes.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

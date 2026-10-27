@@ -1,0 +1,162 @@
+---
+id: L2.2.P
+titre: "Mini-projet : résultats d'écrasement d'un chantier"
+objectifs:
+  - Organiser et décrire une série de résultats d'essais
+  - Tracer l'histogramme et repérer une valeur suspecte
+  - Estimer la résistance moyenne avec son intervalle de confiance
+  - Conclure sur la conformité du béton selon l'EN 206
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { conformiteBeton, intervalleConfiance } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { BoiteMoustaches, FractileBeton, Histogramme } from '@/components/schemas/Probas'
+
+export const essais = [33.5, 36.2, 31.8, 38.4, 29.6, 35.1, 34.0, 37.7, 32.2, 30.9, 36.8, 33.9, 25.4, 35.6, 34.7]
+export const c = conformiteBeton(essais, 30)
+export const ic = intervalleConfiance(essais, 0.95)
+export const depart = { fck: 30, fcm: Math.round(c.moyenne * 10) / 10, s: Math.round(c.ecartType * 10) / 10, fmin: c.min, n: 15 }
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Un immeuble R+4 se construit à Kinshasa (Gombe). Les poteaux et les poutres sont prévus en **C30/37**. Le laboratoire a écrasé 15 éprouvettes cylindriques à 28 jours (en MPa, données de l'énoncé) :
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>n°</th>{essais.slice(0, 8).map((_, i) => <th key={i}>{i + 1}</th>)}</tr></thead>
+    <tbody>
+      <tr><td>fc</td>{essais.slice(0, 8).map((x, i) => <td key={i}>{nombre(x, 1)}</td>)}</tr>
+    </tbody>
+  </table>
+</div>
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>n°</th>{essais.slice(8).map((_, i) => <th key={i}>{i + 9}</th>)}</tr></thead>
+    <tbody>
+      <tr><td>fc</td>{essais.slice(8).map((x, i) => <td key={i}>{nombre(x, 1)}</td>)}</tr>
+    </tbody>
+  </table>
+</div>
+
+Le maître d'ouvrage te demande une note : « le béton est-il conforme ? ».
+
+### Ce que tu rends
+
+1. Le **tableau statistique** : moyenne, médiane, écart-type, CV, min, max.
+2. L'**histogramme** et la boîte à moustaches, avec un commentaire sur la valeur la plus faible.
+3. L'**intervalle de confiance** à 95 % de la moyenne.
+4. Les **deux critères** de l'EN 206 et la **décision**, avec ce qu'il faut faire ensuite.
+
+<Histogramme xs={essais} debut={24} largeur={2} nb={8} limite={30} />
+
+</Page>
+
+<Infographie titre="La démarche" sousTitre="Des résultats à la décision" etape="projet">
+
+<Panneau n={1} titre="Vérifier" icone="verification" couleur="correction">
+Saisie, unités, cylindres ou cubes, âge des éprouvettes.
+</Panneau>
+
+<Panneau n={2} titre="Décrire" icone="calcul" couleur="encre">
+Moyenne, médiane, s, CV (L2.2.1).
+</Panneau>
+
+<Panneau n={3} titre="Regarder" icone="plan" couleur="terre">
+Histogramme, boîte : une valeur isolée ?
+</Panneau>
+
+<Panneau n={4} titre="Estimer" icone="idee" couleur="acier">
+Intervalle de la moyenne (L2.2.6), fractile 5 % (L2.2.5).
+</Panneau>
+
+<Panneau n={5} titre="Juger" icone="regle" couleur="brique">
+Critère 1 sur la moyenne, critère 2 sur chaque résultat.
+</Panneau>
+
+<Panneau n={6} titre="Décider" icone="attention" couleur="validation">
+Accepter, ou localiser et expertiser.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="conformiteBeton" depart={depart}>
+
+<Cahier titre="Étape 1 : le fractile 5 %" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Où se situe la production ?">
+<AN k="fk5" />
+<Note>Pourquoi commencer par là ? Le fractile 5 % estimé dit déjà si la production vise juste, avant la norme.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : les critères de l'EN 206" etape="projet">
+
+<Etape n={3} titre="Critère 1 et critère 2">
+<AN k="critere1" />
+<AN k="critere2" />
+<Resultat k="conforme" libelle="Décision" />
+<Schema />
+<Note couleur="vert">Contrôle : remplace la valeur la plus faible par la médiane ; regarde quel critère change. Une seule gâchée peut décider de la conformité.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le corrigé">
+
+| Grandeur | Valeur |
+|---|---|
+| moyenne | {grandeur(c.moyenne, 2, 'MPa')} |
+| médiane | {grandeur(c.mediane, 1, 'MPa')} |
+| écart-type | {grandeur(c.ecartType, 2, 'MPa')} |
+| CV | {nombre(c.cv * 100, 1)} % |
+| min / max | {nombre(c.min, 1)} / {nombre(c.max, 1)} MPa |
+| IC 95 % de la moyenne | [{nombre(ic.bas, 1)} ; {nombre(ic.haut, 1)}] MPa |
+| fractile 5 % estimé | {grandeur(c.fk5, 1, 'MPa')} |
+| critère 1 (≥ {nombre(c.seuilMoyenne, 1)} MPa) | {c.critere1 ? 'vérifié' : 'non vérifié'} |
+| critère 2 (≥ {nombre(c.seuilIndividuel, 1)} MPa) | {c.critere2 ? 'vérifié' : 'non vérifié'} |
+
+<BoiteMoustaches xs={essais} />
+
+**Conclusion.** {c.conforme ? 'Le béton est conforme.' : 'Le béton n’est pas conforme.'} {c.critere2 ? '' : `L'éprouvette n° 13 (${nombre(c.min, 1)} MPa) est sous fck − 4 : on retrouve sur le bon de livraison l'élément coulé avec cette gâchée, on y fait des carottes, et l'on vérifie cet élément avec la résistance réelle.`} {c.critere1 ? 'La moyenne, elle, est suffisante : la production est globalement bonne ; c’est une gâchée isolée qu’il faut expliquer (eau ajoutée au camion ?).' : 'La moyenne est aussi insuffisante : toute la production est en cause.'}
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+<FractileBeton fcm={c.moyenne} s={c.ecartType} fck={30} />
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Statistiques | Moyenne seule | Moyenne, s, CV | Médiane, min, max, unités |
+| Graphiques | Absents | Histogramme | Boîte et valeur suspecte commentée |
+| Estimation | Absente | IC 95 % | Fractile 5 % comparé à fck |
+| Décision | « Ça va » | Deux critères appliqués | Suite à donner : traçabilité, carottes, recalcul |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Si l'éprouvette n° 13 avait été mal conservée (laissée au soleil), le résultat ne serait pas représentatif du béton. Quelles preuves faudrait-il réunir avant de l'écarter ?
+</Encadre>
+
+<Quiz id="L2.2.P">
+
+<QCM n={1} question="Ma note contient-elle les statistiques, les graphiques, l'intervalle de confiance, les deux critères et la décision argumentée ?" choix={['Oui, tout y est', 'Il manque une partie']} bonne={0} colonnes={2}>
+Sinon, complète : le maître d'ouvrage doit pouvoir décider sur cette seule page.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

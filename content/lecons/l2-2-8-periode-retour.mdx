@@ -1,0 +1,311 @@
+---
+id: L2.2.8
+titre: "Valeurs extrêmes et période de retour"
+objectifs:
+  - Définir la période de retour d'une pluie ou d'une crue
+  - Calculer la probabilité qu'un événement survienne pendant la vie d'un ouvrage
+  - Ajuster une loi de Gumbel à une série de maximums annuels
+  - Choisir une période de retour de projet et en mesurer le risque
+relecture: false
+normes: []
+glossaire:
+  - terme: Maximum annuel
+    definition: Plus grande valeur observée chaque année (pluie journalière, débit de crue) ; on en fait une série.
+  - terme: Période de retour
+    definition: Durée moyenne T entre deux dépassements d'une valeur ; la probabilité de dépassement chaque année vaut 1/T.
+  - terme: Loi de Gumbel
+    definition: Loi des valeurs extrêmes souvent utilisée pour les maximums annuels de pluie et de débit.
+  - terme: Risque
+    definition: Probabilité que la valeur de projet soit dépassée au moins une fois pendant la durée de vie de l'ouvrage.
+symboles:
+  - { symbole: 'T', signification: 'période de retour', unite: 'ans' }
+  - { symbole: 'p', signification: 'probabilité annuelle de dépassement, 1/T', unite: '—' }
+  - { symbole: 'n', signification: 'durée de vie de l''ouvrage', unite: 'ans' }
+  - { symbole: 'u, α', signification: 'paramètres de Gumbel (position, échelle)', unite: 'mm ou m³/s' }
+formules:
+  - { nom: 'Probabilité annuelle', tex: 'p = \frac{1}{T}', domaine: 'Maximums annuels' }
+  - { nom: 'Risque sur n années', tex: 'R = 1 - \left(1 - \frac{1}{T}\right)^n', domaine: 'Années indépendantes' }
+  - { nom: 'Gumbel (moments)', tex: '\alpha = \frac{s\sqrt 6}{\pi},\quad u = \bar x - 0{,}5772\,\alpha,\quad x_T = u - \alpha \ln\!\left(-\ln\!\left(1 - \frac{1}{T}\right)\right)', domaine: 'Ajustement' }
+---
+
+import { EXEMPLE_PLUIES, gumbel, risqueDepassement } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { DroiteGumbel, Histogramme, RisqueRetour } from '@/components/schemas/Probas'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const g = gumbel(EXEMPLE_PLUIES)
+export const r100 = risqueDepassement(100, 50)
+export const r10 = risqueDepassement(10, 10)
+export const ex2 = risqueDepassement(50, 30)
+export const Tex3 = 1 / (1 - (1 - 0.1) ** (1 / 50))
+
+<Page etape="intuition" titre="L'intuition : la pluie qui revient « tous les cent ans »">
+
+À Lubumbashi comme à Kinshasa, les orages de saison des pluies déversent parfois en une journée plus de 100 mm d'eau. Les caniveaux débordent, les routes en terre se ravinent. Pour dimensionner un ouvrage d'assainissement, on ne peut pas prendre la pluie **moyenne** : c'est la pluie **exceptionnelle** qui cause les dégâts.
+
+On classe donc les **maximums annuels** et l'on parle de **période de retour** : une pluie « décennale » est dépassée en moyenne une fois tous les dix ans. Attention : cela ne veut pas dire qu'elle arrivera dans dix ans, ni qu'elle ne peut pas revenir l'an prochain.
+
+<Histogramme xs={EXEMPLE_PLUIES} debut={60} largeur={10} nb={8} unite="mm" titre="pluie journalière maximale" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer d'une série de maximums observés à la pluie de projet, et quel risque prend-on en la choisissant ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les extrêmes en six idées" sousTitre="De l'observation au projet" etape="cours">
+
+<Panneau n={1} titre="Maximums annuels" icone="calcul" couleur="encre">
+Une valeur par année : la plus forte.
+</Panneau>
+
+<Panneau n={2} titre="T et p" icone="regle" couleur="acier">
+p = 1/T : la décennale a 10 % de chances chaque année.
+</Panneau>
+
+<Panneau n={3} titre="Risque" icone="attention" couleur="correction">
+1 − (1 − 1/T)ⁿ sur la vie de l'ouvrage.
+</Panneau>
+
+<Panneau n={4} titre="Gumbel" icone="idee" couleur="terre">
+Loi des maximums : ajustée par x̄ et s.
+</Panneau>
+
+<Panneau n={5} titre="Papier de Gumbel" icone="plan" couleur="brique">
+Les points s'alignent : on lit x_T sur la droite.
+</Panneau>
+
+<Panneau n={6} titre="Choisir T" icone="verification" couleur="validation">
+Selon les dégâts possibles : 2 à 10 ans pour un fossé, 100 ans pour un pont.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : période de retour et risque">
+
+### La définition
+
+Si une valeur $x_T$ est dépassée en moyenne une fois tous les T ans, la probabilité qu'elle le soit **une année donnée** vaut $p = 1/T$.
+
+### Le risque pendant la vie de l'ouvrage
+
+Les années étant supposées indépendantes, la probabilité que $x_T$ ne soit **jamais** dépassée en n années vaut $(1 - 1/T)^n$. Le risque est le contraire :
+
+$$R = 1 - \left(1 - \frac{1}{T}\right)^n$$
+
+Une crue centennale, pendant les 50 ans de vie d'un pont : R = {nombre(r100 * 100, 0)} %. Une pluie décennale, en 10 ans : R = {nombre(r10 * 100, 0)} %, pas 100 %.
+
+<RisqueRetour />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la loi de Gumbel">
+
+### Pourquoi une loi spéciale ?
+
+Le maximum d'une année est le plus grand de 365 valeurs : sa loi n'est pas normale mais **dissymétrique**, étalée vers les grandes valeurs. La loi de Gumbel décrit bien les maximums de pluie et de débit.
+
+### L'ajustement par les moments
+
+Avec la moyenne $\bar x$ et l'écart-type s des maximums annuels :
+
+$$\alpha = \frac{s\sqrt 6}{\pi},\qquad u = \bar x - 0{,}5772\,\alpha,\qquad x_T = u - \alpha \ln\!\left(-\ln\!\left(1 - \frac 1T\right)\right)$$
+
+Pour la série du Katanga (20 ans) : $\bar x$ = {grandeur(g.moyenne, 1, 'mm')}, s = {grandeur(g.ecartType, 1, 'mm')}, donc α = {grandeur(g.alpha, 1, 'mm')} et u = {grandeur(g.u, 1, 'mm')}.
+
+<Regle type="simplification">
+La méthode des moments est la plus simple ; les hydrologues utilisent aussi le maximum de vraisemblance ou les L-moments, et d'autres lois (GEV, Pearson III). Avec 20 ans de données, estimer la centennale reste une extrapolation fragile.
+</Regle>
+
+<Histogramme xs={EXEMPLE_PLUIES} debut={60} largeur={10} nb={8} unite="mm" titre="maximums annuels" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : le papier de Gumbel">
+
+### Lire la droite
+
+On range les maximums par ordre croissant ; la valeur de rang i (sur n) reçoit la période empirique $T_i = (n + 1)/(n + 1 - i)$. En graduant l'axe horizontal en $-\ln(-\ln(1 - 1/T))$, les points s'alignent sur la droite de Gumbel : on y lit la valeur de projet.
+
+<DroiteGumbel xs={EXEMPLE_PLUIES} u={g.u} alpha={g.alpha} T={100} />
+
+<DiagrammeBarres alt={`Pluie journalière de projet selon la période de retour : ${[2, 10, 50, 100].map((t) => `T = ${t} ans, ${nombre(g.valeur(t), 0)} mm`).join(' ; ')}.`} titre="pluie journalière de projet (mm)" barres={[2, 10, 50, 100].map((t, i) => ({ libelle: `T = ${t} ans`, valeur: g.valeur(t), texte: nombre(g.valeur(t), 0), teinte: ['validation', 'acier', 'terre', 'correction'][i] }))} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : de la série à l'ouvrage">
+
+<DiagrammeFlux alt="Démarche : rassembler les maximums annuels ; calculer moyenne et écart-type ; ajuster Gumbel ; choisir la période de retour selon l'ouvrage ; lire la valeur de projet ; vérifier le risque sur la durée de vie." etapes={[{ titre: 'Série', texte: 'maximums annuels', teinte: 'encre' }, { titre: 'x̄, s', texte: 'moments', teinte: 'acier' }, { titre: 'Gumbel', texte: 'u, α', teinte: 'terre' }, { titre: 'Choisir T', texte: 'selon l’ouvrage', teinte: 'brique' }, { titre: 'x_T', texte: 'et risque', teinte: 'validation' }]} />
+
+<DroiteGumbel xs={EXEMPLE_PLUIES} u={g.u} alpha={g.alpha} T={10} />
+
+</Page>
+
+<FicheCalcul calcul="periodeRetour">
+
+<Cahier titre="Exemple résolu : la pluie de projet d'un dalot">
+
+**Énoncé.** Les 20 maximums annuels de pluie journalière d'une station du Katanga ont une moyenne de {nombre(g.moyenne, 0)} mm et un écart-type de {nombre(g.ecartType, 1)} mm (données de l'énoncé). On dimensionne un dalot sous une route, durée de vie 50 ans, pour la pluie centennale. Quelle pluie retenir ? Quel est le risque ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Probabilité et risque">
+<AN k="p" />
+<AN k="risque" />
+<Note>Pourquoi le risque est-il si élevé ? 50 années, ce sont 50 « tirages » ; même un événement rare finit par avoir de bonnes chances d'arriver.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la valeur de projet">
+
+<Etape n={3} titre="Gumbel">
+<AN k="gumbel" />
+<Resultat k="xT" libelle="Pluie de projet" />
+<Resultat k="risque" libelle="Risque sur la durée de vie" />
+<Schema />
+<Note couleur="vert">Contrôle : la pluie centennale dépasse le plus fort maximum observé en 20 ans ({nombre(g.max, 0)} mm), ce qui est logique. Avec T = 10 ans, la pluie de projet baisse mais le risque devient quasi certain.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire que la centennale ne revient qu'une fois par siècle.">
+Elle peut arriver deux années de suite ; 1/T est une probabilité annuelle.
+</Piege>
+
+<Piege erreur="ajuster une loi normale sur des maximums.">
+Leur loi est dissymétrique : la normale sous-estime les grandes valeurs.
+</Piege>
+
+<Piege erreur="extrapoler loin avec peu d'années.">
+20 ans de données pour la crue millénale : l'incertitude est énorme.
+</Piege>
+
+<RisqueRetour T={[10, 100, 1000]} />
+
+<Piege erreur="oublier l'évolution du bassin versant.">
+Une ville qui s'étend imperméabilise les sols : le débit de projet augmente même si la pluie ne change pas (L2.7).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Choisir la période de retour.** On la choisit selon les conséquences d'un dépassement : quelques années pour un fossé de route en terre, 10 ans pour un réseau d'assainissement urbain, 100 ans ou plus pour un pont ou une digue <AVerifier note="A_VERIFIER.md n° 57 : périodes de retour de projet usuelles (assainissement, ouvrages routiers, ponts, barrages) selon les guides techniques applicables en RDC" />.
+
+<DroiteGumbel xs={EXEMPLE_PLUIES} u={g.u} alpha={g.alpha} T={50} />
+
+<Encadre type="terrain" titre="Peu de stations, des séries courtes">
+En RDC, beaucoup de stations météorologiques ont des séries interrompues. On complète avec des stations voisines, des données satellitaires, et l'on reste prudent : une période de retour de projet plus longue compense en partie l'incertitude. Le changement climatique intensifie aussi les pluies extrêmes en zone tropicale.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : valeurs extrêmes">
+
+### Définitions
+
+maximums annuels · T : période de retour · p = 1/T par an
+
+### Risque
+
+R = 1 − (1 − 1/T)ⁿ · centennale sur 50 ans ≈ {nombre(r100 * 100, 0)} % · décennale sur 10 ans ≈ {nombre(r10 * 100, 0)} %
+
+### Gumbel
+
+α = s√6/π · u = x̄ − 0,5772 α · x_T = u − α ln(−ln(1 − 1/T))
+
+### Choisir T
+
+selon les dégâts (à vérifier) · prudence si série courte
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="La décennale">
+
+Quelle est la pluie décennale de la station ?
+
+<Indice>x_T avec T = 10.</Indice>
+
+<Corrige>
+**{grandeur(g.valeur(10), 0, 'mm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un pont de 30 ans">
+
+Risque qu'une crue cinquantennale survienne au moins une fois en 30 ans ?
+
+<Indice>1 − (1 − 1/50)³⁰.</Indice>
+
+<Corrige>
+**{nombre(ex2 * 100, 0)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Choisir T pour un risque donné">
+
+Quelle période de retour choisir pour que le risque sur 50 ans ne dépasse pas 10 % ?
+
+<Indice>(1 − 1/T)⁵⁰ = 0,9.</Indice>
+
+<Corrige>
+T = 1 / (1 − 0,9^(1/50)) ≈ **{nombre(Tex3, 0)} ans**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.2.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une pluie décennale a, chaque année, une probabilité d'être dépassée de :" choix={['10 %', '1 %', '100 %', '50 %']} bonne={0} colonnes={4}>
+p = 1/T.
+</QCM>
+
+<QCM n={2} question="Le risque qu'une crue centennale arrive en 100 ans vaut environ :" choix={[`${nombre(risqueDepassement(100, 100) * 100, 0)} %`, '100 %', '1 %', '50 %']} bonne={0} colonnes={4}>
+1 − 0,99¹⁰⁰.
+</QCM>
+
+<QCM n={3} question="Les maximums annuels suivent plutôt une loi :" choix={['de Gumbel', 'normale', 'uniforme', 'binomiale']} bonne={0} colonnes={4}>
+Loi des extrêmes.
+</QCM>
+
+<QCM n={4} question="Sur le papier de Gumbel, les maximums :" choix={['s’alignent sur une droite', 'forment une cloche', 'sont aléatoires', 'décroissent']} bonne={0} colonnes={2}>
+Axe en −ln(−ln(1 − 1/T)).
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>La pluie centennale de la station vaut environ :</>} choix={[grandeur(g.valeur(100), 0, 'mm'), grandeur(g.moyenne, 0, 'mm'), grandeur(g.max, 0, 'mm'), '100 mm']} bonne={0} colonnes={4}>
+Gumbel, T = 100.
+</QCM>
+
+<QCM n={6} question="Allonger la période de retour de projet :" choix={['réduit le risque mais coûte plus cher', 'augmente le risque', 'ne change rien', 'supprime tout risque']} bonne={0} colonnes={2}>
+Compromis.
+</QCM>
+
+<QCM n={7} question="Une crue centennale survenue l'an dernier :" choix={['peut revenir cette année', 'ne peut pas revenir avant 100 ans', 'reviendra dans 99 ans', 'est impossible']} bonne={0} colonnes={2}>
+Les années sont indépendantes.
+</QCM>
+
+<QCM n={8} question="Pour un pont, on retient en général une période de retour :" choix={['de l’ordre de 100 ans', 'de 1 an', 'de 2 ans', 'aucune']} bonne={0} colonnes={2}>
+Conséquences graves (à vérifier selon le guide applicable).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

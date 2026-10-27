@@ -1,0 +1,317 @@
+---
+id: L2.2.1
+titre: "Statistique descriptive"
+objectifs:
+  - Calculer la moyenne, la médiane et l'écart-type d'une série de mesures
+  - Calculer le coefficient de variation et juger la régularité d'une production
+  - Tracer et lire un histogramme et une boîte à moustaches
+  - Choisir le bon indicateur selon la question posée
+relecture: false
+normes: []
+glossaire:
+  - terme: Série statistique
+    definition: Liste de mesures d'une même grandeur, par exemple les résistances des éprouvettes d'un chantier.
+  - terme: Écart-type
+    definition: Mesure de la dispersion autour de la moyenne, dans l'unité des mesures.
+  - terme: Coefficient de variation
+    definition: Écart-type divisé par la moyenne ; il compare la dispersion de séries d'ordres de grandeur différents.
+  - terme: Histogramme
+    definition: Graphique en barres jointives qui montre combien de mesures tombent dans chaque classe.
+symboles:
+  - { symbole: 'x̄', signification: 'moyenne', unite: 'unité des mesures' }
+  - { symbole: 's', signification: 'écart-type', unite: 'unité des mesures' }
+  - { symbole: 'n', signification: 'nombre de mesures', unite: '—' }
+  - { symbole: 'CV', signification: 'coefficient de variation', unite: '%' }
+formules:
+  - { nom: 'Moyenne', tex: '\bar x = \frac{1}{n}\sum_{i=1}^{n} x_i', domaine: 'Tendance centrale' }
+  - { nom: 'Écart-type', tex: 's = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n} (x_i - \bar x)^2}', domaine: 'Dispersion (échantillon)' }
+  - { nom: 'Coefficient de variation', tex: 'CV = \frac{s}{\bar x}', domaine: 'Dispersion relative' }
+---
+
+import { descriptive, EXEMPLE_ESSAIS } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { BoiteMoustaches, Histogramme } from '@/components/schemas/Probas'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d0 = descriptive(EXEMPLE_ESSAIS)
+export const six = descriptive([31.2, 28.5, 33.0, 29.8, 34.1, 30.6])
+export const A = descriptive([30, 30.5, 29.5, 30.2, 29.8])
+export const B = descriptive([24, 36, 27, 33, 30])
+export const ex2 = descriptive([12, 14, 13, 40, 15])
+export const ex3a = descriptive([25.1, 26.0, 24.8, 25.6])
+export const ex3b = descriptive([42.0, 44.5, 41.2, 43.8])
+
+<Page etape="intuition" titre="L'intuition : un chantier, quinze éprouvettes, quinze résultats">
+
+Sur un chantier de Lubumbashi, on coule un béton commandé en C25/30. À chaque gâchée importante, le laborantin remplit des moules ; 28 jours plus tard, il les écrase. Les quinze résultats ne sont jamais identiques : l'eau, le sable, le vibrage, la cure varient un peu.
+
+Deux questions se posent tout de suite : **autour de quelle valeur** les résultats se groupent-ils, et **à quel point** s'écartent-ils les uns des autres ? Deux nombres y répondent : la **moyenne** et l'**écart-type**.
+
+<Histogramme xs={EXEMPLE_ESSAIS} debut={27} largeur={2} nb={5} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment résumer une série de mesures en quelques nombres et un graphique, sans perdre l'information utile ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Résumer une série" sousTitre="Centre, dispersion, forme" etape="cours">
+
+<Panneau n={1} titre="Moyenne" icone="calcul" couleur="encre">
+La somme divisée par le nombre : le centre de gravité des mesures.
+</Panneau>
+
+<Panneau n={2} titre="Médiane" icone="regle" couleur="acier">
+La valeur du milieu : la moitié des mesures dessous, la moitié dessus.
+</Panneau>
+
+<Panneau n={3} titre="Écart-type" icone="idee" couleur="correction">
+L'écart « typique » à la moyenne, dans l'unité des mesures.
+</Panneau>
+
+<Panneau n={4} titre="CV" icone="verification" couleur="validation">
+s / x̄ : la régularité, en pourcentage.
+</Panneau>
+
+<Panneau n={5} titre="Histogramme" icone="plan" couleur="terre">
+Des classes de même largeur, des barres jointives.
+</Panneau>
+
+<Panneau n={6} titre="Boîte" icone="attention" couleur="brique">
+Min, quartiles, médiane, max : la forme en un coup d'œil.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la tendance centrale">
+
+### La moyenne
+
+$\bar x = \frac{1}{n}\sum x_i$ : on additionne les n mesures et on divise par n. Pour les quinze essais, $\bar x$ = {grandeur(d0.moyenne, 2, 'MPa')}.
+
+### La médiane
+
+On range les mesures dans l'ordre croissant ; la médiane est celle du milieu (ou la moyenne des deux du milieu si n est pair). Ici, médiane = {grandeur(d0.mediane, 1, 'MPa')}.
+
+### Laquelle choisir ?
+
+La moyenne utilise toutes les valeurs, mais une seule valeur aberrante (une éprouvette mal remplie) la déplace beaucoup. La médiane y est insensible. En contrôle du béton, la **norme** raisonne sur la moyenne et l'écart-type (L2.2.5) ; la médiane sert à repérer une valeur suspecte.
+
+<BoiteMoustaches xs={EXEMPLE_ESSAIS} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la dispersion">
+
+### L'écart-type
+
+On mesure l'écart de chaque valeur à la moyenne, on l'élève au carré (pour que les écarts positifs et négatifs ne s'annulent pas), on fait la moyenne en divisant par **n − 1**, puis on prend la racine pour revenir à l'unité des mesures :
+
+$$s = \sqrt{\frac{1}{n-1}\sum (x_i - \bar x)^2}$$
+
+Pourquoi n − 1 et non n ? Les écarts sont mesurés à $\bar x$, calculée sur les mêmes données : ils sont un peu trop petits. Diviser par n − 1 corrige ce biais. C'est la convention des normes d'essais et des tableurs (fonction ÉCARTYPE ou ECARTYPE.STANDARD).
+
+### Le coefficient de variation
+
+$CV = s / \bar x$. Un écart-type de 3 MPa est faible pour un béton de 50 MPa, mais énorme pour un mortier de 10 MPa. Pour nos essais : CV = {nombre(d0.cv * 100, 1)} %.
+
+<DiagrammeBarres alt={`Deux séries de même moyenne, ${nombre(A.moyenne, 1)} MPa : la série A, régulière, a un écart-type de ${nombre(A.ecartType, 2)} MPa ; la série B, irrégulière, de ${nombre(B.ecartType, 2)} MPa.`} titre="écart-type de deux séries de même moyenne (MPa)" barres={[{ libelle: 'série A, centrale à béton', valeur: A.ecartType, texte: nombre(A.ecartType, 2), teinte: 'validation' }, { libelle: 'série B, gâchage à la pelle', valeur: B.ecartType, texte: nombre(B.ecartType, 2), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : les graphiques">
+
+### L'histogramme
+
+On découpe l'étendue en **classes** de même largeur (5 à 10 classes en général ; environ √n), on compte les mesures de chaque classe, et l'on trace des barres **jointives** dont la hauteur est l'effectif. La forme compte : en cloche et symétrique, la loi normale conviendra (L2.2.4) ; étalée d'un côté, ou à deux bosses, il faut chercher une cause (deux centrales, deux équipes).
+
+### La boîte à moustaches
+
+Elle montre le minimum, le premier quartile Q1 (25 % des valeurs dessous), la médiane, le troisième quartile Q3 et le maximum. La boîte contient la moitié centrale des mesures.
+
+<Regle type="art">
+Avant tout calcul, regarder les données : un graphique révèle une erreur de saisie (une virgule déplacée, 3,12 au lieu de 31,2) qu'aucune moyenne ne montre.
+</Regle>
+
+<Histogramme xs={EXEMPLE_ESSAIS} debut={25} largeur={2} nb={6} limite={25} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Analyser une série : vérifier les données ; tracer l'histogramme ; calculer la moyenne et la médiane ; calculer l'écart-type et le coefficient de variation ; conclure." etapes={[{ titre: 'Vérifier', texte: 'saisie, unités', teinte: 'correction' }, { titre: 'Tracer', texte: 'histogramme', teinte: 'terre' }, { titre: 'Centre', texte: 'moyenne, médiane', teinte: 'encre' }, { titre: 'Dispersion', texte: 's, CV', teinte: 'acier' }, { titre: 'Conclure', texte: 'régularité', teinte: 'validation' }]} />
+
+<BoiteMoustaches xs={[31.2, 28.5, 33.0, 29.8, 34.1, 30.6]} />
+
+</Page>
+
+<FicheCalcul calcul="statistiqueEssais">
+
+<Cahier titre="Exemple résolu : les six premiers essais du chantier">
+
+**Énoncé.** Les six premières éprouvettes donnent 31,2 ; 28,5 ; 33,0 ; 29,8 ; 34,1 et 30,6 MPa (données de l'énoncé). Calcule la moyenne, l'écart-type et le coefficient de variation.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La moyenne">
+<AN k="moyenne" />
+<Note>Pourquoi commencer par la moyenne ? Les écarts se mesurent à partir d'elle.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la dispersion">
+
+<Etape n={3} titre="Les écarts au carré">
+<AN k="ecarts" />
+</Etape>
+
+<Etape n={4} titre="Écart-type et CV">
+<AN k="s" />
+<Resultat k="s" libelle="Écart-type" />
+<Schema />
+<Note couleur="vert">Contrôle : l'écart-type est de l'ordre du sixième de l'étendue ({nombre(six.etendue, 1)} MPa) ; un CV de {nombre(six.cv * 100, 1)} % traduit une production régulière.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="diviser par n au lieu de n − 1.">
+Sur six essais, l'écart-type serait sous-estimé de 9 % ; les normes d'essais utilisent n − 1.
+</Piege>
+
+<Piege erreur="oublier l'unité de l'écart-type.">
+s s'exprime dans l'unité des mesures (MPa) ; la variance, en MPa².
+</Piege>
+
+<Piege erreur="garder une valeur aberrante sans enquête.">
+Une valeur très éloignée (éprouvette cassée au démoulage, mauvaise lecture) fausse moyenne et écart-type. On cherche la cause avant de l'écarter, et on le note dans le rapport.
+</Piege>
+
+<DiagrammeBarres alt={`Effet d'une valeur aberrante sur cinq mesures (12, 14, 13, 40 et 15) : moyenne ${nombre(ex2.moyenne, 1)}, médiane ${nombre(ex2.mediane, 1)}.`} titre="série 12 ; 14 ; 13 ; 40 ; 15" barres={[{ libelle: 'moyenne', valeur: ex2.moyenne, texte: nombre(ex2.moyenne, 1), teinte: 'correction' }, { libelle: 'médiane', valeur: ex2.mediane, texte: nombre(ex2.mediane, 1), teinte: 'validation' }]} />
+
+<Piege erreur="tracer des barres séparées pour un histogramme.">
+Les classes se suivent sans trou : les barres sont jointives.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le cahier du laboratoire.** Chaque éprouvette porte un numéro, la date de coulage, l'élément d'ouvrage (semelle, poteau, dalle), et le résultat d'écrasement. On tient la moyenne et l'écart-type **glissants** sur les derniers résultats : une dérive (sable plus fin, ciment d'un autre lot) se voit avant qu'elle ne devienne une non-conformité.
+
+<Histogramme xs={EXEMPLE_ESSAIS} debut={25} largeur={2} nb={6} limite={25} titre="fc" />
+
+<Encadre type="terrain" titre="Gâchage à la main ou centrale">
+Sur les petits chantiers de RDC, le béton est souvent dosé au seau et gâché à la bétonnière ou à la pelle : l'écart-type dépasse alors facilement 5 MPa. Une centrale à béton descend vers 2 à 3 MPa. La régularité coûte moins cher que le surdosage en ciment qu'on fait pour la compenser.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : statistique descriptive">
+
+### Centre
+
+x̄ = Σx / n · médiane : valeur du milieu, insensible aux aberrantes
+
+### Dispersion
+
+s = √(Σ(x − x̄)² / (n − 1)) · même unité que x · CV = s / x̄
+
+### Graphiques
+
+histogramme : classes égales, barres jointives, environ √n classes · boîte : min, Q1, médiane, Q3, max
+
+### Réflexe
+
+regarder les données avant de calculer · enquêter sur toute valeur aberrante
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Les quinze essais">
+
+Avec les quinze résultats du chantier, donne la moyenne, l'écart-type et le CV.
+
+<Indice>Utilise la fiche ou un tableur (MOYENNE, ECARTYPE).</Indice>
+
+<Corrige>
+x̄ = **{grandeur(d0.moyenne, 2, 'MPa')}** ; s = **{grandeur(d0.ecartType, 2, 'MPa')}** ; CV = **{nombre(d0.cv * 100, 1)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une valeur suspecte">
+
+Cinq mesures de teneur en eau : 12, 14, 13, 40 et 15 %. Moyenne et médiane ? Laquelle représente le mieux le sol ?
+
+<Indice>La valeur 40 vient peut-être d'un échantillon mal fermé ou d'une pesée fausse.</Indice>
+
+<Corrige>
+Moyenne **{nombre(ex2.moyenne, 1)} %**, médiane **{nombre(ex2.mediane, 0)} %**. La médiane représente mieux le sol ; on refait la mesure suspecte avant de conclure.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Comparer deux bétons">
+
+Béton 1 : 25,1 ; 26,0 ; 24,8 ; 25,6 MPa. Béton 2 : 42,0 ; 44,5 ; 41,2 ; 43,8 MPa. Lequel est le plus régulier ?
+
+<Indice>Compare les CV, pas les écarts-types.</Indice>
+
+<Corrige>
+s₁ = {nombre(ex3a.ecartType, 2)} MPa, CV₁ = **{nombre(ex3a.cv * 100, 1)} %** ; s₂ = {nombre(ex3b.ecartType, 2)} MPa, CV₂ = **{nombre(ex3b.cv * 100, 1)} %**. En valeur relative, {ex3a.cv < ex3b.cv ? 'le béton 1' : 'le béton 2'} est le plus régulier.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.2.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La médiane de 3 ; 7 ; 1 ; 9 ; 5 vaut :" choix={['5', '7', '9', '25']} bonne={0} colonnes={4}>
+On range : 1, 3, 5, 7, 9.
+</QCM>
+
+<QCM n={2} question="L'écart-type s'exprime :" choix={['dans l’unité des mesures', 'au carré de l’unité', 'en %', 'sans unité']} bonne={0} colonnes={2}>
+La variance est au carré.
+</QCM>
+
+<QCM n={3} question="Pour l'écart-type d'un échantillon, on divise par :" choix={['n − 1', 'n', 'n + 1', '√n']} bonne={0} colonnes={4}>
+Correction du biais.
+</QCM>
+
+<QCM n={4} question="L'indicateur le moins sensible à une valeur aberrante est :" choix={['la médiane', 'la moyenne', 'l’écart-type', 'l’étendue']} bonne={0} colonnes={4}>
+Seul l'ordre compte.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour les quinze essais, la moyenne vaut :</>} choix={[grandeur(d0.moyenne, 2, 'MPa'), grandeur(d0.mediane, 2, 'MPa'), '25,00 MPa', '30,00 MPa']} bonne={0} colonnes={4}>
+466,8 / 15.
+</QCM>
+
+<QCM n={6} question="Le coefficient de variation sert à :" choix={['comparer des dispersions de séries différentes', 'calculer la moyenne', 'tracer un histogramme', 'trouver la médiane']} bonne={0} colonnes={2}>
+Il est sans unité.
+</QCM>
+
+<QCM n={7} question="Les barres d'un histogramme sont :" choix={['jointives', 'séparées', 'en camembert', 'horizontales']} bonne={0} colonnes={4}>
+Les classes se suivent.
+</QCM>
+
+<QCM n={8} question="Une boîte à moustaches contient dans sa boîte :" choix={['la moitié centrale des valeurs', 'toutes les valeurs', '5 % des valeurs', 'la moyenne seule']} bonne={0} colonnes={2}>
+De Q1 à Q3.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

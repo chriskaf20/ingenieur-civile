@@ -1,0 +1,313 @@
+---
+id: L2.2.7
+titre: "Régression linéaire et corrélation"
+objectifs:
+  - Tracer un nuage de points et juger s'il est à peu près rectiligne
+  - Calculer la droite des moindres carrés
+  - Calculer et interpréter le coefficient de corrélation
+  - Utiliser une droite d'étalonnage sans extrapoler
+relecture: false
+normes: []
+glossaire:
+  - terme: Nuage de points
+    definition: Graphique où chaque mesure (x, y) est un point ; il montre la forme de la relation entre deux grandeurs.
+  - terme: Moindres carrés
+    definition: Méthode qui choisit la droite rendant minimale la somme des carrés des écarts verticaux (résidus).
+  - terme: Coefficient de corrélation
+    definition: Nombre r entre −1 et 1 qui mesure l'alignement des points ; proche de ±1, les points sont presque sur une droite.
+  - terme: Étalonnage
+    definition: Relation établie entre une mesure indirecte (indice de rebond) et la grandeur voulue (résistance).
+symboles:
+  - { symbole: 'a', signification: 'pente', unite: 'unité de y par unité de x' }
+  - { symbole: 'b', signification: 'ordonnée à l''origine', unite: 'unité de y' }
+  - { symbole: 'r', signification: 'coefficient de corrélation', unite: '—' }
+  - { symbole: 'r²', signification: 'coefficient de détermination', unite: '—' }
+formules:
+  - { nom: 'Pente', tex: 'a = \frac{\sum (x_i - \bar x)(y_i - \bar y)}{\sum (x_i - \bar x)^2}', domaine: 'Moindres carrés' }
+  - { nom: 'Ordonnée à l''origine', tex: 'b = \bar y - a\,\bar x', domaine: 'La droite passe par (x̄, ȳ)' }
+  - { nom: 'Corrélation', tex: 'r = \frac{\sum (x_i - \bar x)(y_i - \bar y)}{\sqrt{\sum (x_i - \bar x)^2 \sum (y_i - \bar y)^2}}', domaine: '−1 ≤ r ≤ 1' }
+---
+
+import { EXEMPLE_SCLEROMETRE, regression } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { NuageRegression, TroisCorrelations } from '@/components/schemas/Probas'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const r0 = regression(EXEMPLE_SCLEROMETRE.indice, EXEMPLE_SCLEROMETRE.fc)
+export const tass = { t: [1, 2, 4, 8, 16, 32], s: [12, 18, 25, 31, 38, 44] }
+export const rt = regression(tass.t, tass.s)
+export const rlog = regression(tass.t.map(Math.log10), tass.s)
+export const ex1 = regression([0, 1, 2, 3, 4], [2.1, 3.9, 6.2, 7.8, 10.1])
+export const ec = { ec: [0.40, 0.45, 0.50, 0.55, 0.60, 0.65], fc: [46, 41, 36, 32, 28, 25] }
+export const r3 = regression(ec.ec, ec.fc)
+
+<Page etape="intuition" titre="L'intuition : le marteau qui rebondit">
+
+Le **scléromètre** est un petit marteau à ressort : on l'appuie sur le béton, une masse frappe la surface et rebondit. Plus le béton est dur, plus le rebond est grand. On lit un **indice de rebond**, mais ce qu'on veut, c'est une **résistance** en MPa.
+
+Pour passer de l'un à l'autre, on mesure les deux sur quelques éprouvettes ou carottes, on porte les points sur un graphique, et l'on trace la droite qui passe « au mieux » : c'est la **régression linéaire**.
+
+<NuageRegression xs={EXEMPLE_SCLEROMETRE.indice} ys={EXEMPLE_SCLEROMETRE.fc} titreX="indice de rebond" titreY="fc (MPa)" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment ajuster une droite à des mesures, et comment savoir si on peut lui faire confiance ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Ajuster une droite" sousTitre="Nuage, droite, corrélation" etape="cours">
+
+<Panneau n={1} titre="Regarder" icone="plan" couleur="encre">
+Tracer le nuage avant tout calcul.
+</Panneau>
+
+<Panneau n={2} titre="Moindres carrés" icone="calcul" couleur="acier">
+La droite qui minimise Σ résidus².
+</Panneau>
+
+<Panneau n={3} titre="Pente a" icone="regle" couleur="terre">
+Σ(x − x̄)(y − ȳ) / Σ(x − x̄)².
+</Panneau>
+
+<Panneau n={4} titre="Passe par (x̄, ȳ)" icone="idee" couleur="brique">
+b = ȳ − a x̄.
+</Panneau>
+
+<Panneau n={5} titre="Corrélation r" icone="verification" couleur="validation">
+Proche de ±1 : alignement ; proche de 0 : pas de lien linéaire.
+</Panneau>
+
+<Panneau n={6} titre="Pas au-delà" icone="attention" couleur="correction">
+Ne pas extrapoler hors du domaine mesuré.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la droite des moindres carrés">
+
+### Le critère
+
+Pour chaque point, le **résidu** est l'écart vertical entre la mesure $y_i$ et la droite $a x_i + b$. On choisit a et b pour que la somme des **carrés** des résidus soit la plus petite possible. Le calcul (en annulant les dérivées par rapport à a et b, L1.2) donne :
+
+$$a = \frac{\sum (x_i - \bar x)(y_i - \bar y)}{\sum (x_i - \bar x)^2},\qquad b = \bar y - a\,\bar x$$
+
+La droite passe toujours par le **point moyen** $(\bar x, \bar y)$.
+
+### Unités
+
+a est en « unité de y par unité de x » : ici, MPa par point d'indice. Pour l'étalonnage : a = {nombre(r0.a, 3)} MPa par point, b = {nombre(r0.b, 2)} MPa.
+
+<NuageRegression xs={EXEMPLE_SCLEROMETRE.indice} ys={EXEMPLE_SCLEROMETRE.fc} titreX="indice de rebond" titreY="fc (MPa)" residus />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : le coefficient de corrélation">
+
+### Mesurer l'alignement
+
+$$r = \frac{\sum (x_i - \bar x)(y_i - \bar y)}{\sqrt{\sum (x_i - \bar x)^2\,\sum (y_i - \bar y)^2}}$$
+
+r est sans unité, entre −1 et 1. Proche de 1 : les points montent ensemble sur une droite ; proche de −1 : l'un monte quand l'autre descend ; proche de 0 : pas de relation **linéaire**. $r^2$ est la part de la variation de y « expliquée » par la droite.
+
+<TroisCorrelations />
+
+<Regle type="art">
+Un r élevé ne prouve pas une cause. Le nombre de bétonnières vendues et le nombre de fissures dans une ville peuvent être corrélés : tous deux augmentent avec le nombre de chantiers.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : linéariser et ne pas extrapoler">
+
+### Une relation courbe
+
+Le tassement d'un remblai croît vite puis ralentit : le nuage (temps, tassement) n'est pas droit (r = {nombre(rt.r, 3)}). En portant le **logarithme** du temps en abscisse, il devient presque rectiligne (r = {nombre(rlog.r, 3)}). On ajuste alors la droite sur (log t, s).
+
+<NuageRegression xs={tass.t.map(Math.log10)} ys={tass.s} titreX="log₁₀ t (t en jours)" titreY="tassement (mm)" residus={false} />
+
+### Le domaine de validité
+
+Une droite d'étalonnage établie entre 28 et 42 points d'indice ne dit rien pour un indice de 15 ou de 60 : on n'**extrapole** pas.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la méthode">
+
+<DiagrammeFlux alt="Régression : tracer le nuage ; vérifier qu'il est à peu près droit, sinon transformer ; calculer les moyennes ; calculer la pente et l'ordonnée à l'origine ; calculer r et regarder les résidus ; utiliser la droite dans le domaine mesuré." etapes={[{ titre: 'Nuage', texte: 'regarder', teinte: 'encre' }, { titre: 'Droit ?', texte: 'sinon log', teinte: 'terre' }, { titre: 'a, b', texte: 'moindres carrés', teinte: 'acier' }, { titre: 'r, résidus', texte: 'juger', teinte: 'brique' }, { titre: 'Utiliser', texte: 'sans extrapoler', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Coefficient de corrélation pour le tassement : ${nombre(rt.r, 3)} en fonction du temps, ${nombre(rlog.r, 3)} en fonction du logarithme du temps.`} titre="r selon l'échelle des abscisses" barres={[{ libelle: 'tassement – temps', valeur: rt.r, texte: nombre(rt.r, 3), teinte: 'terre' }, { libelle: 'tassement – log temps', valeur: rlog.r, texte: nombre(rlog.r, 3), teinte: 'validation' }]} />
+
+</Page>
+
+<FicheCalcul calcul="regressionSclerometre">
+
+<Cahier titre="Exemple résolu : étalonner un scléromètre">
+
+**Énoncé.** Sur cinq carottes, on a mesuré l'indice de rebond juste avant le carottage (28, 32, 36, 40, 44) puis la résistance de la carotte (données de l'énoncé). Établis la droite d'étalonnage, juge sa qualité, et estime la résistance d'un poteau d'indice 38.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les moyennes et la pente">
+<AN k="moyennes" />
+<AN k="pente" />
+<Note>Pourquoi passer par les écarts aux moyennes ? Les formules restent simples et la droite passe par le point moyen.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : juger et utiliser">
+
+<Etape n={3} titre="La corrélation">
+<AN k="r" />
+<Resultat k="r" libelle="Coefficient de corrélation" />
+</Etape>
+
+<Etape n={4} titre="Prévoir">
+<AN k="prediction" />
+<Resultat k="f38" libelle="Résistance estimée" />
+<Schema />
+<Note couleur="vert">Contrôle : 38 est dans le domaine mesuré (28 à 44) ; modifie une résistance : r chute et le résidu apparaît sur le schéma.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer sans regarder le nuage.">
+Un r élevé peut cacher une courbe ou un point aberrant qui tire la droite.
+</Piege>
+
+<Piege erreur="extrapoler.">
+La droite n'est valable que dans le domaine des mesures.
+</Piege>
+
+<Piege erreur="confondre corrélation et cause.">
+r mesure un lien, pas une explication.
+</Piege>
+
+<TroisCorrelations />
+
+<Piege erreur="utiliser la courbe du fabricant sans étalonner.">
+Les courbes livrées avec le scléromètre valent pour d'autres bétons ; on étalonne sur le béton étudié.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Loi d'Abrams.** La résistance d'un béton baisse quand le rapport eau / ciment augmente. Sur des essais d'un même ciment et de mêmes granulats, la relation est presque linéaire dans le domaine courant : on en tire le E/C à viser pour une résistance donnée.
+
+<NuageRegression xs={ec.ec.map((x) => x * 100)} ys={ec.fc} titreX="rapport E/C × 100" titreY="fc (MPa)" />
+
+<Encadre type="terrain" titre="Expertise d'une école">
+Pour une école à réhabiliter, on fait 30 mesures au scléromètre mais seulement 4 carottes. Les carottes étalonnent le scléromètre ; le scléromètre étend l'information à tous les poteaux. C'est la démarche combinée de l'EN 13791 (A_VERIFIER.md n° 56).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : régression">
+
+### Droite
+
+a = Σ(x − x̄)(y − ȳ) / Σ(x − x̄)² · b = ȳ − a x̄ · passe par (x̄, ȳ)
+
+### Corrélation
+
+r entre −1 et 1 · r² : part expliquée · r ≈ 0 : pas de lien linéaire
+
+### Bonnes pratiques
+
+regarder le nuage · linéariser (log) si courbe · pas d'extrapolation · corrélation ≠ cause
+
+### Tableur
+
+PENTE, ORDONNEE.ORIGINE, COEFFICIENT.CORRELATION, courbe de tendance
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Allongement d'un ressort">
+
+Charges 0, 1, 2, 3, 4 kN ; allongements 2,1 ; 3,9 ; 6,2 ; 7,8 ; 10,1 mm. Pente et r ?
+
+<Indice>Fiche ou tableur.</Indice>
+
+<Corrige>
+a = **{nombre(ex1.a, 3)} mm/kN**, b = {nombre(ex1.b, 2)} mm, r = **{nombre(ex1.r, 4)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Tassement">
+
+Pourquoi ajuster le tassement sur log t plutôt que sur t ? Compare les r.
+
+<Indice>Regarde les deux nuages.</Indice>
+
+<Corrige>
+r = {nombre(rt.r, 3)} sur t, **{nombre(rlog.r, 3)}** sur log t : la relation est logarithmique.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Loi d'Abrams">
+
+E/C de 0,40 à 0,65 ; fc de 46 à 25 MPa (voir le terrain). Quel E/C pour viser 35 MPa ?
+
+<Indice>Résous a x + b = 35.</Indice>
+
+<Corrige>
+a = {nombre(r3.a, 1)} MPa par unité de E/C ; b = {nombre(r3.b, 1)} MPa ; E/C = (35 − b)/a = **{nombre((35 - r3.b) / r3.a, 2)}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.2.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La droite des moindres carrés minimise :" choix={['la somme des carrés des résidus', 'la somme des résidus', 'le plus grand résidu', 'la pente']} bonne={0} colonnes={2}>
+Carrés des écarts verticaux.
+</QCM>
+
+<QCM n={2} question="La droite passe toujours par :" choix={['le point moyen (x̄, ȳ)', 'l’origine', 'le premier point', 'le dernier point']} bonne={0} colonnes={2}>
+b = ȳ − a x̄.
+</QCM>
+
+<QCM n={3} question="r = −0,98 signifie :" choix={['un fort alignement décroissant', 'aucun lien', 'un lien faible', 'une erreur']} bonne={0} colonnes={2}>
+Le signe donne le sens.
+</QCM>
+
+<QCM n={4} question="r = 0 signifie :" choix={['pas de lien linéaire', 'aucun lien du tout', 'un alignement parfait', 'une pente nulle forcément']} bonne={0} colonnes={2}>
+Il peut exister un lien courbe.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour l'étalonnage, la pente vaut :</>} choix={[`${nombre(r0.a, 3)} MPa par point`, `${nombre(r0.b, 2)} MPa par point`, '1 MPa par point', '0']} bonne={0} colonnes={2}>
+Moindres carrés.
+</QCM>
+
+<QCM n={6} question="Avec une droite établie entre 28 et 42, l'indice 60 :" choix={['ne doit pas être converti', 'donne une valeur sûre', 'donne fc = 0', 'est impossible']} bonne={0} colonnes={2}>
+Pas d'extrapolation.
+</QCM>
+
+<QCM n={7} question="Pour une relation logarithmique, on porte en abscisse :" choix={['log x', 'x²', '1/x', 'x']} bonne={0} colonnes={4}>
+On linéarise.
+</QCM>
+
+<QCM n={8} question="Une forte corrélation prouve :" choix={['un lien statistique, pas une cause', 'une cause', 'une loi physique', 'rien du tout']} bonne={0} colonnes={2}>
+Corrélation ≠ causalité.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

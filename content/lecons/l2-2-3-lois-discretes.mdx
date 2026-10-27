@@ -1,0 +1,319 @@
+---
+id: L2.2.3
+titre: "Variables aléatoires et lois discrètes"
+objectifs:
+  - Définir une variable aléatoire, sa loi, son espérance et sa variance
+  - Reconnaître une situation binomiale et calculer ses probabilités
+  - Utiliser la loi de Poisson pour des événements rares
+  - Choisir la taille d'un échantillon de contrôle
+relecture: false
+normes: []
+glossaire:
+  - terme: Variable aléatoire
+    definition: Nombre qui dépend du hasard, par exemple le nombre d'éprouvettes faibles dans un lot.
+  - terme: Espérance
+    definition: Valeur moyenne d'une variable aléatoire sur un grand nombre d'expériences.
+  - terme: Loi binomiale
+    definition: Loi du nombre de succès en n essais indépendants de même probabilité p.
+  - terme: Loi de Poisson
+    definition: Loi du nombre d'événements rares survenant dans un intervalle de temps ou d'espace, de moyenne λ.
+symboles:
+  - { symbole: 'X', signification: 'variable aléatoire', unite: '—' }
+  - { symbole: 'E(X)', signification: 'espérance', unite: 'unité de X' }
+  - { symbole: 'n, p', signification: 'nombre d''essais, probabilité de succès', unite: '—' }
+  - { symbole: 'λ', signification: 'nombre moyen d''événements', unite: '—' }
+formules:
+  - { nom: 'Binomiale', tex: 'P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}', domaine: 'n essais indépendants' }
+  - { nom: 'Moments binomiaux', tex: 'E(X) = n p,\quad V(X) = n p (1 - p)', domaine: 'Binomiale' }
+  - { nom: 'Poisson', tex: 'P(X = k) = e^{-\lambda} \frac{\lambda^k}{k!},\quad E(X) = V(X) = \lambda', domaine: 'Événements rares' }
+---
+
+import { binomiale, binomialeCumul, combinaisons, poisson, poissonCumul } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { BarresLoi } from '@/components/schemas/Probas'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const B10 = Array.from({ length: 11 }, (_, k) => binomiale(10, 0.05, k))
+export const P2 = Array.from({ length: 9 }, (_, k) => poisson(2, k))
+export const P05 = Array.from({ length: 6 }, (_, k) => poisson(0.5, k))
+export const ex1 = binomiale(5, 0.1, 0)
+export const ex2 = 1 - poissonCumul(2, 3)
+export const nAuMoins = Math.ceil(Math.log(0.05) / Math.log(0.9))
+
+<Page etape="intuition" titre="L'intuition : compter les éprouvettes faibles">
+
+On prélève dix éprouvettes d'un béton dont, en moyenne, 5 % des gâchées sont un peu faibles. Combien d'éprouvettes faibles va-t-on trouver ? Pas toujours le même nombre : 0 le plus souvent, parfois 1, rarement 2. Ce nombre est une **variable aléatoire** ; sa **loi** dit avec quelle probabilité il prend chaque valeur.
+
+<BarresLoi probas={B10} titre="B(10 ; 0,05)" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer la probabilité de trouver k éléments défectueux, ou k événements rares, et en déduire une règle de contrôle ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Deux lois à connaître" sousTitre="Compter des succès ou des événements" etape="cours">
+
+<Panneau n={1} titre="Variable aléatoire" icone="calcul" couleur="encre">
+Un nombre qui dépend du hasard.
+</Panneau>
+
+<Panneau n={2} titre="Espérance" icone="idee" couleur="acier">
+E(X) = Σ k P(X = k) : la moyenne à long terme.
+</Panneau>
+
+<Panneau n={3} titre="Binomiale" icone="regle" couleur="terre">
+n essais indépendants, même p : nombre de succès.
+</Panneau>
+
+<Panneau n={4} titre="Poisson" icone="plan" couleur="brique">
+Événements rares, moyenne λ : accidents, pannes, crues.
+</Panneau>
+
+<Panneau n={5} titre="Approximation" icone="verification" couleur="validation">
+n grand, p petit : B(n, p) ≈ P(n p).
+</Panneau>
+
+<Panneau n={6} titre="Contrôle" icone="attention" couleur="correction">
+« Au moins un » : passer par le contraire.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : variable aléatoire, espérance, variance">
+
+### La loi d'une variable discrète
+
+X prend des valeurs $k = 0, 1, 2…$ avec des probabilités $P(X = k)$ dont la somme vaut 1.
+
+### Espérance et variance
+
+- espérance : $E(X) = \sum k\,P(X = k)$, la moyenne sur un grand nombre de répétitions ;
+- variance : $V(X) = \sum (k - E(X))^2\,P(X = k)$ ; écart-type $\sigma = \sqrt{V(X)}$.
+
+Ce sont les équivalents, pour une loi, de la moyenne et de l'écart-type d'une série (L2.2.1).
+
+<BarresLoi probas={P2} titre="Poisson, λ = 2" couleur="var(--color-terre)" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la loi binomiale">
+
+### Quand l'utiliser ?
+
+On répète **n** fois la même épreuve, **indépendamment** ; chaque fois, « succès » avec la probabilité **p**. X = nombre de succès suit la loi binomiale B(n, p) :
+
+$$P(X = k) = \binom{n}{k}\,p^k\,(1 - p)^{n-k}$$
+
+$\binom{n}{k}$ compte les façons de placer les k succès parmi les n essais : $\binom{10}{3}$ = {nombre(combinaisons(10, 3), 0)}.
+
+### Moyenne et dispersion
+
+$E(X) = n p$, $V(X) = n p (1 - p)$. Pour B(10 ; 0,05) : en moyenne 0,5 éprouvette faible ; P(X = 0) = {nombre(B10[0] ?? 0, 3)}, P(X ≤ 1) = {nombre(binomialeCumul(10, 0.05, 1), 3)}.
+
+<Regle type="simplification">
+Pour un prélèvement sans remise dans un petit lot, la vraie loi est hypergéométrique ; la binomiale est une bonne approximation quand l'échantillon fait moins de 10 % du lot.
+</Regle>
+
+<BarresLoi probas={Array.from({ length: 11 }, (_, k) => binomiale(10, 0.3, k))} titre="B(10 ; 0,3)" couleur="var(--color-brique)" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : la loi de Poisson">
+
+### Les événements rares
+
+Pannes de grue par mois, accidents sur un tronçon de route par an, défauts par mètre de soudure : le nombre d'événements, de moyenne λ, suit souvent la loi de Poisson :
+
+$$P(X = k) = e^{-\lambda}\,\frac{\lambda^k}{k!},\quad E(X) = V(X) = \lambda$$
+
+### L'approximation
+
+Quand n est grand et p petit ($n \ge 30$, $p \le 0{,}1$ en pratique), B(n, p) ≈ P(λ = n p) : plus simple à calculer.
+
+<BarresLoi probas={P05} titre="Poisson, λ = 0,5" couleur="var(--color-acier)" />
+
+### « Au moins un »
+
+P(X ≥ 1) = 1 − P(X = 0) : passer par le contraire évite une somme infinie.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : choisir sa loi">
+
+<DiagrammeFlux alt="Choisir la loi : compter des succès sur n essais indépendants de même probabilité donne la loi binomiale ; compter des événements rares dans un intervalle donne la loi de Poisson ; si n est grand et p petit, la binomiale se remplace par Poisson de moyenne n p." etapes={[{ titre: 'Que compte-t-on ?', texte: 'succès ou événements', teinte: 'encre' }, { titre: 'n essais fixés', texte: 'binomiale', teinte: 'terre' }, { titre: 'intervalle', texte: 'Poisson', teinte: 'brique' }, { titre: 'n grand, p petit', texte: 'λ = n p', teinte: 'acier' }, { titre: 'Calculer', texte: 'P(X = k), P(X ≤ k)', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Comparaison pour n = 10, p = 0,05 : binomiale P(X = 0) = ${nombre(B10[0] ?? 0, 3)} ; Poisson de moyenne 0,5 : P(X = 0) = ${nombre(poisson(0.5, 0), 3)}.`} titre="P(X = 0) : binomiale et Poisson" barres={[{ libelle: 'B(10 ; 0,05)', valeur: B10[0] ?? 0, texte: nombre(B10[0] ?? 0, 3), teinte: 'encre' }, { libelle: 'Poisson λ = 0,5', valeur: poisson(0.5, 0), texte: nombre(poisson(0.5, 0), 3), teinte: 'terre' }]} />
+
+</Page>
+
+<FicheCalcul calcul="loiBinomiale">
+
+<Cahier titre="Exemple résolu : dix éprouvettes, une faible">
+
+**Énoncé.** 5 % des gâchées d'une centrale donnent une éprouvette faible. On prélève 10 éprouvettes, indépendamment (données de l'énoncé). Quelle est la probabilité d'en trouver exactement une faible ? Au plus une ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Exactement k">
+<AN k="Pk" />
+<Note>Pourquoi C(n, k) ? L'éprouvette faible peut être la première, la deuxième… : n façons.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : au plus k et approximation">
+
+<Etape n={3} titre="Au plus k">
+<AN k="cumul" />
+<Resultat k="Pcum" libelle="P(X ≤ k)" />
+</Etape>
+
+<Etape n={4} titre="Poisson">
+<AN k="poisson" />
+<Schema />
+<Note couleur="vert">Contrôle : les deux lois donnent des valeurs voisines car p est petit ; la somme de toutes les barres vaut 1.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="utiliser la binomiale sans indépendance.">
+Dix éprouvettes de la même gâchée ne sont pas dix essais indépendants.
+</Piege>
+
+<Piege erreur="calculer « au moins un » par une somme.">
+1 − P(X = 0) est plus court et plus sûr.
+</Piege>
+
+<Piege erreur="oublier le coefficient C(n, k).">
+P(X = 1) n'est pas p (1 − p)ⁿ⁻¹ mais n fois cette valeur.
+</Piege>
+
+<BarresLoi probas={Array.from({ length: 6 }, (_, k) => binomiale(5, 0.1, k))} titre="B(5 ; 0,1)" marque={0} />
+
+<Piege erreur="prendre λ comme une probabilité.">
+λ est un nombre moyen d'événements ; il peut dépasser 1.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Combien de prélèvements ?** Pour avoir 95 % de chances de détecter au moins une barre d'acier faible dans un lot où 10 % le sont, il faut n tel que $1 - 0{,}9^n \ge 0{,}95$, soit **n = {nAuMoins}** barres. Un ou deux essais rassurent faussement.
+
+<BarresLoi probas={Array.from({ length: 9 }, (_, k) => binomiale(nAuMoins, 0.1, k))} titre={`B(${nAuMoins} ; 0,1)`} marque={0} />
+
+<Encadre type="terrain" titre="Accidents sur une route en terre">
+Sur un tronçon de la RN1, on observe en moyenne 2 accidents graves par an. Avec Poisson, la probabilité d'en avoir 4 ou plus une année donnée vaut {nombre(ex2 * 100, 0)} % : un « pic » n'est pas forcément le signe d'un danger nouveau. Il faut plusieurs années pour conclure.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : lois discrètes">
+
+### Variable aléatoire
+
+E(X) = Σ k P(X = k) · V(X) = Σ (k − E)² P(X = k)
+
+### Binomiale B(n, p)
+
+P(X = k) = C(n, k) pᵏ (1 − p)ⁿ⁻ᵏ · E = n p · V = n p (1 − p) · essais indépendants
+
+### Poisson P(λ)
+
+P(X = k) = e⁻λ λᵏ / k! · E = V = λ · B(n, p) ≈ P(n p) si n grand, p petit
+
+### Réflexe
+
+au moins un : 1 − P(X = 0)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Cinq barres saines">
+
+10 % des barres d'un lot sont faibles. On en teste 5. Probabilité qu'aucune ne soit faible ?
+
+<Indice>P(X = 0) = 0,9⁵.</Indice>
+
+<Corrige>
+**{nombre(ex1, 3)}** : plus d'une chance sur deux de ne rien voir.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Une mauvaise année">
+
+λ = 2 accidents par an. Probabilité d'en avoir 4 ou plus ?
+
+<Indice>1 − P(X ≤ 3).</Indice>
+
+<Corrige>
+**{nombre(ex2, 3)}**, soit environ {nombre(ex2 * 100, 0)} %.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Taille d'échantillon">
+
+Combien de barres tester pour détecter au moins une barre faible avec 95 % de chances, si 10 % sont faibles ?
+
+<Indice>1 − 0,9ⁿ ≥ 0,95 ; n ≥ ln 0,05 / ln 0,9.</Indice>
+
+<Corrige>
+**n = {nAuMoins}** barres.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.2.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La loi binomiale suppose des essais :" choix={['indépendants, de même probabilité', 'liés', 'en nombre infini', 'continus']} bonne={0} colonnes={2}>
+n fixé, p constant.
+</QCM>
+
+<QCM n={2} question="L'espérance de B(20 ; 0,1) vaut :" choix={['2', '0,1', '20', '1,8']} bonne={0} colonnes={4}>
+n p.
+</QCM>
+
+<QCM n={3} question="Pour la loi de Poisson, la variance vaut :" choix={['λ', 'λ²', '√λ', '1/λ']} bonne={0} colonnes={4}>
+E = V = λ.
+</QCM>
+
+<QCM n={4} question="C(10, 3) vaut :" choix={[nombre(combinaisons(10, 3), 0), '30', '1 000', '7']} bonne={0} colonnes={4}>
+10 × 9 × 8 / 6.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>B(10 ; 0,05) : P(X = 0) vaut :</>} choix={[nombre(B10[0] ?? 0, 3), '0,05', '0,95', '0,5']} bonne={0} colonnes={4}>
+0,95¹⁰.
+</QCM>
+
+<QCM n={6} question="P(au moins un) se calcule par :" choix={['1 − P(X = 0)', 'P(X = 1)', 'n p', 'P(X = 0)']} bonne={0} colonnes={2}>
+Contraire.
+</QCM>
+
+<QCM n={7} question="Le nombre de pannes d'une grue par mois suit plutôt une loi :" choix={['de Poisson', 'binomiale à n = 2', 'uniforme', 'normale à moyenne nulle']} bonne={0} colonnes={2}>
+Événements rares dans le temps.
+</QCM>
+
+<QCM n={8} question="B(n, p) ≈ P(n p) quand :" choix={['n est grand et p petit', 'n est petit', 'p est proche de 1', 'toujours']} bonne={0} colonnes={2}>
+Événements rares.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

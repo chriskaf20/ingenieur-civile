@@ -1,0 +1,317 @@
+---
+id: L2.2.6
+titre: "Estimation et intervalles de confiance"
+objectifs:
+  - Distinguer la population, l'échantillon et l'estimateur
+  - Calculer l'erreur type d'une moyenne
+  - Construire un intervalle de confiance avec la loi de Student
+  - Choisir le nombre d'essais pour une précision donnée
+relecture: false
+normes: []
+glossaire:
+  - terme: Population
+    definition: Ensemble de tout ce que l'on veut connaître, par exemple tout le béton d'une dalle.
+  - terme: Échantillon
+    definition: Petite partie de la population effectivement mesurée, par exemple six carottes.
+  - terme: Erreur type
+    definition: Écart-type de la moyenne d'un échantillon, s/√n ; elle diminue quand n augmente.
+  - terme: Intervalle de confiance
+    definition: Fourchette qui contient la vraie valeur avec un niveau de confiance choisi, par exemple 95 %.
+symboles:
+  - { symbole: 'μ', signification: 'vraie moyenne (inconnue)', unite: 'unité de X' }
+  - { symbole: 'x̄', signification: 'moyenne de l''échantillon', unite: 'unité de X' }
+  - { symbole: 's/√n', signification: 'erreur type', unite: 'unité de X' }
+  - { symbole: 't', signification: 'fractile de Student à n − 1 degrés de liberté', unite: '—' }
+formules:
+  - { nom: 'Erreur type', tex: '\sigma_{\bar x} = \frac{s}{\sqrt{n}}', domaine: 'Moyenne de n mesures' }
+  - { nom: 'Intervalle de confiance', tex: '\bar x \pm t_{n-1;\,1-\alpha/2}\,\frac{s}{\sqrt{n}}', domaine: 'σ inconnu, loi normale' }
+  - { nom: 'Nombre d''essais', tex: 'n \approx \left(\frac{u\,\sigma}{e}\right)^2', domaine: 'Précision e voulue' }
+---
+
+import { EXEMPLE_ESSAIS, fractileNormal, fractileStudent, intervalleConfiance } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { Cloche, IntervallesEchantillons } from '@/components/schemas/Probas'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const ic6 = intervalleConfiance([31.2, 28.5, 33.0, 29.8, 34.1, 30.6], 0.95)
+export const ic15 = intervalleConfiance(EXEMPLE_ESSAIS, 0.95)
+export const t3 = fractileStudent(0.975, 2)
+export const t30 = fractileStudent(0.975, 29)
+export const ex2 = intervalleConfiance([18.2, 21.5, 19.8, 20.4], 0.95)
+export const nEx3 = Math.ceil((fractileNormal(0.975) * 3 / 1) ** 2)
+
+<Page etape="intuition" titre="L'intuition : six carottes pour toute une dalle">
+
+On soupçonne qu'une dalle a été coulée avec un béton faible. On ne peut pas l'écraser toute entière : on prélève six **carottes** et l'on mesure leur résistance. La moyenne des six n'est pas la vraie résistance moyenne de la dalle ; avec six autres carottes, on trouverait un peu autre chose.
+
+La statistique répond honnêtement : « la vraie moyenne est **probablement** entre telle et telle valeur ». C'est un **intervalle de confiance**.
+
+<IntervallesEchantillons />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que peut-on affirmer sur toute une population à partir de quelques mesures, et avec quelle précision ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Estimer honnêtement" sousTitre="Du petit échantillon à la fourchette" etape="cours">
+
+<Panneau n={1} titre="Population" icone="plan" couleur="encre">
+Tout le béton de la dalle : μ et σ inconnus.
+</Panneau>
+
+<Panneau n={2} titre="Échantillon" icone="calcul" couleur="acier">
+n carottes : x̄ et s, calculables.
+</Panneau>
+
+<Panneau n={3} titre="Erreur type" icone="idee" couleur="terre">
+s/√n : quatre fois plus d'essais, deux fois plus précis.
+</Panneau>
+
+<Panneau n={4} titre="Student" icone="regle" couleur="brique">
+σ inconnu : t remplace 1,96, plus grand si n est petit.
+</Panneau>
+
+<Panneau n={5} titre="Fourchette" icone="verification" couleur="validation">
+x̄ ± t s/√n contient μ avec 95 % de confiance.
+</Panneau>
+
+<Panneau n={6} titre="Planifier" icone="attention" couleur="correction">
+Choisir n avant d'essayer, selon la précision voulue.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : population, échantillon, erreur type">
+
+### Estimer
+
+La moyenne $\bar x$ de l'échantillon est l'**estimateur** de la vraie moyenne μ ; s est l'estimateur de σ (d'où le n − 1, L2.2.1).
+
+### L'erreur type
+
+D'un échantillon à l'autre, $\bar x$ varie, mais beaucoup moins que les mesures individuelles : son écart-type est l'**erreur type**
+
+$$\sigma_{\bar x} = \frac{s}{\sqrt n}$$
+
+Pour gagner un facteur 2 en précision, il faut **quatre fois** plus d'essais.
+
+<DiagrammeBarres alt={`Demi-largeur de l'intervalle à 95 % pour la même dispersion : avec 6 essais, ${nombre(ic6.demiLargeur, 2)} MPa ; avec 15 essais, ${nombre(ic15.demiLargeur, 2)} MPa.`} titre="demi-largeur de l'intervalle à 95 % (MPa)" barres={[{ libelle: '6 essais', valeur: ic6.demiLargeur, texte: nombre(ic6.demiLargeur, 2), teinte: 'correction' }, { libelle: '15 essais', valeur: ic15.demiLargeur, texte: nombre(ic15.demiLargeur, 2), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : l'intervalle de confiance">
+
+### σ connu
+
+Si σ était connu, $\bar x$ suivrait N(μ ; σ/√n), et μ serait dans $\bar x \pm 1{,}96\,\sigma/\sqrt n$ avec 95 % de confiance.
+
+### σ inconnu : la loi de Student
+
+En pratique, on n'a que s, estimé sur peu de valeurs : l'incertitude est plus grande. Le statisticien Gosset (« Student ») a montré qu'il faut remplacer 1,96 par $t_{n-1}$, le fractile de la **loi de Student** à n − 1 degrés de liberté :
+
+$$\bar x \pm t_{n-1;\,0{,}975}\,\frac{s}{\sqrt n}$$
+
+t vaut {nombre(t3, 2)} pour n = 3, {nombre(ic6.t, 2)} pour n = 6, {nombre(t30, 2)} pour n = 30 : il tend vers 1,96.
+
+<DiagrammeBarres alt={`Fractile de Student à 97,5 % : ${nombre(t3, 2)} pour 3 essais, ${nombre(ic6.t, 2)} pour 6, ${nombre(ic15.t, 2)} pour 15, ${nombre(t30, 2)} pour 30 ; 1,96 pour la loi normale.`} titre="t(0,975 ; n − 1)" barres={[{ libelle: 'n = 3', valeur: t3, texte: nombre(t3, 2), teinte: 'correction' }, { libelle: 'n = 6', valeur: ic6.t, texte: nombre(ic6.t, 2), teinte: 'terre' }, { libelle: 'n = 15', valeur: ic15.t, texte: nombre(ic15.t, 2), teinte: 'acier' }, { libelle: 'n = 30', valeur: t30, texte: nombre(t30, 2), teinte: 'validation' }]} repere={{ valeur: 1.96, texte: '1,96' }} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : ce que veut dire 95 %">
+
+### Une méthode, pas une certitude
+
+« 95 % » ne veut pas dire que μ a 95 % de chances d'être dans **cet** intervalle-là (μ est fixe). Cela veut dire que la **méthode** fournit un intervalle qui contient μ dans 95 % des cas : sur vingt chantiers, environ un intervalle manque la cible.
+
+<IntervallesEchantillons mu={30} sigma={2.5} n={6} />
+
+### Combien d'essais ?
+
+Pour une demi-largeur e voulue, avec σ estimé à l'avance : $n \approx (u\,\sigma / e)^2$, avec u = 1,96 à 95 %.
+
+<Regle type="simplification">
+L'intervalle de Student suppose des mesures à peu près normales et indépendantes. Six carottes prises au même endroit de la dalle ne représentent pas toute la dalle : on les répartit.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la méthode">
+
+<DiagrammeFlux alt="Construire un intervalle de confiance : mesurer n valeurs réparties ; calculer la moyenne et l'écart-type ; calculer l'erreur type ; lire t de Student à n − 1 degrés de liberté ; écrire la fourchette." etapes={[{ titre: 'Mesurer', texte: 'n valeurs', teinte: 'terre' }, { titre: 'x̄, s', texte: 'L2.2.1', teinte: 'encre' }, { titre: 'Erreur type', texte: 's/√n', teinte: 'acier' }, { titre: 'Student', texte: 't(n − 1)', teinte: 'brique' }, { titre: 'Fourchette', texte: 'x̄ ± t s/√n', teinte: 'validation' }]} />
+
+<Cloche mu={ic6.moyenne} sigma={ic6.erreurType} entre={[ic6.bas, ic6.haut]} unite="MPa" titreX="moyenne vraie possible (MPa)" />
+
+</Page>
+
+<FicheCalcul calcul="intervalleMoyenne">
+
+<Cahier titre="Exemple résolu : six carottes d'une dalle">
+
+**Énoncé.** Six carottes donnent une moyenne de {nombre(ic6.moyenne, 1)} MPa et un écart-type de {nombre(ic6.ecartType, 1)} MPa (données de l'énoncé, résultats ramenés sur cylindre). Donne l'intervalle de confiance à 95 % de la résistance moyenne de la dalle.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="L'erreur type">
+<AN k="et" />
+<Note>Pourquoi diviser par √n ? La moyenne de six mesures fluctue moins qu'une mesure seule.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la fourchette">
+
+<Etape n={3} titre="Le fractile de Student">
+<AN k="t" />
+</Etape>
+
+<Etape n={4} titre="L'intervalle">
+<AN k="ic" />
+<Resultat k="bas" libelle="Borne basse" />
+<Resultat k="haut" libelle="Borne haute" />
+<Schema />
+<Note couleur="vert">Contrôle : passe n à 24 avec les mêmes x̄ et s ; la fourchette est plus de deux fois plus étroite.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="utiliser 1,96 avec trois essais.">
+Avec n = 3, t = {nombre(t3, 2)} : l'intervalle est deux fois plus large.
+</Piege>
+
+<Piege erreur="confondre s et s/√n.">
+s décrit la dispersion des mesures ; s/√n, la précision de la moyenne.
+</Piege>
+
+<Piege erreur="croire que l'intervalle contient 95 % des mesures.">
+Il concerne la moyenne, pas les valeurs individuelles, bien plus dispersées.
+</Piege>
+
+<IntervallesEchantillons mu={25} sigma={3} n={4} />
+
+<Piege erreur="prélever tous les échantillons au même endroit.">
+L'estimation ne vaut que pour la zone prélevée.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Expertiser un bâtiment existant.** Avant de surélever une maison à Kinshasa, l'ingénieur doit connaître la résistance du béton des poteaux. Il fait carotter quelques poteaux (pas trop : chaque trou affaiblit), complète par des mesures au scléromètre (L2.2.7), et retient une valeur prudente déduite de l'intervalle. L'EN 13791 encadre cette démarche <AVerifier note="A_VERIFIER.md n° 56 : méthode d'estimation de la résistance in situ de l'EN 13791 (nombre minimal de carottes, marges)" />.
+
+<Cloche mu={ex2.moyenne} sigma={ex2.erreurType} entre={[ex2.bas, ex2.haut]} unite="MPa" titreX="résistance moyenne des poteaux (MPa)" />
+
+<Encadre type="attention" titre="Peu de carottes, grande incertitude">
+Avec quatre carottes, la fourchette est souvent de ± 3 à 5 MPa. Il vaut mieux le dire au client que d'annoncer une précision qu'on n'a pas.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : intervalles de confiance">
+
+### Estimer
+
+x̄ estime μ · s estime σ · erreur type s/√n
+
+### Intervalle (σ inconnu)
+
+x̄ ± t(n − 1 ; 0,975) s/√n · t(2) = {nombre(t3, 2)} · t(5) = {nombre(ic6.t, 2)} · t(14) = {nombre(ic15.t, 2)} · t(∞) = 1,96
+
+### Interpréter
+
+la méthode réussit dans 95 % des cas · concerne la moyenne, pas les mesures
+
+### Planifier
+
+n ≈ (1,96 σ / e)² · ×4 essais → ×2 en précision
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Quinze essais">
+
+Avec les quinze essais du chantier, donne l'intervalle à 95 % de la moyenne.
+
+<Indice>t(14) = {nombre(ic15.t, 3)}.</Indice>
+
+<Corrige>
+[**{nombre(ic15.bas, 1)} ; {nombre(ic15.haut, 1)}**] MPa.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Quatre carottes">
+
+Quatre carottes : 18,2 ; 21,5 ; 19,8 ; 20,4 MPa. Intervalle à 95 % ?
+
+<Indice>n − 1 = 3 degrés de liberté, t ≈ {nombre(ex2.t, 2)}.</Indice>
+
+<Corrige>
+x̄ = {nombre(ex2.moyenne, 2)} ; s = {nombre(ex2.ecartType, 2)} ; t = {nombre(ex2.t, 3)} → [**{nombre(ex2.bas, 1)} ; {nombre(ex2.haut, 1)}**] MPa.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Planifier les essais">
+
+On estime σ ≈ 3 MPa. Combien d'essais pour connaître la moyenne à ± 1 MPa près, à 95 % ?
+
+<Indice>n ≈ (1,96 × 3 / 1)².</Indice>
+
+<Corrige>
+**n ≈ {nEx3}** essais (un peu plus en tenant compte de Student).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.2.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'erreur type d'une moyenne vaut :" choix={['s/√n', 's', 's √n', 's/n']} bonne={0} colonnes={4}>
+Elle diminue avec n.
+</QCM>
+
+<QCM n={2} question="Pour diviser l'erreur type par 2, il faut :" choix={['4 fois plus d’essais', '2 fois plus', '8 fois plus', '√2 fois plus']} bonne={0} colonnes={2}>
+√4 = 2.
+</QCM>
+
+<QCM n={3} question="Quand σ est inconnu, on utilise la loi :" choix={['de Student', 'binomiale', 'de Poisson', 'uniforme']} bonne={0} colonnes={4}>
+t remplace 1,96.
+</QCM>
+
+<QCM n={4} question="Le nombre de degrés de liberté est :" choix={['n − 1', 'n', 'n + 1', '2n']} bonne={0} colonnes={4}>
+Un degré « consommé » par x̄.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Six carottes : la borne basse à 95 % vaut :</>} choix={[grandeur(ic6.bas, 1, 'MPa'), grandeur(ic6.moyenne, 1, 'MPa'), grandeur(ic6.moyenne - 1.96 * ic6.ecartType, 1, 'MPa'), '25,0 MPa']} bonne={0} colonnes={4}>
+x̄ − t s/√n.
+</QCM>
+
+<QCM n={6} question="Quand n augmente, t de Student :" choix={['diminue vers 1,96', 'augmente', 'reste égal', 'tend vers 0']} bonne={0} colonnes={2}>
+La loi de Student tend vers la loi normale.
+</QCM>
+
+<QCM n={7} question="Un intervalle à 95 % de la moyenne contient :" choix={['probablement la vraie moyenne', '95 % des mesures', 'toutes les mesures', 'le minimum']} bonne={0} colonnes={2}>
+Il concerne μ.
+</QCM>
+
+<QCM n={8} question="Sur 20 intervalles à 95 %, combien manquent la vraie valeur en moyenne ?" choix={['1', '0', '5', '19']} bonne={0} colonnes={4}>
+5 % de 20.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

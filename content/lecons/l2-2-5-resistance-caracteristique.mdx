@@ -1,0 +1,311 @@
+---
+id: L2.2.5
+titre: "Résistance caractéristique du béton"
+objectifs:
+  - Interpréter fck comme le fractile 5 % des résistances
+  - Relier fck, fcm et l'écart-type d'une production
+  - Appliquer les critères de conformité de l'EN 206
+  - Expliquer l'intérêt d'une production régulière
+relecture: false
+normes:
+  - "EN 1990 §4.2 : valeur caractéristique d'une propriété d'un matériau (fractile 5 %)"
+  - "EN 1992-1-1 §3.1.2 et tableau 3.1 : classes de résistance, fcm = fck + 8 MPa"
+  - "EN 206 §8.2.1 et tableau 14 : critères de conformité de la résistance à la compression"
+glossaire:
+  - terme: Résistance caractéristique
+    definition: Résistance sous laquelle on s'attend à trouver 5 % des résultats d'un béton donné ; notée fck, sur cylindre à 28 jours.
+  - terme: Classe de résistance
+    definition: "Notation C fck,cyl / fck,cube, par exemple C25/30 : 25 MPa sur cylindre, 30 MPa sur cube."
+  - terme: Conformité
+    definition: Vérification, par des critères statistiques normalisés, que la production atteint la classe commandée.
+  - terme: Marge
+    definition: Écart entre la moyenne visée et fck ; il dépend de la régularité de la production.
+symboles:
+  - { symbole: 'fck', signification: 'résistance caractéristique (cylindre, 28 j)', unite: 'MPa' }
+  - { symbole: 'fcm', signification: 'résistance moyenne', unite: 'MPa' }
+  - { symbole: 's ou σ', signification: 'écart-type de la production', unite: 'MPa' }
+  - { symbole: 'fci', signification: 'résultat individuel', unite: 'MPa' }
+formules:
+  - { nom: 'Fractile 5 %', tex: 'f_{ck} = f_{cm} - 1{,}645\,\sigma', domaine: 'Loi normale' }
+  - { nom: 'Conformité (production continue)', tex: 'f_{cm} \geq f_{ck} + 1{,}48\,\sigma,\quad f_{ci} \geq f_{ck} - 4', domaine: 'EN 206, n ≥ 15' }
+  - { nom: 'Conformité (production initiale)', tex: 'f_{cm} \geq f_{ck} + 4,\quad f_{ci} \geq f_{ck} - 4', domaine: 'EN 206, n = 3' }
+---
+
+import { conformiteBeton, EXEMPLE_ESSAIS, normale } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { FractileBeton, Histogramme } from '@/components/schemas/Probas'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const c0 = conformiteBeton(EXEMPLE_ESSAIS, 25)
+export const visee = (s) => 25 + 1.645 * s
+export const ex2 = conformiteBeton([27.5, 30.1, 28.9], 25)
+export const ex3 = normale(31, 5).P(25)
+
+<Page etape="intuition" titre="L'intuition : pourquoi pas la moyenne ?">
+
+Un ingénieur calcule une poutre avec « un béton de 25 MPa ». Si 25 MPa était la **moyenne**, la moitié du béton coulé serait plus faible que prévu : inacceptable. Si c'était le **minimum absolu**, il faudrait un béton énorme pour être sûr qu'aucune gâchée ne descende dessous : impossible à garantir.
+
+Les Eurocodes choisissent un compromis : **5 %** des résultats seulement sont autorisés sous la valeur de calcul. Cette valeur, c'est la **résistance caractéristique** fck.
+
+<FractileBeton fcm={33} s={4} fck={25} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que signifie exactement « C25/30 », et comment vérifie-t-on qu'un béton livré l'atteint ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="fck en six idées" sousTitre="Du fractile à la conformité" etape="cours">
+
+<Panneau n={1} titre="Fractile 5 %" icone="calcul" couleur="encre">
+fck = valeur sous laquelle tombent 5 % des résultats.
+</Panneau>
+
+<Panneau n={2} titre="Cylindre" icone="regle" couleur="acier">
+C25/30 : 25 MPa sur cylindre, 30 MPa sur cube.
+</Panneau>
+
+<Panneau n={3} titre="Marge" icone="idee" couleur="terre">
+fcm = fck + 1,645 σ : plus σ est grand, plus la marge l'est.
+</Panneau>
+
+<Panneau n={4} titre="Calcul" icone="plan" couleur="brique">
+L'EC2 prend fcm = fck + 8 MPa (σ ≈ 5 MPa).
+</Panneau>
+
+<Panneau n={5} titre="Conformité" icone="verification" couleur="validation">
+Deux critères : sur la moyenne et sur chaque résultat.
+</Panneau>
+
+<Panneau n={6} titre="Non-conformité" icone="attention" couleur="correction">
+Carottes, recalcul, renforcement : cher et long.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la définition">
+
+### Le fractile 5 %
+
+L'EN 1990 (§4.2) définit la valeur caractéristique d'une résistance comme son **fractile 5 %**. Si les résistances d'une production suivent une loi normale de moyenne fcm et d'écart-type σ (L2.2.4) :
+
+$$f_{ck} = f_{cm} - 1{,}645\,\sigma$$
+
+### Les classes
+
+L'EN 206 et l'EC2 (tableau 3.1) notent la classe **C fck,cyl / fck,cube** : C20/25, C25/30, C30/37… La première valeur est mesurée sur cylindre 16 × 32 cm, la seconde sur cube de 15 cm, plus élevée car le cube, trapu, est fretté par les plateaux de la presse.
+
+<Regle type="norme">
+L'EC2 (tableau 3.1) pose fcm = fck + 8 MPa : cela correspond à un écart-type d'environ 8 / 1,645 ≈ 5 MPa. C'est la valeur à utiliser dans les calculs de déformation (module, fluage), pas une exigence de production.
+</Regle>
+
+<FractileBeton fcm={33} s={8 / 1.645} fck={25} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la marge et la régularité">
+
+### Viser une moyenne
+
+Pour obtenir fck, la centrale vise $f_{cm} = f_{ck} + 1{,}645\,\sigma$. Plus elle est **régulière** (σ petit), plus elle peut viser bas, donc économiser du ciment.
+
+<DiagrammeBarres alt={`Moyenne à viser pour un C25/30 selon la régularité : σ = 2 MPa, ${nombre(visee(2), 1)} MPa ; σ = 4 MPa, ${nombre(visee(4), 1)} MPa ; σ = 6 MPa, ${nombre(visee(6), 1)} MPa.`} titre="moyenne à viser pour fck = 25 MPa (MPa)" barres={[{ libelle: 'centrale, σ = 2 MPa', valeur: visee(2), texte: nombre(visee(2), 1), teinte: 'validation' }, { libelle: 'bétonnière soignée, σ = 4 MPa', valeur: visee(4), texte: nombre(visee(4), 1), teinte: 'terre' }, { libelle: 'gâchage manuel, σ = 6 MPa', valeur: visee(6), texte: nombre(visee(6), 1), teinte: 'correction' }]} repere={{ valeur: 25, texte: 'fck' }} />
+
+### Ce que coûte l'irrégularité
+
+Passer de σ = 2 à σ = 6 MPa oblige à viser {nombre(visee(6) - visee(2), 1)} MPa de plus en moyenne, soit en ordre de grandeur 40 à 60 kg de ciment de plus par m³ <AVerifier note="A_VERIFIER.md n° 55 : correspondance entre gain de résistance moyenne et dosage en ciment (règle de l'art, dépend du ciment et des granulats)" />.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : les critères de conformité">
+
+### Ce que dit l'EN 206
+
+On ne connaît jamais σ exactement : on l'estime sur les résultats. L'EN 206 (§8.2.1, tableau 14) fixe deux critères <AVerifier note="A_VERIFIER.md n° 54 : critères de conformité de l'EN 206 (tableau 14) et de l'annexe nationale NF EN 206/CN" /> :
+
+- **critère 1, sur la moyenne** de n résultats : production initiale (n = 3) $f_{cm} \ge f_{ck} + 4$ ; production continue (n ≥ 15) $f_{cm} \ge f_{ck} + 1{,}48\,\sigma$ ;
+- **critère 2, sur chaque résultat** : $f_{ci} \ge f_{ck} - 4$.
+
+<Regle type="norme">
+Pourquoi 1,48 et non 1,645 ? Les critères acceptent un petit risque de refuser un bon béton et de recevoir un béton juste limite ; le coefficient a été calibré pour équilibrer ces deux risques sur 15 résultats.
+</Regle>
+
+<Histogramme xs={EXEMPLE_ESSAIS} debut={25} largeur={2} nb={6} limite={25} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : le parcours d'un résultat">
+
+<DiagrammeFlux alt="Du béton à la décision : prélever à la livraison ; confectionner et conserver les éprouvettes dans l'eau à 20 °C ; écraser à 28 jours ; calculer moyenne et écart-type ; appliquer les deux critères ; accepter, ou enquêter." etapes={[{ titre: 'Prélever', texte: 'à la livraison', teinte: 'terre' }, { titre: 'Conserver', texte: 'eau, 20 °C', teinte: 'acier' }, { titre: 'Écraser', texte: '28 jours', teinte: 'encre' }, { titre: 'Calculer', texte: 'fcm, s', teinte: 'brique' }, { titre: 'Décider', texte: 'critères 1 et 2', teinte: 'validation' }]} />
+
+<FractileBeton fcm={c0.moyenne} s={c0.ecartType} fck={25} />
+
+</Page>
+
+<FicheCalcul calcul="conformiteBeton">
+
+<Cahier titre="Exemple résolu : le béton C25/30 du chantier">
+
+**Énoncé.** Les quinze résultats du chantier (L2.2.1) ont une moyenne de {nombre(c0.moyenne, 1)} MPa, un écart-type de {nombre(c0.ecartType, 1)} MPa, et le plus faible vaut {nombre(c0.min, 1)} MPa. Le béton commandé est un C25/30. Est-il conforme ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le fractile 5 % estimé">
+<AN k="fk5" />
+<Note>Pourquoi l'estimer ? Pour voir où se situe la production par rapport à fck, avant d'appliquer la norme.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les critères de l'EN 206">
+
+<Etape n={3} titre="Les deux critères">
+<AN k="critere1" />
+<AN k="critere2" />
+<Resultat k="conforme" libelle="Décision" />
+<Schema />
+<Note couleur="vert">Contrôle : passe en production initiale (n = 3) ou baisse la moyenne à 27 MPa : le critère 1 tombe. Un béton peut être « en moyenne au-dessus de 25 » et pourtant non conforme.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre fck pour la moyenne.">
+fck est un fractile 5 % : la moyenne est toujours au-dessus.
+</Piege>
+
+<Piege erreur="comparer un résultat sur cube à fck sur cylindre.">
+Un C25/30 doit donner 30 MPa sur cube, 25 sur cylindre (en caractéristique).
+</Piege>
+
+<Piege erreur="juger sur une seule éprouvette.">
+Une éprouvette à 23 MPa ne rend pas un C25/30 non conforme si le critère 2 (≥ 21 MPa) et le critère 1 sont respectés.
+</Piege>
+
+<FractileBeton fcm={31} s={5} fck={25} />
+
+<Piege erreur="oublier les conditions de conservation.">
+Une éprouvette laissée au soleil sur le chantier perd une part de sa résistance : le résultat juge alors la cure, pas le béton.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Prélever correctement.** Le prélèvement se fait à la livraison, au tiers central du déchargement ; on remplit les moules en deux ou trois couches piquées ou vibrées ; on les couvre ; on les démoule à 24 h et on les conserve dans l'eau. Chaque éprouvette porte une étiquette : date, élément, numéro de bon de livraison.
+
+<Histogramme xs={EXEMPLE_ESSAIS} debut={25} largeur={2} nb={6} limite={25} titre="fc" />
+
+<Encadre type="terrain" titre="Chantiers sans laboratoire">
+Dans de nombreuses villes de RDC, il n'y a pas de presse à proximité. On conserve alors les éprouvettes dans un bac d'eau à l'ombre et on les transporte au laboratoire le plus proche (Laboratoire national des travaux publics, universités). Sans essais, on ne peut rien affirmer : on prend un béton de classe plus élevée dans les calculs que dans la commande, et on le signale.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : résistance caractéristique">
+
+### Définition
+
+fck = fractile 5 % (EN 1990 §4.2) · fck = fcm − 1,645 σ · C25/30 : cylindre / cube
+
+### EC2
+
+fcm = fck + 8 MPa (tableau 3.1) pour les calculs de déformation
+
+### Conformité EN 206 (à vérifier)
+
+n = 3 : fcm ≥ fck + 4 · n ≥ 15 : fcm ≥ fck + 1,48 σ · chaque fci ≥ fck − 4
+
+### Économie
+
+σ petit → moyenne visée plus basse → moins de ciment
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Moyenne à viser">
+
+Une centrale a σ = 3 MPa. Quelle moyenne viser pour un C30/37 ?
+
+<Indice>fcm = fck + 1,645 σ.</Indice>
+
+<Corrige>
+30 + 1,645 × 3 = **{grandeur(30 + 1.645 * 3, 1, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Production initiale">
+
+Trois premiers résultats d'un C25/30 : 27,5 ; 30,1 ; 28,9 MPa. Conforme ?
+
+<Indice>n = 3 : fcm ≥ 29 MPa et chaque fci ≥ 21 MPa.</Indice>
+
+<Corrige>
+fcm = {nombre(ex2.moyenne, 1)} MPa {ex2.moyenne >= 29 ? '≥' : '<'} 29 ; min {nombre(ex2.min, 1)} ≥ 21 : **{ex2.moyenne >= 29 && ex2.min >= 21 ? 'conforme' : 'non conforme'}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une production irrégulière">
+
+Un béton a fcm = 31 MPa et σ = 5 MPa. Quelle part des éprouvettes est sous 25 MPa ? Le béton est-il un vrai C25/30 ?
+
+<Indice>z = (25 − 31)/5.</Indice>
+
+<Corrige>
+Φ(−1,2) = **{nombre(ex3 * 100, 1)} %** &gt; 5 % : le fractile 5 % est sous 25 MPa, ce n'est **pas** un vrai C25/30.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.2.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="fck est :" choix={['le fractile 5 % des résistances', 'la moyenne', 'le minimum absolu', 'le maximum']} bonne={0} colonnes={2}>
+EN 1990 §4.2.
+</QCM>
+
+<QCM n={2} question="Dans C25/30, 30 désigne la résistance :" choix={['sur cube', 'sur cylindre', 'moyenne', 'à 7 jours']} bonne={0} colonnes={4}>
+Cube de 15 cm.
+</QCM>
+
+<QCM n={3} question="Pour l'EC2, fcm vaut :" choix={['fck + 8 MPa', 'fck', 'fck − 8 MPa', '1,5 fck']} bonne={0} colonnes={4}>
+Tableau 3.1.
+</QCM>
+
+<QCM n={4} question="Une production plus régulière permet :" choix={['de viser une moyenne plus basse', 'de viser plus haut', 'de supprimer les essais', 'rien']} bonne={0} colonnes={2}>
+fcm = fck + 1,645 σ.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour le chantier, le fractile 5 % estimé vaut :</>} choix={[grandeur(c0.fk5, 1, 'MPa'), grandeur(c0.moyenne, 1, 'MPa'), '25,0 MPa', '20,0 MPa']} bonne={0} colonnes={4}>
+fcm − 1,645 s.
+</QCM>
+
+<QCM n={6} question="Critère 2 de l'EN 206 pour un C25/30 : chaque résultat doit dépasser :" choix={['21 MPa', '25 MPa', '29 MPa', '30 MPa']} bonne={0} colonnes={4}>
+fck − 4.
+</QCM>
+
+<QCM n={7} question="En production initiale (n = 3), la moyenne doit dépasser :" choix={['fck + 4', 'fck', 'fck + 8', 'fck + 1,48 σ']} bonne={0} colonnes={4}>
+EN 206.
+</QCM>
+
+<QCM n={8} question="Une éprouvette laissée au soleil sans cure donne :" choix={['un résultat trop faible', 'un résultat trop fort', 'le même résultat', 'aucun résultat']} bonne={0} colonnes={2}>
+Elle juge la cure, pas le béton.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

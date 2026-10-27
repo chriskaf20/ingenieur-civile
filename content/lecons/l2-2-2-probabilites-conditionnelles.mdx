@@ -1,0 +1,312 @@
+---
+id: L2.2.2
+titre: "Probabilités : événements et conditionnement"
+objectifs:
+  - Décrire une expérience aléatoire par son univers et ses événements
+  - Calculer la probabilité d'une union, d'une intersection, d'un contraire
+  - Calculer une probabilité conditionnelle avec un arbre
+  - Appliquer la formule de Bayes à un contrôle imparfait
+relecture: false
+normes: []
+glossaire:
+  - terme: Événement
+    definition: Ensemble de résultats possibles d'une expérience aléatoire, par exemple « l'éprouvette est sous 25 MPa ».
+  - terme: Indépendance
+    definition: Deux événements sont indépendants si savoir que l'un est arrivé ne change pas la probabilité de l'autre.
+  - terme: Probabilité conditionnelle
+    definition: Probabilité de A sachant que B est arrivé, notée P(A|B).
+  - terme: Formule de Bayes
+    definition: Formule qui retourne un conditionnement, de P(B|A) vers P(A|B).
+symboles:
+  - { symbole: 'P(A)', signification: 'probabilité de l''événement A', unite: '— (entre 0 et 1)' }
+  - { symbole: 'P(A|B)', signification: 'probabilité de A sachant B', unite: '—' }
+  - { symbole: 'Ā', signification: 'événement contraire de A', unite: '—' }
+formules:
+  - { nom: 'Contraire', tex: 'P(\bar A) = 1 - P(A)', domaine: 'Toujours' }
+  - { nom: 'Union', tex: 'P(A \cup B) = P(A) + P(B) - P(A \cap B)', domaine: 'Toujours' }
+  - { nom: 'Conditionnelle', tex: 'P(A|B) = \frac{P(A \cap B)}{P(B)}', domaine: 'P(B) > 0' }
+  - { nom: 'Bayes', tex: 'P(A|B) = \frac{P(B|A)\,P(A)}{P(B)}', domaine: 'Retourner un conditionnement' }
+---
+
+import { bayes } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { ArbreProbas, Venn } from '@/components/schemas/Probas'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const b0 = bayes({ p: 0.1, sensibilite: 0.9, specificite: 0.95 })
+export const b1 = bayes({ p: 0.01, sensibilite: 0.9, specificite: 0.95 })
+export const ex3 = bayes({ p: 0.2, sensibilite: 0.8, specificite: 0.9 })
+export const indep = 1 - 0.9 ** 3
+
+<Page etape="intuition" titre="L'intuition : le contrôleur qui se trompe parfois">
+
+Sur un chantier, on contrôle les soudures d'une charpente métallique au ressuage. Le contrôle n'est pas parfait : il laisse passer quelques soudures défectueuses et en signale parfois de bonnes. Quand l'alarme sonne, quelle est la probabilité que la soudure soit **vraiment** mauvaise ?
+
+L'intuition dit « 90 %, puisque le test détecte 90 % des défauts ». Elle se trompe souvent. Pour répondre juste, il faut apprendre à raisonner avec des **probabilités conditionnelles**.
+
+<ArbreProbas p={0.1} se={0.9} sp={0.95} D="défaut" T="alarme +" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer des probabilités qui dépendent d'une information déjà connue ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les règles du jeu" sousTitre="Événements et probabilités" etape="cours">
+
+<Panneau n={1} titre="Univers" icone="plan" couleur="encre">
+L'ensemble de tous les résultats possibles.
+</Panneau>
+
+<Panneau n={2} titre="Entre 0 et 1" icone="regle" couleur="acier">
+0 : impossible ; 1 : certain ; P(Ā) = 1 − P(A).
+</Panneau>
+
+<Panneau n={3} titre="Ou" icone="calcul" couleur="terre">
+P(A ∪ B) = P(A) + P(B) − P(A ∩ B).
+</Panneau>
+
+<Panneau n={4} titre="Et" icone="idee" couleur="brique">
+P(A ∩ B) = P(A) P(B|A) ; = P(A) P(B) si indépendants.
+</Panneau>
+
+<Panneau n={5} titre="Sachant" icone="verification" couleur="validation">
+P(A|B) = P(A ∩ B) / P(B).
+</Panneau>
+
+<Panneau n={6} titre="Bayes" icone="attention" couleur="correction">
+Retourner P(B|A) en P(A|B), sans oublier P(A).
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : événements et règles de base">
+
+### Univers et événements
+
+Une **expérience aléatoire** a plusieurs résultats possibles : leur ensemble est l'**univers** Ω. Un **événement** est une partie de Ω. Exemple : on prélève une éprouvette ; « elle dépasse 30 MPa » est un événement.
+
+### Les règles
+
+- $0 \le P(A) \le 1$ ; $P(\Omega) = 1$ ;
+- **contraire** : $P(\bar A) = 1 - P(A)$ ;
+- **union** (A ou B) : $P(A \cup B) = P(A) + P(B) - P(A \cap B)$ : on retire l'intersection, comptée deux fois.
+
+<Venn pA={0.3} pB={0.2} pAB={0.08} A="fissure" B="nid de cailloux" />
+
+Si 30 % des poteaux présentent une fissure, 20 % un nid de cailloux et 8 % les deux, la probabilité qu'un poteau ait au moins un défaut vaut 0,30 + 0,20 − 0,08 = 0,42.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : conditionnement et indépendance">
+
+### La probabilité conditionnelle
+
+$P(A|B) = P(A \cap B)/P(B)$ : on se restreint aux cas où B est arrivé. Avec le diagramme précédent, P(nid | fissure) = 0,08 / 0,30 ≈ 0,27.
+
+### L'indépendance
+
+A et B sont **indépendants** si $P(A|B) = P(A)$, soit $P(A \cap B) = P(A)\,P(B)$. Trois boulons qui cassent chacun avec la probabilité 0,1, indépendamment : la probabilité qu'au moins un casse vaut $1 - 0{,}9^3$ = {nombre(indep, 3)}.
+
+<Regle type="simplification">
+L'indépendance est une hypothèse, pas une évidence : les défauts de trois soudures faites par le même soudeur, le même jour, ne sont pas indépendants. Les supposer indépendants sous-estime le risque.
+</Regle>
+
+### L'arbre
+
+On écrit chaque branche avec sa probabilité **conditionnelle** ; la probabilité d'un chemin est le **produit** des branches ; celle d'un événement, la **somme** des chemins qui y mènent (formule des probabilités totales).
+
+<ArbreProbas p={0.3} se={0.08 / 0.3} sp={1 - 0.12 / 0.7} D="fissure" T="nid +" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : la formule de Bayes">
+
+### Retourner le conditionnement
+
+Le contrôle donne P(alarme | défaut) ; on veut P(défaut | alarme). Bayes :
+
+$$P(D|+) = \frac{P(+|D)\,P(D)}{P(+)},\quad P(+) = P(+|D)P(D) + P(+|\bar D)P(\bar D)$$
+
+### L'effet du taux de base
+
+Avec 10 % de soudures défectueuses, un contrôle sensible à 90 % et spécifique à 95 % : P(D|+) = {nombre(b0.pSachantPositif * 100, 0)} %. Si seulement 1 % des soudures sont défectueuses : P(D|+) = {nombre(b1.pSachantPositif * 100, 0)} %. La plupart des alarmes sont alors **fausses**.
+
+<DiagrammeBarres alt={`Probabilité qu'une soudure signalée soit vraiment défectueuse : ${nombre(b0.pSachantPositif * 100, 0)} % si 10 % des soudures sont mauvaises, ${nombre(b1.pSachantPositif * 100, 0)} % si 1 % seulement le sont.`} titre="P(défaut | alarme) selon le taux de défauts" barres={[{ libelle: '10 % de défauts', valeur: b0.pSachantPositif * 100, texte: `${nombre(b0.pSachantPositif * 100, 0)} %`, teinte: 'correction' }, { libelle: '1 % de défauts', valeur: b1.pSachantPositif * 100, texte: `${nombre(b1.pSachantPositif * 100, 0)} %`, teinte: 'terre' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : raisonner avec un arbre">
+
+<DiagrammeFlux alt="Méthode de l'arbre : poser les événements ; écrire les probabilités de premier niveau ; écrire les probabilités conditionnelles ; multiplier le long des chemins ; additionner les chemins ; diviser pour obtenir la probabilité sachant." etapes={[{ titre: 'Événements', texte: 'D, +', teinte: 'encre' }, { titre: 'Niveau 1', texte: 'P(D), P(non D)', teinte: 'acier' }, { titre: 'Niveau 2', texte: 'P(+|D)…', teinte: 'terre' }, { titre: 'Multiplier', texte: 'chemins', teinte: 'brique' }, { titre: 'Bayes', texte: 'diviser', teinte: 'validation' }]} />
+
+<ArbreProbas p={0.01} se={0.9} sp={0.95} D="défaut" T="alarme +" />
+
+</Page>
+
+<FicheCalcul calcul="bayesControle">
+
+<Cahier titre="Exemple résolu : le contrôle des soudures">
+
+**Énoncé.** Sur une charpente, 10 % des soudures sont défectueuses. Le contrôle détecte 90 % des défauts (sensibilité) et reconnaît 95 % des soudures saines (spécificité) (données de l'énoncé). Une soudure déclenche l'alarme : quelle est la probabilité qu'elle soit défectueuse ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La probabilité d'une alarme">
+<AN k="total" />
+<Note>Pourquoi deux termes ? Une alarme vient soit d'un vrai défaut, soit d'une fausse alarme sur une soudure saine.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : retourner le conditionnement">
+
+<Etape n={3} titre="Bayes">
+<AN k="bayes" />
+<Resultat k="pD" libelle="P(défaut | alarme)" />
+<Schema />
+<Note couleur="vert">Contrôle : la réponse est bien inférieure à 90 %. Baisse le taux de défauts à 1 % : la majorité des alarmes deviennent fausses ; on confirme donc une alarme par un second contrôle (radiographie, ultrasons).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre P(A|B) et P(B|A).">
+« 90 % des défauts déclenchent l'alarme » ne veut pas dire « 90 % des alarmes sont des défauts ».
+</Piege>
+
+<Piege erreur="additionner des événements non disjoints.">
+P(A ou B) = P(A) + P(B) seulement si A et B ne peuvent pas arriver ensemble.
+</Piege>
+
+<Venn pA={0.3} pB={0.2} pAB={0.08} A="fissure" B="nid" />
+
+<Piege erreur="supposer l'indépendance sans raison.">
+Même soudeur, même lot d'électrodes, même météo : les défauts sont liés.
+</Piege>
+
+<Piege erreur="oublier le taux de base.">
+Un événement rare reste rare, même après un test positif.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Inspections et diagnostics.** Le même raisonnement sert au ferroscan qui cherche des armatures, au scléromètre qui signale un béton faible, à la caméra thermique qui repère une infiltration. Chaque méthode a ses faux positifs : on combine deux méthodes indépendantes avant de démolir.
+
+<ArbreProbas p={0.2} se={0.8} sp={0.9} D="béton faible" T="indice bas" />
+
+<Encadre type="terrain" titre="Contrôle des fers à béton importés">
+Une partie des barres d'acier vendues sur certains marchés de RDC n'a pas la résistance annoncée. Un essai de pliage simple sur le chantier élimine les pires lots, mais il laisse passer certains aciers faibles : un essai de traction en laboratoire confirme. Raisonner en probabilités aide à choisir combien de barres prélever (L2.2.3).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : probabilités">
+
+### Règles
+
+P(Ā) = 1 − P(A) · P(A ∪ B) = P(A) + P(B) − P(A ∩ B)
+
+### Conditionnement
+
+P(A|B) = P(A ∩ B) / P(B) · indépendance : P(A ∩ B) = P(A) P(B)
+
+### Arbre
+
+branches : probabilités conditionnelles · chemin : produit · événement : somme des chemins
+
+### Bayes
+
+P(A|B) = P(B|A) P(A) / P(B) · ne pas oublier le taux de base P(A)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trois boulons">
+
+Chaque boulon casse avec la probabilité 0,1, indépendamment. Probabilité qu'au moins un des trois casse ?
+
+<Indice>Passe par le contraire : aucun ne casse.</Indice>
+
+<Corrige>
+1 − 0,9³ = **{nombre(indep, 3)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Fissure et nid de cailloux">
+
+P(fissure) = 0,3 ; P(nid) = 0,2 ; P(les deux) = 0,08. Calcule P(nid | fissure). Les défauts sont-ils indépendants ?
+
+<Indice>Compare P(nid | fissure) et P(nid).</Indice>
+
+<Corrige>
+P(nid | fissure) = 0,08 / 0,3 = **{nombre(0.08 / 0.3, 2)}** ≠ 0,2 : **dépendants** (un mauvais vibrage cause les deux).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Le scléromètre">
+
+20 % des poteaux d'un vieux bâtiment ont un béton faible. Le scléromètre signale 80 % des bétons faibles et donne un indice bas pour 10 % des bons. Un poteau a un indice bas : probabilité qu'il soit faible ?
+
+<Indice>Même arbre que l'exemple, avec p = 0,2, Se = 0,8, Sp = 0,9.</Indice>
+
+<Corrige>
+P(bas) = {nombre(ex3.pPositif, 2)} ; P(faible | bas) = **{nombre(ex3.pSachantPositif * 100, 0)} %** : on carotte pour confirmer.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.2.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Si P(A) = 0,15, P(Ā) vaut :" choix={['0,85', '0,15', '1,15', '0']} bonne={0} colonnes={4}>
+Contraire.
+</QCM>
+
+<QCM n={2} question="P(A ∪ B) = P(A) + P(B) seulement si :" choix={['A et B sont incompatibles', 'A et B sont indépendants', 'P(A) = P(B)', 'toujours']} bonne={0} colonnes={2}>
+Sinon on retire l'intersection.
+</QCM>
+
+<QCM n={3} question="A et B indépendants, P(A) = 0,5, P(B) = 0,2. P(A ∩ B) vaut :" choix={['0,1', '0,7', '0,3', '0,25']} bonne={0} colonnes={4}>
+Produit.
+</QCM>
+
+<QCM n={4} question="Le long d'un chemin d'un arbre, on :" choix={['multiplie les probabilités', 'additionne', 'soustrait', 'divise']} bonne={0} colonnes={4}>
+Puis on additionne les chemins.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple des soudures, P(défaut | alarme) vaut :</>} choix={[`${nombre(b0.pSachantPositif * 100, 0)} %`, '90 %', '95 %', '10 %']} bonne={0} colonnes={4}>
+Bayes.
+</QCM>
+
+<QCM n={6} question="Si le défaut devient plus rare, la proportion de fausses alarmes :" choix={['augmente', 'diminue', 'reste égale', 'devient nulle']} bonne={0} colonnes={2}>
+Effet du taux de base.
+</QCM>
+
+<QCM n={7} question="P(A|B) se lit :" choix={['probabilité de A sachant B', 'probabilité de A ou B', 'probabilité de A et B', 'probabilité de B sachant A']} bonne={0} colonnes={2}>
+B est déjà arrivé.
+</QCM>
+
+<QCM n={8} question="Les défauts de soudures faites par le même soudeur le même jour sont :" choix={['probablement dépendants', 'forcément indépendants', 'impossibles', 'certains']} bonne={0} colonnes={2}>
+Même cause commune.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

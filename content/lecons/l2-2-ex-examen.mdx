@@ -1,0 +1,123 @@
+---
+id: L2.2.EX
+titre: "Examen du module L2.2 : probabilités et statistiques"
+objectifs:
+  - Décrire une série et calculer des probabilités
+  - Utiliser les lois binomiale, de Poisson et normale
+  - Interpréter fck, un intervalle de confiance et une régression
+  - Relier période de retour, fiabilité et coefficients partiels
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { bayes, binomiale, conformiteBeton, descriptive, fiabilite, fractileNormal, intervalleConfiance, normale, poisson, regression, risqueDepassement } from '@/lib/calc/probas'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+
+export const q1 = descriptive([20, 22, 24, 26, 28])
+export const q4 = bayes({ p: 0.05, sensibilite: 0.95, specificite: 0.9 })
+export const q5 = binomiale(8, 0.1, 0)
+export const q6 = poisson(3, 0)
+export const q7 = normale(40, 5)
+export const q8 = 35 + fractileNormal(0.05) * 3
+export const q9 = conformiteBeton([27, 31, 29], 25)
+export const q10 = intervalleConfiance([30, 32, 34, 28], 0.95)
+export const q11 = regression([1, 2, 3, 4], [3, 5, 7, 9])
+export const q13 = risqueDepassement(20, 20)
+export const q14 = fiabilite({ muR: 180, sR: 24, muS: 100, sS: 18 })
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 2 h.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice scientifique, une table de la loi normale, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Écris la loi utilisée et ses paramètres avant de calculer.
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="L2.2.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="Série 20 ; 22 ; 24 ; 26 ; 28. L'écart-type (n − 1) vaut :" choix={[nombre(q1.ecartType, 2), '2,00', '2,83', '10,00']} bonne={0} colonnes={4}>
+√(40/4) (L2.2.1).
+</QCM>
+
+<QCM n={2} question="Le coefficient de variation est :" choix={['s / x̄', 'x̄ / s', 's²', 's − x̄']} bonne={0} colonnes={4}>
+Dispersion relative (L2.2.1).
+</QCM>
+
+<QCM n={3} question="P(A) = 0,4 ; P(B) = 0,3 ; P(A ∩ B) = 0,1. P(A ∪ B) vaut :" choix={[nombre(0.4 + 0.3 - 0.1, 1), '0,7', '0,12', '0,8']} bonne={0} colonnes={4}>
+0,4 + 0,3 − 0,1 (L2.2.2).
+</QCM>
+
+<QCM n={4} question="5 % de pièces défectueuses ; test sensible à 95 %, spécifique à 90 %. P(défaut | test +) vaut :" choix={[`${nombre(q4.pSachantPositif * 100, 0)} %`, '95 %', '90 %', '5 %']} bonne={0} colonnes={4}>
+Bayes (L2.2.2).
+</QCM>
+
+<QCM n={5} question="B(8 ; 0,1) : probabilité de zéro succès :" choix={[nombre(q5, 3), '0,1', '0,8', '0,9']} bonne={0} colonnes={4}>
+0,9⁸ (L2.2.3).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={6} question="Poisson de moyenne 3 : P(X = 0) vaut :" choix={[nombre(q6, 3), '0,333', '0', '0,3']} bonne={0} colonnes={4}>
+e⁻³ (L2.2.3).
+</QCM>
+
+<QCM n={7} question="X ~ N(40 ; 5). P(X < 30) vaut :" choix={[`${nombre(q7.P(30) * 100, 1)} %`, '5 %', '16 %', '30 %']} bonne={0} colonnes={4}>
+z = −2 (L2.2.4).
+</QCM>
+
+<QCM n={8} question="fcm = 35 MPa, σ = 3 MPa. Le fractile 5 % vaut :" choix={[grandeur(q8, 1, 'MPa'), '32,0 MPa', '29,0 MPa', '35,0 MPa']} bonne={0} colonnes={4}>
+35 − 1,645 × 3 (L2.2.4, L2.2.5).
+</QCM>
+
+<QCM n={9} question="C25/30, production initiale : 27 ; 31 ; 29 MPa. Le béton est :" choix={[q9.conforme ? 'conforme' : 'non conforme', q9.conforme ? 'non conforme' : 'conforme', 'impossible à juger', 'à refaire en cube']} bonne={0} colonnes={2}>
+fcm ≥ fck + 4 et chaque fci ≥ fck − 4 (L2.2.5).
+</QCM>
+
+<QCM n={10} question="Quatre essais 30 ; 32 ; 34 ; 28 MPa. La demi-largeur de l'intervalle à 95 % vaut :" choix={[grandeur(q10.demiLargeur, 1, 'MPa'), grandeur(1.96 * q10.ecartType / 2, 1, 'MPa'), grandeur(q10.ecartType, 1, 'MPa'), '1,0 MPa']} bonne={0} colonnes={4}>
+t(3) s/√4 (L2.2.6).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={11} question="Points (1 ; 3), (2 ; 5), (3 ; 7), (4 ; 9). La droite des moindres carrés est :" choix={[`y = ${nombre(q11.a, 0)} x + ${nombre(q11.b, 0)}`, 'y = x + 2', 'y = 3x', 'y = 2x']} bonne={0} colonnes={4}>
+Points alignés, r = 1 (L2.2.7).
+</QCM>
+
+<QCM n={12} question="r = 0,1 entre deux grandeurs signifie :" choix={['pas de lien linéaire marqué', 'une cause forte', 'un alignement parfait', 'une erreur de calcul']} bonne={0} colonnes={2}>
+L2.2.7.
+</QCM>
+
+<QCM n={13} question="Risque qu'une pluie vicennale (T = 20 ans) soit dépassée au moins une fois en 20 ans :" choix={[`${nombre(q13 * 100, 0)} %`, '100 %', '5 %', '20 %']} bonne={0} colonnes={4}>
+1 − 0,95²⁰ (L2.2.8).
+</QCM>
+
+<QCM n={14} question="μR = 180, σR = 24, μS = 100, σS = 18 kN·m. β vaut :" choix={[nombre(q14.beta, 2), '1,80', '3,80', '4,44']} bonne={0} colonnes={4}>
+80 / 30 (L2.2.9).
+</QCM>
+
+<QCM n={15} question="γc = 1,5 et γs = 1,15 (EC2) diffèrent parce que :" choix={['le béton est plus dispersé que l’acier', 'l’acier est plus lourd', 'le béton est plus cher', 'c’est arbitraire']} bonne={0} colonnes={2}>
+L2.2.9.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

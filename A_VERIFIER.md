@@ -61,3 +61,8 @@ Statuts :
 | 51 | Taux d'amortissement usuels des structures (≈ 1 à 5 % selon le matériau et l'assemblage) | L2.1.5 | `à confirmer` : valeurs à préciser en dynamique (M1.7) et selon l'EN 1998-1 (spectre à 5 %) |
 | 52 | Limites de flèche : EN 1992-1-1 §7.4.1 (L/250 sous charges quasi permanentes, L/500 après mise en œuvre des cloisons) ; EN 1995-1-1 §7.2 (valeurs recommandées) | L2.1.6 | `à confirmer` : valeurs des annexes nationales |
 | 53 | Coefficient de consolidation cv des argiles (≈ 0,1 à 10 m²/an) ; Tv(50 %) ≈ 0,197, Tv(90 %) ≈ 0,848 | L2.1.7 | `à confirmer` : cv à mesurer à l'œdomètre (EN ISO 17892-5) ; ordres de grandeur seulement |
+| 54 | Critères de conformité de la résistance à la compression : EN 206 §8.2.1, tableau 14 (n = 3 : fcm ≥ fck + 4 ; n ≥ 15 : fcm ≥ fck + 1,48 σ ; fci ≥ fck − 4) | L2.2.5, L2.2.P, L2.2.EX | `à confirmer` : texte de l'EN 206 et de l'annexe NF EN 206/CN (conditions sur σ, familles de bétons) |
+| 55 | Gain de résistance moyenne et dosage en ciment : 40 à 60 kg/m³ pour ≈ 6 à 7 MPa | L2.2.5 | `hypothèse` : ordre de grandeur de règle de l'art, dépend du ciment et des granulats |
+| 56 | Estimation de la résistance in situ (carottes, scléromètre) : EN 13791 | L2.2.6, L2.2.7 | `à confirmer` : nombre minimal de carottes, marges et méthode combinée |
+| 57 | Périodes de retour de projet : quelques années (fossés de routes en terre), 10 ans (assainissement urbain), 100 ans ou plus (ponts, digues) | L2.2.8 | `à confirmer` : guides techniques applicables en RDC (Office des routes, OVD) |
+| 58 | Fiabilité : β cible EN 1990 annexe B (RC2 : 3,8 sur 50 ans, 4,7 sur 1 an) ; αR = 0,8, αS = −0,7 (annexe C) | L2.2.9 | `à confirmer` : valeurs de l'EN 1990 et de son annexe nationale |
