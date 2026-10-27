@@ -35,6 +35,8 @@ formules:
 import { chargeMaxSansSoulevement, EXEMPLE_POUTRE_CONSOLE, poutreConsole, reactionsAppuis, resultanteCharge } from '@/lib/calc/statique'
 import { grandeur, nombre } from '@/lib/format'
 import { PoutreReactions } from '@/components/schemas/Statique'
+import { CasUsuelsReactions, DeuxOuvriers, GrueStabilisateurs, ResultantesTypes, SuperpositionReactions, TriangleDeuxTiers } from '@/components/schemas/StatiqueCours2'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
 
 export const r0 = poutreConsole(EXEMPLE_POUTRE_CONSOLE)
 export const souleve = { L: 7, xB: 5, q: 4, P: 30, a: 7 }
@@ -45,6 +47,8 @@ export const tri = reactionsAppuis(0, 6, [{ type: 'repartie', nom: 'triangle', q
 export const rtri = resultanteCharge({ type: 'repartie', nom: 'triangle', q1: 0, q2: 12, a: 0, b: 6 })
 export const entreAppuis = resultanteCharge({ type: 'repartie', nom: 'q', q1: 12, q2: 12, a: 0, b: 5.5 })
 export const sansCtrl = poutreConsole({ ...EXEMPLE_POUTRE_CONSOLE, xB: EXEMPLE_POUTRE_CONSOLE.L })
+export const dMax = { ...EXEMPLE_POUTRE_CONSOLE, P: pMax }
+export const rMax = poutreConsole(dMax)
 
 <Page etape="intuition" titre="L'intuition : porter une poutre à deux">
 
@@ -54,13 +58,15 @@ Les appuis d'une poutre se comportent comme ces deux ouvriers. Leurs **réaction
 
 Calculer ces réactions est le premier calcul de toute poutre : elles donnent les charges transmises aux poteaux, aux murs et aux fondations, et elles sont le point de départ des efforts intérieurs (L2).
 
+<DeuxOuvriers />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Comment calculer ce que chaque appui reçoit, quelle que soit la disposition des charges ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : la méthode">
+<Page etape="cours" titre="Le cours (1/3) : résultantes et moments">
 
 ### Étape 1 : les résultantes
 
@@ -70,11 +76,17 @@ Pour l'équilibre, une charge répartie se remplace par sa **résultante** (L1.2
 - charge triangulaire de 0 à q<sub>max</sub> : R = q<sub>max</sub> ℓ / 2, aux deux tiers depuis la pointe ;
 - charge trapézoïdale : un rectangle plus un triangle, ou la formule de la résultante.
 
+<ResultantesTypes />
+
 ### Étape 2 : les moments en A
 
 Avec A et B les deux appuis, les moments en A éliminent R<sub>A</sub> :
 
 $$R_B\,(x_B - x_A) = \sum R_i\,(x_i - x_A)$$
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : équilibre, contrôle, cas usuels">
 
 ### Étape 3 : l'équilibre vertical
 
@@ -91,13 +103,17 @@ Poutre de portée L sur deux appuis d'extrémité :
 - charge P en a : R<sub>A</sub> = P (L − a) / L et R<sub>B</sub> = P a / L ;
 - charge uniforme q : R<sub>A</sub> = R<sub>B</sub> = q L / 2.
 
+<CasUsuelsReactions />
+
 </Page>
 
-<Page etape="cours" titre="Le cours (2/2) : superposition et porte-à-faux">
+<Page etape="cours" titre="Le cours (3/3) : superposition et porte-à-faux">
 
 ### La superposition
 
 Les équations d'équilibre sont **linéaires** : les réactions dues à plusieurs charges sont la somme des réactions dues à chaque charge seule. On peut donc traiter les charges une par une, puis additionner.
+
+<SuperpositionReactions />
 
 ### Le porte-à-faux
 
@@ -173,6 +189,8 @@ Résultantes, puis moments en A pour R<sub>B</sub>, équilibre vertical pour R<s
 Elle est aux deux tiers depuis la pointe, du côté où la charge est la plus forte : pour 0 à 12 kN/m sur 6 m, {grandeur(rtri.R, 0, 'kN')} à {grandeur(rtri.x, 0, 'm')} de la pointe.
 </Piege>
 
+<TriangleDeuxTiers L={6} qmax={12} R={rtri.R} x={rtri.x} />
+
 <Piege erreur="oublier la charge répartie sur le porte-à-faux.">
 La résultante de 12 kN/m s'étend sur 7 m, pas sur les 5,50 m entre appuis : {grandeur(r0.parties[0].R, 0, 'kN')} et non {grandeur(entreAppuis.R, 0, 'kN')}.
 </Piege>
@@ -201,6 +219,8 @@ Beaucoup de maisons prolongent leur toiture ou leur dalle par un auvent porté e
 
 **Les engins de levage.** Une grue mobile s'appuie sur ses stabilisateurs. Quand elle lève une charge loin de son axe, la réaction des stabilisateurs opposés diminue : s'ils décollent, la grue bascule. Les tableaux de charge du constructeur reposent sur ce calcul de réactions.
 
+<GrueStabilisateurs />
+
 </Page>
 
 <FicheMemo titre="Fiche mémo : réactions d'appui">
@@ -227,11 +247,13 @@ une charge au-delà de B soulage A · réaction négative = soulèvement → anc
 
 </FicheMemo>
 
-<Page etape="exercices" titre="Les exercices">
+<Page etape="exercices" titre="Les exercices (1/2)">
 
 <Exercice n={1} niveau="facile" titre="Une charge ponctuelle">
 
 Une poutre de 6 m sur deux appuis d'extrémité porte une charge de 24 kN à 2 m de A. Calcule R<sub>A</sub> et R<sub>B</sub>.
+
+<PoutreModele alt="Poutre de 6 m sur deux appuis d'extrémité A et B, chargée par 24 kN à 2 m de A." L={6} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: 6, type: 'simple', nom: 'B' }]} charges={[{ type: 'ponctuelle', nom: 'P', F: 24, a: 2 }]} cotes={[0, 2, 6]} dec={0} prefixe="pm-ex1" />
 
 <Indice>R<sub>B</sub> = P a / L, puis R<sub>A</sub> = P − R<sub>B</sub>.</Indice>
 
@@ -244,12 +266,18 @@ R<sub>B</sub> = 24 × 2 / 6 = **{grandeur(ex1.RB, 0, 'kN')}** ; R<sub>A</sub> = 
 
 Une poutre de 6 m sur deux appuis d'extrémité porte une charge qui croît de 0 (en A) à 12 kN/m (en B). Calcule les réactions.
 
+<PoutreModele alt="Poutre de 6 m sur deux appuis d'extrémité A et B, chargée par une charge triangulaire croissant de 0 en A à 12 kN/m en B." L={6} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: 6, type: 'simple', nom: 'B' }]} charges={[{ type: 'repartie', nom: 'q', q1: 0, q2: 12, a: 0, b: 6 }]} cotes={[0, 6]} dec={0} prefixe="pm-ex2" />
+
 <Indice>Résultante R = 12 × 6 / 2, à 4 m de A.</Indice>
 
 <Corrige>
 R = **{grandeur(rtri.R, 0, 'kN')}** à {grandeur(rtri.x, 0, 'm')} de A ; R<sub>B</sub> = {nombre(rtri.R, 0)} × 4 / 6 = **{grandeur(tri.RB, 0, 'kN')}** ; R<sub>A</sub> = **{grandeur(tri.RA, 0, 'kN')}**.
 </Corrige>
 </Exercice>
+
+</Page>
+
+<Page etape="exercices" titre="Les exercices (2/2)">
 
 <Exercice n={3} niveau="difficile" titre="Jusqu'où charger le porte-à-faux ?">
 
@@ -259,6 +287,8 @@ Pour la poutre de l'exemple (7 m, appuis en 0 et 5,50 m, 12 kN/m sur toute la lo
 
 <Corrige>
 Moments en B : R<sub>A</sub> × 5,50 = 12 × 7 × (5,50 − 3,50) − P × (7 − 5,50). R<sub>A</sub> ≥ 0 tant que P ≤ 12 × 7 × 2 / 1,50 = **{grandeur(pMax, 0, 'kN')}**. Au-delà, il faut ancrer A ; en pratique, on garde une marge confortable, car les charges réelles varient.
+
+<PoutreReactions d={dMax} r={rMax} prefixe="pr-ex3" />
 </Corrige>
 </Exercice>
 

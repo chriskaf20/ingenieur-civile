@@ -33,11 +33,14 @@ formules:
 import { EXEMPLE_TROIS_APPUIS, troisAppuis } from '@/lib/calc/statique'
 import { moment3D } from '@/lib/calc/vecteurs'
 import { grandeur, nombre } from '@/lib/format'
-import { TroisAppuisIso } from '@/components/schemas/Statique'
+import { TroisAppuisIso, TroisAppuisPlan } from '@/components/schemas/Statique'
+import { BrasDeuxAxes, ChevreTrepied, PotenceEspace, SixDegres, TabouretSac, ZoneStabilite } from '@/components/schemas/StatiqueCours3'
 
 export const r0 = troisAppuis(EXEMPLE_TROIS_APPUIS)
-export const centre = troisAppuis({ appuis: EXEMPLE_TROIS_APPUIS.appuis, charges: [{ nom: 'cuve', x: 2, y: 3.5 / 3, F: 240 }] })
-export const dehors = troisAppuis({ appuis: EXEMPLE_TROIS_APPUIS.appuis, charges: [{ nom: 'charge', x: 3.8, y: 2.5, F: 50 }] })
+export const dCentre = { appuis: EXEMPLE_TROIS_APPUIS.appuis, charges: [{ nom: 'cuve', x: 2, y: 3.5 / 3, F: 240 }] }
+export const centre = troisAppuis(dCentre)
+export const dDehors = { appuis: EXEMPLE_TROIS_APPUIS.appuis, charges: [{ nom: 'charge', x: 3.8, y: 2.5, F: 50 }] }
+export const dehors = troisAppuis(dDehors)
 export const potence = moment3D([0, 0, 0], [0, 2, 5], [0, 0, -1.2])
 
 <Page etape="intuition" titre="L'intuition : la table à trois pieds">
@@ -48,13 +51,15 @@ Mais tous les pieds ne portent pas la même charge. Pose un sac sur le tabouret,
 
 Pour calculer ces charges, le plan ne suffit plus : les pieds ne sont pas alignés, la structure est **dans l'espace**. Les équations d'équilibre gagnent une dimension.
 
+<TabouretSac appuis={EXEMPLE_TROIS_APPUIS.appuis} />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Comment écrire l'équilibre d'un solide dans l'espace, et que portent les pieds d'un plateau ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : six équations">
+<Page etape="cours" titre="Le cours (1/3) : six équations">
 
 ### L'équilibre dans l'espace
 
@@ -64,6 +69,12 @@ $$\sum F_x = 0, \quad \sum F_y = 0, \quad \sum F_z = 0$$
 $$\sum M_x = 0, \quad \sum M_y = 0, \quad \sum M_z = 0$$
 
 Six équations : la statique permet de trouver au plus six inconnues pour un solide.
+
+<SixDegres />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : le moment d'une force">
 
 ### Le moment d'une force
 
@@ -79,9 +90,11 @@ Pour une **force verticale** F (vers le bas) appliquée au point (x ; y), les mo
 Une charge de 1,2 kN pend au bout d'une potence de 2 m de bras, à 5 m de haut. Par le produit vectoriel, son moment au pied vaut ({nombre(potence[0], 1)} ; {nombre(potence[1], 1)} ; {nombre(potence[2], 1)}) kN·m : un moment de {grandeur(Math.abs(potence[0]), 1, 'kN·m')} autour de l'axe x, que le pied du mât doit reprendre.
 </Encadre>
 
+<PotenceEspace bras={2} hauteur={5} F={1.2} Mx={potence[0]} />
+
 </Page>
 
-<Page etape="cours" titre="Le cours (2/2) : le plateau sur trois appuis">
+<Page etape="cours" titre="Le cours (3/3) : le plateau sur trois appuis">
 
 ### Trois équations utiles
 
@@ -101,6 +114,8 @@ Avec trois appuis non alignés, ces trois équations donnent les trois réaction
 ### La condition de stabilité
 
 Toutes les réactions sont positives si et seulement si la résultante des charges tombe **à l'intérieur du triangle des appuis**. Si elle sort du triangle, une réaction devient négative : le plateau bascule autour du côté le plus proche, sauf s'il est ancré.
+
+<ZoneStabilite appuis={EXEMPLE_TROIS_APPUIS.appuis} charge={dDehors.charges[0]} RA={dehors.R[0]} />
 
 <Regle type="simplification">
 On suppose des appuis ponctuels qui ne transmettent que des forces verticales, et un plateau indéformable. Un vrai château d'eau reçoit aussi le vent (forces horizontales) : ses pieds et leurs contreventements se calculent en trois dimensions, souvent par logiciel.
@@ -163,6 +178,8 @@ Six équations dans l'espace ; trois seulement pour des forces parallèles. Plat
 Autour de l'axe x, le bras de levier d'une force verticale est sa coordonnée y ; autour de l'axe y, c'est sa coordonnée x. On écrit chaque équation en précisant l'axe.
 </Piege>
 
+<BrasDeuxAxes />
+
 <Piege erreur="raisonner comme dans le plan.">
 Avec trois pieds non alignés, une seule équation de moments ne suffit pas : il en faut deux, autour de deux axes différents, plus l'équilibre vertical.
 </Piege>
@@ -184,6 +201,8 @@ Elle signale un basculement. Avec une charge de 50 kN placée en (3,8 ; 2,5), ho
 <Page etape="terrain" titre="Sur le terrain">
 
 **Les trépieds de levage.** Au-dessus des puits et des forages, les équipes utilisent souvent une chèvre à trois pieds pour descendre la pompe ou les tubages. La charge suspendue au sommet doit rester à la verticale du centre du triangle formé par les pieds : un tirage oblique décale la résultante, charge un pied et peut faire basculer l'ensemble.
+
+<ChevreTrepied />
 
 <Encadre type="terrain" titre="Les châteaux d'eau des villages">
 Beaucoup de petits châteaux d'eau ruraux sont des cuves posées sur trois ou quatre poteaux. Les pieds doivent reprendre le poids de l'eau, mais aussi le vent, qui pousse latéralement la cuve haut placée. Un poteau mal fondé, sur un sol qui se tasse en saison des pluies, et la cuve penche : le centre de gravité se décale, la charge se reporte sur les autres pieds, et le mouvement s'aggrave.
@@ -227,6 +246,8 @@ La cuve de 240 kN est placée au centre de gravité du triangle ABC, en (2 ; 3,5
 
 <Corrige>
 Les trois équations donnent **R<sub>A</sub> = R<sub>B</sub> = R<sub>C</sub> = {grandeur(centre.R[0], 0, 'kN')}** : au centre de gravité du triangle, la charge se partage en trois parts égales.
+
+<TroisAppuisPlan d={dCentre} R={centre.R} />
 </Corrige>
 </Exercice>
 
@@ -249,6 +270,8 @@ Une charge de 50 kN est posée seule en (3,8 ; 2,5) sur le plateau, qui déborde
 
 <Corrige>
 R<sub>C</sub> = {grandeur(dehors.R[2], 2, 'kN')} ; R<sub>B</sub> = {grandeur(dehors.R[1], 2, 'kN')} ; R<sub>A</sub> = **{grandeur(dehors.R[0], 2, 'kN')}**. La réaction en A est négative : la charge est hors du triangle (au-delà de la droite BC), et le plateau bascule autour de BC s'il n'est pas ancré en A.
+
+<TroisAppuisPlan d={dDehors} R={dehors.R} />
 </Corrige>
 </Exercice>
 

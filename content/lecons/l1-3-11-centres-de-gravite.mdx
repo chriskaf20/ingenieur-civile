@@ -35,6 +35,7 @@ import { caniveauU, centrePoids, EXEMPLE_CANIVEAU } from '@/lib/calc/statique'
 import { gravite, rectangle } from '@/lib/calc/geometrie'
 import { grandeur, nombre } from '@/lib/format'
 import { CaniveauSchema } from '@/components/schemas/Statique'
+import { CaniveauCouvert, CorniereG, LevageElingue, MoyenneFausse, MurSemelleG, RaccourcisG, RegleSurDoigt, UsagesG } from '@/components/schemas/StatiqueCours3'
 
 export const c0 = caniveauU(EXEMPLE_CANIVEAU)
 export const corniere = gravite([rectangle('aile', 0, 0, 10, 1), rectangle('âme', 0, 1, 1, 9)])
@@ -53,13 +54,15 @@ Pour l'ingénieur, ce point compte partout. La stabilité d'un mur dépend de la
 
 Pour une forme compliquée, on la découpe en formes simples dont on connaît le centre, et l'on fait une moyenne pondérée. C'est l'objet de cette leçon, qui prolonge N0.5.6.
 
+<RegleSurDoigt />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Où se trouve le centre de gravité d'une section ou d'un ouvrage fait de plusieurs morceaux ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : moment statique et centre de gravité">
+<Page etape="cours" titre="Le cours (1/4) : moment statique et centre de gravité">
 
 ### Le moment statique
 
@@ -83,13 +86,21 @@ Conséquence : le moment statique par rapport à un axe passant par G est **nul*
 2. Un **trou** se compte avec une **aire négative** : on prend la figure pleine, puis on retranche le vide.
 3. Le résultat se **contrôle** : G doit se trouver à l'intérieur du contour général de la figure, du côté où la matière est la plus abondante.
 
+<RaccourcisG />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/4) : l'exemple de la cornière">
+
 <Encadre type="exemple" titre="Une cornière">
 Une cornière à ailes égales de 10 cm et d'épaisseur 1 cm se découpe en un rectangle 10 × 1 (centre à 0,5 cm du bas) et un rectangle 1 × 9 (centre à 5,5 cm). y<sub>G</sub> = (10 × 0,5 + 9 × 5,5) / 19 = {grandeur(corniere.yG, 2, 'cm')}, et x<sub>G</sub> a la même valeur par symétrie par rapport à la bissectrice : G est hors de la matière, dans l'angle de la cornière.
 </Encadre>
 
+<CorniereG aile={10} ep={1} xG={corniere.xG} yG={corniere.yG} />
+
 </Page>
 
-<Page etape="cours" titre="Le cours (2/2) : les centres de gravité des poids">
+<Page etape="cours" titre="Le cours (3/4) : les centres de gravité des poids">
 
 ### Plusieurs matériaux
 
@@ -103,11 +114,19 @@ Un mur en blocs (γ ≈ 18 kN/m³) posé sur une semelle en béton (24 kN/m³) a
 Semelle de 1,20 × 0,40 m en béton (24 kN/m³), mur de 0,20 × 2,00 m en blocs (18 kN/m³, donnée de l'énoncé), posé entre x = 0,20 et 0,40 m. Poids : {grandeur(mur.poids[0].W, 2, 'kN/m')} et {grandeur(mur.poids[1].W, 2, 'kN/m')}. Centre des poids : x<sub>G</sub> = {grandeur(mur.xG, 3, 'm')} depuis le bord de la semelle.
 </Encadre>
 
+<MurSemelleG bS={1.2} hS={0.4} bM={0.2} hM={2} xM={0.2} W1={mur.poids[0].W} W2={mur.poids[1].W} xG={mur.xG} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (4/4) : à quoi sert le centre de gravité ?">
+
 ### À quoi sert le centre de gravité ?
 
 - **Stabilité** : le poids d'un ouvrage agit en son centre de gravité ; son bras de levier par rapport à l'arête de basculement donne le moment stabilisant.
 - **Flexion** : une poutre fléchit autour d'un axe passant par le centre de gravité de sa section, l'**axe neutre** (L2).
 - **Levage** : une charge élinguée au-dessus de son centre de gravité reste horizontale ; sinon, elle bascule pendant le levage.
+
+<UsagesG />
 
 <Regle type="simplification">
 On suppose chaque morceau homogène, avec son centre de gravité au centre de sa forme. Un poids volumique « moyen » de maçonnerie (blocs, joints, enduits) est une approximation : sur un projet, on prend les valeurs de l'EC1 ou des fiches des fabricants.
@@ -174,6 +193,8 @@ S = Σ A<sub>i</sub> y<sub>i</sub> ; y<sub>G</sub> = S / A. Symétrie : G sur l'
 La moyenne simple des centres du radier et des parois donne {grandeur(moyenneFausse.yG, 1, 'cm')}, au lieu de {grandeur(c0.yG, 2, 'cm')} : chaque morceau doit compter pour son aire.
 </Piege>
 
+<MoyenneFausse B={EXEMPLE_CANIVEAU.B} H={EXEMPLE_CANIVEAU.H} e={EXEMPLE_CANIVEAU.e} ef={EXEMPLE_CANIVEAU.ef} yJuste={c0.yG} yFaux={moyenneFausse.yG} />
+
 <Piege erreur="oublier qu'un trou se retranche.">
 Un vide compté positivement déplace G du mauvais côté et augmente l'aire. On l'affecte d'une aire négative.
 </Piege>
@@ -195,6 +216,8 @@ Pour une cornière, un anneau ou un U, G peut tomber dans le vide. Ce n'est pas 
 <Page etape="terrain" titre="Sur le terrain">
 
 **Le levage des éléments préfabriqués.** Un caniveau, une buse, une dalle préfabriquée se lèvent par des points d'accroche placés pour que la charge reste horizontale : la verticale du crochet doit passer par le centre de gravité. Une erreur, et l'élément bascule, se brise, ou blesse quelqu'un.
+
+<LevageElingue />
 
 <Encadre type="terrain" titre="Les caniveaux des villes">
 Dans les villes de RDC, les caniveaux en béton longent les avenues pour évacuer les pluies tropicales. Les éléments préfabriqués en U, posés bout à bout, sont plus rapides à mettre en œuvre que des caniveaux coulés en place. Leur centre de gravité bas les rend stables sur leur lit de pose ; quand on les couvre d'une dallette, le centre de gravité de l'ensemble remonte (exercice 3).
@@ -260,6 +283,8 @@ On pose sur le caniveau de l'exemple une dallette de couverture de 80 × 10 cm, 
 
 <Corrige>
 A = {nombre(c0.A, 0)} + 800 = **{grandeur(couvert.A, 0, 'cm²')}** ; S = {nombre(c0.Sx, 0)} + 800 × 75 = {grandeur(couvert.Sx, 0, 'cm³')} ; y<sub>G</sub> = **{grandeur(couvert.yG, 2, 'cm')}** : le centre de gravité remonte nettement.
+
+<CaniveauCouvert B={EXEMPLE_CANIVEAU.B} H={EXEMPLE_CANIVEAU.H} e={EXEMPLE_CANIVEAU.e} ef={EXEMPLE_CANIVEAU.ef} d={10} yAvant={c0.yG} yApres={couvert.yG} />
 </Corrige>
 </Exercice>
 

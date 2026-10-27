@@ -31,13 +31,20 @@ formules:
   - { nom: 'Console encastrée', tex: 'V = qL + P, \quad M = \frac{qL^2}{2} + P\,a', domaine: 'Charges verticales' }
 ---
 
-import { consoleEncastree, EXEMPLE_CONSOLE } from '@/lib/calc/statique'
+import { consoleEncastree, degreHyperstaticite, EXEMPLE_CONSOLE, STRUCTURES_TYPES } from '@/lib/calc/statique'
 import { grandeur, nombre } from '@/lib/format'
-import { LiaisonsIso } from '@/components/schemas/Statique'
+import { GalerieStructures, LiaisonsIso } from '@/components/schemas/Statique'
+import { ArticuleOuEncastre, BalconAciers, ConsoleDeuxCas, DetailVersModele, DeuxArticulations, PiedsDePoteau, PlancheTenue, SymbolesLiaisons } from '@/components/schemas/StatiqueCours2'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
 
 export const c0 = consoleEncastree(EXEMPLE_CONSOLE)
 export const c2 = consoleEncastree({ L: 2, q: 5, P: 0, a: 0 })
 export const cMi = consoleEncastree({ ...EXEMPLE_CONSOLE, a: EXEMPLE_CONSOLE.L / 2 })
+export const hId = (id) => {
+  const s = STRUCTURES_TYPES.find((t) => t.id === id)
+  return degreHyperstaticite(s.r, s.p, s.internes).h
+}
+export const ex2ids = ['deuxAppuis', 'console', 'encastreeAppuyee']
 
 <Page etape="intuition" titre="L'intuition : posé, cloué ou scellé">
 
@@ -47,13 +54,15 @@ Chaque manière de tenir un élément **empêche certains mouvements**. Et pour 
 
 Avant tout calcul, l'ingénieur doit donc décider comment chaque élément est tenu. Ce choix change les réactions, et parfois tout le dimensionnement.
 
+<PlancheTenue />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Quels efforts un appui exerce-t-il, selon la manière dont il tient la structure ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : mouvements empêchés et réactions">
+<Page etape="cours" titre="Le cours (1/3) : mouvements empêchés et réactions">
 
 ### Trois mouvements possibles
 
@@ -73,13 +82,21 @@ Règle à retenir : **à chaque mouvement empêché correspond une réaction**. 
 
 Sur les schémas : l'appui simple est un triangle posé sur des rouleaux, l'articulation un triangle fixé au sol, l'encastrement une paroi hachurée dans laquelle l'élément est pris.
 
+<SymbolesLiaisons />
+
 </Page>
 
-<Page etape="cours" titre="Le cours (2/2) : du détail réel au modèle">
+<Page etape="cours" titre="Le cours (2/3) : du détail réel au modèle">
 
 ### Aucun appui n'est parfait
 
 Un modèle est une idéalisation. Une poutre en béton posée sur un mur en maçonnerie tourne un peu, glisse un peu : on la modélise par un **appui simple** ou une **articulation**. Un poteau coulé avec sa semelle sur un bon sol retient presque toute rotation : on le modélise par un **encastrement**.
+
+<DetailVersModele />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : choisir le modèle prudent">
 
 ### Choisir le modèle prudent
 
@@ -89,6 +106,8 @@ Le choix change les efforts :
 - la même poutre supposée encastrée reporte une partie du moment sur ses appuis.
 
 Si l'on suppose un encastrement que le détail ne réalise pas, l'appui reçoit un moment qu'il ne peut pas reprendre, et la travée est sous-dimensionnée. On choisit donc le modèle qui correspond **vraiment** à ce qui est construit, ou l'on encadre les deux cas.
+
+<ArticuleOuEncastre />
 
 <Regle type="simplification">
 Les liaisons sont supposées **parfaites** : sans jeu, sans frottement, et infiniment rigides dans les directions bloquées. Les appareils d'appui réels (néoprène, plaques glissantes) ont une raideur et un frottement, étudiés en ouvrages d'art (L3).
@@ -164,6 +183,8 @@ Un simple appui sur maçonnerie laisse la poutre tourner : on le modélise par u
 La poutre ne peut alors plus s'allonger librement quand la température change : des efforts horizontaux apparaissent. On place une articulation et un appui simple, sauf calcul particulier.
 </Piege>
 
+<DeuxArticulations />
+
 <Piege erreur="confondre articulation et appui simple.">
 L'articulation retient aussi les efforts horizontaux (deux réactions) ; l'appui simple, une seule direction.
 </Piege>
@@ -178,11 +199,15 @@ Le même élément, supposé articulé ou encastré, n'a pas les mêmes moments.
 
 **Les balcons et les consoles.** Dans les immeubles des centres-villes, les balcons en porte-à-faux sont nombreux. Leur seul appui est l'encastrement dans la dalle : les armatures qui reprennent le moment sont placées **en partie haute**, là où le béton est tendu. Un balcon dont les aciers ont été posés en bas, ou écrasés par les ouvriers pendant le bétonnage, peut s'effondrer.
 
+<BalconAciers />
+
 <Encadre type="terrain" titre="Les appuis des ponts">
 Sur les ponts, on ne laisse pas le tablier se dilater contre des appuis fixes : on combine un appui fixe (articulation) et des appuis glissants ou en néoprène fretté, qui laissent le tablier s'allonger et tourner. Sur les petits ponts en béton des pistes rurales, un appui mal réalisé se fissure au fil des saisons.
 </Encadre>
 
 **Les pieds de poteaux.** Un poteau métallique fixé par deux tiges d'ancrage proches de son axe tourne facilement : c'est une articulation. Pour un encastrement, il faut une platine large, des tiges écartées et un massif capable de reprendre le moment.
+
+<PiedsDePoteau />
 
 </Page>
 
@@ -224,6 +249,8 @@ Une console encastrée de 2 m porte une charge répartie de 5 kN/m. Calcule les 
 
 <Corrige>
 V = 5 × 2 = **{grandeur(c2.V, 0, 'kN')}** ; M = 5 × 2² / 2 = **{grandeur(c2.M, 0, 'kN·m')}** ; H = 0.
+
+<PoutreModele alt="Console de 2 m encastrée en A, chargée par 5 kN/m : l'encastrement reprend V et M." L={2} appuis={[{ x: 0, type: 'encastrement', nom: 'A' }]} charges={[{ type: 'repartie', nom: 'q', q1: 5, q2: 5, a: 0, b: 2 }]} reactions={[{ x: 0, R: c2.V, nom: 'V' }]} moments={[{ x: 0, M: c2.M, nom: 'M' }]} cotes={[0, 2]} dec={0} prefixe="pm-ex1" />
 </Corrige>
 </Exercice>
 
@@ -239,6 +266,8 @@ Combien de réactions exercent : une poutre sur articulation et appui simple ; u
 - Console encastrée : **3** réactions, calculables.
 - Encastrement + appui simple : 3 + 1 = **4** réactions pour 3 équations : une de trop, la poutre est hyperstatique (L1.3.7).
 
+<GalerieStructures ids={ex2ids} degres={ex2ids.map(hId)} prefixe="gal-ex2" />
+
 </Corrige>
 </Exercice>
 
@@ -250,6 +279,8 @@ Pour le balcon de l'exemple, compare le moment d'encastrement quand la charge de
 
 <Corrige>
 Au bout : M = **{grandeur(c0.M, 2, 'kN·m')}** ; au milieu : M = **{grandeur(cMi.M, 2, 'kN·m')}**. La charge en bout donne le moment le plus fort : c'est le cas le plus défavorable, qu'il faut prévoir puisque les personnes s'appuient sur le garde-corps.
+
+<ConsoleDeuxCas L={EXEMPLE_CONSOLE.L} q={EXEMPLE_CONSOLE.q} P={EXEMPLE_CONSOLE.P} cas={[{ a: EXEMPLE_CONSOLE.L, M: c0.M, titre: 'au bout' }, { a: EXEMPLE_CONSOLE.L / 2, M: cMi.M, titre: 'au milieu' }]} />
 </Corrige>
 </Exercice>
 

@@ -18,6 +18,8 @@ import { chargePoutre, degreHyperstaticite, EXEMPLE_PRATT, geometriePratt, momen
 import { gravite, rectangle } from '@/lib/calc/geometrie'
 import { SEUIL_TEXTE } from '@/lib/progression/types'
 import { grandeur, nombre } from '@/lib/format'
+import { PoteauForceH, SectionTDonnees, SemelleDonnees } from '@/components/schemas/StatiqueCours3'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
 
 export const q1 = chargePoutre({ g: 5, q: 0, e: 3, b: 0, h: 0, gamma: 0, L: 1 }).G
 export const q2 = momentForceO({ xA: 0, yA: 3, F: 8, theta: 0 })
@@ -47,35 +49,45 @@ En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen
 
 <Quiz id="L1.3.EX">
 
-<Page etape="examen" titre="Les questions (1/3)">
+<Page etape="examen" titre="Les questions (1/4)">
 
 <QCM n={1} question="Une poutre porte une bande de plancher de 3 m de large, chargée à 5 kN/m². La charge linéique sur la poutre vaut :" choix={['1,67 kN/m', grandeur(q1, 0, 'kN/m'), '8 kN/m', grandeur(q1, 0, 'kN/m²')]} bonne={1} colonnes={4}>
 5 kN/m² × 3 m = {grandeur(q1, 0, 'kN/m')} (L1.3.1).
 </QCM>
 
+<PoteauForceH F={8} h={3} />
+
 <QCM n={2} question="Une force horizontale de 8 kN est appliquée à 3 m au-dessus du pied d'un poteau. Son moment au pied vaut, en valeur absolue :" choix={['11 kN·m', grandeur(Math.abs(q2.M), 0, 'kN·m'), '2,67 kN·m', '0 kN·m']} bonne={1} colonnes={4}>
 M = F × d, le bras de levier étant la hauteur (L1.3.2).
 </QCM>
+
+<SemelleDonnees N={500} H={20} h={2} B={1.5} />
 
 <QCM n={3} question="Un poteau transmet N = 500 kN et H = 20 kN appliqué à 2 m au-dessus de la base de sa semelle. L'excentricité de l'effort vertical vaut :" choix={[grandeur(q3.e, 2, 'm'), '0,04 m', '25 m', '0,8 m']} bonne={0} colonnes={4}>
 M = 20 × 2 = {grandeur(q3.M, 0, 'kN·m')} ; e = M / N (L1.3.3).
 </QCM>
 
+</Page>
+
+<Page etape="examen" titre="Les questions (2/4)">
+
 <QCM n={4} question="Pour la marquise articulée en A et tenue en bout par un tirant, sans charge en bout (P = 0), la réaction verticale V_A vaut :" choix={['q L', 'q L / 2', '0', 'T sin α']} bonne={1} colonnes={4}>
 V<sub>A</sub> = q L + P − T sin α, avec T sin α = q L / 2 quand P = 0 (L1.3.4).
 </QCM>
-
-</Page>
-
-<Page etape="examen" titre="Les questions (2/3)">
 
 <QCM n={5} question="Un encastrement plan exerce :" choix={['une force', 'deux forces', 'deux forces et un moment', 'un moment seul']} bonne={2} colonnes={2}>
 Il empêche les deux translations et la rotation (L1.3.5).
 </QCM>
 
+<PoutreModele alt="Poutre de 6 m sur deux appuis A et B, chargée par 30 kN à 2 m de A." L={6} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: 6, type: 'simple', nom: 'B' }]} charges={[{ type: 'ponctuelle', nom: 'P', F: 30, a: 2 }]} cotes={[0, 2, 6]} dec={0} prefixe="pm-q6" />
+
 <QCM n={6} question="Une poutre de 6 m sur deux appuis porte 30 kN à 2 m de l'appui A. La réaction en B vaut :" choix={[grandeur(q6.RA, 0, 'kN'), grandeur(q6.RB, 0, 'kN'), '15 kN', '30 kN']} bonne={1} colonnes={4}>
 Moments en A : R<sub>B</sub> × 6 = 30 × 2 (L1.3.6).
 </QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/4)">
 
 <QCM n={7} question="Une poutre encastrée à une extrémité et posée sur un appui simple à l'autre a un degré d'hyperstaticité de :" choix={['0', nombre(q7.h, 0), '2', '3']} bonne={1} colonnes={4}>
 r = 3 + 1 = 4, h = 4 − 3 (L1.3.7).
@@ -85,17 +97,19 @@ r = 3 + 1 = 4, h = 4 − 3 (L1.3.7).
 ΣF<sub>y</sub> : 30 + N sin 45° = 0, d'où une compression (L1.3.8).
 </QCM>
 
-</Page>
-
-<Page etape="examen" titre="Les questions (3/3)">
-
 <QCM n={9} question="Dans un treillis de 3 m de haut, le moment fléchissant au droit d'un nœud inférieur vaut 120 kN·m. Par Ritter, la membrure supérieure du panneau qui aboutit à ce nœud reçoit :" choix={[grandeur(q9.Nsup, 0, 'kN'), grandeur(-q9.Nsup, 0, 'kN'), '360 kN', '−120 kN']} bonne={0} colonnes={4}>
 N<sub>sup</sub> = −M / h (L1.3.9).
 </QCM>
 
+</Page>
+
+<Page etape="examen" titre="Les questions (4/4)">
+
 <QCM n={10} question="Un mur poids pèse 80 kN par mètre ; la poussée des terres vaut 25 kN/m et le coefficient de frottement 0,5. Le coefficient de sécurité au glissement vaut :" choix={['3,2', nombre(q10.FSg, 1), '0,31', '2,0']} bonne={1} colonnes={4}>
 μ W / Q = 0,5 × 80 / 25 (L1.3.10).
 </QCM>
+
+<SectionTDonnees bw={20} hw={40} b={60} hf={10} />
 
 <QCM n={11} question="Une section en T est formée d'une âme de 20 × 40 cm (de y = 0 à 40 cm) surmontée d'une table de 60 × 10 cm. Son centre de gravité est à :" choix={['25,00 cm', grandeur(q11.yG, 2, 'cm'), '45,00 cm', '35,00 cm']} bonne={1} colonnes={4}>
 y<sub>G</sub> = (800 × 20 + 600 × 45) / 1 400 (L1.3.11).

@@ -36,7 +36,8 @@ formules:
 
 import { EXEMPLE_SEMELLE_TORSEUR, reduction, semelleTorseur } from '@/lib/calc/statique'
 import { grandeur, nombre } from '@/lib/format'
-import { TorseurEquivalent } from '@/components/schemas/Statique'
+import { SemelleTorseurSchema, TorseurEquivalent } from '@/components/schemas/Statique'
+import { ChangementPoint, ChargeExcentree, MatEclairage, ReleveEtTorseur, TransportForce, TroisCasSemelle } from '@/components/schemas/StatiqueCours1'
 
 export const trois = [
   { nom: 'F1', x: 1, y: 0, Fx: 0, Fy: -10 },
@@ -57,6 +58,8 @@ Une poutre porte un mur, un poteau, des sacs de ciment, son propre poids. Pour c
 C'est comme un relevé de compte : des dizaines d'opérations se résument par un solde. Ici, le « solde » des forces s'appelle la **résultante**, et leur effet de rotation global, le **moment résultant**. Ce couple de deux informations, calculé en un point choisi, forme le **torseur** des actions.
 
 Pour une fondation, ce résumé dit tout de suite si la charge tombe bien au centre, ou si elle est décalée au point de soulever un bord de la semelle.
+
+<ReleveEtTorseur />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment remplacer un ensemble de forces par un système plus simple, qui a exactement le même effet ?
@@ -87,6 +90,8 @@ $$M_B = M_A + (x_A - x_B)\,R_y - (y_A - y_B)\,R_x$$
 
 Pour les trois charges, au point B situé à 6 m : M<sub>B</sub> = {nombre(red.M, 0)} + (0 − 6) × ({nombre(red.Ry, 0)}) = {grandeur(redB.M, 0, 'kN·m')}.
 
+<ChangementPoint Ry={red.Ry} MA={red.M} MB={redB.M} xB={6} />
+
 <Regle type="simplification">
 Remplacer des forces par leur torseur suppose un solide **indéformable**. Pour calculer des appuis ou l'équilibre, c'est exact. Pour les efforts intérieurs d'une poutre (L2), on ne peut plus regrouper les charges n'importe comment : l'endroit où chacune s'applique compte.
 </Regle>
@@ -114,6 +119,8 @@ $$e = \frac{M}{N}$$
 ### Le tiers central
 
 Si l'on suppose que la pression sous une base rectangulaire varie linéairement, elle reste partout positive (le sol est comprimé partout) tant que la résultante tombe dans le **tiers central** de la base : |e| ≤ B/6. Au-delà, un bord de la semelle tend à se soulever.
+
+<TroisCasSemelle />
 
 </Page>
 
@@ -174,6 +181,8 @@ Torseur en un point = résultante + moment résultant. On change de point en ajo
 Transporter une force parallèlement à elle-même change son moment. Pour garder le même effet, on ajoute le couple de transport F × d.
 </Piege>
 
+<TransportForce />
+
 <Piege erreur="oublier que le moment dépend du point.">
 Pour les trois charges, M<sub>A</sub> = {grandeur(red.M, 0, 'kN·m')} mais M<sub>B</sub> = {grandeur(redB.M, 0, 'kN·m')}. Un moment donné sans son point ne veut rien dire.
 </Piege>
@@ -201,6 +210,8 @@ Autour des marchés et des ports fluviaux de RDC, les hangars métalliques lége
 </Encadre>
 
 **Les charges excentrées.** Un poteau de rive posé au bord de sa semelle, une semelle bloquée contre une limite de parcelle, un mur posé sur le bord d'une longrine : chaque fois, la charge est excentrée et crée un moment, même sans aucune force horizontale.
+
+<ChargeExcentree />
 
 </Page>
 
@@ -249,6 +260,8 @@ N = 400 kN, H = 30 kN appliqué à 1,5 m au-dessus de la base, semelle de 1,5 m 
 
 <Corrige>
 M = 30 × 1,5 = **{grandeur(ex2.M, 1, 'kN·m')}** ; e = {nombre(ex2.M, 1)} / 400 = **{grandeur(ex2.e, 4, 'm')}** ; B/6 = {grandeur(ex2.tiers, 3, 'm')} : la résultante reste dans le tiers central.
+
+<SemelleTorseurSchema d={{ N: 400, H: 30, h: 1.5, B: 1.5 }} r={ex2} prefixe="st-ex2" />
 </Corrige>
 </Exercice>
 
@@ -260,6 +273,8 @@ Un mât d'éclairage transmet N = 60 kN (fût et massif compris) et reçoit un e
 
 <Corrige>
 M = 12 × 4 = {grandeur(mat.M, 0, 'kN·m')} ; e = {nombre(mat.M, 0)} / 60 = **{grandeur(mat.e, 2, 'm')}** ; il faudrait B ≥ 6 e = **{grandeur(mat.Bmin, 1, 'm')}**. C'est énorme : on préfère alourdir le massif (N augmente, e diminue), l'enterrer plus profondément, ou accepter un décollement partiel vérifié par un calcul de sol (L3).
+
+<MatEclairage N={60} H={12} h={4} e={mat.e} Bmin={mat.Bmin} />
 </Corrige>
 </Exercice>
 

@@ -37,14 +37,18 @@ formules:
 import { baseMinGlissement, EXEMPLE_MUR_POIDS, FS_REPERE_MUR, murPoids } from '@/lib/calc/statique'
 import { pousseeParoi } from '@/lib/calc/physique'
 import { grandeur, nombre } from '@/lib/format'
-import { MurPoidsIso } from '@/components/schemas/Statique'
+import { MurPoidsIso, MurPoidsSchema } from '@/components/schemas/Statique'
+import { CaisseArmoire, DeuxModesRuine, EauDerriereMur, MurGabions, ReactionSolMur, RemedesMur } from '@/components/schemas/StatiqueCours3'
 
 export const m0 = murPoids(EXEMPLE_MUR_POIDS)
 export const Bmin = baseMinGlissement(EXEMPLE_MUR_POIDS, FS_REPERE_MUR)
-export const mB = murPoids({ ...EXEMPLE_MUR_POIDS, B: Math.ceil(Bmin * 20) / 20 })
-export const rect = murPoids({ H: 2, b: 0.8, B: 0.8, gamma: 24, Q: 12, zQ: 2 / 3, mu: 0.55 })
+export const dB = { ...EXEMPLE_MUR_POIDS, B: Math.ceil(Bmin * 20) / 20 }
+export const mB = murPoids(dB)
+export const dRect = { H: 2, b: 0.8, B: 0.8, gamma: 24, Q: 12, zQ: 2 / 3, mu: 0.55 }
+export const rect = murPoids(dRect)
 export const eau = pousseeParoi(EXEMPLE_MUR_POIDS.H)
-export const mEau = murPoids({ ...EXEMPLE_MUR_POIDS, Q: EXEMPLE_MUR_POIDS.Q + eau.F })
+export const dEau = { ...EXEMPLE_MUR_POIDS, Q: EXEMPLE_MUR_POIDS.Q + eau.F }
+export const mEau = murPoids(dEau)
 
 <Page etape="intuition" titre="L'intuition : pousser une armoire">
 
@@ -54,13 +58,15 @@ Un mur de soutènement vit la même chose. Les terres qu'il retient le poussent 
 
 Ces deux vérifications, glissement et renversement, sont les premières de tout ouvrage soumis à une poussée : murs, digues, culées de ponts, réservoirs.
 
+<CaisseArmoire />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Un mur poids est-il assez lourd et assez large pour ne ni glisser ni basculer ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : glissement et renversement">
+<Page etape="cours" titre="Le cours (1/3) : glissement et renversement">
 
 ### Le glissement
 
@@ -79,13 +85,16 @@ $$F_r = \frac{M_s}{M_r}$$
 
 Pour un mur trapézoïdal, on découpe la section en un rectangle et un triangle (L1.3.11), chacun avec son poids et son centre de gravité.
 
+<DeuxModesRuine />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : marges et réaction du sol">
+
 ### Les coefficients de sécurité
 
 Un rapport supérieur à 1 signifie l'équilibre, mais sans marge. L'ancienne pratique demandait des coefficients globaux d'au moins {nombre(FS_REPERE_MUR, 1)} au glissement et au renversement : c'est une **règle de l'art**, retenue ici comme repère <AVerifier note="A_VERIFIER.md n° 33 : coefficients globaux de l'ancienne pratique pour les murs" />. L'EC7 remplace ces coefficients globaux par des coefficients partiels sur les actions et les résistances (vérifications EQU et GEO), étudiés en géotechnique (L3.4).
 
-</Page>
-
-<Page etape="cours" titre="Le cours (2/2) : la réaction du sol et les remèdes">
 
 ### Où passe la réaction du sol ?
 
@@ -95,12 +104,20 @@ $$x_N = \frac{M_s - M_r}{W} \qquad e = \frac{B}{2} - x_N$$
 
 Si |e| ≤ B/6, la réaction reste dans le tiers central (L1.3.3) : le sol est comprimé sous toute la base. Plus e grandit, plus la pression se concentre sous l'arête aval.
 
+<ReactionSolMur B={EXEMPLE_MUR_POIDS.B} xN={m0.xN} e={m0.e} tiers={m0.tiers} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : améliorer la stabilité">
+
 ### Améliorer la stabilité
 
 - **Élargir la base** : plus de poids et un bras de levier plus grand.
 - **Ajouter une bêche** sous la base : un ergot enfoncé dans le sol qui s'oppose au glissement.
 - **Drainer** le remblai : barbacanes, couche drainante, fossé en tête. L'eau accumulée derrière un mur ajoute sa propre poussée et peut le renverser.
 - **Changer de type de mur** : mur en béton armé en T renversé, dont le talon porte des terres qui le stabilisent.
+
+<RemedesMur />
 
 <Regle type="simplification">
 La poussée Q et le coefficient μ sont des données de l'énoncé. Leur calcul (théories de Rankine ou de Coulomb, caractéristiques du sol) est vu en géotechnique. On néglige aussi la butée des terres devant le pied du mur, ce qui va dans le sens de la sécurité.
@@ -181,6 +198,8 @@ Le coefficient de frottement dépend du sol et de l'état de la base. Il vient d
 Si les barbacanes sont bouchées, l'eau ajoute sa poussée, {grandeur(eau.F, 1, 'kN/m')} pour 3 m d'eau. Le renversement tombe alors à {nombre(mEau.FSr, 2)} et le glissement à {nombre(mEau.FSg, 2)} : le mur cède.
 </Piege>
 
+<EauDerriereMur H={EXEMPLE_MUR_POIDS.H} Feau={eau.F} FSr={mEau.FSr} FSg={mEau.FSg} />
+
 <Piege erreur="se contenter d'un rapport à peine supérieur à 1.">
 Un rapport de 1,05 signifie que le mur tient tout juste avec les valeurs supposées. Les incertitudes sur Q et μ exigent une marge.
 </Piege>
@@ -190,6 +209,8 @@ Un rapport de 1,05 signifie que le mur tient tout juste avec les valeurs suppos�
 <Page etape="terrain" titre="Sur le terrain">
 
 **Les routes en relief.** À Bukavu, à Goma ou sur les routes de montagne du Kivu, les murs de soutènement tiennent les talus des routes et des parcelles. Beaucoup sont en maçonnerie de moellons, en béton cyclopéen ou en **gabions**, cages grillagées remplies de pierres : des murs poids, lourds et drainants.
+
+<MurGabions />
 
 <Encadre type="terrain" titre="Les murs qui tombent en saison des pluies">
 La plupart des effondrements de murs de soutènement surviennent après de fortes pluies. L'eau s'infiltre dans le remblai, les barbacanes bouchées par la boue ne l'évacuent plus, et la poussée augmente brutalement. Entretenir les barbacanes, poser une couche drainante derrière le mur et un fossé en tête coûtent peu ; reconstruire un mur et une route coûte beaucoup.
@@ -233,6 +254,8 @@ Un mur rectangulaire en béton non armé (24 kN/m³) mesure 2 m de haut et 0,80 
 
 <Corrige>
 W = 24 × 0,80 × 2 = **{grandeur(rect.W, 1, 'kN/m')}** ; M<sub>s</sub> = {nombre(rect.W, 1)} × 0,40 = **{grandeur(rect.Ms, 2, 'kN·m/m')}** ; M<sub>r</sub> = 12 × 2/3 = {grandeur(rect.Mr, 0, 'kN·m/m')} ; F<sub>r</sub> = **{nombre(rect.FSr, 2)}**.
+
+<MurPoidsSchema d={dRect} r={rect} prefixe="mp-ex1" />
 </Corrige>
 </Exercice>
 
@@ -244,6 +267,8 @@ Pour le mur de l'exemple, quelle largeur de base B faut-il, la tête restant à 
 
 <Corrige>
 Il faut W ≥ {nombre(FS_REPERE_MUR, 1)} × 30 / 0,55, donc b + B ≥ 2 × {nombre(FS_REPERE_MUR, 1)} × 30 / (0,55 × 24 × 3), soit **B ≥ {grandeur(Bmin, 2, 'm')}**. Avec B = {grandeur(Math.ceil(Bmin * 20) / 20, 2, 'm')} : glissement {nombre(mB.FSg, 2)}, renversement {nombre(mB.FSr, 2)}.
+
+<MurPoidsSchema d={dB} r={mB} prefixe="mp-ex2" />
 </Corrige>
 </Exercice>
 
@@ -255,6 +280,8 @@ Après un orage, les barbacanes du mur de l'exemple sont bouchées et l'eau mont
 
 <Corrige>
 Poussée de l'eau : 1 000 × 9,81 × 3² / 2 = **{grandeur(eau.F, 2, 'kN/m')}**, à 1 m. Q devient {grandeur(EXEMPLE_MUR_POIDS.Q + eau.F, 2, 'kN/m')} : renversement **{nombre(mEau.FSr, 2)}**, glissement **{nombre(mEau.FSg, 2)}**. Le mur glisse et frôle le basculement : le drainage n'est pas un détail.
+
+<MurPoidsSchema d={dEau} r={mEau} prefixe="mp-ex3" />
 </Corrige>
 </Exercice>
 

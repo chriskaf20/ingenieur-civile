@@ -34,7 +34,9 @@ formules:
 
 import { consoleTriangulee, EXEMPLE_MARQUISE, marquise, reactionsAppuis } from '@/lib/calc/statique'
 import { grandeur, nombre } from '@/lib/format'
-import { TroisForcesMarquise } from '@/components/schemas/Statique'
+import { MarquiseSchema, TroisForcesMarquise } from '@/components/schemas/Statique'
+import { AngleTirant, ConsoleTriangulee, EtaisButons, IsolementPoutre, LivreSurTable, MarquiseBilan, TirantButon } from '@/components/schemas/StatiqueCours1'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
 
 export const m0 = marquise(EXEMPLE_MARQUISE)
 export const m25 = marquise({ ...EXEMPLE_MARQUISE, alpha: 25 })
@@ -49,6 +51,8 @@ Un livre posé sur une table ne s'enfonce pas, ne glisse pas, ne tourne pas. La 
 Une structure, c'est pareil : une poutre, un mur, une marquise restent immobiles parce que toutes les forces qui s'exercent sur eux se compensent. Rien ne bouge, donc rien ne « gagne » : ni dans une direction, ni en rotation.
 
 Ce constat simple est le **principe fondamental de la statique**. Il fournit trois équations, et ces trois équations suffisent pour trouver les forces que les appuis doivent exercer, les **réactions**, et l'effort dans un tirant ou un câble.
+
+<LivreSurTable />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment trouver les forces inconnues qui maintiennent une structure en équilibre ?
@@ -75,6 +79,8 @@ Trois équations : on peut trouver **au plus trois inconnues** avec la seule sta
 5. **Interpréter les signes** : une valeur négative signifie que la force agit dans le sens opposé à celui supposé. Ce n'est pas une erreur.
 6. **Contrôler** avec une équation non utilisée (par exemple les moments en un autre point).
 
+<IsolementPoutre />
+
 <Regle type="simplification">
 On suppose le solide **indéformable** et les liaisons **parfaites** (sans frottement dans les articulations). Pour une structure de bâtiment, les déformations sont si petites que l'équilibre s'écrit sur la géométrie initiale : c'est l'hypothèse des petits déplacements.
 </Regle>
@@ -86,6 +92,8 @@ On suppose le solide **indéformable** et les liaisons **parfaites** (sans frott
 ### Solide soumis à deux forces
 
 Si un solide n'est soumis qu'à deux forces, elles sont **égales, opposées et portées par la même droite**. C'est le cas d'une barre articulée à ses deux bouts et chargée seulement à ses extrémités : l'effort suit l'axe de la barre. Elle est soit **tendue** (tirant), soit **comprimée** (buton, bracon).
+
+<TirantButon />
 
 ### Solide soumis à trois forces
 
@@ -171,6 +179,8 @@ Elle signifie seulement que la force agit dans le sens opposé à celui dessiné
 Le tirant incliné tire la marquise vers le mur : le mur la repousse en A avec H<sub>A</sub> = {grandeur(m0.HA, 2, 'kN')}. Sans cette force, l'équilibre horizontal est impossible.
 </Piege>
 
+<MarquiseBilan T={m0.T} HA={m0.HA} VA={m0.VA} alpha={EXEMPLE_MARQUISE.alpha} />
+
 <Piege erreur="prendre les moments en un point quelconque.">
 Le résultat est le même, mais avec plus d'inconnues dans l'équation. En choisissant le point où passent les inconnues, on résout en une ligne.
 </Piege>
@@ -189,7 +199,11 @@ Avec trois équations, la statique ne donne que trois inconnues. Au-delà, la st
 Plus le tirant est couché, plus il est sollicité : avec la même marquise, T vaut {grandeur(m60.T, 2, 'kN')} si le tirant est incliné à 60°, {grandeur(m0.T, 2, 'kN')} à 35°, et {grandeur(m25.T, 2, 'kN')} à 25°. Un tirant ancré trop bas, parce que le mur s'arrête sous la toiture, peut être dangereux. On remonte l'ancrage ou l'on change de système.
 </Encadre>
 
+<AngleTirant L={EXEMPLE_MARQUISE.L} cas={[{ alpha: 60, T: m60.T }, { alpha: EXEMPLE_MARQUISE.alpha, T: m0.T }, { alpha: 25, T: m25.T }]} />
+
 **Les étais et les butons.** Sur chantier, les étais qui soutiennent un coffrage et les butons qui tiennent une fouille sont des barres à deux forces : comprimées, elles doivent aussi résister au flambement (L2).
+
+<EtaisButons />
 
 </Page>
 
@@ -223,6 +237,8 @@ $T = \frac{qL^2/2 + PL}{L\sin\alpha}$ · $H_A = T\cos\alpha$ · $V_A = qL + P - 
 
 Une poutre de 5 m repose sur une articulation en A et un appui simple en B. Elle porte une charge de 30 kN à 2 m de A. Calcule les réactions.
 
+<PoutreModele alt="Poutre de 5 m sur une articulation en A et un appui simple en B, chargée par 30 kN à 2 m de A." L={5} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: 5, type: 'simple', nom: 'B' }]} charges={[{ type: 'ponctuelle', nom: 'P', F: 30, a: 2 }]} cotes={[0, 2, 5]} dec={0} prefixe="pm-ex1" />
+
 <Indice>Moments en A pour trouver R<sub>B</sub>, puis ΣF<sub>y</sub> = 0. Il n'y a pas de charge horizontale.</Indice>
 
 <Corrige>
@@ -238,6 +254,8 @@ Reprends la marquise de l'exemple avec un tirant incliné à 25° au lieu de 35�
 
 <Corrige>
 T = (2 × 3² / 2 + 1,5 × 3) / (3 × sin 25°) = **{grandeur(m25.T, 2, 'kN')}** ; H<sub>A</sub> = T cos 25° = **{grandeur(m25.HA, 2, 'kN')}** ; V<sub>A</sub> = **{grandeur(m25.VA, 2, 'kN')}**, inchangée. Le tirant et le mur travaillent beaucoup plus.
+
+<MarquiseSchema d={{ ...EXEMPLE_MARQUISE, alpha: 25 }} r={m25} prefixe="mq-ex2" />
 </Corrige>
 </Exercice>
 
@@ -251,6 +269,8 @@ Une barre horizontale AB de 1,5 m est articulée au mur en A. Un bracon CB, arti
 
 - ΣF<sub>y</sub> au nœud B : la composante verticale du bracon reprend P : |N<sub>CB</sub>| = P × {nombre(ct.longueurBracon, 3)} / 1 = **{grandeur(Math.abs(ct.NCB), 2, 'kN')}**, en **compression** (le bracon pousse B vers le haut).
 - ΣF<sub>x</sub> : la barre AB équilibre la composante horizontale : N<sub>AB</sub> = 10 × 1,5 / 1 = **{grandeur(ct.NAB, 1, 'kN')}**, en **traction**.
+
+<ConsoleTriangulee P={10} L={1.5} h={1} NAB={ct.NAB} NCB={ct.NCB} />
 
 </Corrige>
 </Exercice>

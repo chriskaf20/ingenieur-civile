@@ -19,6 +19,8 @@ import { BARRES_FERME, EXEMPLE_FERME_EFFORTS, fermeEfforts } from '@/lib/calc/st
 import { ferme } from '@/lib/calc/trigo'
 import { grandeur, nombre } from '@/lib/format'
 import { NoeudIsole, TreillisDessin } from '@/components/schemas/Statique'
+import { ArcEtTirant, ToitureFermesPlan, VentSoulevement } from '@/components/schemas/StatiqueCours3'
+import { DiagrammeBarres } from '@/components/drawing/Diagrammes'
 
 export const d = EXEMPLE_FERME_EFFORTS
 export const r = fermeEfforts(d)
@@ -41,6 +43,12 @@ export const lignes = BARRES_FERME.filter((b) => !b.id.includes('M2') && b.id !=
 - ferme en W : arbalétriers coupés en leur milieu (nœuds M1, M2), entrait coupé en trois (nœuds D1, D2), quatre diagonales ;
 - charges permanentes (tôles, pannes, ferme) : g = {grandeur(d.g, 2, 'kN/m²')}, et charge d'entretien : q = {grandeur(d.q, 2, 'kN/m²')}, toutes deux en projection horizontale <AVerifier note="A_VERIFIER.md n° 34 : charges de toiture du mini-projet (hypothèses)" /> ;
 - les pannes sont posées au droit des nœuds de l'arbalétrier.
+
+<ToitureFermesPlan L={d.ferme.L} longueur={d.ferme.longueurBatiment} entraxe={d.ferme.entraxe} />
+
+</Page>
+
+<Page etape="projet" titre="Les livrables">
 
 ### Ce que tu rends
 
@@ -162,15 +170,23 @@ Nœuds supposés articulés (assemblages cloués ou boulonnés), charges appliqu
   </table>
 </div>
 
+</Page>
+
+<Page etape="projet" titre="Ce qu'il faut en retenir">
+
 ### Ce qu'il faut en retenir
 
 - Les **arbalétriers sont comprimés** et l'**entrait tendu** : la ferme fonctionne comme un arc dont l'entrait retient la poussée. Sans entrait, les arbalétriers écarteraient les murs.
 - Les efforts les plus forts sont **près des appuis** : {grandeur(N['A-M1'], 2, 'kN')} dans l'arbalétrier bas, {grandeur(N['A-D1'], 2, 'kN')} dans l'entrait d'extrémité.
 - Les arbalétriers comprimés et longs sont les barres critiques : il faudra vérifier leur **flambement** (L2, EC5), pas seulement leur résistance.
 
+<ArcEtTirant />
+
 <Encadre type="attention">
 Sur une toiture légère en tôles, le vent peut soulever la couverture : les efforts changent alors de signe. L'entrait devient comprimé et doit être tenu contre le flambement, les assemblages doivent résister à l'arrachement. Ce cas, souvent déterminant en RDC lors des orages, n'est pas traité dans ce mini-projet.
 </Encadre>
+
+<VentSoulevement />
 
 </Page>
 
@@ -187,6 +203,8 @@ Sur une toiture légère en tôles, le vent peut soulever la couverture : les ef
 <Encadre type="exemple" titre="Pour aller plus loin">
 Avec une pente de 20° au lieu de 30°, l'arbalétrier bas passe à {grandeur(plat.resultat.efforts['A-M1'], 2, 'kN')} et l'entrait d'extrémité à {grandeur(plat.resultat.efforts['A-D1'], 2, 'kN')}. Pourquoi une toiture plus plate sollicite-t-elle davantage sa ferme ? Et pourquoi, en revanche, une toiture plus raide prend-elle plus le vent ?
 </Encadre>
+
+<DiagrammeBarres alt="Efforts près des appuis selon la pente : avec une toiture plus plate, l'arbalétrier bas et l'entrait d'about sont plus sollicités." titre="efforts près des appuis, en valeur absolue" barres={[{ libelle: `arbalétrier bas, ${nombre(d.ferme.alpha, 0)}°`, valeur: Math.abs(N['A-M1']), texte: grandeur(N['A-M1'], 2, 'kN'), teinte: 'correction' }, { libelle: 'arbalétrier bas, 20°', valeur: Math.abs(plat.resultat.efforts['A-M1']), texte: grandeur(plat.resultat.efforts['A-M1'], 2, 'kN'), teinte: 'correction' }, { libelle: `entrait d’about, ${nombre(d.ferme.alpha, 0)}°`, valeur: Math.abs(N['A-D1']), texte: grandeur(N['A-D1'], 2, 'kN'), teinte: 'encre' }, { libelle: 'entrait d’about, 20°', valeur: Math.abs(plat.resultat.efforts['A-D1']), texte: grandeur(plat.resultat.efforts['A-D1'], 2, 'kN'), teinte: 'encre' }]} />
 
 <Quiz id="L1.3.P">
 

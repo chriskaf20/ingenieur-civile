@@ -34,7 +34,8 @@ formules:
 
 import { degreHyperstaticite, degreTreillis, STRUCTURES_TYPES } from '@/lib/calc/statique'
 import { nombre } from '@/lib/format'
-import { GalerieStructures } from '@/components/schemas/Statique'
+import { GalerieStructures, StructureTypeSchema } from '@/components/schemas/Statique'
+import { DecoupeRotule, JointsDilatation, LiaisonsMalDisposees, PrattVariantes, SymbolesLiaisons, Tabourets, TassementIsoHyper } from '@/components/schemas/StatiqueCours2'
 
 export const h = (id) => {
   const s = STRUCTURES_TYPES.find((t) => t.id === id)
@@ -46,6 +47,7 @@ export const troisAppuis = degreHyperstaticite(4, 1, 0)
 export const pratt = degreTreillis(13, 3, 8)
 export const prattPlus = degreTreillis(14, 3, 8)
 export const prattMoins = degreTreillis(12, 3, 8)
+export const portiques = ['portiqueArticule', 'portiqueEncastre', 'troisRotules']
 
 <Page etape="intuition" titre="L'intuition : le tabouret à trois pieds">
 
@@ -54,6 +56,8 @@ Un tabouret à **trois pieds** tient toujours, même sur un sol inégal : chaque
 Les structures se rangent dans ces trois familles. Avec juste assez de liaisons, elles sont **isostatiques** : la statique suffit à les calculer. Avec trop de liaisons, elles sont **hyperstatiques** : plus robustes, mais il faut connaître leurs déformations. Avec pas assez, ce sont des **mécanismes** : elles bougent.
 
 Avant de calculer une structure, l'ingénieur compte donc ses liaisons : ce comptage dit quelle méthode employer, et parfois qu'il manque un appui.
+
+<Tabourets />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment savoir si la statique suffit pour calculer une structure ?
@@ -83,6 +87,8 @@ Articulation + appui simple : h = 3 − 3 = {nombre(h('deuxAppuis'), 0)}. Deux a
 
 h ≥ 0 ne garantit pas la stabilité : les liaisons doivent aussi être **bien disposées**. Une poutre posée sur trois appuis simples verticaux a r = 3, donc h = 0, mais rien ne l'empêche de glisser horizontalement : c'est un mécanisme. De même, trois réactions concourantes en un point laissent la rotation libre autour de ce point.
 
+<LiaisonsMalDisposees />
+
 </Page>
 
 <Page etape="cours" titre="Le cours (2/2) : rotules, portiques et treillis">
@@ -94,6 +100,8 @@ Si la structure est faite de p parties reliées par des **rotules**, chaque part
 $$h = r + i - 3p$$
 
 La poutre **Gerber** (console + rotule + appui) : r = 4, p = 2, i = 2, donc h = {nombre(h('gerber'), 0)}. Le **portique à trois articulations** : h = {nombre(h('troisRotules'), 0)}. Le portique **encastré en pied**, lui, est un seul solide avec r = 6 : h = {nombre(h('portiqueEncastre'), 0)}.
+
+<DecoupeRotule />
 
 ### Les treillis
 
@@ -172,6 +180,8 @@ Un appui simple n'empêche qu'un déplacement : 1 inconnue. Une articulation : 2
 Une rotule entre deux parties ajoute 2 inconnues, mais aussi 3 équations pour la seconde partie : le bilan change.
 </Piege>
 
+<SymbolesLiaisons rotule prefixe="sli-er" />
+
 <Piege erreur="croire que h = 0 suffit à garantir la stabilité.">
 Trois appuis simples verticaux donnent h = 0, mais la poutre glisse horizontalement. Il faut aussi des liaisons bien disposées.
 </Piege>
@@ -194,7 +204,11 @@ C'est souvent un avantage (réserves de résistance, moments plus faibles). Il f
 Sur les argiles gonflantes ou les remblais mal compactés, les appuis peuvent se déplacer de plusieurs centimètres au fil des saisons des pluies et de la saison sèche. Une structure hyperstatique fissure alors, car chaque tassement différentiel crée des efforts. Les ponts et les ouvrages construits sur ces sols sont souvent conçus **isostatiques** (travées indépendantes, poutres Gerber, joints), pour suivre les mouvements sans dommage.
 </Encadre>
 
+<TassementIsoHyper />
+
 **Les joints de dilatation.** Couper un long bâtiment par des joints (N0.7.6) revient à réduire son hyperstaticité : chaque bloc peut se dilater librement, sans efforts dus à la température.
+
+<JointsDilatation />
 
 </Page>
 
@@ -232,6 +246,8 @@ Une poutre repose sur une articulation et deux appuis simples. Calcule son degr�
 
 <Corrige>
 r = 4, h = 4 − 3 = **{nombre(troisAppuis.h, 0)}** : la poutre continue est **{troisAppuis.nature}** de degré 1.
+
+<StructureTypeSchema id="continue" h={troisAppuis.h} nature={troisAppuis.nature} prefixe="sty-ex1" />
 </Corrige>
 </Exercice>
 
@@ -247,6 +263,8 @@ Calcule h pour un portique articulé en pied, un portique encastré en pied et u
 - Encastré en pied : r = 3 + 3 = 6, h = **{nombre(h('portiqueEncastre'), 0)}**.
 - Trois articulations : r = 4, i = 2, p = 2, h = 4 + 2 − 6 = **{nombre(h('troisRotules'), 0)}** : isostatique.
 
+<GalerieStructures ids={portiques} degres={portiques.map(h)} prefixe="gal-ex2" />
+
 </Corrige>
 </Exercice>
 
@@ -261,6 +279,8 @@ Une poutre treillis Pratt à 4 panneaux compte 8 nœuds et 13 barres ; elle repo
 - 13 + 3 − 16 = **{nombre(pratt.h, 0)}** : isostatique.
 - Une diagonale de plus : h = **{nombre(prattPlus.h, 0)}**, hyperstatique.
 - Une diagonale de moins : h = **{nombre(prattMoins.h, 0)}** : le panneau se déforme en parallélogramme, c'est un mécanisme.
+
+<PrattVariantes degres={[pratt.h, prattPlus.h, prattMoins.h]} />
 
 </Corrige>
 </Exercice>

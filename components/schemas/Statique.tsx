@@ -1181,8 +1181,8 @@ export function TroisAppuisPlan({ d, R }: { d: DonneesTroisAppuis; R: readonly [
           </Etiquette>
         </g>
       ))}
-      <Fleche x1={X(Math.min(...xs)) - 30} y1={Y(Math.min(...ys)) + 24} x2={X(Math.min(...xs)) + 30} y2={Y(Math.min(...ys)) + 24} couleur="var(--trait)" epaisseur={1.4} tete={7} texte="x" tx={X(Math.min(...xs)) + 34} ty={Y(Math.min(...ys)) + 28} />
-      <Fleche x1={X(Math.min(...xs)) - 30} y1={Y(Math.min(...ys)) + 24} x2={X(Math.min(...xs)) - 30} y2={Y(Math.min(...ys)) - 36} couleur="var(--trait)" epaisseur={1.4} tete={7} texte="y" tx={X(Math.min(...xs)) - 26} ty={Y(Math.min(...ys)) - 38} />
+      <Fleche x1={24} y1={92} x2={78} y2={92} couleur="var(--trait)" epaisseur={1.4} tete={7} texte="x" tx={82} ty={96} />
+      <Fleche x1={24} y1={92} x2={24} y2={38} couleur="var(--trait)" epaisseur={1.4} tete={7} texte="y" tx={28} ty={40} />
     </Figure>
   );
 }

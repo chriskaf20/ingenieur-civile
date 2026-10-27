@@ -1,16 +1,16 @@
 # Avancement
 
-**Phase en cours :** enrichissement en schémas de tout le contenu existant (demande utilisateur), module par module dans l'ordre du parcours, arrêt après chaque module. N0.1 terminé ; attendre « continue » pour N0.2.
+**Phase en cours :** enrichissement en schémas de L1.3 à L1.5, puis rédaction de L1.6 à L1.8 (demande utilisateur), modules enchaînés avec build, tests, A4, commit et push après chacun. N0.1 et L1.3 terminés ; en cours : L1.4.
 
 **Fait :**
 - Phases 0 à 3 validées. Seuil de validation des quiz et examens : 65 % (`SEUIL_VALIDATION`), en conseil non bloquant.
-- Phase 4 : N0.1 à N0.7 et L1.1 à L1.5 complets (leçons, mini-projets, examens) ; leçons vitrines L1.6, L3.3, L3.6, L3.8.
-- Schémas : diagrammes génériques `components/drawing/Diagrammes.tsx` (flux, cycle, comparaison, barres ; espace insécable = pas de coupure). N0.1 : 12 → 58 figures, plus aucune page de cours, d'erreurs ou de terrain sans figure.
+- Phase 4 : N0.1 à N0.7 et L1.1 à L1.5 complets (leçons, mini-projets, examens) ; leçons vitrines L1.6.5, L3.3, L3.6, L3.8.
+- Schémas : `components/drawing/Diagrammes.tsx` (flux, cycle, comparaison, barres) et `PoutreModele.tsx` (poutre, appuis, charges, réactions, cotes). N0.1 : 12 → 58 figures ; L1.3 : 29 → 143 (`components/schemas/StatiqueCours1-3.tsx`), plus aucune page de cours, d'erreurs ou de terrain sans figure.
 - `<FicheCalcul depart={…}>` : une fiche peut repartir de valeurs propres à une leçon.
 - Contrôles automatiques : identifiants SVG en double (`postbuild`), A4 et console (Chrome headless) ; toutes les feuilles de N0.1 à L1.5 tiennent en A4.
 - 271 tests au vert, build au vert.
 
-**Prochaine étape :** schémas de N0.2, puis N0.3 à L1.5 et les leçons vitrines ; ensuite le module L1.6.
+**Prochaine étape :** schémas de L1.4, puis L1.5 ; ensuite rédiger L1.6 (compléter autour de L1.6.5), L1.7 et L1.8.
 
 **Points bloquants :**
 - `references/` toujours vide : style fondé sur les descriptions du prompt.

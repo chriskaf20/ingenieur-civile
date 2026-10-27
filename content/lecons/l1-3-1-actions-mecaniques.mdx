@@ -39,6 +39,8 @@ import { chargePoutre, EXEMPLE_CHARGE_POUTRE, poidsSurfacique } from '@/lib/calc
 import { POIDS_VOLUMIQUE_BA } from '@/lib/calc/methode'
 import { poidsDeMasse } from '@/lib/calc/unites'
 import { grandeur, nombre } from '@/lib/format'
+import { AnatomieForce, ChargesGQ, CheminCiterne, CiterneEtMur, DemiTravees, DuReelAuModele, LargeurOuPortee, MassePoids, PaletteSurDalle, QuatreRepartitions } from '@/components/schemas/StatiqueCours1'
+import { BandeChargement } from '@/components/schemas/Statique'
 
 export const c0 = chargePoutre(EXEMPLE_CHARGE_POUTRE)
 export const sac = poidsDeMasse(50)
@@ -59,13 +61,15 @@ Un sac de ciment devient une flèche verticale au point où il est posé. Un mur
 
 C'est la première étape de tout calcul de structure, et la plus importante : si une charge est oubliée ou mal placée, le calcul le plus soigné donne un résultat faux.
 
+<DuReelAuModele />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Comment transformer les charges réelles d'un bâtiment en forces que l'on sait calculer ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : forces, masses et poids">
+<Page etape="cours" titre="Le cours (1/4) : actions et forces">
 
 ### Les actions mécaniques
 
@@ -83,6 +87,12 @@ Une force se modélise par un vecteur (N0.6) :
 3. un **sens** ;
 4. une **intensité**, en newtons (N) ou en kilonewtons (1 kN = 1 000 N).
 
+<AnatomieForce />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/4) : poids et répartitions">
+
 ### Masse et poids
 
 La masse m (kg) mesure la quantité de matière ; le **poids** P est la force de la pesanteur sur cette masse : P = m g (N0.7.2). Un sac de ciment de 50 kg pèse {grandeur(sac, 1, 'N')}, soit environ {grandeur(sac / 1000, 2, 'kN')}. Un mètre cube d'eau (1 000 kg) pèse {grandeur(eau / 1000, 2, 'kN')}.
@@ -95,10 +105,6 @@ En calcul de structure, on travaille en kN. Repère utile : 1 kN est le poids d'
 
 Le **poids volumique** γ est le poids d'un mètre cube de matériau, en kN/m³. Pour le béton armé, on prend γ = {nombre(POIDS_VOLUMIQUE_BA, 0)} kN/m³ (EC1, annexe A). C'est une valeur normative, à ne pas confondre avec la masse volumique (kg/m³).
 
-</Page>
-
-<Page etape="cours" titre="Le cours (2/2) : du volume à la poutre">
-
 ### Quatre manières de répartir une charge
 
 | Charge | Unité | Exemple |
@@ -110,9 +116,25 @@ Le **poids volumique** γ est le poids d'un mètre cube de matériau, en kN/m³.
 
 On passe de l'une à l'autre en multipliant par une dimension. Une dalle de 16 cm en béton armé pèse γ × épaisseur = {nombre(POIDS_VOLUMIQUE_BA, 0)} × 0,16 = {grandeur(dalle16, 2, 'kN/m²')}.
 
+<QuatreRepartitions />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/4) : la largeur d'influence">
+
 ### La largeur d'influence
 
 Une poutre de plancher porte la bande de dalle située à mi-distance de ses voisines : sa **largeur d'influence** e, égale à l'entraxe des poutres. Une charge surfacique g (kN/m²) devient alors une charge linéique g × e (kN/m). On ajoute le **poids propre** de la retombée de la poutre, γ b h.
+
+<DemiTravees />
+
+<Regle type="simplification">
+Dans cette leçon, les charges g et q sont des données de l'énoncé. On suppose aussi que chaque poutre reçoit exactement la moitié de chaque travée de dalle voisine : c'est la règle des largeurs d'influence, exacte pour des poutres régulières et une dalle portant dans une seule direction.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (4/4) : permanentes et variables">
 
 ### Permanentes et variables
 
@@ -121,9 +143,7 @@ Une poutre de plancher porte la bande de dalle située à mi-distance de ses voi
 
 Pour vérifier la résistance, l'EC0 combine ces charges avec des coefficients de sécurité : p = 1,35 G + 1,5 Q (expression 6.10, état limite ultime). C'est une **règle normative** ; les valeurs de g et q d'un projet viennent de l'EC1 et des choix du projet (L3.2).
 
-<Regle type="simplification">
-Dans cette leçon, les charges g et q sont des données de l'énoncé. On suppose aussi que chaque poutre reçoit exactement la moitié de chaque travée de dalle voisine : c'est la règle des largeurs d'influence, exacte pour des poutres régulières et une dalle portant dans une seule direction.
-</Regle>
+<ChargesGQ />
 
 </Page>
 
@@ -202,6 +222,8 @@ Chaque action devient une force ponctuelle (kN), linéique (kN/m) ou surfacique 
 Un sac de 50 kg ne « pèse » pas 50 kN : il pèse {grandeur(sac / 1000, 2, 'kN')}. Les kilogrammes mesurent une masse ; les forces s'expriment en N ou en kN.
 </Piege>
 
+<MassePoids masse={50} poids={sac} />
+
 <Piege erreur="oublier le poids propre de la poutre.">
 Sans lui, la charge permanente de l'exemple tomberait à {grandeur(sansPP.G, 2, 'kN/m')} au lieu de {grandeur(c0.G, 2, 'kN/m')}. Pour les grandes portées, le poids propre est souvent la charge principale.
 </Piege>
@@ -209,6 +231,8 @@ Sans lui, la charge permanente de l'exemple tomberait à {grandeur(sansPP.G, 2, 
 <Piege erreur="multiplier la charge surfacique par la portée.">
 La largeur d'influence (perpendiculaire à la poutre) donne des kN/m ; la portée (le long de la poutre) sert ensuite à obtenir la charge totale en kN.
 </Piege>
+
+<LargeurOuPortee />
 
 <Piege erreur="mélanger kN/m² et kN/m.">
 On écrit l'unité à chaque ligne. Une charge en kN/m² posée sur une poutre n'a pas de sens : il manque la largeur d'influence.
@@ -224,9 +248,13 @@ G + Q sert aux vérifications de service (flèches) ; la résistance se vérifie
 
 **Les surcharges de chantier.** Une palette de 50 sacs de ciment pèse {grandeur(palette / 1000, 1, 'kN')}, posée sur à peine plus d'un mètre carré. C'est bien plus que la charge d'exploitation d'un plancher d'habitation. Avant de stocker des matériaux sur une dalle, surtout jeune, on vérifie qu'elle peut les porter, ou l'on répartit le stock et l'on étaie.
 
+<PaletteSurDalle nSacs={50} poidsSac={sac / 1000} poidsPalette={palette / 1000} />
+
 <Encadre type="terrain" titre="Les citernes sur les toits">
 Faute de pression régulière dans le réseau, beaucoup de maisons de Kinshasa ou de Lubumbashi ont une citerne sur le toit ou sur une dalle. Chaque mètre cube d'eau pèse {grandeur(eau / 1000, 2, 'kN')}. Une citerne posée sans vérification sur une dalle conçue pour des personnes peut provoquer fissures et flèches importantes. La charge se calcule : volume × poids volumique de l'eau, répartie sur la surface d'appui.
 </Encadre>
+
+<CheminCiterne poidsM3={eau / 1000} />
 
 **Les murs posés sur les planchers.** Un mur en blocs ajouté après coup, posé sur une dalle ou une poutre qui n'était pas prévue pour lui, devient une charge linéique importante. Toute transformation d'un bâtiment commence par le recensement des charges nouvelles.
 
@@ -281,6 +309,8 @@ Dans l'exemple résolu, on rapproche les poutres : l'entraxe passe de 4 m à 3 m
 
 <Corrige>
 G = 5,5 × 3 + {nombre(e3.pp, 2)} = **{grandeur(e3.G, 2, 'kN/m')}** ; Q = 2,5 × 3 = **{grandeur(e3.Q, 2, 'kN/m')}** ; ELU : **{grandeur(e3.pELU, 2, 'kN/m')}**, au lieu de {grandeur(c0.pELU, 2, 'kN/m')}. Plus de poutres, mais chacune moins chargée.
+
+<BandeChargement d={{ ...EXEMPLE_CHARGE_POUTRE, e: 3 }} r={e3} prefixe="bc-ex2" />
 </Corrige>
 </Exercice>
 
@@ -292,6 +322,8 @@ Une citerne de 1,2 m de hauteur d'eau repose sur toute sa surface sur une dalle.
 
 <Corrige>
 Citerne : 10 × 1,2 = **{grandeur(citerne, 1, 'kN/m²')}**, bien plus que les quelques kN/m² d'exploitation d'un logement : la dalle doit être vérifiée. Mur : 14 × 0,20 = **{grandeur(mur20, 1, 'kN/m²')}** de surface de mur, qu'on multiplie par sa hauteur pour obtenir une charge linéique en kN/m.
+
+<CiterneEtMur hEau={1.2} gEau={10} qCiterne={citerne} eMur={0.2} gMur={14} qMur={mur20} />
 </Corrige>
 </Exercice>
 

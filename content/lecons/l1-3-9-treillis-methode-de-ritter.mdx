@@ -34,6 +34,8 @@ formules:
 import { EXEMPLE_PRATT, geometriePratt, ritterPratt, treillis } from '@/lib/calc/statique'
 import { grandeur, nombre } from '@/lib/format'
 import { CoupeRitter } from '@/components/schemas/Statique'
+import { BarreCorrodee, CentresRitter, CoupeLongPont, QuatreBarresCoupees, TreillisPoutreEquivalente } from '@/components/schemas/StatiqueCours3'
+import { DiagrammeBarres, DiagrammeFlux } from '@/components/drawing/Diagrammes'
 
 export const r2 = ritterPratt(EXEMPLE_PRATT, 2)
 export const r1 = ritterPratt(EXEMPLE_PRATT, 1)
@@ -50,13 +52,15 @@ L'idée de Ritter, ingénieur allemand du XIX<sup>e</sup> siècle : **couper** l
 
 C'est aussi la façon dont l'ingénieur « lit » un treillis : les membrures portent le moment, les diagonales portent l'effort tranchant, comme dans une poutre.
 
+<CoupeLongPont />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Comment trouver l'effort dans une barre précise d'un treillis, sans calculer toutes les autres ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : la coupe et les moments">
+<Page etape="cours" titre="Le cours (1/3) : la coupe et les moments">
 
 ### La méthode
 
@@ -66,6 +70,12 @@ Comment trouver l'effort dans une barre précise d'un treillis, sans calculer to
 4. Pour chaque barre, prendre les moments autour du **point d'intersection des deux autres** : seule la barre cherchée reste dans l'équation.
 5. Si deux barres sont **parallèles** (les membrures), leur intersection est rejetée à l'infini : on projette alors perpendiculairement à elles pour obtenir la troisième.
 
+<DiagrammeFlux alt="La méthode de Ritter en cinq temps : calculer les réactions du treillis entier ; couper à travers trois barres au plus ; isoler une partie avec les efforts coupés dessinés en traction ; prendre les moments autour de l'intersection des deux autres barres ; projeter perpendiculairement aux barres parallèles." etapes={[{ titre: 'Réactions', texte: 'du treillis entier', teinte: 'validation' }, { titre: 'Couper', texte: '3 barres inconnues au plus', teinte: 'correction' }, { titre: 'Isoler', texte: 'une partie, efforts en traction', teinte: 'acier' }, { titre: 'Moments', texte: 'autour de l’intersection des 2 autres', teinte: 'encre' }, { titre: 'Projeter', texte: 'si 2 barres parallèles', teinte: 'terre' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la coupe dans une poutre Pratt">
+
 ### Dans une poutre Pratt
 
 Coupons le panneau k, entre les nœuds inférieurs B<sub>k−1</sub> et B<sub>k</sub> :
@@ -74,13 +84,15 @@ Coupons le panneau k, entre les nœuds inférieurs B<sub>k−1</sub> et B<sub>k<
 - **membrure inférieure** : moments autour du nœud supérieur où se coupent la membrure supérieure et la diagonale : N<sub>inf</sub> h = M ;
 - **diagonale** : les membrures sont parallèles ; la projection verticale donne N<sub>diag</sub> sin θ = V, l'effort tranchant du panneau.
 
+<CentresRitter />
+
 <Regle type="simplification">
 Comme pour la méthode des nœuds, on suppose les nœuds articulés et les charges aux nœuds. La coupe doit traverser le treillis de part en part : chaque partie doit être un solide complet, en équilibre.
 </Regle>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (2/2) : le treillis lu comme une poutre">
+<Page etape="cours" titre="Le cours (3/3) : le treillis lu comme une poutre">
 
 ### Membrures et moment fléchissant
 
@@ -93,6 +105,8 @@ Les membrures sont donc les plus chargées là où le moment est maximal : **au 
 ### Diagonales et effort tranchant
 
 L'effort tranchant V (somme des forces verticales à gauche de la coupe) ne peut être repris que par la diagonale, la seule barre coupée qui ne soit pas horizontale. Les diagonales sont donc les plus chargées **près des appuis**, là où V est maximal.
+
+<TreillisPoutreEquivalente d={EXEMPLE_PRATT} />
 
 <Encadre type="exemple" titre="La passerelle de L1.3.8">
 Dans le panneau 2 : M au nœud droit = {grandeur(r2.Mdroite, 0, 'kN·m')}, d'où N<sub>sup</sub> = −{nombre(r2.Mdroite, 0)} / 3 = {grandeur(r2.Nsup, 0, 'kN')}. Effort tranchant V = {grandeur(r2.V, 0, 'kN')}, d'où N<sub>diag</sub> = {grandeur(r2.Ndiag, 2, 'kN')}. La méthode des nœuds donne exactement les mêmes valeurs.
@@ -166,6 +180,8 @@ Couper à travers trois barres au plus ; moments autour de l'intersection des de
 Trois équations ne résolvent pas quatre inconnues. On choisit une coupe qui traverse trois barres au plus.
 </Piege>
 
+<QuatreBarresCoupees />
+
 <Piege erreur="prendre un centre de moments quelconque.">
 Le résultat reste juste, mais avec deux ou trois inconnues dans l'équation. L'intérêt de Ritter est de prendre l'intersection des deux autres barres.
 </Piege>
@@ -187,6 +203,8 @@ On la dessine en traction ; un résultat négatif signale une compression, comme
 <Page etape="terrain" titre="Sur le terrain">
 
 **Vérifier une barre critique.** Lors de l'inspection d'un pont en treillis, l'ingénieur repère les barres corrodées ou déformées. La méthode de Ritter lui donne en quelques lignes l'effort de chacune, pour juger si la section restante suffit, sans refaire tout le calcul.
+
+<BarreCorrodee />
 
 <Encadre type="terrain" titre="Contrôler les logiciels">
 Les bureaux d'études calculent les treillis par ordinateur. Une coupe de Ritter au milieu de la portée est le contrôle le plus rapide : l'effort des membrures doit être voisin de M/h, avec M le moment de la poutre équivalente. Un écart important signale une erreur de saisie (charge oubliée, appui mal défini).
@@ -230,6 +248,8 @@ Pour la passerelle (4 panneaux de 3 m, h = 3 m, 20 kN par nœud), calcule le mom
 
 <Corrige>
 M = 30 × 6 − 20 × 3 = **{grandeur(r2.Mdroite, 0, 'kN·m')}** ; N<sub>sup</sub> = −{nombre(r2.Mdroite, 0)} / 3 = **{grandeur(r2.Nsup, 0, 'kN')}** (compression).
+
+<CoupeRitter d={EXEMPLE_PRATT} r={r2} />
 </Corrige>
 </Exercice>
 
@@ -244,6 +264,8 @@ Un treillis Pratt de 6 panneaux de 2,5 m, haut de 2 m, porte 15 kN à chaque nœ
 - R<sub>A</sub> = **{grandeur(s63.RA, 1, 'kN')}** ; M(5 m) = {grandeur(s63.Mgauche, 2, 'kN·m')} ; M(7,5 m) = {grandeur(s63.Mdroite, 2, 'kN·m')}.
 - N<sub>sup</sub> = **{grandeur(s63.Nsup, 2, 'kN')}** ; N<sub>inf</sub> = **{grandeur(s63.Ninf, 2, 'kN')}** ; V = {grandeur(s63.V, 1, 'kN')}, N<sub>diag</sub> = **{grandeur(s63.Ndiag, 2, 'kN')}**.
 
+<CoupeRitter d={d6} r={s63} />
+
 </Corrige>
 </Exercice>
 
@@ -255,6 +277,8 @@ Pour le treillis de l'exercice 2, compare les efforts des membrures supérieures
 
 <Corrige>
 Membrures supérieures : {grandeur(s62.Nsup, 2, 'kN')} (panneau 2) puis **{grandeur(s63.Nsup, 2, 'kN')}** (panneau 3) : elles croissent vers le milieu, comme le moment. Diagonales : **{grandeur(s62.Ndiag, 2, 'kN')}** puis {grandeur(s63.Ndiag, 2, 'kN')} : elles décroissent vers le milieu, comme l'effort tranchant.
+
+<DiagrammeBarres alt="Efforts du treillis de l'exercice 2, en valeur absolue : les membrures supérieures croissent du panneau 2 au panneau 3, comme le moment ; les diagonales décroissent, comme l'effort tranchant." titre="efforts en valeur absolue (treillis de l'exercice 2)" barres={[{ libelle: 'membrure sup., panneau 2', valeur: Math.abs(s62.Nsup), texte: grandeur(s62.Nsup, 2, 'kN'), teinte: 'correction' }, { libelle: 'membrure sup., panneau 3', valeur: Math.abs(s63.Nsup), texte: grandeur(s63.Nsup, 2, 'kN'), teinte: 'correction' }, { libelle: 'diagonale, panneau 2', valeur: Math.abs(s62.Ndiag), texte: grandeur(s62.Ndiag, 2, 'kN'), teinte: 'encre' }, { libelle: 'diagonale, panneau 3', valeur: Math.abs(s63.Ndiag), texte: grandeur(s63.Ndiag, 2, 'kN'), teinte: 'encre' }]} />
 </Corrige>
 </Exercice>
 

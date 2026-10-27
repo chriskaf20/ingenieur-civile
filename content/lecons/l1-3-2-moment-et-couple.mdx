@@ -35,6 +35,7 @@ formules:
 import { EXEMPLE_MOMENT_FORCE, forceLevier, momentForceO } from '@/lib/calc/statique'
 import { grandeur, nombre } from '@/lib/format'
 import { MomentForceSchema } from '@/components/schemas/Statique'
+import { BrasOuDistance, CleEtPorte, CoupleEtLevier, FixationMurale, LevierBarre, PanneauVent, PotenceTroisCables, ProprietesMoment, VarignonSchema } from '@/components/schemas/StatiqueCours1'
 
 export const m0 = momentForceO(EXEMPLE_MOMENT_FORCE)
 export const panneau = { xA: 0, yA: 2.5, F: 6, theta: 0 }
@@ -52,13 +53,15 @@ Cet effet de rotation s'appelle le **moment** de la force. Il dépend de l'inten
 
 En structure, tout est affaire de moments : un poteau qui reçoit une poussée horizontale en tête, un panneau publicitaire poussé par le vent, une console qui porte une charge à son extrémité. Le moment dit ce que la fixation doit retenir.
 
+<CleEtPorte />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Comment mesurer l'effet de rotation d'une force, et comment le calculer quand la force est inclinée ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : moment et bras de levier">
+<Page etape="cours" titre="Le cours (1/3) : moment et bras de levier">
 
 ### Définition
 
@@ -78,13 +81,15 @@ On choisit un sens positif, et on s'y tient. Convention habituelle : **positif d
 2. On peut faire **glisser** une force le long de sa ligne d'action sans changer son moment.
 3. Le moment dépend du point choisi : une même force a des moments différents en des points différents.
 
+<ProprietesMoment />
+
 <Encadre type="exemple" titre="Le vent sur un panneau">
 Le vent pousse un panneau de chantier avec une force horizontale de {grandeur(panneau.F, 0, 'kN')} appliquée à {grandeur(panneau.yA, 1, 'm')} de haut. Au pied du poteau, le bras de levier est la hauteur : M = {nombre(panneau.F, 0)} × {nombre(panneau.yA, 1)} = {grandeur(Math.abs(mp.M), 1, 'kN·m')}, dans le sens horaire si le vent souffle vers la droite.
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (2/2) : Varignon et les couples">
+<Page etape="cours" titre="Le cours (2/3) : le théorème de Varignon">
 
 ### Le théorème de Varignon
 
@@ -93,6 +98,12 @@ Quand la force est inclinée, trouver le bras de levier demande de la géométri
 $$M_O = x_A\,F_y - y_A\,F_x$$
 
 F<sub>y</sub> a pour bras de levier x<sub>A</sub> ; F<sub>x</sub> a pour bras de levier y<sub>A</sub>, avec un signe moins (une force vers la droite au-dessus de O fait tourner dans le sens horaire). C'est la composante z du produit vectoriel de N0.6.5.
+
+<VarignonSchema />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : couples et leviers">
 
 ### Le couple
 
@@ -105,6 +116,8 @@ Une clé dynamométrique applique un couple de serrage, en N·m, indiqué par le
 ### Le levier
 
 Un levier en équilibre autour de son pivot vérifie F b<sub>F</sub> = P b<sub>P</sub> : les moments des deux forces se compensent. Avec un bras long du côté de l'effort, une petite force soulève une grande charge : c'est le principe de la barre à mine.
+
+<CoupleEtLevier />
 
 </Page>
 
@@ -165,6 +178,8 @@ Moment = force × bras de levier, le bras étant mesuré **perpendiculairement**
 Le bras de levier est la distance de O à la ligne d'action, pas au point d'application. Avec OA, on trouverait {grandeur(faux, 2, 'kN·m')} au lieu de {grandeur(Math.abs(m0.M), 2, 'kN·m')}.
 </Piege>
 
+<BrasOuDistance />
+
 <Piege erreur="oublier le signe.">
 Deux moments de sens contraires se retranchent. On fixe une convention (trigonométrique positif) et on l'écrit avant de calculer.
 </Piege>
@@ -186,6 +201,8 @@ Un couple a une résultante nulle : aucune force unique ne peut le remplacer. Il
 <Page etape="terrain" titre="Sur le terrain">
 
 **Les fixations au mur.** Potences, consoles, auvents, garde-corps : la fixation reprend la charge **et** son moment. Plus la charge est loin du mur, plus les chevilles du haut sont arrachées. C'est pourquoi on dimensionne les fixations avec le moment, pas seulement avec le poids.
+
+<FixationMurale />
 
 <Encadre type="terrain" titre="Les panneaux et le vent">
 Panneaux publicitaires, enseignes et panneaux de chantier sont nombreux le long des grands axes de Kinshasa. Sous une rafale, la force du vent appliquée en hauteur crée un moment important au pied du poteau : {grandeur(Math.abs(mp.M), 1, 'kN·m')} dans l'exemple du cours. Un massif de fondation trop petit, ou un poteau mal encastré, et le panneau se couche.
@@ -225,11 +242,13 @@ $F\,b_F = P\,b_P$
 
 </FicheMemo>
 
-<Page etape="exercices" titre="Les exercices">
+<Page etape="exercices" titre="Les exercices (1/2)">
 
 <Exercice n={1} niveau="facile" titre="Le panneau de chantier">
 
 Le vent pousse un panneau avec une force horizontale de {grandeur(panneau.F, 0, 'kN')}, appliquée à {grandeur(panneau.yA, 1, 'm')} du sol. Quel moment au pied du poteau ?
+
+<PanneauVent F={panneau.F} h={panneau.yA} />
 
 <Indice>La force est horizontale : son bras de levier par rapport au pied est la hauteur.</Indice>
 
@@ -242,12 +261,18 @@ M = F × d = {nombre(panneau.F, 0)} × {nombre(panneau.yA, 1)} = **{grandeur(Mat
 
 Pour soulever une pierre de 3 kN, un ouvrier glisse une barre à mine sous la pierre, avec un pivot à 0,15 m de la pierre. Il appuie à 1,35 m du pivot. Quelle force doit-il exercer ?
 
+<LevierBarre P={3} bP={0.15} bF={1.35} />
+
 <Indice>Équilibre des moments autour du pivot : F × 1,35 = 3 × 0,15.</Indice>
 
 <Corrige>
 F = 3 × 0,15 / 1,35 = **{grandeur(levier, 3, 'kN')}**, soit environ {grandeur(levier * 1000, 0, 'N')} : {nombre(3 / levier, 0)} fois moins que le poids de la pierre.
 </Corrige>
 </Exercice>
+
+</Page>
+
+<Page etape="exercices" titre="Les exercices (2/2)">
 
 <Exercice n={3} niveau="difficile" titre="Le câble change de direction">
 
@@ -260,6 +285,8 @@ Pour la potence de l'exemple (A à 1,20 m du mur et 0,40 m au-dessus de O, force
 - Vertical : F<sub>x</sub> = 0, M = 1,20 × (−20) = **{grandeur(mVert.M, 2, 'kN·m')}**.
 - Incliné vers le mur : **{grandeur(mMur.M, 2, 'kN·m')}**, contre {grandeur(m0.M, 2, 'kN·m')} dans l'exemple.
 - Tournée vers l'extérieur, la composante horizontale ajoute du moment ; tournée vers le mur, elle en retire. La verticale de la charge n'est donc pas toujours le cas le plus défavorable.
+
+<PotenceTroisCables xA={EXEMPLE_MOMENT_FORCE.xA} yA={EXEMPLE_MOMENT_FORCE.yA} F={EXEMPLE_MOMENT_FORCE.F} cas={[{ theta: EXEMPLE_MOMENT_FORCE.theta, M: m0.M }, { theta: -90, M: mVert.M }, { theta: -105, M: mMur.M }]} />
 
 </Corrige>
 </Exercice>

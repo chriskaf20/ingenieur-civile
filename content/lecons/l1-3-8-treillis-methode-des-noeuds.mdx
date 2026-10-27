@@ -34,6 +34,7 @@ formules:
 import { EXEMPLE_PRATT, geometriePratt, ritterPratt, treillis } from '@/lib/calc/statique'
 import { grandeur, nombre } from '@/lib/format'
 import { NoeudIsole, TreillisDessin } from '@/components/schemas/Statique'
+import { BarresNulles, CarreTriangle, ChargeEntreNoeuds, EchafaudageContreventement, SensEffortNoeud } from '@/components/schemas/StatiqueCours2'
 
 export const g0 = geometriePratt(EXEMPLE_PRATT)
 export const t0 = treillis(g0)
@@ -42,6 +43,8 @@ export const sinT = ritterPratt(EXEMPLE_PRATT, 1).sinDiag
 export const angleDiag = (Math.atan2(EXEMPLE_PRATT.h, EXEMPLE_PRATT.a) * 180) / Math.PI
 export const t30 = treillis(geometriePratt({ ...EXEMPLE_PRATT, P: 30 }))
 export const tBas = treillis(geometriePratt({ ...EXEMPLE_PRATT, h: 2 }))
+export const g30 = geometriePratt({ ...EXEMPLE_PRATT, P: 30 })
+export const gBas = geometriePratt({ ...EXEMPLE_PRATT, h: 2 })
 
 <Page etape="intuition" titre="L'intuition : le triangle ne se déforme pas">
 
@@ -50,6 +53,8 @@ Prends quatre baguettes et relie-les par des clous à leurs extrémités pour fo
 Le **triangle** est la seule figure indéformable quand ses côtés sont articulés. En assemblant des triangles, on obtient un **treillis** : une structure légère et rigide, qui porte de grandes charges avec peu de matière. Fermes de toiture, ponts métalliques, pylônes électriques, grues : tous sont des treillis.
 
 Dans un treillis bien conçu, chaque barre est simplement **tirée** ou **poussée** suivant son axe, sans fléchir. Il suffit de connaître ces efforts pour choisir les barres.
+
+<CarreTriangle />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment trouver l'effort dans chaque barre d'un treillis ?
@@ -81,6 +86,8 @@ Un treillis plan de b barres, n nœuds et r réactions est isostatique si b + r 
 
 À un nœud, l'effort d'une barre **tendue** tire le nœud vers la barre : la flèche **quitte** le nœud. Une barre **comprimée** pousse le nœud : la flèche **arrive** sur le nœud.
 
+<SensEffortNoeud />
+
 </Page>
 
 <Page etape="cours" titre="Le cours (2/2) : la méthode des nœuds">
@@ -102,6 +109,8 @@ Sans charge au nœud :
 - si seulement deux barres non alignées s'y rejoignent, **les deux** sont nulles.
 
 Dans la passerelle, le montant central est nul : au nœud supérieur du milieu, sans charge, les deux membrures sont alignées.
+
+<BarresNulles />
 
 ### Ce que montrent les résultats
 
@@ -187,6 +196,8 @@ Comme dans une poutre fléchie, la **membrure supérieure est comprimée** et la
 Une charge au milieu d'une barre la fait fléchir : le modèle articulé ne s'applique plus tel quel. On ramène les charges aux nœuds (par les pièces de pont, les pannes) ou l'on calcule la barre en flexion.
 </Piege>
 
+<ChargeEntreNoeuds />
+
 <Piege erreur="se tromper de sens de flèche.">
 On dessine toujours les inconnues en traction (flèches qui quittent le nœud) : le signe du résultat dit ensuite la vérité, sans hésitation.
 </Piege>
@@ -214,6 +225,8 @@ Les membrures d'un treillis jouent le rôle des fibres d'une poutre : plus le tr
 </Encadre>
 
 **Les pylônes et les échafaudages.** Les lignes électriques à haute tension et les tours de télécommunication sont des treillis dans l'espace. Les échafaudages tubulaires sont contreventés par des diagonales : sans elles, comme le carré articulé, ils se déforment et s'écroulent.
+
+<EchafaudageContreventement />
 
 </Page>
 
@@ -255,6 +268,8 @@ Dans la passerelle, pourquoi le montant central (entre le nœud supérieur du mi
 
 <Corrige>
 Au nœud supérieur central arrivent les deux membrures supérieures, alignées, et le montant ; aucune charge n'y est appliquée. ΣF<sub>y</sub> = 0 ne fait intervenir que le montant : N<sub>mont2</sub> = **{nombre(t0.efforts.mont2, 0)}**.
+
+<NoeudIsole compact titre="Nœud T2" forces={[{ nom: 'sup2', angle: 180, valeur: t0.efforts.sup2, type: 'barre' }, { nom: 'sup3', angle: 0, valeur: t0.efforts.sup3, type: 'barre' }, { nom: 'mont2', angle: -90, valeur: t0.efforts.mont2, type: 'barre' }]} />
 </Corrige>
 </Exercice>
 
@@ -266,6 +281,8 @@ On porte la charge à 30 kN par nœud. Calcule la réaction R<sub>A</sub>, puis 
 
 <Corrige>
 R<sub>A</sub> = 3 × 30 / 2 = **{grandeur(t30.reactions[0].Ry, 0, 'kN')}** ; N<sub>diag1</sub> = **{grandeur(t30.efforts.diag1, 2, 'kN')}** (compression) ; N<sub>inf1</sub> = **{grandeur(t30.efforts.inf1, 2, 'kN')}** (traction). Les efforts sont proportionnels aux charges.
+
+<TreillisDessin d={g30} r={t30} prefixe="tr-ex2" />
 </Corrige>
 </Exercice>
 
@@ -277,6 +294,8 @@ On réduit la hauteur de la passerelle à 2 m, sans changer les charges. Comment
 
 <Corrige>
 Membrure supérieure centrale : {grandeur(t0.efforts.sup2, 1, 'kN')} → **{grandeur(tBas.efforts.sup2, 1, 'kN')}** ; diagonale d'about : {grandeur(t0.efforts.diag1, 1, 'kN')} → **{grandeur(tBas.efforts.diag1, 1, 'kN')}**. Le treillis plus bas a moins de bras de levier : ses membrures sont plus chargées, et ses diagonales plus couchées travaillent davantage.
+
+<TreillisDessin d={gBas} r={tBas} prefixe="tr-ex3" />
 </Corrige>
 </Exercice>
 
