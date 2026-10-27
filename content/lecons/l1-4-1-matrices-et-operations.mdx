@@ -35,6 +35,7 @@ formules:
 import { EXEMPLE_METRE, foisScalaire, metre, PRIX_METRE, produit, QUANTITES_UNITAIRES, somme, transposee } from '@/lib/calc/lineaire'
 import { grandeur, nombre } from '@/lib/format'
 import { ProduitMetre } from '@/components/schemas/Lineaire'
+import { DevisMatriciel, ProduitLigneColonne, TableauMetreur } from '@/components/schemas/LineaireCours1'
 
 export const Q = QUANTITES_UNITAIRES
 export const m0 = metre(EXEMPLE_METRE.n)
@@ -62,6 +63,8 @@ Un métreur prépare le devis d'un petit bâtiment de bureaux à Kolwezi : {EXEM
 Ce tableau, c'est une **matrice**. Pour trouver le béton total, le métreur descend la colonne « béton » : il multiplie chaque case par le nombre d'éléments, puis il additionne. Ce geste « une ligne de nombres contre une colonne », répété pour chaque matériau, s'appelle le **produit matriciel**.
 
 Un tableur fait ce calcul avec une seule fonction. Un logiciel de calcul de structures fait le même calcul sur des matrices de plusieurs milliers de lignes. La règle reste celle du métreur.
+
+<TableauMetreur />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment ranger des nombres dans un tableau pour calculer vite, sans oubli, et toujours de la même façon ?
@@ -192,6 +195,8 @@ Une colonne = une grandeur, une unité. Le produit n'additionne jamais des m³ a
 Le produit matriciel combine une ligne entière et une colonne entière. Pour A et B du cours, la première case de AB vaut {nombre(AB[0][0], 0)} (1 × 5 + 2 × 7), pas 1 × 5.
 </Piege>
 
+<ProduitLigneColonne A={A} B={B} C={AB} i={0} j={0} />
+
 <Piege erreur="croire que AB = BA.">
 L'ordre compte : AB commence par {nombre(AB[0][0], 0)}, BA par {nombre(BA[0][0], 0)}. On écrit toujours le produit dans l'ordre imposé par le problème.
 </Piege>
@@ -213,6 +218,8 @@ Un tableau où une colonne contient des m³ et des m² donne des totaux absurdes
 <Page etape="terrain" titre="Sur le terrain">
 
 **Le devis quantitatif et estimatif.** Le devis d'un projet est un grand produit matriciel : des quantités, multipliées par des prix unitaires, puis additionnées. Le métré donne les quantités, le bordereau des prix donne la colonne des prix.
+
+<DevisMatriciel />
 
 <Encadre type="terrain" titre="Des prix qui changent d'une ville à l'autre">
 En RDC, le prix rendu chantier du ciment ou de l'acier dépend beaucoup du transport : il n'est pas le même à Kinshasa, à Kolwezi ou à Kananga. Avec l'écriture matricielle, on garde la matrice des quantités et l'on remplace seulement la colonne des prix. Les prix de cette leçon sont indicatifs : un devis réel utilise le bordereau local et sa date.
@@ -269,6 +276,8 @@ Calcule CD et DC pour <Matrice nom="C" M={C} dec={0} /> et <Matrice nom="D" M={D
 
 <Corrige>
 <Matrice nom="CD" M={CD} dec={0} /> et <Matrice nom="DC" M={DC} dec={0} /> : les deux produits sont **différents**, le produit matriciel n'est pas commutatif.
+
+<ProduitLigneColonne A={C} B={D} C={CD} i={0} j={0} />
 </Corrige>
 </Exercice>
 

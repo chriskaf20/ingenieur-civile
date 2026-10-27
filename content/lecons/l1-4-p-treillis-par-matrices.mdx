@@ -16,6 +16,7 @@ formules: []
 import { EXEMPLE_TRIANGLE, geometrieTriangle, treillisMatriciel } from '@/lib/calc/lineaire'
 import { grandeur, nombre } from '@/lib/format'
 import { TriangleInconnues } from '@/components/schemas/Lineaire'
+import { DiagrammeBarres } from '@/components/drawing/Diagrammes'
 
 export const d = EXEMPLE_TRIANGLE
 export const t = treillisMatriciel(d)
@@ -117,10 +118,16 @@ Nœuds articulés, charges appliquées aux nœuds, poids propre compris dans P. 
   </table>
 </div>
 
+</Page>
+
+<Page etape="projet" titre="Ce qu'il faut en retenir">
+
 ### Ce qu'il faut en retenir
 
 - L'**entrait est tendu** et les **arbalétriers comprimés** : comme en L1.3, la ferme travaille comme un arc dont l'entrait retient la poussée.
 - Le vent modifie tous les efforts. Soufflant vers la droite, il comprime davantage l'arbalétrier **sous le vent**, BC ({grandeur(s[2], 2, 'kN')} contre {grandeur(tSans.s[2], 2, 'kN')} sans vent), et tend davantage l'entrait ({grandeur(s[0], 2, 'kN')} contre {grandeur(tSans.s[0], 2, 'kN')}). Pour dimensionner, on retient le plus défavorable des deux sens du vent : chaque arbalétrier doit porter {grandeur(Math.min(s[2], tInv.s[1]), 2, 'kN')}.
+<DiagrammeBarres alt="Efforts dans l'entrait AB et l'arbalétrier BC selon le vent : vers la droite, sans vent, vers la gauche. Le vent modifie tous les efforts." titre="efforts en valeur absolue (rouge : compression, bleu : traction)" barres={[[0, s[0], 'vent à droite'], [0, tSans.s[0], 'sans vent'], [0, tInv.s[0], 'vent à gauche'], [2, s[2], 'vent à droite'], [2, tSans.s[2], 'sans vent'], [2, tInv.s[2], 'vent à gauche']].map(([k, v, cas]) => ({ libelle: `${noms[k].split(' ')[0]} ${['AB', 'AC', 'BC'][k]}, ${cas}`, valeur: Math.abs(v), texte: grandeur(v, 2, 'kN'), teinte: v < 0 ? 'correction' : 'encre' }))} />
+
 - La matrice A ne dépend que de la **géométrie** : changer les charges ne change que B. Un logiciel factorise A une fois et traite des dizaines de cas de charge.
 
 </Page>

@@ -17,6 +17,8 @@ formules: []
 import { chargeVersant, determinant, inverse, natureSysteme, pivotGauss, produit, raideurBarre, valeursPropres2 } from '@/lib/calc/lineaire'
 import { SEUIL_TEXTE } from '@/lib/progression/types'
 import { grandeur, nombre } from '@/lib/format'
+import { AppuisAlignesPlan, ProduitLigneColonne } from '@/components/schemas/LineaireCours1'
+import { PanneDonnees } from '@/components/schemas/LineaireCours2'
 
 export const q2 = produit([[1, 2], [3, 4]], [[5, 6], [7, 8]])
 export const q5 = pivotGauss([[3, 1], [1, 1]], [11, 5]).x
@@ -45,11 +47,13 @@ En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen
 
 <Quiz id="L1.4.EX">
 
-<Page etape="examen" titre="Les questions (1/3)">
+<Page etape="examen" titre="Les questions (1/4)">
 
 <QCM n={1} question="Le produit d'une matrice 2 × 3 par une matrice 3 × 4 est une matrice :" choix={['3 × 3', '2 × 4', '4 × 2', 'il n’existe pas']} bonne={1} colonnes={4}>
 (2 × 3)(3 × 4) = (2 × 4) : les dimensions du milieu sont égales (L1.4.1).
 </QCM>
+
+<ProduitLigneColonne A={[[1, 2], [3, 4]]} B={[[5, 6], [7, 8]]} i={1} j={0} resultat={false} />
 
 <QCM n={2} question="Pour A = (1 2 ; 3 4) et B = (5 6 ; 7 8), le coefficient c₂₁ de C = AB vaut :" choix={[nombre(q2[1][0], 0), nombre(q2[0][1], 0), '21', '15']} bonne={0} colonnes={4}>
 Ligne 2 de A contre colonne 1 de B : 3 × 5 + 4 × 7 (L1.4.1).
@@ -59,13 +63,13 @@ Ligne 2 de A contre colonne 1 de B : 3 × 5 + 4 × 7 (L1.4.1).
 Lignes et colonnes s'échangent (L1.4.1).
 </QCM>
 
+</Page>
+
+<Page etape="examen" titre="Les questions (2/4)">
+
 <QCM n={4} question="Pour [2 1 | 5] et [4 3 | 11], quelle opération annule le 4 de la deuxième ligne ?" choix={['L₂ ← L₂ − 2 L₁', 'L₂ ← L₂ − 4 L₁', 'L₂ ← 2 L₂ − L₁', 'L₁ ← L₁ − 2 L₂']} bonne={0} colonnes={2}>
 k = a₂₁ / a₁₁ = 4 / 2 (L1.4.2).
 </QCM>
-
-</Page>
-
-<Page etape="examen" titre="Les questions (2/3)">
 
 <QCM n={5} question="La solution de 3 x + y = 11 et x + y = 5 est :" choix={[`x = ${nombre(q5[0], 0)}, y = ${nombre(q5[1], 0)}`, `x = ${nombre(q5[1], 0)}, y = ${nombre(q5[0], 0)}`, 'x = 4, y = 1', 'x = 5, y = 0']} bonne={0} colonnes={2}>
 L₁ − L₂ : 2 x = 6. Puis y = 5 − x. Contrôle dans la première équation (L1.4.2).
@@ -75,6 +79,12 @@ L₁ − L₂ : 2 x = 6. Puis y = 5 − x. Contrôle dans la première équation
 5 × 4 − 2 × 3 (L1.4.3).
 </QCM>
 
+</Page>
+
+<Page etape="examen" titre="Les questions (3/4)">
+
+<AppuisAlignesPlan />
+
 <QCM n={7} question="Un plateau repose sur trois appuis alignés. La matrice M de son système M R = F :" choix={['a un déterminant nul : pas d’inverse', 'a un déterminant égal à 1', 'est l’identité', 'donne des réactions égales']} bonne={0} colonnes={2}>
 Le triangle des appuis a une aire nulle, donc det M = 0 (L1.4.3).
 </QCM>
@@ -83,13 +93,15 @@ Le triangle des appuis a une aire nulle, donc det M = 0 (L1.4.3).
 det = 6 − 5 = 1 ; on échange 2 et 3, on change le signe de 1 et de 5 (L1.4.3).
 </QCM>
 
-</Page>
-
-<Page etape="examen" titre="Les questions (3/3)">
-
 <QCM n={9} question="Le système x + 2 y = 3 et 2 x + 4 y = 7 :" choix={['a une solution unique', 'a une infinité de solutions', 'n’a aucune solution', 'a deux solutions']} bonne={2} colonnes={2}>
 rg A = {q9.rangA} et rg [A | b] = {q9.rangAb} : droites parallèles (L1.4.4).
 </QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (4/4)">
+
+<PanneDonnees q={4} alpha={30} />
 
 <QCM n={10} question="Une panne reçoit 4 kN/m verticalement sur un versant à 30°. La composante perpendiculaire au versant vaut :" choix={[grandeur(q10.qNormale, 2, 'kN/m'), grandeur(q10.qPente, 2, 'kN/m'), grandeur(4, 2, 'kN/m'), grandeur(q10.qNormale + q10.qPente, 2, 'kN/m')]} bonne={0} colonnes={4}>
 q cos α, obtenue par q′ = Rᵀ q (L1.4.5).

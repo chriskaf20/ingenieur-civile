@@ -33,6 +33,7 @@ formules:
 import { EXEMPLE_MELANGE, GRANULATS, melangeGranulats, pivotGauss } from '@/lib/calc/lineaire'
 import { grandeur, nombre, scientifique } from '@/lib/format'
 import { MelangeColonnes } from '@/components/schemas/Lineaire'
+import { CruCimenterie, DeuxTickets, DroitesSecantes, EtapesGauss, PivotNulEchange, SecondMembre } from '@/components/schemas/LineaireCours1'
 
 export const mel = melangeGranulats(EXEMPLE_MELANGE.cible5, EXEMPLE_MELANGE.cible15)
 export const recu = pivotGauss([[2, 1], [1, 1]], [25, 15])
@@ -49,6 +50,8 @@ Un chef de chantier retrouve deux tickets de la quincaillerie, sans le détail d
 Il compare les deux tickets. La différence, c'est **un sac de ciment** de plus pour 10 USD de plus : le ciment coûte {grandeur(recu.x[0], 0, 'USD')}. Il remplace dans le second ticket : la chaux coûte {grandeur(recu.x[1], 0, 'USD')}.
 
 Sans le savoir, il vient d'appliquer le **pivot de Gauss** : il a **retranché une équation à une autre** pour faire disparaître une inconnue, puis il est **remonté** vers l'autre. Avec trois inconnues ou mille, la méthode est la même ; seule la patience change, et c'est pourquoi on la confie aux ordinateurs.
+
+<DeuxTickets t1={[2, 1, 25]} t2={[1, 1, 15]} ciment={recu.x[0]} chaux={recu.x[1]} />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment résoudre, sans se perdre, un système de plusieurs équations à plusieurs inconnues ?
@@ -77,6 +80,8 @@ Trois opérations ne changent pas les solutions du système :
 3. On recommence avec le pivot suivant, sur les lignes du dessous.
 4. Le système devient **triangulaire** : on le résout par **remontée**, de la dernière inconnue à la première.
 
+<EtapesGauss />
+
 <Encadre type="exemple" titre="Le premier pas sur les tickets">
 [2 1 | 25] et [1 1 | 15] : pivot 2, k = 1/2. L<sub>2</sub> ← L<sub>2</sub> − ½ L<sub>1</sub> donne [0 ½ | 2,5]. Donc y = 2,5 / 0,5 = {nombre(recu.x[1], 0)}, puis 2 x = 25 − {nombre(recu.x[1], 0)} et x = {nombre(recu.x[0], 0)}.
 </Encadre>
@@ -92,6 +97,8 @@ On traite ici des systèmes carrés (autant d'équations que d'inconnues) qui on
 ### Un pivot nul
 
 Si le pivot est nul, on ne peut pas diviser par lui. On **échange** sa ligne avec une ligne du dessous dont le coefficient n'est pas nul. Pour 0 x + y = 2 et x + y = 3, on échange les deux lignes ; le système est alors déjà triangulaire : y = {nombre(swap.x[1], 0)}, puis x = {nombre(swap.x[0], 0)}.
+
+<PivotNulEchange M1={[[0, 1, 2], [1, 1, 3]]} M2={[[1, 1, 3], [0, 1, 2]]} />
 
 ### Le pivot partiel
 
@@ -186,6 +193,8 @@ Une solution du calcul n'est pas forcément un mélange réel : une proportion n
 L'opération L<sub>2</sub> ← L<sub>2</sub> − 0,95 L<sub>1</sub> s'applique à toute la ligne, second membre compris : {nombre(EXEMPLE_MELANGE.cible5, 2)} − 0,95 × 1 = {nombre(mel.etapes[1].M[1][3], 2)}. Sinon la solution est fausse, et le contrôle le montre.
 </Piege>
 
+<SecondMembre />
+
 <Piege erreur="diviser par un pivot nul.">
 Un zéro sur la diagonale ne se divise pas : on échange d'abord la ligne avec une ligne du dessous (exercice 3).
 </Piege>
@@ -211,6 +220,8 @@ Une erreur de calcul donne quand même trois nombres. Seul le report dans les é
 <Encadre type="terrain" titre="À la cimenterie">
 Dans une cimenterie, comme celles du Kongo-Central, le cru est un mélange de calcaire, d'argile et de correctifs. Chaque matière apporte sa part de chaux, de silice, d'alumine et d'oxyde de fer : trouver les proportions qui donnent la composition visée est le même problème que notre mélange de granulats, avec plus d'équations.
 </Encadre>
+
+<CruCimenterie />
 
 **Les logiciels de calcul.** Un logiciel de structure, de réseau d'eau ou de topographie résout des systèmes de milliers d'équations. Les méthodes qu'il emploie (Gauss avec pivot, Cholesky, méthodes itératives, L2.3.5) sont des variantes de ce que tu viens de faire à la main.
 
@@ -252,6 +263,8 @@ Résous par le pivot de Gauss : x + y = 10 et x − y = 2.
 
 <Corrige>
 L<sub>2</sub> ← L<sub>2</sub> − L<sub>1</sub> donne −2 y = −8, donc y = **{nombre(ex1.x[1], 0)}** ; puis x = 10 − {nombre(ex1.x[1], 0)} = **{nombre(ex1.x[0], 0)}**. Contrôle : {nombre(ex1.x[0], 0)} − {nombre(ex1.x[1], 0)} = 2.
+
+<DroitesSecantes e1={[1, 1, 10]} e2={[1, -1, 2]} sol={ex1.x} />
 </Corrige>
 </Exercice>
 

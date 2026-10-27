@@ -32,6 +32,8 @@ formules:
 import { determinant, EXEMPLE_APPUIS_TRIANGLE, EXEMPLE_CHARGE_PLATEAU, inverse, inverseTroisAppuis, pivotGauss, produitVecteur, sarrus } from '@/lib/calc/lineaire'
 import { grandeur, nombre } from '@/lib/format'
 import { AireDeterminant } from '@/components/schemas/Lineaire'
+import { AppuisPresqueAlignes, DeuxParallelogrammes, InverseRecette, OmbreEcrasee, SarrusSchema, UnInverseCasMultiples } from '@/components/schemas/LineaireCours1'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
 
 export const M2 = [[3, 1], [1, 2]]
 export const d2 = determinant(M2)
@@ -59,13 +61,15 @@ Une matrice transforme des vecteurs. Le **déterminant** dit par combien elle mu
 
 En génie civil, un déterminant nul a souvent un sens physique très concret : trois pieds alignés sous un plateau, deux barres alignées à un nœud, un appui oublié. La structure ne tient pas, et le calcul refuse de donner une réponse.
 
+<OmbreEcrasee />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Comment savoir, avant de résoudre, si un système a une solution unique, puis la calculer d'un seul coup pour plusieurs cas de charge ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : le déterminant">
+<Page etape="cours" titre="Le cours (1/3) : le déterminant">
 
 ### Matrice 2 × 2
 
@@ -81,6 +85,8 @@ $$\det A = a_{11} \begin{vmatrix} a_{22} & a_{23} \\ a_{32} & a_{33} \end{vmatri
 
 La **règle de Sarrus** donne le même résultat : trois produits « descendants » moins trois produits « montants ». Elle ne vaut **que** pour les matrices 3 × 3. En trois dimensions, le déterminant est le **volume** signé construit sur les trois colonnes.
 
+<SarrusSchema M={S} plus={sS.plus} moins={sS.moins} det={sS.det} />
+
 ### Les propriétés utiles
 
 - échanger deux lignes change le signe ; une ligne nulle, ou deux lignes proportionnelles, donnent det = 0 ;
@@ -89,7 +95,7 @@ La **règle de Sarrus** donne le même résultat : trois produits « descendants
 
 </Page>
 
-<Page etape="cours" titre="Le cours (2/2) : la matrice inverse">
+<Page etape="cours" titre="Le cours (2/3) : la matrice inverse">
 
 ### Définition
 
@@ -105,6 +111,12 @@ On échange a et d, on change le signe de b et c, on divise par le déterminant.
 
 On écrit [A | I] et l'on fait des opérations sur les lignes jusqu'à obtenir [I | A⁻¹]. C'est le pivot de Gauss poussé jusqu'au bout, au-dessus comme au-dessous de la diagonale.
 
+<InverseRecette />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : résoudre avec l'inverse">
+
 ### Résoudre avec l'inverse
 
 Si A est inversible, A x = b a une solution unique : **x = A⁻¹ b**. Pour un produit, l'ordre s'inverse : (AB)⁻¹ = B⁻¹ A⁻¹.
@@ -112,6 +124,8 @@ Si A est inversible, A x = b a une solution unique : **x = A⁻¹ b**. Pour un p
 <Regle type="art">
 Pour résoudre un seul système, le pivot de Gauss est plus rapide et plus précis que le calcul de A⁻¹. L'inverse devient intéressante quand la même matrice sert pour beaucoup de seconds membres, par exemple plusieurs cas de charge sur la même structure : chaque colonne de A⁻¹ est alors la réponse à une « charge unité ».
 </Regle>
+
+<UnInverseCasMultiples />
 
 <Encadre type="retenir">
 det 2 × 2 = ad − bc ; 3 × 3 : développement ou Sarrus. det = 0 : colonnes liées, pas d'inverse. det ≠ 0 : x = A⁻¹ b, solution unique.
@@ -197,6 +211,8 @@ L'inverse de (4 7 ; 2 6) n'est pas (1/4 1/7 ; 1/2 1/6). Seule la définition A A
 L'ordre s'inverse : (AB)⁻¹ = B⁻¹ A⁻¹, comme on retire ses chaussures avant ses chaussettes.
 </Piege>
 
+<DiagrammeFlux alt="On met ses chaussettes, puis ses chaussures ; pour revenir en arrière, on retire d'abord les chaussures, puis les chaussettes. Ce qui est fait en dernier se défait en premier : l'inverse d'un produit inverse l'ordre, (AB)⁻¹ = B⁻¹ A⁻¹." etapes={[{ titre: 'Chaussettes', texte: 'mises en premier', teinte: 'encre' }, { titre: 'Chaussures', texte: 'mises en dernier', teinte: 'encre' }, { titre: 'Retirer les chaussures', texte: 'défaites en premier', teinte: 'correction' }, { titre: 'Retirer les chaussettes', texte: 'défaites en dernier', teinte: 'correction' }]} />
+
 </Page>
 
 <Page etape="terrain" titre="Sur le terrain">
@@ -206,6 +222,8 @@ L'ordre s'inverse : (AB)⁻¹ = B⁻¹ A⁻¹, comme on retire ses chaussures av
 <Encadre type="terrain" titre="Trois appuis presque alignés">
 Si C n'est qu'à 20 cm de la droite AB, det M = {nombre(determinant([[1, 1, 1], [0, 4, 2], [0, 0, 0.2]]), 1)} au lieu de {nombre(t0.det, 0)}. La cuve de {grandeur(ch.F, 0, 'kN')} placée à 15 cm de la droite AB donne R<sub>C</sub> = {grandeur(pr1.R[2], 0, 'kN')} ; placée à 10 cm, R<sub>C</sub> = {grandeur(pr2.R[2], 0, 'kN')}. Cinq centimètres d'écart changent la réaction de {grandeur(pr1.R[2] - pr2.R[2], 0, 'kN')} : un petit déterminant rend le résultat très sensible aux imprécisions de chantier. On écarte les appuis.
 </Encadre>
+
+<AppuisPresqueAlignes yC={0.2} F={ch.F} cas={[{ y: 0.15, RC: pr1.R[2] }, { y: 0.1, RC: pr2.R[2] }]} det={determinant([[1, 1, 1], [0, 4, 2], [0, 0, 0.2]])} detRef={t0.det} />
 
 **Plusieurs cas de charge.** Pour un réservoir, un plancher ou un pont, on étudie de nombreux cas de charge sur la même structure. La matrice ne change pas : les logiciels la factorisent une seule fois, puis traitent chaque cas très vite. C'est l'idée de l'inverse, appliquée à grande échelle.
 
@@ -245,6 +263,8 @@ Calcule les déterminants de <Matrice nom="M" M={M2} dec={0} /> et de <Matrice n
 
 <Corrige>
 det M = 3 × 2 − 1 × 1 = **{nombre(d2, 0)}** : M est inversible. det P = 2 × 2 − 4 × 1 = **{nombre(dP, 0)}** : la deuxième colonne de P vaut deux fois la première, P n'a pas d'inverse.
+
+<DeuxParallelogrammes M={M2} P={P2} dM={d2} dP={dP} />
 </Corrige>
 </Exercice>
 

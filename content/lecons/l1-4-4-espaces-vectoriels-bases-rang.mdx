@@ -30,9 +30,10 @@ formules:
   - { nom: 'Solutions multiples', tex: '\operatorname{rg} A = \operatorname{rg}[A \mid b] < n \Rightarrow \text{infinité}, \quad \operatorname{rg} A < \operatorname{rg}[A \mid b] \Rightarrow \text{aucune}', domaine: 'Système de n inconnues' }
 ---
 
-import { CAS_RANG, determinant, echelonne, natureSysteme, plateauRang } from '@/lib/calc/lineaire'
+import { CAS_RANG, determinant, echelonne, natureSysteme, pivotGauss, plateauRang } from '@/lib/calc/lineaire'
 import { grandeur, nombre } from '@/lib/format'
 import { TroisCasDroites } from '@/components/schemas/Lineaire'
+import { CoordonneesBase, DeuxDirections, EscalierRang, FilTendu, HangarContreventement, TroisPlateaux, TroisVecteurs } from '@/components/schemas/LineaireCours1'
 
 export const natures = CAS_RANG.map((c) => ({ ...c, ...natureSysteme(c.A, c.b) }))
 export const dUV = determinant([[1, 2], [2, 4]])
@@ -45,6 +46,7 @@ export const pSur = plateauRang(0, 100, 1.5, 0)
 export const pTri = plateauRang(3.5, 100, 1.5, 0.8)
 export const libelle = { unique: 'une seule', infinite: 'une infinité', aucune: 'aucune' }
 export const ePar = echelonne([[1, 1, 3], [1, 1, 1]]).E
+export const coordF = pivotGauss([[1, 3], [2, 1]], [5, 5]).x
 
 <Page etape="intuition" titre="L'intuition : deux directions pour aller partout">
 
@@ -53,6 +55,8 @@ Sur un terrain plat, un géomètre peut atteindre n'importe quel point en marcha
 Un nœud de charpente fonctionne pareil. Deux barres non alignées peuvent équilibrer **n'importe quelle** charge : on la décompose selon leurs deux directions. Deux barres alignées ne retiennent rien perpendiculairement à leur axe : le nœud descend jusqu'à ce que les barres ne soient plus alignées. C'est pourquoi un fil à linge tendu fléchit toujours sous le linge.
 
 Le **rang** compte le nombre de directions, ou d'équations, vraiment indépendantes. Il dit si un système a une solution, une infinité, ou aucune, avant même de le résoudre.
+
+<DeuxDirections />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Trois équations à trois inconnues ont-elles toujours une solution unique ? Comment le savoir ?
@@ -78,6 +82,8 @@ Une famille est **libre** si aucun de ses vecteurs n'est une combinaison des aut
 Une **base** est une famille libre qui permet d'écrire tout vecteur. Dans le plan, toute base a **deux** vecteurs ; dans l'espace, **trois** : c'est la **dimension**. Trois vecteurs du plan sont donc toujours liés.
 
 Les nombres λ et μ tels que F = λ u + μ w sont les **coordonnées** de F dans la base (u, w). Il y a une seule façon de les trouver : c'est un système 2 × 2 de déterminant non nul.
+
+<CoordonneesBase u={[1, 2]} w={[3, 1]} F={[5, 5]} l={coordF[0]} m={coordF[1]} />
 
 <Encadre type="exemple" titre="L'équilibre d'un nœud est un changement de base">
 À un nœud de treillis, les deux barres donnent deux directions e<sub>1</sub> et e<sub>2</sub>. Équilibrer la charge F, c'est l'écrire F = λ e<sub>1</sub> + μ e<sub>2</sub> : les efforts dans les barres sont, au signe près, les coordonnées de F dans la base des barres. Si les barres sont alignées, ce n'est plus une base.
@@ -108,6 +114,8 @@ Pour les réactions d'un plateau sur trois appuis (système M R = F de L1.4.3) :
 - appuis en triangle : {libelle[natures[0].nature]} solution, la structure est **isostatique** ;
 - appuis alignés, charge sur leur ligne : {libelle[natures[1].nature]} de solutions ; la statique ne suffit pas, il faut les déformations (structure **hyperstatique**, L2) ;
 - appuis alignés, charge hors de leur ligne : {libelle[natures[2].nature]} solution ; le plateau bascule (**mécanisme**).
+
+<TroisPlateaux cas={natures} />
 
 <Encadre type="retenir">
 Rang = lignes non nulles après échelonnement. rg A = rg [A | b] = n : une solution ; rg A = rg [A | b] &lt; n : une infinité ; rg A &lt; rg [A | b] : aucune.
@@ -185,6 +193,8 @@ Le rang de A seul ne suffit pas : il faut comparer avec le rang de [A | b]. Le s
 La matrice (1 2 3 ; 2 4 6 ; 1 0 1) n'a aucune ligne nulle, mais son rang vaut {e1.rang} : il faut éliminer d'abord.
 </Piege>
 
+<EscalierRang M={R1} E={e1.E} rang={e1.rang} />
+
 <Piege erreur="chercher trois vecteurs libres dans le plan.">
 Le plan est de dimension 2 : trois forces coplanaires sont toujours liées. C'est pourquoi un nœud plan n'offre que deux équations d'équilibre.
 </Piege>
@@ -198,6 +208,8 @@ C'est le résultat : une contradiction, donc aucune solution. Physiquement, le p
 <Page etape="terrain" titre="Sur le terrain">
 
 **Le contreventement.** Un cadre rectangulaire aux nœuds articulés est un mécanisme : ses équations d'équilibre n'ont pas de solution pour une charge horizontale, il se couche comme un parallélogramme. Une diagonale le transforme en deux triangles : les équations deviennent indépendantes et le cadre devient rigide.
+
+<HangarContreventement />
 
 <Encadre type="terrain" titre="Les hangars sans contreventement">
 En RDC, des hangars et des abris de marché en bois ou en acier léger s'effondrent sous les rafales des orages tropicaux, parce qu'il manque des diagonales de contreventement dans la toiture ou les longs pans. Le calcul le dit avant l'accident : la structure est un mécanisme, son système d'équilibre n'a pas de solution.
@@ -243,6 +255,8 @@ Les vecteurs u = (1 ; 2) et v = (2 ; 4) forment-ils une base du plan ? Et u et w
 
 <Corrige>
 det(u, v) = 1 × 4 − 2 × 2 = **{nombre(dUV, 0)}** : u et v sont liés (v = 2 u), ce n'est pas une base. det(u, w) = 1 × 1 − 3 × 2 = **{nombre(dUW, 0)}** ≠ 0 : u et w forment une base.
+
+<TroisVecteurs u={[1, 2]} v={[2, 4]} w={[3, 1]} />
 </Corrige>
 </Exercice>
 
@@ -260,6 +274,8 @@ Après élimination : <Matrice M={e1.E} dec={0} />. Deux lignes non nulles : ran
 <Exercice n={3} niveau="difficile" titre="Le fil tendu">
 
 Un nœud N est tenu par deux barres horizontales alignées, l'une vers la gauche, l'autre vers la droite. On y accroche une charge verticale de 10 kN. Écris les deux équations d'équilibre en fonction des efforts N₁ et N₂, puis discute avec les rangs.
+
+<FilTendu F={10} />
 
 <Indice>ΣF<sub>x</sub> : −N₁ + N₂ = 0. ΣF<sub>y</sub> : les barres n'ont aucune composante verticale.</Indice>
 

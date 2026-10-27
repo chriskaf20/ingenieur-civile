@@ -38,6 +38,7 @@ import { contraintesPrincipales, EXEMPLE_CONTRAINTES, jacobiSym3, valeursPropres
 import { MATERIAUX_THERMIQUES } from '@/lib/calc/physique'
 import { grandeur, nombre } from '@/lib/format'
 import { ContraintesElements } from '@/components/schemas/Lineaire'
+import { CaoutchoucEtire, CisaillementPur, CubePrincipal, FissurePerpendiculaire, FissuresPoutre, VecteursPropres } from '@/components/schemas/LineaireCours2'
 
 export const d0 = EXEMPLE_CONTRAINTES
 export const c0 = contraintesPrincipales(d0)
@@ -56,13 +57,15 @@ Dessine des flèches dans toutes les directions sur une feuille de caoutchouc, p
 
 Dans une poutre en charge, chaque point est tiré, comprimé et cisaillé. Pourtant, en tout point, il existe deux directions perpendiculaires où la matière est **seulement tirée ou comprimée**, sans cisaillement : les **directions principales**. Le béton, qui résiste mal à la traction, se fissure perpendiculairement à la plus forte traction. C'est pourquoi les fissures d'effort tranchant sont **inclinées** près des appuis.
 
+<CaoutchoucEtire />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Comment trouver les directions qu'une matrice ne fait pas tourner, et que nous disent-elles sur la fissuration du béton ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : définition et calcul">
+<Page etape="cours" titre="Le cours (1/3) : définition et calcul">
 
 ### Définition
 
@@ -88,15 +91,17 @@ Pour chaque λ, on résout (A − λ I) v = 0. Ce système a une infinité de so
 A = (4 1 ; 2 3) : tr A = {nombre(vp2.trace, 0)}, det A = {nombre(vp2.det, 0)}, donc λ² − {nombre(vp2.trace, 0)} λ + {nombre(vp2.det, 0)} = 0, soit λ = {nombre(vp2.lambda[0], 0)} et λ = {nombre(vp2.lambda[1], 0)}. Pour λ = {nombre(vp2.lambda[0], 0)}, v = ({nombre(vp2.vecteurs[0][0], 3)} ; {nombre(vp2.vecteurs[0][1], 3)}) ; pour λ = {nombre(vp2.lambda[1], 0)}, v = ({nombre(vp2.vecteurs[1][0], 3)} ; {nombre(vp2.vecteurs[1][1], 3)}).
 </Encadre>
 
+<VecteursPropres A={A2} lambda={vp2.lambda} vecteurs={vp2.vecteurs} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : propriétés et contraintes principales">
+
 ### Les propriétés
 
 - λ₁ + λ₂ = tr A et λ₁ λ₂ = det A : deux contrôles rapides ;
 - une matrice **symétrique** a des valeurs propres réelles et des vecteurs propres **perpendiculaires** ;
 - une rotation de 90° ne laisse aucune direction fixe : ses valeurs propres ne sont pas réelles.
-
-</Page>
-
-<Page etape="cours" titre="Le cours (2/2) : les contraintes principales">
 
 ### Le tenseur des contraintes
 
@@ -114,9 +119,17 @@ $$\sigma_{1,2} = \frac{\sigma_x + \sigma_y}{2} \pm \sqrt{\Big(\frac{\sigma_x - \
 
 Le **cercle de Mohr** (exemple résolu) est une construction graphique des mêmes valeurs. En cisaillement pur (σ<sub>x</sub> = σ<sub>y</sub> = 0), les directions principales sont à **45°** : σ<sub>1</sub> = τ et σ<sub>2</sub> = −τ.
 
+<CisaillementPur tau={1.5} s1={cis.s1} s2={cis.s2} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : en trois dimensions">
+
 ### En trois dimensions
 
 Le tenseur devient 3 × 3, avec trois contraintes principales. Les logiciels les calculent par des méthodes itératives, comme la méthode de Jacobi : pour la matrice (4 1 0 ; 1 3 0 ; 0 0 2), elle donne {j3.valeurs.map((v) => nombre(v, 3)).join(', ')}.
+
+<CubePrincipal valeurs={j3.valeurs} />
 
 <Regle type="simplification">
 Les contraintes de l'exemple sont des données de l'énoncé ; leur calcul à partir des efforts dans une poutre relève de la résistance des matériaux (L2). On suppose le béton non fissuré et élastique jusqu'à f<sub>ctm</sub>.
@@ -213,6 +226,8 @@ La formule donne 2θ<sub>1</sub>, pas θ<sub>1</sub>. Pour l'exemple, 2θ<sub>1<
 La traction ouvre la fissure **perpendiculairement** à sa direction, comme on déchire une feuille en tirant de part et d'autre.
 </Piege>
 
+<FissurePerpendiculaire />
+
 <Piege erreur="négliger le signe de τ.">
 Changer le signe de τ change le côté vers lequel tournent les directions principales, donc l'inclinaison des fissures.
 </Piege>
@@ -222,6 +237,8 @@ Changer le signe de τ change le côté vers lequel tournent les directions prin
 <Page etape="terrain" titre="Sur le terrain">
 
 **Les fissures d'effort tranchant.** Près des appuis d'une poutre en béton armé, le cisaillement est fort : les directions principales s'inclinent et les fissures apparaissent en biais, vers 45°. Les **cadres** et les **étriers** cousent ces fissures ; leur calcul relève de l'Eurocode 2 (EN 1992-1-1 §6.2, traité en L3). Une fissure inclinée qui s'ouvre près d'un appui est un signal d'alerte à signaler.
+
+<FissuresPoutre />
 
 <Encadre type="terrain" titre="Lire les fissures pendant une visite">
 Fissures verticales au milieu de la portée : flexion. Fissures inclinées près des appuis : effort tranchant. L'orientation d'une fissure indique la direction de la traction principale qui l'a ouverte : c'est le premier indice d'un diagnostic.

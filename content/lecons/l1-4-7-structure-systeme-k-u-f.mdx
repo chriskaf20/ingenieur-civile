@@ -37,6 +37,8 @@ import { deuxBarres, EXEMPLE_DEUX_BARRES, noeudBarres, raideurBarre, TROISIEME_B
 import { grandeur, nombre } from '@/lib/format'
 import { NoeudBarresSchema } from '@/components/schemas/Lineaire'
 import { NoeudIsole } from '@/components/schemas/Statique'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+import { CageEscalierRaide, ProjectionAllongement, RessortPoids, TroisTirants, UneSeuleBarre } from '@/components/schemas/LineaireCours2'
 
 export const d = EXEMPLE_DEUX_BARRES
 export const r0 = deuxBarres(d)
@@ -57,13 +59,15 @@ Une barre d'acier est un ressort très raide. Sous la charge d'un palan, les deu
 
 Pour une vraie structure, chaque nœud est relié à plusieurs barres et chaque barre relie deux nœuds : les raideurs se combinent dans une **matrice de rigidité** K, et l'équilibre devient **K u = F**. C'est exactement le système que résolvent les logiciels de calcul.
 
+<RessortPoids />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Comment écrire l'équilibre d'une structure sous la forme K u = F, et pourquoi cette écriture marche même quand la statique ne suffit plus ?
 </Encadre>
 
 </Page>
 
-<Page etape="cours" titre="Le cours (1/2) : du ressort à la matrice de rigidité">
+<Page etape="cours" titre="Le cours (1/3) : du ressort à la matrice de rigidité">
 
 ### Le ressort et la barre
 
@@ -79,6 +83,8 @@ Le nœud se déplace de u = (u<sub>x</sub> ; u<sub>y</sub>). La barre ne s'allon
 
 $$K_e = k\, e\, e^T = k \begin{pmatrix} c^2 & c\,s \\ c\,s & s^2 \end{pmatrix}$$
 
+<ProjectionAllongement />
+
 ### L'assemblage
 
 Les forces des barres qui arrivent au nœud s'additionnent, donc leurs matrices aussi : **K = K₁ + K₂ + …**. L'équilibre du nœud s'écrit :
@@ -91,7 +97,7 @@ Barres articulées, matériau élastique, petits déplacements (on écrit l'équ
 
 </Page>
 
-<Page etape="cours" titre="Le cours (2/2) : résoudre et interpréter">
+<Page etape="cours" titre="Le cours (2/3) : résoudre et interpréter">
 
 ### Résoudre
 
@@ -111,9 +117,17 @@ Avec deux barres, la statique suffit : deux équations, deux efforts. Ajoutons u
 La barre verticale ajoutée, plus courte donc plus raide, reprend {grandeur(r3.N[2], 2, 'kN')} sur les {grandeur(F, 0, 'kN')}, soit {nombre(part3 * 100, 0)} % ; les deux tirants inclinés n'en portent plus que {grandeur(r3.N[0], 2, 'kN')} chacun. Le nœud ne descend plus que de {grandeur(-r3.u[1] * 1000, 3, 'mm')} au lieu de {grandeur(-r0.u[1] * 1000, 3, 'mm')}. **La charge va vers la raideur.**
 </Encadre>
 
+<TroisTirants ancrages={[[d.xA, d.yA], [d.xB, d.yB], [TROISIEME_BARRE.x, TROISIEME_BARRE.y]]} N={r3.N} F={F} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : ce que font les logiciels">
+
 ### Ce que font les logiciels
 
 Un bâtiment compte des milliers de nœuds. Le logiciel calcule la matrice de chaque élément, l'assemble dans une immense matrice K, résout K u = F, puis calcule les efforts de chaque élément. C'est la **méthode des déplacements**, à la base de la méthode des éléments finis (L2, L3).
+
+<DiagrammeFlux alt="La méthode des déplacements des logiciels : calculer la matrice de chaque élément, les assembler dans la matrice K de la structure, résoudre K u = F, puis revenir aux efforts de chaque élément." etapes={[{ titre: 'Chaque élément', texte: 'sa matrice Ke = k e eᵀ', teinte: 'acier' }, { titre: 'Assembler', texte: 'K = Σ Ke, symétrique', teinte: 'encre' }, { titre: 'Résoudre', texte: 'K u = F : les déplacements', teinte: 'terre' }, { titre: 'Les efforts', texte: 'N = k (u · e) dans chaque barre', teinte: 'validation' }]} />
 
 <Encadre type="retenir">
 k = E A / L ; K<sub>e</sub> = k e eᵀ ; K = Σ K<sub>e</sub> ; K u = F ; N = k (u · e). det K = 0 : mécanisme. La méthode marche aussi pour les structures hyperstatiques.
@@ -232,6 +246,8 @@ Si e va du nœud vers l'appui au lieu de l'appui vers le nœud, le signe de u ·
 Une seule barre donne une matrice de déterminant nul : le nœud peut tourner autour de l'appui. Il faut au moins deux barres non alignées dans le plan (exercice 2).
 </Piege>
 
+<UneSeuleBarre />
+
 </Page>
 
 <Page etape="terrain" titre="Sur le terrain">
@@ -241,6 +257,8 @@ Une seule barre donne une matrice de déterminant nul : le nœud peut tourner au
 <Encadre type="terrain" titre="La charge va vers la raideur">
 Dans un bâtiment, les éléments les plus raides attirent les efforts. Une cage d'escalier en béton armé, très raide, reprend l'essentiel du vent ou du séisme, bien plus que les poteaux voisins. Si elle est excentrée, le bâtiment tourne autour d'elle. On place donc les éléments raides avec soin, et l'on vérifie qu'ils peuvent porter ce qu'ils attirent.
 </Encadre>
+
+<CageEscalierRaide />
 
 **Les passerelles suspendues.** Dans les zones rurales, des passerelles piétonnes suspendues franchissent les rivières. Les suspentes, les câbles porteurs et le tablier forment un réseau de « ressorts » : leur calcul suit la même logique, avec des câbles qui ne travaillent qu'en traction.
 

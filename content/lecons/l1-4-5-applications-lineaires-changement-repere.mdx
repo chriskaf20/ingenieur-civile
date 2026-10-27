@@ -34,6 +34,8 @@ formules:
 import { chargeVersant, EXEMPLE_REPERE, produit, produitVecteur, rotation2, rotation3, transposee, versGlobal, versLocal } from '@/lib/calc/lineaire'
 import { grandeur, nombre } from '@/lib/format'
 import { PanneVersant, VersantIso } from '@/components/schemas/Lineaire'
+import { AngleHorizontal, DeuxReperes, ForceDansBarre, ImagesBase, ReperesChantier, RotationColonnes, SuccionVent } from '@/components/schemas/LineaireCours2'
+import { DiagrammeBarres } from '@/components/drawing/Diagrammes'
 
 export const q0 = -EXEMPLE_REPERE.Fy
 export const a0 = EXEMPLE_REPERE.alpha
@@ -54,6 +56,8 @@ Sur le chantier d'un hangar, l'architecte dit : « la toiture pèse sur la panne
 Les deux ont raison. La force est la même ; ils la décrivent dans **deux repères** différents : l'un horizontal et vertical, l'autre tourné avec la pente. Passer d'une description à l'autre, c'est **changer de repère**, et cela se fait par un produit matriciel.
 
 Tous les logiciels de calcul le font en permanence : chaque barre a son repère local, la structure a son repère global.
+
+<DeuxReperes />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment passer des composantes horizontale et verticale d'une force à ses composantes le long d'un élément incliné, et revenir ?
@@ -77,6 +81,8 @@ Dans le plan, elle s'écrit f(u) = A u, avec une matrice A 2 × 2. **Les colonne
 - **projection** sur l'axe x : A = (1 0 ; 0 0). Son déterminant est nul : on perd la composante y, on ne peut pas revenir (L1.4.3) ;
 - **rotation** d'angle θ : les vecteurs tournent sans changer de longueur.
 
+<ImagesBase />
+
 ### Composition
 
 Appliquer A puis B revient à appliquer le produit **B A** : la première transformation s'écrit à droite. L'ordre compte, comme pour tout produit matriciel.
@@ -96,6 +102,8 @@ L'image de (1 ; 0) est (cos θ ; sin θ), celle de (0 ; 1) est (−sin θ ; cos 
 $$R(\theta) = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$$
 
 Ses colonnes sont unitaires et perpendiculaires : **Rᵀ R = I**. L'inverse d'une rotation est donc sa transposée, qui est la rotation d'angle −θ. Son déterminant vaut 1 : elle conserve les longueurs et les aires.
+
+<RotationColonnes />
 
 ### Le changement de repère
 
@@ -197,6 +205,8 @@ cos 30 en radians vaut environ {nombre(Math.cos(30), 2)} : la composante normale
 Si l'on prend l'angle entre le versant et la verticale, sinus et cosinus s'échangent. Dessine toujours l'angle sur le schéma avant d'écrire la formule.
 </Piege>
 
+<AngleHorizontal />
+
 <Piege erreur="croire que la charge change avec le repère.">
 Seules les composantes changent. √(q′ₓ² + q′ᵧ²) doit redonner q : c'est le contrôle le plus rapide.
 </Piege>
@@ -211,11 +221,15 @@ Dans l'espace, tourner autour de x puis de z ne donne pas la même chose que l'i
 
 **Pannes et liernes.** Plus la toiture est raide, plus la composante le long de la pente grandit : {grandeur(raide.qPente, 2, 'kN/m')} à 45° contre {grandeur(plat.qPente, 2, 'kN/m')} à 10°, pour la même charge. Cette composante fléchit la panne selon son axe faible. On ajoute alors des **liernes**, de petits tirants qui relient les pannes au faîtage et coupent leur portée sur le côté : c'est une règle de l'art des charpentes métalliques.
 
+<DiagrammeBarres alt="Composante de la charge le long de la pente selon l'inclinaison du versant, pour la même charge verticale : elle croît avec la pente." titre="composante le long de la pente (même charge verticale)" barres={[{ libelle: `versant à ${nombre(10, 0)}°`, valeur: plat.qPente, texte: grandeur(plat.qPente, 2, 'kN/m'), teinte: 'validation' }, { libelle: `versant à ${nombre(a0, 0)}°`, valeur: c0.qPente, texte: grandeur(c0.qPente, 2, 'kN/m'), teinte: 'terre' }, { libelle: `versant à ${nombre(45, 0)}°`, valeur: raide.qPente, texte: grandeur(raide.qPente, 2, 'kN/m'), teinte: 'correction' }]} />
+
 <Encadre type="terrain" titre="Les axes locaux dans les logiciels">
 Dans un logiciel de structure, chaque barre a son repère local. Une poutre IPE mal orientée est calculée avec son axe faible là où l'on attendait son axe fort : les flèches et les contraintes sont fausses, sans aucun message d'erreur. Avant d'exploiter les résultats, on affiche et l'on vérifie les axes locaux.
 </Encadre>
 
 **Implantation topographique.** Sur un chantier, on travaille souvent dans un repère local aligné sur le bâtiment, tourné par rapport au repère cartographique. Le géomètre passe de l'un à l'autre par une rotation, suivie d'une translation de l'origine.
+
+<ReperesChantier />
 
 </Page>
 
@@ -264,6 +278,8 @@ Une force de 10 kN est inclinée à 45° sur l'horizontale. Calcule ses composan
 
 <Corrige>
 v = ({F45.map((v) => nombre(v, 3)).join(' ; ')}) kN, puis v′ = R(30°)ᵀ v = **({ex2.map((v) => nombre(v, 3)).join(' ; ')}) kN**. Contrôle : la force fait 15° avec la barre, et 10 cos 15° = {nombre(ex2[0], 3)} kN.
+
+<ForceDansBarre F={10} aF={45} aB={30} comp={ex2} />
 </Corrige>
 </Exercice>
 
@@ -275,6 +291,8 @@ Pendant un orage, le vent exerce sur un versant incliné à 20° une succion de 
 
 <Corrige>
 v = R(20°) (0 ; 0,8) = **({vent.map((v) => nombre(v, 3)).join(' ; ')}) kN/m** : le vent **soulève** la toiture de {grandeur(vent[1], 3, 'kN/m')} et la pousse horizontalement. Si cette succion dépasse le poids de la couverture, les tôles s'arrachent : les fixations doivent être calculées pour ce cas (actions du vent, L3).
+
+<SuccionVent alpha={20} q={0.8} comp={vent} />
 </Corrige>
 </Exercice>
 
