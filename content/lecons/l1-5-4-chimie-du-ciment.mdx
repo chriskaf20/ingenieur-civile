@@ -31,7 +31,9 @@ formules:
 
 import { bogue, coefficientsBogue, DOSAGES_CIMENTERIE, EXEMPLE_CLINKER, hydratationSilicates, reaction, TEMPERATURES_CUISSON } from '@/lib/calc/chimie'
 import { grandeur, nombre } from '@/lib/format'
-import { equationTexte, FiliereCiment } from '@/components/schemas/Chimie'
+import { equationTexte, FiliereCiment, PhasesClinker } from '@/components/schemas/Chimie'
+import { EauRajoutee, HydratationPate, StockageSacs } from '@/components/schemas/ChimieCours1'
+import { DiagrammeCycle } from '@/components/drawing/Diagrammes'
 
 export const o0 = EXEMPLE_CLINKER
 export const b0 = bogue(o0)
@@ -52,6 +54,8 @@ Le calcaire est une pierre. On le broie avec de l'argile, on le cuit très fort,
 Le ciment ne « sèche » pas comme une peinture : il **réagit** avec l'eau. La cuisson a fabriqué des minéraux instables, avides d'eau ; l'eau les transforme en cristaux et en gels qui s'enchevêtrent et collent les grains de sable et de gravier.
 
 Comprendre cette chimie explique les règles du chantier : ne pas ajouter d'eau dans un béton qui raidit, garder le béton humide pendant qu'il durcit, se méfier de la chaleur des grandes masses coulées en plein soleil.
+
+<DiagrammeCycle alt="Une pierre que l'on refait : le calcaire et l'argile sont cuits en clinker, broyés en ciment ; avec l'eau, le ciment réagit et redevient une pierre artificielle, le béton durci." centre="une pierre que l'on refait" etapes={[{ titre: 'Calcaire + argile', texte: 'la carrière', teinte: 'terre' }, { titre: 'Cuisson', texte: 'four : le clinker', teinte: 'brique' }, { titre: 'Broyage', texte: 'clinker + gypse = ciment', teinte: 'beton' }, { titre: 'Hydratation', texte: 'ciment + eau : réactions', teinte: 'encre' }, { titre: 'Pierre artificielle', texte: 'le béton durci', teinte: 'acier' }]} />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Que se passe-t-il, chimiquement, entre le calcaire de la carrière et le béton durci ?
@@ -109,6 +113,8 @@ La chimie ne demande qu'une partie de l'eau du béton. Le reste sert à rendre l
 ### La chaleur
 
 L'hydratation est **exothermique** : le C₃A et le C₃S chauffent le plus. Dans une grosse pièce coulée en plein soleil, le cœur s'échauffe, la surface refroidit : des fissures thermiques peuvent apparaître.
+
+<HydratationPate />
 
 <Regle type="simplification">
 Les formules des hydrates sont simplifiées : les C-S-H n'ont pas de composition fixe. Le calcul de Bogue donne une composition « potentielle » ; la composition réelle du clinker, mesurée par diffraction des rayons X, s'en écarte un peu.
@@ -177,6 +183,8 @@ Il durcit en fixant l'eau. Un béton qui sèche trop tôt, au soleil et au vent,
 La prise a commencé : l'eau ajoutée ne réagit plus, elle ne fait que créer des pores. Le béton perd en résistance et en durabilité.
 </Piege>
 
+<EauRajoutee />
+
 <Piege erreur="confondre clinker et ciment.">
 Le ciment est le clinker broyé avec du gypse, et souvent avec des ajouts (laitier, cendres, pouzzolanes, calcaire) : c'est le type CEM de l'EN 197-1.
 </Piege>
@@ -194,6 +202,8 @@ Plus de ciment, c'est plus de chaleur et plus de retrait, donc plus de fissures.
 <Page etape="terrain" titre="Sur le terrain">
 
 **Stocker le ciment en climat humide.** Le ciment réagit avec l'humidité de l'air : un sac mal stocké se couvre de grumeaux durs. On stocke les sacs sur palettes, à l'abri, sans les poser contre un mur, et l'on utilise les plus anciens d'abord. Un ciment éventé se refuse.
+
+<StockageSacs />
 
 <Encadre type="terrain" titre="Bétonner sous la chaleur">
 En RDC, le béton est souvent coulé par forte chaleur. L'hydratation s'accélère, la prise est plus rapide, l'eau s'évapore. Parades : bétonner tôt le matin, protéger du soleil, garder les granulats à l'ombre, utiliser un retardateur si nécessaire (L1.5.8), et surtout assurer une cure humide pendant plusieurs jours.
@@ -248,6 +258,8 @@ Un clinker contient CaO {pc(o2.CaO)}, SiO₂ {pc(o2.SiO2)}, Al₂O₃ {pc(o2.Al2
 
 <Corrige>
 C₄AF = **{pc(b2.C4AF)}**, C₃A = **{pc(b2.C3A)}**, C₃S = **{pc(b2.C3S)}**, C₂S = **{pc(b2.C2S)}**. Moins d'alumine et plus de fer qu'à l'exemple : moins de C₃A ({pc(b2.C3A)} contre {pc(b0.C3A)}), donc un ciment qui chauffe moins et résiste mieux aux sulfates (L1.5.7).
+
+<PhasesClinker C3S={b2.C3S} C2S={b2.C2S} C3A={b2.C3A} C4AF={b2.C4AF} CaSO4={b2.CaSO4} />
 </Corrige>
 </Exercice>
 

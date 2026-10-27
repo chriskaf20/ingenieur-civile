@@ -32,6 +32,8 @@ formules:
 import { analyseEau, EAU_DE_MER, EXEMPLE_EAU, LIMITES_GACHAGE, REPERES_OMS } from '@/lib/calc/chimie'
 import { grandeur, nombre } from '@/lib/format'
 import { AnalyseEauSchema } from '@/components/schemas/Chimie'
+import { DeuxEnsemblesEau, EauClaireSels, EbullitionConcentre } from '@/components/schemas/ChimieCours2'
+import { DiagrammeBarres, DiagrammeFlux } from '@/components/drawing/Diagrammes'
 
 export const e0 = analyseEau(EXEMPLE_EAU, 'arme')
 export const mer = analyseEau(EAU_DE_MER, 'arme')
@@ -49,6 +51,8 @@ Sur un chantier loin du réseau, on gâche le béton avec l'eau qu'on a : un for
 Une eau limpide peut contenir beaucoup de sels dissous, invisibles : des chlorures qui feront rouiller les armatures, des sulfates qui feront gonfler le béton, des nitrates nocifs pour les nourrissons. À l'inverse, une eau un peu trouble peut convenir au béton sans être buvable.
 
 Le béton et la santé ne craignent pas les mêmes substances. Une règle simple guide le chantier : **une eau potable convient au béton sans essai**. Pour toute autre eau, on analyse.
+
+<EauClaireSels />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment lire une analyse d'eau pour décider si elle convient au gâchage, à la boisson, ou à aucun des deux ?
@@ -84,7 +88,7 @@ Potable ⇒ bonne pour le béton. Bonne pour le béton ⇏ potable. Une analyse 
 
 </Infographie>
 
-<Page etape="cours" titre="Le cours : les limites et leur sens">
+<Page etape="cours" titre="Le cours (1/2) : l'eau de gâchage">
 
 ### L'eau de gâchage (EN 1008)
 
@@ -95,6 +99,12 @@ L'EN 1008 admet l'eau potable sans essai. Pour les autres eaux, elle fixe notamm
 - le **pH** : au moins {nombre(L.pHmin, 0)}.
 
 Elle demande aussi de contrôler les sucres, les huiles, les matières humiques, et de comparer le temps de prise et la résistance avec ceux d'une eau de référence.
+
+<DiagrammeBarres alt={`Chlorures admis dans l'eau de gâchage selon l'EN 1008 : ${grandeur(L.chlorures.precontraint, 0, 'mg/L')} pour le béton précontraint, ${grandeur(L.chlorures.arme, 0, 'mg/L')} pour le béton armé, ${grandeur(L.chlorures.nonArme, 0, 'mg/L')} pour le béton non armé. Plus l'acier est sensible à la corrosion, plus la limite est basse.`} titre="chlorures admis dans l'eau de gâchage, EN 1008 (mg/L)" barres={[{ libelle: 'béton précontraint', valeur: L.chlorures.precontraint, texte: grandeur(L.chlorures.precontraint, 0, 'mg/L'), teinte: 'correction' }, { libelle: 'béton armé', valeur: L.chlorures.arme, texte: grandeur(L.chlorures.arme, 0, 'mg/L'), teinte: 'terre' }, { libelle: 'béton non armé', valeur: L.chlorures.nonArme, texte: grandeur(L.chlorures.nonArme, 0, 'mg/L'), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : l'eau de boisson et l'eau agressive">
 
 ### L'eau de boisson (OMS)
 
@@ -110,6 +120,8 @@ La première exigence reste microbiologique : une eau chimiquement correcte peut
 ### Gâcher n'est pas baigner
 
 L'eau de gâchage est consommée par le ciment et ne se renouvelle pas. Une eau souterraine au contact d'une fondation, elle, se renouvelle sans cesse et apporte des sulfates pendant des années : les seuils de **l'eau agressive** (classes XA) sont donc bien plus bas que ceux de l'eau de gâchage.
+
+<DeuxEnsemblesEau />
 
 <Regle type="simplification">
 L'analyse de la fiche ne retient que cinq paramètres. Une décision réelle s'appuie sur l'analyse complète demandée par l'EN 1008 ou par la réglementation de l'eau de boisson, faite par un laboratoire.
@@ -183,6 +195,8 @@ Ses chlorures dépassent de loin la limite : les armatures rouilleraient de l'in
 L'ébullition tue les microbes, mais elle ne retire ni les nitrates ni les métaux : elle les concentre même un peu en évaporant l'eau.
 </Piege>
 
+<EbullitionConcentre />
+
 <Piege erreur="confondre mg/L et g/L.">
 {nombre(L.chlorures.arme, 0)} mg/L, c'est {nombre(L.chlorures.arme / 1000, 0)} g/L. Une erreur d'unité multiplie ou divise par mille.
 </Piege>
@@ -196,6 +210,8 @@ Une rivière change avec les saisons et avec les rejets en amont. On analyse au 
 <Page etape="terrain" titre="Sur le terrain">
 
 **Le chantier isolé.** Sans réseau, on prélève l'eau du forage ou de la rivière dans des flacons propres, on la fait analyser, et l'on garde les résultats au dossier du chantier. Un essai simple de conductivité, sur place, permet ensuite de vérifier qu'elle ne change pas.
+
+<DiagrammeFlux alt="Contrôler l'eau d'un chantier isolé : prélever dans un flacon propre, étiqueter, faire analyser au laboratoire, comparer critère par critère, puis décider et classer le résultat au dossier." etapes={[{ titre: 'Prélever', texte: 'flacon propre, rincé à l’eau du point', teinte: 'encre' }, { titre: 'Étiqueter', texte: 'lieu, date, heure', teinte: 'acier' }, { titre: 'Analyser', texte: 'laboratoire', teinte: 'terre' }, { titre: 'Comparer', texte: 'critère par critère', teinte: 'brique' }, { titre: 'Décider', texte: 'et classer au dossier', teinte: 'validation' }]} />
 
 <Encadre type="terrain" titre="L'eau des ouvriers">
 Sur les chantiers de RDC, l'eau de boisson des ouvriers est une question de santé publique : risque de choléra et de diarrhées. On fournit une eau traitée (réseau, chloration, filtration) et l'on ne laisse jamais boire l'eau destinée au béton si elle n'est pas potable.
@@ -252,6 +268,8 @@ Un puits donne : pH {nombre(puits.pH, 1)}, chlorures {nombre(puits.chlorures, 0)
 
 <Corrige>
 Gâchage : **{ep.gachageOk ? 'oui' : 'non'}**, tous les critères vérifiés sont respectés. Boisson : **{ep.potableOk ? 'oui' : 'non'}** ; critères refusés : {refus(ep.potable)}. Les nitrates, sans doute venus de latrines ou d'engrais proches, rendent cette eau dangereuse pour les nourrissons.
+
+<AnalyseEauSchema gachage={ep.gachage} potable={ep.potable} titreGachage="eau du puits pour un béton armé (EN 1008)" />
 </Corrige>
 </Exercice>
 

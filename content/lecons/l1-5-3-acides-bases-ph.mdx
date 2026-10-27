@@ -35,6 +35,7 @@ formules:
 import { concentrationDepH, ECHELLE_PH, EXEMPLE_NEUTRALISATION, KE_25, neutralisation, pHdeConcentration, pOH, PH_DEPASSIVATION, PH_PASSIVATION } from '@/lib/calc/chimie'
 import { grandeur, nombre, scientifique } from '@/lib/format'
 import { EchellePH } from '@/components/schemas/Chimie'
+import { ChauxDeuxH, EauxDeMine, FacteurDix, TroisBechers, TroisMesures } from '@/components/schemas/ChimieCours1'
 
 export const d0 = EXEMPLE_NEUTRALISATION
 export const r0 = neutralisation(d0)
@@ -53,6 +54,8 @@ Le béton frais est une base très forte : l'eau de ses pores a un pH voisin de 
 
 À l'inverse, les eaux acides, comme celles qui s'écoulent de certaines mines du Katanga, attaquent le béton et corrodent l'acier. Savoir mesurer le pH, et le corriger, est donc utile à l'ingénieur.
 
+<TroisBechers />
+
 <Encadre type="idee" titre="La question de cette leçon">
 Comment mesurer l'acidité d'une eau ou d'un sol, et combien de chaux faut-il pour la neutraliser ?
 </Encadre>
@@ -70,6 +73,8 @@ Un **acide** cède des ions H⁺ ; dans l'eau, ils forment des ions oxonium H₃
 $$\mathrm{pH} = -\log_{10} [\mathrm{H_3O^+}] \qquad [\mathrm{H_3O^+}] = 10^{-\mathrm{pH}}$$
 
 L'échelle est **logarithmique** : une unité de pH en moins, c'est dix fois plus d'ions H₃O⁺. Une eau à pH 3 est {nombre(concentrationDepH(3) / concentrationDepH(7), 0)} fois plus acide qu'une eau à pH 7.
+
+<FacteurDix cas={[7, 6, 5].map((p) => ({ pH: p, facteur: concentrationDepH(p) / concentrationDepH(7) }))} />
 
 ### Le produit ionique de l'eau
 
@@ -93,6 +98,8 @@ Les formules de cette leçon supposent des solutions diluées à 25 °C et des a
 - **papier indicateur** : une couleur à comparer à une échelle ; rapide, à une unité près.
 - **phénolphtaléine** : incolore en milieu acide ou peu basique, rose au-dessus d'un pH voisin de {nombre(PH_DEPASSIVATION, 0)}. Pulvérisée sur une cassure fraîche de béton, elle révèle la zone carbonatée (L1.5.7).
 - **pH d'un sol** : on met le sol en suspension dans de l'eau selon une méthode normalisée (ISO 10390), on agite, puis on mesure l'eau.
+
+<TroisMesures />
 
 ### Neutraliser
 
@@ -171,6 +178,8 @@ Les concentrations sont en mol/L : un bassin de {nombre(d0.V, 0)} m³ contient {
 Ca(OH)₂ apporte deux OH⁻ : une mole neutralise deux moles de H⁺. Oublier ce 2 double la dose.
 </Piege>
 
+<ChauxDeuxH />
+
 <Piege erreur="mesurer sans étalonner le pH-mètre.">
 Une électrode dérive avec le temps : sans étalonnage, l'appareil affiche un nombre précis mais faux.
 </Piege>
@@ -188,6 +197,8 @@ Le pH mesure la concentration en ions H₃O⁺ libres, pas tout l'acide présent
 <Encadre type="terrain" titre="Les eaux de mine">
 Dans la ceinture du cuivre, l'air et l'eau oxydent les sulfures des roches et des stériles : il se forme de l'acide sulfurique. Ces eaux acides attaquent le béton des ouvrages qu'elles baignent, corrodent les aciers et polluent les rivières. On les traite souvent à la chaux, dans des bassins où l'on suit le pH en continu.
 </Encadre>
+
+<EauxDeMine />
 
 **Les sols acides.** Beaucoup de sols tropicaux lessivés, dont certaines latérites, sont acides. Le pH d'un sol se mesure avant d'y enterrer du béton ou des conduites métalliques, et avant de le traiter à la chaux (L1.5.5).
 
@@ -229,6 +240,8 @@ Une eau de pluie contient 2,5 × 10⁻⁶ mol/L d'ions H₃O⁺. Calcule son pH.
 
 <Corrige>
 pH = −log(2,5 × 10⁻⁶) = **{nombre(ex1, 2)}** : légèrement acide, à cause du CO₂ dissous.
+
+<EchellePH marques={[{ pH: ex1, texte: 'cette pluie' }]} reperes={false} prefixe="ph-ex1" />
 </Corrige>
 </Exercice>
 

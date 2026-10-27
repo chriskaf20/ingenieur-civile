@@ -37,6 +37,7 @@ formules:
 import { dosageAdjuvant, EXEMPLE_ADJUVANT } from '@/lib/calc/chimie'
 import { grandeur, nombre } from '@/lib/format'
 import { StructuresOrganiques } from '@/components/schemas/Chimie'
+import { BilanEauAdjuvant, BitumeTemperature, CoucheRoulement, Defloculation } from '@/components/schemas/ChimieCours2'
 
 export const a0 = dosageAdjuvant(EXEMPLE_ADJUVANT)
 export const d0 = EXEMPLE_ADJUVANT
@@ -53,6 +54,8 @@ Un sac plastique s'étire, un tuyau en PVC se plie à chaud, une colle époxy de
 Leur comportement s'explique par leur architecture : des chaînes libres qui glissent quand on chauffe, des chaînes nouées en réseau qui ne fondent plus, des amas de molécules lourdes dispersés dans une huile.
 
 Le béton lui-même en contient : quelques litres d'**adjuvant** par mètre cube suffisent à le rendre fluide sans ajouter d'eau, ou à retarder sa prise par forte chaleur. Bien dosés, ils améliorent le béton ; mal dosés, ils le ruinent.
+
+<BitumeTemperature />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment la structure des polymères et des bitumes explique-t-elle leur comportement, et comment agit un adjuvant ?
@@ -104,6 +107,8 @@ Le bitume est un **colloïde** : des amas d'asphaltènes, sombres et durs, dispe
 - **Retardateurs** : ils ralentissent l'hydratation ; utiles par forte chaleur ou pour un long transport. Le sucre est un retardateur puissant : une eau sucrée peut empêcher la prise.
 - **Accélérateurs** : ils hâtent la prise et le durcissement ; ceux à base de chlorure sont proscrits dans le béton armé (L1.5.6).
 - **Entraîneurs d'air**, **hydrofuges** : microbulles d'air, réduction de l'absorption d'eau.
+
+<Defloculation />
 
 <Regle type="art">
 Un adjuvant liquide contient surtout de l'eau : on la compte dans l'eau de gâchage. Et l'on vérifie, par un essai de convenance, que l'adjuvant fonctionne avec le ciment et les granulats du chantier.
@@ -167,6 +172,8 @@ Le superplastifiant sert à **réduire** l'eau : si l'on garde toute l'eau, on o
 Dans l'exemple, l'adjuvant apporte {grandeur(a0.eau, 2, 'L')} d'eau par m³ : on la retranche de l'eau ajoutée au malaxeur.
 </Piege>
 
+<BilanEauAdjuvant total={eauReduite} adjuvant={a0.eau} malaxeur={eauMalaxeur} />
+
 <Piege erreur="gâcher avec une eau sucrée ou souillée.">
 Le sucre retarde fortement la prise ; une eau de lavage de fûts ou de sacs peut en contenir. On contrôle l'eau de gâchage (L1.5.9).
 </Piege>
@@ -180,6 +187,8 @@ Les ultraviolets cassent les chaînes : le tuyau jaunit et devient cassant. On l
 <Page etape="terrain" titre="Sur le terrain">
 
 **Les routes revêtues.** Les enrobés et les enduits superficiels des routes de RDC utilisent des bitumes et des émulsions. La chaleur et le soleil les vieillissent vite : le bitume s'oxyde, se fissure, et l'eau entre dans la chaussée. Un entretien précoce (enduit de scellement) coûte bien moins qu'une reconstruction.
+
+<CoucheRoulement />
 
 <Encadre type="terrain" titre="Bétonner loin de la centrale">
 Pour un chantier éloigné, le béton voyage longtemps sous la chaleur. Un retardateur prolonge sa maniabilité ; un superplastifiant ajouté à l'arrivée lui rend sa fluidité sans eau. Ajouter de l'eau dans la toupie, au contraire, affaiblit le béton : c'est à interdire.

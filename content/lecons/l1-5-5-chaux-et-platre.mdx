@@ -33,6 +33,8 @@ formules:
 import { cyclePlatre, cycleChaux, EXEMPLE_CYCLE_CHAUX, massesReaction, reaction, TEMPERATURES_CUISSON } from '@/lib/calc/chimie'
 import { grandeur, nombre } from '@/lib/format'
 import { CyclesLiants } from '@/components/schemas/Chimie'
+import { AerienneHydraulique, EnduitMurTerre, PlatreCiment } from '@/components/schemas/ChimieCours1'
+import { DiagrammeCycle } from '@/components/drawing/Diagrammes'
 
 export const c0 = cycleChaux(EXEMPLE_CYCLE_CHAUX)
 export const p0 = cyclePlatre(1000)
@@ -48,6 +50,8 @@ Avant le ciment, on bâtissait à la chaux. On cuit une pierre calcaire : elle p
 Le plâtre suit une boucle semblable, avec le gypse et l'eau au lieu du calcaire et du CO₂. Elle est beaucoup plus rapide : un plâtre gâché durcit en quelques minutes.
 
 Ces deux liants restent très utiles : enduits respirants sur les murs en terre, traitement des sols argileux, plâtres d'intérieur. Mais ils ne se comportent pas comme le ciment, et l'erreur de les confondre coûte cher.
+
+<DiagrammeCycle alt="Le cycle de la chaux : le calcaire cuit donne la chaux vive et du CO₂ ; arrosée, elle devient chaux éteinte ; à l'air, elle reprend le CO₂ et redevient calcaire." centre="le cycle de la chaux" etapes={[{ titre: 'Calcaire CaCO₃', texte: 'la pierre', teinte: 'terre' }, { titre: 'Cuisson', texte: 'chaux vive CaO + CO₂', teinte: 'brique' }, { titre: 'Extinction', texte: '+ eau : Ca(OH)₂, chaleur', teinte: 'encre' }, { titre: 'Prise à l’air', texte: '+ CO₂ : retour au calcaire', teinte: 'validation' }]} />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment la chaux et le plâtre durcissent-ils, et en quoi leur prise diffère-t-elle de celle du ciment ?
@@ -100,6 +104,8 @@ Une chaux tirée d'un calcaire pur est **aérienne** : sans air, elle ne durcit 
 ### Le plâtre
 
 Le gypse CaSO₄·2H₂O perd vers {nombre(T.platre, 0)} °C les trois quarts de son eau : il devient semi-hydrate CaSO₄·½H₂O. Au gâchage, le semi-hydrate se dissout, et le gypse, moins soluble, cristallise en fines aiguilles enchevêtrées : c'est la prise. Pour 1 kg de plâtre, la chimie ne demande que {grandeur(p0.eauSurPlatre, 3, 'kg')} d'eau ; on en met davantage pour qu'il soit maniable.
+
+<AerienneHydraulique />
 
 <Regle type="simplification">
 On présente des chaux et des gypses purs. Les produits commerciaux contiennent de la magnésie, des argiles ou des additifs (retardateurs de prise pour le plâtre) : leur fiche technique et l'EN 459-1 (chaux) en précisent la composition et l'emploi.
@@ -178,6 +184,8 @@ Le gypse est un peu soluble : à la pluie ou dans une douche, il se ramollit et 
 Le sulfate du plâtre réagit avec l'aluminate du ciment : il se forme de l'ettringite qui gonfle et fait éclater l'ouvrage. Un enduit de ciment sur un fond plâtré, ou l'inverse, est à proscrire.
 </Piege>
 
+<PlatreCiment />
+
 <Piege erreur="attendre d'un mortier de chaux la prise rapide du ciment.">
 La chaux aérienne durcit en semaines et en mois. On la protège du soleil et de la pluie battante pendant ce temps, et l'on charge la maçonnerie progressivement.
 </Piege>
@@ -191,6 +199,8 @@ La chaux aérienne durcit en semaines et en mois. On la protège du soleil et de
 <Encadre type="terrain" titre="Les maisons en terre et en brique">
 Sur un mur en briques de terre ou en adobe, un enduit de ciment, rigide et peu perméable, retient l'humidité dans le mur et finit par se décoller. Un enduit à la chaux, plus souple et respirant, laisse sécher le mur. Le badigeon de chaux, lui, protège et assainit les murs à faible coût.
 </Encadre>
+
+<EnduitMurTerre />
 
 **Le plâtre en intérieur.** Plaques de plâtre, faux plafonds, enduits lisses : le plâtre se pose vite et se répare facilement. On le protège de l'humidité et l'on vérifie qu'il n'est jamais au contact d'un mortier de ciment encore humide.
 

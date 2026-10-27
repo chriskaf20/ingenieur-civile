@@ -34,6 +34,8 @@ formules:
 import { AVOGADRO, detailMasseMolaire, equilibrer, massesReaction, masseMolaire, reaction, co2Decarbonatation, TEMPERATURES_CUISSON } from '@/lib/calc/chimie'
 import { grandeur, nombre, scientifique } from '@/lib/format'
 import { BilanMasseReaction } from '@/components/schemas/Chimie'
+import { CalcairePieces, FourAChaux, MoleculesPropane } from '@/components/schemas/ChimieCours1'
+import { DiagrammeBarres, DiagrammeFlux } from '@/components/drawing/Diagrammes'
 
 export const calc = massesReaction(reaction('calcination'), 0, 1000)
 export const propane = equilibrer(['C3H8', 'O2'], ['CO2', 'H2O'])
@@ -51,6 +53,8 @@ Sur un chantier, une gâchée de mortier suit une recette : tant de sacs de cime
 Une réaction chimique est aussi une recette, mais elle compte des **pièces** : des atomes et des molécules. Pour cuire du calcaire en chaux, chaque « pièce » de calcaire CaCO₃ donne exactement une pièce de chaux vive CaO et une pièce de dioxyde de carbone CO₂. Comme ces pièces sont minuscules, on les compte par paquets géants : les **moles**.
 
 Ce comptage permet de prévoir, avant d'allumer le four, combien de chaux on obtiendra et combien de CO₂ partira dans l'air. Pour une tonne de calcaire, ce CO₂ pèse {grandeur(calc.lignes[2].m, 0, 'kg')} : presque la moitié.
+
+<CalcairePieces m={[calc.lignes[0].m, calc.lignes[1].m, calc.lignes[2].m]} />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment passer d'une équation chimique à des masses en kilogrammes, utilisables sur un chantier ou dans une usine ?
@@ -78,6 +82,8 @@ C₃H₈ + O₂ → CO₂ + H₂O. Carbone : 3 CO₂. Hydrogène : 4 H₂O. Oxyg
 
 On dresse le tableau des atomes, élément par élément : même nombre à gauche et à droite. C'est rapide et sans appel.
 
+<MoleculesPropane coef={propane} />
+
 <Regle type="simplification">
 Les équations de ce module décrivent le bilan global. Les réactions réelles passent par des étapes intermédiaires, et certains produits, comme les silicates de calcium hydratés du ciment, n'ont pas de formule fixe : on en retient une formule simplifiée.
 </Regle>
@@ -103,6 +109,8 @@ Les coefficients donnent les proportions **en moles**, jamais en masses : pour a
 1. n du réactif connu = m / M ;
 2. n de chaque autre espèce, par les coefficients ;
 3. m = n × M pour chacune.
+
+<DiagrammeFlux alt="De la masse aux masses : on divise la masse connue par sa masse molaire pour avoir des moles ; les coefficients donnent les moles des autres espèces ; on multiplie par leurs masses molaires pour revenir aux masses ; on contrôle la conservation de la masse." etapes={[{ titre: 'Masse connue', texte: 'm en kg', teinte: 'terre' }, { titre: 'Moles', texte: 'n = m / M (kmol)', teinte: 'encre' }, { titre: 'Coefficients', texte: 'n des autres espèces', teinte: 'acier' }, { titre: 'Masses', texte: 'm = n × M, puis contrôle', teinte: 'validation' }]} />
 
 ### La conservation de la masse
 
@@ -182,6 +190,8 @@ Toutes les proportions seraient fausses. Le tableau des atomes prend une minute 
 « 1 CaCO₃ donne 1 CaO » veut dire une mole pour une mole, pas un kilogramme pour un kilogramme : une tonne de calcaire donne {grandeur(calc.lignes[1].m, 0, 'kg')} de chaux vive, pas une tonne.
 </Piege>
 
+<DiagrammeBarres alt="Une tonne de calcaire donne moins d'une tonne de chaux vive : les coefficients relient des moles, pas des masses." titre="cuisson d'une tonne de calcaire pur (kg)" barres={[{ libelle: 'calcaire CaCO₃', valeur: calc.lignes[0].m, texte: grandeur(calc.lignes[0].m, 0, 'kg'), teinte: 'terre' }, { libelle: 'chaux vive CaO', valeur: calc.lignes[1].m, texte: grandeur(calc.lignes[1].m, 0, 'kg'), teinte: 'encre' }, { libelle: 'CO₂ (dans l’air)', valeur: calc.lignes[2].m, texte: grandeur(calc.lignes[2].m, 0, 'kg'), teinte: 'beton' }]} />
+
 <Piege erreur="changer un indice pour équilibrer.">
 Écrire CaO₂ au lieu de CaO pour « équilibrer » l'oxygène invente une autre substance. On ne modifie que les coefficients.
 </Piege>
@@ -203,6 +213,8 @@ Masse en kg et masse molaire en g/mol donnent des kilomoles : garde la même éc
 <Encadre type="terrain" titre="Doser un réactif">
 Traiter une eau acide à la chaux (L1.5.3), stabiliser un sol à la chaux (L1.5.5), préparer une solution de laboratoire : chaque fois, la stœchiométrie donne la quantité minimale. Sur le terrain, on ajoute une marge, car les produits ne sont pas purs et les réactions ne sont pas complètes.
 </Encadre>
+
+<FourAChaux calcaire={calc.lignes[0].m} chaux={calc.lignes[1].m} co2={calc.lignes[2].m} />
 
 **La masse qui « disparaît ».** Un four à chaux perd près de la moitié de la masse enfournée : ce n'est ni un vol ni une erreur de pesée, c'est le CO₂ parti par la cheminée. Le rendement d'un four se contrôle par ce calcul.
 
@@ -264,6 +276,8 @@ Calcule le CO₂ de décarbonatation par tonne de chaux vive (CaO pur), puis par
 
 <Corrige>
 Chaux vive : {nombre(masseMolaire('CO2'), 3)} / {nombre(masseMolaire('CaO'), 3)} = **{grandeur(co2Chaux, 3, 't')}** de CO₂ par tonne. Clinker : 0,65 × {nombre(co2Chaux, 3)} = **{grandeur(co2Clinker, 3, 't')}** par tonne. La chaux est presque entièrement faite de CaO venu du calcaire, alors que le clinker contient aussi de la silice et de l'alumine, apportées par l'argile sans CO₂.
+
+<DiagrammeBarres alt="CO₂ de décarbonatation par tonne : la chaux vive en émet plus que le clinker." titre="CO₂ de décarbonatation (t par t de produit)" barres={[{ libelle: 'chaux vive (CaO pur)', valeur: co2Chaux, texte: grandeur(co2Chaux, 3, 't'), teinte: 'correction' }, { libelle: 'clinker (65 % de CaO)', valeur: co2Clinker, texte: grandeur(co2Clinker, 3, 't'), teinte: 'terre' }]} />
 </Corrige>
 </Exercice>
 

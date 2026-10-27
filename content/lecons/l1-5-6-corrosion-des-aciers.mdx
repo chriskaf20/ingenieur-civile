@@ -38,7 +38,9 @@ formules:
 import { EXEMPLE_CORROSION, FARADAY, perteSection, PH_DEPASSIVATION, PH_PASSIVATION, RAPPORT_VOLUME_ROUILLE, vitessePenetration, dureeCarbonatation } from '@/lib/calc/chimie'
 import { CMIN_DUR_S4, enrobageNominal } from '@/lib/calc/ba/enrobage'
 import { grandeur, nombre } from '@/lib/format'
-import { PileCorrosion, PoteauCorrosionIso } from '@/components/schemas/Chimie'
+import { PerteSectionBarre, PileCorrosion, PoteauCorrosionIso } from '@/components/schemas/Chimie'
+import { ClouDehorsDedans, CorrosionFormes, CuivreAcier, EnrobagesExposition, SerieGalvanique, TolesGalvanisees } from '@/components/schemas/ChimieCours2'
+import { DiagrammeBarres } from '@/components/drawing/Diagrammes'
 
 export const d0 = EXEMPLE_CORROSION
 export const r0 = perteSection(d0)
@@ -58,6 +60,8 @@ Laisse un clou dehors : en quelques semaines, il se couvre de rouille. Enferme l
 La rouille n'est pas une simple « saleté » : c'est une **pile électrique** qui fonctionne à la surface du métal. À un endroit, le fer se dissout et libère des électrons ; à un autre, l'oxygène les consomme. Il suffit d'un peu d'eau pour fermer le circuit.
 
 La rouille occupe bien plus de place que l'acier qu'elle remplace : elle pousse sur le béton, le fissure, le fait éclater. Les balcons dont l'enrobage tombe en morceaux en sont la preuve visible.
+
+<ClouDehorsDedans />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Pourquoi l'acier rouille-t-il, pourquoi le béton le protège-t-il, et à quelle vitesse une barre perd-elle sa section ?
@@ -93,7 +97,7 @@ Enrobage épais et béton compact ; peinture sur l'acier nu ; galvanisation (le 
 
 </Infographie>
 
-<Page etape="cours" titre="Le cours : vitesse de corrosion et protections">
+<Page etape="cours" titre="Le cours (1/2) : la vitesse de corrosion">
 
 ### La loi de Faraday
 
@@ -107,21 +111,31 @@ avec M = masse molaire du fer, n = 2, F = {nombre(FARADAY, 2)} C/mol et ρ la ma
 
 La carbonatation provoque une corrosion assez **uniforme**. Les chlorures provoquent des **piqûres** : la perte moyenne est faible, mais localement la barre peut être percée bien plus vite. Une barre piquée est plus dangereuse qu'elle n'en a l'air.
 
+<CorrosionFormes />
+
 ### Le volume de la rouille
 
 La rouille occupe {nombre(RAPPORT_VOLUME_ROUILLE.min, 0)} à {nombre(RAPPORT_VOLUME_ROUILLE.max, 0)} fois le volume du fer consommé. Quelques dizaines de micromètres de corrosion suffisent à fissurer l'enrobage : la fissure le long de l'armature est souvent le premier signe visible.
+
+<Regle type="simplification">
+La loi de Faraday suppose une corrosion uniforme et un courant constant. Sur un ouvrage, le courant varie avec l'humidité et la température ; il se mesure en plusieurs points et à plusieurs saisons.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : couples galvaniques et enrobage">
 
 ### Les couples galvaniques
 
 Deux métaux différents en contact, dans l'eau, forment une pile : le plus actif se corrode. Le **zinc** protège ainsi l'acier galvanisé, même rayé ; le **cuivre**, au contraire, accélère la corrosion de l'acier qui le touche.
 
+<SerieGalvanique />
+
 ### L'enrobage
 
 L'EN 1992-1-1 (tableau 4.4N) fixe un enrobage minimal de durabilité selon l'exposition : {nombre(CMIN_DUR_S4.XC1, 0)} mm à l'intérieur sec (XC1), {nombre(CMIN_DUR_S4.XC4, 0)} mm à l'extérieur soumis aux cycles d'humidité (XC4), {nombre(CMIN_DUR_S4.XS1, 0)} mm à l'air marin (XS1), pour une durée d'utilisation de 50 ans. On y ajoute la tolérance d'exécution.
 
-<Regle type="simplification">
-La loi de Faraday suppose une corrosion uniforme et un courant constant. Sur un ouvrage, le courant varie avec l'humidité et la température ; il se mesure en plusieurs points et à plusieurs saisons.
-</Regle>
+<EnrobagesExposition xc1={CMIN_DUR_S4.XC1} xc4={CMIN_DUR_S4.XC4} />
 
 </Page>
 
@@ -204,6 +218,8 @@ Une peinture posée sur de la rouille non éliminée se décolle et emprisonne l
 Le contact crée une pile où l'acier se corrode à la place du cuivre. Il faut un raccord isolant entre les deux métaux.
 </Piege>
 
+<CuivreAcier />
+
 <Piege erreur="gâcher le béton avec du sable de mer non lavé.">
 Les chlorures apportés dès la fabrication dépassivent l'acier de l'intérieur. Le sable marin se lave à l'eau douce et se contrôle avant emploi (L1.5.9).
 </Piege>
@@ -221,6 +237,8 @@ Un enrobage de quelques millimètres en sous-face de balcon suffit pour que le f
 <Encadre type="terrain" titre="Les tôles galvanisées">
 Les toitures en tôles galvanisées sont partout en RDC. Le zinc protège l'acier tant qu'il en reste : il s'use plus vite aux découpes, aux trous de fixation et là où l'eau stagne. Une vis en acier non protégé ou un contact avec du cuivre crée un point de corrosion. On choisit des fixations adaptées et l'on évite les eaux stagnantes.
 </Encadre>
+
+<TolesGalvanisees />
 
 **Les armatures sur chantier.** Une fine rouille superficielle, qui s'essuie, ne gêne pas l'adhérence. Une rouille écailleuse, qui fait perdre de la matière, ne s'accepte pas : on nettoie ou l'on refuse les barres. On stocke l'acier sur cales, hors de la boue.
 
@@ -273,6 +291,8 @@ Une barre HA 10 subit {grandeur(d2.icorr, 0, 'µA/cm²')} pendant {grandeur(d2.d
 
 <Corrige>
 v = {grandeur(r2.vitesse, 2, 'µm/an')} ; p = {grandeur(r2.penetration, 3, 'mm')} ; φ′ = **{grandeur(r2.phiRestant, 2, 'mm')}** ; perte de section **{grandeur(r2.perte * 100, 0, '%')}**. Un quart de l'acier perdu : la poutre doit être réparée ou renforcée.
+
+<PerteSectionBarre phi={d2.phi} phiRestant={r2.phiRestant} A0={r2.A0} A1={r2.A1} perte={r2.perte} />
 </Corrige>
 </Exercice>
 
@@ -284,6 +304,8 @@ Avec des cadres de 8 mm, compare l'enrobage nominal d'un poteau intérieur sec (
 
 <Corrige>
 XC1 : c<sub>min,dur</sub> = {nombre(e1.cminDur, 0)} mm, c<sub>nom</sub> = **{grandeur(e1.cnom, 0, 'mm')}**, front aux armatures vers **{grandeur(t1, 0, 'ans')}**. XC4 : c<sub>min,dur</sub> = {nombre(e4.cminDur, 0)} mm, c<sub>nom</sub> = **{grandeur(e4.cnom, 0, 'mm')}**, vers **{grandeur(t4, 0, 'ans')}**. Le front avance comme la racine du temps : un enrobage plus épais fait gagner beaucoup plus que les quelques millimètres ajoutés. À l'intérieur sec, un front atteint plus vite fait moins de dégâts, car il manque l'eau pour fermer la pile.
+
+<DiagrammeBarres alt="Âge auquel le front de carbonatation atteint les armatures, selon l'enrobage nominal XC1 ou XC4 : l'enrobage plus épais fait gagner beaucoup d'années." titre="le front atteint les armatures vers… (ans)" barres={[{ libelle: `XC1 : c = ${nombre(e1.cnom, 0)} mm`, valeur: t1, texte: grandeur(t1, 0, 'ans'), teinte: 'terre' }, { libelle: `XC4 : c = ${nombre(e4.cnom, 0)} mm`, valeur: t4, texte: grandeur(t4, 0, 'ans'), teinte: 'validation' }]} />
 </Corrige>
 </Exercice>
 

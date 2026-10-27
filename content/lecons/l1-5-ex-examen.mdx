@@ -17,6 +17,7 @@ formules: []
 import { bogue, concentrationDepH, diagnosticCarbonatation, dureeCarbonatation, LIMITES_GACHAGE, massesReaction, masseMolaire, reaction, vitessePenetration } from '@/lib/calc/chimie'
 import { SEUIL_TEXTE } from '@/lib/progression/types'
 import { grandeur, nombre } from '@/lib/format'
+import { FissuresReseauPile } from '@/components/schemas/ChimieCours2'
 
 export const q2 = masseMolaire('CaCO3')
 export const q3 = massesReaction(reaction('calcination'), 0, 1000)
@@ -92,6 +93,8 @@ Loi de Faraday : environ {nombre(vitessePenetration(1), 1)} µm/an pour 1 µA/cm
 <QCM n={10} question="Un béton de 25 ans est carbonaté sur 18 mm. Avec la loi x = K √t, le front atteindra un enrobage de 30 mm vers :" choix={[grandeur(q10b, 0, 'ans'), '42 ans', '30 ans', '100 ans']} bonne={0} colonnes={4}>
 K = 18 / √25 = {nombre(q10.K, 1)} mm/√an ; t = (30 / K)² (L1.5.7).
 </QCM>
+
+<FissuresReseauPile />
 
 <QCM n={11} question="Des fissures en réseau, avec un gel dans les fissures, sur une pile de pont humide, font penser à :" choix={['la carbonatation', 'l’alcali-réaction', 'un défaut de coffrage', 'une attaque par le gel']} bonne={1} colonnes={2}>
 Granulat réactif, alcalis et eau ; à confirmer par un examen au microscope (L1.5.7).

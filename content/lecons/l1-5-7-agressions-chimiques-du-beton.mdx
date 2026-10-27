@@ -32,9 +32,10 @@ formules:
   - { nom: 'Alcalin équivalent', tex: '\mathrm{Na_2O_{éq}} = \mathrm{Na_2O} + 0{,}658\,\mathrm{K_2O}', domaine: 'Teneurs en % de la masse de ciment' }
 ---
 
-import { alcalinEquivalent, classeXA, COEF_K2O, diagnosticCarbonatation, massesReaction, masseMolaire, PH_DEPASSIVATION, profondeurCarbonatation, reaction } from '@/lib/calc/chimie'
+import { alcalinEquivalent, classeXA, COEF_K2O, diagnosticCarbonatation, dureeCarbonatation, massesReaction, masseMolaire, PH_DEPASSIVATION, profondeurCarbonatation, reaction } from '@/lib/calc/chimie'
 import { grandeur, nombre } from '@/lib/format'
 import { TroisAgressions } from '@/components/schemas/Chimie'
+import { AttaquesDepuisSurface, CourbeFront, EfflorescenceOuRAG, EgoutH2S, TroisConditionsRAG } from '@/components/schemas/ChimieCours2'
 
 export const depart = { age: 15, x: 12, c: 30 }
 export const d0 = diagnosticCarbonatation(depart)
@@ -51,6 +52,8 @@ Un béton bien fait ressemble à une pierre éternelle. Pourtant, il vit dans un
 La plupart de ces attaques avancent **depuis la surface**, par les pores remplis d'air ou d'eau. Elles sont lentes, invisibles pendant des années, puis apparaissent d'un coup : rouille et éclats sous un balcon, béton gonflé au pied d'un mur, fissures en réseau sur une pile de pont.
 
 Comme en médecine, il vaut mieux prévenir que guérir : un béton compact, bien enrobé et adapté à son milieu résiste des décennies. Un diagnostic précoce permet de réparer avant que la structure ne soit en danger.
+
+<AttaquesDepuisSurface />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Quelles réactions chimiques détruisent le béton, à quelle vitesse, et comment s'en protéger ?
@@ -86,11 +89,21 @@ Béton compact (peu d'eau, bonne cure), enrobage suffisant, ciment adapté au mi
 
 </Infographie>
 
-<Page etape="cours" titre="Le cours : mécanismes et vitesses">
+<Page etape="cours" titre="Le cours (1/2) : la carbonatation">
 
 ### La carbonatation
 
 Le CO₂ entre par les pores et consomme la portlandite couche après couche. Le front avance vite au début, puis de plus en plus lentement : en première approche, **x = K √t**. Le coefficient K dépend surtout de la compacité du béton et de son humidité : la carbonatation est lente dans un béton saturé d'eau, où le CO₂ circule mal, et dans un béton très sec, où il manque l'eau de la réaction. On la mesure en pulvérisant de la **phénolphtaléine** sur une cassure fraîche : le béton sain devient rose, la zone carbonatée reste incolore.
+
+<CourbeFront K={d0.K} enrobages={[{ c: depart.c, t: d0.tArmatures, nom: 'enrobage du poteau' }]} mesure={{ age: depart.age, x: depart.x }} />
+
+<Regle type="simplification">
+La loi en racine du temps et les coefficients K de cette leçon sont des simplifications : sur un ouvrage, K se déduit d'une mesure, et il varie selon l'orientation, l'abri de la pluie et l'humidité.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/2) : sulfates et alcali-réaction">
 
 ### Les sulfates
 
@@ -102,9 +115,7 @@ Une forme interne existe aussi : si le béton a été trop chaud pendant son dur
 
 Il faut trois conditions à la fois : un granulat **réactif**, assez d'**alcalis** (Na₂Oéq = Na₂O + {nombre(COEF_K2O, 3)} K₂O, le coefficient étant le rapport des masses molaires) et de l'**eau**. La réaction est lente : les fissures apparaissent souvent après plusieurs années. Parades : granulats qualifiés non réactifs, ciments et additions qui limitent les alcalis, ouvrages drainés <AVerifier note="A_VERIFIER.md n° 38 : recommandations nationales de prévention de l'alcali-réaction" />.
 
-<Regle type="simplification">
-La loi en racine du temps et les coefficients K de cette leçon sont des simplifications : sur un ouvrage, K se déduit d'une mesure, et il varie selon l'orientation, l'abri de la pluie et l'humidité.
-</Regle>
+<TroisConditionsRAG />
 
 </Page>
 
@@ -181,6 +192,8 @@ Sans compacité, le meilleur ciment ne suffit pas : l'eau agressive circule dans
 Des traces blanches de sels qui sèchent en surface (efflorescences) sont en général sans gravité. L'alcali-réaction se reconnaît à des fissures en réseau, ouvertes, avec un gel dans les fissures : il faut une analyse pour conclure.
 </Piege>
 
+<EfflorescenceOuRAG />
+
 <Piege erreur="réparer un éclat sans traiter la cause.">
 Reboucher un éclat au mortier sans dégager l'acier rouillé ni traiter le béton carbonaté autour : la corrosion continue sous la réparation, qui tombera à son tour.
 </Piege>
@@ -190,6 +203,8 @@ Reboucher un éclat au mortier sans dégager l'acier rouillé ni traiter le bét
 <Page etape="terrain" titre="Sur le terrain">
 
 **Les égouts et les fosses.** Dans les réseaux d'assainissement, des bactéries transforment le soufre des eaux usées en hydrogène sulfuré, puis en acide sulfurique sur les parois humides : la voûte des regards et des collecteurs se ronge au-dessus de l'eau. On choisit des bétons et des revêtements adaptés, et l'on ventile.
+
+<EgoutH2S />
 
 <Encadre type="terrain" titre="Les sols et les eaux des zones minières">
 Autour des mines du Katanga, les eaux d'exhaure et certains sols sont chargés en sulfates et parfois acides. Avant de couler une fondation ou un bassin, on analyse l'eau et le sol : une eau souterraine à 1 500 mg/L de sulfates et pH 6 relèverait de la classe **{xa2.classe}** (sulfates : {xa2.sulfates}, pH : {xa2.pH}) <AVerifier note="A_VERIFIER.md n° 37" />, avec les exigences de béton correspondantes.
@@ -235,6 +250,8 @@ Un béton se carbonate selon x = 4 √t (mm, années ; donnée de l'énoncé). Q
 
 <Corrige>
 x = 4 × √30 = **{grandeur(x30, 1, 'mm')}**. Un enrobage de 20 mm serait dépassé ; un enrobage de 30 mm, pas encore.
+
+<CourbeFront K={4} enrobages={[{ c: 20, t: dureeCarbonatation(20, 4) }, { c: 30, t: dureeCarbonatation(30, 4) }]} mesure={{ age: 30, x: x30 }} />
 </Corrige>
 </Exercice>
 

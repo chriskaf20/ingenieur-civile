@@ -33,6 +33,7 @@ formules:
 import { MASSES_ATOMIQUES, NUMEROS_ATOMIQUES, masseMolaire } from '@/lib/calc/chimie'
 import { grandeur, nombre } from '@/lib/format'
 import { TypesLiaisons } from '@/components/schemas/Chimie'
+import { AcierVerreArgile, ArgileGonflante, AtomeIonMolecule, CristalAmorphe, FeuilletsEau } from '@/components/schemas/ChimieCours1'
 
 export const Ma = MASSES_ATOMIQUES
 export const Z = NUMEROS_ATOMIQUES
@@ -45,6 +46,8 @@ Plie une barre d'acier : elle se tord sans se rompre. Plie une plaque de verre :
 La différence tient à la façon dont les atomes **s'accrochent** entre eux. Dans l'acier, les atomes partagent un nuage d'électrons : des plans d'atomes peuvent glisser les uns sur les autres sans se séparer. Dans le verre, chaque atome est tenu par des liaisons rigides et orientées : rien ne peut glisser, tout casse d'un coup. Dans l'argile, des feuillets solides ne sont retenus entre eux que par de l'eau et des forces faibles.
 
 Connaître ces liaisons, c'est comprendre d'avance comment un matériau va se comporter sur le chantier : s'il plie ou s'il casse, s'il rouille, s'il gonfle.
+
+<AcierVerreArgile />
 
 <Encadre type="idee" titre="La question de cette leçon">
 Comment la liaison entre les atomes explique-t-elle les propriétés des matériaux de construction ?
@@ -89,6 +92,8 @@ Dans un **cristal**, les atomes sont rangés selon un motif régulier : l'acier,
 ### Pourquoi l'acier est ductile
 
 Un cristal métallique contient des défauts en ligne, les **dislocations**. Sous l'effort, elles se déplacent et les plans d'atomes glissent de proche en proche : le métal s'allonge sans rompre. C'est ce qui permet à une armature de prévenir avant la rupture (grande déformation).
+
+<CristalAmorphe />
 
 ### Pourquoi le béton est fragile en traction
 
@@ -154,6 +159,8 @@ Feuillets **ioniques et covalents**, tenus entre eux par des **liaisons faibles*
 L'atome est neutre ; l'ion a gagné ou perdu des électrons ; la molécule est un groupe d'atomes liés (H₂O). Dans la chaux vive, il n'y a pas de molécules CaO, mais un empilement d'ions Ca²⁺ et O²⁻.
 </Piege>
 
+<AtomeIonMolecule />
+
 <Piege erreur="croire que dur veut dire résistant.">
 Le verre et le béton sont durs mais fragiles : ils cassent sans prévenir. L'acier est moins dur que le quartz, mais ductile : il se déforme beaucoup avant de rompre.
 </Piege>
@@ -175,6 +182,8 @@ Le calcium a Z = {Z.Ca} protons, mais une masse molaire de {grandeur(Ma.Ca, 3, '
 <Page etape="terrain" titre="Sur le terrain">
 
 **Les argiles gonflantes.** Les sols argileux gonflants existent dans de nombreuses régions tropicales. Leurs mouvements saisonniers fissurent les murs et soulèvent les dallages des maisons légères. On les reconnaît par des fentes de retrait profondes en saison sèche ; on les identifie au laboratoire (limites d'Atterberg, L3.4).
+
+<ArgileGonflante />
 
 <Encadre type="terrain" titre="Les latérites, durcies par le fer">
 Les latérites, très répandues en RDC, sont riches en oxydes de fer et d'aluminium. Ces oxydes cimentent les grains : séchée, la latérite peut former une cuirasse dure. C'est aussi pourquoi le graveleux latéritique est un bon matériau de chaussée, à condition de rester drainé (L3).
@@ -242,6 +251,8 @@ Le dallage d'une maison construite sur un sol argileux se soulève au milieu à 
 
 <Corrige>
 L'eau de pluie s'infiltre et entre **entre les feuillets** de l'argile, tenus par des liaisons faibles : les feuillets s'écartent, le sol gonfle ; au séchage, l'eau repart et le sol se rétracte. Parades : stabiliser la teneur en eau (trottoir étanche périphérique, drainage, gouttières), descendre les fondations sous la zone qui varie, ou désolidariser le dallage (vide sanitaire). Le traitement à la chaux du sol peut aussi réduire le gonflement (L1.5.5).
+
+<FeuilletsEau />
 </Corrige>
 </Exercice>
 

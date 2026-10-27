@@ -16,6 +16,7 @@ formules: []
 import { diagnosticCarbonatation, EXEMPLE_CARBONATATION, PH_DEPASSIVATION } from '@/lib/calc/chimie'
 import { grandeur, nombre } from '@/lib/format'
 import { QuatreDegradations } from '@/components/schemas/Chimie'
+import { CourbeFront } from '@/components/schemas/ChimieCours2'
 
 export const d = EXEMPLE_CARBONATATION
 export const r = diagnosticCarbonatation(d)
@@ -108,7 +109,7 @@ Supprimer la cause ou couper le mécanisme, puis réparer. Pour les ouvrages neu
 
 </FicheCalcul>
 
-<Page etape="projet" titre="Le corrigé : les quatre fiches">
+<Page etape="projet" titre="Le corrigé (1/2) : les quatre fiches">
 
 <div className="tableau">
   <table>
@@ -122,9 +123,13 @@ Supprimer la cause ou couper le mécanisme, puis réparer. Pour les ouvrages neu
   </table>
 </div>
 
-### Le cas A en chiffres
+</Page>
+
+<Page etape="projet" titre="Le corrigé (2/2) : le cas A en chiffres">
 
 En partie courante, K = {nombre(r.K, 2)} mm/√an : le front atteindra l'enrobage de {grandeur(d.c, 0, 'mm')} vers **{grandeur(r.tArmatures, 0, 'ans')}**, dans {grandeur(r.reste, 0, 'ans')}. Au droit des éclats, avec {grandeur(cEclat, 0, 'mm')} d'enrobage, l'acier a été atteint vers **{grandeur(rEclat.tArmatures, 0, 'ans')}** : depuis, le béton carbonaté (pH sous {nombre(PH_DEPASSIVATION, 0)} environ) ne protège plus l'acier, et la pluie a fourni l'eau de la pile. La cause est double : carbonatation **et** enrobage insuffisant.
+
+<CourbeFront K={r.K} enrobages={[{ c: d.c, t: r.tArmatures, nom: 'partie courante' }, { c: cEclat, t: rEclat.tArmatures, nom: 'au droit des éclats' }]} mesure={{ age: d.age, x: d.x }} />
 
 <Encadre type="attention">
 Réparer seulement les éclats ne suffit pas : dans {grandeur(r.reste, 0, 'ans')}, le front atteindra aussi les armatures de la partie courante. Une protection de surface (revêtement anti-carbonatation) ralentit le front ; elle se décide avec un spécialiste.
