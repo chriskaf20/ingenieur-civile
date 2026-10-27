@@ -1,0 +1,305 @@
+---
+id: L2.1.2
+titre: Équations du premier ordre
+objectifs:
+  - Résoudre une équation à variables séparables
+  - Résoudre une équation linéaire du premier ordre à coefficients constants
+  - Interpréter la constante de temps et la valeur d'équilibre
+  - Appliquer la loi de refroidissement de Newton à un béton chaud
+relecture: false
+normes: []
+glossaire:
+  - terme: Variables séparables
+    definition: Équation qu'on peut écrire g(y) dy = f(t) dt, puis intégrer de chaque côté.
+  - terme: Constante de temps
+    definition: Durée τ = 1/k au bout de laquelle l'écart à l'équilibre n'est plus que 37 % de l'écart initial.
+  - terme: Régime permanent
+    definition: Valeur vers laquelle tend la solution quand le temps devient grand.
+  - terme: Loi de Newton du refroidissement
+    definition: La vitesse de refroidissement est proportionnelle à l'écart de température avec le milieu.
+symboles:
+  - { symbole: 'k', signification: 'constante de vitesse', unite: '1/h' }
+  - { symbole: 'τ', signification: 'constante de temps', unite: 'h' }
+  - { symbole: 'Ta', signification: 'température de l''air', unite: '°C' }
+formules:
+  - { nom: 'Équation linéaire', tex: 'y'' = a\,y + b \;\Rightarrow\; y = -\frac{b}{a} + \left(y_0 + \frac{b}{a}\right) e^{a t}', domaine: 'a ≠ 0' }
+  - { nom: 'Refroidissement', tex: 'T(t) = T_a + (T_0 - T_a)\,e^{-k t}', domaine: 'Loi de Newton' }
+  - { nom: 'Temps pour atteindre T', tex: 't = \frac{1}{k}\ln\frac{T_0 - T_a}{T - T_a}', domaine: 'Loi de Newton' }
+---
+
+import { decroissance, EXEMPLE_REFROIDISSEMENT, lineairePremier, refroidissement } from '@/lib/calc/equadiff'
+import { grandeur, nombre } from '@/lib/format'
+import { ChampPentes, CourbeRefroidissement, Exponentielle } from '@/components/schemas/EquaDiff'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const d0 = EXEMPLE_REFROIDISSEMENT
+export const r0 = refroidissement(d0)
+export const ex2 = { a: -2, b: 4, y0: 0 }
+export const ex3 = refroidissement({ T0: 70, Ta: 28, k: 0.08, Tcible: 35 })
+
+<Page etape="intuition" titre="L'intuition : plus l'écart est grand, plus ça va vite">
+
+Une tasse de thé brûlant refroidit vite au début, puis de plus en plus lentement : quand il ne reste que quelques degrés d'écart avec la pièce, il n'y a presque plus rien qui pousse. C'est la loi du **premier ordre** : la vitesse de variation est proportionnelle à l'écart avec l'équilibre.
+
+<CourbeRefroidissement T0={d0.T0} Ta={d0.Ta} k={d0.k} Tcible={d0.Tcible} tCible={r0.tCible} />
+
+Le même schéma décrit un béton de masse qui refroidit, un réservoir qui se remplit à débit constant en fuyant par un orifice, une charge qui se dissipe : partout une exponentielle vers un équilibre.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment résoudre les équations du premier ordre et lire leur solution ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Le premier ordre en six points" sousTitre="Séparer, intégrer, interpréter" etape="cours">
+
+<Panneau n={1} titre="Séparer" icone="idee" couleur="encre">
+Mettre tout y d'un côté, tout t de l'autre : g(y) dy = f(t) dt.
+</Panneau>
+
+<Panneau n={2} titre="Intégrer" icone="calcul" couleur="acier">
+Une primitive de chaque côté, plus une constante.
+</Panneau>
+
+<Panneau n={3} titre="y' = −k y" icone="regle" couleur="terre">
+Solution y0 e^(−kt) : la décroissance exponentielle.
+</Panneau>
+
+<Panneau n={4} titre="y' = a y + b" icone="plan" couleur="brique">
+Équilibre −b/a, plus une exponentielle qui s'éteint (si a &lt; 0).
+</Panneau>
+
+<Panneau n={5} titre="τ = 1/k" icone="verification" couleur="validation">
+En τ, l'écart tombe à 37 % ; en 3τ, à 5 % ; en 5τ, moins de 1 %.
+</Panneau>
+
+<Panneau n={6} titre="Vérifier" icone="attention" couleur="correction">
+Remplacer dans l'équation, vérifier la condition initiale et le régime permanent.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : variables séparables">
+
+### La méthode
+
+Une équation est à **variables séparables** si l'on peut écrire $g(y)\,dy = f(t)\,dt$. On intègre chaque côté : $\int g(y)\,dy = \int f(t)\,dt + C$, puis on exprime y, et l'on fixe C par la condition initiale.
+
+### L'exemple fondamental
+
+$y' = -k\,y$ s'écrit $\frac{dy}{y} = -k\,dt$, d'où $\ln|y| = -k t + C$, soit $y = y_0\,e^{-k t}$. La même fraction disparaît à chaque intervalle de temps : c'est la **décroissance exponentielle**.
+
+<Exponentielle y0={100} k={0.2} titreX="t (h)" titreY="y (%)" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : l'équation linéaire">
+
+### y' = a y + b
+
+C'est le premier ordre linéaire à coefficients constants. Son **régime permanent** est la valeur qui annule y' : $y_\infty = -b/a$. Sa solution est l'équilibre plus un écart qui évolue en $e^{a t}$ :
+
+$$y(t) = -\frac{b}{a} + \left(y_0 + \frac{b}{a}\right) e^{a t}$$
+
+Si a &lt; 0, l'écart s'éteint et y tend vers l'équilibre ; si a &gt; 0, il explose : le système est instable.
+
+### La constante de temps
+
+Pour a = −k, $\tau = 1/k$. Au bout de τ, l'écart à l'équilibre vaut $e^{-1} \approx 37\,\%$ de l'écart initial ; au bout de 3τ, 5 % ; au bout de 5τ, moins de 1 % : on considère alors l'équilibre atteint.
+
+<ChampPentes k={0.5} y0={4.5} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : le refroidissement du béton">
+
+### La loi de Newton
+
+Un corps à la température T, dans un milieu à $T_a$, perd de la chaleur à une vitesse proportionnelle à l'écart : $T' = -k\,(T - T_a)$. C'est une équation linéaire avec $a = -k$, $b = k T_a$ : l'équilibre est $T_a$, et
+
+$$T(t) = T_a + (T_0 - T_a)\,e^{-k t}$$
+
+### Le temps pour atteindre une température
+
+On isole t : $t = \frac{1}{k}\ln\frac{T_0 - T_a}{T - T_a}$. Ici, le béton passe de {d0.T0} à {d0.Tcible} °C en {grandeur(r0.tCible, 1, 'h')}.
+
+<Regle type="simplification">
+La loi de Newton suppose une température uniforme dans le béton et un échange constant avec l'air. Dans une grosse pièce, le cœur reste plus chaud que la peau : on le modélise par l'équation de la chaleur (L2.1.7). La constante k se déduit de mesures sur le chantier.
+</Regle>
+
+<CourbeRefroidissement T0={d0.T0} Ta={d0.Ta} k={d0.k} Tcible={d0.Tcible} tCible={r0.tCible} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la recette du premier ordre">
+
+<DiagrammeFlux alt="La recette pour une équation du premier ordre linéaire : écrire sous la forme y′ = a y + b ; trouver l'équilibre −b/a ; écrire la solution générale ; fixer la constante avec la condition initiale ; vérifier le régime permanent et la constante de temps." etapes={[{ titre: 'Forme', texte: 'y′ = a y + b', teinte: 'encre' }, { titre: 'Équilibre', texte: 'y∞ = −b/a', teinte: 'acier' }, { titre: 'Solution', texte: 'y∞ + C e^(at)', teinte: 'terre' }, { titre: 'Condition', texte: 'C = y0 − y∞', teinte: 'brique' }, { titre: 'Vérifier', texte: 'τ = −1/a', teinte: 'validation' }]} />
+
+<Exponentielle y0={d0.T0 - d0.Ta} k={d0.k} titreX="t (h)" titreY="T − Ta (°C)" />
+
+L'écart de température au-dessus de l'air, {d0.T0 - d0.Ta} °C au départ, décroît exponentiellement avec une constante de temps de {grandeur(r0.tau, 0, 'h')}.
+
+</Page>
+
+<FicheCalcul calcul="refroidissementBeton">
+
+<Cahier titre="Exemple résolu : le béton d'une semelle massive à Kinshasa">
+
+**Énoncé.** Le cœur d'une grosse semelle est à {d0.T0} °C quelques heures après le coulage ; l'air est à {d0.Ta} °C ; on estime k = {nombre(d0.k, 2)} /h (données de l'énoncé). Quand le béton sera-t-il descendu à {d0.Tcible} °C, pour décoffrer sans choc thermique ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La solution">
+<AN k="solution" />
+<Note>Pourquoi Ta et pas 0 ? Le béton tend vers la température de l'air, pas vers zéro : c'est l'écart qui décroît exponentiellement.</Note>
+</Etape>
+
+<Etape n={3} titre="Le temps">
+<AN k="temps" />
+<Resultat k="t" libelle="Temps pour atteindre la cible" />
+<Schema />
+<Note couleur="vert">Contrôle : en une constante de temps (<Val k="tau" />), l'écart est passé à 37 % ; la cible tombe plus loin. Double k : le temps est divisé par deux.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier la constante d'intégration.">
+Sans elle, on ne peut plus satisfaire la condition initiale : on l'écrit dès l'intégration.
+</Piege>
+
+<Piege erreur="faire tendre la solution vers zéro au lieu de l'équilibre.">
+Pour y' = a y + b, la limite est −b/a. Le béton tend vers la température de l'air.
+</Piege>
+
+<CourbeRefroidissement T0={70} Ta={28} k={0.08} Tcible={35} tCible={ex3.tCible} />
+
+<Piege erreur="se tromper de signe dans l'exposant.">
+Une solution qui croît sans limite alors que le système se stabilise trahit un signe faux.
+</Piege>
+
+<Piege erreur="mélanger les unités de temps.">
+Si k est en 1/h, t sort en heures ; avec k en 1/min, en minutes.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le béton de masse.** Radiers, semelles de pylônes, piles de ponts : leur béton chauffe par l'hydratation du ciment (L1.5.4). Si la peau refroidit beaucoup plus vite que le cœur, elle se fissure. On suit la température par des sondes noyées, et l'on décoffre et protège au bon moment.
+
+<Exponentielle y0={40} k={0.05} titreX="t (h)" titreY="écart (°C)" />
+
+<Encadre type="terrain" titre="Mesurer k sur place">
+On mesure la température du béton à deux instants : $k = \ln\big((T_1 - T_a)/(T_2 - T_a)\big) / (t_2 - t_1)$. Avec ce k, l'équation prévoit la suite. Le soleil de midi et la pluie changent l'échange : on recale k si la météo change.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : premier ordre">
+
+### Séparables
+
+g(y) dy = f(t) dt → intégrer, + C, condition initiale
+
+### Linéaire
+
+y' = a y + b → y = −b/a + (y0 + b/a) e^(at) · stable si a &lt; 0
+
+### Constante de temps
+
+τ = 1/k · 37 % en τ · 5 % en 3τ · &lt; 1 % en 5τ
+
+### Refroidissement
+
+T = Ta + (T0 − Ta) e^(−kt) · t = ln((T0 − Ta)/(T − Ta)) / k
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Séparer">
+
+Résous $y' = -3y$, y(0) = 5.
+
+<Indice>dy/y = −3 dt.</Indice>
+
+<Corrige>
+**y = 5 e^(−3t)** ; y(1) = {nombre(decroissance(5, 3, 1), 4)}.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Avec second membre">
+
+Résous $y' = -2y + 4$, y(0) = 0. Vers quoi tend y ? Que vaut y(1) ?
+
+<Indice>Équilibre −b/a = 2.</Indice>
+
+<Corrige>
+y = 2 (1 − e^(−2t)) ; tend vers **2** ; y(1) = **{nombre(lineairePremier(ex2.a, ex2.b, ex2.y0, 1), 4)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un autre béton">
+
+Béton à 70 °C, air à 28 °C, k = 0,08 /h. Quand atteint-il 35 °C ?
+
+<Indice>t = ln((T0 − Ta)/(T − Ta)) / k.</Indice>
+
+<Corrige>
+t = ln(42 / 7) / 0,08 = **{grandeur(ex3.tCible, 1, 'h')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.1.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La solution de y' = −k y est :" choix={['y0 e^(−kt)', 'y0 − k t', 'y0 e^(kt)', 'k y0']} bonne={0} colonnes={4}>
+La décroissance exponentielle.
+</QCM>
+
+<QCM n={2} question="y' = a y + b, a < 0, tend vers :" choix={['−b/a', '0', 'b', 'l’infini']} bonne={0} colonnes={4}>
+La valeur qui annule y'.
+</QCM>
+
+<QCM n={3} question="Au bout d'une constante de temps, l'écart à l'équilibre vaut :" choix={['37 % de l’écart initial', '50 %', '0 %', '63 %']} bonne={0} colonnes={4}>
+e^(−1) ≈ 0,37.
+</QCM>
+
+<QCM n={4} question="Un béton chaud refroidit vers :" choix={['la température de l’air', '0 °C', '20 °C', 'sa température initiale']} bonne={0} colonnes={2}>
+L'équilibre de la loi de Newton.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, la constante de temps vaut :</>} choix={[grandeur(r0.tau, 0, 'h'), grandeur(r0.tCible, 1, 'h'), grandeur(d0.k, 2, 'h'), '1 h']} bonne={0} colonnes={4}>
+τ = 1/k.
+</QCM>
+
+<QCM n={6} question={<>Le béton de l'exemple atteint {d0.Tcible} °C au bout de :</>} choix={[grandeur(r0.tCible, 1, 'h'), grandeur(r0.tau, 1, 'h'), grandeur(r0.tCible * 2, 1, 'h'), '10 h']} bonne={0} colonnes={4}>
+ln(30/10) / 0,05.
+</QCM>
+
+<QCM n={7} question="Si k double, le temps pour atteindre une même température :" choix={['est divisé par deux', 'double', 'ne change pas', 'est multiplié par e']} bonne={0} colonnes={2}>
+t = ln(…)/k.
+</QCM>
+
+<QCM n={8} question="Pour séparer les variables de y' = t y, on écrit :" choix={['dy/y = t dt', 'dy = t dt', 'y dy = t dt', 'dy/t = y dt']} bonne={0} colonnes={2}>
+Tout y à gauche, tout t à droite.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

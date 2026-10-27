@@ -1,0 +1,309 @@
+---
+id: L2.1.4
+titre: Équations du second ordre à coefficients constants
+objectifs:
+  - Écrire l'équation caractéristique d'une équation homogène du second ordre
+  - Donner la forme des solutions selon le signe du discriminant
+  - Trouver une solution particulière pour un second membre constant ou sinusoïdal
+  - Fixer les constantes par deux conditions initiales
+relecture: false
+normes: []
+glossaire:
+  - terme: Équation caractéristique
+    definition: Équation r² + p r + q = 0 obtenue en cherchant des solutions de la forme e^(rt).
+  - terme: Solution générale
+    definition: Solution de l'équation homogène plus une solution particulière de l'équation complète.
+  - terme: Solution particulière
+    definition: Une solution quelconque de l'équation avec second membre, souvent cherchée de la même forme que le second membre.
+  - terme: Résonance
+    definition: Réponse très forte d'un système quand le second membre oscille à sa fréquence propre.
+symboles:
+  - { symbole: 'p, q', signification: 'coefficients de l''équation', unite: '—' }
+  - { symbole: 'Δ', signification: 'discriminant p² − 4q', unite: '—' }
+  - { symbole: 'r', signification: 'racine de l''équation caractéristique', unite: '1/unité de t' }
+formules:
+  - { nom: 'Équation caractéristique', tex: 'r^2 + p\,r + q = 0', domaine: 'y'''' + p y'' + q y = 0' }
+  - { nom: 'Δ > 0', tex: 'y = A e^{r_1 t} + B e^{r_2 t}', domaine: 'Racines réelles' }
+  - { nom: 'Δ = 0', tex: 'y = (A + B t)\,e^{r t}', domaine: 'Racine double' }
+  - { nom: 'Δ < 0', tex: 'y = e^{\alpha t}(A\cos\beta t + B\sin\beta t)', domaine: 'r = α ± iβ' }
+---
+
+import { racinesCaracteristiques } from '@/lib/calc/equadiff'
+import { nombre } from '@/lib/format'
+import { MasseRessort, PoutreDeformee, TroisRegimes } from '@/components/schemas/EquaDiff'
+import { deformeePoutre, EXEMPLE_DEFORMEE } from '@/lib/calc/equadiff'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const ex1 = racinesCaracteristiques(-3, 2)
+export const ex2 = racinesCaracteristiques(4, 4)
+export const ex3 = racinesCaracteristiques(2, 10)
+export const d0 = deformeePoutre(EXEMPLE_DEFORMEE)
+
+<Page etape="intuition" titre="L'intuition : une balançoire qui revient">
+
+Pousse une balançoire puis lâche-la : elle repart vers le milieu, le dépasse, revient… La force qui la ramène dépend de sa **position**, son inertie dépend de son **accélération** : l'équation fait intervenir la dérivée seconde. C'est le **second ordre**.
+
+<MasseRessort />
+
+Selon le frottement, le mouvement oscille longtemps, s'arrête vite sans osciller, ou entre les deux. Les mathématiques donnent exactement ces trois comportements, par le signe d'un discriminant.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment résoudre y'' + p y' + q y = f(t), et que dit le discriminant ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Résoudre le second ordre" sousTitre="Caractéristique, homogène, particulière" etape="cours">
+
+<Panneau n={1} titre="Chercher e^(rt)" icone="idee" couleur="encre">
+On essaie y = e^(rt) : il faut r² + p r + q = 0.
+</Panneau>
+
+<Panneau n={2} titre="Δ > 0" icone="calcul" couleur="acier">
+Deux exponentielles réelles : pas d'oscillation.
+</Panneau>
+
+<Panneau n={3} titre="Δ = 0" icone="regle" couleur="validation">
+(A + B t) e^(rt) : la limite entre les deux.
+</Panneau>
+
+<Panneau n={4} titre="Δ < 0" icone="attention" couleur="correction">
+Racines α ± iβ : oscillation de pulsation β, amplitude en e^(αt).
+</Panneau>
+
+<Panneau n={5} titre="Second membre" icone="plan" couleur="terre">
+Solution particulière de même forme : constante pour une constante, sinusoïde pour une sinusoïde.
+</Panneau>
+
+<Panneau n={6} titre="Constantes" icone="verification" couleur="brique">
+Deux conditions initiales : y(0) et y'(0).
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'équation homogène">
+
+### L'équation caractéristique
+
+Pour $y'' + p\,y' + q\,y = 0$, on cherche $y = e^{rt}$ : alors $y' = r e^{rt}$, $y'' = r^2 e^{rt}$, et l'équation devient $(r^2 + p r + q)\,e^{rt} = 0$. Il faut donc $r^2 + p\,r + q = 0$ : c'est l'**équation caractéristique**. Son discriminant $\Delta = p^2 - 4q$ décide de tout.
+
+### Les trois cas
+
+- $\Delta > 0$ : deux racines réelles $r_1, r_2$ ; $y = A e^{r_1 t} + B e^{r_2 t}$.
+- $\Delta = 0$ : une racine double r ; $y = (A + B t)\,e^{r t}$.
+- $\Delta < 0$ : racines complexes $\alpha \pm i\beta$ ; $y = e^{\alpha t}(A\cos\beta t + B\sin\beta t)$ : une **oscillation** de pulsation β dont l'amplitude évolue en $e^{\alpha t}$.
+
+<TroisRegimes />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : le second membre">
+
+### Solution générale = homogène + particulière
+
+Pour $y'' + p\,y' + q\,y = f(t)$, toute solution est la somme d'une solution de l'équation homogène (avec ses deux constantes) et d'**une** solution particulière de l'équation complète.
+
+### Trouver une solution particulière
+
+On la cherche de la même forme que le second membre :
+
+- f constante = F : on essaie $y_p = C$, d'où $q\,C = F$, $C = F/q$ ;
+- f polynôme : un polynôme de même degré ;
+- f = F cos ωt : $y_p = a\cos\omega t + b\sin\omega t$.
+
+Exemple : $y'' + 4y = 8$ a pour solution particulière $y_p = 2$, et pour solution générale $y = 2 + A\cos 2t + B\sin 2t$.
+
+<Regle type="simplification">
+Si le second membre oscille à la pulsation propre (ω = β avec α = 0), la forme proposée ne marche plus : c'est la **résonance**, où l'amplitude croît sans cesse. En pratique, l'amortissement la limite (L2.1.5, dynamique en M1.7).
+</Regle>
+
+<TroisRegimes />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : les conditions initiales">
+
+### Deux constantes, deux conditions
+
+La solution générale a deux constantes A et B. On les fixe par **deux** conditions : la position et la vitesse au départ, $y(0)$ et $y'(0)$, ou deux valeurs aux bords pour une poutre, $y(0) = 0$ et $y(L) = 0$.
+
+### Un exemple complet
+
+$y'' - 3y' + 2y = 0$, $y(0) = 1$, $y'(0) = 0$ : racines 2 et 1, $y = A e^{2t} + B e^{t}$. Les conditions donnent $A + B = 1$ et $2A + B = 0$, d'où $A = -1$, $B = 2$ : $y = 2e^{t} - e^{2t}$.
+
+<DiagrammeFlux alt="Méthode de résolution : écrire l'équation caractéristique ; calculer le discriminant ; écrire la solution homogène ; ajouter une solution particulière ; fixer les deux constantes par les conditions." etapes={[{ titre: 'Caractéristique', texte: 'r² + p r + q = 0', teinte: 'encre' }, { titre: 'Δ', texte: 'p² − 4q', teinte: 'acier' }, { titre: 'Homogène', texte: '3 formes', teinte: 'terre' }, { titre: 'Particulière', texte: 'forme du 2e membre', teinte: 'brique' }, { titre: 'Constantes', texte: '2 conditions', teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : du discriminant au comportement">
+
+<TroisRegimes />
+
+En génie civil, le second ordre apparaît dans le **temps** (vibrations des structures, L2.1.5) et dans l'**espace** (déformée d'une poutre, où la variable est x, L2.1.6) :
+
+<PoutreDeformee L={EXEMPLE_DEFORMEE.L} y={d0.y} f={d0.f} />
+
+</Page>
+
+<FicheCalcul calcul="racinesSecondOrdre">
+
+<Cahier titre="Exemple résolu : classer une équation">
+
+**Énoncé.** Pour l'équation $y'' + p\,y' + q\,y = 0$ avec les coefficients donnés, calcule le discriminant, les racines et la forme de la solution.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le discriminant">
+<AN k="D" />
+<Note>Pourquoi le discriminant suffit-il ? Il dit si les racines sont réelles ou complexes, donc si la solution oscille.</Note>
+</Etape>
+
+<Etape n={3} titre="La forme de la solution">
+<AN k="sol" />
+<Resultat k="type" libelle="Nature" />
+<Schema />
+<Note couleur="vert">Contrôle : avec p = 2, q = 5, on trouve −1 ± 2i : une oscillation amortie. Mets q = 1 : racine double.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier la solution homogène.">
+La solution particulière seule ne peut pas satisfaire deux conditions initiales.
+</Piege>
+
+<Piege erreur="écrire A e^(rt) + B e^(rt) pour une racine double.">
+C'est une seule fonction : il manque une solution, (A + B t) e^(rt).
+</Piege>
+
+<TroisRegimes />
+
+<Piege erreur="fixer les constantes avant d'ajouter la solution particulière.">
+Les conditions s'appliquent à la solution complète.
+</Piege>
+
+<Piege erreur="se tromper de signe dans α.">
+α = −p/2 : avec p > 0, l'oscillation s'amortit ; un α positif voudrait dire une amplitude qui croît.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Pourquoi l'ingénieur s'en soucie.** Une passerelle piétonne, un plancher léger, une tour : chacun a une fréquence propre. Si les pas des piétons, une machine ou le vent l'excitent à cette fréquence, la résonance peut rendre l'ouvrage inconfortable, voire dangereux. Le second ordre explique pourquoi on éloigne les fréquences et pourquoi l'amortissement compte.
+
+<MasseRessort />
+
+<Encadre type="terrain" titre="Les machines sur les planchers">
+Un groupe électrogène ou une pompe posés sur une dalle la font vibrer à leur vitesse de rotation. On les pose sur des plots souples et l'on vérifie que la fréquence propre de la dalle est loin de celle de la machine.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : second ordre">
+
+### Homogène
+
+r² + p r + q = 0 · Δ = p² − 4q
+
+### Trois formes
+
+Δ &gt; 0 : A e^(r1 t) + B e^(r2 t) · Δ = 0 : (A + B t) e^(rt) · Δ &lt; 0 : e^(αt)(A cos βt + B sin βt)
+
+### Avec second membre
+
+générale = homogène + particulière (forme du second membre) · constante F : y_p = F/q
+
+### Constantes
+
+deux conditions, appliquées à la solution complète
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Deux racines réelles">
+
+Résous $y'' - 3y' + 2y = 0$.
+
+<Indice>r² − 3r + 2 = 0.</Indice>
+
+<Corrige>
+Racines {nombre(ex1.type === 'reelles' ? ex1.r1 : 0, 0)} et {nombre(ex1.type === 'reelles' ? ex1.r2 : 0, 0)} : **y = A e^(2t) + B e^(t)**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Racine double">
+
+Résous $y'' + 4y' + 4y = 0$, y(0) = 1, y'(0) = 0.
+
+<Indice>Δ = 0.</Indice>
+
+<Corrige>
+r = {nombre(ex2.type === 'double' ? ex2.r : 0, 0)} : y = (A + B t) e^(−2t) ; y(0) = A = 1 ; y'(0) = B − 2A = 0, B = 2 : **y = (1 + 2t) e^(−2t)**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Avec second membre">
+
+Résous $y'' + 2y' + 10y = 20$.
+
+<Indice>Particulière constante ; homogène à racines complexes.</Indice>
+
+<Corrige>
+y_p = 20/10 = 2 ; racines {nombre(ex3.type === 'complexes' ? ex3.alpha : 0, 0)} ± {nombre(ex3.type === 'complexes' ? ex3.beta : 0, 0)} i : **y = 2 + e^(−t)(A cos 3t + B sin 3t)**, qui oscille en s'amortissant vers 2.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.1.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'équation caractéristique de y'' + 5y' + 6y = 0 est :" choix={['r² + 5r + 6 = 0', 'r + 5 = 0', '5r + 6 = 0', 'r² = 6']} bonne={0} colonnes={2}>
+On remplace y par e^(rt).
+</QCM>
+
+<QCM n={2} question="Δ < 0 donne une solution :" choix={['oscillante', 'sans oscillation', 'constante', 'linéaire']} bonne={0} colonnes={4}>
+Sinus et cosinus de pulsation β.
+</QCM>
+
+<QCM n={3} question="Pour une racine double r, la solution s'écrit :" choix={['(A + B t) e^(rt)', 'A e^(rt)', 'A e^(rt) + B e^(rt)', 'A + B t']} bonne={0} colonnes={2}>
+Il faut deux fonctions indépendantes.
+</QCM>
+
+<QCM n={4} question="Pour y'' + 4y = 8, une solution particulière est :" choix={['y = 2', 'y = 8', 'y = 4', 'y = 0']} bonne={0} colonnes={4}>
+4C = 8.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Racines −1 ± 3i : la solution :" choix={['oscille en s’amortissant', 'croît sans fin', 'ne varie pas', 'décroît sans osciller']} bonne={0} colonnes={2}>
+α = −1 &lt; 0.
+</QCM>
+
+<QCM n={6} question="Combien de conditions faut-il pour fixer les constantes ?" choix={['2', '1', '3', '0']} bonne={0} colonnes={4}>
+Une par ordre.
+</QCM>
+
+<QCM n={7} question="La résonance se produit quand le second membre oscille :" choix={['à la fréquence propre', 'très lentement', 'très vite', 'jamais']} bonne={0} colonnes={2}>
+L'amplitude croît.
+</QCM>
+
+<QCM n={8} question="La solution générale d'une équation avec second membre est :" choix={['homogène + particulière', 'la particulière seule', 'l’homogène seule', 'le produit des deux']} bonne={0} colonnes={2}>
+Linéarité.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

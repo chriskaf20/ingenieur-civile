@@ -1,0 +1,309 @@
+---
+id: L2.1.5
+titre: "Application : oscillateur masse-ressort amorti"
+objectifs:
+  - Écrire l'équation du mouvement d'un oscillateur amorti
+  - Calculer la pulsation, la fréquence et la période propres
+  - Calculer le taux d'amortissement et identifier le régime
+  - Mesurer l'amortissement par le décrément logarithmique
+relecture: false
+normes: []
+glossaire:
+  - terme: Pulsation propre
+    definition: ω0 = √(k/m) ; elle fixe la fréquence à laquelle le système oscille librement.
+  - terme: Taux d'amortissement
+    definition: ζ = c / (2√(km)), rapport de l'amortissement réel à l'amortissement critique.
+  - terme: Amortissement critique
+    definition: Amortissement juste suffisant pour que le système revienne à l'équilibre sans osciller.
+  - terme: Décrément logarithmique
+    definition: Logarithme du rapport de deux pics successifs ; il permet de mesurer ζ sur un enregistrement.
+symboles:
+  - { symbole: 'm', signification: 'masse', unite: 'kg' }
+  - { symbole: 'k', signification: 'raideur', unite: 'N/m' }
+  - { symbole: 'c', signification: 'coefficient d''amortissement', unite: 'N·s/m' }
+  - { symbole: 'ζ', signification: 'taux d''amortissement', unite: '—' }
+formules:
+  - { nom: 'Équation', tex: 'm\,\ddot x + c\,\dot x + k\,x = 0', domaine: 'Oscillateur libre' }
+  - { nom: 'Pulsation propre', tex: '\omega_0 = \sqrt{k/m},\quad f_0 = \frac{\omega_0}{2\pi},\quad T_0 = \frac{1}{f_0}', domaine: 'Sans amortissement' }
+  - { nom: 'Amortissement', tex: '\zeta = \frac{c}{2\sqrt{k m}},\quad \omega_d = \omega_0\sqrt{1 - \zeta^2}', domaine: 'ζ < 1' }
+  - { nom: 'Décrément', tex: '\delta = \ln\frac{x_n}{x_{n+1}} = \frac{2\pi\zeta}{\sqrt{1 - \zeta^2}}', domaine: 'Mesure de ζ' }
+---
+
+import { EXEMPLE_OSCILLATEUR, oscillateur } from '@/lib/calc/equadiff'
+import { grandeur, nombre } from '@/lib/format'
+import { MasseRessort, OscillationAmortie, TroisRegimes } from '@/components/schemas/EquaDiff'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d0 = EXEMPLE_OSCILLATEUR
+export const o0 = oscillateur(d0)
+export const ex2 = oscillateur({ m: 20000, k: 2e6, c: 2 * 0.05 * Math.sqrt(2e6 * 20000), x0: 0.02 })
+export const z3 = Math.log(1 / 0.6) / Math.sqrt(4 * Math.PI ** 2 + Math.log(1 / 0.6) ** 2)
+export const crit = oscillateur({ ...d0, c: 2 * Math.sqrt(d0.k * d0.m) })
+
+<Page etape="intuition" titre="L'intuition : un château d'eau qui se balance">
+
+Un réservoir plein, perché sur une tour, c'est une grosse masse au bout d'un ressort : la tour. Un coup de vent l'écarte, la tour la ramène, elle dépasse, revient… et chaque oscillation est un peu plus petite, car le frottement dissipe l'énergie. C'est l'**oscillateur amorti**, la base de toute la dynamique des structures.
+
+<MasseRessort />
+
+Deux nombres résument son comportement : à quelle **fréquence** il oscille, et à quel point il est **amorti**.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer la fréquence et l'amortissement d'une structure modélisée par une masse et un ressort ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="L'oscillateur en six grandeurs" sousTitre="Masse, raideur, amortissement" etape="cours">
+
+<Panneau n={1} titre="L'équation" icone="calcul" couleur="encre">
+m x'' + c x' + k x = 0 : inertie, freinage, rappel.
+</Panneau>
+
+<Panneau n={2} titre="ω0 = √(k/m)" icone="idee" couleur="acier">
+Plus raide : plus rapide. Plus lourd : plus lent.
+</Panneau>
+
+<Panneau n={3} titre="f0 et T0" icone="regle" couleur="terre">
+f0 = ω0/2π en hertz ; T0 = 1/f0 en secondes.
+</Panneau>
+
+<Panneau n={4} titre="ζ" icone="attention" couleur="correction">
+c / (2√(km)) : 1 à 5 % pour les ouvrages courants.
+</Panneau>
+
+<Panneau n={5} titre="Trois régimes" icone="plan" couleur="brique">
+ζ &lt; 1 oscille ; ζ = 1 critique ; ζ &gt; 1 apériodique.
+</Panneau>
+
+<Panneau n={6} titre="Décrément" icone="verification" couleur="validation">
+Mesurer deux pics successifs donne ζ sur le terrain.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'équation et la pulsation propre">
+
+### Les trois forces
+
+La masse m, écartée de x, subit la force de rappel du ressort $-k\,x$ et la force de l'amortisseur $-c\,\dot x$. Newton donne $m\,\ddot x = -k\,x - c\,\dot x$, soit $m\,\ddot x + c\,\dot x + k\,x = 0$ : une équation du second ordre (L2.1.4).
+
+### Sans amortissement
+
+Si c = 0, l'équation caractéristique $m r^2 + k = 0$ donne $r = \pm i\sqrt{k/m}$ : le système oscille indéfiniment à la **pulsation propre** $\omega_0 = \sqrt{k/m}$, de fréquence $f_0 = \omega_0/(2\pi)$ et de période $T_0 = 1/f_0$.
+
+<Regle type="simplification">
+Modéliser une tour et sa cuve par une seule masse et un seul ressort est une simplification : on concentre la masse en tête et l'on prend la raideur de la tour en flexion. Les structures réelles ont plusieurs modes de vibration (M1.7).
+</Regle>
+
+<MasseRessort />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : l'amortissement et les régimes">
+
+### Le taux d'amortissement
+
+Le discriminant de $m r^2 + c r + k = 0$ s'annule pour $c_c = 2\sqrt{k m}$, l'**amortissement critique**. On compare c à cette valeur : $\zeta = c / c_c$.
+
+- ζ &lt; 1 : régime **pseudo-périodique** : oscillations d'amplitude décroissante, de pulsation $\omega_d = \omega_0\sqrt{1-\zeta^2}$, presque $\omega_0$ quand ζ est petit ;
+- ζ = 1 : régime **critique** : retour le plus rapide sans oscillation ;
+- ζ &gt; 1 : régime **apériodique** : retour lent, sans oscillation.
+
+<TroisRegimes />
+
+### Les ordres de grandeur
+
+Les ouvrages de génie civil sont **très peu amortis** : ζ de l'ordre de 1 à 5 % <AVerifier note="A_VERIFIER.md n° 51 : taux d'amortissement usuels des structures (béton, acier, bois), à préciser en dynamique (M1.7) et selon l'EN 1998" />. Ils oscillent donc de nombreuses fois avant de s'arrêter.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : la réponse libre et le décrément">
+
+### La solution
+
+Lâché en $x_0$ sans vitesse, l'oscillateur sous-amorti suit
+$x(t) = x_0\,e^{-\zeta\omega_0 t}\left(\cos\omega_d t + \frac{\zeta\omega_0}{\omega_d}\sin\omega_d t\right)$ : une oscillation sous une **enveloppe exponentielle**.
+
+<OscillationAmortie x={o0.x} x0={d0.x0} zeta={o0.zeta} w0={o0.w0} Td={o0.Td} tmax={3} />
+
+### Mesurer l'amortissement
+
+D'un pic au suivant, l'amplitude est multipliée par $e^{-\delta}$, avec $\delta = 2\pi\zeta/\sqrt{1-\zeta^2} \approx 2\pi\zeta$. En mesurant deux pics successifs sur un enregistrement, on obtient δ, donc ζ. Ici δ = {nombre(o0.delta, 3)} : chaque pic vaut {nombre(Math.exp(-o0.delta) * 100, 0)} % du précédent.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : de la structure au modèle">
+
+<DiagrammeFlux alt="Modéliser une structure par un oscillateur : la masse vibrante (cuve pleine) ; la raideur de la tour ; l'amortissement estimé ; la fréquence propre et la période ; la comparaison avec les sollicitations (vent, séisme)." etapes={[{ titre: 'Masse', texte: 'cuve pleine', teinte: 'encre' }, { titre: 'Raideur', texte: 'tour en flexion', teinte: 'acier' }, { titre: 'Amortissement', texte: 'ζ ≈ 2 à 5 %', teinte: 'terre' }, { titre: 'Fréquence', texte: 'f0 = √(k/m) / 2π', teinte: 'brique' }, { titre: 'Comparer', texte: 'vent, séisme', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Effet de la raideur sur la période : avec k = 8 MN/m, T0 = ${nombre(o0.T0, 3)} s ; avec une tour quatre fois plus souple, k = 2 MN/m, T0 = ${nombre(ex2.T0, 3)} s, deux fois plus longue.`} titre="période propre de la cuve (s)" barres={[{ libelle: 'k = 8 MN/m', valeur: o0.T0, texte: nombre(o0.T0, 3), teinte: 'encre' }, { libelle: 'k = 2 MN/m', valeur: ex2.T0, texte: nombre(ex2.T0, 3), teinte: 'terre' }]} />
+
+</Page>
+
+<FicheCalcul calcul="oscillateurAmorti">
+
+<Cahier titre="Exemple résolu : la cuve d'un château d'eau sur sa tour">
+
+**Énoncé.** La cuve pleine pèse {nombre(d0.m / 1000, 0)} t ; la tour, en flexion, a une raideur de {nombre(d0.k / 1e6, 0)} MN/m ; on retient 5 % d'amortissement ; un coup de vent l'écarte de {nombre(d0.x0 * 100, 0)} cm (données de l'énoncé). Calcule la fréquence et la période propres, la pseudo-période et le décrément.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Pulsation et fréquence propres">
+<AN k="w0" />
+<Note>Pourquoi convertir en kg et N/m ? √(k/m) n'est en rad/s qu'avec des unités SI cohérentes.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'amortissement">
+
+<Etape n={3} titre="Amortissement et décrément">
+<AN k="amort" />
+<Resultat k="T0" libelle="Période propre" />
+<Schema />
+<Note couleur="vert">Contrôle : avec ζ = 5 %, la pseudo-période est presque égale à la période propre ; il faut une dizaine d'oscillations pour que l'amplitude soit divisée par vingt.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="mélanger tonnes, kN et mètres.">
+ω0 = √(k/m) exige k en N/m et m en kg (ou kN/m et t, qui donnent le même rapport) ; un mélange fausse ω0 d'un facteur 30.
+</Piege>
+
+<Piege erreur="confondre ω, f et T.">
+ω en rad/s, f = ω/2π en Hz, T = 1/f en s : un facteur 2π d'écart est l'erreur la plus courante.
+</Piege>
+
+<Piege erreur="croire qu'un ouvrage est fortement amorti.">
+Avec 5 %, il oscille encore longtemps ; l'amortissement critique, c'est 100 %.
+</Piege>
+
+<OscillationAmortie x={crit.x} x0={d0.x0} zeta={crit.zeta} w0={crit.w0} Td={o0.T0} tmax={1} />
+
+<Piege erreur="utiliser la masse de la cuve vide.">
+La fréquence dépend de la masse qui vibre : cuve pleine, la fréquence est la plus basse.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Mesurer une structure.** On pose un accéléromètre en tête d'ouvrage, on donne une petite impulsion (ou l'on attend un coup de vent), et l'on enregistre : la période se lit entre deux pics, l'amortissement par le décrément. C'est ainsi qu'on vérifie un modèle et qu'on suit l'état d'un ouvrage dans le temps.
+
+<OscillationAmortie x={o0.x} x0={d0.x0} zeta={o0.zeta} w0={o0.w0} Td={o0.Td} tmax={2} />
+
+<Encadre type="terrain" titre="Zones sismiques de RDC">
+L'est de la RDC, le long du rift (Goma, Bukavu, Uvira), connaît des séismes. Les structures y sont étudiées en dynamique : leur période propre, calculée comme ici, détermine les efforts sismiques qu'elles subissent (EN 1998, M1.7).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : oscillateur amorti">
+
+### Équation
+
+m x'' + c x' + k x = 0 · unités SI
+
+### Propre
+
+ω0 = √(k/m) · f0 = ω0/2π · T0 = 1/f0
+
+### Amortissement
+
+ζ = c / (2√(km)) · ζ &lt; 1 oscille, = 1 critique, &gt; 1 apériodique · ωd = ω0√(1 − ζ²) · ouvrages : 1 à 5 %
+
+### Mesure
+
+δ = ln(x(n)/x(n+1)) ≈ 2πζ
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une tour plus souple">
+
+Même cuve, tour quatre fois plus souple (k = 2 MN/m). Nouvelle période propre ?
+
+<Indice>T0 est proportionnelle à √(m/k).</Indice>
+
+<Corrige>
+T0 = **{grandeur(ex2.T0, 3, 's')}**, deux fois plus longue.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Le régime critique">
+
+Quel amortissement c faudrait-il pour que la cuve revienne sans osciller ?
+
+<Indice>c_c = 2√(k m).</Indice>
+
+<Corrige>
+c_c = 2√(8·10⁶ × 2·10⁴) = **{nombre(2 * Math.sqrt(d0.k * d0.m) / 1000, 0)} kN·s/m**, vingt fois l'amortissement réel.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Mesurer ζ">
+
+Sur un enregistrement, un pic vaut 10 mm et le suivant 6 mm. Quel est le taux d'amortissement ?
+
+<Indice>δ = ln(10/6), puis ζ = δ / √(4π² + δ²).</Indice>
+
+<Corrige>
+δ = {nombre(Math.log(1 / 0.6), 3)} ; ζ = **{nombre(z3 * 100, 1)} %**, un amortissement élevé pour un ouvrage.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.1.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La pulsation propre vaut :" choix={['√(k/m)', 'k/m', '√(m/k)', 'k m']} bonne={0} colonnes={4}>
+Raide et léger : rapide.
+</QCM>
+
+<QCM n={2} question="Si la masse quadruple, la période propre :" choix={['double', 'quadruple', 'est divisée par deux', 'ne change pas']} bonne={0} colonnes={4}>
+T0 ∝ √m.
+</QCM>
+
+<QCM n={3} question="ζ = 1 correspond au régime :" choix={['critique', 'pseudo-périodique', 'apériodique', 'résonant']} bonne={0} colonnes={4}>
+Retour le plus rapide sans oscillation.
+</QCM>
+
+<QCM n={4} question="Les ouvrages courants ont un amortissement de l'ordre de :" choix={['1 à 5 %', '50 %', '100 %', '200 %']} bonne={0} colonnes={4}>
+Ils sont peu amortis.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, la fréquence propre vaut :</>} choix={[grandeur(o0.f0, 2, 'Hz'), grandeur(o0.w0, 2, 'Hz'), grandeur(o0.T0, 2, 'Hz'), '1 Hz']} bonne={0} colonnes={4}>
+ω0/2π.
+</QCM>
+
+<QCM n={6} question="f = 4 Hz correspond à une période de :" choix={['0,25 s', '4 s', '25 s', '0,4 s']} bonne={0} colonnes={4}>
+T = 1/f.
+</QCM>
+
+<QCM n={7} question="Le décrément logarithmique se mesure :" choix={['sur deux pics successifs', 'sur la masse', 'sur la raideur', 'au repos']} bonne={0} colonnes={2}>
+δ = ln du rapport des pics.
+</QCM>
+
+<QCM n={8} question="Pour une période propre réaliste de la cuve, on prend la masse :" choix={['de la cuve pleine', 'de la cuve vide', 'de la tour seule', 'de l’eau seule']} bonne={0} colonnes={2}>
+La masse qui vibre réellement, la plus défavorable.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

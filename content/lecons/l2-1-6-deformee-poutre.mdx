@@ -1,0 +1,314 @@
+---
+id: L2.1.6
+titre: "Application : la déformée d'une poutre (aperçu)"
+objectifs:
+  - Écrire l'équation différentielle de la déformée d'une poutre
+  - Intégrer deux fois le moment pour obtenir rotation et flèche
+  - Fixer les constantes par les conditions d'appui
+  - Calculer la flèche d'une poutre sur deux appuis et la comparer à une limite
+relecture: false
+normes:
+  - "EN 1995-1-1 §7.2 et EN 1992-1-1 §7.4 : limites de flèche (valeurs recommandées, annexes nationales)"
+glossaire:
+  - terme: Déformée
+    definition: Courbe que prend l'axe d'une poutre sous les charges.
+  - terme: Flèche
+    definition: Déplacement vertical maximal de la poutre, souvent au milieu.
+  - terme: Rigidité en flexion
+    definition: Produit EI du module d'Young et du moment d'inertie de la section ; plus il est grand, moins la poutre fléchit.
+  - terme: Conditions d'appui
+    definition: "Valeurs imposées par les appuis : flèche nulle sur un appui, flèche et rotation nulles dans un encastrement."
+symboles:
+  - { symbole: 'y(x)', signification: 'flèche à l''abscisse x', unite: 'm' }
+  - { symbole: 'E', signification: 'module d''Young', unite: 'MPa' }
+  - { symbole: 'I', signification: 'moment d''inertie', unite: 'cm⁴' }
+  - { symbole: 'M(x)', signification: 'moment fléchissant', unite: 'kN·m' }
+formules:
+  - { nom: 'Équation de la déformée', tex: 'E I\, y'''' = -M(x)', domaine: 'Petites déformations' }
+  - { nom: 'Déformée, charge uniforme', tex: 'y = \frac{q\,x\,(L^3 - 2 L x^2 + x^3)}{24\, E I}', domaine: 'Deux appuis simples' }
+  - { nom: 'Flèche maximale', tex: 'f = \frac{5\, q L^4}{384\, E I}', domaine: 'Au milieu' }
+---
+
+import { deformeePoutre, EXEMPLE_DEFORMEE } from '@/lib/calc/equadiff'
+import { grandeur, nombre } from '@/lib/format'
+import { PoutreDeformee } from '@/components/schemas/EquaDiff'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d0 = EXEMPLE_DEFORMEE
+export const r0 = deformeePoutre(d0)
+export const debout = deformeePoutre({ ...d0, I: (22.5 * 7.5 ** 3) / 12 })
+export const ex1 = deformeePoutre({ ...d0, L: d0.L * 2 })
+export const ex3 = deformeePoutre({ L: 5, q: 15, E: 30000, I: (25 * 50 ** 3) / 12 })
+
+<Page etape="intuition" titre="L'intuition : la courbure suit le moment">
+
+Une règle en plastique posée sur deux livres et chargée au milieu se courbe. Plus le moment est fort, plus elle se courbe à cet endroit ; plus elle est épaisse et rigide, moins elle se courbe. Mathématiquement, la **courbure** de la poutre, sa dérivée seconde $y''$, est proportionnelle au **moment** : c'est une équation différentielle du second ordre, où la variable n'est plus le temps mais l'abscisse x.
+
+<PoutreDeformee L={d0.L} y={r0.y} f={r0.f} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer du moment fléchissant à la forme et à la flèche d'une poutre ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="De la charge à la flèche" sousTitre="Intégrer deux fois" etape="cours">
+
+<Panneau n={1} titre="Le moment" icone="calcul" couleur="encre">
+M(x) se calcule par la statique (L1.3) : pour q uniforme, q x (L − x)/2.
+</Panneau>
+
+<Panneau n={2} titre="La courbure" icone="idee" couleur="acier">
+EI y'' = −M : plus de moment, plus de courbure.
+</Panneau>
+
+<Panneau n={3} titre="La rotation" icone="regle" couleur="terre">
+Première intégration : y' = pente de la déformée.
+</Panneau>
+
+<Panneau n={4} titre="La flèche" icone="plan" couleur="brique">
+Seconde intégration : y = déplacement.
+</Panneau>
+
+<Panneau n={5} titre="Les appuis" icone="verification" couleur="validation">
+Deux constantes, deux conditions : y = 0 sur chaque appui.
+</Panneau>
+
+<Panneau n={6} titre="La limite" icone="attention" couleur="correction">
+On compare la flèche à L/300 ou L/250 selon l'usage.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'équation">
+
+### La loi de comportement
+
+Pour une poutre élastique, en petites déformations, la courbure est proportionnelle au moment : $E I\, y'' = -M(x)$. Le signe moins vient de la convention : un moment positif (fibres du bas tendues) donne une courbure vers le bas. On compte ici la flèche positive vers le bas.
+
+### La rigidité EI
+
+E dépend du matériau (bois ≈ 11 000 MPa, béton ≈ 30 000 MPa, acier 210 000 MPa) ; I dépend de la section : $I = b h^3/12$ pour un rectangle. La hauteur compte au **cube** : une poutre posée sur chant est bien plus raide qu'à plat.
+
+<DiagrammeBarres alt={`Flèche de la même poutre de 7,5 × 22,5 cm sur ${nombre(d0.L, 0)} m sous ${nombre(d0.q, 0)} kN/m : posée sur chant, ${nombre(r0.fmm, 1)} mm ; posée à plat, ${nombre(debout.fmm, 0)} mm, neuf fois plus.`} titre="flèche selon le sens de la section (mm)" barres={[{ libelle: 'sur chant (h = 22,5 cm)', valeur: r0.fmm, texte: nombre(r0.fmm, 1), teinte: 'validation' }, { libelle: 'à plat (h = 7,5 cm)', valeur: debout.fmm, texte: nombre(debout.fmm, 0), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : intégrer deux fois">
+
+### Poutre sur deux appuis, charge uniforme
+
+$M(x) = \frac{q\,x\,(L - x)}{2}$. On intègre $E I y'' = -\frac{q}{2}(L x - x^2)$ :
+
+- une fois : $E I y' = -\frac{q}{2}\left(\frac{L x^2}{2} - \frac{x^3}{3}\right) + C_1$ ;
+- deux fois : $E I y = -\frac{q}{2}\left(\frac{L x^3}{6} - \frac{x^4}{12}\right) + C_1 x + C_2$.
+
+### Les conditions d'appui
+
+y(0) = 0 donne $C_2 = 0$ ; y(L) = 0 donne $C_1 = \frac{q L^3}{24}$. En comptant la flèche vers le bas :
+
+$$y(x) = \frac{q\,x\,(L^3 - 2 L x^2 + x^3)}{24\,E I}$$
+
+La flèche maximale, au milieu, vaut $f = \frac{5\,q L^4}{384\,E I}$, et la rotation aux appuis $\frac{q L^3}{24 E I}$.
+
+<PoutreModele alt="La poutre de l'exemple : 4 m sur deux appuis A et B, charge uniforme q." L={d0.L} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: d0.L, type: 'simple', nom: 'B' }]} charges={[{ type: 'repartie', nom: 'q', q1: d0.q, q2: d0.q, a: 0, b: d0.L }]} cotes={[0, d0.L]} dec={0} prefixe="dp-pm" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : lire le résultat">
+
+### La portée à la puissance quatre
+
+$f \propto L^4$ : doubler la portée multiplie la flèche par **seize**. C'est pourquoi les grandes portées sont limitées par la flèche plus que par la résistance.
+
+### Les limites de flèche
+
+Une flèche trop grande fissure les cloisons et les carrelages, fait stagner l'eau sur les toitures, et inquiète les usagers. Les Eurocodes recommandent des limites de l'ordre de L/250 à L/300 selon l'élément et le matériau <AVerifier note="A_VERIFIER.md n° 52 : limites de flèche de l'EN 1992-1-1 §7.4.1 (L/250, L/500) et de l'EN 1995-1-1 §7.2 (valeurs recommandées), et annexes nationales" />.
+
+<Regle type="simplification">
+Cette leçon est un aperçu : l'équation de la déformée, les autres cas d'appui et de charge, et la prise en compte du fluage du béton sont traités en résistance des matériaux (L2.4, L2.5) et en béton armé (L3.3).
+</Regle>
+
+<PoutreDeformee L={d0.L} y={r0.y} f={r0.f} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la chaîne des dérivées">
+
+<DiagrammeFlux alt="La chaîne de la flexion : la charge q ; l'effort tranchant V, dérivée du moment ; le moment M ; la rotation, première intégrale de −M/EI ; la flèche, seconde intégrale ; les constantes fixées par les appuis." etapes={[{ titre: 'Charge q', texte: 'kN/m', teinte: 'correction' }, { titre: 'Moment M', texte: 'statique', teinte: 'encre' }, { titre: 'Courbure', texte: 'y″ = −M/EI', teinte: 'acier' }, { titre: 'Rotation', texte: 'y′ = ∫', teinte: 'terre' }, { titre: 'Flèche', texte: 'y = ∫∫', teinte: 'validation' }]} />
+
+<PoutreDeformee L={d0.L} y={r0.y} f={r0.f} />
+
+</Page>
+
+<FicheCalcul calcul="deformeePoutre">
+
+<Cahier titre="Exemple résolu : une solive en bois de 4 m">
+
+**Énoncé.** Une solive en bois de {nombre(7.5, 1)} × {nombre(22.5, 1)} cm porte {grandeur(d0.q, 1, 'kN/m')} sur {grandeur(d0.L, 2, 'm')}, entre deux appuis ; E = {nombre(d0.E, 0)} MPa (données de l'énoncé). Calcule la flèche et compare-la à L/300.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La rigidité">
+<AN k="EI" />
+<Note>Pourquoi convertir E en kN/m² et I en m⁴ ? Pour que EI soit en kN·m², cohérent avec q en kN/m et L en m.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la flèche">
+
+<Etape n={3} titre="Intégrer et fixer les constantes">
+<AN k="integration" />
+</Etape>
+
+<Etape n={4} titre="La flèche">
+<AN k="fleche" />
+<Resultat k="f" libelle="Flèche au milieu" />
+<Schema />
+<Note couleur="vert">Contrôle : L/300 = {nombre(d0.L * 1000 / 300, 1)} mm ; la flèche est en dessous. Pose la solive à plat (b = 22,5, h = 7,5) : la flèche est multipliée par neuf.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="mélanger les unités de E et I.">
+E en MPa = 1 000 kN/m², I en cm⁴ = 10⁻⁸ m⁴ : une erreur de puissance de dix change la flèche d'un facteur mille.
+</Piege>
+
+<Piege erreur="oublier les constantes d'intégration.">
+Ce sont elles qui portent les conditions d'appui ; sans elles, la poutre « flotte ».
+</Piege>
+
+<Piege erreur="sous-estimer l'effet de la portée.">
+Doubler la portée multiplie la flèche par seize : {nombre(r0.fmm, 1)} mm deviennent {nombre(ex1.fmm, 0)} mm.
+</Piege>
+
+<DiagrammeBarres alt={`Effet de la portée : ${nombre(r0.fmm, 1)} mm sur 4 m, ${nombre(ex1.fmm, 0)} mm sur 8 m.`} titre="flèche (mm)" barres={[{ libelle: 'L = 4 m', valeur: r0.fmm, texte: nombre(r0.fmm, 1), teinte: 'encre' }, { libelle: 'L = 8 m', valeur: ex1.fmm, texte: nombre(ex1.fmm, 0), teinte: 'correction' }]} />
+
+<Piege erreur="poser une poutre rectangulaire à plat.">
+I = b h³/12 : la hauteur compte au cube.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les flèches qui se voient.** Une dalle trop souple fissure les cloisons posées dessus ; un balcon fléchi fait couler l'eau vers la façade ; une toiture qui fléchit retient l'eau, qui la charge encore plus. Le calcul de flèche n'est pas un détail : il protège tout ce que la structure porte.
+
+<PoutreDeformee L={d0.L} y={r0.y} f={r0.f} />
+
+<Encadre type="terrain" titre="Les bois locaux">
+Les bois d'œuvre de RDC (iroko, sapelli, limba…) ont des modules différents ; un bois humide ou attaqué par les termites est bien plus souple. On utilise le module garanti par le fournisseur ou la classe de résistance, jamais une valeur au hasard (M1.6).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : déformée d'une poutre">
+
+### Équation
+
+EI y'' = −M(x) · y' rotation · y flèche · constantes par les appuis
+
+### Deux appuis, q uniforme
+
+y = q x (L³ − 2Lx² + x³) / (24 EI) · f = 5 q L⁴ / (384 EI) · rotation q L³ / (24 EI)
+
+### Ordres de grandeur
+
+f ∝ L⁴ · I = b h³/12 · limites L/250 à L/300 (à vérifier selon l'élément)
+
+### Unités
+
+E (MPa) × 10³ → kN/m² · I (cm⁴) × 10⁻⁸ → m⁴ · EI en kN·m²
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Portée doublée">
+
+La solive de l'exemple franchit 8 m au lieu de 4 m. Nouvelle flèche ?
+
+<Indice>f ∝ L⁴.</Indice>
+
+<Corrige>
+× 16 : **{grandeur(ex1.fmm, 0, 'mm')}**, inadmissible.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Retrouver C1">
+
+Vérifie que C1 = q L³/24 en écrivant y(L) = 0 dans la seconde intégrale.
+
+<Indice>À x = L, −(q/2)(L⁴/6 − L⁴/12) + C1 L = 0.</Indice>
+
+<Corrige>
+−(q/2)(L⁴/12) + C1 L = 0 → **C1 = q L³/24**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une poutre en béton">
+
+Poutre en béton de 25 × 50 cm, L = 5 m, q = 15 kN/m, E = 30 000 MPa (section brute, sans fluage). Flèche ?
+
+<Indice>I = 25 × 50³ / 12 cm⁴.</Indice>
+
+<Corrige>
+EI = {nombre(ex3.EI, 0)} kN·m² ; f = **{grandeur(ex3.fmm, 2, 'mm')}**, soit L/{nombre(ex3.rapport, 0)}. En réalité, la fissuration et le fluage du béton augmentent fortement la flèche (L3.3).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.1.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La courbure d'une poutre est proportionnelle :" choix={['au moment fléchissant', 'à la charge', 'à la portée', 'à l’effort tranchant']} bonne={0} colonnes={2}>
+EI y'' = −M.
+</QCM>
+
+<QCM n={2} question="Pour passer du moment à la flèche, on intègre :" choix={['deux fois', 'une fois', 'trois fois', 'jamais']} bonne={0} colonnes={4}>
+Rotation puis flèche.
+</QCM>
+
+<QCM n={3} question="Sur un appui simple :" choix={['la flèche est nulle', 'la rotation est nulle', 'le moment est maximal', 'la courbure est maximale']} bonne={0} colonnes={2}>
+Dans un encastrement, la rotation aussi.
+</QCM>
+
+<QCM n={4} question="Doubler la portée multiplie la flèche par :" choix={['16', '2', '4', '8']} bonne={0} colonnes={4}>
+f ∝ L⁴.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, la flèche vaut :</>} choix={[grandeur(r0.fmm, 2, 'mm'), grandeur(r0.fmm * 16, 0, 'mm'), grandeur(d0.L * 1000 / 300, 1, 'mm'), '1 mm']} bonne={0} colonnes={4}>
+5 q L⁴ / (384 EI).
+</QCM>
+
+<QCM n={6} question="Le moment d'inertie d'un rectangle vaut :" choix={['b h³ / 12', 'b h² / 6', 'b h', 'h³ / 12']} bonne={0} colonnes={4}>
+La hauteur au cube.
+</QCM>
+
+<QCM n={7} question="Une flèche excessive cause surtout :" choix={['la fissuration des cloisons et carrelages', 'la rupture immédiate', 'la corrosion', 'rien']} bonne={0} colonnes={2}>
+C'est un état limite de service.
+</QCM>
+
+<QCM n={8} question="E en MPa se convertit en kN/m² en multipliant par :" choix={['1 000', '1', '10⁶', '0,001']} bonne={0} colonnes={4}>
+1 MPa = 1 000 kN/m².
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

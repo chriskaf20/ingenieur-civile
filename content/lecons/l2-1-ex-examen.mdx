@@ -1,0 +1,121 @@
+---
+id: L2.1.EX
+titre: "Examen du module L2.1 : équations différentielles"
+objectifs:
+  - Classer et résoudre une équation différentielle du premier ordre
+  - Résoudre une équation linéaire du second ordre à coefficients constants
+  - Calculer une vidange, un oscillateur et une flèche
+  - Reconnaître une EDP et calculer un degré de consolidation
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { consolidation, decroissance, deformeePoutre, euler, oscillateur, racinesCaracteristiques, refroidissement, vidange } from '@/lib/calc/equadiff'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+
+export const q3 = decroissance(100, 0.1, 10)
+export const q4 = euler((t, y) => -y, 0, 1, 0.5, 2)
+export const q5 = refroidissement({ T0: 70, Ta: 30, k: 0.1, Tcible: 40 })
+export const q7 = vidange({ A: 4, d: 0.1, Cd: 0.6, h0: 4, h1: 1 })
+export const q8 = racinesCaracteristiques(-5, 6)
+export const q9 = racinesCaracteristiques(2, 5)
+export const q10 = oscillateur({ m: 1000, k: 1e5, c: 0, x0: 0.01 })
+export const q12 = deformeePoutre({ L: 3, q: 2, E: 11000, I: 5000 })
+export const q14 = consolidation({ cv: 4, H: 4, doubleDrainage: true, t: 0.5 })
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 2 h.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice scientifique, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Écris l'équation avant de calculer ; vérifie les unités (secondes, mètres, kN).
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="L2.1.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="y'' + 3y' = sin t est une équation :" choix={['linéaire du second ordre', 'non linéaire du premier ordre', 'linéaire du premier ordre', 'aux dérivées partielles']} bonne={0} colonnes={2}>
+Ordre de la plus haute dérivée : 2 (L2.1.1).
+</QCM>
+
+<QCM n={2} question="La solution générale de y' = −k y est :" choix={['C e^(−kt)', 'C t', 'C e^(kt) + k', '−k t²']} bonne={0} colonnes={4}>
+Variables séparables (L2.1.2).
+</QCM>
+
+<QCM n={3} question="y' = −0,1 y, y(0) = 100. y(10) vaut :" choix={[nombre(q3, 1), '90', '0', '10']} bonne={0} colonnes={4}>
+100 e^(−1) (L2.1.2).
+</QCM>
+
+<QCM n={4} question="Euler, y' = −y, y(0) = 1, pas 0,5 : après deux pas, y vaut :" choix={[nombre(q4.at(-1)?.[1] ?? 0, 2), '0,37', '0', '0,5']} bonne={0} colonnes={4}>
+y ← y + h(−y), deux fois (L2.1.1).
+</QCM>
+
+<QCM n={5} question="Un béton à 70 °C refroidit dans un air à 30 °C, k = 0,1 h⁻¹. Il atteint 40 °C après :" choix={[grandeur(q5.tCible, 1, 'h'), '10 h', '3 h', '40 h']} bonne={0} colonnes={4}>
+t = ln((T0 − Ta)/(T − Ta))/k (L2.1.2).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={6} question="Pour la vidange par un orifice, le débit est proportionnel à :" choix={['√h', 'h', 'h²', '1/h']} bonne={0} colonnes={4}>
+Torricelli (L2.1.3).
+</QCM>
+
+<QCM n={7} question="Cuve de 4 m², vanne de 100 mm, Cd = 0,6, de 4 m à 1 m. Temps de vidange :" choix={[grandeur(q7.T / 60, 1, 'min'), grandeur(q7.Tconstant / 60, 1, 'min'), '60 min', '1 min']} bonne={0} colonnes={4}>
+T = 2(√h0 − √h1)/c (L2.1.3).
+</QCM>
+
+<QCM n={8} question="y'' − 5y' + 6y = 0 a pour racines caractéristiques :" choix={[q8.type === 'reelles' ? `${nombre(Math.min(q8.r1, q8.r2), 0)} et ${nombre(Math.max(q8.r1, q8.r2), 0)}` : '—', '−2 et −3', '1 et 6', '±i']} bonne={0} colonnes={4}>
+r² − 5r + 6 = 0 (L2.1.4).
+</QCM>
+
+<QCM n={9} question="y'' + 2y' + 5y = 0 : les solutions sont :" choix={[q9.type === 'complexes' ? `oscillantes, e^(${nombre(q9.alpha, 0)}t) et pulsation ${nombre(q9.beta, 0)}` : '—', 'exponentielles pures', 'polynomiales', 'constantes']} bonne={0} colonnes={2}>
+Δ &lt; 0, r = −1 ± 2i (L2.1.4).
+</QCM>
+
+<QCM n={10} question="m = 1 t, k = 100 kN/m, sans amortissement : la fréquence propre vaut :" choix={[grandeur(q10.f0, 2, 'Hz'), grandeur(q10.w0, 0, 'Hz'), '100 Hz', '0,1 Hz']} bonne={0} colonnes={4}>
+f0 = √(k/m)/2π (L2.1.5).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={11} question="Un taux d'amortissement ζ = 1 donne un régime :" choix={['critique', 'pseudo-périodique', 'résonant', 'divergent']} bonne={0} colonnes={4}>
+L2.1.5.
+</QCM>
+
+<QCM n={12} question="Solive : L = 3 m, q = 2 kN/m, E = 11 000 MPa, I = 5 000 cm⁴. La flèche vaut :" choix={[grandeur(q12.fmm, 1, 'mm'), grandeur(q12.fmm * 16, 0, 'mm'), '10 mm', '0,1 mm']} bonne={0} colonnes={4}>
+5qL⁴/(384EI) (L2.1.6).
+</QCM>
+
+<QCM n={13} question="∂²y/∂t² = c² ∂²y/∂x² est l'équation :" choix={['des ondes', 'de la chaleur', 'de la consolidation', 'de Laplace']} bonne={0} colonnes={4}>
+Dérivée seconde en temps (L2.1.7).
+</QCM>
+
+<QCM n={14} question="Argile de 4 m drainée des deux côtés, cv = 4 m²/an, après 6 mois. U vaut :" choix={[`${nombre(q14.U * 100, 0)} %`, '100 %', '10 %', '50 %']} bonne={0} colonnes={4}>
+Tv = cv t / Hd² (L2.1.7).
+</QCM>
+
+<QCM n={15} question="Passer d'un drainage double à un drainage simple multiplie la durée de consolidation par :" choix={['4', '2', '1/2', '1']} bonne={0} colonnes={4}>
+Hd double, au carré (L2.1.7).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

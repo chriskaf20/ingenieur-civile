@@ -1,0 +1,304 @@
+---
+id: L2.1.1
+titre: "Qu'est-ce qu'une équation différentielle ?"
+objectifs:
+  - Reconnaître une équation différentielle et donner son ordre
+  - Distinguer équation linéaire et non linéaire, homogène et avec second membre
+  - Vérifier qu'une fonction est solution d'une équation
+  - Approcher une solution par la méthode d'Euler
+relecture: false
+normes: []
+glossaire:
+  - terme: Équation différentielle
+    definition: Équation dont l'inconnue est une fonction, et qui relie cette fonction à ses dérivées.
+  - terme: Ordre
+    definition: Ordre de la plus haute dérivée qui apparaît dans l'équation.
+  - terme: Condition initiale
+    definition: Valeur connue de la fonction (et de ses dérivées) à l'instant de départ ; elle choisit une solution parmi toutes.
+  - terme: Méthode d'Euler
+    definition: Méthode numérique qui avance par petits pas en suivant à chaque pas la pente donnée par l'équation.
+symboles:
+  - { symbole: "y'", signification: 'dérivée de y par rapport à t (ou x)', unite: 'unité de y par unité de t' }
+  - { symbole: 'h', signification: 'pas de la méthode d''Euler', unite: 'unité de t' }
+formules:
+  - { nom: 'Méthode d''Euler', tex: 'y_{n+1} = y_n + h\, f(t_n, y_n)', domaine: 'Équation y'' = f(t, y)' }
+  - { nom: 'Décroissance', tex: 'y'' = -k\,y \;\Rightarrow\; y = y_0\, e^{-k t}', domaine: 'Premier ordre' }
+---
+
+import { decroissance, euler } from '@/lib/calc/equadiff'
+import { nombre } from '@/lib/format'
+import { ChampPentes, EulerExact, MasseRessort, PoutreDeformee, ReservoirOrifice } from '@/components/schemas/EquaDiff'
+import { deformeePoutre, EXEMPLE_DEFORMEE } from '@/lib/calc/equadiff'
+import { DiagrammeFlux } from '@/components/drawing/Diagrammes'
+
+export const d0 = deformeePoutre(EXEMPLE_DEFORMEE)
+export const e2 = euler((_t, y) => -0.5 * y, 0, 4, 1, 3)
+export const ex3 = decroissance(4, 0.5, 3)
+
+<Page etape="intuition" titre="L'intuition : connaître la vitesse pour trouver la position">
+
+Un réservoir se vide d'autant plus vite qu'il est plein. Un béton chaud refroidit d'autant plus vite qu'il est chaud. Une poutre se courbe d'autant plus que le moment est grand. Dans chaque cas, on ne connaît pas directement la grandeur qui nous intéresse, mais on sait **comment elle varie** : sa dérivée. Une **équation différentielle** dit exactement cela : « la vitesse de variation de y dépend de y ».
+
+<ReservoirOrifice h0={4} h1={0.5} />
+
+Résoudre l'équation, c'est retrouver la grandeur elle-même, à chaque instant, à partir de cette règle de variation et d'un point de départ.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Qu'est-ce qu'une équation différentielle, comment la lire, et comment en approcher la solution ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Lire une équation différentielle" sousTitre="L'inconnue est une fonction" etape="cours">
+
+<Panneau n={1} titre="L'inconnue" icone="idee" couleur="encre">
+Une fonction y(t) ou y(x), pas un nombre. On cherche toute une courbe.
+</Panneau>
+
+<Panneau n={2} titre="L'ordre" icone="calcul" couleur="acier">
+La plus haute dérivée : y' (premier ordre), y'' (second ordre).
+</Panneau>
+
+<Panneau n={3} titre="Linéaire" icone="regle" couleur="terre">
+y et ses dérivées apparaissent seules, au premier degré, multipliées par des coefficients.
+</Panneau>
+
+<Panneau n={4} titre="Second membre" icone="plan" couleur="brique">
+Le terme sans y : nul, l'équation est homogène ; sinon, il représente une action extérieure.
+</Panneau>
+
+<Panneau n={5} titre="Conditions initiales" icone="verification" couleur="validation">
+Une par ordre : elles choisissent la solution du problème parmi une famille.
+</Panneau>
+
+<Panneau n={6} titre="Euler" icone="quantites" couleur="correction">
+Quand on ne sait pas résoudre : avancer pas à pas en suivant la pente.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : reconnaître et classer">
+
+### La définition
+
+Une **équation différentielle** relie une fonction inconnue y à ses dérivées y', y''… Exemples tirés du génie civil :
+
+- vidange : $A\,h' = -C_d\,a\sqrt{2 g h}$ ;
+- refroidissement du béton : $T' = -k\,(T - T_a)$ ;
+- oscillateur : $m\,x'' + c\,x' + k\,x = 0$ ;
+- déformée d'une poutre : $E I\, y'' = -M(x)$.
+
+### Ordre et linéarité
+
+L'**ordre** est celui de la plus haute dérivée : le refroidissement est du premier ordre, l'oscillateur du second. Une équation est **linéaire** si y, y', y''… n'apparaissent qu'au premier degré, sans produit entre eux ni fonction appliquée à eux. Le refroidissement est linéaire ; la vidange ne l'est pas, à cause de $\sqrt h$.
+
+### Homogène ou avec second membre
+
+Dans $y'' + p\,y' + q\,y = f(t)$, le terme $f(t)$ est le **second membre** : une force, une charge, une source de chaleur. S'il est nul, l'équation est **homogène** : le système évolue seul.
+
+<ChampPentes k={0.5} y0={2} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : solutions et conditions initiales">
+
+### Vérifier une solution
+
+Une fonction est **solution** si, remplacée dans l'équation, elle la rend vraie pour tout t. Exemple : $y = 4 e^{-0{,}5 t}$ a pour dérivée $y' = -2 e^{-0{,}5 t} = -0{,}5\,y$ : c'est une solution de $y' = -0{,}5\,y$.
+
+### Une famille de solutions
+
+$y = C e^{-0{,}5 t}$ est solution pour **toute** constante C : une équation du premier ordre a une famille de solutions à un paramètre ; du second ordre, à deux paramètres. Les **conditions initiales** fixent ces constantes : y(0) = 4 donne C = 4.
+
+### Le champ de pentes
+
+L'équation donne la **pente** de la solution en chaque point du plan (t, y). En dessinant ces pentes, on voit la forme des solutions avant tout calcul :
+
+<ChampPentes />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : la méthode d'Euler">
+
+### Avancer pas à pas
+
+Beaucoup d'équations ne se résolvent pas à la main. La **méthode d'Euler** part de $(t_0, y_0)$ et avance d'un pas h en suivant la pente : $y_{n+1} = y_n + h\,f(t_n, y_n)$. Plus le pas est petit, plus on suit fidèlement la vraie courbe, au prix de plus de calculs.
+
+<EulerExact h={0.5} />
+
+<Regle type="simplification">
+La méthode d'Euler est la plus simple des méthodes numériques ; les logiciels utilisent des méthodes plus précises (Runge-Kutta, L2.3), mais toutes reposent sur la même idée : suivre la pente par petits pas.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : les équations du module">
+
+Le module rencontre quatre systèmes du génie civil. Chacun a son équation :
+
+<DiagrammeFlux alt="Les quatre systèmes du module et leurs équations : le réservoir qui se vide, équation du premier ordre non linéaire ; le béton qui refroidit, premier ordre linéaire ; l'oscillateur masse-ressort, second ordre linéaire ; la poutre qui fléchit, second ordre en x." etapes={[{ titre: 'Réservoir', texte: 'A h′ = −Cd a √(2gh)', teinte: 'encre' }, { titre: 'Béton chaud', texte: 'T′ = −k (T − Ta)', teinte: 'correction' }, { titre: 'Oscillateur', texte: 'm x″ + c x′ + k x = 0', teinte: 'acier' }, { titre: 'Poutre', texte: 'EI y″ = −M(x)', teinte: 'terre' }]} />
+
+<MasseRessort />
+
+<PoutreDeformee L={EXEMPLE_DEFORMEE.L} y={d0.y} f={d0.f} />
+
+</Page>
+
+<FicheCalcul calcul="eulerDecroissance">
+
+<Cahier titre="Exemple résolu : Euler sur une décroissance">
+
+**Énoncé.** On approche la solution de $y' = -y$, y(0) = 1, entre 0 et 1, par la méthode d'Euler avec le pas indiqué. Compare à la solution exacte $e^{-t}$.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les pas">
+<AN k="pas" />
+<Note>Pourquoi le résultat est-il trop petit ? La pente au début de chaque pas est la plus forte du pas : en la suivant, on descend un peu trop.</Note>
+</Etape>
+
+<Etape n={3} titre="La comparaison">
+<AN k="ecart" />
+<Resultat k="y1" libelle="y(1) par Euler" />
+<Schema />
+<Note couleur="vert">Contrôle : divise le pas par 5, l'écart diminue nettement ; il est à peu près proportionnel au pas.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="chercher un nombre au lieu d'une fonction.">
+L'inconnue est une fonction : la réponse est une courbe, y(t) pour tout t, pas une valeur.
+</Piege>
+
+<Piege erreur="oublier les conditions initiales.">
+Sans elles, on n'a qu'une famille de solutions ; avec, la solution du problème. Il en faut autant que l'ordre.
+</Piege>
+
+<ChampPentes k={0.5} y0={2} />
+
+<Piege erreur="prendre un pas d'Euler trop grand.">
+La solution numérique s'écarte, voire oscille et diverge. On teste toujours avec un pas plus petit.
+</Piege>
+
+<Piege erreur="croire qu'une équation est linéaire parce qu'elle « a l'air simple ».">
+$h' = -c\sqrt h$ est simple mais non linéaire ; ses solutions ne s'additionnent pas.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Partout des taux de variation.** Débit d'un réservoir, température d'un béton de masse, tassement d'un remblai, vibration d'une passerelle, flèche d'une poutre : les grandeurs qui évoluent dans le temps ou le long d'un ouvrage obéissent à des équations différentielles. Les logiciels de calcul les résolvent numériquement ; l'ingénieur doit savoir les écrire et vérifier les résultats sur des cas simples.
+
+<ReservoirOrifice h0={3} h1={0.3} />
+
+<Encadre type="terrain" titre="Le béton des grosses semelles">
+Sous le climat chaud de la RDC, le cœur d'une semelle massive peut dépasser 60 °C quelques heures après le coulage ; la peau refroidit plus vite que le cœur et risque de fissurer. L'équation du refroidissement (L2.1.2) aide à prévoir l'évolution et à décider des protections.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : équations différentielles">
+
+### Lire
+
+inconnue = fonction · ordre = plus haute dérivée · linéaire : y, y', y'' au premier degré · second membre = action extérieure
+
+### Solutions
+
+famille à autant de constantes que l'ordre · conditions initiales → la solution du problème · vérifier en remplaçant
+
+### Euler
+
+y(n+1) = y(n) + h f(t(n), y(n)) · erreur ≈ proportionnelle à h · tester avec un pas plus petit
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Ordre et linéarité">
+
+Donne l'ordre et dis si elles sont linéaires : a) $y' + 3y = 0$ ; b) $y'' + y^2 = 0$ ; c) $m x'' + k x = F(t)$.
+
+<Indice>Plus haute dérivée ; y au premier degré seulement ?</Indice>
+
+<Corrige>
+a) ordre 1, **linéaire**, homogène ; b) ordre 2, **non linéaire** (y²) ; c) ordre 2, **linéaire**, avec second membre F(t).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Trois pas d'Euler">
+
+$y' = -0{,}5\,y$, y(0) = 4, pas h = 1. Calcule y(1), y(2), y(3) par Euler.
+
+<Indice>y(n+1) = y(n) − 0,5 × y(n) = 0,5 y(n).</Indice>
+
+<Corrige>
+**{e2.slice(1).map(([, y]) => nombre(y, 3)).join(' ; ')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Solution exacte et écart">
+
+Vérifie que $y = 4e^{-0{,}5t}$ est solution, puis compare y(3) exact au résultat d'Euler de l'exercice 2.
+
+<Indice>Dérive, puis calcule e^(−1,5).</Indice>
+
+<Corrige>
+y' = −2 e^(−0,5 t) = −0,5 y : c'est une solution, avec y(0) = 4. y(3) exact = **{nombre(ex3, 3)}**, Euler {nombre(e2[3][1], 3)} : le pas h = 1 est trop grand pour cette décroissance.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.1.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'inconnue d'une équation différentielle est :" choix={['une fonction', 'un nombre', 'une matrice', 'un angle']} bonne={0} colonnes={4}>
+On cherche toute une courbe.
+</QCM>
+
+<QCM n={2} question="m x'' + c x' + k x = 0 est d'ordre :" choix={['2', '1', '3', '0']} bonne={0} colonnes={4}>
+La plus haute dérivée est x''.
+</QCM>
+
+<QCM n={3} question="Une équation du second ordre demande :" choix={['deux conditions initiales', 'une seule', 'aucune', 'trois']} bonne={0} colonnes={4}>
+Autant que l'ordre.
+</QCM>
+
+<QCM n={4} question="h' = −c √h est :" choix={['non linéaire', 'linéaire', 'd’ordre 2', 'sans solution']} bonne={0} colonnes={4}>
+À cause de la racine.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="La méthode d'Euler avance en suivant :" choix={['la pente au début du pas', 'la solution exacte', 'une droite horizontale', 'la moyenne']} bonne={0} colonnes={2}>
+y(n+1) = y(n) + h f(t(n), y(n)).
+</QCM>
+
+<QCM n={6} question="Si l'on divise le pas d'Euler par 10, l'erreur est :" choix={['environ divisée par 10', 'inchangée', 'multipliée par 10', 'nulle']} bonne={0} colonnes={2}>
+Elle est à peu près proportionnelle au pas.
+</QCM>
+
+<QCM n={7} question="y = 5 e^(−2t) est solution de :" choix={["y' = −2y", "y' = 2y", "y' = −5y", "y'' = y"]} bonne={0} colonnes={4}>
+y' = −10 e^(−2t) = −2 y.
+</QCM>
+
+<QCM n={8} question="Le second membre d'une équation représente :" choix={['une action extérieure', 'la condition initiale', 'l’ordre', 'la solution']} bonne={0} colonnes={2}>
+Force, charge, source.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

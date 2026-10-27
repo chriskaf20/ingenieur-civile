@@ -1,0 +1,146 @@
+---
+id: L2.1.P
+titre: "Mini-projet : vidange d'un château d'eau"
+objectifs:
+  - Modéliser la vidange d'une cuve par une équation différentielle
+  - Résoudre l'équation et calculer le temps de vidange
+  - Comparer le résultat à un débit constant et à une mesure
+  - Proposer un diamètre de vanne adapté à un délai imposé
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { EXEMPLE_VIDANGE, vidange } from '@/lib/calc/equadiff'
+import { grandeur, nombre } from '@/lib/format'
+import { ChateauEau, CourbeVidange, ReservoirOrifice } from '@/components/schemas/EquaDiff'
+import { DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d = EXEMPLE_VIDANGE
+export const D = Math.sqrt((4 * d.A) / Math.PI)
+export const v = vidange(d)
+export const v15 = vidange({ ...d, d: 0.15 })
+export const v20 = vidange({ ...d, d: 0.2 })
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+La régie d'eau d'une cité minière du Haut-Katanga doit inspecter la cuve de son château d'eau : diamètre {grandeur(D, 0, 'm')}, eau sur {grandeur(d.h0, 1, 'm')}. On ouvre la vanne de fond, de diamètre {nombre(d.d * 1000, 0)} mm, coefficient de débit {nombre(d.Cd, 2)} <AVerifier note="A_VERIFIER.md n° 50 : coefficients de débit des orifices et vannes" />. La pompe d'épuisement termine quand il reste {grandeur(d.h1, 1, 'm')} (données de l'énoncé).
+
+<ChateauEau D={D} h0={d.h0} />
+
+### Ce que tu rends
+
+1. La **mise en équation** : bilan de volume, loi de Torricelli, équation en h(t).
+2. La **résolution** et le **temps de vidange** jusqu'à {nombre(d.h1, 1)} m.
+3. La courbe **h(t)** et la comparaison avec un débit constant.
+4. Le **diamètre de vanne** qui ramène la vidange sous une heure.
+
+<Regle type="simplification">
+On néglige les pertes de charge dans la conduite de vidange et la variation de Cd ; on suppose la cuve cylindrique. Une mesure sur site reste indispensable.
+</Regle>
+
+</Page>
+
+<Infographie titre="La démarche" sousTitre="De l'équation au délai" etape="projet">
+
+<Panneau n={1} titre="Bilan" icone="calcul" couleur="encre">
+A dh/dt = −Q : le niveau baisse au rythme du débit sortant.
+</Panneau>
+
+<Panneau n={2} titre="Torricelli" icone="idee" couleur="acier">
+Q = Cd a √(2 g h) : le débit dépend du niveau.
+</Panneau>
+
+<Panneau n={3} titre="Séparer" icone="regle" couleur="terre">
+dh/√h = −c dt, puis intégrer.
+</Panneau>
+
+<Panneau n={4} titre="Temps" icone="plan" couleur="brique">
+T = 2(√h0 − √h1)/c.
+</Panneau>
+
+<Panneau n={5} titre="Comparer" icone="verification" couleur="validation">
+Débit constant Q0 : plus court, donc optimiste.
+</Panneau>
+
+<Panneau n={6} titre="Dimensionner" icone="attention" couleur="correction">
+T ∝ 1/d² : choisir la vanne.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="vidangeReservoir">
+
+<Cahier titre="Étape 1 : la mise en équation" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Sections et équation">
+<AN k="sections" />
+<AN k="equation" />
+<Note>Pourquoi le débit diminue-t-il ? La vitesse de sortie dépend de la hauteur d'eau au-dessus de la vanne.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : le temps de vidange" etape="projet">
+
+<Etape n={3} titre="Intégrer">
+<AN k="temps" />
+<Resultat k="T" libelle="Temps de vidange" />
+<Schema />
+</Etape>
+
+<Etape n={4} titre="Contrôler">
+<AN k="controle" />
+<Note couleur="vert">Contrôle : à débit constant, on trouverait moins ; la vraie vidange ralentit en fin de course.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le corrigé">
+
+Volume à vider : {grandeur(v.volume, 0, 'm³')} ; débit initial : {grandeur(v.Q0 * 1000, 0, 'L/s')}. Temps de vidange : **{grandeur(v.T / 60, 0, 'min')}**, contre {grandeur(v.Tconstant / 60, 0, 'min')} si le débit restait égal à Q0.
+
+<CourbeVidange dd={d} T={v.T} c={v.c} />
+
+<ReservoirOrifice h0={d.h0} h1={d.h1} />
+
+**Dimensionner la vanne.** T est inversement proportionnel à la section, donc à d² :
+
+<DiagrammeBarres alt={`Temps de vidange selon le diamètre de la vanne : ${nombre(v.T / 60, 0)} min pour 100 mm, ${nombre(v15.T / 60, 0)} min pour 150 mm, ${nombre(v20.T / 60, 0)} min pour 200 mm.`} titre="temps de vidange (min)" barres={[{ libelle: '100 mm', valeur: v.T / 60, texte: nombre(v.T / 60, 0), teinte: 'correction' }, { libelle: '150 mm', valeur: v15.T / 60, texte: nombre(v15.T / 60, 0), teinte: 'terre' }, { libelle: '200 mm', valeur: v20.T / 60, texte: nombre(v20.T / 60, 0), teinte: 'validation' }]} />
+
+Une vanne de 150 mm suffit pour passer sous l'heure ({nombre(v15.T / 60, 0)} min).
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Mise en équation | Formule sans justification | Bilan et Torricelli | Hypothèses listées (Cd, cuve cylindrique) |
+| Résolution | Débit constant | Séparation des variables juste | Unités à chaque ligne |
+| Courbe | Absente | h(t) tracée | Comparée au débit constant |
+| Vanne | Absente | Diamètre proposé | Choix justifié par T ∝ 1/d² |
+
+<Encadre type="exemple" titre="Pour aller plus loin">
+Où rejeter {nombre(v.volume, 0)} m³ d'eau sans raviner une latérite ? Prévois un exutoire et un débit compatible avec le fossé (L2.7).
+</Encadre>
+
+<Quiz id="L2.1.P">
+
+<QCM n={1} question="Mon dossier contient-il la mise en équation, le temps de vidange, la courbe h(t) et le choix de la vanne ?" choix={['Oui, tout y est', 'Il manque une partie']} bonne={0} colonnes={2}>
+Sinon, complète : la régie en a besoin pour planifier l'arrêt du service.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

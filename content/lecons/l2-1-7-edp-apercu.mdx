@@ -1,0 +1,307 @@
+---
+id: L2.1.7
+titre: "Équations aux dérivées partielles (aperçu)"
+objectifs:
+  - Distinguer une équation différentielle ordinaire d'une équation aux dérivées partielles
+  - Reconnaître l'équation de la chaleur, celle des ondes et celle de la consolidation
+  - Calculer le facteur temps et le degré de consolidation d'une couche d'argile
+  - Expliquer pourquoi le drainage double accélère le tassement
+relecture: false
+normes: []
+glossaire:
+  - terme: Dérivée partielle
+    definition: Dérivée d'une fonction de plusieurs variables par rapport à l'une d'elles, les autres restant fixes.
+  - terme: Équation de diffusion
+    definition: "Équation du type ∂u/∂t = c ∂²u/∂z² : chaleur, consolidation, migration d'un polluant."
+  - terme: Consolidation
+    definition: Tassement lent d'une argile saturée, au rythme où l'eau s'échappe de ses pores.
+  - terme: Facteur temps
+    definition: Nombre sans dimension Tv = cv t / Hd² qui mesure l'avancement de la consolidation.
+symboles:
+  - { symbole: 'u(z,t)', signification: 'surpression de l''eau interstitielle', unite: 'kPa' }
+  - { symbole: 'cv', signification: 'coefficient de consolidation', unite: 'm²/an' }
+  - { symbole: 'Hd', signification: 'longueur de drainage', unite: 'm' }
+  - { symbole: 'U', signification: 'degré de consolidation moyen', unite: '%' }
+formules:
+  - { nom: 'Chaleur', tex: '\frac{\partial T}{\partial t} = a\,\frac{\partial^2 T}{\partial z^2}', domaine: 'Diffusion' }
+  - { nom: 'Ondes', tex: '\frac{\partial^2 y}{\partial t^2} = c^2\,\frac{\partial^2 y}{\partial x^2}', domaine: 'Propagation' }
+  - { nom: 'Consolidation (Terzaghi)', tex: '\frac{\partial u}{\partial t} = c_v\,\frac{\partial^2 u}{\partial z^2}', domaine: 'Argile saturée' }
+  - { nom: 'Facteur temps', tex: 'T_v = \frac{c_v\, t}{H_d^2},\quad U \approx \sqrt{\frac{4 T_v}{\pi}}\ (U < 60\,\%)', domaine: 'Degré moyen' }
+---
+
+import { consolidation, EXEMPLE_CONSOLIDATION } from '@/lib/calc/equadiff'
+import { grandeur, nombre } from '@/lib/format'
+import { CoucheConsolidation, CourbeConsolidation, TroisEDP } from '@/components/schemas/EquaDiff'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d0 = EXEMPLE_CONSOLIDATION
+export const c0 = consolidation(d0)
+export const simple = consolidation({ ...d0, doubleDrainage: false })
+export const ex1 = consolidation({ ...d0, t: 5 })
+export const ex3 = consolidation({ cv: 1, H: 6, doubleDrainage: true, t: 1 })
+
+<Page etape="intuition" titre="L'intuition : quand l'inconnue dépend de deux variables">
+
+Jusqu'ici, l'inconnue dépendait d'une seule variable : le temps (la température du béton) ou l'abscisse (la flèche d'une poutre). Mais la température d'un mur dépend **à la fois** de la profondeur dans le mur et de l'heure ; la pression de l'eau dans une argile dépend de la profondeur et du temps. L'équation relie alors des dérivées par rapport à chaque variable : c'est une **équation aux dérivées partielles** (EDP).
+
+<TroisEDP />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment reconnaître les grandes EDP de l'ingénieur, et que dit la plus utile en géotechnique, celle de la consolidation ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Trois EDP à reconnaître" sousTitre="Diffusion, propagation, consolidation" etape="cours">
+
+<Panneau n={1} titre="Dérivée partielle" icone="calcul" couleur="encre">
+∂u/∂t : on dérive en t, z restant fixe.
+</Panneau>
+
+<Panneau n={2} titre="Chaleur" icone="idee" couleur="correction">
+∂T/∂t = a ∂²T/∂z² : la chaleur s'étale.
+</Panneau>
+
+<Panneau n={3} titre="Ondes" icone="regle" couleur="acier">
+∂²y/∂t² = c² ∂²y/∂x² : une vibration se propage.
+</Panneau>
+
+<Panneau n={4} titre="Consolidation" icone="terrain" couleur="terre">
+∂u/∂t = cv ∂²u/∂z² : l'eau s'échappe de l'argile.
+</Panneau>
+
+<Panneau n={5} titre="Facteur temps" icone="plan" couleur="brique">
+Tv = cv t / Hd² : un seul nombre résume l'avancement.
+</Panneau>
+
+<Panneau n={6} titre="Drainage" icone="verification" couleur="validation">
+Drainée des deux côtés, la couche se consolide quatre fois plus vite.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : dérivées partielles et grandes familles">
+
+### La dérivée partielle
+
+Si u dépend de z et de t, $\frac{\partial u}{\partial t}$ est la vitesse de variation de u **en un point fixe**, et $\frac{\partial u}{\partial z}$ sa pente **à un instant fixe**. On dérive par rapport à une variable en gelant les autres.
+
+### Les trois familles
+
+- **Diffusion** (chaleur, consolidation) : la dérivée première en temps égale la dérivée seconde en espace. Les écarts s'**étalent** et s'amortissent, sans jamais osciller.
+- **Ondes** (cordes, poutres en vibration, séismes) : la dérivée **seconde** en temps. Les perturbations se **propagent** à la vitesse c.
+- **Équilibre** (Laplace, $\frac{\partial^2 h}{\partial x^2} + \frac{\partial^2 h}{\partial z^2} = 0$) : pas de temps ; elle décrit l'écoulement permanent de l'eau sous un barrage (L2.7).
+
+<Regle type="simplification">
+Résoudre une EDP dépasse ce module : on admet ici les solutions classiques sous forme d'abaques et de formules approchées. Les méthodes numériques (différences finies, éléments finis) sont abordées en M1.6.
+</Regle>
+
+<TroisEDP />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la consolidation de Terzaghi">
+
+### Le mécanisme
+
+Une argile saturée chargée par un remblai ne peut pas se tasser tout de suite : il faut d'abord chasser l'eau de ses pores, et l'argile est très peu perméable. Au début, c'est l'eau qui porte la charge (surpression u) ; à mesure qu'elle s'écoule vers les couches drainantes, la charge passe au squelette du sol, qui se tasse.
+
+<CoucheConsolidation H={d0.H} double={d0.doubleDrainage} />
+
+### L'équation
+
+La surpression u(z, t) suit $\frac{\partial u}{\partial t} = c_v\,\frac{\partial^2 u}{\partial z^2}$ : une équation de diffusion. Le coefficient $c_v$ (m²/an) se mesure à l'œdomètre ; il vaut couramment de 0,1 à 10 m²/an <AVerifier note="A_VERIFIER.md n° 53 : ordres de grandeur du coefficient de consolidation cv des argiles (à mesurer à l'œdomètre, EN 1997-2 ; M1.3)" />.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : le facteur temps et le degré de consolidation">
+
+### Un seul nombre : Tv
+
+La solution ne dépend du temps et de l'épaisseur qu'à travers $T_v = c_v\, t / H_d^2$, où $H_d$ est le plus long chemin que doit parcourir l'eau : la moitié de l'épaisseur si la couche est drainée en haut et en bas, toute l'épaisseur si elle ne l'est que d'un côté.
+
+### Le degré de consolidation moyen
+
+U (de 0 à 100 %) est la fraction du tassement final déjà réalisée. Pour U &lt; 60 %, $U \approx \sqrt{4 T_v / \pi}$ ; on retient U = 50 % pour Tv ≈ 0,197 et U = 90 % pour Tv ≈ 0,848.
+
+<CourbeConsolidation Tv={c0.Tv} />
+
+$H_d$ intervient **au carré** : doubler le chemin de drainage multiplie la durée par quatre. C'est pourquoi on pose des drains verticaux dans les argiles épaisses.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : du remblai au tassement">
+
+<DiagrammeFlux alt="Le déroulement de la consolidation : on pose le remblai ; l'eau porte d'abord la charge ; elle s'écoule vers les couches drainantes ; la charge passe au squelette du sol ; le tassement progresse puis se stabilise." etapes={[{ titre: 'Remblai', texte: 'charge Δσ', teinte: 'terre' }, { titre: 'Eau', texte: 'u = Δσ', teinte: 'encre' }, { titre: 'Drainage', texte: 'vers le sable', teinte: 'acier' }, { titre: 'Squelette', texte: 'reprend Δσ', teinte: 'brique' }, { titre: 'Tassement', texte: 'U → 100 %', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Durée pour atteindre 90 % de consolidation dans la couche de ${nombre(d0.H, 0)} m : ${nombre(c0.t90, 1)} an(s) avec un drainage double, ${nombre(simple.t90, 1)} ans avec un drainage simple, quatre fois plus.`} titre="t90 (années)" barres={[{ libelle: 'drainage double', valeur: c0.t90, texte: nombre(c0.t90, 1), teinte: 'validation' }, { libelle: 'drainage simple', valeur: simple.t90, texte: nombre(simple.t90, 1), teinte: 'correction' }]} />
+
+</Page>
+
+<FicheCalcul calcul="consolidationArgile">
+
+<Cahier titre="Exemple résolu : une argile sous un remblai routier">
+
+**Énoncé.** Un remblai routier repose sur {grandeur(d0.H, 0, 'm')} d'argile, entre deux couches de sable ; cv = {nombre(d0.cv, 0)} m²/an (données de l'énoncé). Quel pourcentage du tassement est atteint après {nombre(d0.t, 0)} an ? Quand atteint-on 90 % ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le facteur temps">
+<AN k="Tv" />
+<Note>Pourquoi Hd = H/2 ? Le sable en haut et en bas draine l'eau : la goutte la plus éloignée est au milieu de la couche.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le degré de consolidation">
+
+<Etape n={3} titre="Le degré moyen">
+<AN k="U" />
+<Resultat k="U" libelle="Degré de consolidation" />
+<Resultat k="t90" libelle="Durée pour 90 %" />
+<Schema />
+<Note couleur="vert">Contrôle : passe en drainage simple ; Hd double, la durée est multipliée par quatre. C'est pour cela qu'on attend parfois des mois avant de poser la chaussée.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre H au lieu de Hd.">
+En drainage double, Hd = H/2 ; utiliser H divise Tv par quatre.
+</Piege>
+
+<Piege erreur="mélanger les unités de temps.">
+cv en m²/an impose t en années ; cv en m²/s, t en secondes.
+</Piege>
+
+<Piege erreur="croire qu'une argile tasse tout de suite.">
+Sa faible perméabilité retarde le tassement de mois ou d'années ; un sable, lui, tasse pendant la construction.
+</Piege>
+
+<Piege erreur="appliquer √(4Tv/π) au-delà de 60 %.">
+Au-delà, on utilise la formule exponentielle ou l'abaque.
+</Piege>
+
+<CourbeConsolidation />
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Construire sur les argiles molles.** Le long du fleuve Congo, à Kinshasa (zones basses de Ndjili, Kingabwa) ou dans les plaines alluviales, des argiles molles saturées supportent routes et remblais. On pré-charge le terrain, on pose des drains verticaux pour raccourcir le chemin de l'eau, et l'on suit le tassement avec des plaques et des piézomètres : la mesure confirme ou corrige le cv du laboratoire.
+
+<CoucheConsolidation H={d0.H} double={false} />
+
+<Encadre type="attention" titre="Argiles gonflantes">
+Les argiles gonflantes (smectites) obéissent aussi à la diffusion, mais à l'envers : elles absorbent l'eau en saison des pluies et gonflent, puis se rétractent en saison sèche. C'est le même type d'équation, avec un signe de charge opposé (M1.3).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : EDP et consolidation">
+
+### Familles
+
+Diffusion ∂u/∂t = c ∂²u/∂z² · ondes ∂²y/∂t² = c² ∂²y/∂x² · équilibre (Laplace) sans temps
+
+### Consolidation
+
+∂u/∂t = cv ∂²u/∂z² · Tv = cv t / Hd² · Hd = H/2 (double) ou H (simple)
+
+### Degré moyen
+
+U ≈ √(4Tv/π) si U &lt; 60 % · U50 : Tv ≈ 0,197 · U90 : Tv ≈ 0,848
+
+### Pratique
+
+durée ∝ Hd² · drains verticaux · suivi par plaques et piézomètres
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Après cinq ans">
+
+Même couche que l'exemple. Degré de consolidation après 5 ans ?
+
+<Indice>Tv = cv t / Hd², puis U.</Indice>
+
+<Corrige>
+Tv = {nombre(ex1.Tv, 2)} ; U = **{nombre(ex1.U * 100, 0)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Reconnaître l'équation">
+
+∂²y/∂t² = 400 ∂²y/∂x². Quelle famille ? Quelle vitesse de propagation ?
+
+<Indice>c² = 400.</Indice>
+
+<Corrige>
+Équation des **ondes**, c = **20 m/s**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une couche plus épaisse">
+
+Couche de 6 m drainée des deux côtés, cv = 1 m²/an. U après 1 an ? Durée pour 90 % ?
+
+<Indice>Hd = 3 m.</Indice>
+
+<Corrige>
+Tv = {nombre(ex3.Tv, 3)} ; U = **{nombre(ex3.U * 100, 0)} %** ; t90 = **{grandeur(ex3.t90, 1, 'ans')}**. Des drains verticaux tous les 2 m raccourciraient fortement ce délai.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.1.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une EDP fait intervenir :" choix={['des dérivées par rapport à plusieurs variables', 'une seule variable', 'aucune dérivée', 'seulement des intégrales']} bonne={0} colonnes={2}>
+Par exemple z et t.
+</QCM>
+
+<QCM n={2} question="∂T/∂t = a ∂²T/∂z² est l'équation :" choix={['de la chaleur', 'des ondes', 'de Laplace', 'de Newton']} bonne={0} colonnes={4}>
+Diffusion.
+</QCM>
+
+<QCM n={3} question="La consolidation d'une argile est lente parce que :" choix={['l’eau s’échappe lentement des pores', 'l’argile est dure', 'la charge est faible', 'le sable bloque']} bonne={0} colonnes={2}>
+Faible perméabilité.
+</QCM>
+
+<QCM n={4} question="En drainage double, la longueur de drainage vaut :" choix={['H/2', 'H', '2H', 'H/4']} bonne={0} colonnes={4}>
+La goutte la plus éloignée est au milieu.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, après 1 an, U vaut :</>} choix={[`${nombre(c0.U * 100, 0)} %`, `${nombre(simple.U * 100, 0)} %`, '100 %', '10 %']} bonne={0} colonnes={4}>
+Tv = cv t / Hd².
+</QCM>
+
+<QCM n={6} question="Doubler Hd multiplie la durée de consolidation par :" choix={['4', '2', '8', '1']} bonne={0} colonnes={4}>
+Tv ∝ t / Hd².
+</QCM>
+
+<QCM n={7} question="U = 90 % correspond à Tv environ égal à :" choix={['0,85', '0,2', '0,5', '2']} bonne={0} colonnes={4}>
+À retenir avec U50 ≈ 0,2.
+</QCM>
+
+<QCM n={8} question="Pour accélérer la consolidation, on pose :" choix={['des drains verticaux', 'une dalle', 'des pieux en bois', 'rien']} bonne={0} colonnes={4}>
+Ils raccourcissent le chemin de l'eau.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

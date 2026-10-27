@@ -1,0 +1,312 @@
+---
+id: L2.1.3
+titre: "Application : vidange d'un réservoir"
+objectifs:
+  - Écrire le bilan de volume d'un réservoir qui se vide
+  - Appliquer la loi de Torricelli à un orifice
+  - Résoudre l'équation de vidange et calculer un temps de vidange
+  - Comparer une décroissance non linéaire et une décroissance exponentielle
+relecture: false
+normes: []
+glossaire:
+  - terme: Loi de Torricelli
+    definition: Un liquide sort d'un orifice à la vitesse √(2 g h), celle d'une chute libre de hauteur h.
+  - terme: Coefficient de débit
+    definition: Coefficient Cd (souvent voisin de 0,6) qui tient compte de la contraction du jet et des pertes à l'orifice.
+  - terme: Bilan de volume
+    definition: Variation du volume stocké = débit entrant − débit sortant.
+symboles:
+  - { symbole: 'A', signification: 'section du réservoir', unite: 'm²' }
+  - { symbole: 'a', signification: 'section de l''orifice', unite: 'm²' }
+  - { symbole: 'Cd', signification: 'coefficient de débit', unite: '—' }
+  - { symbole: 'h', signification: 'hauteur d''eau au-dessus de l''orifice', unite: 'm' }
+formules:
+  - { nom: 'Débit sortant', tex: 'Q = C_d\, a \sqrt{2 g h}', domaine: 'Orifice' }
+  - { nom: 'Équation de vidange', tex: 'A\,\frac{dh}{dt} = -C_d\, a \sqrt{2 g h}', domaine: 'Réservoir de section constante' }
+  - { nom: 'Temps de vidange', tex: 'T = \frac{2A}{C_d\, a \sqrt{2g}}\left(\sqrt{h_0} - \sqrt{h_1}\right)', domaine: 'Entre h0 et h1' }
+---
+
+import { EXEMPLE_VIDANGE, vidange } from '@/lib/calc/equadiff'
+import { grandeur, nombre } from '@/lib/format'
+import { CourbeVidange, Exponentielle, ReservoirOrifice } from '@/components/schemas/EquaDiff'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d0 = EXEMPLE_VIDANGE
+export const v0 = vidange(d0)
+export const v2 = vidange({ ...d0, d: 0.2 })
+export const vMoit = vidange({ ...d0, h1: d0.h0 / 2 })
+export const ex3 = vidange({ A: 2 * 1.5, d: 0.05, Cd: 0.6, h0: 1.2, h1: 0 })
+
+<Page etape="intuition" titre="L'intuition : un seau percé">
+
+Un seau percé se vide vite au début, puis de plus en plus lentement : quand il est plein, l'eau pousse fort sur le trou ; presque vide, elle ne pousse presque plus. Le débit dépend de la hauteur d'eau, et la hauteur dépend de ce qui est sorti : c'est une **équation différentielle**.
+
+<ReservoirOrifice h0={d0.h0} h1={d0.h1} />
+
+Bassins de rétention, cuves de château d'eau, réservoirs de chantier : savoir combien de temps ils mettent à se vider sert à dimensionner les vannes et à organiser les inspections.
+
+<Encadre type="idee" titre="La question de cette leçon">
+Combien de temps faut-il à un réservoir pour se vider par un orifice ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Vider un réservoir" sousTitre="Bilan, Torricelli, intégration" etape="cours">
+
+<Panneau n={1} titre="Bilan" icone="quantites" couleur="encre">
+Le volume stocké diminue du débit sortant : A dh/dt = −Q.
+</Panneau>
+
+<Panneau n={2} titre="Torricelli" icone="idee" couleur="acier">
+L'eau sort à √(2 g h) ; Q = Cd a √(2 g h).
+</Panneau>
+
+<Panneau n={3} titre="Cd" icone="regle" couleur="terre">
+Environ 0,6 pour un orifice en mince paroi : le jet se contracte.
+</Panneau>
+
+<Panneau n={4} titre="Séparer" icone="calcul" couleur="brique">
+dh/√h = −c dt : √h décroît linéairement.
+</Panneau>
+
+<Panneau n={5} titre="Le temps" icone="verification" couleur="validation">
+T proportionnel à √h0 − √h1, et à A/a.
+</Panneau>
+
+<Panneau n={6} titre="Pas exponentiel" icone="attention" couleur="correction">
+Le réservoir se vide en un temps fini, contrairement à l'exponentielle.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : le bilan et Torricelli">
+
+### Le bilan de volume
+
+Pendant dt, la hauteur baisse de dh et le volume de A dh ; c'est le volume sorti, Q dt. Donc $A\,\frac{dh}{dt} = -Q$ (s'il n'y a pas d'apport).
+
+### La loi de Torricelli
+
+Une goutte qui descend de la surface à l'orifice gagne la vitesse d'une chute libre de hauteur h : $v = \sqrt{2 g h}$. Le jet se contracte en sortant : on applique un **coefficient de débit** $C_d$, voisin de 0,6 pour un orifice à arête vive. D'où $Q = C_d\,a\sqrt{2 g h}$.
+
+<Regle type="art">
+Cd ≈ 0,6 à 0,62 pour un orifice circulaire en mince paroi ; une buse ou un ajutage donne davantage. On retient la valeur du fabricant de la vanne ou une valeur mesurée <AVerifier note="A_VERIFIER.md n° 50 : coefficients de débit des orifices et vannes, à traiter en hydraulique (L2.8, L3.5)" />.
+</Regle>
+
+<ReservoirOrifice h0={d0.h0} h1={d0.h1} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : résoudre">
+
+### Séparer les variables
+
+$A\,\frac{dh}{dt} = -C_d\,a\sqrt{2 g h}$ donne $\frac{dh}{\sqrt h} = -\frac{C_d\,a\sqrt{2g}}{A}\,dt$. Une primitive de $h^{-1/2}$ est $2\sqrt h$ :
+
+$$\sqrt{h(t)} = \sqrt{h_0} - c\,t, \qquad c = \frac{C_d\,a\sqrt{2g}}{2A}$$
+
+La **racine** de la hauteur baisse linéairement : la hauteur suit une parabole qui touche zéro en un temps fini.
+
+### Le temps de vidange
+
+Entre $h_0$ et $h_1$ : $T = \frac{\sqrt{h_0} - \sqrt{h_1}}{c}$. Le temps est proportionnel au rapport des sections A/a : doubler le diamètre de l'orifice divise le temps par quatre.
+
+<CourbeVidange dd={d0} T={v0.T} c={v0.c} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : comparer">
+
+### Racine contre exponentielle
+
+Dans une décroissance exponentielle, la vitesse est proportionnelle à y : on n'atteint jamais zéro. Ici, elle est proportionnelle à $\sqrt h$ : elle diminue moins vite quand h est petit, et le réservoir se vide en un temps fini.
+
+<Exponentielle y0={d0.h0} k={0.5} titreX="t" titreY="h (exponentielle)" />
+
+### La première moitié va plus vite
+
+Pour passer de {nombre(d0.h0, 1)} m à {nombre(d0.h0 / 2, 1)} m, il faut {nombre(vMoit.T / 60, 1)} min ; la seconde moitié, jusqu'au fond, prend davantage, car la poussée a diminué.
+
+<DiagrammeBarres alt={`Temps de vidange par tranche : de ${nombre(d0.h0, 1)} à ${nombre(d0.h0 / 2, 1)} m, ${nombre(vMoit.T / 60, 1)} min ; de ${nombre(d0.h0 / 2, 1)} m à ${nombre(d0.h1, 1)} m, ${nombre((v0.T - vMoit.T) / 60, 1)} min.`} titre="temps par tranche de hauteur (min)" barres={[{ libelle: `${nombre(d0.h0, 1)} → ${nombre(d0.h0 / 2, 1)} m`, valeur: vMoit.T / 60, texte: nombre(vMoit.T / 60, 1), teinte: 'encre' }, { libelle: `${nombre(d0.h0 / 2, 1)} → ${nombre(d0.h1, 1)} m`, valeur: (v0.T - vMoit.T) / 60, texte: nombre((v0.T - vMoit.T) / 60, 1), teinte: 'terre' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : de la physique au temps">
+
+<DiagrammeFlux alt="Calculer un temps de vidange : bilan de volume A dh/dt = −Q ; loi de l'orifice Q = Cd a √(2gh) ; séparation des variables ; intégration, √h linéaire en t ; temps entre deux hauteurs." etapes={[{ titre: 'Bilan', texte: 'A dh/dt = −Q', teinte: 'encre' }, { titre: 'Orifice', texte: 'Q = Cd a √(2gh)', teinte: 'acier' }, { titre: 'Séparer', texte: 'dh/√h = −c dt', teinte: 'terre' }, { titre: 'Intégrer', texte: '√h = √h0 − c t', teinte: 'brique' }, { titre: 'Temps', texte: 'T = (√h0 − √h1)/c', teinte: 'validation' }]} />
+
+<ReservoirOrifice h0={d0.h0} h1={0} />
+
+</Page>
+
+<FicheCalcul calcul="vidangeReservoir">
+
+<Cahier titre="Exemple résolu : la cuve d'un château d'eau de Kikwit">
+
+**Énoncé.** La cuve cylindrique d'un château d'eau, de 6 m de diamètre, contient {nombre(d0.h0, 1)} m d'eau. On ouvre une vanne de {nombre(d0.d * 100, 0)} cm au fond (Cd = {nombre(d0.Cd, 2)}) pour descendre l'eau à {nombre(d0.h1, 1)} m (données de l'énoncé). Combien de temps faut-il ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les sections et l'équation">
+<AN k="sections" />
+<AN k="equation" />
+<Note>Pourquoi le facteur 2 dans c ? Il vient de la primitive de 1/√h, qui vaut 2√h.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le temps">
+
+<Etape n={3} titre="Le temps de vidange">
+<AN k="temps" />
+<Resultat k="T" libelle="Temps de vidange" />
+</Etape>
+
+<Etape n={4} titre="Le contrôle">
+<AN k="controle" />
+<Schema />
+<Note couleur="vert">Contrôle : doublez le diamètre de l'orifice, le temps est divisé par quatre ; c'est le rapport des sections.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="supposer un débit constant.">
+Le débit baisse avec la hauteur : diviser le volume par le débit initial sous-estime le temps.
+</Piege>
+
+<CourbeVidange dd={d0} T={v0.T} c={v0.c} />
+
+<Piege erreur="confondre diamètre et section de l'orifice.">
+a = π d²/4 : un orifice de 10 cm a une section de {nombre(v0.a * 1e4, 1)} cm², pas 10.
+</Piege>
+
+<Piege erreur="oublier le coefficient de débit.">
+Sans Cd, le temps est sous-estimé de près de 40 %.
+</Piege>
+
+<Piege erreur="mesurer h depuis le fond au lieu de l'orifice.">
+La charge qui pousse l'eau se compte au-dessus de l'orifice.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les bassins de rétention.** En ville, des bassins stockent l'eau des orages et la relâchent lentement par un orifice calibré, pour ne pas saturer les collecteurs. Le temps de vidange, calculé comme ici, dit si le bassin sera vide avant l'orage suivant.
+
+<DiagrammeBarres alt={`Effet du diamètre de l'orifice sur le temps de vidange de la cuve de l'exemple : ${nombre(v0.T / 60, 1)} min avec 10 cm, ${nombre(v2.T / 60, 1)} min avec 20 cm.`} titre="temps de vidange de la cuve (min)" barres={[{ libelle: 'orifice de 10 cm', valeur: v0.T / 60, texte: nombre(v0.T / 60, 1), teinte: 'encre' }, { libelle: 'orifice de 20 cm', valeur: v2.T / 60, texte: nombre(v2.T / 60, 1), teinte: 'validation' }]} />
+
+<Encadre type="terrain" titre="Vider un château d'eau pour l'inspecter">
+Avant une inspection ou un nettoyage de cuve, on annonce la coupure aux usagers. Le temps de vidange, plus le temps de nettoyage et de remplissage, fixe la durée de la coupure.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : vidange">
+
+### Équations
+
+bilan A dh/dt = −Q · Torricelli Q = Cd a √(2gh) · Cd ≈ 0,6
+
+### Solution
+
+√h = √h0 − c t · c = Cd a √(2g) / (2A)
+
+### Temps
+
+T = (√h0 − √h1) / c · proportionnel à A/a · fini, contrairement à l'exponentielle
+
+### Pièges
+
+débit constant · diamètre ou section · Cd oublié · h depuis l'orifice
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Le débit initial">
+
+Quel est le débit initial de la cuve de l'exemple ?
+
+<Indice>Q0 = Cd a √(2 g h0).</Indice>
+
+<Corrige>
+Q0 = **{grandeur(v0.Q0 * 1000, 1, 'L/s')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un orifice deux fois plus grand">
+
+Même cuve, orifice de 20 cm. Temps de vidange de {nombre(d0.h0, 1)} m à {nombre(d0.h1, 1)} m ?
+
+<Indice>Le temps est inversement proportionnel à la section.</Indice>
+
+<Corrige>
+**{nombre(v2.T / 60, 1)} min**, quatre fois moins.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Un bac de chantier">
+
+Un bac rectangulaire de 2 × 1,5 m contient 1,20 m d'eau ; orifice de 5 cm, Cd = 0,6. Temps pour le vider entièrement ?
+
+<Indice>A = 3 m², h1 = 0.</Indice>
+
+<Corrige>
+T = **{nombre(ex3.T / 60, 1)} min**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.1.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La vitesse de l'eau à l'orifice vaut :" choix={['√(2 g h)', '2 g h', 'g h', 'h / t']} bonne={0} colonnes={4}>
+Loi de Torricelli.
+</QCM>
+
+<QCM n={2} question="Le coefficient de débit d'un orifice en mince paroi vaut environ :" choix={['0,6', '1', '0,1', '2']} bonne={0} colonnes={4}>
+Le jet se contracte.
+</QCM>
+
+<QCM n={3} question="Pendant la vidange, √h :" choix={['décroît linéairement', 'décroît exponentiellement', 'reste constant', 'croît']} bonne={0} colonnes={2}>
+√h = √h0 − c t.
+</QCM>
+
+<QCM n={4} question="Doubler le diamètre de l'orifice divise le temps de vidange par :" choix={['4', '2', '√2', '8']} bonne={0} colonnes={4}>
+La section est multipliée par 4.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, le temps de vidange vaut :</>} choix={[`${nombre(v0.T / 60, 1)} min`, `${nombre(v0.Tconstant / 60, 1)} min`, `${nombre(v2.T / 60, 1)} min`, '10 min']} bonne={0} colonnes={4}>
+(√h0 − √h1)/c.
+</QCM>
+
+<QCM n={6} question="Supposer un débit constant égal au débit initial :" choix={['sous-estime le temps', 'surestime le temps', 'est exact', 'n’a pas d’effet']} bonne={0} colonnes={2}>
+Le débit baisse ensuite.
+</QCM>
+
+<QCM n={7} question="La hauteur h se compte :" choix={['au-dessus de l’orifice', 'depuis le sommet de la cuve', 'depuis le sol', 'au hasard']} bonne={0} colonnes={2}>
+C'est la charge qui pousse l'eau.
+</QCM>
+
+<QCM n={8} question="Contrairement à une décroissance exponentielle, la vidange :" choix={['se termine en un temps fini', 'ne finit jamais', 'est linéaire', 'est oscillante']} bonne={0} colonnes={2}>
+√h atteint zéro.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
