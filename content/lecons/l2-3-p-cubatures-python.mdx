@@ -1,0 +1,162 @@
+---
+id: L2.3.P
+titre: "Mini-projet : cubatures par Simpson en Python"
+objectifs:
+  - Programmer les méthodes des trapèzes et de Simpson en Python
+  - Lire des profils en travers dans un fichier CSV
+  - Calculer les volumes de déblai et de remblai d'un tronçon de route
+  - Tester le programme sur un cas dont on connaît la réponse
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { simpsonMesures, trapezesMesures } from '@/lib/calc/numerique'
+import { grandeur, nombre } from '@/lib/format'
+import { ProfilsTravers, TrapezesSimpson } from '@/components/schemas/Numerique'
+import { Console } from '@/components/schemas/InfoCours2'
+
+export const pas = 25
+export const deblai = [0, 6.2, 11.8, 15.4, 12.6, 7.1, 2.3, 0, 0, 0, 0]
+export const remblai = [0, 0, 0, 0, 0, 0.8, 3.9, 8.6, 12.1, 9.4, 4.0]
+export const depart = { pas: 25, a0: 0, a1: 6.2, a2: 11.8, a3: 15.4, a4: 12.6, a5: 7.1, a6: 2.3, a7: 0, a8: 0 }
+export const VdT = trapezesMesures(deblai, pas)
+export const VdS = simpsonMesures(deblai, pas)
+export const VrT = trapezesMesures(remblai, pas)
+export const VrS = simpsonMesures(remblai, pas)
+export const test = simpsonMesures([0, 0.25, 1, 2.25, 4], 0.5)
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Une route en terre de la province du Kwilu doit être recalibrée sur 250 m : la première moitié traverse une butte (déblai), la seconde un bas-fond (remblai). Le géomètre a levé un profil en travers tous les **25 m** et calculé les aires (m², données de l'énoncé) :
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>abscisse (m)</th>{deblai.map((_, i) => <th key={i}>{i * pas}</th>)}</tr></thead>
+    <tbody>
+      <tr><td>déblai</td>{deblai.map((a, i) => <td key={i}>{nombre(a, 1)}</td>)}</tr>
+      <tr><td>remblai</td>{remblai.map((a, i) => <td key={i}>{nombre(a, 1)}</td>)}</tr>
+    </tbody>
+  </table>
+</div>
+
+<ProfilsTravers aires={deblai.map((a, i) => a + remblai[i])} pas={pas} />
+
+### Ce que tu rends
+
+1. Un module Python `cubature.py` avec deux fonctions `trapezes(aires, pas)` et `simpson(aires, pas)`, documentées.
+2. Un **test** sur un cas connu (∫ x² de 0 à 2 = 8/3).
+3. Un programme qui lit `profils.csv` et affiche les volumes de déblai et de remblai par les deux méthodes.
+4. Une conclusion : faut-il apporter ou évacuer de la terre ?
+
+</Page>
+
+<Page etape="projet" titre="Le programme">
+
+On écrit d'abord les deux fonctions, chacune avec sa vérification de forme :
+
+```python
+def trapezes(aires, pas):
+    """Volume par la méthode des trapèzes (moyenne des aires)."""
+    n = len(aires) - 1
+    return pas * (aires[0] / 2 + sum(aires[1:n]) + aires[n] / 2)
+
+def simpson(aires, pas):
+    """Volume par Simpson ; exige un nombre pair d'intervalles."""
+    n = len(aires) - 1
+    if n % 2 != 0:
+        raise ValueError("Simpson : nombre d'intervalles impair")
+    s = aires[0] + aires[n]
+    s += 4 * sum(aires[1:n:2]) + 2 * sum(aires[2:n:2])
+    return pas / 3 * s
+```
+
+Puis le test, et la lecture du fichier :
+
+```python
+import csv, math
+from cubature import trapezes, simpson
+
+# test : x² sur [0 ; 2], pas 0,5 → 8/3 exactement par Simpson
+assert math.isclose(simpson([0, 0.25, 1, 2.25, 4], 0.5), 8 / 3)
+
+deblai, remblai = [], []
+with open("profils.csv", encoding="utf-8") as f:
+    for ligne in csv.DictReader(f, delimiter=";"):
+        deblai.append(float(ligne["deblai"]))
+        remblai.append(float(ligne["remblai"]))
+
+for nom, aires in (("déblai", deblai), ("remblai", remblai)):
+    print(f"{nom:8s} trapèzes {trapezes(aires, 25):8.0f} m³  Simpson {simpson(aires, 25):8.0f} m³")
+```
+
+<Console alt={`Sortie du programme : déblai ${nombre(VdT, 0)} m³ par trapèzes et ${nombre(VdS ?? 0, 0)} m³ par Simpson ; remblai ${nombre(VrT, 0)} m³ et ${nombre(VrS ?? 0, 0)} m³.`} lignes={[`déblai   trapèzes ${nombre(VdT, 0).padStart(8)} m³  Simpson ${nombre(VdS ?? 0, 0).padStart(8)} m³`, `remblai  trapèzes ${nombre(VrT, 0).padStart(8)} m³  Simpson ${nombre(VrS ?? 0, 0).padStart(8)} m³`]} />
+
+</Page>
+
+<FicheCalcul calcul="cubatureSimpson" depart={depart}>
+
+<Cahier titre="Étape 1 : vérifier le déblai sur les huit premiers intervalles" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Trapèzes et Simpson">
+<AN k="trapezes" />
+<AN k="simpson" />
+<Note>Pourquoi vérifier à la main une partie du calcul ? Pour s'assurer que le programme fait bien ce qu'on croit.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : comparer" etape="projet">
+
+<Etape n={3} titre="Écart entre méthodes">
+<AN k="ecart" />
+<Resultat k="simpson" libelle="Déblai (profils 0 à 8)" />
+<Schema />
+<Note couleur="vert">Contrôle : les profils 8 à 10 n'ont pas de déblai ; le volume des 200 premiers mètres est donc celui de tout le tronçon.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le corrigé">
+
+| Volume | Trapèzes | Simpson |
+|---|---|---|
+| déblai | {grandeur(VdT, 0, 'm³')} | {grandeur(VdS ?? 0, 0, 'm³')} |
+| remblai | {grandeur(VrT, 0, 'm³')} | {grandeur(VrS ?? 0, 0, 'm³')} |
+
+<TrapezesSimpson ys={remblai} pas={pas} titreX="abscisse (m)" titreY="remblai (m²)" />
+
+**Conclusion.** Le test sur x² donne {nombre(test ?? 0, 6)} = 8/3 : Simpson est exacte pour un polynôme de degré 2. Les volumes de déblai et de remblai {Math.abs((VdS ?? 0) - (VrS ?? 0)) < 0.1 * (VdS ?? 1) ? 'sont proches' : 'diffèrent nettement'} : {(VdS ?? 0) > (VrS ?? 0) ? 'il reste de la terre à évacuer ou à mettre en dépôt' : 'il faut apporter de la terre d’un emprunt'}. Attention : la terre de déblai foisonne, puis se tasse au compactage ; le bilan réel demande les coefficients de foisonnement (L3.8).
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+<TrapezesSimpson ys={deblai} pas={pas} titreX="abscisse (m)" titreY="déblai (m²)" />
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Fonctions | Une seule méthode | Trapèzes et Simpson | Contrôle de n pair, docstrings |
+| Test | Absent | Un cas connu | Plusieurs cas, dont un impair qui lève l'erreur |
+| Lecture CSV | Données tapées dans le code | Lecture du fichier | Séparateur et virgule décimale gérés |
+| Conclusion | Volumes seuls | Bilan déblai/remblai | Foisonnement et transport évoqués |
+
+<Quiz id="L2.3.P">
+
+<QCM n={1} question="Mon programme contient-il les deux fonctions, un test sur un cas connu, la lecture du CSV et une conclusion sur le bilan des terres ?" choix={['Oui, tout y est', 'Il manque une partie']} bonne={0} colonnes={2}>
+Sinon, complète : le conducteur de travaux doit pouvoir le réutiliser sur le tronçon suivant.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

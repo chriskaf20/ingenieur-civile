@@ -66,3 +66,5 @@ Statuts :
 | 56 | Estimation de la résistance in situ (carottes, scléromètre) : EN 13791 | L2.2.6, L2.2.7 | `à confirmer` : nombre minimal de carottes, marges et méthode combinée |
 | 57 | Périodes de retour de projet : quelques années (fossés de routes en terre), 10 ans (assainissement urbain), 100 ans ou plus (ponts, digues) | L2.2.8 | `à confirmer` : guides techniques applicables en RDC (Office des routes, OVD) |
 | 58 | Fiabilité : β cible EN 1990 annexe B (RC2 : 3,8 sur 50 ans, 4,7 sur 1 an) ; αR = 0,8, αS = −0,7 (annexe C) | L2.2.9 | `à confirmer` : valeurs de l'EN 1990 et de son annexe nationale |
+| 59 | Coefficients de Strickler usuels : ≈ 25 à 40 (canal en terre), 60 à 80 (béton lisse) | L2.3.2 | `à confirmer` : manuel d'hydraulique de référence (L2.7) |
+| 60 | Méthodes d'intégration temporelle pour le calcul sismique (EN 1998-1 §4.3.3.4.3) et choix du pas de temps | L2.3.6 | `à confirmer` : texte de l'EN 1998-1 et pratique des logiciels |

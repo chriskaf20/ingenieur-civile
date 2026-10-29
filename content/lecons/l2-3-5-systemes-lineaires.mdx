@@ -1,0 +1,310 @@
+---
+id: L2.3.5
+titre: "Systèmes linéaires de grande taille"
+objectifs:
+  - Expliquer pourquoi les structures conduisent à de grands systèmes creux
+  - Résoudre un système symétrique par la décomposition de Cholesky
+  - Appliquer les méthodes itératives de Jacobi et de Gauss-Seidel
+  - Choisir une méthode selon la taille et la forme de la matrice
+relecture: false
+normes: []
+glossaire:
+  - terme: Matrice de raideur
+    definition: Matrice K qui relie les forces aux déplacements d'une structure, F = K u ; elle est symétrique.
+  - terme: Matrice creuse
+    definition: Matrice dont la plupart des coefficients sont nuls ; on ne stocke que les non nuls.
+  - terme: Décomposition de Cholesky
+    definition: Écriture d'une matrice symétrique définie positive sous la forme L Lᵀ, avec L triangulaire inférieure.
+  - terme: Méthode itérative
+    definition: Méthode qui améliore une solution approchée pas à pas jusqu'à ce que le résidu soit assez petit.
+symboles:
+  - { symbole: 'K', signification: 'matrice de raideur', unite: 'kN/m' }
+  - { symbole: 'u', signification: 'vecteur des déplacements', unite: 'm' }
+  - { symbole: 'F', signification: 'vecteur des forces', unite: 'kN' }
+  - { symbole: 'L', signification: 'facteur de Cholesky', unite: '√(kN/m)' }
+formules:
+  - { nom: 'Équilibre', tex: 'K\,u = F', domaine: 'Structure élastique' }
+  - { nom: 'Cholesky', tex: 'K = L\,L^{T},\quad L\,y = F,\quad L^{T} u = y', domaine: 'K symétrique définie positive' }
+  - { nom: 'Gauss-Seidel', tex: 'u_i \leftarrow \frac{1}{K_{ii}}\left(F_i - \sum_{j \ne i} K_{ij}\,u_j\right)', domaine: 'Diagonale dominante' }
+---
+
+import { chaineRessorts, cholesky, iteratif, thomas } from '@/lib/calc/numerique'
+import { grandeur, nombre } from '@/lib/format'
+import { ConvergenceIterative, MatriceCreuse } from '@/components/schemas/Numerique'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const c0 = chaineRessorts([100, 100, 100, 100], [0, 10, 0])
+export const A3 = [[4, -1, 0], [-1, 4, -1], [0, -1, 4]]
+export const j3 = iteratif(A3, [3, 2, 3], 'jacobi')
+export const s3 = iteratif(A3, [3, 2, 3], 'seidel')
+export const ops = (n) => n ** 3 / 3
+export const L2 = cholesky([[4, 2], [2, 5]])
+export const ex3 = thomas([0, 1, 1, 1], [-2, -2, -2, -2], [1, 1, 1, 0], [-1, -1, -1, -1])
+
+<Page etape="intuition" titre="L'intuition : un immeuble, des milliers d'inconnues">
+
+Pour calculer un portique simple, on écrit trois ou quatre équations. Un logiciel qui calcule un immeuble de dix étages, lui, découpe la structure en milliers de nœuds : chaque nœud a jusqu'à six déplacements inconnus. On obtient un système $K u = F$ de **dizaines de milliers** d'équations.
+
+Bonne nouvelle : chaque nœud n'est relié qu'à ses voisins. La matrice K est presque entièrement remplie de **zéros** : elle est creuse. Les méthodes de cette leçon en profitent.
+
+<MatriceCreuse n={12} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment résoudre vite et sûrement les grands systèmes que produisent les structures ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Résoudre K u = F" sousTitre="Directes ou itératives" etape="cours">
+
+<Panneau n={1} titre="K symétrique" icone="calcul" couleur="encre">
+Kᵢⱼ = Kⱼᵢ : action et réaction (Maxwell-Betti).
+</Panneau>
+
+<Panneau n={2} titre="Creuse" icone="plan" couleur="acier">
+Seuls les voisins sont reliés : beaucoup de zéros.
+</Panneau>
+
+<Panneau n={3} titre="Gauss" icone="regle" couleur="terre">
+Pivot (L1.4) : ≈ n³/3 opérations si pleine.
+</Panneau>
+
+<Panneau n={4} titre="Cholesky" icone="idee" couleur="validation">
+K = L Lᵀ : deux fois moins de calcul, très stable.
+</Panneau>
+
+<Panneau n={5} titre="Itératif" icone="verification" couleur="brique">
+Jacobi, Gauss-Seidel : améliorer pas à pas.
+</Panneau>
+
+<Panneau n={6} titre="Bande" icone="attention" couleur="correction">
+Tridiagonal : algorithme de Thomas, ≈ 8n opérations.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : le coût de Gauss et la matrice creuse">
+
+### Combien d'opérations ?
+
+Le pivot de Gauss (L1.4) sur une matrice pleine n × n coûte environ $n^3/3$ multiplications : {nombre(ops(1000) / 1e6, 0)} millions pour n = 1 000, {nombre(ops(100000) / 1e12, 0)} × 10¹² pour n = 100 000. Impossible sans exploiter les zéros.
+
+### La structure en bande
+
+En numérotant bien les nœuds, les coefficients non nuls se regroupent près de la diagonale : c'est une matrice **bande**. Le cas extrême, une poutre découpée en éléments, donne une matrice **tridiagonale**, que l'algorithme de Thomas résout en environ 8n opérations.
+
+<DiagrammeBarres alt={`Coût de Gauss sur une matrice pleine : ${nombre(ops(100), 0)} opérations pour n = 100, ${nombre(ops(1000), 0)} pour n = 1 000 ; Thomas sur un tridiagonal de 1 000 inconnues : 8 000.`} titre="opérations (échelle × 10⁶)" barres={[{ libelle: 'Gauss plein, n = 100', valeur: ops(100) / 1e6, texte: nombre(ops(100) / 1e6, 2), teinte: 'terre' }, { libelle: 'Gauss plein, n = 1 000', valeur: ops(1000) / 1e6, texte: nombre(ops(1000) / 1e6, 0), teinte: 'correction' }, { libelle: 'Thomas, n = 1 000', valeur: 8000 / 1e6, texte: nombre(8000 / 1e6, 3), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la décomposition de Cholesky">
+
+### L'idée
+
+Une matrice de raideur est **symétrique** et **définie positive** (toute déformation stocke une énergie positive). On peut alors l'écrire $K = L L^T$, avec L triangulaire inférieure. On résout ensuite deux systèmes triangulaires, très simples : $L y = F$ (descente), puis $L^T u = y$ (remontée).
+
+### Le calcul de L
+
+$L_{11} = \sqrt{K_{11}}$, puis colonne par colonne. Exemple : $\begin{pmatrix}4 & 2\\2 & 5\end{pmatrix}$ donne L = ({L2 ? L2.map((l) => l.map((v) => nombre(v, 0)).join(' ; ')).join(' | ') : '—'}).
+
+<Regle type="art">
+Si une racine carrée négative apparaît, K n'est pas définie positive : la structure est un **mécanisme** (appuis insuffisants, articulation mal placée). Le logiciel signale alors une « matrice singulière » : c'est un message sur la structure, pas sur l'ordinateur.
+</Regle>
+
+<MatriceCreuse n={10} bande={2} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : les méthodes itératives">
+
+### Jacobi et Gauss-Seidel
+
+On part de u = 0 et l'on résout chaque équation pour son inconnue diagonale, en prenant les autres valeurs de l'itération précédente (Jacobi) ou les plus récentes (Gauss-Seidel). On recommence jusqu'à ce que le **résidu** $|K u - F|$ soit assez petit.
+
+### Quand convergent-elles ?
+
+Elles convergent si la matrice est à **diagonale dominante** (chaque terme diagonal plus grand que la somme des autres de sa ligne) ou symétrique définie positive (Gauss-Seidel). Pour le système 3 × 3 de l'exemple : Jacobi {j3.length} itérations, Gauss-Seidel {s3.length}.
+
+<ConvergenceIterative A={A3} b={[3, 2, 3]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : choisir sa méthode">
+
+<DiagrammeComparaison alt="Méthodes directes : solution exacte en un nombre fixe d'opérations, idéales jusqu'à quelques centaines de milliers d'inconnues en bande. Méthodes itératives : peu de mémoire, adaptées aux très grands systèmes creux, mais convergence à vérifier." gauche={{ titre: 'Directes (Gauss, Cholesky)', items: ['nombre d’opérations connu', 'solution « exacte »', 'mémoire importante', 'logiciels de structure'] }} droite={{ titre: 'Itératives (Jacobi, Seidel)', items: ['peu de mémoire', 'convergence à vérifier', 'très grands systèmes', 'écoulements, thermique'] }} />
+
+<DiagrammeFlux alt="Choisir : la matrice est-elle symétrique définie positive ? Cholesky. Est-elle tridiagonale ? Thomas. Très grande et creuse ? Méthode itérative. Sinon Gauss avec pivot." etapes={[{ titre: 'Symétrique +', texte: 'Cholesky', teinte: 'validation' }, { titre: 'Tridiagonale', texte: 'Thomas', teinte: 'acier' }, { titre: 'Énorme, creuse', texte: 'itérative', teinte: 'brique' }, { titre: 'Sinon', texte: 'Gauss + pivot', teinte: 'encre' }]} />
+
+</Page>
+
+<FicheCalcul calcul="ressortsCholesky">
+
+<Cahier titre="Exemple résolu : trois masses reliées par quatre ressorts">
+
+**Énoncé.** Trois nœuds sont reliés en ligne par quatre ressorts de 100 kN/m, les extrémités étant fixées ; on applique 10 kN au nœud central (données de l'énoncé). Écris la matrice de raideur, puis calcule les déplacements par Cholesky et par une méthode itérative.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La matrice de raideur">
+<AN k="K" />
+<Note>Pourquoi K est-elle symétrique ? Le ressort entre i et j agit de la même façon sur les deux nœuds.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : résoudre">
+
+<Etape n={3} titre="Cholesky">
+<AN k="L" />
+<AN k="u" />
+<Resultat k="u2" libelle="Déplacement du nœud 2" />
+</Etape>
+
+<Etape n={4} titre="Itératif">
+<AN k="iter" />
+<Schema />
+<Note couleur="vert">Contrôle : par symétrie, les nœuds 1 et 3 bougent autant ; rends le ressort 4 très raide : le nœud 3 ne bouge presque plus.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="inverser la matrice pour résoudre.">
+Calculer K⁻¹ coûte bien plus que résoudre K u = F, et détruit la structure creuse.
+</Piege>
+
+<Piege erreur="ignorer un message « matrice singulière ».">
+La structure est instable : il manque un appui ou une liaison.
+</Piege>
+
+<Piege erreur="lancer Jacobi sur n'importe quelle matrice.">
+Sans diagonale dominante, les itérations peuvent diverger.
+</Piege>
+
+<ConvergenceIterative A={[[10, -2, 1], [-2, 8, -3], [1, -3, 6]]} b={[9, 3, 4]} />
+
+<Piege erreur="arrêter les itérations trop tôt.">
+On vérifie le résidu K u − F, pas seulement l'écart entre deux itérés.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Ce que fait un logiciel de structure.** Il numérote les nœuds pour réduire la largeur de bande, assemble K élément par élément, la factorise par Cholesky (ou une variante), puis résout pour chaque cas de charge en réutilisant la factorisation. Ajouter un cas de charge coûte presque rien ; modifier la structure oblige à tout refactoriser.
+
+<MatriceCreuse n={14} bande={2} />
+
+<Encadre type="terrain" titre="Ordinateurs modestes">
+Dans beaucoup de bureaux d'études de RDC, les postes sont anciens. Bien numéroter, éviter les maillages inutilement fins et exploiter la symétrie de l'ouvrage permet de garder des temps de calcul raisonnables.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : systèmes linéaires">
+
+### Structure
+
+K u = F · K symétrique, définie positive, creuse, en bande
+
+### Directes
+
+Gauss plein ≈ n³/3 · Cholesky K = L Lᵀ, descente puis remontée · Thomas (tridiagonal) ≈ 8n
+
+### Itératives
+
+Jacobi : anciennes valeurs · Gauss-Seidel : valeurs récentes · diagonale dominante · arrêt sur le résidu
+
+### Réflexes
+
+ne jamais inverser · « singulière » = mécanisme · réutiliser la factorisation pour plusieurs cas de charge
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Cholesky 2 × 2">
+
+Calcule L pour K = (4 2 ; 2 5).
+
+<Indice>L₁₁ = √4 ; L₂₁ = 2/L₁₁ ; L₂₂ = √(5 − L₂₁²).</Indice>
+
+<Corrige>
+L = **({L2 ? L2.map((l) => l.map((v) => nombre(v, 0)).join(' ; ')).join(' | ') : '—'})**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Gauss-Seidel à la main">
+
+Système 4x − y = 3 ; −x + 4y − z = 2 ; −y + 4z = 3. Fais une itération de Gauss-Seidel depuis (0 ; 0 ; 0).
+
+<Indice>x = 3/4 ; puis y avec ce x ; puis z avec ce y.</Indice>
+
+<Corrige>
+**({s3[0]?.x.map((v) => nombre(v, 4)).join(' ; ')})** ; la solution exacte est (1 ; 1 ; 1).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Thomas">
+
+Résous le système tridiagonal de 4 équations −2xᵢ + xᵢ₋₁ + xᵢ₊₁ = −1 (x₀ = x₅ = 0) par l'algorithme de Thomas.
+
+<Indice>C'est une poutre discrétisée sous charge uniforme : solution symétrique.</Indice>
+
+<Corrige>
+x = **({ex3.map((v) => nombre(v, 2)).join(' ; ')})**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.3.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La matrice de raideur d'une structure est :" choix={['symétrique', 'triangulaire', 'diagonale', 'quelconque']} bonne={0} colonnes={4}>
+Maxwell-Betti.
+</QCM>
+
+<QCM n={2} question="Le pivot de Gauss sur une matrice pleine coûte environ :" choix={['n³/3 opérations', 'n opérations', 'n² opérations', '2ⁿ opérations']} bonne={0} colonnes={2}>
+Cubique.
+</QCM>
+
+<QCM n={3} question="Cholesky s'applique aux matrices :" choix={['symétriques définies positives', 'quelconques', 'singulières', 'rectangulaires']} bonne={0} colonnes={2}>
+K = L Lᵀ.
+</QCM>
+
+<QCM n={4} question="Gauss-Seidel utilise :" choix={['les valeurs les plus récentes', 'les valeurs de l’itération précédente seulement', 'l’inverse de K', 'des tangentes']} bonne={0} colonnes={2}>
+D'où sa vitesse.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple des ressorts, le nœud central se déplace de :</>} choix={[grandeur((c0.u?.[1] ?? 0) * 1000, 0, 'mm'), '10 mm', '50 mm', '200 mm']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="« Matrice singulière » dans un logiciel signifie souvent :" choix={['un mécanisme', 'un ordinateur trop lent', 'une charge trop forte', 'un béton faible']} bonne={0} colonnes={2}>
+Appuis insuffisants.
+</QCM>
+
+<QCM n={7} question="Pour résoudre K u = F, on évite de :" choix={['calculer K⁻¹', 'factoriser K', 'utiliser la symétrie', 'numéroter les nœuds']} bonne={0} colonnes={2}>
+Coûteux et inutile.
+</QCM>
+
+<QCM n={8} question="Un système tridiagonal se résout par :" choix={['l’algorithme de Thomas', 'la dichotomie', 'Simpson', 'Lagrange']} bonne={0} colonnes={2}>
+En ≈ 8n opérations.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,316 @@
+---
+id: L2.3.4
+titre: "Intégration numérique : trapèzes et Simpson"
+objectifs:
+  - Calculer une intégrale à partir de mesures équidistantes
+  - Appliquer la méthode des trapèzes et celle de Simpson
+  - Comparer leur précision et choisir la méthode
+  - Calculer un volume de terrassement à partir de profils en travers
+relecture: false
+normes: []
+glossaire:
+  - terme: Intégration numérique
+    definition: Calcul approché d'une intégrale à partir de valeurs de la fonction en quelques points.
+  - terme: Méthode des trapèzes
+    definition: On relie les points par des segments et on additionne les aires des trapèzes.
+  - terme: Méthode de Simpson
+    definition: On relie les points trois par trois par des arcs de parabole ; il faut un nombre pair d'intervalles.
+  - terme: Cubature
+    definition: Calcul d'un volume de terrassement, souvent à partir des aires de profils en travers successifs.
+symboles:
+  - { symbole: 'h ou d', signification: 'pas entre deux mesures', unite: 'm' }
+  - { symbole: 'S_i', signification: 'aire du profil i', unite: 'm²' }
+  - { symbole: 'V', signification: 'volume', unite: 'm³' }
+formules:
+  - { nom: 'Trapèzes', tex: '\int_a^b f \approx h\left(\frac{y_0}{2} + y_1 + \dots + y_{n-1} + \frac{y_n}{2}\right)', domaine: 'Erreur ∝ h²' }
+  - { nom: 'Simpson', tex: '\int_a^b f \approx \frac{h}{3}\left(y_0 + 4y_1 + 2y_2 + 4y_3 + \dots + 4y_{n-1} + y_n\right)', domaine: 'n pair, erreur ∝ h⁴' }
+  - { nom: 'Volume', tex: 'V = \int_0^L S(x)\,dx', domaine: 'Profils en travers' }
+---
+
+import { cubatureProfils, EXEMPLE_PROFILS, simpsonMesures, trapezesMesures } from '@/lib/calc/numerique'
+import { simpson, trapezes } from '@/lib/calc/analyse'
+import { grandeur, nombre } from '@/lib/format'
+import { ProfilsTravers, TrapezesSimpson } from '@/components/schemas/Numerique'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const c0 = cubatureProfils(EXEMPLE_PROFILS.aires, EXEMPLE_PROFILS.pas)
+export const exact = 2
+export const t4 = trapezes(Math.sin, 0, Math.PI, 4)
+export const s4 = simpson(Math.sin, 0, Math.PI, 4)
+export const t8 = trapezes(Math.sin, 0, Math.PI, 8)
+export const s8 = simpson(Math.sin, 0, Math.PI, 8)
+export const riviere = [0, 1.2, 2.1, 2.6, 2.4, 1.5, 0]
+export const ex2 = simpsonMesures(riviere, 2)
+
+<Page etape="intuition" titre="L'intuition : un volume à partir de quelques coupes">
+
+Pour ouvrir une route dans une colline, il faut savoir combien de mètres cubes de terre enlever. On ne connaît pas la forme exacte de la colline, mais le géomètre a relevé un **profil en travers** tous les 20 m, et l'on a calculé l'aire de chacun. Le volume, c'est l'**intégrale** de l'aire le long de l'axe ; on ne connaît la fonction qu'en quelques points.
+
+<ProfilsTravers aires={EXEMPLE_PROFILS.aires} pas={EXEMPLE_PROFILS.pas} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer une intégrale quand on ne connaît la fonction que par des mesures ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Intégrer des mesures" sousTitre="Trapèzes ou paraboles" etape="cours">
+
+<Panneau n={1} titre="Mesures" icone="regle" couleur="terre">
+Valeurs y₀ … yₙ tous les h mètres.
+</Panneau>
+
+<Panneau n={2} titre="Trapèzes" icone="calcul" couleur="encre">
+Segments entre points : h (y₀/2 + … + yₙ/2).
+</Panneau>
+
+<Panneau n={3} titre="Simpson" icone="idee" couleur="validation">
+Paraboles : h/3 (1, 4, 2, 4, …, 4, 1).
+</Panneau>
+
+<Panneau n={4} titre="n pair" icone="attention" couleur="correction">
+Simpson exige un nombre pair d'intervalles.
+</Panneau>
+
+<Panneau n={5} titre="Précision" icone="verification" couleur="acier">
+Trapèzes ∝ h², Simpson ∝ h⁴.
+</Panneau>
+
+<Panneau n={6} titre="Cubature" icone="plan" couleur="brique">
+V = ∫ S(x) dx sur l'axe du projet.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la méthode des trapèzes">
+
+### Le principe
+
+Entre deux mesures voisines, on remplace la courbe par un **segment** : l'aire sous ce segment est un trapèze, $h\,(y_i + y_{i+1})/2$. En additionnant :
+
+$$\int_a^b f \approx h\left(\frac{y_0}{2} + y_1 + \dots + y_{n-1} + \frac{y_n}{2}\right)$$
+
+Les deux valeurs extrêmes comptent pour moitié, toutes les autres en entier. En terrassement, c'est la classique **méthode des moyennes des aires**.
+
+### La précision
+
+L'erreur est proportionnelle à h² : diviser le pas par 2 divise l'erreur par 4. La méthode est exacte pour une fonction affine.
+
+<TrapezesSimpson ys={EXEMPLE_PROFILS.aires} pas={EXEMPLE_PROFILS.pas} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la méthode de Simpson">
+
+### Le principe
+
+On prend les points **trois par trois** et l'on fait passer une parabole par chaque triplet (L2.3.3). L'aire sous la parabole vaut $\frac h3 (y_0 + 4 y_1 + y_2)$. En enchaînant :
+
+$$\int_a^b f \approx \frac h3\left(y_0 + 4y_1 + 2y_2 + 4y_3 + \dots + 4y_{n-1} + y_n\right)$$
+
+Coefficients 1, 4, 2, 4, 2, …, 4, 1 : il faut un nombre **pair** d'intervalles.
+
+### La précision
+
+L'erreur est proportionnelle à h⁴ : diviser le pas par 2 divise l'erreur par 16. Simpson est exacte jusqu'aux polynômes de degré 3.
+
+<DiagrammeBarres alt={`Erreur sur l'intégrale de sin x de 0 à π (valeur exacte 2) : trapèzes à 4 intervalles ${nombre(Math.abs(t4 - exact), 4)}, à 8 intervalles ${nombre(Math.abs(t8 - exact), 4)} ; Simpson à 4 intervalles ${nombre(Math.abs(s4 - exact), 5)}, à 8 ${nombre(Math.abs(s8 - exact), 6)}.`} titre="erreur sur ∫ sin x de 0 à π (× 1 000)" barres={[{ libelle: 'trapèzes, n = 4', valeur: Math.abs(t4 - exact) * 1000, texte: nombre(Math.abs(t4 - exact) * 1000, 1), teinte: 'terre' }, { libelle: 'trapèzes, n = 8', valeur: Math.abs(t8 - exact) * 1000, texte: nombre(Math.abs(t8 - exact) * 1000, 1), teinte: 'terre' }, { libelle: 'Simpson, n = 4', valeur: Math.abs(s4 - exact) * 1000, texte: nombre(Math.abs(s4 - exact) * 1000, 2), teinte: 'validation' }, { libelle: 'Simpson, n = 8', valeur: Math.abs(s8 - exact) * 1000, texte: nombre(Math.abs(s8 - exact) * 1000, 3), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : de l'aire au volume">
+
+### La cubature
+
+Si S(x) est l'aire du profil en travers à l'abscisse x, le volume entre deux profils extrêmes est $V = \int S(x)\,dx$. Trapèzes ou Simpson s'appliquent directement aux aires mesurées.
+
+<Regle type="art">
+On met un profil à chaque changement de pente du terrain ou du projet, et aux points de passage déblai / remblai (aire nulle). Un pas régulier permet Simpson ; un pas irrégulier impose les trapèzes (avec chaque h propre).
+</Regle>
+
+### Déblais et remblais
+
+On calcule séparément les aires de déblai et de remblai de chaque profil : on obtient deux volumes. Leur comparaison dit s'il faut évacuer ou apporter de la terre (L3.8).
+
+<ProfilsTravers aires={[0, 4.1, 9.6, 12.2, 8.3, 3.0, 0]} pas={25} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Calculer un volume : lever les profils ; calculer l'aire de chaque profil ; vérifier que le pas est régulier et le nombre d'intervalles pair ; appliquer Simpson, sinon les trapèzes ; comparer les deux méthodes." etapes={[{ titre: 'Profils', texte: 'tous les d m', teinte: 'terre' }, { titre: 'Aires', texte: 'S₀ … Sₙ', teinte: 'brique' }, { titre: 'n pair ?', texte: 'pas régulier', teinte: 'acier' }, { titre: 'Simpson', texte: 'sinon trapèzes', teinte: 'encre' }, { titre: 'Comparer', texte: 'écart', teinte: 'validation' }]} />
+
+<TrapezesSimpson ys={riviere} pas={2} titreX="largeur (m)" titreY="profondeur (m)" unite="m²" />
+
+</Page>
+
+<FicheCalcul calcul="cubatureSimpson">
+
+<Cahier titre="Exemple résolu : le déblai d'une route en colline">
+
+**Énoncé.** Neuf profils en travers, tous les 20 m, donnent les aires de déblai 0 ; 8,4 ; 14,2 ; 18,6 ; 21,0 ; 19,3 ; 15,1 ; 9,8 ; 4,2 m² (données de l'énoncé). Calcule le volume par trapèzes et par Simpson.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Trapèzes">
+<AN k="trapezes" />
+<Note>Pourquoi les extrémités comptent-elles pour moitié ? Chaque profil intérieur sert à deux trapèzes, les extrêmes à un seul.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : Simpson">
+
+<Etape n={3} titre="Simpson">
+<AN k="simpson" />
+<Resultat k="simpson" libelle="Volume (Simpson)" />
+</Etape>
+
+<Etape n={4} titre="Comparer">
+<AN k="ecart" />
+<Schema />
+<Note couleur="vert">Contrôle : l'écart est faible car le terrain varie régulièrement ; un écart de plus de quelques pourcents signale des profils trop espacés.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="appliquer Simpson avec un nombre impair d'intervalles.">
+Les coefficients 1, 4, 2, …, 4, 1 exigent n pair ; sinon on finit le dernier intervalle par un trapèze.
+</Piege>
+
+<Piege erreur="compter les extrémités en entier avec les trapèzes.">
+y₀ et yₙ comptent pour moitié.
+</Piege>
+
+<Piege erreur="espacer les profils sans regarder le terrain.">
+Un ravin entre deux profils disparaît du calcul.
+</Piege>
+
+<TrapezesSimpson ys={[0, 6, 2, 7, 0]} pas={20} />
+
+<Piege erreur="additionner déblais et remblais.">
+Ce sont deux volumes distincts : leur différence seule ne suffit pas à organiser le chantier.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Jaugeage d'une rivière.** Pour mesurer le débit d'une rivière avant de construire un pont, on mesure la profondeur tous les 2 m sur la largeur, puis la vitesse. L'aire de la section, calculée par Simpson, multipliée par la vitesse moyenne donne le débit.
+
+<TrapezesSimpson ys={riviere} pas={2} titreX="largeur (m)" titreY="profondeur (m)" unite="m²" />
+
+<Encadre type="terrain" titre="Le métré des terrassements">
+Les entreprises de travaux publics de RDC paient les terrassements au mètre cube. Un écart de 5 % sur 50 000 m³ de déblai, c'est 2 500 m³ : plusieurs centaines de rotations de camion. La méthode de cubature est souvent fixée au marché ; on la connaît avant de lever les profils.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : intégration numérique">
+
+### Trapèzes
+
+h (y₀/2 + y₁ + … + yₙ₋₁ + yₙ/2) · erreur ∝ h² · exacte pour une droite
+
+### Simpson
+
+h/3 (y₀ + 4y₁ + 2y₂ + … + 4yₙ₋₁ + yₙ) · n pair · erreur ∝ h⁴ · exacte jusqu'au degré 3
+
+### Cubature
+
+V = ∫ S(x) dx · un profil à chaque changement de terrain · déblai et remblai séparés
+
+### Contrôle
+
+comparer les deux méthodes · réduire le pas si l'écart est grand
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Trapèzes à la main">
+
+Mesures 2 ; 4 ; 5 ; 4 ; 2 tous les 1 m. Intégrale par trapèzes ?
+
+<Indice>1 × (1 + 4 + 5 + 4 + 1).</Indice>
+
+<Corrige>
+**{nombre(trapezesMesures([2, 4, 5, 4, 2], 1), 1)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Section d'une rivière">
+
+Profondeurs 0 ; 1,2 ; 2,1 ; 2,6 ; 2,4 ; 1,5 ; 0 m tous les 2 m. Aire de la section par Simpson ?
+
+<Indice>6 intervalles : pair.</Indice>
+
+<Corrige>
+**{grandeur(ex2 ?? 0, 2, 'm²')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Gain de Simpson">
+
+Pour ∫ sin x de 0 à π, compare trapèzes et Simpson avec 4 puis 8 intervalles. Par combien chaque erreur est-elle divisée ?
+
+<Indice>Ordres 2 et 4.</Indice>
+
+<Corrige>
+Trapèzes : {nombre(Math.abs(t4 - exact), 4)} → {nombre(Math.abs(t8 - exact), 4)}, divisée par **{nombre(Math.abs(t4 - exact) / Math.abs(t8 - exact), 1)}** ; Simpson : divisée par **{nombre(Math.abs(s4 - exact) / Math.abs(s8 - exact), 1)}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.3.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Dans la méthode des trapèzes, y₀ et yₙ comptent :" choix={['pour moitié', 'en entier', 'double', 'pas du tout']} bonne={0} colonnes={4}>
+Un seul trapèze chacun.
+</QCM>
+
+<QCM n={2} question="Simpson exige un nombre d'intervalles :" choix={['pair', 'impair', 'premier', 'quelconque']} bonne={0} colonnes={4}>
+Paraboles sur deux intervalles.
+</QCM>
+
+<QCM n={3} question="Les coefficients de Simpson sont :" choix={['1, 4, 2, 4, …, 4, 1', '1, 2, 2, …, 2, 1', '1, 1, …, 1', '1, 3, 3, 1']} bonne={0} colonnes={2}>
+Multipliés par h/3.
+</QCM>
+
+<QCM n={4} question="Diviser le pas par 2 divise l'erreur de Simpson par environ :" choix={['16', '2', '4', '8']} bonne={0} colonnes={4}>
+Ordre 4.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Le volume de déblai de l'exemple par Simpson vaut :</>} choix={[grandeur(c0.simpson ?? 0, 0, 'm³'), grandeur(c0.trapezes * 1.2, 0, 'm³'), '160 m³', '21 000 m³']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="Avec des profils à pas irrégulier, on utilise :" choix={['les trapèzes', 'Simpson', 'Newton', 'la dichotomie']} bonne={0} colonnes={2}>
+Simpson veut un pas régulier.
+</QCM>
+
+<QCM n={7} question="La méthode des trapèzes est exacte pour :" choix={['une fonction affine', 'toute fonction', 'une parabole', 'un sinus']} bonne={0} colonnes={2}>
+Ordre 1 en géométrie.
+</QCM>
+
+<QCM n={8} question="V = ∫ S(x) dx calcule :" choix={['un volume à partir d’aires de profils', 'une aire', 'une pente', 'un débit']} bonne={0} colonnes={2}>
+Cubature.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

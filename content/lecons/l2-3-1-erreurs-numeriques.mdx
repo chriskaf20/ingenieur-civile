@@ -1,0 +1,313 @@
+---
+id: L2.3.1
+titre: "Erreurs numériques et précision"
+objectifs:
+  - Distinguer erreur d'arrondi, erreur de troncature et erreur de modèle
+  - Calculer une erreur absolue et une erreur relative
+  - Expliquer pourquoi 0,1 + 0,2 n'est pas exactement 0,3 en machine
+  - Choisir un pas de calcul ni trop grand ni trop petit
+relecture: false
+normes: []
+glossaire:
+  - terme: Erreur d'arrondi
+    definition: Erreur due au nombre fini de chiffres avec lequel l'ordinateur ou la calculatrice représente un nombre.
+  - terme: Erreur de troncature
+    definition: Erreur due à une méthode approchée (formule coupée, pas fini), même si les calculs étaient exacts.
+  - terme: Erreur relative
+    definition: Erreur divisée par la valeur exacte ; elle s'exprime en pourcentage ou en chiffres significatifs.
+  - terme: Virgule flottante
+    definition: Représentation d'un nombre par une mantisse et un exposant en base 2, avec environ 16 chiffres significatifs (double précision).
+symboles:
+  - { symbole: 'Δx', signification: 'erreur absolue', unite: 'unité de x' }
+  - { symbole: 'ε', signification: 'erreur relative', unite: '—' }
+  - { symbole: 'h', signification: 'pas de la méthode', unite: 'unité de la variable' }
+formules:
+  - { nom: 'Erreurs', tex: '\Delta x = |\tilde x - x|,\quad \varepsilon = \frac{|\tilde x - x|}{|x|}', domaine: 'x exact, x̃ approché' }
+  - { nom: 'Différence avant', tex: 'f''(x) \approx \frac{f(x+h) - f(x)}{h},\quad \text{erreur} \propto h', domaine: 'Ordre 1' }
+  - { nom: 'Différence centrée', tex: 'f''(x) \approx \frac{f(x+h) - f(x-h)}{2h},\quad \text{erreur} \propto h^2', domaine: 'Ordre 2' }
+---
+
+import { chiffresExacts, deriveeFinie, sommeRepetee } from '@/lib/calc/numerique'
+import { reprFlottant } from '@/lib/calc/programmation'
+import { grandeur, nombre } from '@/lib/format'
+import { ErreurPas } from '@/components/schemas/Numerique'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const s10 = sommeRepetee(0.1, 10)
+export const s1e6 = sommeRepetee(0.1, 1000000)
+export const d2 = deriveeFinie(Math.exp, 1, 0, 0.01)
+export const d8 = deriveeFinie(Math.exp, 1, 0, 1e-8)
+export const d12 = deriveeFinie(Math.exp, 1, 0, 1e-12)
+export const sci = (x) => { const e = Math.floor(Math.log10(Math.abs(x))); return `${nombre(x / 10 ** e, 1)} × 10^${e}` }
+export const pi1 = 3.14
+export const pi2 = 22 / 7
+
+<Page etape="intuition" titre="L'intuition : la calculatrice ne ment pas, mais elle arrondit">
+
+Tape 0,1 + 0,2 dans Python : il répond {reprFlottant(0.1 + 0.2)}. Additionne 0,1 un million de fois : tu n'obtiens pas exactement 100 000, mais {nombre(s1e6.somme, 6)}. L'ordinateur ne se trompe pas « au hasard » : il travaille en base 2 avec environ 16 chiffres, et 0,1 n'a pas d'écriture finie en base 2, comme 1/3 en base 10.
+
+Ces petites erreurs sont sans danger… tant qu'on sait d'où elles viennent et comment elles grossissent.
+
+<ErreurPas />
+
+<Encadre type="idee" titre="La question de cette leçon">
+D'où viennent les erreurs d'un calcul numérique, et comment les maîtriser ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Trois sources d'erreur" sousTitre="Modèle, méthode, machine" etape="cours">
+
+<Panneau n={1} titre="Modèle" icone="plan" couleur="terre">
+Poutre idéale, sol homogène : la réalité est différente.
+</Panneau>
+
+<Panneau n={2} titre="Données" icone="regle" couleur="brique">
+Mesures et hypothèses : ± quelques %.
+</Panneau>
+
+<Panneau n={3} titre="Troncature" icone="calcul" couleur="acier">
+Méthode approchée : l'erreur diminue avec le pas h.
+</Panneau>
+
+<Panneau n={4} titre="Arrondi" icone="idee" couleur="encre">
+16 chiffres en machine : l'erreur grossit si h est trop petit.
+</Panneau>
+
+<Panneau n={5} titre="Relative" icone="verification" couleur="validation">
+ε = |x̃ − x| / |x| : comparer à la précision utile.
+</Panneau>
+
+<Panneau n={6} titre="Pas optimal" icone="attention" couleur="correction">
+Ni trop grand, ni trop petit.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : mesurer une erreur">
+
+### Absolue et relative
+
+Si x est la valeur exacte et $\tilde x$ l'approchée : erreur absolue $\Delta x = |\tilde x - x|$, erreur relative $\varepsilon = \Delta x / |x|$. Une erreur de 1 cm est négligeable sur un pont de 100 m, énorme sur une épaisseur de 2 cm.
+
+### Chiffres significatifs exacts
+
+$-\log_{10}\varepsilon$ compte à peu près les chiffres exacts : π ≈ 3,14 en donne {nombre(chiffresExacts(pi1, Math.PI), 1)}, π ≈ 22/7 en donne {nombre(chiffresExacts(pi2, Math.PI), 1)}.
+
+### La hiérarchie des erreurs
+
+L'erreur de **modèle** (poutre idéale, sol homogène) et celle sur les **données** (charges, résistances) dépassent souvent quelques pourcents. Il est inutile de calculer avec 10 chiffres quand les données en ont 2.
+
+<DiagrammeBarres alt={`Chiffres exacts de deux approximations de π : 3,14 donne ${nombre(chiffresExacts(pi1, Math.PI), 1)} chiffres, 22/7 en donne ${nombre(chiffresExacts(pi2, Math.PI), 1)}.`} titre="chiffres exacts de deux approximations de π" barres={[{ libelle: 'π ≈ 3,14', valeur: chiffresExacts(pi1, Math.PI), texte: nombre(chiffresExacts(pi1, Math.PI), 1), teinte: 'terre' }, { libelle: 'π ≈ 22/7', valeur: chiffresExacts(pi2, Math.PI), texte: nombre(chiffresExacts(pi2, Math.PI), 1), teinte: 'acier' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : l'arrondi en machine">
+
+### La virgule flottante
+
+Un nombre « double » est stocké en base 2 avec 53 bits de mantisse : environ **16 chiffres significatifs**. L'écart relatif entre deux nombres voisins vaut environ $2{,}2 \times 10^{-16}$ (l'« epsilon machine »).
+
+### Les pièges
+
+- **Accumulation** : chaque addition ajoute une petite erreur ; après un million d'opérations, l'écart vaut {nombre(Math.abs(s1e6.ecart), 6)} sur 100 000.
+- **Soustraction de nombres voisins** : 1,000 0001 − 1,000 0000 ne garde que les derniers chiffres, les moins sûrs. C'est la « cancellation ».
+- **Comparer deux réels** : on ne teste jamais a == b, mais |a − b| &lt; tolérance (L1.7, isclose).
+
+<Regle type="art">
+Dans une note de calcul, on arrondit les **résultats affichés**, jamais les valeurs intermédiaires : on garde toute la précision jusqu'au bout et l'on arrondit à la fin, de façon cohérente avec la précision des données.
+</Regle>
+
+<DiagrammeFlux alt="Bonnes pratiques d'arrondi : garder toute la précision en mémoire ; éviter de soustraire des nombres voisins ; comparer avec une tolérance ; arrondir seulement l'affichage final." etapes={[{ titre: 'Garder', texte: 'précision', teinte: 'encre' }, { titre: 'Éviter', texte: 'a − b voisins', teinte: 'correction' }, { titre: 'Comparer', texte: '|a − b| < tol', teinte: 'acier' }, { titre: 'Arrondir', texte: 'à la fin', teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : troncature et pas optimal">
+
+### L'erreur de méthode
+
+La dérivée $f'(x)$ est une limite. Avec un pas h fini, la différence avant $\frac{f(x+h)-f(x)}{h}$ fait une erreur proportionnelle à h (méthode **d'ordre 1**) ; la différence centrée $\frac{f(x+h)-f(x-h)}{2h}$, proportionnelle à h² (**ordre 2**) : diviser h par 10 divise l'erreur par 100.
+
+### Le compromis
+
+Quand h devient très petit, f(x + h) et f(x) sont presque égaux : la soustraction perd des chiffres, et l'erreur d'arrondi **remonte**. Pour eˣ en 0, avec la différence centrée :
+
+<DiagrammeBarres alt={`Erreur de la différence centrée pour eˣ en 0 : h = 0,01 donne ${sci(d2.eCentree)}, h = 10⁻⁸ donne ${sci(d8.eCentree)}, h = 10⁻¹² donne ${sci(d12.eCentree)}.`} titre="chiffres exacts de la dérivée centrée" barres={[{ libelle: 'h = 10⁻²', valeur: chiffresExacts(d2.centree, 1), texte: nombre(chiffresExacts(d2.centree, 1), 1), teinte: 'terre' }, { libelle: 'h = 10⁻⁸', valeur: chiffresExacts(d8.centree, 1), texte: nombre(chiffresExacts(d8.centree, 1), 1), teinte: 'validation' }, { libelle: 'h = 10⁻¹²', valeur: chiffresExacts(d12.centree, 1), texte: nombre(chiffresExacts(d12.centree, 1), 1), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'erreur en fonction du pas">
+
+<ErreurPas />
+
+<DiagrammeFlux alt="Choisir un pas : partir d'un pas raisonnable ; diviser par deux ; comparer les résultats ; s'arrêter quand ils ne changent plus à la précision utile." etapes={[{ titre: 'Pas h', texte: 'raisonnable', teinte: 'encre' }, { titre: 'h/2', texte: 'recalculer', teinte: 'acier' }, { titre: 'Comparer', texte: 'écart', teinte: 'terre' }, { titre: 'Stable ?', texte: 'à la précision utile', teinte: 'validation' }]} />
+
+</Page>
+
+<FicheCalcul calcul="erreurDerivee">
+
+<Cahier titre="Exemple résolu : la dérivée de eˣ en 0">
+
+**Énoncé.** La dérivée exacte de eˣ en 0 vaut 1. Calcule-la par différences avant et centrée avec h = 0,01, et compare les erreurs. Recommence avec d'autres pas.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Les deux formules">
+<AN k="avant" />
+<AN k="centree" />
+<Note>Pourquoi la centrée est-elle meilleure ? Les termes en h s'annulent par symétrie : il ne reste que des termes en h².</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le meilleur pas">
+
+<Etape n={3} titre="Comparer">
+<Resultat k="eAvant" libelle="Erreur avant" />
+<Resultat k="eCentree" libelle="Erreur centrée" />
+<Schema />
+<Note couleur="vert">Contrôle : passe k de 2 à 5 ; l'erreur centrée chute. Va jusqu'à k = 12 : elle remonte, l'arrondi domine.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="tester l'égalité de deux réels.">
+0,1 + 0,2 == 0,3 est faux en machine ; on compare avec une tolérance.
+</Piege>
+
+<Piege erreur="arrondir en cours de calcul.">
+Les erreurs s'accumulent ; on arrondit seulement le résultat affiché.
+</Piege>
+
+<Piege erreur="croire qu'un pas plus petit est toujours meilleur.">
+En dessous du pas optimal, l'arrondi l'emporte.
+</Piege>
+
+<ErreurPas />
+
+<Piege erreur="afficher 10 chiffres sur un résultat de chantier.">
+« 23,478 916 kN » trompe le lecteur : les charges sont connues à quelques pourcents.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Lire une sortie de logiciel.** Un logiciel de structure affiche souvent des réactions comme 1,2 × 10⁻¹³ kN là où l'on attend zéro : c'est un résidu d'arrondi, pas une force. De même, un équilibre vérifié « à 0,001 kN près » sur des charges de 1 000 kN est parfait.
+
+<DiagrammeBarres alt="Hiérarchie des erreurs typiques d'un calcul de structure : modèle et charges de l'ordre de 5 à 20 %, données matériaux de 5 à 10 %, méthode numérique moins de 1 %, arrondi machine négligeable." titre="ordre de grandeur des erreurs (%)" barres={[{ libelle: 'modèle et charges', valeur: 15, texte: '5 à 20', teinte: 'correction' }, { libelle: 'données matériaux', valeur: 8, texte: '5 à 10', teinte: 'terre' }, { libelle: 'méthode numérique', valeur: 1, texte: '< 1', teinte: 'acier' }, { libelle: 'arrondi machine', valeur: 0.1, texte: '≈ 0', teinte: 'validation' }]} />
+
+<Encadre type="terrain" titre="Calculatrices et tableurs du bureau d'études">
+Une calculatrice affiche 10 chiffres, un tableur 15. Les écarts de « 0,01 » entre deux notes de calcul viennent presque toujours d'arrondis intermédiaires différents : on fixe une règle commune (garder la précision, arrondir à la fin).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : erreurs numériques">
+
+### Mesures
+
+Δx = |x̃ − x| · ε = Δx / |x| · chiffres exacts ≈ −log₁₀ ε
+
+### Sources
+
+modèle &gt; données &gt; troncature &gt; arrondi (en général)
+
+### Machine
+
+double précision : ≈ 16 chiffres · ε machine ≈ 2,2 × 10⁻¹⁶ · comparer avec une tolérance
+
+### Méthodes
+
+avant : ordre 1 (∝ h) · centrée : ordre 2 (∝ h²) · pas optimal : ni trop grand, ni trop petit
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Erreur relative">
+
+Une portée de 6,00 m est mesurée 6,03 m. Erreur absolue et relative ?
+
+<Indice>Δ = 0,03 m.</Indice>
+
+<Corrige>
+Δ = **0,03 m** ; ε = 0,03 / 6 = **{nombre(0.03 / 6 * 100, 1)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Dix fois 0,1">
+
+Que donne la somme de dix fois 0,1 en Python ? Pourquoi ?
+
+<Indice>0,1 en base 2 est périodique.</Indice>
+
+<Corrige>
+**{reprFlottant(s10.somme)}** : chaque 0,1 est déjà arrondi, les erreurs s'additionnent.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Ordre d'une méthode">
+
+Avec h = 0,01, l'erreur de la différence centrée vaut {sci(d2.eCentree)}. Que prévois-tu pour h = 0,001 ?
+
+<Indice>Ordre 2 : erreur ∝ h².</Indice>
+
+<Corrige>
+Environ 100 fois moins : **{sci(deriveeFinie(Math.exp, 1, 0, 0.001).eCentree)}** (calculé).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.3.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un double représente environ :" choix={['16 chiffres significatifs', '8 chiffres', '32 chiffres', 'une infinité']} bonne={0} colonnes={2}>
+53 bits de mantisse.
+</QCM>
+
+<QCM n={2} question="0,1 + 0,2 == 0,3 en Python donne :" choix={['False', 'True', 'une erreur', '0,3']} bonne={0} colonnes={4}>
+Arrondi en base 2.
+</QCM>
+
+<QCM n={3} question="La différence centrée est d'ordre :" choix={['2', '1', '3', '0']} bonne={0} colonnes={4}>
+Erreur ∝ h².
+</QCM>
+
+<QCM n={4} question="Diminuer le pas h sans limite :" choix={['finit par augmenter l’erreur', 'réduit toujours l’erreur', 'ne change rien', 'annule l’erreur']} bonne={0} colonnes={2}>
+L'arrondi remonte.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="On arrondit :" choix={['le résultat final', 'chaque valeur intermédiaire', 'les données', 'jamais']} bonne={0} colonnes={2}>
+Garder la précision jusqu'au bout.
+</QCM>
+
+<QCM n={6} question="La plus grande source d'erreur d'un calcul de structure est souvent :" choix={['le modèle et les charges', 'l’arrondi machine', 'la calculatrice', 'le nombre de chiffres affichés']} bonne={0} colonnes={2}>
+Hiérarchie des erreurs.
+</QCM>
+
+<QCM n={7} question="Une réaction affichée 3 × 10⁻¹⁴ kN est :" choix={['un résidu d’arrondi', 'une vraie force', 'une erreur de modèle', 'un bug grave']} bonne={0} colonnes={2}>
+C'est zéro en pratique.
+</QCM>
+
+<QCM n={8} question="Soustraire deux nombres très voisins :" choix={['fait perdre des chiffres exacts', 'est toujours exact', 'gagne de la précision', 'est interdit']} bonne={0} colonnes={2}>
+Cancellation.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

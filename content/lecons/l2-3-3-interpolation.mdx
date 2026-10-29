@@ -1,0 +1,313 @@
+---
+id: L2.3.3
+titre: "Interpolation"
+objectifs:
+  - Interpoler linéairement une valeur dans un tableau
+  - Interpoler dans un tableau à double entrée (bilinéaire)
+  - Connaître le polynôme de Lagrange et ses limites
+  - Refuser l'extrapolation hors d'un tableau normatif
+relecture: false
+normes:
+  - "EN 1992-1-1 tableau 3.1 : Ecm = 22 (fcm/10)^0,3 GPa"
+glossaire:
+  - terme: Interpolation
+    definition: Estimation d'une valeur entre des valeurs connues d'un tableau.
+  - terme: Extrapolation
+    definition: Estimation hors du domaine des valeurs connues ; risquée et souvent interdite pour un tableau normatif.
+  - terme: Interpolation bilinéaire
+    definition: Interpolation dans un tableau à deux entrées, faite deux fois dans un sens puis une fois dans l'autre.
+  - terme: Polynôme de Lagrange
+    definition: Unique polynôme de degré n − 1 qui passe exactement par n points donnés.
+symboles:
+  - { symbole: 'x₀, x₁', signification: 'valeurs encadrantes du tableau', unite: 'unité de x' }
+  - { symbole: 'y₀, y₁', signification: 'valeurs correspondantes', unite: 'unité de y' }
+  - { symbole: 'u, v', signification: 'positions relatives dans une maille', unite: '— (entre 0 et 1)' }
+formules:
+  - { nom: 'Linéaire', tex: 'y = y_0 + (y_1 - y_0)\,\frac{x - x_0}{x_1 - x_0}', domaine: 'x₀ ≤ x ≤ x₁' }
+  - { nom: 'Bilinéaire', tex: 'z = z_{00}(1-u)(1-v) + z_{10}\,u(1-v) + z_{01}(1-u)\,v + z_{11}\,u v', domaine: 'Maille' }
+  - { nom: 'Lagrange', tex: 'P(x) = \sum_i y_i \prod_{j \ne i} \frac{x - x_j}{x_i - x_j}', domaine: 'n points' }
+---
+
+import { bilineaire, ecm, interpLineaire, interpTableau, lagrange } from '@/lib/calc/numerique'
+import { grandeur, nombre } from '@/lib/format'
+import { InterpolationTableau, MailleBilineaire, PhenomeneRunge } from '@/components/schemas/Numerique'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const FCK = [12, 16, 20, 25, 30, 35, 40, 45, 50]
+export const ECM = FCK.map((f) => Math.round(ecm(f)))
+export const i28 = interpTableau(FCK, ECM, 28)
+export const zP = bilineaire(102.4, 102.9, 103.1, 103.8, 0.3, 0.6)
+export const runge = [-1, -0.5, 0, 0.5, 1].map((x) => 1 / (1 + 25 * x * x))
+export const ex1 = interpLineaire(20, 1.8, 30, 2.4, 26)
+export const ex3 = lagrange([0, 1, 2], [1, 3, 7], 1.5)
+
+<Page etape="intuition" titre="L'intuition : lire entre les lignes d'un tableau">
+
+Les normes et les catalogues donnent beaucoup de valeurs sous forme de **tableaux** : module du béton selon la classe, coefficients selon un élancement, sections d'armatures… Ton cas tombe rarement pile sur une ligne. Pour une classe de 28 MPa, entre 25 et 30, que prendre ?
+
+On trace mentalement un **segment** entre les deux valeurs voisines et on lit dessus : c'est l'interpolation linéaire, l'outil le plus utilisé du bureau d'études.
+
+<InterpolationTableau xs={FCK} ys={ECM} x={28} titreX="fck (MPa)" titreY="Ecm (GPa)" dec={0} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment estimer proprement une valeur entre deux lignes, ou deux colonnes, d'un tableau ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Interpoler en six idées" sousTitre="Entre les valeurs connues, jamais au-delà" etape="cours">
+
+<Panneau n={1} titre="Encadrer" icone="regle" couleur="encre">
+Trouver x₀ ≤ x ≤ x₁ dans le tableau.
+</Panneau>
+
+<Panneau n={2} titre="Proportion" icone="calcul" couleur="acier">
+(x − x₀)/(x₁ − x₀) : la fraction du chemin.
+</Panneau>
+
+<Panneau n={3} titre="Lire" icone="idee" couleur="terre">
+y = y₀ + fraction × (y₁ − y₀).
+</Panneau>
+
+<Panneau n={4} titre="Double entrée" icone="plan" couleur="brique">
+Deux interpolations puis une troisième.
+</Panneau>
+
+<Panneau n={5} titre="Lagrange" icone="verification" couleur="validation">
+Une courbe par tous les points ; prudence aux bords.
+</Panneau>
+
+<Panneau n={6} titre="Pas d'extrapolation" icone="attention" couleur="correction">
+Hors du tableau : on ne sait pas.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'interpolation linéaire">
+
+### La formule
+
+Entre $(x_0, y_0)$ et $(x_1, y_1)$ :
+
+$$y = y_0 + (y_1 - y_0)\,\frac{x - x_0}{x_1 - x_0}$$
+
+C'est la règle de trois appliquée à l'écart : si x est aux 3/5 du chemin de 25 à 30, y est aux 3/5 du chemin de {ECM[3]} à {ECM[4]} GPa.
+
+### La précision
+
+L'erreur dépend de la **courbure** de la loi entre les deux points : faible si le tableau est serré ou la loi presque droite. Pour Ecm, la formule de l'EC2 donne {nombre(ecm(28), 2)} GPa pour 28 MPa ; l'interpolation dans le tableau arrondi donne {nombre(i28?.y ?? 0, 2)} GPa.
+
+<InterpolationTableau xs={FCK} ys={ECM} x={28} exacte={ecm} titreX="fck (MPa)" titreY="Ecm (GPa)" dec={0} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : le tableau à double entrée">
+
+### Interpolation bilinéaire
+
+Quand la valeur dépend de **deux** entrées (une altitude sur un quadrillage, un coefficient fonction de deux rapports), on interpole d'abord sur les deux lignes encadrantes, puis entre les deux résultats. Avec u et v les positions relatives (de 0 à 1) dans la maille :
+
+$$z = z_{00}(1-u)(1-v) + z_{10}\,u(1-v) + z_{01}(1-u)\,v + z_{11}\,u v$$
+
+<MailleBilineaire z={[102.4, 102.9, 103.1, 103.8]} u={0.3} v={0.6} zP={zP} />
+
+C'est ainsi qu'on lit l'altitude d'un point quelconque sur un plan de nivellement en grille (L1.8).
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : Lagrange, et ce qu'il ne faut pas faire">
+
+### Le polynôme de Lagrange
+
+Par n points passe un unique polynôme de degré n − 1. Avec 3 points, une parabole : plus précise qu'une ligne brisée si la loi est régulière.
+
+### Le phénomène de Runge
+
+Avec beaucoup de points équidistants, le polynôme oscille violemment près des bords. Pour 1/(1 + 25x²), le polynôme par 5 points s'écarte de la courbe :
+
+<PhenomeneRunge />
+
+<Regle type="norme">
+Dans un tableau normatif, l'interpolation **linéaire** est en général admise entre deux valeurs (la norme le précise souvent en note) ; l'extrapolation ne l'est pas. Hors du tableau, on cherche la formule d'origine ou une autre référence.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la méthode">
+
+<DiagrammeFlux alt="Interpoler dans un tableau : vérifier que x est dans le tableau ; repérer les deux lignes encadrantes ; calculer la fraction ; lire la valeur ; arrondir comme le tableau." etapes={[{ titre: 'Dans le tableau ?', texte: 'sinon stop', teinte: 'correction' }, { titre: 'Encadrer', texte: 'x₀, x₁', teinte: 'encre' }, { titre: 'Fraction', texte: '(x − x₀)/(x₁ − x₀)', teinte: 'acier' }, { titre: 'Lire', texte: 'y₀ + f (y₁ − y₀)', teinte: 'terre' }, { titre: 'Arrondir', texte: 'comme le tableau', teinte: 'validation' }]} />
+
+<MailleBilineaire z={[98.2, 98.6, 99.0, 99.7]} u={0.5} v={0.25} zP={bilineaire(98.2, 98.6, 99.0, 99.7, 0.5, 0.25)} />
+
+</Page>
+
+<FicheCalcul calcul="interpolationEcm">
+
+<Cahier titre="Exemple résolu : le module d'un béton de 28 MPa">
+
+**Énoncé.** Le tableau donne Ecm (arrondi au GPa) pour fck = 12, 16, 20, 25, 30, 35, 40, 45 et 50 MPa, d'après la formule de l'EC2 (tableau 3.1). Estime Ecm pour fck = 28 MPa par interpolation, et compare à la formule.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Encadrer">
+<AN k="encadrement" />
+<Note>Pourquoi encadrer d'abord ? Pour être sûr de ne pas extrapoler.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : interpoler et comparer">
+
+<Etape n={3} titre="Interpoler">
+<AN k="interp" />
+<Resultat k="y" libelle="Ecm interpolé" />
+</Etape>
+
+<Etape n={4} titre="Comparer">
+<AN k="exact" />
+<Schema />
+<Note couleur="vert">Contrôle : l'écart vient surtout de l'arrondi du tableau au GPa. Quand la formule existe, on l'utilise directement.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="extrapoler hors du tableau.">
+Au-delà de la dernière ligne, la loi peut changer complètement.
+</Piege>
+
+<Piege erreur="interpoler sur un tableau en escalier.">
+Certaines tables (classes d'exposition, diamètres de barres) donnent des valeurs discrètes : on prend la classe ou le diamètre supérieur, on n'interpole pas.
+</Piege>
+
+<Piege erreur="prendre la ligne la plus proche sans interpoler.">
+Entre 25 et 30, prendre 30 « parce que c'est plus près » fausse le résultat ; interpoler ou prendre la valeur du côté de la sécurité.
+</Piege>
+
+<InterpolationTableau xs={[10, 20, 30]} ys={[1.2, 1.5, 2.4]} x={24} titreX="x" titreY="y" dec={0} />
+
+<Piege erreur="utiliser un polynôme de haut degré.">
+Il oscille entre les points (Runge) ; une interpolation linéaire par morceaux est plus sûre.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Altitudes, abaques, catalogues.** Le géomètre interpole une courbe de niveau entre deux points cotés ; le projeteur lit un abaque de ferraillage entre deux courbes ; le conducteur de travaux interpole dans le barème d'une grue entre deux portées. Toujours le même geste.
+
+<MailleBilineaire z={[102.4, 102.9, 103.1, 103.8]} u={0.8} v={0.2} zP={bilineaire(102.4, 102.9, 103.1, 103.8, 0.8, 0.2)} />
+
+<Encadre type="attention" titre="Abaque de grue">
+Les tableaux de charge des grues mobiles interdisent souvent l'interpolation : il faut prendre la portée **supérieure** du tableau. La règle du constructeur prime toujours sur la règle mathématique.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : interpolation">
+
+### Linéaire
+
+y = y₀ + (y₁ − y₀)(x − x₀)/(x₁ − x₀) · seulement si x₀ ≤ x ≤ x₁
+
+### Bilinéaire
+
+deux interpolations sur les lignes, puis une entre elles · u, v entre 0 et 1
+
+### Lagrange
+
+polynôme par n points · oscillations aux bords (Runge) avec beaucoup de points
+
+### Règles
+
+jamais d'extrapolation · tables en escalier : prendre la classe supérieure · consignes du constructeur d'abord
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Interpoler">
+
+Un tableau donne 1,8 pour x = 20 et 2,4 pour x = 30. Valeur pour x = 26 ?
+
+<Indice>Fraction 6/10.</Indice>
+
+<Corrige>
+1,8 + 0,6 × 0,6 = **{nombre(ex1, 2)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Altitude d'un point">
+
+Maille de 10 m : A = 102,40 (0;0), B = 102,90 (10;0), D = 103,10 (0;10), C = 103,80 (10;10). Altitude de P (3 ; 6) ?
+
+<Indice>u = 0,3 ; v = 0,6.</Indice>
+
+<Corrige>
+**{grandeur(zP, 2, 'm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Parabole de Lagrange">
+
+Points (0 ; 1), (1 ; 3), (2 ; 7). Valeur du polynôme de Lagrange en 1,5 ? Compare à l'interpolation linéaire entre 1 et 2.
+
+<Indice>La parabole est x² + x + 1.</Indice>
+
+<Corrige>
+Lagrange : **{nombre(ex3, 2)}** ; linéaire : **{nombre(interpLineaire(1, 3, 2, 7, 1.5), 2)}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.3.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Interpoler, c'est estimer une valeur :" choix={['entre des valeurs connues', 'au-delà du tableau', 'au hasard', 'par la moyenne de tout le tableau']} bonne={0} colonnes={2}>
+Jamais au-delà.
+</QCM>
+
+<QCM n={2} question="Entre (10 ; 4) et (20 ; 8), la valeur en 15 vaut :" choix={[nombre(interpLineaire(10, 4, 20, 8, 15), 0), '4', '8', '12']} bonne={0} colonnes={4}>
+Milieu.
+</QCM>
+
+<QCM n={3} question="Une interpolation bilinéaire demande :" choix={['3 interpolations linéaires', '1 interpolation', '4 extrapolations', 'une dérivée']} bonne={0} colonnes={2}>
+Deux puis une.
+</QCM>
+
+<QCM n={4} question="Par 4 points passe un polynôme de Lagrange de degré :" choix={['3', '4', '2', '1']} bonne={0} colonnes={4}>
+n − 1.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Ecm interpolé pour fck = 28 MPa vaut :</>} choix={[grandeur(i28?.y ?? 0, 2, 'GPa'), `${ECM[3]} GPa`, `${ECM[4]} GPa`, '28 GPa']} bonne={0} colonnes={4}>
+Entre 25 et 30.
+</QCM>
+
+<QCM n={6} question="Le phénomène de Runge concerne :" choix={['les oscillations d’un polynôme de haut degré', 'l’arrondi machine', 'la dichotomie', 'les tableaux en escalier']} bonne={0} colonnes={2}>
+Aux bords de l'intervalle.
+</QCM>
+
+<QCM n={7} question="Pour un diamètre de barre calculé à 13,2 mm, on prend :" choix={['14 mm', '13,2 mm', '12 mm', 'une interpolation']} bonne={0} colonnes={4}>
+Valeurs discrètes : le supérieur.
+</QCM>
+
+<QCM n={8} question="Pour un tableau de charges de grue, on suit :" choix={['la règle du constructeur', 'l’interpolation linéaire', 'Lagrange', 'l’extrapolation']} bonne={0} colonnes={2}>
+Elle prime.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

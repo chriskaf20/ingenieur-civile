@@ -1,0 +1,312 @@
+---
+id: L2.3.2
+titre: "Équations non linéaires : dichotomie et Newton"
+objectifs:
+  - Ramener un problème d'ingénieur à la forme f(x) = 0
+  - Encadrer une racine et appliquer la dichotomie
+  - Appliquer la méthode de Newton et juger sa convergence
+  - Calculer la hauteur normale d'un canal
+relecture: false
+normes: []
+glossaire:
+  - terme: Racine
+    definition: Valeur x qui annule la fonction f.
+  - terme: Dichotomie
+    definition: Méthode qui coupe un intervalle en deux à chaque étape en gardant la moitié où f change de signe.
+  - terme: Méthode de Newton
+    definition: Méthode qui suit la tangente à la courbe jusqu'à l'axe des x ; très rapide près de la racine.
+  - terme: Hauteur normale
+    definition: Hauteur d'eau d'un écoulement uniforme dans un canal, pour un débit, une pente et une rugosité donnés.
+symboles:
+  - { symbole: 'f(x)', signification: 'fonction dont on cherche la racine', unite: '—' }
+  - { symbole: 'tol', signification: 'tolérance d''arrêt', unite: 'unité de x' }
+  - { symbole: 'K', signification: 'coefficient de Strickler', unite: 'm^(1/3)/s' }
+  - { symbole: 'Q', signification: 'débit', unite: 'm³/s' }
+formules:
+  - { nom: 'Dichotomie', tex: 'm = \frac{a+b}{2},\quad \text{largeur après } n \text{ étapes} = \frac{b-a}{2^n}', domaine: 'f(a) f(b) < 0' }
+  - { nom: 'Newton', tex: 'x_{k+1} = x_k - \frac{f(x_k)}{f''(x_k)}', domaine: 'f dérivable, départ proche' }
+  - { nom: 'Manning-Strickler', tex: 'Q = K\,A\,R_h^{2/3}\,\sqrt{i},\quad R_h = \frac{A}{P}', domaine: 'Écoulement uniforme' }
+---
+
+import { dichotomie, EXEMPLE_CANAL, hauteurNormale, newton } from '@/lib/calc/numerique'
+import { grandeur, nombre } from '@/lib/format'
+import { CanalRectangulaire, Dichotomie, TangentesNewton } from '@/components/schemas/Numerique'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const hn = hauteurNormale(EXEMPLE_CANAL)
+export const f2 = (x) => x * x - 2
+export const d2 = dichotomie(f2, 1, 2, 1e-6)
+export const n2r = newton(f2, (x) => 2 * x, 1, 1e-12)
+export const ex1 = newton((x) => x ** 3 - 10, (x) => 3 * x * x, 2, 1e-10)
+export const nEtapes = Math.ceil(Math.log2(1 / 0.001))
+export const hn2 = hauteurNormale({ ...EXEMPLE_CANAL, Q: 6 })
+
+<Page etape="intuition" titre="L'intuition : l'équation qu'on ne sait pas isoler">
+
+Un canal en terre de 2 m de large doit évacuer 3 m³/s. Quelle hauteur d'eau va-t-il prendre ? La formule de Manning-Strickler donne le débit **à partir** de la hauteur, mais pas l'inverse : la hauteur h apparaît à plusieurs endroits, sous une puissance 2/3. Impossible de l'isoler à la main.
+
+On écrit alors $f(h) = Q(h) - 3 = 0$ et l'on cherche h **numériquement**, en s'approchant pas à pas de la racine.
+
+<CanalRectangulaire b={EXEMPLE_CANAL.b} h={hn.h} Q={EXEMPLE_CANAL.Q} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment résoudre une équation qu'on ne sait pas résoudre à la main ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Deux méthodes, deux tempéraments" sousTitre="Sûre ou rapide" etape="cours">
+
+<Panneau n={1} titre="f(x) = 0" icone="calcul" couleur="encre">
+Tout mettre d'un côté : f(h) = Q(h) − Q voulu.
+</Panneau>
+
+<Panneau n={2} titre="Encadrer" icone="regle" couleur="acier">
+Trouver a et b où f change de signe.
+</Panneau>
+
+<Panneau n={3} titre="Dichotomie" icone="verification" couleur="validation">
+Couper en deux : lente mais sûre.
+</Panneau>
+
+<Panneau n={4} titre="Newton" icone="idee" couleur="terre">
+Suivre la tangente : très rapide près de la racine.
+</Panneau>
+
+<Panneau n={5} titre="Arrêt" icone="plan" couleur="brique">
+|Δx| &lt; tolérance et |f(x)| petit.
+</Panneau>
+
+<Panneau n={6} titre="Pièges" icone="attention" couleur="correction">
+Newton diverge si on part loin ou si f′ ≈ 0.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la dichotomie">
+
+### Le principe
+
+Si f est continue et f(a), f(b) sont de **signes opposés**, il y a une racine entre a et b (théorème des valeurs intermédiaires, L1.2). On prend le milieu m : on garde [a ; m] si f change de signe entre a et m, sinon [m ; b]. On recommence.
+
+### La vitesse
+
+L'intervalle est divisé par 2 à chaque étape : après n étapes, il vaut $(b - a)/2^n$. Pour passer de 1 à 0,001, il faut {nEtapes} étapes. C'est lent, mais **garanti**.
+
+<Dichotomie f={f2} a={1} b={2} etapes={6} />
+
+Pour √2 (racine de x² − 2) à 10⁻⁶ près : {d2.length} étapes.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la méthode de Newton">
+
+### Le principe
+
+On remplace la courbe par sa **tangente** au point $x_k$ et l'on prend l'intersection de la tangente avec l'axe :
+
+$$x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)}$$
+
+### La vitesse
+
+Près de la racine, le nombre de chiffres exacts **double** à chaque itération (convergence quadratique). Pour √2 depuis 1 : {n2r.slice(0, 5).map((p) => nombre(p.x, 6)).join(' → ')} : {n2r.length - 1} itérations pour 12 chiffres.
+
+<TangentesNewton f={f2} fp={(x) => 2 * x} x0={3} a={0} b={3.2} />
+
+<Regle type="art">
+Si f′ n'est pas connue, on l'approche par une différence centrée (L2.3.1) : c'est ce que font les logiciels. Il faut un point de départ raisonnable, par exemple une estimation physique (ici h ≈ 1 m).
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : comparer et combiner">
+
+<DiagrammeComparaison alt="Comparaison des deux méthodes : la dichotomie est lente mais garantie dès qu'on a un encadrement ; Newton est très rapide mais peut diverger si on part loin ou si la dérivée s'annule." gauche={{ titre: 'Dichotomie', items: ['un encadrement suffit', 'converge toujours', 'lente : 1 bit par étape', 'pas de dérivée'] }} droite={{ titre: 'Newton', items: ['un point de départ', 'peut diverger', 'très rapide près de la racine', 'demande f′ (ou son approximation)'] }} />
+
+### La stratégie des logiciels
+
+On commence par quelques étapes de dichotomie pour s'approcher, puis on finit par Newton. Le solveur d'un tableur (valeur cible) fait à peu près cela.
+
+<DiagrammeBarres alt={`Itérations pour la hauteur normale du canal à 10⁻⁴ m près : dichotomie ${hn.dich.length}, Newton ${hn.newt.length - 1}.`} titre="itérations pour la hauteur normale (tolérance 0,1 mm)" barres={[{ libelle: 'dichotomie', valeur: hn.dich.length, texte: String(hn.dich.length), teinte: 'terre' }, { libelle: 'Newton', valeur: hn.newt.length - 1, texte: String(hn.newt.length - 1), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Résoudre une équation non linéaire : écrire f(x) = 0 ; tracer f ou tabuler pour encadrer la racine ; choisir la méthode ; itérer jusqu'à la tolérance ; vérifier f(x) et le sens physique." etapes={[{ titre: 'f(x) = 0', texte: 'tout d’un côté', teinte: 'encre' }, { titre: 'Encadrer', texte: 'tracer, tabuler', teinte: 'acier' }, { titre: 'Méthode', texte: 'dichotomie, Newton', teinte: 'terre' }, { titre: 'Itérer', texte: 'jusqu’à tol', teinte: 'brique' }, { titre: 'Vérifier', texte: 'f(x) ≈ 0, sens', teinte: 'validation' }]} />
+
+<Dichotomie f={hn.f} a={0.2} b={2} etapes={5} titreX="h (m)" />
+
+</Page>
+
+<FicheCalcul calcul="hauteurNormaleCanal">
+
+<Cahier titre="Exemple résolu : la hauteur normale d'un canal en terre">
+
+**Énoncé.** Un canal rectangulaire en terre de 2 m de large, de pente 1 ‰, avec K = 40 m^(1/3)/s, doit évacuer 3 m³/s (données de l'énoncé). Quelle hauteur d'eau ? Quelle vitesse ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="L'équation">
+<AN k="equation" />
+<Note>Pourquoi ne pas isoler h ? Il figure dans A et dans R à une puissance 2/3 : aucune formule simple.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les deux méthodes">
+
+<Etape n={3} titre="Dichotomie et Newton">
+<AN k="dichotomie" />
+<AN k="newton" />
+<Resultat k="h" libelle="Hauteur normale" />
+</Etape>
+
+<Etape n={4} titre="Contrôle">
+<AN k="controle" />
+<Schema />
+<Note couleur="vert">Contrôle : remets h dans la formule de Manning, tu retrouves le débit. Double le débit : h augmente, mais moins que du double.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="lancer la dichotomie sans encadrement.">
+Si f(a) et f(b) ont le même signe, rien ne garantit une racine entre les deux.
+</Piege>
+
+<Piege erreur="partir trop loin avec Newton.">
+Une tangente presque horizontale envoie l'itéré très loin, parfois vers une racine sans sens physique (h négatif).
+</Piege>
+
+<TangentesNewton f={(x) => x * x * x - 2 * x + 2} fp={(x) => 3 * x * x - 2} x0={0} a={-2} b={1.5} n={3} />
+
+<Piege erreur="s'arrêter sur |Δx| seul.">
+On vérifie aussi que f(x) est proche de zéro.
+</Piege>
+
+<Piege erreur="oublier les unités dans f.">
+Pente en ‰ à convertir en m/m, débit en m³/s.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Fossés et caniveaux.** Les caniveaux le long des routes en terre de la province du Kasaï, les canaux d'irrigation, les collecteurs d'eaux pluviales de Kinshasa : tous se dimensionnent avec la hauteur normale. On vérifie ensuite que la vitesse n'érode pas le fond (canal en terre) et qu'elle reste assez forte pour ne pas déposer le sable.
+
+<CanalRectangulaire b={EXEMPLE_CANAL.b} h={hn2.h} Q={6} />
+
+<Encadre type="terrain" titre="Le coefficient de Strickler">
+K vaut environ 25 à 40 pour un canal en terre, 60 à 80 pour un béton lisse <AVerifier note="A_VERIFIER.md n° 59 : coefficients de Strickler usuels (terre, enrochement, béton) à confirmer dans un manuel d'hydraulique (L2.7)" />. Un canal envahi d'herbes ou de déchets voit K chuter : le niveau monte et le canal déborde. L'entretien fait partie du dimensionnement.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : équations non linéaires">
+
+### Préparer
+
+f(x) = 0 · tracer ou tabuler · encadrer : f(a) f(b) &lt; 0
+
+### Dichotomie
+
+m = (a + b)/2 · garder la moitié qui change de signe · largeur (b − a)/2ⁿ
+
+### Newton
+
+x ← x − f(x)/f′(x) · chiffres exacts doublés à chaque pas · départ proche, f′ ≠ 0
+
+### Arrêt et contrôle
+
+|Δx| &lt; tol et |f(x)| petit · sens physique (h &gt; 0)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Racine cubique">
+
+Calcule ∛10 par Newton depuis x₀ = 2 (f = x³ − 10).
+
+<Indice>x ← x − (x³ − 10)/(3x²).</Indice>
+
+<Corrige>
+{ex1.slice(0, 4).map((p) => nombre(p.x, 5)).join(' → ')} … → **{nombre(ex1[ex1.length - 1]?.x ?? 0, 6)}** en {ex1.length - 1} itérations.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Combien d'étapes ?">
+
+Dichotomie sur [0 ; 1] : combien d'étapes pour une précision de 0,001 ?
+
+<Indice>1/2ⁿ &lt; 0,001.</Indice>
+
+<Corrige>
+**n = {nEtapes}** (2¹⁰ = 1 024).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Débit doublé">
+
+Même canal, débit 6 m³/s. Hauteur normale et vitesse ?
+
+<Indice>Utilise la fiche.</Indice>
+
+<Corrige>
+h = **{grandeur(hn2.h, 3, 'm')}**, V = **{grandeur(hn2.V, 2, 'm/s')}** : la hauteur n'a pas doublé, la vitesse a augmenté.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.3.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La dichotomie exige :" choix={['f(a) et f(b) de signes opposés', 'la dérivée de f', 'un départ proche', 'f linéaire']} bonne={0} colonnes={2}>
+Encadrement.
+</QCM>
+
+<QCM n={2} question="Après 10 étapes de dichotomie, l'intervalle est divisé par :" choix={['1 024', '10', '100', '20']} bonne={0} colonnes={4}>
+2¹⁰.
+</QCM>
+
+<QCM n={3} question="La formule de Newton est :" choix={['x − f(x)/f′(x)', 'x − f′(x)/f(x)', '(a + b)/2', 'x + f(x)']} bonne={0} colonnes={2}>
+Tangente.
+</QCM>
+
+<QCM n={4} question="Près de la racine, Newton :" choix={['double le nombre de chiffres exacts à chaque pas', 'gagne un chiffre tous les 3 pas', 'diverge toujours', 'stagne']} bonne={0} colonnes={2}>
+Convergence quadratique.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>La hauteur normale du canal de l'exemple vaut :</>} choix={[grandeur(hn.h, 2, 'm'), '1,50 m', '3,00 m', '0,50 m']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="Newton peut échouer si :" choix={['f′ est presque nulle', 'f est continue', 'on part près de la racine', 'la tolérance est grande']} bonne={0} colonnes={2}>
+Tangente horizontale.
+</QCM>
+
+<QCM n={7} question="Pour arrêter les itérations, on vérifie :" choix={['|Δx| et |f(x)| petits', 'seulement le nombre d’itérations', 'que x est entier', 'rien']} bonne={0} colonnes={2}>
+Deux critères.
+</QCM>
+
+<QCM n={8} question="Dans Manning-Strickler, un canal envahi d'herbes :" choix={['a un K plus faible, donc un niveau plus haut', 'a un K plus fort', 'ne change pas', 'a un débit nul']} bonne={0} colonnes={2}>
+Rugosité accrue.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

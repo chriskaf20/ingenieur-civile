@@ -1,0 +1,311 @@
+---
+id: L2.3.7
+titre: "Différences finies (aperçu)"
+objectifs:
+  - Remplacer une dérivée seconde par une différence finie sur une grille
+  - Écrire le système d'équations d'une poutre discrétisée
+  - Résoudre ce système et comparer à la solution exacte
+  - Relier la finesse du maillage à la précision
+relecture: false
+normes: []
+glossaire:
+  - terme: Discrétisation
+    definition: Remplacement d'une grandeur continue par ses valeurs en un nombre fini de points (nœuds).
+  - terme: Grille ou maillage
+    definition: Ensemble des nœuds où l'on calcule la solution, espacés d'un pas h.
+  - terme: Molécule de calcul
+    definition: Ensemble des nœuds voisins qui interviennent dans l'équation d'un nœud.
+  - terme: Conditions aux limites
+    definition: Valeurs imposées aux bords du domaine, par exemple une flèche nulle sur les appuis.
+symboles:
+  - { symbole: 'h', signification: 'pas de la grille', unite: 'm' }
+  - { symbole: 'y_i', signification: 'flèche au nœud i', unite: 'm' }
+  - { symbole: 'n', signification: 'nombre d''intervalles', unite: '—' }
+formules:
+  - { nom: 'Dérivée seconde', tex: 'y''''(x_i) \approx \frac{y_{i-1} - 2y_i + y_{i+1}}{h^2}', domaine: 'Erreur ∝ h²' }
+  - { nom: 'Poutre', tex: 'y_{i-1} - 2y_i + y_{i+1} = -\frac{h^2\,M(x_i)}{EI}', domaine: 'Nœud intérieur' }
+  - { nom: 'Chaleur 1D', tex: '\frac{T_i^{k+1} - T_i^k}{\Delta t} = a\,\frac{T_{i-1}^k - 2T_i^k + T_{i+1}^k}{\Delta x^2}', domaine: 'Schéma explicite' }
+---
+
+import { deformeeDF, EXEMPLE_DF } from '@/lib/calc/numerique'
+import { grandeur, nombre } from '@/lib/format'
+import { DeformeeDF, GrilleDF, MatriceCreuse } from '@/components/schemas/Numerique'
+import { TroisEDP } from '@/components/schemas/EquaDiff'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const r6 = deformeeDF(EXEMPLE_DF)
+export const r12 = deformeeDF({ ...EXEMPLE_DF, n: 12 })
+export const r24 = deformeeDF({ ...EXEMPLE_DF, n: 24 })
+export const r2 = deformeeDF({ ...EXEMPLE_DF, n: 2 })
+export const ex3 = deformeeDF({ L: 5, q: 12, EI: 15000, n: 10 })
+
+<Page etape="intuition" titre="L'intuition : remplacer la courbe par des points">
+
+Une équation différentielle relie une fonction à ses dérivées en **chaque** point. Un ordinateur ne connaît que des nombres en nombre fini. On découpe donc la poutre en petits morceaux de longueur h, on ne cherche la flèche qu'aux **nœuds**, et l'on remplace chaque dérivée par une formule qui n'utilise que les nœuds voisins. L'équation différentielle devient un **système d'équations** ordinaire.
+
+<GrilleDF n={6} L={6} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment transformer une équation différentielle en un système qu'un ordinateur sait résoudre ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Différences finies" sousTitre="De la courbe à la grille" etape="cours">
+
+<Panneau n={1} titre="Grille" icone="plan" couleur="encre">
+Nœuds xᵢ = i h, de 0 à n.
+</Panneau>
+
+<Panneau n={2} titre="Dérivée seconde" icone="calcul" couleur="acier">
+(yᵢ₋₁ − 2yᵢ + yᵢ₊₁)/h².
+</Panneau>
+
+<Panneau n={3} titre="Une équation par nœud" icone="regle" couleur="terre">
+n − 1 nœuds intérieurs, n − 1 inconnues.
+</Panneau>
+
+<Panneau n={4} titre="Limites" icone="verification" couleur="validation">
+Appuis : y₀ = yₙ = 0.
+</Panneau>
+
+<Panneau n={5} titre="Système creux" icone="idee" couleur="brique">
+Tridiagonal : Thomas (L2.3.5).
+</Panneau>
+
+<Panneau n={6} titre="Affiner" icone="attention" couleur="correction">
+h divisé par 2 : erreur divisée par 4.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la formule à trois points">
+
+### La dérivée seconde
+
+En combinant les développements de $y(x+h)$ et $y(x-h)$ (L1.2), les termes impairs s'annulent :
+
+$$y''(x_i) \approx \frac{y_{i-1} - 2y_i + y_{i+1}}{h^2}$$
+
+L'erreur est proportionnelle à h² : la méthode est d'**ordre 2**.
+
+### L'équation de la poutre
+
+L'équation de la déformée $EI\,y'' = -M(x)$ (L2.1.6) devient, au nœud i :
+
+$$y_{i-1} - 2y_i + y_{i+1} = -\frac{h^2\,M(x_i)}{EI}$$
+
+Avec les conditions d'appui $y_0 = y_n = 0$, on obtient n − 1 équations à n − 1 inconnues.
+
+<GrilleDF n={8} L={6} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : le système et sa résolution">
+
+### Un système tridiagonal
+
+Chaque équation ne fait intervenir que trois nœuds voisins : la matrice est **tridiagonale**. L'algorithme de Thomas (L2.3.5) la résout en un nombre d'opérations proportionnel à n.
+
+<MatriceCreuse n={9} bande={1} />
+
+### La convergence
+
+Avec 6 intervalles, l'écart sur la flèche vaut {nombre(r6.erreur * 100, 2)} % ; avec 12, {nombre(r12.erreur * 100, 2)} % ; avec 24, {nombre(r24.erreur * 100, 3)} %. Diviser h par 2 divise l'erreur par 4 : c'est l'ordre 2.
+
+<DiagrammeBarres alt={`Écart sur la flèche selon le nombre d'intervalles : 6 intervalles ${nombre(r6.erreur * 100, 2)} %, 12 intervalles ${nombre(r12.erreur * 100, 2)} %, 24 intervalles ${nombre(r24.erreur * 100, 3)} %.`} titre="écart sur la flèche au milieu (%)" barres={[{ libelle: 'n = 6', valeur: r6.erreur * 100, texte: nombre(r6.erreur * 100, 2), teinte: 'terre' }, { libelle: 'n = 12', valeur: r12.erreur * 100, texte: nombre(r12.erreur * 100, 2), teinte: 'acier' }, { libelle: 'n = 24', valeur: r24.erreur * 100, texte: nombre(r24.erreur * 100, 3), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : au-delà de la poutre">
+
+### Les équations aux dérivées partielles
+
+La même idée s'applique aux EDP de L2.1.7 : pour la chaleur dans un mur ou la consolidation d'une argile, on discrétise l'espace (pas Δx) **et** le temps (pas Δt). Le schéma explicite calcule la température de demain à partir de celle d'aujourd'hui :
+
+$$T_i^{k+1} = T_i^k + \frac{a\,\Delta t}{\Delta x^2}\left(T_{i-1}^k - 2T_i^k + T_{i+1}^k\right)$$
+
+<Regle type="simplification">
+Ce schéma n'est stable que si $a\,\Delta t/\Delta x^2 \le 1/2$ : un pas de temps trop grand fait exploser le calcul. Les éléments finis (M1.6), plus souples pour les formes complexes, ont remplacé les différences finies dans la plupart des logiciels de structure, mais l'idée de discrétisation est la même.
+</Regle>
+
+<TroisEDP />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : de l'équation au résultat">
+
+<DiagrammeFlux alt="Démarche des différences finies : poser la grille ; écrire la formule de dérivée à chaque nœud intérieur ; ajouter les conditions aux limites ; assembler le système ; le résoudre ; affiner la grille pour vérifier." etapes={[{ titre: 'Grille', texte: 'pas h', teinte: 'encre' }, { titre: 'Formule', texte: 'à chaque nœud', teinte: 'acier' }, { titre: 'Limites', texte: 'y₀ = yₙ = 0', teinte: 'terre' }, { titre: 'Système', texte: 'tridiagonal', teinte: 'brique' }, { titre: 'Affiner', texte: 'h/2', teinte: 'validation' }]} />
+
+<DeformeeDF d={EXEMPLE_DF} />
+
+</Page>
+
+<FicheCalcul calcul="deformeeDiffFinies">
+
+<Cahier titre="Exemple résolu : la flèche d'une poutre en six morceaux">
+
+**Énoncé.** Une poutre sur deux appuis de 6 m porte 10 kN/m ; EI = 20 000 kN·m² (données de l'énoncé). Calcule la flèche par différences finies avec 6 intervalles et compare à la formule exacte 5qL⁴/(384EI).
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La grille et les équations">
+<AN k="pas" />
+<AN k="systeme" />
+<Note>Pourquoi seulement les nœuds intérieurs ? Aux appuis, la flèche est connue : y = 0.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : résoudre et comparer">
+
+<Etape n={3} titre="La flèche">
+<AN k="fleche" />
+<Resultat k="fDF" libelle="Flèche (différences finies)" />
+<Resultat k="erreur" libelle="Écart" />
+<Schema />
+<Note couleur="vert">Contrôle : passe à 12 puis 24 intervalles ; l'écart est divisé par 4 à chaque fois.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier les conditions aux limites.">
+Sans y₀ = yₙ = 0, le système n'a pas de solution unique : la poutre « flotte ».
+</Piege>
+
+<Piege erreur="oublier le h² au second membre.">
+La formule est divisée par h² : en la multipliant, h² passe à droite.
+</Piege>
+
+<Piege erreur="conclure avec une grille trop grossière.">
+Avec 2 intervalles, l'écart atteint {nombre(r2.erreur * 100, 0)} % ; on affine jusqu'à stabilité.
+</Piege>
+
+<DeformeeDF d={{ ...EXEMPLE_DF, n: 2 }} />
+
+<Piege erreur="choisir Δt trop grand en schéma explicite.">
+Le calcul diverge : respecter a Δt/Δx² ≤ 1/2.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Écoulements sous un barrage, chaleur d'un béton massif.** Pour un petit barrage en terre ou une digue, on calcule souvent la charge hydraulique sous l'ouvrage par différences finies sur une grille (équation de Laplace, L2.7). Pour une fondation massive coulée en saison sèche, on estime la température au cœur du béton par le schéma de la chaleur.
+
+<GrilleDF n={10} L={5} />
+
+<Encadre type="terrain" titre="Un tableur suffit">
+Une grille de différences finies se programme dans un tableur : une cellule par nœud, la formule (gauche − 2 × centre + droite) recopiée, et les itérations de Gauss-Seidel faites par le calcul itératif du tableur. C'est un excellent outil pour vérifier un logiciel.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : différences finies">
+
+### Formules
+
+y′ ≈ (yᵢ₊₁ − yᵢ₋₁)/(2h) · y″ ≈ (yᵢ₋₁ − 2yᵢ + yᵢ₊₁)/h² · ordre 2
+
+### Poutre
+
+yᵢ₋₁ − 2yᵢ + yᵢ₊₁ = −h² M(xᵢ)/EI · y₀ = yₙ = 0 · tridiagonal → Thomas
+
+### Convergence
+
+h/2 → erreur/4 · affiner jusqu'à stabilité
+
+### Chaleur explicite
+
+stable si a Δt/Δx² ≤ 1/2
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Dérivée seconde">
+
+y = x² aux points 1, 2, 3 (valeurs 1, 4, 9). Dérivée seconde en 2 par la formule à trois points ?
+
+<Indice>(1 − 8 + 9)/1².</Indice>
+
+<Corrige>
+**{nombre(1 - 2 * 4 + 9, 0)}** : exact, car l'erreur dépend de y⁗, nulle pour un polynôme de degré 2.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Affiner la grille">
+
+Pour la poutre de l'exemple, compare la flèche avec 6 et 12 intervalles.
+
+<Indice>Fiche.</Indice>
+
+<Corrige>
+**{grandeur(r6.fDF * 1000, 2, 'mm')}** puis **{grandeur(r12.fDF * 1000, 2, 'mm')}** ; exacte {grandeur(r6.fExact * 1000, 2, 'mm')}.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une autre poutre">
+
+L = 5 m, q = 12 kN/m, EI = 15 000 kN·m², 10 intervalles. Flèche par différences finies et écart ?
+
+<Indice>Mêmes équations.</Indice>
+
+<Corrige>
+**{grandeur(ex3.fDF * 1000, 2, 'mm')}** contre {grandeur(ex3.fExact * 1000, 2, 'mm')} ; écart **{nombre(ex3.erreur * 100, 2)} %**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.3.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La formule de la dérivée seconde utilise :" choix={['trois nœuds voisins', 'deux nœuds', 'tous les nœuds', 'un nœud']} bonne={0} colonnes={4}>
+Molécule à trois points.
+</QCM>
+
+<QCM n={2} question="Avec n intervalles et deux appuis, le nombre d'inconnues est :" choix={['n − 1', 'n', 'n + 1', '2n']} bonne={0} colonnes={4}>
+Nœuds intérieurs.
+</QCM>
+
+<QCM n={3} question="La matrice obtenue pour une poutre est :" choix={['tridiagonale', 'pleine', 'diagonale', 'triangulaire']} bonne={0} colonnes={4}>
+Thomas.
+</QCM>
+
+<QCM n={4} question="Diviser h par 2 divise l'erreur par environ :" choix={['4', '2', '8', '16']} bonne={0} colonnes={4}>
+Ordre 2.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Avec 6 intervalles, la flèche de l'exemple vaut :</>} choix={[grandeur(r6.fDF * 1000, 2, 'mm'), grandeur(r6.fExact * 1000 * 2, 2, 'mm'), '1,00 mm', '60,0 mm']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="Les conditions aux limites d'une poutre sur deux appuis sont :" choix={['y₀ = yₙ = 0', 'y′ = 0 partout', 'M = 0 partout', 'aucune']} bonne={0} colonnes={2}>
+Flèche nulle aux appuis.
+</QCM>
+
+<QCM n={7} question="Le schéma explicite de la chaleur est stable si :" choix={['a Δt/Δx² ≤ 1/2', 'Δt est grand', 'Δx est grand', 'toujours']} bonne={0} colonnes={2}>
+Condition de stabilité.
+</QCM>
+
+<QCM n={8} question="Les logiciels de structure utilisent surtout :" choix={['les éléments finis', 'la dichotomie', 'Simpson', 'Lagrange']} bonne={0} colonnes={2}>
+M1.6.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

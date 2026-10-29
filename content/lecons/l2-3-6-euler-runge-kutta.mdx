@@ -1,0 +1,308 @@
+---
+id: L2.3.6
+titre: "Équations différentielles : Euler et Runge-Kutta"
+objectifs:
+  - Écrire une équation du second ordre comme un système du premier ordre
+  - Intégrer pas à pas par Euler, Heun et Runge-Kutta 4
+  - Comparer la précision et le coût des méthodes
+  - Choisir un pas de temps adapté au phénomène
+relecture: false
+normes: []
+glossaire:
+  - terme: Intégration pas à pas
+    definition: Calcul de la solution d'une équation différentielle en avançant d'un petit pas de temps h à la fois.
+  - terme: Méthode d'Euler
+    definition: On avance avec la pente du début du pas ; simple mais peu précise (ordre 1).
+  - terme: Runge-Kutta 4
+    definition: On combine quatre pentes calculées dans le pas ; très précise (ordre 4) pour un coût modéré.
+  - terme: Stabilité
+    definition: Capacité d'une méthode à ne pas amplifier les erreurs au fil des pas.
+symboles:
+  - { symbole: 'h', signification: 'pas de temps', unite: 's' }
+  - { symbole: 'y_n', signification: 'valeur approchée au pas n', unite: 'unité de y' }
+  - { symbole: 'k₁ … k₄', signification: 'pentes intermédiaires', unite: 'unité de y par s' }
+formules:
+  - { nom: 'Euler', tex: 'y_{n+1} = y_n + h\,f(t_n, y_n)', domaine: 'Ordre 1' }
+  - { nom: 'Heun (RK2)', tex: 'y_{n+1} = y_n + \frac h2\left(k_1 + k_2\right),\quad k_2 = f(t_n + h, y_n + h k_1)', domaine: 'Ordre 2' }
+  - { nom: 'Runge-Kutta 4', tex: 'y_{n+1} = y_n + \frac h6\left(k_1 + 2k_2 + 2k_3 + k_4\right)', domaine: 'Ordre 4' }
+---
+
+import { integrer, oscillateurNumerique } from '@/lib/calc/numerique'
+import { grandeur, nombre } from '@/lib/format'
+import { EulerRK, PentesRK4 } from '@/components/schemas/Numerique'
+import { MasseRessort } from '@/components/schemas/EquaDiff'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const w = 2 * Math.PI
+export const sci = (x) => { const e = Math.floor(Math.log10(Math.abs(x))); return `${nombre(x / 10 ** e, 1)} × 10^${e}` }
+export const err = (m, h) => oscillateurNumerique(w, 1, h, 1, m).erreur
+export const e1 = integrer((t, y) => [-y[0]], [1], 0, 0.1, 10, 'euler')
+export const r1 = integrer((t, y) => [-y[0]], [1], 0, 0.1, 10, 'rk4')
+export const ex2 = integrer((t, y) => [-0.5 * y[0]], [8], 0, 1, 2, 'euler')
+
+<Page etape="intuition" titre="L'intuition : avancer en suivant la pente">
+
+Une équation différentielle dit, en chaque point, **dans quelle direction** va la solution (L2.1.1). Pour la tracer sans formule, on avance d'un petit pas dans cette direction, on recalcule la direction, on avance encore. C'est l'idée de toutes les méthodes pas à pas.
+
+Toute la question est : avec **quelle** pente avancer ? Celle du début du pas (Euler) est simple, mais la courbe tourne pendant le pas. En regardant aussi au milieu et à la fin du pas, on fait beaucoup mieux.
+
+<PentesRK4 />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer pas à pas la réponse d'un système dynamique, avec une précision maîtrisée ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Trois méthodes pas à pas" sousTitre="Plus de pentes, plus de précision" etape="cours">
+
+<Panneau n={1} titre="Système" icone="calcul" couleur="encre">
+x″ = … devient (x, v)′ = (v, …).
+</Panneau>
+
+<Panneau n={2} titre="Euler" icone="regle" couleur="correction">
+Une pente, ordre 1 : erreur ∝ h.
+</Panneau>
+
+<Panneau n={3} titre="Heun" icone="idee" couleur="terre">
+Deux pentes, ordre 2 : erreur ∝ h².
+</Panneau>
+
+<Panneau n={4} titre="RK4" icone="verification" couleur="validation">
+Quatre pentes, ordre 4 : erreur ∝ h⁴.
+</Panneau>
+
+<Panneau n={5} titre="Pas" icone="plan" couleur="acier">
+Une période propre = au moins 20 à 50 pas.
+</Panneau>
+
+<Panneau n={6} titre="Stabilité" icone="attention" couleur="brique">
+Euler amplifie les oscillations.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : du second ordre au système">
+
+### Une seule forme
+
+Les méthodes s'écrivent pour $y' = f(t, y)$. Une équation du second ordre, comme l'oscillateur $m\ddot x + c\dot x + kx = F(t)$ (L2.1.5), se ramène à un **système** de deux équations du premier ordre en posant $v = \dot x$ :
+
+$$\dot x = v,\qquad \dot v = \frac{F(t) - c\,v - k\,x}{m}$$
+
+Le vecteur y = (x, v) avance d'un bloc ; tout ce qui suit s'applique à des vecteurs.
+
+<MasseRessort />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : Euler, Heun, Runge-Kutta">
+
+### Euler
+
+$y_{n+1} = y_n + h\,f(t_n, y_n)$ : la pente du début du pas. Erreur globale ∝ h.
+
+### Heun (Runge-Kutta 2)
+
+On fait un pas d'Euler pour estimer la fin du pas, on y calcule une seconde pente, et l'on avance avec la **moyenne** des deux. Erreur ∝ h².
+
+### Runge-Kutta 4
+
+Quatre pentes : $k_1$ au début, $k_2$ et $k_3$ au milieu, $k_4$ à la fin, combinées avec les poids 1, 2, 2, 1. Erreur ∝ h⁴ : diviser le pas par 2 divise l'erreur par 16. C'est la méthode par défaut de nombreux logiciels.
+
+<DiagrammeBarres alt={`Erreur sur l'oscillateur de 1 Hz après 1 s, pas de 0,01 s : Euler ${sci(err('euler', 0.01))}, Heun ${sci(err('rk2', 0.01))}, Runge-Kutta 4 ${sci(err('rk4', 0.01))}.`} titre="chiffres exacts après 1 s (pas 0,01 s)" barres={[{ libelle: 'Euler', valeur: -Math.log10(err('euler', 0.01)), texte: nombre(-Math.log10(err('euler', 0.01)), 1), teinte: 'correction' }, { libelle: 'Heun (RK2)', valeur: -Math.log10(err('rk2', 0.01)), texte: nombre(-Math.log10(err('rk2', 0.01)), 1), teinte: 'terre' }, { libelle: 'Runge-Kutta 4', valeur: -Math.log10(err('rk4', 0.01)), texte: nombre(-Math.log10(err('rk4', 0.01)), 1), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : le pas de temps et la stabilité">
+
+### Choisir h
+
+Le pas doit être petit devant le temps caractéristique du phénomène : pour une oscillation de période T, on prend au moins 20 à 50 pas par période ; pour un séisme, on suit aussi le pas de l'accélérogramme (souvent 0,01 ou 0,02 s).
+
+### La stabilité
+
+Pour un oscillateur non amorti, Euler **ajoute** de l'énergie à chaque pas : l'amplitude grandit sans fin, même avec un petit pas. RK4 reste fidèle sur des durées bien plus longues.
+
+<EulerRK />
+
+<Regle type="art">
+On vérifie toujours un calcul pas à pas en le refaisant avec un pas deux fois plus petit : si le résultat change peu, le pas convient.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'algorithme">
+
+<DiagrammeFlux alt="Algorithme pas à pas : écrire le système y′ = f(t, y) ; fixer les conditions initiales ; choisir le pas ; boucler : calculer les pentes, avancer d'un pas ; vérifier avec un pas moitié." etapes={[{ titre: 'Système', texte: 'y′ = f(t, y)', teinte: 'encre' }, { titre: 'Initial', texte: 'y(0)', teinte: 'acier' }, { titre: 'Pas h', texte: 'T/50', teinte: 'terre' }, { titre: 'Boucle', texte: 'pentes, avancer', teinte: 'brique' }, { titre: 'Vérifier', texte: 'h/2', teinte: 'validation' }]} boucle="pour chaque pas" />
+
+<PentesRK4 />
+
+</Page>
+
+<FicheCalcul calcul="oscillateurRK">
+
+<Cahier titre="Exemple résolu : un oscillateur de 1 Hz">
+
+**Énoncé.** Une masse sur ressort oscille librement à 1 Hz ; on la lâche à 1 (unité de longueur) sans vitesse. On simule 3 s avec un pas de 0,01 s (données de l'énoncé). Compare Euler, Heun et Runge-Kutta 4 à la solution exacte cos(2πt).
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le système">
+<AN k="systeme" />
+<Note>Pourquoi deux inconnues ? Une équation du second ordre demande position et vitesse pour avancer.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : comparer">
+
+<Etape n={3} titre="Les erreurs">
+<AN k="erreurs" />
+<Resultat k="r4" libelle="Erreur RK4" />
+<Schema />
+<Note couleur="vert">Contrôle : divise le pas par 2 ; l'erreur d'Euler est divisée par environ 2, celle de RK4 par environ 16.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier de transformer l'équation en système.">
+Euler et RK s'appliquent à y′ = f(t, y) ; x″ seule ne suffit pas.
+</Piege>
+
+<Piege erreur="mettre à jour x avant de calculer la pente de v.">
+Toutes les pentes d'un pas se calculent avec les valeurs du début du pas (ou des étapes intermédiaires prévues).
+</Piege>
+
+<Piege erreur="choisir un pas trop grand.">
+Avec 5 pas par période, même RK4 se trompe : 20 à 50 pas par période.
+</Piege>
+
+<EulerRK h={0.02} tmax={3} />
+
+<Piege erreur="faire confiance à Euler sur de longues durées.">
+Son erreur s'accumule et l'oscillation diverge.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Calcul sismique temporel.** Pour vérifier un ouvrage important en zone sismique (est de la RDC), on peut imposer à sa base un accélérogramme enregistré et calculer pas à pas sa réponse. Les logiciels utilisent des schémas dédiés (Newmark), de la même famille que ceux de cette leçon <AVerifier note="A_VERIFIER.md n° 60 : méthodes d'intégration temporelle admises pour le calcul sismique (EN 1998-1 §4.3.3.4.3) et choix du pas de temps" />.
+
+<EulerRK w={2 * Math.PI * 2} h={0.005} tmax={2} />
+
+<Encadre type="terrain" titre="Vidange, refroidissement, consolidation">
+Les équations de L2.1 (vidange d'un château d'eau, refroidissement d'un béton, consolidation) se traitent aussi pas à pas quand les données varient : pluie réelle, température de l'air mesurée heure par heure, chargement progressif d'un remblai.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : Euler et Runge-Kutta">
+
+### Système
+
+x″ = g(t, x, x′) → (x, v)′ = (v, g)
+
+### Méthodes
+
+Euler y + h k₁ (ordre 1) · Heun y + h/2 (k₁ + k₂) (ordre 2) · RK4 y + h/6 (k₁ + 2k₂ + 2k₃ + k₄) (ordre 4)
+
+### Pas
+
+20 à 50 pas par période · vérifier avec h/2
+
+### Stabilité
+
+Euler amplifie les oscillations · RK4 fidèle longtemps
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Deux pas d'Euler">
+
+y′ = −0,5 y, y(0) = 8, h = 1. Calcule y(1) et y(2) par Euler.
+
+<Indice>y ← y − 0,5 y = 0,5 y.</Indice>
+
+<Corrige>
+y(1) = **{nombre(ex2[1]?.y[0] ?? 0, 1)}** ; y(2) = **{nombre(ex2[2]?.y[0] ?? 0, 1)}** (exact : {nombre(8 * Math.exp(-1), 2)} et {nombre(8 * Math.exp(-2), 2)}).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Euler contre RK4">
+
+y′ = −y, y(0) = 1, h = 0,1, jusqu'à t = 1. Compare Euler et RK4 à e⁻¹.
+
+<Indice>Utilise un tableur ou Python.</Indice>
+
+<Corrige>
+Euler : **{nombre(e1[e1.length - 1]?.y[0] ?? 0, 5)}** ; RK4 : **{nombre(r1[r1.length - 1]?.y[0] ?? 0, 6)}** ; exact {nombre(Math.exp(-1), 6)}.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Ordre de convergence">
+
+Pour l'oscillateur de 1 Hz, mesure l'erreur de RK4 après 1 s avec h = 0,02 puis 0,01. Quel rapport ?
+
+<Indice>Ordre 4.</Indice>
+
+<Corrige>
+{sci(err('rk4', 0.02))} puis {sci(err('rk4', 0.01))} : rapport **{nombre(err('rk4', 0.02) / err('rk4', 0.01), 0)}** ≈ 2⁴.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.3.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La méthode d'Euler utilise la pente :" choix={['du début du pas', 'du milieu du pas', 'de la fin du pas', 'moyenne exacte']} bonne={0} colonnes={2}>
+Ordre 1.
+</QCM>
+
+<QCM n={2} question="Runge-Kutta 4 combine :" choix={['4 pentes avec les poids 1, 2, 2, 1', '2 pentes', '4 pas d’Euler', 'des tangentes de Newton']} bonne={0} colonnes={2}>
+Divisées par 6.
+</QCM>
+
+<QCM n={3} question="Pour intégrer x″ = −ω² x, on pose :" choix={['v = x′', 'x = v″', 'y = x²', 'rien']} bonne={0} colonnes={4}>
+Système du premier ordre.
+</QCM>
+
+<QCM n={4} question="Diviser le pas par 2 divise l'erreur de RK4 par environ :" choix={['16', '2', '4', '8']} bonne={0} colonnes={4}>
+Ordre 4.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Pour une oscillation de période 0,5 s, un pas raisonnable est :" choix={['0,01 s', '0,5 s', '1 s', '0,25 s']} bonne={0} colonnes={4}>
+50 pas par période.
+</QCM>
+
+<QCM n={6} question="Sur un oscillateur non amorti, Euler :" choix={['fait grandir l’amplitude', 'l’amortit exactement', 'est exact', 'arrête le mouvement']} bonne={0} colonnes={2}>
+Instabilité.
+</QCM>
+
+<QCM n={7} question="Pour vérifier un pas, on :" choix={['refait le calcul avec h/2', 'double h', 'change de méthode au hasard', 'arrondit']} bonne={0} colonnes={2}>
+Le résultat doit peu changer.
+</QCM>
+
+<QCM n={8} question="Heun est une méthode d'ordre :" choix={['2', '1', '3', '4']} bonne={0} colonnes={4}>
+Moyenne de deux pentes.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
