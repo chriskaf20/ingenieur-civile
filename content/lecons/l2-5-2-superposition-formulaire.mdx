@@ -1,0 +1,298 @@
+---
+id: L2.5.2
+titre: "Superposition et formulaire de flèches"
+objectifs:
+  - Utiliser un formulaire de flèches pour les cas courants
+  - Énoncer le principe de superposition et ses conditions
+  - Combiner plusieurs cas de charge pour obtenir une flèche
+  - Vérifier rapidement un résultat de logiciel
+relecture: false
+normes: []
+glossaire:
+  - terme: Principe de superposition
+    definition: En élasticité linéaire, l'effet de plusieurs charges est la somme des effets de chaque charge prise seule.
+  - terme: Formulaire
+    definition: Tableau des réactions, moments et flèches des cas de charge usuels.
+  - terme: Linéarité
+    definition: Proportionnalité entre causes et effets ; elle suppose un matériau élastique et de petites déformations.
+symboles:
+  - { symbole: 'f', signification: 'flèche', unite: 'mm' }
+  - { symbole: 'q, P', signification: 'charge répartie, force', unite: 'kN/m, kN' }
+  - { symbole: 'EI', signification: 'rigidité', unite: 'kN·m²' }
+formules:
+  - { nom: 'Deux appuis', tex: 'f_q = \frac{5qL^4}{384EI},\quad f_P = \frac{PL^3}{48EI}', domaine: 'q uniforme ; P au milieu' }
+  - { nom: 'Console', tex: 'f_q = \frac{qL^4}{8EI},\quad f_P = \frac{PL^3}{3EI}', domaine: 'q uniforme ; P en bout' }
+  - { nom: 'Superposition', tex: 'f = \sum_i f_i', domaine: 'Élasticité linéaire, même point' }
+---
+
+import { flecheFormulaire, ligneElastique } from '@/lib/calc/rdm2'
+import { grandeur, nombre } from '@/lib/format'
+import { FormulaireFleches, LigneElastique, Superposition } from '@/components/schemas/Rdm2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const fq = flecheFormulaire('uniforme', 10, 6, 20000)
+export const fP = flecheFormulaire('centree', 20, 6, 20000)
+export const num = ligneElastique({ L: 6, xA: 0, xB: 6, charges: [{ type: 'repartie', nom: 'q', q1: 10, q2: 10, a: 0, b: 6 }, { type: 'ponctuelle', nom: 'P', F: 20, a: 3 }] }, 20000, 600)
+export const cq = flecheFormulaire('consoleUniforme', 6, 1.5, 3000)
+export const cP = flecheFormulaire('consoleBout', 1, 1.5, 3000)
+export const deux = flecheFormulaire('uniforme', 10, 12, 20000) / flecheFormulaire('uniforme', 10, 6, 20000)
+
+<Page etape="intuition" titre="L'intuition : additionner les effets">
+
+Un plancher porte son poids, des meubles, des personnes ; une poutre reçoit une charge répartie et une poutre secondaire. Faut-il tout recalculer à chaque combinaison ? Non : tant que le matériau reste élastique, les effets **s'additionnent**. On calcule chaque cas avec une formule toute faite, et on fait la somme.
+
+<Superposition f1={fq} f2={fP} t1="10 kN/m" t2="20 kN au milieu" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment obtenir vite une flèche avec un formulaire et le principe de superposition ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Superposer" sousTitre="Cas simples, somme" etape="cours">
+
+<Panneau n={1} titre="Découper" icone="plan" couleur="encre">
+Une charge = un cas.
+</Panneau>
+
+<Panneau n={2} titre="Formulaire" icone="regle" couleur="acier">
+Chaque cas a sa formule.
+</Panneau>
+
+<Panneau n={3} titre="Même point" icone="idee" couleur="terre">
+Additionner au même endroit.
+</Panneau>
+
+<Panneau n={4} titre="Somme" icone="calcul" couleur="brique">
+f = Σ fᵢ ; idem pour M, V, R.
+</Panneau>
+
+<Panneau n={5} titre="Conditions" icone="attention" couleur="correction">
+Élastique, petites déformations.
+</Panneau>
+
+<Panneau n={6} titre="Contrôle" icone="verification" couleur="validation">
+Vérifier un logiciel en une ligne.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : le formulaire">
+
+### Les quatre cas à connaître
+
+<FormulaireFleches />
+
+Ces formules viennent toutes de la ligne élastique (L2.5.1). Les formulaires complets (charges triangulaires, forces quelconques, poutres encastrées) se trouvent dans les aide-mémoires de RDM.
+
+### L'effet de la portée
+
+La flèche sous charge répartie est proportionnelle à L⁴ : doubler la portée multiplie la flèche par {nombre(deux, 0)}.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : le principe de superposition">
+
+### L'énoncé
+
+Si le matériau reste **élastique linéaire** et les déformations **petites**, l'effet de plusieurs charges est la somme des effets de chaque charge seule. Cela vaut pour les réactions, les efforts internes, les contraintes et les déplacements.
+
+### Attention au point
+
+On additionne les flèches **au même point**. Pour 10 kN/m et 20 kN au milieu, les deux maximums sont au milieu : f = {nombre(fq * 1000, 2)} + {nombre(fP * 1000, 2)} = {nombre((fq + fP) * 1000, 2)} mm. L'intégration complète donne {nombre(num.f * 1000, 2)} mm : identique.
+
+<LigneElastique d={{ L: 6, xA: 0, xB: 6, charges: [{ type: 'repartie', nom: 'q', q1: 10, q2: 10, a: 0, b: 6 }, { type: 'ponctuelle', nom: 'P', F: 20, a: 3 }] }} EI={20000} titre="Charge répartie + force centrée" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : quand la superposition ne marche plus">
+
+### Les limites
+
+- le matériau **plastifie** (acier au-delà de fy) ou **fissure** (béton) : la rigidité change ;
+- les déformations ne sont plus petites : câbles, membranes, poteaux près du flambement (effets du second ordre, L2.5.8) ;
+- les conditions d'appui changent avec la charge (appui qui se soulève).
+
+<Regle type="simplification">
+Les Eurocodes combinent des **charges** (1,35 G + 1,5 Q…) avant de calculer : c'est encore de la superposition, valable tant que l'analyse est linéaire élastique.
+</Regle>
+
+<DiagrammeBarres alt={`Superposition sur une poutre de 6 m : 10 kN/m donne ${nombre(fq * 1000, 2)} mm, 20 kN au milieu ${nombre(fP * 1000, 2)} mm, total ${nombre((fq + fP) * 1000, 2)} mm ; calcul direct ${nombre(num.f * 1000, 2)} mm.`} titre="flèche au milieu (mm)" barres={[{ libelle: 'q seul', valeur: fq * 1000, texte: nombre(fq * 1000, 2), teinte: 'terre' }, { libelle: 'P seul', valeur: fP * 1000, texte: nombre(fP * 1000, 2), teinte: 'correction' }, { libelle: 'somme', valeur: (fq + fP) * 1000, texte: nombre((fq + fP) * 1000, 2), teinte: 'encre' }, { libelle: 'calcul direct', valeur: num.f * 1000, texte: nombre(num.f * 1000, 2), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la méthode">
+
+<DiagrammeFlux alt="Méthode de superposition : décomposer le chargement en cas simples ; lire chaque formule ; calculer chaque flèche au même point ; additionner ; vérifier les conditions de linéarité." etapes={[{ titre: 'Décomposer', texte: 'cas simples', teinte: 'encre' }, { titre: 'Formulaire', texte: 'formules', teinte: 'acier' }, { titre: 'Même point', texte: 'milieu, bout', teinte: 'terre' }, { titre: 'Additionner', texte: 'Σ fᵢ', teinte: 'brique' }, { titre: 'Linéaire ?', texte: 'vérifier', teinte: 'validation' }]} />
+
+<Superposition f1={cq} f2={cP} t1="console : q" t2="console : P en bout" />
+
+</Page>
+
+<FicheCalcul calcul="superpositionFleches">
+
+<Cahier titre="Exemple résolu : poutre sous q et P">
+
+**Énoncé.** Poutre de 6 m sur deux appuis, EI = 20 000 kN·m², portant 10 kN/m et une force de 20 kN au milieu (données de l'énoncé). Flèche au milieu ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Chaque cas">
+<AN k="q" />
+<AN k="P" />
+<Note>Pourquoi peut-on additionner ? Les deux maximums sont au même point et la poutre reste élastique.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la somme">
+
+<Etape n={3} titre="Superposer">
+<AN k="total" />
+<Resultat k="f" libelle="Flèche totale" />
+<Schema />
+<Note couleur="vert">Contrôle : double q et P, la flèche double ; double L, elle est multipliée par 16 pour q et par 8 pour P.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="additionner des flèches à des endroits différents.">
+Le maximum d'une force excentrée n'est pas au milieu.
+</Piege>
+
+<Piege erreur="superposer au-delà du domaine élastique.">
+Un béton fissuré n'a plus la même rigidité.
+</Piege>
+
+<Piege erreur="confondre formules de console et de poutre sur appuis.">
+qL⁴/8EI (console) est {nombre((1 / 8) / (5 / 384), 1)} fois plus grand que 5qL⁴/384EI.
+</Piege>
+
+<FormulaireFleches />
+
+<Piege erreur="oublier le poids propre comme cas de charge.">
+C'est souvent le plus important.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le contrôle d'une ligne.** Un logiciel donne une flèche de 3 cm pour une poutre de 5 m ? En une ligne avec le formulaire, l'ingénieur retrouve l'ordre de grandeur. Si l'écart dépasse 20 à 30 %, il cherche l'erreur (unité de E, inertie, appuis mal définis).
+
+<Superposition f1={fq} f2={fP} t1="charges réparties" t2="poutre secondaire" />
+
+<Encadre type="terrain" titre="Ajouter un réservoir sur une dalle">
+Poser une citerne de 1 000 L sur une dalle existante, c'est ajouter environ 10 kN concentrés. La superposition permet d'estimer la flèche supplémentaire sans tout recalculer ; on vérifie aussi la résistance (L3.3).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : formulaire et superposition">
+
+### Deux appuis
+
+q : 5qL⁴/384EI · P milieu : PL³/48EI · M : qL²/8, PL/4
+
+### Console
+
+q : qL⁴/8EI · P bout : PL³/3EI · M encastrement : qL²/2, PL
+
+### Superposition
+
+f = Σ fᵢ au même point · élastique linéaire, petites déformations
+
+### Sensibilité
+
+q : f ∝ L⁴ · P : f ∝ L³ · f ∝ 1/EI
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Force centrée">
+
+P = 20 kN, L = 6 m, EI = 20 000 kN·m². Flèche ?
+
+<Indice>PL³/48EI.</Indice>
+
+<Corrige>
+**{grandeur(fP * 1000, 2, 'mm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Console de balcon">
+
+Console de 1,5 m, 6 kN/m et 1 kN en bout, EI = 3 000 kN·m². Flèche en bout ?
+
+<Indice>Somme des deux cas de console.</Indice>
+
+<Corrige>
+{nombre(cq * 1000, 2)} + {nombre(cP * 1000, 2)} = **{grandeur((cq + cP) * 1000, 2, 'mm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Portée doublée">
+
+Que devient la flèche d'une poutre uniformément chargée si l'on double la portée ?
+
+<Indice>L⁴.</Indice>
+
+<Corrige>
+× **{nombre(deux, 0)}** : on ne double jamais une portée sans revoir la hauteur.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.5.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La flèche d'une console sous force en bout vaut :" choix={['PL³/3EI', 'PL³/48EI', 'qL⁴/8EI', 'PL/4']} bonne={0} colonnes={4}>
+Formulaire.
+</QCM>
+
+<QCM n={2} question="La superposition suppose :" choix={['un comportement linéaire', 'un béton fissuré', 'de grandes déformations', 'un seul cas de charge']} bonne={0} colonnes={2}>
+Élastique, petites déformations.
+</QCM>
+
+<QCM n={3} question="On additionne les flèches :" choix={['au même point', 'à leurs maximums respectifs', 'au hasard', 'aux appuis']} bonne={0} colonnes={2}>
+Même abscisse.
+</QCM>
+
+<QCM n={4} question="Doubler EI :" choix={['divise la flèche par 2', 'la double', 'la divise par 4', 'ne change rien']} bonne={0} colonnes={2}>
+f ∝ 1/EI.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Poutre de 6 m sous 10 kN/m et 20 kN au milieu : f vaut :</>} choix={[grandeur((fq + fP) * 1000, 2, 'mm'), grandeur(fq * 1000, 2, 'mm'), grandeur(fP * 1000, 2, 'mm'), '30,00 mm']} bonne={0} colonnes={4}>
+Somme.
+</QCM>
+
+<QCM n={6} question="Une console sous q fléchit, comparée à la même poutre sur deux appuis :" choix={['bien plus', 'moins', 'autant', 'pas du tout']} bonne={0} colonnes={2}>
+1/8 contre 5/384.
+</QCM>
+
+<QCM n={7} question="La superposition ne vaut plus si :" choix={['l’acier plastifie', 'les charges sont deux', 'la poutre est longue', 'E est grand']} bonne={0} colonnes={2}>
+Non-linéarité.
+</QCM>
+
+<QCM n={8} question="Les combinaisons 1,35 G + 1,5 Q reposent sur :" choix={['la superposition', 'le flambement', 'Castigliano', 'Mohr']} bonne={0} colonnes={2}>
+Analyse linéaire.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

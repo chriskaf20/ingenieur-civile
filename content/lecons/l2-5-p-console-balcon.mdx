@@ -1,0 +1,155 @@
+---
+id: L2.5.P
+titre: "Mini-projet : poutre console de balcon"
+objectifs:
+  - Établir les charges d'un balcon en console
+  - Calculer le moment et l'effort tranchant d'encastrement
+  - Vérifier la contrainte et la flèche par superposition
+  - Proposer une épaisseur et expliquer la position des armatures
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { balcon, EXEMPLE_BALCON } from '@/lib/calc/rdm2'
+import { grandeur, nombre } from '@/lib/format'
+import { BalconConsole, LigneElastique, Superposition } from '@/components/schemas/Rdm2'
+import { ContraintesFlexion } from '@/components/schemas/Rdm1'
+import { DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d = EXEMPLE_BALCON
+export const b0 = balcon(d)
+export const ep = [12, 15, 18, 20]
+export const essais = ep.map((h) => ({ h, r: balcon({ ...d, h }) }))
+export const choix = essais.find((e) => e.r.taux <= 1 && e.r.rapport >= 150) ?? essais[essais.length - 1]
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+À Lubumbashi, on veut ajouter des balcons de **1,50 m** de porte-à-faux sur une façade. Ce sont des dalles en béton armé encastrées dans les poutres de rive. On étudie une bande de **1 m** de largeur (données de l'énoncé) : revêtement et étanchéité 1,5 kN/m, exploitation 3,5 kN/m <AVerifier note="A_VERIFIER.md n° 68 : charge d'exploitation des balcons (EN 1991-1-1 tableau 6.1 et 6.2, catégorie A, balcons) et charge sur garde-corps (EN 1991-1-1 §6.4)" />, garde-corps en bout 1 kN/m. Pour cet avant-projet, on prend un module E = 11 000 MPa (béton fissuré, valeur d'étude), une contrainte limite de 12 MPa et une flèche limitée à L/150 (console).
+
+<BalconConsole L={d.L} h={d.h} P={d.P} />
+
+### Ce que tu rends
+
+1. Les **charges** par mètre de largeur, poids propre compris.
+2. Le **moment** et l'**effort tranchant** à l'encastrement, avec les diagrammes.
+3. La vérification de la **contrainte** et de la **flèche** (superposition).
+4. Le choix de l'épaisseur et un croquis montrant où sont les armatures.
+
+<Regle type="simplification">
+Le béton armé ne se vérifie pas par σ = M/W (le béton tendu fissure) : la vérification réglementaire sera faite en L3.3. Ici, la contrainte « homogène » sert d'indicateur de prédimensionnement.
+</Regle>
+
+</Page>
+
+<Infographie titre="La démarche" sousTitre="Du balcon à l'encastrement" etape="projet">
+
+<Panneau n={1} titre="Charges" icone="calcul" couleur="encre">
+g + q + poids propre ; P en bout.
+</Panneau>
+
+<Panneau n={2} titre="Encastrement" icone="regle" couleur="acier">
+M = pL²/2 + PL ; V = pL + P.
+</Panneau>
+
+<Panneau n={3} titre="Contrainte" icone="plan" couleur="terre">
+σ = M/W indicatif.
+</Panneau>
+
+<Panneau n={4} titre="Flèche" icone="idee" couleur="brique">
+pL⁴/8EI + PL³/3EI.
+</Panneau>
+
+<Panneau n={5} titre="Armatures" icone="attention" couleur="correction">
+En haut : fibres tendues.
+</Panneau>
+
+<Panneau n={6} titre="Choisir" icone="verification" couleur="validation">
+Épaisseur qui passe tout.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="balconConsole">
+
+<Cahier titre="Étape 1 : charges et efforts" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Charges et moment">
+<AN k="p" />
+<AN k="M" />
+<Note>Pourquoi le garde-corps pèse-t-il autant ? Il est au bout du bras de levier.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : contrainte et flèche" etape="projet">
+
+<Etape n={3} titre="Contrainte">
+<AN k="sigma" />
+<Resultat k="sigma" libelle="Contrainte indicative" />
+</Etape>
+
+<Etape n={4} titre="Flèche">
+<AN k="f" />
+<Resultat k="rapport" libelle="Flèche relative" />
+<Schema />
+<Note couleur="vert">Contrôle : essaie 12 cm d'épaisseur ; regarde quel critère tombe.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le corrigé">
+
+<DiagrammeBarres alt={`Moment d'encastrement de la console de départ (h = 15 cm) : charges réparties ${nombre(b0.p * d.L * d.L / 2, 2)} kN·m, garde-corps ${nombre(d.P * d.L, 2)} kN·m.`} titre="contributions au moment d'encastrement (kN·m)" barres={[{ libelle: 'charges réparties p L²/2', valeur: b0.p * d.L * d.L / 2, texte: nombre(b0.p * d.L * d.L / 2, 2), teinte: 'terre' }, { libelle: 'garde-corps P L', valeur: d.P * d.L, texte: nombre(d.P * d.L, 2), teinte: 'correction' }]} />
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>h (cm)</th><th>M (kN·m)</th><th>σ (MPa)</th><th>f (mm)</th><th>L/f</th><th>verdict</th></tr></thead>
+    <tbody>{essais.map((e, i) => <tr key={i}><td>{e.h}</td><td>{nombre(e.r.M, 2)}</td><td>{nombre(e.r.sigma, 2)}</td><td>{nombre(e.r.fmm, 1)}</td><td>{nombre(e.r.rapport, 0)}</td><td>{e.r.taux <= 1 && e.r.rapport >= 150 ? 'convient' : 'insuffisant'}</td></tr>)}</tbody>
+  </table>
+</div>
+
+</Page>
+
+<Page etape="projet" titre="Le choix">
+
+**Choix : h = {choix.h} cm.** Moment d'encastrement {grandeur(choix.r.M, 2, 'kN·m')}, contrainte indicative {grandeur(choix.r.sigma, 2, 'MPa')}, flèche {grandeur(choix.r.fmm, 1, 'mm')} (L/{nombre(choix.r.rapport, 0)}).
+
+<Superposition f1={choix.r.f - (d.P * d.L ** 3) / (3 * choix.r.EI)} f2={(d.P * d.L ** 3) / (3 * choix.r.EI)} t1="charges réparties" t2="garde-corps" />
+
+<ContraintesFlexion rects={[{ b: 100, h: choix.h, y: 0 }]} M={-choix.r.M} />
+
+Le moment est **négatif** : la fibre supérieure est tendue, les armatures principales sont **en haut** et doivent se prolonger dans la dalle intérieure pour l'ancrage. Une console bien conçue a souvent une épaisseur décroissante vers le bout.
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+<DiagrammeBarres alt={`Flèche relative selon l'épaisseur : ${essais.map((e) => `${e.h} cm, L/${nombre(e.r.rapport, 0)}`).join(' ; ')}. Limite retenue L/150.`} titre="L/f selon l'épaisseur" barres={essais.map((e) => ({ libelle: `h = ${e.h} cm`, valeur: e.r.rapport, texte: nombre(e.r.rapport, 0), teinte: e.r.rapport >= 150 ? 'validation' : 'correction' }))} repere={{ valeur: 150, texte: 'L/150' }} />
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Charges | Poids propre oublié | Toutes les charges | Garde-corps et hypothèses citées |
+| Efforts | M seul | M et V | Diagrammes de console |
+| Vérifications | Contrainte seule | Contrainte et flèche | Superposition expliquée |
+| Ferraillage | Armatures en bas | Armatures en haut | Ancrage dans la dalle intérieure |
+
+<Quiz id="L2.5.P">
+
+<QCM n={1} question="Ma note contient-elle les charges, les efforts d'encastrement, la contrainte, la flèche, le choix de l'épaisseur et la position des armatures ?" choix={['Oui, tout y est', 'Il manque une partie']} bonne={0} colonnes={2}>
+Sinon, complète : une erreur sur la position des armatures d'un balcon est dangereuse.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

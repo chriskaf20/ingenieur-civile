@@ -1,0 +1,309 @@
+---
+id: L2.5.6
+titre: "Contraintes principales et cercle de Mohr"
+objectifs:
+  - Décrire l'état de contrainte plan d'un élément de matière
+  - Calculer les contraintes sur une facette inclinée
+  - Déterminer les contraintes principales et leur direction
+  - Construire et lire le cercle de Mohr
+relecture: false
+normes: []
+glossaire:
+  - terme: État de contrainte plan
+    definition: Ensemble des contraintes σx, σy, τxy qui agissent sur un petit élément dans un plan.
+  - terme: Contraintes principales
+    definition: Contraintes normales extrêmes σ1 et σ2, sur des facettes où le cisaillement est nul.
+  - terme: Cercle de Mohr
+    definition: Représentation graphique de toutes les contraintes (σ, τ) sur les facettes qui passent par un point.
+symboles:
+  - { symbole: 'σx, σy', signification: 'contraintes normales', unite: 'MPa' }
+  - { symbole: 'τxy', signification: 'cisaillement', unite: 'MPa' }
+  - { symbole: 'σ1, σ2', signification: 'contraintes principales', unite: 'MPa' }
+  - { symbole: 'θp', signification: 'angle des directions principales', unite: '°' }
+formules:
+  - { nom: 'Centre et rayon', tex: 'c = \frac{\sigma_x + \sigma_y}{2},\quad R = \sqrt{\left(\frac{\sigma_x - \sigma_y}{2}\right)^2 + \tau_{xy}^2}', domaine: 'Cercle de Mohr' }
+  - { nom: 'Principales', tex: '\sigma_{1,2} = c \pm R,\quad \tau_{max} = R', domaine: 'État plan' }
+  - { nom: 'Direction', tex: '\tan 2\theta_p = \frac{2\tau_{xy}}{\sigma_x - \sigma_y}', domaine: 'Facettes sans cisaillement' }
+---
+
+import { etatPlan } from '@/lib/calc/rdm2'
+import { cisaillementRect } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { ElementContraintes } from '@/components/schemas/Rdm2'
+import { CercleMohr } from '@/components/drawing/Graphes'
+import { Figure } from '@/components/drawing/Figure'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const e0 = etatPlan(80, 20, 40)
+export const cis = etatPlan(0, 0, 1.2)
+export const ex2 = etatPlan(-30, 10, 15)
+export const f30 = e0.facette(30)
+
+<Page etape="intuition" titre="L'intuition : les fissures à 45°">
+
+Une poutre en béton sans cadres casse près de ses appuis par des fissures **inclinées** à environ 45°, pas verticales. Pourquoi ? Parce qu'en un point, la matière ne « ressent » pas seulement σ et τ sur la section droite : sur une facette inclinée, la combinaison donne une **traction plus forte**, et c'est elle qui ouvre le béton. Il faut trouver ces facettes : ce sont les directions **principales**.
+
+<ElementContraintes sx={0} sy={0} txy={1.2} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment trouver, en un point, les contraintes les plus grandes et leurs directions ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Contraintes principales" sousTitre="Tourner l'élément" etape="cours">
+
+<Panneau n={1} titre="État plan" icone="plan" couleur="encre">
+σx, σy, τxy sur un petit carré.
+</Panneau>
+
+<Panneau n={2} titre="Facette" icone="regle" couleur="acier">
+Sur une face tournée de θ, σ et τ changent.
+</Panneau>
+
+<Panneau n={3} titre="Cercle" icone="calcul" couleur="terre">
+Centre c, rayon R : toutes les facettes.
+</Panneau>
+
+<Panneau n={4} titre="Principales" icone="idee" couleur="validation">
+σ1,2 = c ± R, τ = 0.
+</Panneau>
+
+<Panneau n={5} titre="τmax" icone="attention" couleur="correction">
+= R, à 45° des directions principales.
+</Panneau>
+
+<Panneau n={6} titre="Béton" icone="verification" couleur="brique">
+Fissures perpendiculaires à σ1.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : contraintes sur une facette">
+
+### L'élément
+
+Autour d'un point, un petit carré porte σx sur ses faces verticales, σy sur ses faces horizontales et τxy sur toutes (réciprocité du cisaillement).
+
+### Une facette tournée de θ
+
+En écrivant l'équilibre d'un petit triangle :
+
+$\sigma_\theta = c + \frac{\sigma_x - \sigma_y}{2}\cos 2\theta + \tau_{xy}\sin 2\theta$, $\tau_\theta = -\frac{\sigma_x - \sigma_y}{2}\sin 2\theta + \tau_{xy}\cos 2\theta$.
+
+Pour σx = 80, σy = 20, τ = 40 MPa et θ = 30° : σ = {nombre(f30.s, 1)} MPa, τ = {nombre(f30.t, 1)} MPa.
+
+<ElementContraintes sx={80} sy={20} txy={40} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : le cercle de Mohr">
+
+### La construction
+
+Les points (σθ, τθ) décrivent un **cercle** de centre $c = (\sigma_x + \sigma_y)/2$ et de rayon $R = \sqrt{((\sigma_x - \sigma_y)/2)^2 + \tau_{xy}^2}$. Une rotation θ de la facette correspond à une rotation 2θ sur le cercle.
+
+### La lecture
+
+- les points sur l'axe horizontal donnent les **contraintes principales** $\sigma_{1,2} = c \pm R$ (τ = 0) ;
+- le sommet du cercle donne le **cisaillement maximal** $\tau_{max} = R$.
+
+<Figure alt={`Cercle de Mohr de l'état σx = 80, σy = 20, τxy = 40 MPa : centre ${nombre(e0.c, 0)} MPa, rayon ${nombre(e0.R, 0)} MPa ; contraintes principales ${nombre(e0.s1, 0)} et ${nombre(e0.s2, 0)} MPa.`} largeur={620} hauteur={260}>
+<CercleMohr sx={80} sy={20} txy={40} x={190} y={10} taille={240} />
+</Figure>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : les directions principales">
+
+### L'angle
+
+Les facettes principales font l'angle $\theta_p$ avec x : $\tan 2\theta_p = 2\tau_{xy}/(\sigma_x - \sigma_y)$. Ici $\theta_p$ = {nombre(e0.theta, 1)}°. Les deux directions principales sont perpendiculaires ; les facettes de τmax sont à 45° de celles-ci.
+
+### Cisaillement pur
+
+Sur l'axe neutre d'une poutre, σ = 0 et τ ≠ 0 (L2.4.8). Le cercle est centré en 0 : $\sigma_1 = +\tau$, $\sigma_2 = -\tau$, à **45°**. D'où les fissures inclinées du béton près des appuis.
+
+<ElementContraintes sx={0} sy={0} txy={1.2} />
+
+<Regle type="simplification">
+On traite ici l'état **plan** (deux dimensions). En trois dimensions, il y a trois contraintes principales et trois cercles ; les critères de résistance (Tresca, von Mises) utilisent ces contraintes principales (M1).
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Contraintes principales : identifier σx, σy, τxy avec leurs signes ; calculer le centre et le rayon ; en déduire σ1, σ2 et τmax ; calculer l'angle des directions principales ; interpréter (fissures, rupture)." etapes={[{ titre: 'σx, σy, τ', texte: 'signes', teinte: 'encre' }, { titre: 'c, R', texte: 'cercle', teinte: 'acier' }, { titre: 'σ1, σ2', texte: 'c ± R', teinte: 'validation' }, { titre: 'θp', texte: 'tan 2θ', teinte: 'terre' }, { titre: 'Interpréter', texte: 'fissures', teinte: 'correction' }]} />
+
+<DiagrammeBarres alt={`État σx = 80, σy = 20, τ = 40 MPa : σ1 = ${nombre(e0.s1, 0)} MPa, σ2 = ${nombre(e0.s2, 0)} MPa, τmax = ${nombre(e0.tauMax, 0)} MPa. La plus grande traction dépasse σx.`} titre="contraintes au point étudié (MPa)" barres={[{ libelle: 'σx', valeur: 80, texte: '80', teinte: 'acier' }, { libelle: 'σ1', valeur: e0.s1, texte: nombre(e0.s1, 0), teinte: 'correction' }, { libelle: 'τmax', valeur: e0.tauMax, texte: nombre(e0.tauMax, 0), teinte: 'terre' }]} />
+
+</Page>
+
+<FicheCalcul calcul="etatPlanMohr">
+
+<Cahier titre="Exemple résolu : un point d'une tôle">
+
+**Énoncé.** En un point d'une tôle d'acier, σx = 80 MPa, σy = 20 MPa et τxy = 40 MPa (données de l'énoncé). Contraintes principales, cisaillement maximal et directions ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le cercle">
+<AN k="cercle" />
+<Note>Pourquoi le rayon fait-il intervenir τ ? Le cisaillement « écarte » les contraintes principales de la moyenne.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la lecture">
+
+<Etape n={3} titre="Principales et angle">
+<AN k="principales" />
+<AN k="angle" />
+<Resultat k="s1" libelle="Contrainte principale σ1" />
+<Schema />
+<Note couleur="vert">Contrôle : σ1 + σ2 = σx + σy (invariant).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier que l'angle double sur le cercle.">
+θ sur l'élément devient 2θ sur le cercle.
+</Piege>
+
+<Piege erreur="négliger les signes.">
+Traction positive, compression négative ; le signe de τ fixe le sens de rotation.
+</Piege>
+
+<Piege erreur="croire que la contrainte maximale est σx.">
+σ1 peut la dépasser largement dès qu'il y a du cisaillement.
+</Piege>
+
+<ElementContraintes sx={-30} sy={10} txy={15} />
+
+<Piege erreur="chercher les fissures du béton sur la section droite.">
+Elles sont perpendiculaires à σ1, souvent inclinées.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Lire des fissures.** Un ingénieur qui expertise un bâtiment lit l'orientation des fissures : verticales en milieu de poutre (flexion), inclinées près des appuis (effort tranchant), en escalier dans un mur (tassement différentiel du sol). Chaque orientation renvoie à une direction principale de traction.
+
+<ElementContraintes sx={0} sy={0} txy={1.2} />
+
+<Encadre type="terrain" titre="Murs et tassements">
+Sur les argiles gonflantes de certaines régions de RDC, les murs en blocs fissurent à 45° près des angles : le sol bouge, le mur est cisaillé, et la traction principale inclinée ouvre les joints. Le cercle de Mohr explique la géométrie de la fissure.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : contraintes principales">
+
+### Cercle
+
+c = (σx + σy)/2 · R = √(((σx − σy)/2)² + τ²)
+
+### Principales
+
+σ1,2 = c ± R · τmax = R · σ1 + σ2 = σx + σy
+
+### Direction
+
+tan 2θp = 2τ/(σx − σy) · τmax à 45° des principales
+
+### Cisaillement pur
+
+σ1 = −σ2 = τ, à 45° : fissures inclinées du béton
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Cisaillement pur">
+
+σx = σy = 0, τ = 1,2 MPa. σ1, σ2 ?
+
+<Indice>Cercle centré en 0.</Indice>
+
+<Corrige>
+σ1 = **{grandeur(cis.s1, 1, 'MPa')}**, σ2 = **{grandeur(cis.s2, 1, 'MPa')}**, à 45°.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Compression et cisaillement">
+
+σx = −30, σy = 10, τ = 15 MPa. σ1, σ2, τmax ?
+
+<Indice>c = −10, R = √(20² + 15²).</Indice>
+
+<Corrige>
+σ1 = **{grandeur(ex2.s1, 1, 'MPa')}** ; σ2 = **{grandeur(ex2.s2, 1, 'MPa')}** ; τmax = **{grandeur(ex2.tauMax, 1, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Facette à 30°">
+
+Pour σx = 80, σy = 20, τ = 40 MPa, contraintes sur la facette à 30° ?
+
+<Indice>Formules de la facette.</Indice>
+
+<Corrige>
+σ = **{grandeur(f30.s, 1, 'MPa')}** ; τ = **{grandeur(f30.t, 1, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.5.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sur une facette principale, le cisaillement est :" choix={['nul', 'maximal', 'égal à σ', 'négatif']} bonne={0} colonnes={4}>
+Définition.
+</QCM>
+
+<QCM n={2} question="Le rayon du cercle de Mohr égale :" choix={['τmax', 'σ1', 'σx', 'c']} bonne={0} colonnes={4}>
+Sommet du cercle.
+</QCM>
+
+<QCM n={3} question="Une rotation θ de la facette correspond sur le cercle à :" choix={['2θ', 'θ', 'θ/2', '90°']} bonne={0} colonnes={4}>
+Angle double.
+</QCM>
+
+<QCM n={4} question="En cisaillement pur, les directions principales sont à :" choix={['45°', '0°', '90°', '30°']} bonne={0} colonnes={4}>
+Fissures inclinées.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour σx = 80, σy = 20, τ = 40 MPa, σ1 vaut :</>} choix={[grandeur(e0.s1, 0, 'MPa'), '80 MPa', '50 MPa', '120 MPa']} bonne={0} colonnes={4}>
+c + R.
+</QCM>
+
+<QCM n={6} question="σ1 + σ2 vaut toujours :" choix={['σx + σy', 'τ', '0', '2R']} bonne={0} colonnes={4}>
+Invariant.
+</QCM>
+
+<QCM n={7} question="Les fissures d'un béton tendu sont :" choix={['perpendiculaires à σ1', 'parallèles à σ1', 'toujours verticales', 'aléatoires']} bonne={0} colonnes={2}>
+La traction les ouvre.
+</QCM>
+
+<QCM n={8} question="Des fissures en escalier dans un mur indiquent souvent :" choix={['un tassement différentiel', 'un excès de ciment', 'la pluie', 'un séisme seulement']} bonne={0} colonnes={2}>
+Cisaillement du mur.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

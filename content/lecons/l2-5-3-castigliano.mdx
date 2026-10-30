@@ -1,0 +1,301 @@
+---
+id: L2.5.3
+titre: "Méthodes énergétiques : théorème de Castigliano"
+objectifs:
+  - Calculer l'énergie de déformation d'une barre et d'une poutre
+  - Énoncer le théorème de Castigliano
+  - Calculer un déplacement par dérivation de l'énergie
+  - Utiliser une force fictive pour un déplacement sans charge
+relecture: false
+normes: []
+glossaire:
+  - terme: Énergie de déformation
+    definition: Travail emmagasiné dans une pièce élastique qui se déforme ; il est restitué au déchargement.
+  - terme: Théorème de Castigliano
+    definition: Le déplacement d'un point dans la direction d'une force est la dérivée de l'énergie de déformation par rapport à cette force.
+  - terme: Force fictive
+    definition: Force ajoutée là où l'on veut un déplacement, puis annulée après dérivation.
+symboles:
+  - { symbole: 'U', signification: 'énergie de déformation', unite: 'J (kN·m × 10³)' }
+  - { symbole: 'δ', signification: 'déplacement', unite: 'mm' }
+  - { symbole: 'P', signification: 'force', unite: 'kN' }
+formules:
+  - { nom: 'Barre', tex: 'U = \frac{N^2 L}{2EA}', domaine: 'Traction-compression' }
+  - { nom: 'Poutre', tex: 'U = \int_0^L \frac{M^2}{2EI}\,dx', domaine: 'Flexion (cisaillement négligé)' }
+  - { nom: 'Castigliano', tex: '\delta_i = \frac{\partial U}{\partial P_i}', domaine: 'Élastique linéaire' }
+---
+
+import { castiglianoConsole, energieBarre } from '@/lib/calc/rdm2'
+import { grandeur, nombre } from '@/lib/format'
+import { EnergieConsole } from '@/components/schemas/Rdm2'
+import { BarreTraction } from '@/components/schemas/Rdm1'
+import { barre } from '@/lib/calc/rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const c0 = castiglianoConsole(10, 2, 5000)
+export const Ub = energieBarre(120, 4, 210000, Math.PI * 100)
+export const c2 = castiglianoConsole(20, 2, 5000)
+export const ex3 = castiglianoConsole(5, 1.5, 2000)
+
+<Page etape="intuition" titre="L'intuition : le ressort qui stocke l'énergie">
+
+Tends un arc : il stocke de l'énergie, qu'il rend à la flèche. Une poutre chargée fait pareil : en se déformant, elle stocke un **travail**, l'énergie de déformation. Le théorème de Castigliano dit une chose étonnante : si l'on sait comment cette énergie varie quand la force change, on connaît le **déplacement** sous la force. Pas besoin de tracer toute la ligne élastique.
+
+<EnergieConsole P={10} L={2} U={c0.U} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer un déplacement à partir de l'énergie stockée dans une structure ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="L'énergie au service du calcul" sousTitre="Castigliano" etape="cours">
+
+<Panneau n={1} titre="Travail" icone="calcul" couleur="encre">
+P monte de 0 à P : travail P δ/2.
+</Panneau>
+
+<Panneau n={2} titre="Barre" icone="regle" couleur="acier">
+U = N² L/(2EA).
+</Panneau>
+
+<Panneau n={3} titre="Poutre" icone="plan" couleur="terre">
+U = ∫ M²/(2EI) dx.
+</Panneau>
+
+<Panneau n={4} titre="Castigliano" icone="idee" couleur="validation">
+δ = ∂U/∂P.
+</Panneau>
+
+<Panneau n={5} titre="Force fictive" icone="verification" couleur="brique">
+Ajouter F, dériver, puis F = 0.
+</Panneau>
+
+<Panneau n={6} titre="Usage" icone="attention" couleur="correction">
+Treillis, cadres, structures hyperstatiques.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'énergie de déformation">
+
+### Le travail d'une force
+
+Une force appliquée progressivement de 0 à P produit un déplacement de 0 à δ ; le travail vaut $P\delta/2$ (aire du triangle force-déplacement). Il est stocké dans la matière : c'est U.
+
+### Barre et poutre
+
+- Barre en traction : $U = \dfrac{N^2 L}{2EA}$. Le tirant de L2.4.5 stocke {nombre(Ub, 1)} J.
+- Poutre en flexion : $U = \displaystyle\int_0^L \frac{M^2}{2EI}\,dx$ (on néglige l'énergie d'effort tranchant pour les poutres élancées).
+
+<BarreTraction N={120} L={4} dL={barre({ N: 120, L: 4, d: 20, E: 210000 }).dL} d={20} sigma={barre({ N: 120, L: 4, d: 20, E: 210000 }).sigma} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : le théorème">
+
+### L'énoncé
+
+Pour une structure élastique linéaire chargée par des forces $P_i$ :
+
+$$\delta_i = \frac{\partial U}{\partial P_i}$$
+
+δᵢ est le déplacement du point d'application de $P_i$, dans sa direction.
+
+### La console
+
+M(x) = −P x (x mesuré depuis le bout). $U = \int_0^L \frac{P^2x^2}{2EI}dx = \frac{P^2L^3}{6EI}$, d'où $\delta = \frac{PL^3}{3EI}$ : on retrouve le formulaire. Pour 10 kN sur 2 m (EI = 5 000) : δ = {nombre(c0.delta * 1000, 2)} mm.
+
+<DiagrammeBarres alt={`Énergie stockée par la console : ${nombre(c0.U * 1000, 1)} J sous 10 kN, ${nombre(c2.U * 1000, 1)} J sous 20 kN : quatre fois plus, car U varie comme P².`} titre="énergie de déformation (J)" barres={[{ libelle: 'P = 10 kN', valeur: c0.U * 1000, texte: nombre(c0.U * 1000, 1), teinte: 'terre' }, { libelle: 'P = 20 kN', valeur: c2.U * 1000, texte: nombre(c2.U * 1000, 1), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : la force fictive">
+
+### Un déplacement sans force
+
+Pour la flèche au milieu d'une poutre qui ne porte qu'une charge répartie, il n'y a pas de force au milieu. On en **ajoute** une fictive F, on calcule U(q, F), on dérive par rapport à F, puis on pose F = 0. On obtient 5qL⁴/(384EI).
+
+<Regle type="art">
+Castigliano est très efficace pour les **treillis** (somme de termes N²L/2EA) et les **cadres**, et c'est la base des méthodes de calcul des structures hyperstatiques (la dérivée par rapport à une réaction inconnue est nulle) que tu verras en M1.
+</Regle>
+
+<EnergieConsole P={5} L={1.5} U={ex3.U} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Castigliano : placer une force (réelle ou fictive) au point et dans la direction voulus ; écrire M(x) ou N dans chaque élément en fonction de cette force ; écrire U ; dériver par rapport à la force ; annuler la force fictive." etapes={[{ titre: 'Force', texte: 'réelle ou fictive', teinte: 'encre' }, { titre: 'M(x), N', texte: 'en fonction de P', teinte: 'acier' }, { titre: 'U', texte: '∫ M²/2EI', teinte: 'terre' }, { titre: '∂U/∂P', texte: 'dériver', teinte: 'brique' }, { titre: 'F = 0', texte: 'si fictive', teinte: 'validation' }]} />
+
+<EnergieConsole P={20} L={2} U={c2.U} />
+
+</Page>
+
+<FicheCalcul calcul="castiglianoConsole">
+
+<Cahier titre="Exemple résolu : flèche d'une console par l'énergie">
+
+**Énoncé.** Une console de 2 m, EI = 5 000 kN·m², porte 10 kN en bout (données de l'énoncé). Calcule l'énergie de déformation, puis la flèche en bout par Castigliano.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Moment et énergie">
+<AN k="M" />
+<AN k="U" />
+<Note>Pourquoi M² ? L'énergie est quadratique : doubler P quadruple U.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : dériver">
+
+<Etape n={3} titre="Castigliano">
+<AN k="delta" />
+<Resultat k="delta" libelle="Flèche en bout" />
+<Schema />
+<Note couleur="vert">Contrôle : on vérifie U = P δ/2.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="dériver par rapport à une force qui n'est pas au point voulu.">
+δ est le déplacement du point d'application de la force dérivée.
+</Piege>
+
+<Piege erreur="oublier d'annuler la force fictive.">
+On la met à zéro **après** la dérivation.
+</Piege>
+
+<Piege erreur="additionner des énergies comme des forces.">
+U(P1 + P2) ≠ U(P1) + U(P2) : l'énergie n'est pas linéaire.
+</Piege>
+
+<DiagrammeBarres alt={`U(10 kN) = ${nombre(c0.U * 1000, 1)} J ; U(20 kN) = ${nombre(c2.U * 1000, 1)} J, et non le double.`} titre="l'énergie n'est pas additive (J)" barres={[{ libelle: '2 × U(10 kN)', valeur: 2 * c0.U * 1000, texte: nombre(2 * c0.U * 1000, 1), teinte: 'correction' }, { libelle: 'U(20 kN)', valeur: c2.U * 1000, texte: nombre(c2.U * 1000, 1), teinte: 'validation' }]} />
+
+<Piege erreur="mélanger les unités d'énergie.">
+kN·m = kJ ; × 1 000 pour des joules.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Absorber l'énergie.** Les glissières de sécurité des routes, les amortisseurs parasismiques, les défenses de quai absorbent l'énergie d'un choc en se déformant. Leur dimensionnement compare l'énergie à absorber à l'énergie de déformation disponible, exactement comme ici.
+
+<EnergieConsole P={10} L={2} U={c0.U} />
+
+<Encadre type="terrain" titre="Ponts en treillis">
+Les anciens ponts métalliques en treillis du réseau ferré congolais (lignes de la SNCC) se recalculent à la main avec l'énergie : la flèche d'un nœud est la somme, sur toutes les barres, de N n L/(EA), où n est l'effort dû à une force unité au nœud.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : énergie et Castigliano">
+
+### Énergies
+
+barre N²L/(2EA) · poutre ∫ M²/(2EI) dx · U = P δ/2
+
+### Théorème
+
+δᵢ = ∂U/∂Pᵢ (déplacement au point et dans la direction de Pᵢ)
+
+### Force fictive
+
+ajouter F → dériver → F = 0
+
+### Attention
+
+U non additive · élastique linéaire
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Énergie d'un tirant">
+
+Tirant de 4 m, Ø 20 mm, acier, 120 kN. Énergie stockée ?
+
+<Indice>N²L/(2EA).</Indice>
+
+<Corrige>
+**{grandeur(Ub, 1, 'J')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Force doublée">
+
+Que deviennent U et δ si l'on double la force sur la console ?
+
+<Indice>U ∝ P², δ ∝ P.</Indice>
+
+<Corrige>
+U × 4 = **{grandeur(c2.U * 1000, 1, 'J')}** ; δ × 2 = **{grandeur(c2.delta * 1000, 2, 'mm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Petite console">
+
+P = 5 kN, L = 1,5 m, EI = 2 000 kN·m². U et δ ?
+
+<Indice>Mêmes formules.</Indice>
+
+<Corrige>
+U = **{grandeur(ex3.U * 1000, 1, 'J')}** ; δ = **{grandeur(ex3.delta * 1000, 2, 'mm')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.5.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'énergie d'une barre tendue vaut :" choix={['N²L/(2EA)', 'NL/(EA)', 'N L', 'EA/L']} bonne={0} colonnes={4}>
+Quadratique.
+</QCM>
+
+<QCM n={2} question="Le théorème de Castigliano donne :" choix={['δ = ∂U/∂P', 'U = P δ', 'P = ∂δ/∂U', 'M = ∂U/∂x']} bonne={0} colonnes={2}>
+Dérivée de l'énergie.
+</QCM>
+
+<QCM n={3} question="Doubler la force multiplie l'énergie par :" choix={['4', '2', '8', '1']} bonne={0} colonnes={4}>
+U ∝ P².
+</QCM>
+
+<QCM n={4} question="Une force fictive est :" choix={['ajoutée puis annulée après dérivation', 'une charge réelle', 'un poids propre', 'une réaction']} bonne={0} colonnes={2}>
+Pour un déplacement sans charge.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Console de l'exemple : δ vaut :</>} choix={[grandeur(c0.delta * 1000, 2, 'mm'), grandeur(c0.U * 1000, 2, 'mm'), '16,00 mm', '0,53 mm']} bonne={0} colonnes={4}>
+PL³/3EI.
+</QCM>
+
+<QCM n={6} question="Pour une poutre élancée, on néglige souvent l'énergie due :" choix={['à l’effort tranchant', 'au moment', 'à la flexion', 'au poids']} bonne={0} colonnes={2}>
+Elle est faible.
+</QCM>
+
+<QCM n={7} question="1 kN·m vaut :" choix={['1 000 J', '1 J', '10 J', '0,001 J']} bonne={0} colonnes={4}>
+1 kJ.
+</QCM>
+
+<QCM n={8} question="Les glissières de sécurité fonctionnent en :" choix={['absorbant de l’énergie en se déformant', 'restant rigides', 'flambant', 'vibrant']} bonne={0} colonnes={2}>
+Énergie de déformation.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

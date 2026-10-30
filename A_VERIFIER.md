@@ -74,3 +74,5 @@ Statuts :
 | 64 | Résistance des boulons : EN 1993-1-8 tableau 3.4 (cisaillement, pression diamétrale) et pinces minimales (tableau 3.3) | L2.4.10 | `à confirmer` |
 | 65 | Élancements de prédimensionnement : béton armé L/10 à L/15, bois L/18 à L/20, acier L/20 à L/25 | L2.4.11 | `hypothèse` : règles de l'art |
 | 66 | Charge d'exploitation des planchers d'habitation 1,5 kN/m² (EN 1991-1-1 tableau 6.2, catégorie A) ; contrainte limite 10 MPa et flèche L/300 retenues pour la solive | L2.4.P | `hypothèse` : valeurs de projet pédagogiques, à confirmer avec l'EN 1995-1-1 et l'annexe nationale |
+| 67 | Flambement : courbes et facteurs d'imperfection EN 1993-1-1 §6.3.1 ; élancement limite EN 1992-1-1 §5.8.3.1 ; méthode bois EN 1995-1-1 §6.3.2 | L2.5.8 | `à confirmer` |
+| 68 | Balcons : charge d'exploitation (EN 1991-1-1 tableaux 6.1 et 6.2) et charge sur garde-corps (§6.4) ; E = 11 000 MPa (béton fissuré), σlim = 12 MPa et flèche L/150 retenus pour l'avant-projet | L2.5.P | `hypothèse` : valeurs pédagogiques d'avant-projet |

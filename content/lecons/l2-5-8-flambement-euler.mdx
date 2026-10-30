@@ -1,0 +1,321 @@
+---
+id: L2.5.8
+titre: "Flambement : charge critique d'Euler"
+objectifs:
+  - Décrire le flambement comme une instabilité
+  - Calculer la longueur de flambement selon les liaisons
+  - Calculer le rayon de giration et l'élancement
+  - Calculer la charge critique d'Euler et la comparer à la résistance du matériau
+relecture: false
+normes:
+  - "EN 1993-1-1 §6.3.1 et EN 1992-1-1 §5.8 : prise en compte du flambement (courbes et méthodes de calcul)"
+glossaire:
+  - terme: Flambement
+    definition: Perte de stabilité d'une pièce comprimée qui se courbe brusquement latéralement, avant d'avoir atteint la résistance du matériau.
+  - terme: Longueur de flambement
+    definition: Lf, longueur de la demi-onde de la déformée ; elle dépend des liaisons aux extrémités.
+  - terme: Rayon de giration
+    definition: i = √(I/A), longueur caractéristique de la section.
+  - terme: Élancement
+    definition: λ = Lf/i, nombre sans unité ; plus il est grand, plus la pièce flambe facilement.
+symboles:
+  - { symbole: 'Ncr', signification: 'charge critique d''Euler', unite: 'kN' }
+  - { symbole: 'Lf', signification: 'longueur de flambement', unite: 'm' }
+  - { symbole: 'i', signification: 'rayon de giration', unite: 'cm' }
+  - { symbole: 'λ', signification: 'élancement', unite: '—' }
+formules:
+  - { nom: 'Euler', tex: 'N_{cr} = \frac{\pi^2 E I}{L_f^2}', domaine: 'Pièce élastique, parfaitement droite' }
+  - { nom: 'Élancement', tex: 'i = \sqrt{\frac{I}{A}},\quad \lambda = \frac{L_f}{i}', domaine: 'Axe de plus faible inertie' }
+  - { nom: 'Contrainte critique', tex: '\sigma_{cr} = \frac{\pi^2 E}{\lambda^2}', domaine: 'Euler' }
+---
+
+import { EXEMPLE_FLAMBEMENT, flambement } from '@/lib/calc/rdm2'
+import { grandeur, nombre } from '@/lib/format'
+import { CasEuler, CourbeEuler } from '@/components/schemas/Rdm2'
+import { Calque, Vue3D } from '@/components/gabarits/Vue3D'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const f0 = flambement(EXEMPLE_FLAMBEMENT)
+export const fEnc = flambement({ ...EXEMPLE_FLAMBEMENT, liaisons: 'encastré-encastré' })
+export const fCons = flambement({ ...EXEMPLE_FLAMBEMENT, liaisons: 'encastré-libre' })
+export const f2L = flambement({ ...EXEMPLE_FLAMBEMENT, L: 6 })
+export const ecrasement = 10 * 10 * 100 * 20 / 1000
+export const ex3 = flambement({ L: 3, liaisons: 'articulé-articulé', E: 11000, b: 7.5, h: 15 })
+
+<Page etape="intuition" titre="L'intuition : la règle qu'on écrase">
+
+Appuie verticalement sur une règle en plastique posée sur la table : au début, rien. Puis, d'un coup, elle se courbe sur le côté et ne porte plus rien de plus. Elle n'a pas cassé, elle est devenue **instable**. C'est le **flambement**. Un poteau élancé, une diagonale de ferme comprimée, un étai de coffrage peuvent flamber bien avant d'écraser leur matière.
+
+<CasEuler actif="articulé-articulé" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+À partir de quelle charge une pièce comprimée flambe-t-elle, et de quoi cela dépend-il ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Le flambement d'Euler" sousTitre="Instabilité des pièces comprimées" etape="cours">
+
+<Panneau n={1} titre="Instabilité" icone="attention" couleur="correction">
+Rupture brutale, sans avertissement.
+</Panneau>
+
+<Panneau n={2} titre="Ncr" icone="calcul" couleur="encre">
+π² E I / Lf².
+</Panneau>
+
+<Panneau n={3} titre="Liaisons" icone="plan" couleur="acier">
+Lf = 0,5 L à 2 L.
+</Panneau>
+
+<Panneau n={4} titre="Axe faible" icone="regle" couleur="terre">
+On prend la plus petite inertie.
+</Panneau>
+
+<Panneau n={5} titre="Élancement" icone="idee" couleur="brique">
+λ = Lf/i.
+</Panneau>
+
+<Panneau n={6} titre="Deux limites" icone="verification" couleur="validation">
+Écrasement si λ petit, flambement si λ grand.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la charge critique">
+
+### L'équation
+
+Une pièce légèrement courbée de y sous N subit le moment M = N y. La ligne élastique $EI\,y'' = -N\,y$ n'a de solution non nulle que pour certaines valeurs de N. La plus petite est la **charge critique d'Euler** :
+
+$$N_{cr} = \frac{\pi^2 E I}{L_f^2}$$
+
+### Ce qui compte
+
+- **E** : le matériau ;
+- **I** de l'axe **faible** : la pièce flambe du côté le plus souple ;
+- **Lf²** : doubler la longueur divise Ncr par quatre ({nombre(f0.Ncr, 1)} kN pour 3 m, {nombre(f2L.Ncr, 1)} kN pour 6 m).
+
+<CourbeEuler E={11000} fy={20} lambda={f0.lambda} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la longueur de flambement">
+
+### Les quatre cas d'Euler
+
+| Liaisons | Lf |
+|---|---|
+| articulé – articulé | L |
+| encastré – articulé | 0,7 L |
+| encastré – encastré | 0,5 L |
+| encastré – libre | 2 L |
+
+Un poteau encastré en pied et libre en tête (un mât, un poteau de hangar sans contreventement) a une longueur de flambement **double** : Ncr divisé par 4.
+
+<DiagrammeBarres alt={`Poteau bois 10 × 10 cm de 3 m : Ncr = ${nombre(fEnc.Ncr, 0)} kN encastré aux deux bouts, ${nombre(f0.Ncr, 0)} kN articulé, ${nombre(fCons.Ncr, 0)} kN en console.`} titre="charge critique selon les liaisons (kN)" barres={[{ libelle: 'encastré – encastré', valeur: fEnc.Ncr, texte: nombre(fEnc.Ncr, 0), teinte: 'validation' }, { libelle: 'articulé – articulé', valeur: f0.Ncr, texte: nombre(f0.Ncr, 0), teinte: 'terre' }, { libelle: 'encastré – libre', valeur: fCons.Ncr, texte: nombre(fCons.Ncr, 1), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : élancement et réalité">
+
+### L'élancement
+
+$i = \sqrt{I/A}$ et $\lambda = L_f/i$ : un seul nombre résume la géométrie. $\sigma_{cr} = \pi^2 E/\lambda^2$. Pour le poteau bois 10 × 10 cm de 3 m : λ = {nombre(f0.lambda, 0)}, $\sigma_{cr}$ = {nombre(f0.scr, 1)} MPa.
+
+### Euler est optimiste
+
+Les vraies pièces ne sont ni parfaitement droites, ni chargées exactement au centre, et le matériau plastifie. Les normes réduisent donc la charge par des **courbes de flambement** (EN 1993-1-1 §6.3.1 pour l'acier, EN 1995 pour le bois) ou par un calcul au second ordre (EN 1992-1-1 §5.8 pour le béton) <AVerifier note="A_VERIFIER.md n° 67 : courbes de flambement EN 1993-1-1 (facteurs d'imperfection), élancement limite EN 1992-1-1 §5.8.3.1, et méthode bois EN 1995-1-1 §6.3.2" />.
+
+<Regle type="norme">
+Ne jamais utiliser Ncr d'Euler comme charge admissible : c'est une borne supérieure théorique. La résistance de calcul d'un poteau est toujours plus faible.
+</Regle>
+
+<CourbeEuler E={11000} fy={20} lambda={ex3.lambda} />
+
+</Page>
+
+<Vue3D titre="Les quatre modes de flambement" calques={[{ id: 'modes', libelle: 'Déformées' }]}>
+
+Compare les déformées : plus les extrémités sont tenues, plus la demi-onde est courte et plus la charge critique est élevée. Le poteau en console (à droite) flambe sur une demi-onde de longueur double.
+
+<CasEuler />
+
+</Vue3D>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Vérifier un poteau au flambement : identifier les liaisons et Lf ; calculer I de l'axe faible et i ; calculer λ ; calculer Ncr ; comparer à l'écrasement et appliquer la méthode de la norme." etapes={[{ titre: 'Liaisons', texte: 'Lf', teinte: 'encre' }, { titre: 'Axe faible', texte: 'I, i', teinte: 'acier' }, { titre: 'λ', texte: 'Lf/i', teinte: 'terre' }, { titre: 'Ncr', texte: 'π²EI/Lf²', teinte: 'brique' }, { titre: 'Norme', texte: 'réduction', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Poteau bois 10 × 10 cm de 3 m : écrasement à environ ${nombre(ecrasement, 0)} kN si la résistance est de 20 MPa ; flambement d'Euler à ${nombre(f0.Ncr, 0)} kN. Le flambement décide.`} titre="poteau bois 10 × 10, 3 m (kN)" barres={[{ libelle: 'écrasement (20 MPa)', valeur: ecrasement, texte: nombre(ecrasement, 0), teinte: 'terre' }, { libelle: 'flambement (Euler)', valeur: f0.Ncr, texte: nombre(f0.Ncr, 0), teinte: 'correction' }]} />
+
+</Page>
+
+<FicheCalcul calcul="flambementEuler">
+
+<Cahier titre="Exemple résolu : un poteau de véranda en bois">
+
+**Énoncé.** Un poteau en bois 10 × 10 cm, de 3 m, articulé en pied et en tête, E = 11 000 MPa (données de l'énoncé). Calcule l'élancement et la charge critique d'Euler.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Longueur de flambement">
+<AN k="Lf" />
+<Note>Pourquoi Lf = L ici ? Deux articulations : la déformée est une demi-sinusoïde sur toute la hauteur.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : élancement et charge critique">
+
+<Etape n={3} titre="Euler">
+<AN k="I" />
+<AN k="Ncr" />
+<Resultat k="Ncr" libelle="Charge critique" />
+<Resultat k="lambda" libelle="Élancement" />
+<Schema />
+<Note couleur="vert">Contrôle : passe en encastré-libre ; Ncr est divisé par 16 par rapport à l'encastré-encastré.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre l'inertie de l'axe fort.">
+La pièce flambe autour de l'axe le plus faible.
+</Piege>
+
+<Piege erreur="oublier les liaisons.">
+Un poteau en console flambe quatre fois plus facilement qu'un poteau articulé.
+</Piege>
+
+<Piege erreur="prendre Ncr comme charge admissible.">
+Les imperfections réduisent fortement la charge réelle.
+</Piege>
+
+<CasEuler actif="encastré-libre" />
+
+<Piege erreur="négliger le flambement des étais.">
+Les étais de coffrage trop longs ou non contreventés flambent pendant le bétonnage : accidents graves.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Étais et contreventement.** Pendant le coulage d'une dalle, les étais portent le béton frais. On les choisit pour leur hauteur, on les **contrevente** (liaisons horizontales à mi-hauteur) pour diviser Lf par deux, et on pose une planche sous le pied. Un étai en bois tordu ou trop élancé est remplacé.
+
+<CourbeEuler E={11000} fy={20} lambda={ex3.lambda} />
+
+<Encadre type="attention" titre="Perches d'eucalyptus">
+Sur beaucoup de chantiers de RDC, on étaie avec des perches d'eucalyptus. Leur diamètre varie, elles sont souvent courbes : leur charge de flambement est très incertaine. On en met davantage, on les contrevente, et on ne charge jamais une dalle fraîche (stock de blocs, sacs de ciment) au-delà de ce qui est prévu.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : flambement">
+
+### Euler
+
+Ncr = π² E I / Lf² · I de l'axe faible
+
+### Longueurs
+
+art.–art. L · enc.–art. 0,7 L · enc.–enc. 0,5 L · enc.–libre 2 L
+
+### Élancement
+
+i = √(I/A) · λ = Lf/i · σcr = π²E/λ²
+
+### Pratique
+
+Euler = borne optimiste · normes : courbes de flambement (à vérifier) · contreventer
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Poteau plus long">
+
+Le poteau de l'exemple fait 6 m. Ncr ?
+
+<Indice>Ncr ∝ 1/L².</Indice>
+
+<Corrige>
+**{grandeur(f2L.Ncr, 1, 'kN')}**, quatre fois moins.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Console">
+
+Même poteau 3 m, encastré en pied et libre en tête. Lf et Ncr ?
+
+<Indice>Lf = 2 L.</Indice>
+
+<Corrige>
+Lf = **{grandeur(fCons.Lf, 1, 'm')}** ; Ncr = **{grandeur(fCons.Ncr, 1, 'kN')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Section rectangulaire">
+
+Poteau bois 7,5 × 15 cm, 3 m, articulé. Autour de quel axe flambe-t-il ? λ et Ncr ?
+
+<Indice>I faible = 15 × 7,5³/12.</Indice>
+
+<Corrige>
+Autour de l'axe faible (épaisseur 7,5 cm) : λ = **{nombre(ex3.lambda, 0)}**, Ncr = **{grandeur(ex3.Ncr, 1, 'kN')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.5.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La charge critique d'Euler vaut :" choix={['π² E I/Lf²', 'E A', 'π E I/L', 'N/A']} bonne={0} colonnes={4}>
+Instabilité.
+</QCM>
+
+<QCM n={2} question="Doubler la longueur de flambement divise Ncr par :" choix={['4', '2', '8', '1']} bonne={0} colonnes={4}>
+Lf².
+</QCM>
+
+<QCM n={3} question="Un poteau encastré en pied et libre en tête a Lf =" choix={['2 L', 'L', '0,7 L', '0,5 L']} bonne={0} colonnes={4}>
+Console.
+</QCM>
+
+<QCM n={4} question="On calcule le flambement avec l'inertie :" choix={['de l’axe faible', 'de l’axe fort', 'polaire', 'moyenne']} bonne={0} colonnes={2}>
+Côté le plus souple.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Poteau de l'exemple : Ncr vaut :</>} choix={[grandeur(f0.Ncr, 1, 'kN'), grandeur(fEnc.Ncr, 1, 'kN'), '200,0 kN', '10,0 kN']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="L'élancement est :" choix={['Lf/i', 'i/Lf', 'E/σ', 'L/h']} bonne={0} colonnes={4}>
+Sans unité.
+</QCM>
+
+<QCM n={7} question="La charge réelle de flambement est :" choix={['plus faible que Ncr', 'égale à Ncr', 'plus forte', 'sans rapport']} bonne={0} colonnes={2}>
+Imperfections.
+</QCM>
+
+<QCM n={8} question="Contreventer un étai à mi-hauteur :" choix={['divise Lf par 2', 'double Lf', 'ne change rien', 'supprime la charge']} bonne={0} colonnes={2}>
+Ncr × 4.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

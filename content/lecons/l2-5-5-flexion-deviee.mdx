@@ -1,0 +1,297 @@
+---
+id: L2.5.5
+titre: "Flexion déviée"
+objectifs:
+  - Décomposer un moment selon les deux axes principaux d'une section
+  - Calculer les contraintes aux quatre coins d'un rectangle
+  - Situer l'axe neutre incliné
+  - Traiter une panne de toiture inclinée
+relecture: false
+normes: []
+glossaire:
+  - terme: Flexion déviée
+    definition: Flexion dont le plan de charge n'est pas un plan principal de la section ; on la traite comme deux flexions simples.
+  - terme: Axes principaux
+    definition: Axes de la section autour desquels on peut calculer les flexions séparément (axes de symétrie pour un rectangle).
+  - terme: Axe fort, axe faible
+    definition: L'axe fort donne la plus grande inertie (Iy), l'axe faible la plus petite (Iz).
+symboles:
+  - { symbole: 'My, Mz', signification: 'moments autour des axes fort et faible', unite: 'kN·m' }
+  - { symbole: 'Wy, Wz', signification: 'modules de flexion', unite: 'cm³' }
+  - { symbole: 'α', signification: 'angle de la charge', unite: '°' }
+formules:
+  - { nom: 'Contraintes', tex: '\sigma = -\frac{N}{A} \pm \frac{M_y}{W_y} \pm \frac{M_z}{W_z}', domaine: 'Rectangle, aux coins' }
+  - { nom: 'Décomposition', tex: 'M_y = M\cos\alpha,\quad M_z = M\sin\alpha', domaine: 'Charge inclinée de α' }
+  - { nom: 'Modules', tex: 'W_y = \frac{b h^2}{6},\quad W_z = \frac{h b^2}{6}', domaine: 'Rectangle' }
+---
+
+import { flexionDeviee } from '@/lib/calc/rdm2'
+import { grandeur, nombre } from '@/lib/format'
+import { FlexionDevieeSection } from '@/components/schemas/Rdm2'
+import { ContraintesFlexion } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const alpha = 25
+export const Mp = 2.4
+export const My = Mp * Math.cos((alpha * Math.PI) / 180)
+export const Mz = Mp * Math.sin((alpha * Math.PI) / 180)
+export const d0 = flexionDeviee(My, Mz, 8, 16)
+export const droit = flexionDeviee(Mp, 0, 8, 16)
+export const ex1 = flexionDeviee(10, 5, 20, 40)
+
+<Page etape="intuition" titre="L'intuition : la panne sur le toit penché">
+
+Une panne de toiture porte le poids des tôles, qui tombe **verticalement**. Mais la panne est posée perpendiculairement au versant, donc **inclinée**. La charge ne suit plus l'axe fort de la section : elle la fléchit à la fois « dans sa hauteur » et « dans sa largeur ». C'est la flexion déviée. Le coin le plus sollicité est plus chargé que si la panne était droite.
+
+<FlexionDevieeSection My={My} Mz={Mz} b={8} h={16} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer les contraintes quand le moment n'agit pas selon un axe principal de la section ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Flexion déviée" sousTitre="Deux flexions simples" etape="cours">
+
+<Panneau n={1} titre="Décomposer" icone="calcul" couleur="encre">
+My = M cos α ; Mz = M sin α.
+</Panneau>
+
+<Panneau n={2} titre="Deux modules" icone="regle" couleur="acier">
+Wy = b h²/6 ; Wz = h b²/6.
+</Panneau>
+
+<Panneau n={3} titre="Superposer" icone="idee" couleur="terre">
+σ = ± My/Wy ± Mz/Wz.
+</Panneau>
+
+<Panneau n={4} titre="Coins" icone="attention" couleur="correction">
+Maximum à un coin, signes concordants.
+</Panneau>
+
+<Panneau n={5} titre="Axe neutre" icone="plan" couleur="brique">
+Incliné, ne suit plus la charge.
+</Panneau>
+
+<Panneau n={6} titre="Axe faible" icone="verification" couleur="validation">
+Une petite composante pèse lourd.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : décomposer le moment">
+
+### Les axes principaux
+
+Pour un rectangle, les axes de symétrie sont principaux : y (horizontal, axe fort si h &gt; b) et z (vertical). On décompose le moment selon ces axes : $M_y = M\cos\alpha$, $M_z = M\sin\alpha$.
+
+### Les modules
+
+$W_y = bh^2/6$ et $W_z = hb^2/6$. Pour une panne 8 × 16 cm : $W_y$ = {nombre(d0.Wy / 1000, 0)} cm³, $W_z$ = {nombre(d0.Wz / 1000, 0)} cm³, deux fois moins.
+
+<ContraintesFlexion rects={[{ b: 8, h: 16, y: 0 }]} M={My} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : les contraintes aux coins">
+
+### Superposition
+
+$$\sigma = -\frac{N}{A} \pm \frac{M_y}{W_y} \pm \frac{M_z}{W_z}$$
+
+Les maximums sont aux **coins** : un coin où les deux flexions compriment, le coin opposé où elles tendent. Pour la panne inclinée de 25° (M = 2,4 kN·m) : {nombre(d0.max, 2)} MPa, contre {nombre(droit.max, 2)} MPa si elle était droite.
+
+<DiagrammeBarres alt={`Panne 8 × 16 cm sous 2,4 kN·m : contrainte maximale ${nombre(droit.max, 2)} MPa si la charge suit l'axe fort ; ${nombre(d0.max, 2)} MPa si la panne est inclinée de 25°.`} titre="contrainte maximale de la panne (MPa)" barres={[{ libelle: 'charge sur l’axe fort', valeur: droit.max, texte: nombre(droit.max, 2), teinte: 'validation' }, { libelle: 'panne inclinée de 25°', valeur: d0.max, texte: nombre(d0.max, 2), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : l'axe neutre incliné">
+
+### Où la contrainte s'annule
+
+L'axe neutre est la droite où σ = 0. En flexion déviée, il passe par G mais il est **incliné**, et pas perpendiculaire à la charge : il tourne vers l'axe faible. La poutre fléchit aussi « de travers ».
+
+<FlexionDevieeSection My={10} Mz={5} b={20} h={40} />
+
+<Regle type="art">
+On évite la flexion déviée des pannes en les reliant entre elles par des **liernes** (tiges dans le plan du versant) qui reprennent la composante parallèle au versant : la panne ne travaille plus que sur son axe fort, sur une portée réduite dans l'autre sens.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Flexion déviée : repérer les axes principaux ; décomposer le moment ; calculer les deux modules ; calculer les contraintes aux quatre coins ; retenir le plus grand." etapes={[{ titre: 'Axes', texte: 'y fort, z faible', teinte: 'encre' }, { titre: 'My, Mz', texte: 'cos, sin', teinte: 'acier' }, { titre: 'Wy, Wz', texte: 'modules', teinte: 'terre' }, { titre: 'Coins', texte: '4 valeurs', teinte: 'brique' }, { titre: 'Max', texte: 'vérifier', teinte: 'validation' }]} />
+
+<FlexionDevieeSection My={My} Mz={Mz} b={8} h={16} />
+
+</Page>
+
+<FicheCalcul calcul="flexionDeviee">
+
+<Cahier titre="Exemple résolu : poutre sous deux moments">
+
+**Énoncé.** Une poutre 20 × 40 cm subit My = 10 kN·m (axe fort) et Mz = 5 kN·m (axe faible) (données de l'énoncé). Contraintes aux coins ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Modules et termes">
+<AN k="W" />
+<AN k="termes" />
+<Note>Pourquoi Mz pèse-t-il autant que My ici ? Wz est deux fois plus petit.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les coins">
+
+<Etape n={3} titre="Superposer">
+<AN k="coins" />
+<Resultat k="max" libelle="Traction maximale" />
+<Resultat k="min" libelle="Compression maximale" />
+<Schema />
+<Note couleur="vert">Contrôle : deux coins opposés ont des contraintes égales et de signes contraires (sans N).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer avec le seul axe fort.">
+La composante sur l'axe faible peut doubler la contrainte maximale.
+</Piege>
+
+<Piege erreur="inverser Wy et Wz.">
+Wz = h b²/6 : c'est la largeur qui est au carré.
+</Piege>
+
+<Piege erreur="additionner les modules des moments.">
+On additionne des **contraintes**, coin par coin, avec leurs signes.
+</Piege>
+
+<FlexionDevieeSection My={10} Mz={5} b={20} h={40} />
+
+<Piege erreur="supposer que la poutre fléchit dans le plan de la charge.">
+Elle fléchit perpendiculairement à l'axe neutre, qui est incliné.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Pannes et chevrons.** Sur les toitures en tôle de RDC, les pannes en bois ou en profilés minces sont en flexion déviée. Sans liernes, on voit souvent les pannes « se coucher » dans le sens de la pente après quelques saisons. Les liernes, ou une panne posée verticalement (et non perpendiculaire au versant), règlent le problème.
+
+<DiagrammeBarres alt={`Composantes du moment pour une panne inclinée de 25° : axe fort ${nombre(My, 2)} kN·m, axe faible ${nombre(Mz, 2)} kN·m.`} titre="décomposition du moment de la panne (kN·m)" barres={[{ libelle: 'My (axe fort)', valeur: My, texte: nombre(My, 2), teinte: 'encre' }, { libelle: 'Mz (axe faible)', valeur: Mz, texte: nombre(Mz, 2), teinte: 'correction' }]} />
+
+<Encadre type="terrain" titre="Poteaux d'angle">
+Un poteau d'angle reçoit des poutres dans deux directions : il est en flexion déviée composée (N, My, Mz). C'est souvent le poteau le plus sollicité d'un petit bâtiment.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : flexion déviée">
+
+### Décomposition
+
+My = M cos α · Mz = M sin α
+
+### Modules
+
+Wy = b h²/6 · Wz = h b²/6
+
+### Contraintes
+
+σ = −N/A ± My/Wy ± Mz/Wz · maximum aux coins
+
+### Pratique
+
+axe neutre incliné · liernes pour les pannes · poteaux d'angle
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Coins">
+
+20 × 40 cm, My = 10 kN·m, Mz = 5 kN·m. Contrainte maximale ?
+
+<Indice>σy + σz.</Indice>
+
+<Corrige>
+**{grandeur(ex1.max, 2, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Décomposer">
+
+M = 2,4 kN·m, panne inclinée de 25°. My et Mz ?
+
+<Indice>cos 25° et sin 25°.</Indice>
+
+<Corrige>
+My = **{grandeur(My, 2, 'kN·m')}** ; Mz = **{grandeur(Mz, 2, 'kN·m')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Gain des liernes">
+
+Avec des liernes, Mz devient négligeable. Contrainte maximale de la panne 8 × 16 ?
+
+<Indice>Seul My reste.</Indice>
+
+<Corrige>
+**{grandeur(flexionDeviee(My, 0, 8, 16).max, 2, 'MPa')}** au lieu de {grandeur(d0.max, 2, 'MPa')}.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.5.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La flexion déviée se traite comme :" choix={['deux flexions simples superposées', 'une torsion', 'une traction', 'un flambement']} bonne={0} colonnes={2}>
+Axes principaux.
+</QCM>
+
+<QCM n={2} question="Wz d'un rectangle b × h vaut :" choix={['h b²/6', 'b h²/6', 'b h³/12', 'b h']} bonne={0} colonnes={4}>
+Largeur au carré.
+</QCM>
+
+<QCM n={3} question="La contrainte maximale est :" choix={['à un coin', 'au centre', 'sur l’axe neutre', 'au milieu d’un côté']} bonne={0} colonnes={2}>
+Les deux termes s'ajoutent.
+</QCM>
+
+<QCM n={4} question="L'axe neutre en flexion déviée est :" choix={['incliné', 'toujours horizontal', 'absent', 'vertical']} bonne={0} colonnes={4}>
+Il tourne vers l'axe faible.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Panne inclinée de 25° : contrainte maximale :</>} choix={[grandeur(d0.max, 2, 'MPa'), grandeur(droit.max, 2, 'MPa'), '2,40 MPa', '1,00 MPa']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="Les liernes d'une toiture servent à :" choix={['reprendre la composante dans le plan du versant', 'décorer', 'fixer les tôles', 'supprimer le vent']} bonne={0} colonnes={2}>
+Réduire Mz.
+</QCM>
+
+<QCM n={7} question="My = M cos α ; Mz =" choix={['M sin α', 'M tan α', 'M', 'M/cos α']} bonne={0} colonnes={4}>
+Décomposition.
+</QCM>
+
+<QCM n={8} question="Un poteau d'angle est souvent en :" choix={['flexion déviée composée', 'traction pure', 'torsion pure', 'cisaillement pur']} bonne={0} colonnes={2}>
+N, My, Mz.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

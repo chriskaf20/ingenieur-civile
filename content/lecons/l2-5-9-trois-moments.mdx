@@ -1,0 +1,301 @@
+---
+id: L2.5.9
+titre: "Premières poutres hyperstatiques : théorème des trois moments"
+objectifs:
+  - Reconnaître une poutre continue hyperstatique
+  - Écrire l'équation des trois moments (Clapeyron) pour deux travées
+  - Calculer le moment sur appui, les réactions et le moment en travée
+  - Comparer une poutre continue à deux poutres isostatiques
+relecture: false
+normes: []
+glossaire:
+  - terme: Poutre continue
+    definition: Poutre qui passe sans interruption sur plusieurs appuis.
+  - terme: Hyperstatique
+    definition: Structure dont les réactions ne se déduisent pas de la seule statique ; il faut écrire une condition de déformation.
+  - terme: Théorème des trois moments
+    definition: Équation de Clapeyron reliant les moments sur trois appuis consécutifs d'une poutre continue.
+  - terme: Continuité
+    definition: La rotation est la même à gauche et à droite d'un appui intermédiaire.
+symboles:
+  - { symbole: 'MB', signification: 'moment sur l''appui intermédiaire', unite: 'kN·m' }
+  - { symbole: 'L1, L2', signification: 'portées des travées', unite: 'm' }
+  - { symbole: 'q1, q2', signification: 'charges réparties', unite: 'kN/m' }
+formules:
+  - { nom: 'Trois moments (q uniformes, EI constant)', tex: 'M_A L_1 + 2 M_B (L_1 + L_2) + M_C L_2 = -\frac{q_1 L_1^3}{4} - \frac{q_2 L_2^3}{4}', domaine: 'Clapeyron' }
+  - { nom: 'Deux travées, rives articulées', tex: 'M_B = -\frac{q_1 L_1^3 + q_2 L_2^3}{8(L_1 + L_2)}', domaine: 'MA = MC = 0' }
+  - { nom: 'Travées égales', tex: 'M_B = -\frac{qL^2}{8},\quad R_B = \frac{5}{4}qL', domaine: 'L1 = L2, q1 = q2' }
+---
+
+import { deuxTravees } from '@/lib/calc/rdm2'
+import { diagrammes } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { PoutreContinue } from '@/components/schemas/Rdm2'
+import { DiagrammesVM } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const t0 = deuxTravees(5, 5, 10, 10)
+export const iso = diagrammes({ L: 5, xA: 0, xB: 5, charges: [{ type: 'repartie', nom: 'q', q1: 10, q2: 10, a: 0, b: 5 }] }, 200)
+export const t1 = deuxTravees(6, 4, 12, 12)
+export const t2 = deuxTravees(5, 5, 10, 0)
+
+<Page etape="intuition" titre="L'intuition : une planche sur trois briques">
+
+Pose une longue planche sur trois briques et appuie sur une moitié : l'autre moitié se **soulève** un peu. La planche est continue : ce qui se passe d'un côté de la brique du milieu agit de l'autre côté. Sur cet appui central, la planche se courbe vers le haut : le moment y est **négatif**. Trois réactions, mais seulement deux équations d'équilibre utiles : la statique ne suffit plus, la poutre est **hyperstatique**.
+
+<PoutreContinue L1={5} L2={5} q1={10} q2={10} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer une poutre continue sur trois appuis, et qu'apporte la continuité ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La poutre continue" sousTitre="Une équation de plus" etape="cours">
+
+<Panneau n={1} titre="Hyperstatique" icone="attention" couleur="correction">
+3 réactions, 2 équations utiles.
+</Panneau>
+
+<Panneau n={2} titre="Inconnue" icone="calcul" couleur="encre">
+Le moment MB sur l'appui central.
+</Panneau>
+
+<Panneau n={3} titre="Continuité" icone="idee" couleur="acier">
+Même rotation à gauche et à droite de B.
+</Panneau>
+
+<Panneau n={4} titre="Clapeyron" icone="regle" couleur="terre">
+Équation des trois moments.
+</Panneau>
+
+<Panneau n={5} titre="Réactions" icone="plan" couleur="brique">
+Isostatiques + effet de MB.
+</Panneau>
+
+<Panneau n={6} titre="Gain" icone="verification" couleur="validation">
+Moments et flèches en travée plus faibles.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'idée de Clapeyron">
+
+### Couper sur l'appui
+
+On remplace la poutre continue par deux poutres isostatiques A–B et B–C, et l'on rétablit la continuité par un moment inconnu $M_B$ appliqué de part et d'autre de B.
+
+### Écrire la continuité
+
+Chaque travée tourne sur B sous sa charge (qL³/24EI, L2.5.1) et sous $M_B$. La poutre étant continue, les deux rotations sont **égales** : c'est l'équation manquante. Avec EI constant et des charges uniformes :
+
+$$M_A L_1 + 2M_B(L_1 + L_2) + M_C L_2 = -\frac{q_1L_1^3}{4} - \frac{q_2L_2^3}{4}$$
+
+Avec des rives articulées ($M_A = M_C = 0$) : $M_B = -\dfrac{q_1L_1^3 + q_2L_2^3}{8(L_1 + L_2)}$.
+
+<PoutreContinue L1={6} L2={4} q1={12} q2={12} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : réactions et moments en travée">
+
+### Les réactions
+
+Chaque travée est une poutre isostatique sous q et le moment $M_B$ : $R_A = \frac{q_1L_1}{2} + \frac{M_B}{L_1}$ (MB est négatif, RA diminue), et $R_B$ s'obtient par l'équilibre vertical.
+
+### Deux travées égales
+
+$M_B = -qL^2/8$, $R_A = \frac{3}{8}qL$, $R_B = \frac{5}{4}qL$ : l'appui central porte {nombre(t0.RB / (t0.RA + t0.RB + t0.RC) * 100, 0)} % de la charge. Le moment maximal en travée tombe à {nombre(t0.Mtravee1, 2)} kN·m contre {nombre(iso.Mmax, 2)} kN·m pour une poutre isostatique de 5 m.
+
+<DiagrammeBarres alt={`Travée de 5 m sous 10 kN/m : moment maximal ${nombre(iso.Mmax, 2)} kN·m si elle est isostatique ; dans une poutre continue sur deux travées, ${nombre(t0.Mtravee1, 2)} kN·m en travée et ${nombre(-t0.MB, 2)} kN·m (négatif) sur l'appui.`} titre="moments (valeur absolue, kN·m)" barres={[{ libelle: 'isostatique, travée', valeur: iso.Mmax, texte: nombre(iso.Mmax, 2), teinte: 'terre' }, { libelle: 'continue, travée', valeur: t0.Mtravee1, texte: nombre(t0.Mtravee1, 2), teinte: 'validation' }, { libelle: 'continue, appui B', valeur: -t0.MB, texte: nombre(-t0.MB, 2), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : avantages et pièges">
+
+<DiagrammeComparaison alt="Comparaison : deux poutres isostatiques sont simples et insensibles aux tassements, mais fléchissent plus ; une poutre continue est plus rigide et économique, mais sensible aux tassements d'appui et demande des armatures hautes sur appui." gauche={{ titre: 'Deux poutres isostatiques', items: ['calcul simple', 'insensibles aux tassements', 'moments en travée qL²/8', 'flèches plus grandes'] }} droite={{ titre: 'Poutre continue', items: ['moments en travée plus faibles', 'flèches réduites', 'moment négatif sur appui', 'sensible aux tassements'] }} />
+
+### Charges alternées
+
+Si une seule travée est chargée, l'autre se soulève et son moment change de signe : on étudie toujours plusieurs dispositions de charge pour trouver les cas les plus défavorables (L3.3).
+
+<PoutreContinue L1={5} L2={5} q1={10} q2={0.001} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Poutre continue à deux travées : écrire l'équation des trois moments ; calculer MB ; calculer les réactions travée par travée ; tracer les diagrammes ; étudier les dispositions de charge défavorables." etapes={[{ titre: 'Clapeyron', texte: 'équation', teinte: 'encre' }, { titre: 'MB', texte: '< 0', teinte: 'correction' }, { titre: 'Réactions', texte: 'travée par travée', teinte: 'acier' }, { titre: 'Diagrammes', texte: 'V, M', teinte: 'terre' }, { titre: 'Cas de charge', texte: 'alternés', teinte: 'validation' }]} />
+
+<DiagrammesVM d={{ L: 5, xA: 0, xB: 5, charges: [{ type: 'repartie', nom: 'q', q1: 10, q2: 10, a: 0, b: 5 }] }} titre="Travée isostatique de comparaison" />
+
+</Page>
+
+<FicheCalcul calcul="deuxTravees">
+
+<Cahier titre="Exemple résolu : poutre de plancher sur trois poteaux">
+
+**Énoncé.** Une poutre continue repose sur trois appuis, travées de 5 m, et porte 10 kN/m partout (données de l'énoncé). Calcule le moment sur l'appui central, les réactions et le moment en travée.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le moment sur appui">
+<AN k="MB" />
+<Note>Pourquoi MB est-il négatif ? Sur l'appui central, la poutre est courbée vers le haut : fibres supérieures tendues.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : réactions et travée">
+
+<Etape n={3} titre="Réactions">
+<AN k="R" />
+<AN k="travee" />
+<Resultat k="MB" libelle="Moment sur appui" />
+<Resultat k="RB" libelle="Réaction centrale" />
+<Schema />
+<Note couleur="vert">Contrôle : RA + RB + RC = q (L1 + L2) ; décharge la seconde travée et observe la première.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="calculer une poutre continue comme deux poutres isostatiques.">
+On sous-estime la réaction centrale et on oublie le moment négatif.
+</Piege>
+
+<Piege erreur="oublier les armatures hautes sur appui.">
+Le béton y fissure en partie supérieure.
+</Piege>
+
+<Piege erreur="ne charger que toutes les travées.">
+Les charges alternées donnent les moments maximaux en travée.
+</Piege>
+
+<PoutreContinue L1={6} L2={4} q1={12} q2={12} />
+
+<Piege erreur="ignorer les tassements d'appui.">
+Un appui central qui s'enfonce change complètement la répartition des moments.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les poutres de nos bâtiments sont continues.** Une poutre de plancher en béton armé qui passe sur plusieurs poteaux est continue : c'est l'usage. Le poteau central d'une file reçoit environ 25 % de plus qu'avec un calcul isostatique ; l'oublier sous-dimensionne sa semelle.
+
+<PoutreContinue L1={5} L2={5} q1={10} q2={10} />
+
+<Encadre type="terrain" titre="Sols compressibles">
+Sur les argiles molles de certaines zones de Kinshasa, un poteau central peut tasser plus que les autres. Une poutre continue en souffre : fissures sur l'appui. On préfère alors des fondations homogènes ou des joints, et l'on suit les tassements (L2.1.7, M1.3).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : trois moments">
+
+### Équation (EI constant, q uniformes)
+
+MA L1 + 2MB(L1 + L2) + MC L2 = −q1L1³/4 − q2L2³/4
+
+### Deux travées articulées aux rives
+
+MB = −(q1L1³ + q2L2³)/(8(L1 + L2)) · travées égales : −qL²/8
+
+### Réactions
+
+RA = q1L1/2 + MB/L1 · RB par ΣF · égales : 3/8 qL, 5/4 qL, 3/8 qL
+
+### Pratique
+
+armatures hautes sur appui · charges alternées · tassements
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Travées égales">
+
+L = 5 m, q = 10 kN/m. MB et RB ?
+
+<Indice>−qL²/8 ; 5/4 qL.</Indice>
+
+<Corrige>
+MB = **{grandeur(t0.MB, 2, 'kN·m')}** ; RB = **{grandeur(t0.RB, 2, 'kN')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Travées inégales">
+
+L1 = 6 m, L2 = 4 m, q = 12 kN/m. MB ?
+
+<Indice>Formule à deux travées.</Indice>
+
+<Corrige>
+MB = **{grandeur(t1.MB, 2, 'kN·m')}** ; RA = {nombre(t1.RA, 2)}, RB = {nombre(t1.RB, 2)}, RC = {nombre(t1.RC, 2)} kN.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une seule travée chargée">
+
+L = 5 m, q = 10 kN/m sur la première travée seulement. MB, RC ?
+
+<Indice>q2 = 0.</Indice>
+
+<Corrige>
+MB = **{grandeur(t2.MB, 2, 'kN·m')}** ; RC = **{grandeur(t2.RC, 2, 'kN')}** (négative : l'appui C doit retenir la poutre, qui tend à se soulever).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.5.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Une poutre sur trois appuis simples est :" choix={['hyperstatique d’ordre 1', 'isostatique', 'un mécanisme', 'hyperstatique d’ordre 3']} bonne={0} colonnes={2}>
+Une inconnue de trop.
+</QCM>
+
+<QCM n={2} question="L'équation manquante exprime :" choix={['la continuité de la rotation sur l’appui', 'l’équilibre vertical', 'la résistance du béton', 'la flèche nulle partout']} bonne={0} colonnes={2}>
+Clapeyron.
+</QCM>
+
+<QCM n={3} question="Deux travées égales : MB =" choix={['−qL²/8', 'qL²/8', '−qL²/2', '0']} bonne={0} colonnes={4}>
+Moment négatif.
+</QCM>
+
+<QCM n={4} question="La réaction centrale de deux travées égales vaut :" choix={['5/4 qL', 'qL', '1/2 qL', '3/8 qL']} bonne={0} colonnes={4}>
+Plus que l'isostatique.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Exemple : moment maximal en travée :</>} choix={[grandeur(t0.Mtravee1, 2, 'kN·m'), grandeur(iso.Mmax, 2, 'kN·m'), grandeur(-t0.MB, 2, 'kN·m'), '10,00 kN·m']} bonne={0} colonnes={4}>
+Plus faible que l'isostatique.
+</QCM>
+
+<QCM n={6} question="Sur l'appui central d'une poutre continue, on place :" choix={['des armatures en haut', 'aucune armature', 'des armatures en bas seulement', 'un joint']} bonne={0} colonnes={2}>
+Fibres hautes tendues.
+</QCM>
+
+<QCM n={7} question="Une poutre continue est sensible :" choix={['aux tassements d’appui', 'à la couleur', 'au vent uniquement', 'à rien']} bonne={0} colonnes={2}>
+Hyperstatique.
+</QCM>
+
+<QCM n={8} question="Pour le moment maximal en travée, on étudie :" choix={['des charges alternées', 'une seule charge uniforme partout', 'aucune charge', 'le poids propre seul']} bonne={0} colonnes={2}>
+Cas défavorables.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

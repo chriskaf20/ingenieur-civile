@@ -1,0 +1,307 @@
+---
+id: L2.5.7
+titre: "Déformations et loi de Hooke généralisée"
+objectifs:
+  - Relier contraintes et déformations dans les trois directions
+  - Utiliser le coefficient de Poisson
+  - Calculer une déformation volumique
+  - Relier E, G et ν, et interpréter une mesure de jauge
+relecture: false
+normes: []
+glossaire:
+  - terme: Loi de Hooke généralisée
+    definition: Relations linéaires entre les trois contraintes normales et les trois déformations d'un matériau isotrope.
+  - terme: Coefficient de Poisson
+    definition: ν, rapport entre la contraction latérale et l'allongement dans le sens de la traction ; entre 0 et 0,5.
+  - terme: Déformation volumique
+    definition: Variation relative de volume, εv = εx + εy + εz.
+  - terme: Jauge de déformation
+    definition: Petit capteur collé sur une pièce qui mesure la déformation dans une direction.
+symboles:
+  - { symbole: 'εx, εy, εz', signification: 'déformations', unite: '— (‰ ou µm/m)' }
+  - { symbole: 'ν', signification: 'coefficient de Poisson', unite: '—' }
+  - { symbole: 'G', signification: 'module de cisaillement', unite: 'MPa' }
+  - { symbole: 'K', signification: 'module de compressibilité', unite: 'MPa' }
+formules:
+  - { nom: 'Hooke généralisée', tex: '\varepsilon_x = \frac{1}{E}\left[\sigma_x - \nu(\sigma_y + \sigma_z)\right]', domaine: 'Idem pour y et z, matériau isotrope' }
+  - { nom: 'Cisaillement', tex: '\gamma_{xy} = \frac{\tau_{xy}}{G},\quad G = \frac{E}{2(1+\nu)}', domaine: 'Élastique' }
+  - { nom: 'Volume', tex: '\varepsilon_v = \frac{1 - 2\nu}{E}(\sigma_x + \sigma_y + \sigma_z)', domaine: 'K = E/(3(1 − 2ν))' }
+---
+
+import { hookeGeneralisee } from '@/lib/calc/rdm2'
+import { grandeur, nombre } from '@/lib/format'
+import { ElementContraintes } from '@/components/schemas/Rdm2'
+import { BarreTraction, DroiteHooke } from '@/components/schemas/Rdm1'
+import { barre } from '@/lib/calc/rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const h0 = hookeGeneralisee(100, 0, 0, 210000, 0.3)
+export const conf = hookeGeneralisee(-20, -5, -5, 30000, 0.2)
+export const libre = hookeGeneralisee(-20, 0, 0, 30000, 0.2)
+export const b0 = barre({ N: 120, L: 4, d: 20, E: 210000 })
+export const eau = hookeGeneralisee(-1, -1, -1, 30000, 0.2)
+export const ex3 = hookeGeneralisee(60, 40, 0, 210000, 0.3)
+
+<Page etape="intuition" titre="L'intuition : la gomme qui s'amincit">
+
+Tire sur une gomme : elle s'allonge, mais elle devient aussi plus **mince**. Écrase-la : elle raccourcit et s'**élargit**. Une contrainte dans une direction produit donc des déformations dans les trois. La loi de Hooke de L2.4.1 (σ = E ε) ne voyait qu'une direction ; la loi généralisée les voit toutes.
+
+<BarreTraction N={120} L={4} dL={b0.dL} d={20} sigma={b0.sigma} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer les déformations d'un élément soumis à des contraintes dans plusieurs directions ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Hooke en 3D" sousTitre="E, ν, G" etape="cours">
+
+<Panneau n={1} titre="Effet direct" icone="calcul" couleur="encre">
+σx allonge selon x : σx/E.
+</Panneau>
+
+<Panneau n={2} titre="Effet Poisson" icone="idee" couleur="acier">
+σx rétrécit y et z : −ν σx/E.
+</Panneau>
+
+<Panneau n={3} titre="Superposer" icone="regle" couleur="terre">
+εx = [σx − ν(σy + σz)]/E.
+</Panneau>
+
+<Panneau n={4} titre="Cisaillement" icone="plan" couleur="brique">
+γ = τ/G, G = E/(2(1 + ν)).
+</Panneau>
+
+<Panneau n={5} titre="Volume" icone="verification" couleur="validation">
+εv = εx + εy + εz.
+</Panneau>
+
+<Panneau n={6} titre="Mesure" icone="attention" couleur="correction">
+Jauges : de ε on remonte à σ.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : le coefficient de Poisson">
+
+### L'effet latéral
+
+Une barre tirée par σx s'allonge de $\varepsilon_x = \sigma_x/E$ et se contracte latéralement de $\varepsilon_y = \varepsilon_z = -\nu\,\varepsilon_x$. ν vaut environ 0,3 pour l'acier, 0,2 pour le béton, près de 0,5 pour le caoutchouc (incompressible).
+
+### Exemple
+
+Acier, σx = 100 MPa : $\varepsilon_x$ = {nombre(h0.ex * 1e6, 0)} µm/m, $\varepsilon_y$ = {nombre(h0.ey * 1e6, 0)} µm/m.
+
+<DiagrammeBarres alt={`Acier sous 100 MPa de traction : allongement ${nombre(h0.ex * 1e6, 0)} µm/m dans l'axe, contraction ${nombre(-h0.ey * 1e6, 0)} µm/m dans les deux autres directions.`} titre="déformations (µm/m)" barres={[{ libelle: 'εx (allongement)', valeur: h0.ex * 1e6, texte: nombre(h0.ex * 1e6, 0), teinte: 'encre' }, { libelle: '−εy (contraction)', valeur: -h0.ey * 1e6, texte: nombre(-h0.ey * 1e6, 0), teinte: 'terre' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la loi généralisée">
+
+### Les trois équations
+
+Par superposition :
+
+$\varepsilon_x = \frac{1}{E}[\sigma_x - \nu(\sigma_y + \sigma_z)]$, et de même pour y et z.
+
+### Le confinement
+
+Un béton comprimé à 20 MPa dans une direction et **confiné** à 5 MPa dans les deux autres (frettage par des cadres serrés) raccourcit de {nombre(-conf.ex * 1000, 3)} ‰ au lieu de {nombre(-libre.ex * 1000, 3)} ‰ libre, et surtout il ne gonfle presque plus latéralement : c'est pourquoi le frettage augmente sa résistance.
+
+<ElementContraintes sx={-20} sy={-5} txy={0} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : cisaillement et volume">
+
+### Le cisaillement
+
+$\gamma_{xy} = \tau_{xy}/G$, avec $G = E/(2(1+\nu))$ : E, ν et G ne sont pas indépendants pour un matériau isotrope. Acier : G ≈ {nombre(h0.G, 0)} MPa.
+
+### La variation de volume
+
+$\varepsilon_v = \varepsilon_x + \varepsilon_y + \varepsilon_z = \frac{1-2\nu}{E}(\sigma_x + \sigma_y + \sigma_z)$. Si ν = 0,5, le volume ne change pas. Un béton sous une pression de 1 MPa dans toutes les directions perd {nombre(-eau.ev * 1e6, 0)} µm/m de volume.
+
+<Regle type="simplification">
+Le bois n'est pas isotrope (propriétés différentes selon le fil), le béton armé non plus : la loi isotrope est une simplification, valable pour l'acier et, en première approche, pour le béton non fissuré.
+</Regle>
+
+<DroiteHooke E={210000} fy={500} point={{ eps: h0.ex, sigma: 100 }} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : de la contrainte à la déformation">
+
+<DiagrammeFlux alt="Hooke généralisée : connaître σx, σy, σz et τ ; calculer chaque déformation normale avec l'effet Poisson ; calculer le glissement γ = τ/G ; en déduire la variation de volume ; ou, à l'inverse, remonter des déformations mesurées aux contraintes." etapes={[{ titre: 'σ, τ', texte: 'état', teinte: 'encre' }, { titre: 'εx, εy, εz', texte: 'avec ν', teinte: 'acier' }, { titre: 'γ', texte: 'τ/G', teinte: 'terre' }, { titre: 'εv', texte: 'volume', teinte: 'brique' }, { titre: 'Inverse', texte: 'jauges → σ', teinte: 'validation' }]} />
+
+<ElementContraintes sx={60} sy={40} txy={0} />
+
+</Page>
+
+<FicheCalcul calcul="hookeGeneralisee">
+
+<Cahier titre="Exemple résolu : une barre d'acier tirée">
+
+**Énoncé.** Une barre d'acier (E = 210 000 MPa, ν = 0,3) subit σx = 100 MPa, sans autre contrainte (données de l'énoncé). Calcule les trois déformations et la variation de volume.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Déformation axiale">
+<AN k="ex" />
+<Note>Pourquoi des ‰ ? Les déformations élastiques de l'acier sont de l'ordre du millième.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : effets latéraux">
+
+<Etape n={3} titre="Poisson et volume">
+<AN k="eyez" />
+<AN k="G" />
+<Resultat k="ev" libelle="Déformation volumique" />
+<Schema />
+<Note couleur="vert">Contrôle : ajoute σy = 100 MPa ; εx diminue, car σy contracte la barre selon x.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier l'effet Poisson.">
+Une contrainte σy déforme aussi selon x.
+</Piege>
+
+<Piege erreur="confondre ν et un pourcentage.">
+ν = 0,3 est un rapport ; il n'y a pas d'unité.
+</Piege>
+
+<Piege erreur="prendre G égal à E.">
+G = E/(2(1 + ν)) ≈ 0,38 E pour l'acier.
+</Piege>
+
+<ElementContraintes sx={-20} sy={-5} txy={0} />
+
+<Piege erreur="appliquer la loi isotrope au bois.">
+Le bois a des modules très différents selon le fil.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Jauges de déformation.** Pour mesurer les efforts réels dans un pont ou un tirant, on colle des jauges (ou des rosettes de trois jauges) sur l'acier, on mesure les déformations sous charge et on remonte aux contraintes par la loi de Hooke généralisée. C'est ainsi qu'on vérifie un ouvrage ancien avant de le rouvrir à la circulation.
+
+<DiagrammeBarres alt={`Rosette sur une tôle sous σx = 60 et σy = 40 MPa : εx = ${nombre(ex3.ex * 1e6, 0)} µm/m, εy = ${nombre(ex3.ey * 1e6, 0)} µm/m.`} titre="déformations mesurées (µm/m)" barres={[{ libelle: 'εx', valeur: ex3.ex * 1e6, texte: nombre(ex3.ex * 1e6, 0), teinte: 'encre' }, { libelle: 'εy', valeur: ex3.ey * 1e6, texte: nombre(ex3.ey * 1e6, 0), teinte: 'acier' }]} />
+
+<Encadre type="terrain" titre="Poteaux frettés">
+Dans les zones sismiques (est de la RDC), les poteaux ont des cadres très serrés près des nœuds : ils confinent le béton, l'empêchent de gonfler, et lui permettent de se déformer beaucoup sans éclater. C'est l'effet Poisson mis au service de la sécurité.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : Hooke généralisée">
+
+### Déformations
+
+εx = [σx − ν(σy + σz)]/E (idem y, z) · γ = τ/G
+
+### Constantes
+
+ν acier ≈ 0,3, béton ≈ 0,2 · G = E/(2(1 + ν)) · K = E/(3(1 − 2ν))
+
+### Volume
+
+εv = εx + εy + εz · ν = 0,5 : incompressible
+
+### Usage
+
+confinement · jauges : de ε vers σ
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Contraction latérale">
+
+Acier, σx = 100 MPa. εy ?
+
+<Indice>−ν σx/E.</Indice>
+
+<Corrige>
+**{nombre(h0.ey * 1e6, 0)} µm/m**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Béton confiné">
+
+Béton E = 30 000 MPa, ν = 0,2 ; σx = −20, σy = σz = −5 MPa. εx ?
+
+<Indice>Hooke généralisée.</Indice>
+
+<Corrige>
+εx = **{nombre(conf.ex * 1000, 3)} ‰** (libre : {nombre(libre.ex * 1000, 3)} ‰).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Tôle biaxiale">
+
+Acier, σx = 60, σy = 40 MPa, σz = 0. εx, εy, εz ?
+
+<Indice>Trois équations.</Indice>
+
+<Corrige>
+εx = **{nombre(ex3.ex * 1e6, 0)}**, εy = **{nombre(ex3.ey * 1e6, 0)}**, εz = **{nombre(ex3.ez * 1e6, 0)}** µm/m.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.5.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le coefficient de Poisson de l'acier vaut environ :" choix={['0,3', '0,5', '0,1', '3']} bonne={0} colonnes={4}>
+Valeur usuelle.
+</QCM>
+
+<QCM n={2} question="εx = " choix={['[σx − ν(σy + σz)]/E', 'σx/E seulement', 'ν σx', 'E σx']} bonne={0} colonnes={2}>
+Superposition.
+</QCM>
+
+<QCM n={3} question="G vaut :" choix={['E/(2(1 + ν))', 'E', 'E/ν', '2E']} bonne={0} colonnes={4}>
+Isotrope.
+</QCM>
+
+<QCM n={4} question="Si ν = 0,5, le matériau est :" choix={['incompressible', 'très compressible', 'fragile', 'anisotrope']} bonne={0} colonnes={2}>
+εv = 0.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Acier sous 100 MPa : εx vaut :</>} choix={[`${nombre(h0.ex * 1e6, 0)} µm/m`, '100 µm/m', '2 100 µm/m', '30 µm/m']} bonne={0} colonnes={4}>
+σ/E.
+</QCM>
+
+<QCM n={6} question="Le confinement d'un béton :" choix={['augmente sa résistance', 'le fragilise', 'ne change rien', 'le dilate']} bonne={0} colonnes={2}>
+Frettage.
+</QCM>
+
+<QCM n={7} question="Une jauge de déformation mesure :" choix={['ε', 'σ directement', 'la force', 'la température seule']} bonne={0} colonnes={4}>
+On calcule σ ensuite.
+</QCM>
+
+<QCM n={8} question="La loi isotrope convient mal :" choix={['au bois', 'à l’acier', 'à l’aluminium', 'au verre']} bonne={0} colonnes={4}>
+Matériau orienté.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

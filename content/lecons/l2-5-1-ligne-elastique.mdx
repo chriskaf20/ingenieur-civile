@@ -1,0 +1,309 @@
+---
+id: L2.5.1
+titre: "Déformée des poutres : ligne élastique"
+objectifs:
+  - Écrire l'équation de la ligne élastique EI y″ = −M(x)
+  - Intégrer deux fois et fixer les constantes par les conditions d'appui
+  - Calculer la flèche maximale et les rotations aux appuis
+  - Comparer une flèche à une limite de service
+relecture: false
+normes:
+  - "EN 1990 annexe A1.4 et EN 1992-1-1 §7.4 : limites de flèche (valeurs recommandées)"
+glossaire:
+  - terme: Ligne élastique
+    definition: Courbe prise par la fibre moyenne d'une poutre déformée.
+  - terme: Rotation
+    definition: Angle θ = y′ de la tangente à la ligne élastique ; maximal sur les appuis simples.
+  - terme: Conditions aux limites
+    definition: "Valeurs imposées : appui simple, y = 0 ; encastrement, y = 0 et y′ = 0."
+  - terme: État limite de service
+    definition: Situation où l'ouvrage reste sûr mais devient inconfortable ou abîmé (flèche, fissures, vibrations).
+symboles:
+  - { symbole: 'y(x)', signification: 'flèche', unite: 'mm' }
+  - { symbole: 'θ', signification: 'rotation', unite: 'rad' }
+  - { symbole: 'EI', signification: 'rigidité en flexion', unite: 'kN·m²' }
+formules:
+  - { nom: 'Ligne élastique', tex: 'EI\,y'''' = -M(x)', domaine: 'Petites déformations' }
+  - { nom: 'Rotation', tex: '\theta(x) = y''(x) = -\frac{1}{EI}\int M\,dx + C_1', domaine: 'Première intégration' }
+  - { nom: 'Flèche', tex: 'y(x) = -\frac{1}{EI}\iint M\,dx\,dx + C_1 x + C_2', domaine: 'Seconde intégration' }
+---
+
+import { EIrect, ligneElastique } from '@/lib/calc/rdm2'
+import { grandeur, nombre } from '@/lib/format'
+import { LigneElastique } from '@/components/schemas/Rdm2'
+import { DiagrammesVM } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const EI0 = EIrect(11000, 7.5, 22.5)
+export const U = { L: 4, xA: 0, xB: 4, charges: [{ type: 'repartie', nom: 'q', q1: 2, q2: 2, a: 0, b: 4 }] }
+export const r0 = ligneElastique(U, EI0, 600)
+export const Pd = { L: 5, xA: 0, xB: 5, charges: [{ type: 'ponctuelle', nom: 'P', F: 20, a: 1.5 }] }
+export const rP = ligneElastique(Pd, 15000, 600)
+export const K = { L: 6, xA: 0, xB: 4.5, charges: [{ type: 'repartie', nom: 'q', q1: 10, q2: 10, a: 0, b: 6 }] }
+export const rK = ligneElastique(K, 30000, 600)
+export const ex3 = ligneElastique({ L: 6, xA: 0, xB: 6, charges: [{ type: 'repartie', nom: 'q', q1: 15, q2: 15, a: 0, b: 6 }] }, EIrect(30000, 25, 50), 600)
+
+<Page etape="intuition" titre="L'intuition : du moment à la forme">
+
+En L2.1.6, tu as vu l'idée : la courbure de la poutre suit le moment. Ici on en fait un outil général, pour **n'importe quel** chargement : on connaît M(x) grâce aux diagrammes (L2.4), on intègre deux fois, et les appuis disent où « accrocher » la courbe. On obtient la forme exacte de la poutre déformée, sa **ligne élastique**.
+
+<LigneElastique d={U} EI={EI0} titre="Solive de 4 m" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer la flèche et les rotations d'une poutre sous un chargement quelconque ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La ligne élastique" sousTitre="Deux intégrations, deux constantes" etape="cours">
+
+<Panneau n={1} titre="M(x)" icone="calcul" couleur="encre">
+Par les coupures, tronçon par tronçon.
+</Panneau>
+
+<Panneau n={2} titre="Courbure" icone="idee" couleur="acier">
+y″ = −M/EI.
+</Panneau>
+
+<Panneau n={3} titre="Rotation" icone="regle" couleur="terre">
+Première intégrale + C₁.
+</Panneau>
+
+<Panneau n={4} titre="Flèche" icone="plan" couleur="brique">
+Seconde intégrale + C₁x + C₂.
+</Panneau>
+
+<Panneau n={5} titre="Appuis" icone="verification" couleur="validation">
+Conditions aux limites → C₁, C₂.
+</Panneau>
+
+<Panneau n={6} titre="Service" icone="attention" couleur="correction">
+Comparer f à L/250, L/300, L/500.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'équation et ses conditions">
+
+### L'équation
+
+$EI\,y'' = -M(x)$ (flèche y comptée vers le bas). EI est la rigidité en flexion : E du matériau, I de la section (L2.4.6).
+
+### Les conditions aux limites
+
+| Liaison | Conditions |
+|---|---|
+| appui simple ou articulation | y = 0 |
+| encastrement | y = 0 et y′ = 0 |
+| bout libre | rien sur y ; M = 0 et V = 0 |
+
+Deux intégrations introduisent deux constantes ; il faut deux conditions par tronçon (plus des conditions de **continuité** de y et y′ entre tronçons).
+
+<DiagrammesVM d={Pd} titre="Poutre avec une force excentrée" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : charge ponctuelle excentrée">
+
+### Deux tronçons
+
+Avec une force P à la distance a de A, M(x) a deux expressions (avant et après la force). On intègre chacune, puis on écrit : y(0) = 0, y(L) = 0, et la continuité de y et de y′ sous la force. Quatre conditions, quatre constantes.
+
+### Le résultat
+
+La flèche maximale n'est **pas** sous la force mais légèrement vers le milieu. Pour 20 kN à 1,5 m sur 5 m (EI = 15 000 kN·m²) : f = {nombre(rP.f * 1000, 2)} mm en x = {nombre(rP.xf, 2)} m.
+
+<LigneElastique d={Pd} EI={15000} titre="Force à 1,5 m" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : porte-à-faux et limites">
+
+### Le porte-à-faux remonte
+
+Avec un porte-à-faux, la travée fléchit vers le bas mais le bout du porte-à-faux peut **remonter** ou descendre selon les longueurs et les charges : la ligne élastique le montre.
+
+<LigneElastique d={K} EI={30000} titre="Poutre avec porte-à-faux" />
+
+### Les limites de service
+
+On compare f à une fraction de la portée : L/250 sous charges quasi permanentes, L/500 après la pose de cloisons fragiles (valeurs recommandées de l'EC2 §7.4.1, voir A_VERIFIER n° 52). Pour une console, on prend souvent L la longueur du porte-à-faux… doublée.
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Calculer une ligne élastique : moment M(x) par tronçons ; intégrer −M/EI une fois puis deux fois ; écrire les conditions d'appui et de continuité ; résoudre les constantes ; trouver la flèche maximale là où y′ = 0." etapes={[{ titre: 'M(x)', texte: 'par tronçons', teinte: 'encre' }, { titre: '∫ et ∫∫', texte: '−M/EI', teinte: 'acier' }, { titre: 'Conditions', texte: 'appuis, continuité', teinte: 'terre' }, { titre: 'Constantes', texte: 'C₁, C₂…', teinte: 'brique' }, { titre: 'fmax', texte: 'où y′ = 0', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Flèches calculées : solive ${nombre(r0.f * 1000, 1)} mm, poutre avec force excentrée ${nombre(rP.f * 1000, 1)} mm, poutre béton de l'exercice ${nombre(ex3.f * 1000, 1)} mm.`} titre="flèches maximales (mm)" barres={[{ libelle: 'solive bois 4 m', valeur: r0.f * 1000, texte: nombre(r0.f * 1000, 1), teinte: 'terre' }, { libelle: 'force excentrée 5 m', valeur: rP.f * 1000, texte: nombre(rP.f * 1000, 1), teinte: 'acier' }, { libelle: 'poutre béton 6 m', valeur: ex3.f * 1000, texte: nombre(ex3.f * 1000, 1), teinte: 'beton' }]} />
+
+</Page>
+
+<FicheCalcul calcul="ligneElastique">
+
+<Cahier titre="Exemple résolu : la flèche d'une solive">
+
+**Énoncé.** Une solive en bois 7,5 × 22,5 cm, E = 11 000 MPa, de 4 m de portée, porte 2 kN/m (données de l'énoncé). Calcule la flèche et la rotation sur appui.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La rigidité et la méthode">
+<AN k="EI" />
+<AN k="integration" />
+<Note>Pourquoi deux conditions ? Deux intégrations, deux constantes à déterminer.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : flèche et rotation">
+
+<Etape n={3} titre="Le résultat">
+<AN k="fleche" />
+<Resultat k="f" libelle="Flèche maximale" />
+<Resultat k="rapport" libelle="Flèche relative" />
+<Schema />
+<Note couleur="vert">Contrôle : le formulaire donne 5qL⁴/(384EI) ; ajoute une force de 5 kN au milieu et observe la nouvelle flèche.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier la continuité entre tronçons.">
+Sans elle, la poutre aurait un « coude » sous la force.
+</Piege>
+
+<Piege erreur="chercher la flèche maximale sous la force.">
+Elle est là où y′ = 0.
+</Piege>
+
+<Piege erreur="mélanger les unités de EI.">
+E en kN/m² (MPa × 1 000), I en m⁴ (cm⁴ × 10⁻⁸).
+</Piege>
+
+<LigneElastique d={K} EI={30000} titre="Porte-à-faux" />
+
+<Piege erreur="utiliser E du béton non fissuré pour le long terme.">
+La fissuration et le fluage augmentent la flèche (L3.3).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Contreflèche.** Pour les grandes poutres (charpente acier, poutres préfabriquées), on fabrique la poutre légèrement bombée vers le haut : sous son poids et les charges permanentes, elle redevient droite. La valeur de la contreflèche vient du calcul de la ligne élastique.
+
+<LigneElastique d={{ L: 6, xA: 0, xB: 6, charges: [{ type: 'repartie', nom: 'q', q1: 15, q2: 15, a: 0, b: 6 }] }} EI={EIrect(30000, 25, 50)} titre="Poutre béton 25 × 50" />
+
+<Encadre type="terrain" titre="Fissures de cloisons">
+Dans les immeubles de Kinshasa, de nombreuses fissures de cloisons en blocs viennent de dalles trop souples : la cloison, rigide, ne suit pas la flèche du plancher. Limiter la flèche après la pose des cloisons (L/500) évite ce désordre.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : ligne élastique">
+
+### Équation
+
+EI y″ = −M(x) · y′ = rotation · y = flèche
+
+### Conditions
+
+appui : y = 0 · encastrement : y = 0, y′ = 0 · continuité de y, y′ entre tronçons
+
+### Maximum
+
+fmax où y′ = 0 · rotation maximale aux appuis simples
+
+### Limites (à vérifier)
+
+L/250 (quasi permanent) · L/500 (cloisons fragiles) · EC2 §7.4.1
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Rotation sur appui">
+
+Poutre de 6 m, 10 kN/m, EI = 20 000 kN·m². Rotation sur appui (qL³/24EI) ?
+
+<Indice>Unités cohérentes.</Indice>
+
+<Corrige>
+**{nombre((10 * 216) / (24 * 20000) * 1000, 2)} mrad**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Force excentrée">
+
+Où est la flèche maximale d'une poutre de 5 m avec 20 kN à 1,5 m ?
+
+<Indice>Entre la force et le milieu.</Indice>
+
+<Corrige>
+x = **{nombre(rP.xf, 2)} m**, f = {grandeur(rP.f * 1000, 2, 'mm')} (EI = 15 000).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Poutre béton">
+
+Poutre 25 × 50 cm, E = 30 000 MPa (section non fissurée), 6 m, 15 kN/m. Flèche et rapport L/f ?
+
+<Indice>EI = 30·10⁶ × 0,25 × 0,5³/12.</Indice>
+
+<Corrige>
+f = **{grandeur(ex3.f * 1000, 2, 'mm')}**, L/{nombre(6 / ex3.f, 0)} ; à long terme, fluage et fissuration peuvent la tripler.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.5.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'équation de la ligne élastique est :" choix={['EI y″ = −M', 'EI y = M', 'y′ = M', 'EI y‴ = q']} bonne={0} colonnes={2}>
+Courbure.
+</QCM>
+
+<QCM n={2} question="Un encastrement impose :" choix={['y = 0 et y′ = 0', 'y = 0 seulement', 'M = 0', 'rien']} bonne={0} colonnes={2}>
+Ni flèche ni rotation.
+</QCM>
+
+<QCM n={3} question="La flèche maximale est là où :" choix={['y′ = 0', 'M = 0', 'V est maximal', 'la force s’applique']} bonne={0} colonnes={2}>
+Tangente horizontale.
+</QCM>
+
+<QCM n={4} question="Avec deux tronçons, il faut écrire aussi :" choix={['la continuité de y et y′', 'M = 0 partout', 'V = 0', 'rien de plus']} bonne={0} colonnes={2}>
+Quatre constantes.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour la solive de l'exemple, f vaut :</>} choix={[grandeur(r0.f * 1000, 2, 'mm'), '1,00 mm', '25,00 mm', grandeur(r0.f * 16000, 1, 'mm')]} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="Une limite de L/500 vise surtout :" choix={['les cloisons fragiles', 'la sécurité contre la ruine', 'le séisme', 'la corrosion']} bonne={0} colonnes={2}>
+État limite de service.
+</QCM>
+
+<QCM n={7} question="EI s'exprime en :" choix={['kN·m²', 'kN/m', 'MPa', 'cm⁴']} bonne={0} colonnes={4}>
+Rigidité.
+</QCM>
+
+<QCM n={8} question="Une contreflèche sert à :" choix={['compenser la flèche permanente', 'renforcer la poutre', 'décorer', 'réduire le moment']} bonne={0} colonnes={2}>
+La poutre redevient droite.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
