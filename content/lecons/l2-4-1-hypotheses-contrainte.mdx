@@ -1,0 +1,312 @@
+---
+id: L2.4.1
+titre: "Hypothèses de la RDM et notion de contrainte"
+objectifs:
+  - Définir une contrainte normale et une contrainte tangentielle
+  - Définir la déformation et la relier à la contrainte par la loi de Hooke
+  - Énoncer les hypothèses de la résistance des matériaux
+  - Distinguer la statique (forces) de la RDM (contraintes et déformations)
+relecture: false
+normes: []
+glossaire:
+  - terme: Contrainte
+    definition: Force rapportée à la surface sur laquelle elle s'exerce ; elle s'exprime en MPa (N/mm²).
+  - terme: Déformation
+    definition: Allongement ou raccourcissement relatif ε = ΔL/L, sans unité (souvent en ‰).
+  - terme: Hypothèse de Navier-Bernoulli
+    definition: Une section plane et perpendiculaire à la fibre moyenne le reste après déformation.
+  - terme: Principe de Saint-Venant
+    definition: Loin du point d'application, l'effet d'une charge ne dépend que de sa résultante, pas de la façon dont elle est appliquée.
+symboles:
+  - { symbole: 'σ', signification: 'contrainte normale', unite: 'MPa' }
+  - { symbole: 'τ', signification: 'contrainte tangentielle (cisaillement)', unite: 'MPa' }
+  - { symbole: 'ε', signification: 'déformation', unite: '— ou ‰' }
+  - { symbole: 'E', signification: 'module d''Young', unite: 'MPa' }
+formules:
+  - { nom: 'Contrainte normale', tex: '\sigma = \frac{N}{A}', domaine: 'Répartition uniforme' }
+  - { nom: 'Déformation', tex: '\varepsilon = \frac{\Delta L}{L}', domaine: 'Petites déformations' }
+  - { nom: 'Loi de Hooke', tex: '\sigma = E\,\varepsilon', domaine: 'Domaine élastique' }
+---
+
+import { barre, EXEMPLE_BARRE } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { BarreTraction, DroiteHooke, SectionsPlanes } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const b0 = barre(EXEMPLE_BARRE)
+export const b16 = barre({ ...EXEMPLE_BARRE, d: 16 })
+export const ex1 = (50 * 1000) / (200 * 200)
+export const ex3 = barre({ N: 10, L: 3, d: 10, E: 11000 })
+
+<Page etape="intuition" titre="L'intuition : la même force, deux effets">
+
+Accroche un sac de ciment de 50 kg à un fil de fer et à une barre de 20 mm : la force est la même, mais le fil casse, la barre tient. Ce qui compte pour le matériau, ce n'est pas la force seule, c'est la force **par unité de surface** : la **contrainte**.
+
+La statique (L1.3) dit quelles forces s'exercent sur une structure. La **résistance des matériaux** (RDM) dit ce que ces forces font **à l'intérieur** de la matière : quelles contraintes, quelles déformations, et si la pièce tient.
+
+<BarreTraction N={EXEMPLE_BARRE.N} L={EXEMPLE_BARRE.L} dL={b0.dL} d={EXEMPLE_BARRE.d} sigma={b0.sigma} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment passer des forces à ce que « ressent » la matière, et sur quelles hypothèses repose ce passage ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La RDM en six idées" sousTitre="Des forces aux contraintes" etape="cours">
+
+<Panneau n={1} titre="Contrainte" icone="calcul" couleur="encre">
+σ = N/A : force par mm², en MPa.
+</Panneau>
+
+<Panneau n={2} titre="Deux familles" icone="regle" couleur="acier">
+σ perpendiculaire à la coupe, τ parallèle.
+</Panneau>
+
+<Panneau n={3} titre="Déformation" icone="idee" couleur="terre">
+ε = ΔL/L : sans unité.
+</Panneau>
+
+<Panneau n={4} titre="Hooke" icone="verification" couleur="validation">
+σ = E ε dans le domaine élastique.
+</Panneau>
+
+<Panneau n={5} titre="Hypothèses" icone="plan" couleur="brique">
+Matériau homogène, petites déformations, sections planes.
+</Panneau>
+
+<Panneau n={6} titre="Limite" icone="attention" couleur="correction">
+Comparer σ à la résistance du matériau.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : contraintes normale et tangentielle">
+
+### La contrainte normale
+
+Si une force N s'exerce perpendiculairement à une section d'aire A, et se répartit uniformément :
+
+$$\sigma = \frac{N}{A}$$
+
+Unités : N et mm² donnent des N/mm², c'est-à-dire des **MPa**. 1 MPa = 1 N/mm² = 1 000 kN/m². Positive en traction, négative en compression (convention de ce cours).
+
+### La contrainte tangentielle
+
+Une force **parallèle** à la section (qui tend à la faire glisser) produit un cisaillement τ = V/A (en moyenne). C'est ce que subit un boulon qui relie deux plats (L2.4.10).
+
+<DiagrammeBarres alt={`Même effort de ${nombre(EXEMPLE_BARRE.N, 0)} kN sur deux barres : Ø 20 mm, contrainte ${nombre(b0.sigma, 0)} MPa ; Ø 16 mm, ${nombre(b16.sigma, 0)} MPa.`} titre={`contrainte sous ${nombre(EXEMPLE_BARRE.N, 0)} kN (MPa)`} barres={[{ libelle: 'Ø 20 mm', valeur: b0.sigma, texte: nombre(b0.sigma, 0), teinte: 'validation' }, { libelle: 'Ø 16 mm', valeur: b16.sigma, texte: nombre(b16.sigma, 0), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : déformation et loi de Hooke">
+
+### La déformation
+
+Une barre de longueur L qui s'allonge de ΔL subit la déformation $\varepsilon = \Delta L/L$, sans unité. On l'exprime souvent en ‰ : l'acier d'armature atteint sa limite d'élasticité vers 2 à 2,5 ‰, le béton s'écrase vers 3,5 ‰.
+
+### La loi de Hooke
+
+Tant qu'on ne dépasse pas la **limite d'élasticité**, la contrainte est proportionnelle à la déformation :
+
+$$\sigma = E\,\varepsilon$$
+
+E, le **module d'Young**, mesure la raideur du matériau : 210 000 MPa pour l'acier, environ 30 000 MPa pour le béton, 10 000 à 12 000 MPa pour le bois dans le sens des fibres <AVerifier note="A_VERIFIER.md n° 61 : modules d'Young usuels (acier EN 1993-1-1 §3.2.6 : 210 000 MPa ; béton EN 1992-1-1 tableau 3.1 ; bois EN 338 selon la classe)" />.
+
+<DroiteHooke point={{ eps: b0.eps, sigma: b0.sigma }} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : les hypothèses de la RDM">
+
+### Ce qu'on suppose
+
+1. **Matériau** continu, homogène et isotrope (mêmes propriétés partout et dans toutes les directions).
+2. **Petites déformations** : on écrit l'équilibre sur la géométrie initiale.
+3. **Élasticité linéaire** (loi de Hooke) dans le domaine de service.
+4. **Navier-Bernoulli** : les sections planes restent planes.
+5. **Saint-Venant** : loin des appuis et des charges, seule la résultante compte.
+
+<SectionsPlanes />
+
+<Regle type="simplification">
+Le béton armé n'est ni homogène ni isotrope, le bois non plus. La RDM s'applique quand même, avec des adaptations : section homogénéisée pour le béton armé (L3.3), propriétés différentes selon le fil pour le bois. Près d'un appui ou d'une charge concentrée, Saint-Venant ne s'applique pas : on y étudie les « zones de diffusion ».
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : de la statique à la RDM">
+
+<DiagrammeFlux alt="La chaîne du calcul : les charges (L1.3) ; les réactions par la statique ; les efforts internes N, V, M dans chaque section ; les contraintes σ et τ ; la comparaison à la résistance du matériau et le calcul des déformations." etapes={[{ titre: 'Charges', texte: 'G, Q', teinte: 'correction' }, { titre: 'Réactions', texte: 'statique', teinte: 'encre' }, { titre: 'Efforts internes', texte: 'N, V, M', teinte: 'acier' }, { titre: 'Contraintes', texte: 'σ, τ', teinte: 'terre' }, { titre: 'Vérifier', texte: 'résistance, flèche', teinte: 'validation' }]} />
+
+<BarreTraction N={50} L={2} dL={barre({ N: 50, L: 2, d: 12, E: 210000 }).dL} d={12} sigma={barre({ N: 50, L: 2, d: 12, E: 210000 }).sigma} />
+
+</Page>
+
+<FicheCalcul calcul="tirantTraction">
+
+<Cahier titre="Exemple résolu : le tirant d'une ferme métallique">
+
+**Énoncé.** Le tirant d'une ferme est une barre d'acier de 20 mm de diamètre et de 4 m de long, tendue par 120 kN ; E = 210 000 MPa (données de l'énoncé). Calcule la contrainte, la déformation et l'allongement.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La section et la contrainte">
+<AN k="A" />
+<AN k="sigma" />
+<Note>Pourquoi passer en N et mm² ? Le rapport donne directement des MPa.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la déformation">
+
+<Etape n={3} titre="Hooke">
+<AN k="dL" />
+<Resultat k="sigma" libelle="Contrainte" />
+<Resultat k="dL" libelle="Allongement" />
+<Schema />
+<Note couleur="vert">Contrôle : quelques millimètres sur 4 m, c'est l'ordre de grandeur attendu pour un acier ; une contrainte proche de 400 MPa demande un acier de nuance suffisante (L2.6).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="mélanger kN et mm².">
+120 kN / 314 mm² = 0,382 « kN/mm² » = 382 MPa : convertir N en newtons avant de diviser.
+</Piege>
+
+<Piege erreur="donner une unité à ε.">
+ΔL et L sont dans la même unité : ε est sans unité.
+</Piege>
+
+<Piege erreur="appliquer Hooke au-delà de la limite d'élasticité.">
+Au-delà, la déformation devient permanente et σ = E ε ne vaut plus.
+</Piege>
+
+<DroiteHooke E={210000} fy={500} />
+
+<Piege erreur="confondre force et contrainte.">
+Une petite force sur une petite surface peut être plus dangereuse qu'une grande force sur une grande surface.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Pourquoi les poteaux s'élargissent en bas.** Un poteau de rez-de-chaussée porte tous les étages : la force augmente, donc la section aussi, pour garder la contrainte sous la limite. Une semelle répartit encore la charge sur une grande surface pour que la contrainte sur le sol reste faible (L3.6).
+
+<DiagrammeBarres alt="Contraintes typiques : sol argileux de l'ordre de 0,1 à 0,2 MPa, béton de poteau 5 à 15 MPa, acier d'armature 300 à 435 MPa." titre="ordres de grandeur des contraintes en service (MPa)" barres={[{ libelle: 'sol sous une semelle', valeur: 0.15, texte: '≈ 0,15', teinte: 'terre' }, { libelle: 'béton d’un poteau', valeur: 10, texte: '5 à 15', teinte: 'beton' }, { libelle: 'acier d’armature', valeur: 350, texte: '300 à 435', teinte: 'acier' }]} />
+
+<Encadre type="terrain" titre="Les fers « 10 » du marché">
+Sur les chantiers de RDC, on parle de « fers de 10, de 12 ». Une barre de 10 a une section de 79 mm², une de 12 de 113 mm² : 43 % de plus pour 2 mm de diamètre. Remplacer une barre de 12 par une de 10 « parce qu'il n'y en avait plus » augmente la contrainte de 43 %.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : contraintes et hypothèses">
+
+### Contraintes
+
+σ = N/A (normale) · τ = V/A (tangentielle, moyenne) · 1 MPa = 1 N/mm²
+
+### Déformations
+
+ε = ΔL/L (sans unité, en ‰) · σ = E ε (Hooke, élastique)
+
+### Modules (à vérifier)
+
+acier 210 000 MPa · béton ≈ 30 000 MPa · bois ≈ 11 000 MPa
+
+### Hypothèses
+
+homogène, isotrope · petites déformations · élasticité · Navier-Bernoulli · Saint-Venant
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un potelet">
+
+Un potelet en bois de 20 × 20 cm porte 50 kN. Contrainte de compression ?
+
+<Indice>A = 200 × 200 mm².</Indice>
+
+<Corrige>
+σ = 50 000 / 40 000 = **{nombre(ex1, 2)} MPa**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Un diamètre plus petit">
+
+Le tirant de l'exemple est remplacé par une barre de 16 mm. Nouvelle contrainte ?
+
+<Indice>A est proportionnelle à Ø².</Indice>
+
+<Corrige>
+σ = **{grandeur(b16.sigma, 0, 'MPa')}** : (20/16)² = 1,56 fois plus.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une cheville en bois">
+
+Une tige en bois de 10 mm de diamètre et 3 m, E = 11 000 MPa, tirée par 10 kN. Allongement ?
+
+<Indice>Mêmes formules.</Indice>
+
+<Corrige>
+σ = {nombre(ex3.sigma, 0)} MPa ; ΔL = **{grandeur(ex3.dL, 1, 'mm')}** : le bois, vingt fois plus souple que l'acier, s'allonge beaucoup plus.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="1 MPa vaut :" choix={['1 N/mm²', '1 kN/mm²', '1 N/m²', '1 kN/m²']} bonne={0} colonnes={4}>
+Unité de base.
+</QCM>
+
+<QCM n={2} question="La déformation ε s'exprime :" choix={['sans unité', 'en mm', 'en MPa', 'en kN']} bonne={0} colonnes={4}>
+Rapport de longueurs.
+</QCM>
+
+<QCM n={3} question="La loi de Hooke s'écrit :" choix={['σ = E ε', 'σ = N A', 'ε = E σ', 'σ = E/ε']} bonne={0} colonnes={4}>
+Domaine élastique.
+</QCM>
+
+<QCM n={4} question="Navier-Bernoulli suppose que les sections :" choix={['restent planes', 'se gauchissent', 'disparaissent', 'doublent']} bonne={0} colonnes={4}>
+Base de la flexion.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour le tirant de l'exemple, σ vaut :</>} choix={[grandeur(b0.sigma, 0, 'MPa'), '120 MPa', '0,38 MPa', '38 MPa']} bonne={0} colonnes={4}>
+120 000 / 314.
+</QCM>
+
+<QCM n={6} question="Le module d'Young de l'acier vaut environ :" choix={['210 000 MPa', '30 000 MPa', '210 MPa', '11 000 MPa']} bonne={0} colonnes={2}>
+Sept fois le béton.
+</QCM>
+
+<QCM n={7} question="Une contrainte tangentielle est :" choix={['parallèle à la section', 'perpendiculaire', 'nulle', 'une pression']} bonne={0} colonnes={2}>
+Cisaillement.
+</QCM>
+
+<QCM n={8} question="Le principe de Saint-Venant dit que loin de la charge :" choix={['seule la résultante compte', 'la contrainte est nulle', 'la poutre casse', 'Hooke ne vaut plus']} bonne={0} colonnes={2}>
+Zones de diffusion près des appuis.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

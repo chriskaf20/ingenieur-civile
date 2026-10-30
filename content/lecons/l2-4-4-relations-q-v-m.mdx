@@ -1,0 +1,299 @@
+---
+id: L2.4.4
+titre: "Relations entre charge, effort tranchant et moment"
+objectifs:
+  - Établir les relations dV/dx = −q et dM/dx = V
+  - Utiliser l'aire sous le diagramme de V pour obtenir M
+  - Tracer un diagramme sans écrire toutes les équations
+  - Vérifier un diagramme fourni par un logiciel
+relecture: false
+normes: []
+glossaire:
+  - terme: Relation charge-tranchant
+    definition: La pente du diagramme de V est égale à l'opposé de la charge répartie.
+  - terme: Relation tranchant-moment
+    definition: La pente du diagramme de M est égale à l'effort tranchant.
+  - terme: Méthode des aires
+    definition: La variation de M entre deux sections est égale à l'aire du diagramme de V entre elles.
+symboles:
+  - { symbole: 'q(x)', signification: 'charge répartie', unite: 'kN/m' }
+  - { symbole: 'V(x)', signification: 'effort tranchant', unite: 'kN' }
+  - { symbole: 'M(x)', signification: 'moment fléchissant', unite: 'kN·m' }
+formules:
+  - { nom: 'Charge et tranchant', tex: '\frac{dV}{dx} = -q(x)', domaine: 'Hors forces ponctuelles' }
+  - { nom: 'Tranchant et moment', tex: '\frac{dM}{dx} = V(x)', domaine: 'Hors couples ponctuels' }
+  - { nom: 'Méthode des aires', tex: 'M(x_2) - M(x_1) = \int_{x_1}^{x_2} V\,dx', domaine: 'Aire sous V' }
+---
+
+import { diagrammes, effortsSection, EXEMPLE_POUTRE } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { DiagrammesVM } from '@/components/schemas/Rdm1'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const e0 = effortsSection(EXEMPLE_POUTRE, 0.0001)
+export const e2 = effortsSection(EXEMPLE_POUTRE, 2)
+export const aire1 = (e0.V + effortsSection(EXEMPLE_POUTRE, 1.9999).V) / 2 * 2
+export const d0 = diagrammes(EXEMPLE_POUTRE, 600)
+export const T = { L: 6, xA: 0, xB: 6, charges: [{ type: 'repartie', nom: 'q', q1: 0, q2: 15, a: 0, b: 6 }] }
+export const dT = diagrammes(T, 600)
+export const ex2 = diagrammes({ L: 4, xA: 0, xB: 4, charges: [{ type: 'ponctuelle', nom: 'P', F: 24, a: 1 }] }, 400)
+
+<Page etape="intuition" titre="L'intuition : les diagrammes sont liés">
+
+Regarde les deux diagrammes d'une même poutre : là où V est grand, M monte vite ; là où V s'annule, M est au sommet ; là où V est négatif, M redescend. Ce n'est pas une coïncidence : **V est la pente de M**, comme la vitesse est la pente de la position (L1.2). Et la charge est la pente (changée de signe) de V.
+
+<DiagrammesVM d={EXEMPLE_POUTRE} titre="Poutre de l'exemple" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment utiliser les liens entre q, V et M pour tracer et vérifier vite un diagramme ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Trois courbes, deux dérivées" sousTitre="q → V → M" etape="cours">
+
+<Panneau n={1} titre="dV/dx = −q" icone="calcul" couleur="terre">
+La charge donne la pente de V.
+</Panneau>
+
+<Panneau n={2} titre="dM/dx = V" icone="regle" couleur="encre">
+V donne la pente de M.
+</Panneau>
+
+<Panneau n={3} titre="Aires" icone="plan" couleur="acier">
+ΔM = aire sous V.
+</Panneau>
+
+<Panneau n={4} titre="Maximum" icone="idee" couleur="brique">
+V = 0 : tangente horizontale de M.
+</Panneau>
+
+<Panneau n={5} titre="Sauts" icone="attention" couleur="correction">
+Force : saut de V ; couple : saut de M.
+</Panneau>
+
+<Panneau n={6} titre="Contrôle" icone="verification" couleur="validation">
+Vérifier un logiciel en 2 minutes.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'équilibre d'un petit tronçon">
+
+### Le tronçon dx
+
+Isolons un petit morceau de poutre de longueur dx, chargé par q dx. À gauche : V et M ; à droite : V + dV et M + dM.
+
+- Équilibre vertical : $V - q\,dx - (V + dV) = 0$, donc $\dfrac{dV}{dx} = -q$.
+- Équilibre des moments : $M + V\,dx - (M + dM) = 0$ (au premier ordre), donc $\dfrac{dM}{dx} = V$.
+
+En dérivant deux fois : $\dfrac{d^2M}{dx^2} = -q$. Avec q constant, M est bien une parabole.
+
+<PoutreModele alt="Un tronçon de poutre chargé par une charge répartie q : les efforts V et M à gauche, V + dV et M + dM à droite." L={1} appuis={[]} charges={[{ type: 'repartie', nom: 'q', q1: 10, q2: 10, a: 0, b: 1 }]} cotes={[0, 1]} dec={0} prefixe="l244-tr" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la méthode des aires">
+
+### Intégrer au lieu de recalculer
+
+En intégrant $dM/dx = V$ entre deux sections :
+
+$$M(x_2) - M(x_1) = \int_{x_1}^{x_2} V\,dx = \text{aire sous } V$$
+
+Exemple : de 0 à 2 m, V passe de {nombre(e0.V, 2)} à {nombre(effortsSection(EXEMPLE_POUTRE, 1.9999).V, 2)} kN (trapèze). Aire = {nombre(aire1, 2)} kN·m. Comme M(0) = 0, M(2) = {nombre(aire1, 2)} kN·m, ce que confirme la coupure ({nombre(e2.M, 2)} kN·m).
+
+<DiagrammeBarres alt={`M(2 m) par deux méthodes : aire sous V, ${nombre(aire1, 2)} kN·m ; méthode des coupures, ${nombre(e2.M, 2)} kN·m.`} titre="M à 2 m (kN·m)" barres={[{ libelle: 'aire sous V', valeur: aire1, texte: nombre(aire1, 2), teinte: 'acier' }, { libelle: 'coupure', valeur: e2.M, texte: nombre(e2.M, 2), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : charge variable">
+
+### Charge triangulaire
+
+Si q croît linéairement (poussée de terre ou d'eau, L1.3), V est une **parabole** et M une **cubique**. Le maximum de M est toujours là où V = 0 : pour 0 à 15 kN/m sur 6 m, en x = {nombre(dT.xMmax, 2)} m, $M_{max}$ = {grandeur(dT.Mmax, 2, 'kN·m')}.
+
+<DiagrammesVM d={T} titre="Charge triangulaire" />
+
+<Regle type="art">
+Les degrés montent d'un cran à chaque intégration : q constant → V degré 1 → M degré 2 ; q linéaire → V degré 2 → M degré 3. Si un diagramme de logiciel ne respecte pas cette règle, il y a une erreur de saisie.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : tracer par les relations">
+
+<DiagrammeFlux alt="Tracer par les relations : partir de RA ; descendre V selon la charge et sauter aux forces ; repérer où V s'annule ; cumuler les aires de V pour obtenir M ; contrôler M nul au bout." etapes={[{ titre: 'V(0) = RA', texte: 'départ', teinte: 'encre' }, { titre: 'Pente −q', texte: 'sauts −P', teinte: 'terre' }, { titre: 'V = 0', texte: 'repère', teinte: 'brique' }, { titre: 'Aires', texte: 'cumul → M', teinte: 'acier' }, { titre: 'M(L) = 0', texte: 'contrôle', teinte: 'validation' }]} />
+
+<DiagrammesVM d={{ L: 4, xA: 0, xB: 4, charges: [{ type: 'ponctuelle', nom: 'P', F: 24, a: 1 }] }} titre="Force à 1 m" />
+
+</Page>
+
+<FicheCalcul calcul="diagrammesPoutre">
+
+<Cahier titre="Exemple résolu : vérifier un diagramme par les aires">
+
+**Énoncé.** Reprends la poutre de 6 m (10 kN/m et 20 kN à 2 m). Vérifie le moment maximal par la méthode des aires.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le diagramme de V">
+<AN k="reactions" />
+<AN k="saut" />
+<Note>Pourquoi la pente vaut-elle −10 kN/m ? C'est dV/dx = −q.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'aire jusqu'au zéro de V">
+
+<Etape n={3} titre="Le maximum">
+<AN k="Mmax" />
+<Resultat k="Mmax" libelle="Moment maximal" />
+<Schema />
+<Note couleur="vert">Contrôle : l'aire totale sous V (positive puis négative) vaut zéro, car M(0) = M(L) = 0.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le signe moins de dV/dx = −q.">
+Une charge vers le bas fait **décroître** V.
+</Piege>
+
+<Piege erreur="compter l'aire sans son signe.">
+Une aire sous l'axe fait diminuer M.
+</Piege>
+
+<Piege erreur="appliquer dM/dx = V à travers un couple ponctuel.">
+Un couple appliqué fait sauter M ; la relation vaut de part et d'autre.
+</Piege>
+
+<DiagrammesVM d={T} titre="Charge triangulaire" />
+
+<Piege erreur="chercher V = 0 à l'œil sur une courbe.">
+On résout l'équation de V sur le tronçon concerné.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Contrôler la sortie d'un logiciel.** Avant de ferrailler sur la base d'un logiciel, l'ingénieur vérifie : les réactions égalent-elles la charge totale ? M est-il nul aux appuis simples ? Les sauts de V correspondent-ils aux charges ? L'aire sous V jusqu'au zéro donne-t-elle Mmax ? Deux minutes, qui évitent une erreur de saisie coûteuse.
+
+<DiagrammesVM d={EXEMPLE_POUTRE} titre="Contrôle de l'exemple" />
+
+<Encadre type="terrain" titre="Mur de soutènement">
+La poussée des terres sur un mur est triangulaire : le moment dans le voile croît comme le cube de la hauteur. Doubler la hauteur d'un mur multiplie le moment à sa base par huit : c'est pourquoi les murs de plus de 2 à 3 m changent de conception (L3.7).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : relations q, V, M">
+
+### Relations
+
+dV/dx = −q · dM/dx = V · d²M/dx² = −q
+
+### Aires
+
+M(x₂) − M(x₁) = aire sous V entre x₁ et x₂
+
+### Degrés
+
+q constant → V droite → M parabole · q linéaire → V parabole → M cubique
+
+### Singularités
+
+force : saut de V, cassure de M · couple : saut de M · Mmax où V = 0
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Pente de V">
+
+Une poutre porte 8 kN/m. De combien V diminue-t-il sur 3 m ?
+
+<Indice>dV/dx = −q.</Indice>
+
+<Corrige>
+**{nombre(8 * 3, 0)} kN**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Par les aires">
+
+Poutre de 4 m, 24 kN à 1 m de A. Calcule Mmax par l'aire sous V.
+
+<Indice>V = RA sur le premier mètre.</Indice>
+
+<Corrige>
+RA = {nombre(ex2.RA, 0)} kN ; aire = {nombre(ex2.RA, 0)} × 1 = **{grandeur(ex2.Mmax, 0, 'kN·m')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Charge triangulaire">
+
+0 à 15 kN/m sur 6 m. Où V s'annule-t-il ? Mmax ?
+
+<Indice>RA = q₀L/6 ; V = RA − q₀x²/(2L).</Indice>
+
+<Corrige>
+x = L/√3 = **{nombre(dT.xMmax, 2)} m** ; Mmax = **{grandeur(dT.Mmax, 2, 'kN·m')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="dM/dx vaut :" choix={['V', '−q', 'M', 'EI']} bonne={0} colonnes={4}>
+Pente de M.
+</QCM>
+
+<QCM n={2} question="dV/dx vaut :" choix={['−q', 'V', 'M', '0']} bonne={0} colonnes={4}>
+Charge vers le bas.
+</QCM>
+
+<QCM n={3} question="ΔM entre deux sections égale :" choix={['l’aire sous V', 'l’aire sous q', 'V × L', 'q L²/8']} bonne={0} colonnes={2}>
+Méthode des aires.
+</QCM>
+
+<QCM n={4} question="Sous une charge triangulaire, M est :" choix={['une cubique', 'une droite', 'une parabole', 'constant']} bonne={0} colonnes={4}>
+Degré 3.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour l'exemple, M(2 m) vaut :</>} choix={[grandeur(e2.M, 2, 'kN·m'), grandeur(e0.V, 2, 'kN·m'), '20,00 kN·m', '0 kN·m']} bonne={0} colonnes={4}>
+Aire du trapèze.
+</QCM>
+
+<QCM n={6} question="Là où V = 0, la courbe de M a :" choix={['une tangente horizontale', 'un saut', 'une pente maximale', 'une valeur nulle']} bonne={0} colonnes={2}>
+Extremum.
+</QCM>
+
+<QCM n={7} question="Un couple ponctuel appliqué provoque :" choix={['un saut de M', 'un saut de V', 'rien', 'une parabole']} bonne={0} colonnes={2}>
+Discontinuité de M.
+</QCM>
+
+<QCM n={8} question="Doubler la hauteur d'un mur soutenant de la terre multiplie le moment à sa base par :" choix={['8', '2', '4', '16']} bonne={0} colonnes={4}>
+Poussée triangulaire : H³.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

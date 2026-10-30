@@ -1,0 +1,122 @@
+---
+id: L2.4.EX
+titre: "Examen du module L2.4 : résistance des matériaux I"
+objectifs:
+  - Calculer des efforts internes et tracer des diagrammes
+  - Calculer des contraintes de traction, de flexion et de cisaillement
+  - Calculer les caractéristiques d'une section
+  - Vérifier un assemblage et dimensionner une section
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { barre, boulons, cisaillementRect, diagrammes, dimensionnerRect, effortsSection, flexionSection, sectionComposee, torsion } from '@/lib/calc/rdm1'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+
+export const P1 = { L: 6, xA: 0, xB: 6, charges: [{ type: 'repartie', nom: 'q', q1: 8, q2: 8, a: 0, b: 6 }] }
+export const q2 = effortsSection(P1, 2)
+export const q4 = diagrammes({ L: 5, xA: 0, xB: 5, charges: [{ type: 'ponctuelle', nom: 'P', F: 40, a: 2 }] }, 500)
+export const q5 = barre({ N: 50, L: 3, d: 16, E: 210000 })
+export const q7 = sectionComposee([{ b: 20, h: 40, y: 0 }])
+export const q8 = flexionSection(40, [{ b: 20, h: 40, y: 0 }])
+export const q10 = cisaillementRect(48, 20, 40)
+export const q11 = torsion({ T: 1.5, D: 40, d: 0, L: 1, G: 81000 })
+export const q12 = boulons({ F: 40, n: 2, d: 14, plans: 1, t: 10 })
+export const q14 = dimensionnerRect(18, 12, 12)
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 2 h.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Dessine la poutre ou la section avant de calculer ; écris les unités à chaque ligne.
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="L2.4.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="1 MPa vaut :" choix={['1 N/mm²', '1 kN/m²', '1 kN/mm²', '1 N/m²']} bonne={0} colonnes={4}>
+L2.4.1.
+</QCM>
+
+<QCM n={2} question="Poutre de 6 m, 8 kN/m. M à 2 m de A :" choix={[grandeur(q2.M, 1, 'kN·m'), '36,0 kN·m', '24,0 kN·m', '16,0 kN·m']} bonne={0} colonnes={4}>
+RA x − q x²/2 (L2.4.2).
+</QCM>
+
+<QCM n={3} question="Sous une force ponctuelle, le diagramme de V présente :" choix={['un saut', 'une parabole', 'un maximum arrondi', 'rien']} bonne={0} colonnes={4}>
+L2.4.3.
+</QCM>
+
+<QCM n={4} question="Poutre de 5 m, 40 kN à 2 m de A. Mmax :" choix={[grandeur(q4.Mmax, 1, 'kN·m'), '50,0 kN·m', '40,0 kN·m', '24,0 kN·m']} bonne={0} colonnes={4}>
+P a b/L (L2.4.3).
+</QCM>
+
+<QCM n={5} question="Tirant Ø 16 mm, 50 kN, 3 m, acier. Allongement :" choix={[grandeur(q5.dL, 2, 'mm'), '0,18 mm', '17,8 mm', '3,00 mm']} bonne={0} colonnes={4}>
+N L/(E A) (L2.4.5).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={6} question="dM/dx vaut :" choix={['V', '−q', 'EI', 'N']} bonne={0} colonnes={4}>
+L2.4.4.
+</QCM>
+
+<QCM n={7} question="Inertie d'un rectangle 20 × 40 cm :" choix={[grandeur(q7.I, 0, 'cm⁴'), '26 667 cm⁴', '5 333 cm⁴', '800 cm⁴']} bonne={0} colonnes={4}>
+b h³/12 (L2.4.6).
+</QCM>
+
+<QCM n={8} question="Même section, M = 40 kN·m. σmax :" choix={[grandeur(q8.sigmaInf, 2, 'MPa'), '4,00 MPa', '15,00 MPa', '0,75 MPa']} bonne={0} colonnes={4}>
+M/W (L2.4.7).
+</QCM>
+
+<QCM n={9} question="Dans une section en T sous moment positif, la fibre la plus sollicitée est :" choix={['la plus éloignée de G', 'la table', 'toujours la plus haute', 'l’axe neutre']} bonne={0} colonnes={2}>
+L2.4.7.
+</QCM>
+
+<QCM n={10} question="Rectangle 20 × 40 cm, V = 48 kN. τmax :" choix={[grandeur(q10.tauMax, 2, 'MPa'), grandeur(q10.tauMoyen, 2, 'MPa'), '1,20 MPa', '0,06 MPa']} bonne={0} colonnes={4}>
+1,5 V/A (L2.4.8).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={11} question="Arbre plein Ø 40 mm, T = 1,5 kN·m. τmax :" choix={[grandeur(q11.tauMax, 1, 'MPa'), '59,7 MPa', '238,7 MPa', '15,0 MPa']} bonne={0} colonnes={4}>
+T D/(2J) (L2.4.9).
+</QCM>
+
+<QCM n={12} question="2 boulons Ø 14 en cisaillement simple transmettent 40 kN. τ :" choix={[grandeur(q12.tau, 1, 'MPa'), grandeur(q12.tau / 2, 1, 'MPa'), '40,0 MPa', '260,0 MPa']} bonne={0} colonnes={4}>
+F/(n m A) (L2.4.10).
+</QCM>
+
+<QCM n={13} question="Un boulon en cisaillement double, comparé au simple, subit :" choix={['deux fois moins de cisaillement', 'deux fois plus', 'autant', 'aucun']} bonne={0} colonnes={2}>
+L2.4.10.
+</QCM>
+
+<QCM n={14} question="M = 18 kN·m, σlim = 12 MPa, b = 12 cm. h minimale :" choix={[grandeur(q14.h, 1, 'cm'), '15,0 cm', '45,0 cm', '12,0 cm']} bonne={0} colonnes={4}>
+√(6W/b) (L2.4.11).
+</QCM>
+
+<QCM n={15} question="Pour une solive en bois, le critère souvent déterminant est :" choix={['la flèche', 'la torsion', 'la traction', 'le flambement']} bonne={0} colonnes={2}>
+L2.4.11, L2.4.P.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

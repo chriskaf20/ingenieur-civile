@@ -1,0 +1,309 @@
+---
+id: L2.4.2
+titre: "Efforts internes N, V, M : méthode des coupures"
+objectifs:
+  - Définir l'effort normal, l'effort tranchant et le moment fléchissant
+  - Appliquer la méthode des coupures en isolant une partie de la poutre
+  - Respecter une convention de signes
+  - Calculer N, V et M dans une section quelconque
+relecture: false
+normes: []
+glossaire:
+  - terme: Efforts internes
+    definition: Actions qu'une partie de la poutre exerce sur l'autre à travers une section ; ils équilibrent les charges de chaque côté.
+  - terme: Effort normal
+    definition: N, composante des efforts internes le long de l'axe de la poutre (traction ou compression).
+  - terme: Effort tranchant
+    definition: V, composante perpendiculaire à l'axe ; il tend à faire glisser une partie par rapport à l'autre.
+  - terme: Moment fléchissant
+    definition: M, moment qui tend à courber la poutre ; positif quand les fibres du bas sont tendues.
+symboles:
+  - { symbole: 'N', signification: 'effort normal', unite: 'kN' }
+  - { symbole: 'V', signification: 'effort tranchant', unite: 'kN' }
+  - { symbole: 'M', signification: 'moment fléchissant', unite: 'kN·m' }
+  - { symbole: 'x', signification: 'abscisse de la coupure', unite: 'm' }
+formules:
+  - { nom: 'Effort tranchant', tex: 'V(x) = \sum F_{\uparrow,\ \text{gauche}}', domaine: 'Forces à gauche de la coupure' }
+  - { nom: 'Moment fléchissant', tex: 'M(x) = \sum M_{/x,\ \text{gauche}}', domaine: 'Moments à gauche, sens horaire positif' }
+  - { nom: 'Charge uniforme', tex: 'V = R_A - q x,\quad M = R_A x - \frac{q x^2}{2}', domaine: 'Avant toute force ponctuelle' }
+---
+
+import { effortsSection, EXEMPLE_POUTRE } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { Coupure } from '@/components/schemas/Rdm1'
+import { PoutreModele } from '@/components/drawing/PoutreModele'
+import { DiagrammeFlux, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const e3 = effortsSection(EXEMPLE_POUTRE, 3)
+export const e1 = effortsSection(EXEMPLE_POUTRE, 1)
+export const e5 = effortsSection(EXEMPLE_POUTRE, 5)
+export const c2 = { L: 2, xA: 0, xB: 0, charges: [] }
+export const ex1 = effortsSection({ L: 5, xA: 0, xB: 5, charges: [{ type: 'repartie', nom: 'q', q1: 8, q2: 8, a: 0, b: 5 }] }, 2)
+export const ex3 = effortsSection({ L: 4, xA: 0, xB: 4, charges: [{ type: 'ponctuelle', nom: 'P', F: 30, a: 1 }] }, 2.5)
+
+<Page etape="intuition" titre="L'intuition : couper pour voir à l'intérieur">
+
+Une poutre chargée tient parce que chaque morceau est en équilibre. Imagine qu'on la scie à l'abscisse x : pour que le morceau de gauche ne tombe pas et ne tourne pas, le morceau de droite doit exercer sur lui, à travers la coupe, une force verticale et un couple. Ce sont les **efforts internes** : l'effort tranchant V et le moment fléchissant M (et l'effort normal N si la poutre est tirée ou comprimée).
+
+<Coupure x={3} V={e3.V} M={e3.M} RA={e3.RA} q={10} P={20} aP={2} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer, en une section quelconque, les efforts que la matière doit transmettre ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La méthode des coupures" sousTitre="Couper, isoler, équilibrer" etape="cours">
+
+<Panneau n={1} titre="Réactions" icone="calcul" couleur="encre">
+D'abord RA et RB par la statique.
+</Panneau>
+
+<Panneau n={2} titre="Couper" icone="regle" couleur="acier">
+À l'abscisse x choisie.
+</Panneau>
+
+<Panneau n={3} titre="Isoler" icone="plan" couleur="terre">
+Garder la partie la plus simple (gauche en général).
+</Panneau>
+
+<Panneau n={4} titre="N, V, M" icone="idee" couleur="brique">
+Les inconnues sur la coupe.
+</Panneau>
+
+<Panneau n={5} titre="Équilibre" icone="verification" couleur="validation">
+ΣF = 0 et ΣM = 0 sur la partie isolée.
+</Panneau>
+
+<Panneau n={6} titre="Signes" icone="attention" couleur="correction">
+M &gt; 0 : fibres du bas tendues.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les trois efforts internes">
+
+### Sur une coupe
+
+Dans le plan, la partie droite exerce sur la partie gauche une force et un moment, que l'on décompose en :
+
+- **N**, effort normal, le long de l'axe : traction (N &gt; 0) ou compression ;
+- **V**, effort tranchant, perpendiculaire à l'axe ;
+- **M**, moment fléchissant.
+
+Sur la partie droite s'exercent les mêmes efforts, de sens opposés (action et réaction).
+
+<DiagrammeComparaison alt="Conventions de signe : sur la partie gauche, V est compté positif s'il résulte de forces de gauche dirigées vers le haut ; M est positif s'il tend les fibres inférieures (poutre qui « sourit »)." gauche={{ titre: 'Effort tranchant V', items: ['somme des forces à gauche', 'vers le haut : positif', 'en kN', 'saute aux forces ponctuelles'] }} droite={{ titre: 'Moment fléchissant M', items: ['somme des moments à gauche', 'fibres du bas tendues : positif', 'en kN·m', 'nul aux appuis simples d’extrémité'] }} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la méthode pas à pas">
+
+### Les étapes
+
+1. Calculer les **réactions** (L1.3).
+2. **Couper** à l'abscisse x.
+3. **Isoler** la partie gauche avec toutes ses charges (réactions comprises).
+4. Écrire l'**équilibre** : V = somme des forces verticales à gauche ; M = somme de leurs moments par rapport à la coupe.
+
+### Exemple
+
+Poutre de 6 m, 10 kN/m et 20 kN à 2 m. $R_A$ = {nombre(e3.RA, 2)} kN. À x = 1 m (avant la force) : V = {nombre(e1.V, 2)} kN, M = {nombre(e1.M, 2)} kN·m. À x = 3 m (après) : V = {nombre(e3.V, 2)} kN, M = {nombre(e3.M, 2)} kN·m.
+
+<PoutreModele alt="Poutre de 6 m sur deux appuis, charge répartie 10 kN/m et force de 20 kN à 2 m de A." L={6} appuis={[{ x: 0, type: 'double', nom: 'A' }, { x: 6, type: 'simple', nom: 'B' }]} charges={EXEMPLE_POUTRE.charges} cotes={[0, 2, 6]} dec={0} prefixe="l242-pm" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : gauche ou droite ?">
+
+### Le même résultat
+
+On peut isoler la partie **droite** : on trouve les mêmes N, V, M (au signe près selon la convention). On choisit le côté qui a le moins de charges. À x = 5 m, la partie droite ne porte que 1 m de charge et $R_B$ : M = {nombre(e5.M, 2)} kN·m.
+
+### Une console
+
+Pour une console encastrée, on isole la partie **libre** (côté sans appui) : pas besoin de calculer d'abord les réactions d'encastrement.
+
+<Coupure x={1} V={e1.V} M={e1.M} RA={e1.RA} q={10} />
+
+<Regle type="art">
+Dessiner **toujours** la partie isolée avec toutes ses forces et les inconnues N, V, M dans le sens positif. Une erreur de signe se voit sur le dessin, pas dans une équation.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Méthode des coupures : réactions ; coupure en x ; partie isolée dessinée ; équilibre des forces : V ; équilibre des moments : M ; contrôle avec l'autre partie." etapes={[{ titre: 'Réactions', texte: 'statique', teinte: 'encre' }, { titre: 'Couper', texte: 'en x', teinte: 'acier' }, { titre: 'Dessiner', texte: 'partie gauche', teinte: 'terre' }, { titre: 'Équilibrer', texte: 'V, M', teinte: 'brique' }, { titre: 'Contrôler', texte: 'partie droite', teinte: 'validation' }]} />
+
+<Coupure x={5} V={e5.V} M={e5.M} RA={e5.RA} q={10} P={20} aP={2} />
+
+</Page>
+
+<FicheCalcul calcul="effortsCoupure">
+
+<Cahier titre="Exemple résolu : V et M à 3 m de l'appui">
+
+**Énoncé.** Une poutre de 6 m sur deux appuis porte 10 kN/m sur toute sa longueur et une force de 20 kN à 2 m de A (données de l'énoncé). Calcule V et M à x = 3 m.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La réaction">
+<AN k="RA" />
+<Note>Pourquoi ΣM en B ? RB disparaît de l'équation : une seule inconnue.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la coupure">
+
+<Etape n={3} titre="Effort tranchant et moment">
+<AN k="V" />
+<AN k="M" />
+<Resultat k="M" libelle="Moment en x" />
+<Schema />
+<Note couleur="vert">Contrôle : déplace la coupure en x = 0,01 m : M ≈ 0 (appui simple) et V ≈ RA.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier les réactions dans la partie isolée.">
+RA est une force comme les autres pour la partie gauche.
+</Piege>
+
+<Piege erreur="prendre toute la charge répartie.">
+Seule la partie de q située à gauche de la coupe compte : q x, appliquée en x/2.
+</Piege>
+
+<Piege erreur="changer de convention en cours de calcul.">
+On fixe les signes une fois, sur un dessin.
+</Piege>
+
+<Coupure x={2.5} V={ex3.V} M={ex3.M} RA={ex3.RA} P={30} aP={1} />
+
+<Piege erreur="confondre moment fléchissant et moment d'une force.">
+M est un effort intérieur à une section ; il résulte de tous les moments à gauche.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Où couper une poutre ?** Quand on ouvre une trémie dans un plancher existant ou qu'on perce une poutre pour passer une gaine, on se demande « quels efforts passent ici ? ». La méthode des coupures répond. Près des appuis, V est fort et M faible ; au milieu, l'inverse.
+
+<PoutreModele alt="Console de 2 m encastrée, chargée par 5 kN/m." L={2} appuis={[{ x: 0, type: 'encastrement', nom: 'A' }]} charges={[{ type: 'repartie', nom: 'q', q1: 5, q2: 5, a: 0, b: 2 }]} cotes={[0, 2]} dec={0} prefixe="l242-cons" />
+
+<Encadre type="attention" titre="Percer une poutre en béton armé">
+Un trou dans une poutre coupe des armatures et réduit la section là où passent V et M. On ne perce jamais sans l'accord de l'ingénieur ; on évite les zones d'appui (V maximal) et le bas de la poutre à mi-portée (armatures tendues).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : méthode des coupures">
+
+### Efforts internes
+
+N (axial) · V (tranchant) · M (fléchissant)
+
+### Méthode
+
+réactions → couper en x → isoler → V = Σ forces gauche ↑ → M = Σ moments gauche
+
+### Charge uniforme seule
+
+V = RA − q x · M = RA x − q x²/2
+
+### Signes
+
+M &gt; 0 : bas tendu · même résultat avec la partie droite
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Charge uniforme">
+
+Poutre de 5 m, 8 kN/m. V et M à 2 m de A ?
+
+<Indice>RA = q L/2.</Indice>
+
+<Corrige>
+V = **{grandeur(ex1.V, 1, 'kN')}** ; M = **{grandeur(ex1.M, 1, 'kN·m')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Avec la partie droite">
+
+Retrouve M à x = 5 m de la poutre de l'exemple en isolant la partie droite.
+
+<Indice>Partie droite : RB et 1 m de charge.</Indice>
+
+<Corrige>
+M = RB × 1 − 10 × 1²/2 = **{grandeur(e5.M, 2, 'kN·m')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Force ponctuelle">
+
+Poutre de 4 m, 30 kN à 1 m de A. V et M à 2,5 m ?
+
+<Indice>RA = 30 × 3/4.</Indice>
+
+<Corrige>
+V = **{grandeur(ex3.V, 1, 'kN')}** ; M = **{grandeur(ex3.M, 2, 'kN·m')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'effort tranchant est :" choix={['perpendiculaire à l’axe', 'le long de l’axe', 'un moment', 'une contrainte']} bonne={0} colonnes={2}>
+V.
+</QCM>
+
+<QCM n={2} question="Un moment positif (convention du cours) tend :" choix={['les fibres du bas', 'les fibres du haut', 'aucune fibre', 'l’appui']} bonne={0} colonnes={2}>
+La poutre « sourit ».
+</QCM>
+
+<QCM n={3} question="Avant de couper, on calcule :" choix={['les réactions', 'les contraintes', 'la flèche', 'l’inertie']} bonne={0} colonnes={4}>
+Statique d'abord.
+</QCM>
+
+<QCM n={4} question="La charge répartie à gauche de la coupure agit en :" choix={['x/2', 'x', 'L/2', '0']} bonne={0} colonnes={4}>
+Son centre.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, M à 3 m vaut :</>} choix={[grandeur(e3.M, 2, 'kN·m'), grandeur(e3.RA * 3, 2, 'kN·m'), '45,00 kN·m', '0 kN·m']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="Sur un appui simple d'extrémité, M vaut :" choix={['0', 'son maximum', 'RA', 'q L²/8']} bonne={0} colonnes={4}>
+Pas de moment repris.
+</QCM>
+
+<QCM n={7} question="Isoler la partie droite donne :" choix={['les mêmes efforts', 'des efforts doubles', 'aucun effort', 'des contraintes']} bonne={0} colonnes={2}>
+Action-réaction.
+</QCM>
+
+<QCM n={8} question="Pour une console, on isole de préférence :" choix={['la partie libre', 'l’encastrement', 'les deux', 'aucune']} bonne={0} colonnes={2}>
+Pas de réaction à calculer.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,304 @@
+---
+id: L2.4.10
+titre: "Cisaillement simple : boulons et assemblages"
+objectifs:
+  - Identifier les plans de cisaillement d'un assemblage
+  - Calculer la contrainte de cisaillement dans un boulon ou une cheville
+  - Calculer la pression diamétrale sur la pièce assemblée
+  - Choisir le nombre de boulons d'une attache
+relecture: false
+normes:
+  - "EN 1993-1-8 §3.6 : résistance des boulons au cisaillement et à la pression diamétrale"
+glossaire:
+  - terme: Cisaillement simple
+    definition: Le boulon est coupé selon un seul plan, entre deux pièces superposées.
+  - terme: Cisaillement double
+    definition: Le boulon traverse trois pièces et est coupé selon deux plans ; chaque plan reprend la moitié de l'effort.
+  - terme: Pression diamétrale
+    definition: Contrainte d'écrasement du trou de la pièce par la tige du boulon.
+  - terme: Cheville
+    definition: Pièce (bois, acier) qui relie deux éléments en travaillant au cisaillement.
+symboles:
+  - { symbole: 'F', signification: 'effort transmis', unite: 'kN' }
+  - { symbole: 'n', signification: 'nombre de boulons', unite: '—' }
+  - { symbole: 'm', signification: 'nombre de plans de cisaillement', unite: '—' }
+  - { symbole: 't', signification: 'épaisseur de la pièce', unite: 'mm' }
+formules:
+  - { nom: 'Cisaillement', tex: '\tau = \frac{F}{n\,m\,A},\quad A = \frac{\pi d^2}{4}', domaine: 'Répartition égale' }
+  - { nom: 'Pression diamétrale', tex: '\sigma_b = \frac{F}{n\,d\,t}', domaine: 'Pièce la plus mince' }
+  - { nom: 'Nombre de boulons', tex: 'n \geq \frac{F}{m\,A\,\tau_{lim}}', domaine: 'Dimensionnement' }
+---
+
+import { boulons, EXEMPLE_BOULON } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { BoulonCisaillement } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const b0 = boulons(EXEMPLE_BOULON)
+export const b1 = boulons({ ...EXEMPLE_BOULON, plans: 1 })
+export const nMin = Math.ceil((90 * 1000) / (2 * (Math.PI * 16 * 16 / 4) * 100))
+export const ex1 = boulons({ F: 20, n: 1, d: 12, plans: 1, t: 6 })
+
+<Page etape="intuition" titre="L'intuition : les ciseaux">
+
+Des ciseaux coupent une feuille en faisant glisser deux lames l'une contre l'autre : c'est du **cisaillement**. Un boulon qui relie deux plats tirés en sens opposés subit exactement cela : les plats essaient de le couper. S'il traverse trois pièces, il y a deux « coups de ciseaux », et il résiste deux fois mieux.
+
+<BoulonCisaillement plans={2} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment vérifier qu'un boulon ou une cheville ne sera ni coupé, ni n'écrasera son trou ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Vérifier une attache" sousTitre="Deux modes de ruine" etape="cours">
+
+<Panneau n={1} titre="Plans" icone="plan" couleur="encre">
+Compter les plans de cisaillement m.
+</Panneau>
+
+<Panneau n={2} titre="Section" icone="regle" couleur="acier">
+A = π d²/4 (tige, ou fond de filet).
+</Panneau>
+
+<Panneau n={3} titre="Cisaillement" icone="calcul" couleur="correction">
+τ = F/(n m A).
+</Panneau>
+
+<Panneau n={4} titre="Pression" icone="attention" couleur="brique">
+σb = F/(n d t) sur le trou.
+</Panneau>
+
+<Panneau n={5} titre="Nombre" icone="verification" couleur="validation">
+n ≥ F/(m A τlim).
+</Panneau>
+
+<Panneau n={6} titre="Dispositions" icone="idee" couleur="terre">
+Pinces et entraxes minimaux (EN 1993-1-8).
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : simple ou double">
+
+### Compter les plans
+
+- **Cisaillement simple** : deux plats superposés, un seul plan de coupe par boulon (m = 1).
+- **Cisaillement double** : un plat pris entre deux couvre-joints (ou une âme entre deux cornières), deux plans (m = 2).
+
+### La contrainte
+
+En supposant l'effort réparti également entre les n boulons :
+
+$$\tau = \frac{F}{n\,m\,A},\qquad A = \frac{\pi d^2}{4}$$
+
+Pour 60 kN, 2 boulons Ø 16 : τ = {nombre(b1.tau, 1)} MPa en simple, {nombre(b0.tau, 1)} MPa en double.
+
+<BoulonCisaillement plans={1} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la pression diamétrale">
+
+### L'écrasement du trou
+
+La tige appuie sur le bord du trou de chaque pièce. On calcule une pression moyenne sur la surface projetée d × t :
+
+$$\sigma_b = \frac{F}{n\,d\,t}$$
+
+avec t l'épaisseur de la pièce **la plus mince** (ou la somme des couvre-joints si elle est plus faible). Pour un gousset de 8 mm : {nombre(b0.pression, 1)} MPa.
+
+<DiagrammeBarres alt={`Attache de 60 kN avec 2 boulons Ø 16 : cisaillement ${nombre(b1.tau, 1)} MPa en simple et ${nombre(b0.tau, 1)} MPa en double ; pression diamétrale ${nombre(b0.pression, 1)} MPa.`} titre="contraintes dans l'attache (MPa)" barres={[{ libelle: 'cisaillement, simple', valeur: b1.tau, texte: nombre(b1.tau, 1), teinte: 'correction' }, { libelle: 'cisaillement, double', valeur: b0.tau, texte: nombre(b0.tau, 1), teinte: 'validation' }, { libelle: 'pression diamétrale', valeur: b0.pression, texte: nombre(b0.pression, 1), teinte: 'terre' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : ce que dit l'Eurocode">
+
+### Résistances de calcul
+
+L'EN 1993-1-8 (§3.6, tableau 3.4) donne la résistance d'un boulon au cisaillement $F_{v,Rd}$ et à la pression diamétrale $F_{b,Rd}$ en fonction de la classe du boulon (4.6, 8.8…), de l'acier des pièces et des distances aux bords <AVerifier note="A_VERIFIER.md n° 64 : formules et coefficients de l'EN 1993-1-8 tableau 3.4 (αv, k1, αb) et pinces minimales (tableau 3.3)" />. Dans cette leçon, la contrainte limite est donnée par l'énoncé.
+
+<Regle type="art">
+On met au moins deux boulons par attache (un seul boulon laisse la pièce pivoter), on respecte les pinces (distance au bord) et les entraxes minimaux, et l'on évite que le filetage soit dans le plan de cisaillement.
+</Regle>
+
+<BoulonCisaillement plans={2} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Vérifier un assemblage boulonné : effort à transmettre ; plans de cisaillement ; contrainte de cisaillement par boulon ; pression diamétrale sur la pièce la plus mince ; dispositions constructives." etapes={[{ titre: 'F', texte: 'statique', teinte: 'encre' }, { titre: 'm plans', texte: '1 ou 2', teinte: 'acier' }, { titre: 'τ', texte: 'F/(n m A)', teinte: 'correction' }, { titre: 'σb', texte: 'F/(n d t)', teinte: 'terre' }, { titre: 'Pinces', texte: 'entraxes', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Pour transmettre 90 kN avec des boulons Ø 16 en cisaillement double et une contrainte limite de 100 MPa, il faut au moins ${nMin} boulons.`} titre="boulons Ø 16 nécessaires pour 90 kN (double, τlim = 100 MPa)" barres={[{ libelle: 'n minimal', valeur: nMin, texte: String(nMin), teinte: 'validation' }]} />
+
+</Page>
+
+<FicheCalcul calcul="boulonsAssemblage">
+
+<Cahier titre="Exemple résolu : l'attache d'une diagonale de ferme">
+
+**Énoncé.** La diagonale d'une ferme métallique transmet 60 kN à un gousset de 8 mm par 2 boulons Ø 16 en cisaillement double (données de l'énoncé). Calcule le cisaillement des boulons et la pression diamétrale sur le gousset.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Cisaillement">
+<AN k="A" />
+<AN k="tau" />
+<Note>Pourquoi diviser par 2 × 2 ? Deux boulons, deux plans chacun.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le trou">
+
+<Etape n={3} titre="Pression diamétrale">
+<AN k="pression" />
+<Resultat k="tau" libelle="Cisaillement" />
+<Resultat k="pression" libelle="Pression diamétrale" />
+<Schema />
+<Note couleur="vert">Contrôle : passe en cisaillement simple ; τ double, la pression ne change pas.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le second plan de cisaillement.">
+En double, chaque boulon résiste deux fois mieux.
+</Piege>
+
+<Piege erreur="prendre la section de la tige dans le filetage.">
+Si le plan de coupe passe dans le filet, la section utile est plus petite.
+</Piege>
+
+<Piege erreur="oublier la pression diamétrale.">
+Une tôle mince s'ovalise avant que le boulon ne casse.
+</Piege>
+
+<BoulonCisaillement plans={1} />
+
+<Piege erreur="supposer qu'un seul boulon suffit.">
+Au moins deux pour empêcher la rotation.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Charpentes boulonnées et chevilles bois.** Les hangars métalliques des zones minières du Katanga sont souvent boulonnés sur place : la qualité des boulons (classe marquée sur la tête), le serrage et la propreté des trous sont contrôlés. En charpente bois traditionnelle, des chevilles en bois dur travaillent au cisaillement de la même façon.
+
+<BoulonCisaillement plans={2} />
+
+<Encadre type="attention" titre="Boulons sans marquage">
+Un boulon sans marquage de classe est souvent de qualité inconnue. On ne le met jamais dans un assemblage de structure : sa résistance peut être deux fois plus faible que prévu.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : boulons au cisaillement">
+
+### Plans
+
+simple m = 1 · double m = 2
+
+### Contraintes
+
+τ = F/(n m A), A = π d²/4 · σb = F/(n d t), t la plus mince
+
+### Dimensionner
+
+n ≥ F/(m A τlim) · au moins 2 boulons
+
+### Norme (à vérifier)
+
+EN 1993-1-8 §3.6 : Fv,Rd, Fb,Rd ; pinces et entraxes minimaux
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Une cheville">
+
+Un boulon Ø 12 en cisaillement simple transmet 20 kN entre deux plats de 6 mm. τ et σb ?
+
+<Indice>A = 113 mm².</Indice>
+
+<Corrige>
+τ = **{grandeur(ex1.tau, 1, 'MPa')}** ; σb = **{grandeur(ex1.pression, 1, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Simple ou double">
+
+Pourquoi les attaches de diagonales de fermes sont-elles souvent en cisaillement double ?
+
+<Indice>Compare les τ.</Indice>
+
+<Corrige>
+Avec deux plans, **τ est divisé par deux** : moins de boulons ou des boulons plus petits ; l'effort est aussi centré (pas de flexion parasite).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Nombre de boulons">
+
+90 kN à transmettre, boulons Ø 16 en double, τlim = 100 MPa. Combien de boulons ?
+
+<Indice>n ≥ F/(m A τlim).</Indice>
+
+<Corrige>
+**{nMin} boulons**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.10">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un plat entre deux couvre-joints met les boulons en :" choix={['cisaillement double', 'cisaillement simple', 'traction', 'torsion']} bonne={0} colonnes={2}>
+Deux plans.
+</QCM>
+
+<QCM n={2} question="τ dans un boulon vaut :" choix={['F/(n m A)', 'F/A', 'F n m A', 'F/(d t)']} bonne={0} colonnes={4}>
+Répartition égale.
+</QCM>
+
+<QCM n={3} question="La pression diamétrale se calcule avec :" choix={['d × t', 'π d²/4', 'd²', 't²']} bonne={0} colonnes={4}>
+Surface projetée.
+</QCM>
+
+<QCM n={4} question="Le nombre minimal de boulons d'une attache est en général :" choix={['2', '1', '4', '10']} bonne={0} colonnes={4}>
+Anti-rotation.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Dans l'exemple, τ vaut :</>} choix={[grandeur(b0.tau, 1, 'MPa'), grandeur(b1.tau, 1, 'MPa'), '300,0 MPa', '18,7 MPa']} bonne={0} colonnes={4}>
+Double cisaillement.
+</QCM>
+
+<QCM n={6} question="Passer de simple à double cisaillement :" choix={['divise τ par 2', 'double τ', 'ne change rien', 'supprime τ']} bonne={0} colonnes={2}>
+Deux plans.
+</QCM>
+
+<QCM n={7} question="La norme de référence des assemblages acier est :" choix={['EN 1993-1-8', 'EN 1992-1-1', 'EN 206', 'EN 1997-1']} bonne={0} colonnes={2}>
+Eurocode 3, partie 1-8.
+</QCM>
+
+<QCM n={8} question="Un boulon sans marquage de classe :" choix={['ne s’emploie pas en structure', 'est toujours en classe 8.8', 'convient partout', 'est plus résistant']} bonne={0} colonnes={2}>
+Qualité inconnue.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

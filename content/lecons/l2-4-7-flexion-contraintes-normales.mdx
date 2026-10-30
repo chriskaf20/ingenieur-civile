@@ -1,0 +1,308 @@
+---
+id: L2.4.7
+titre: "Flexion simple : contraintes normales"
+objectifs:
+  - Établir la répartition linéaire des contraintes de flexion
+  - Calculer σ = M y / I en une fibre quelconque
+  - Repérer la fibre la plus sollicitée d'une section dissymétrique
+  - Vérifier une poutre en flexion par rapport à une contrainte limite
+relecture: false
+normes: []
+glossaire:
+  - terme: Flexion simple
+    definition: Sollicitation d'une poutre par un moment fléchissant et un effort tranchant, sans effort normal.
+  - terme: Fibre neutre
+    definition: Fibre de la section dont la longueur ne change pas en flexion ; elle passe par G.
+  - terme: Fibre extrême
+    definition: Fibre la plus éloignée de l'axe neutre ; c'est la plus sollicitée.
+symboles:
+  - { symbole: 'σ(y)', signification: 'contrainte normale à la distance y de l''axe neutre', unite: 'MPa' }
+  - { symbole: 'M', signification: 'moment fléchissant', unite: 'kN·m' }
+  - { symbole: 'v, v′', signification: 'distances aux fibres supérieure et inférieure', unite: 'cm' }
+formules:
+  - { nom: 'Navier', tex: '\sigma(y) = \frac{M\,y}{I}', domaine: 'Flexion simple élastique' }
+  - { nom: 'Contrainte maximale', tex: '\sigma_{max} = \frac{M}{W},\quad W = \frac{I}{v}', domaine: 'Fibre extrême' }
+  - { nom: 'Courbure', tex: '\frac{1}{R} = \frac{M}{E I}', domaine: 'Déformée' }
+---
+
+import { EXEMPLE_T, flexionSection } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { ContraintesFlexion, SectionsPlanes } from '@/components/schemas/Rdm1'
+import { Vue3D } from '@/components/gabarits/Vue3D'
+import { PoutreTIso } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const f0 = flexionSection(120, EXEMPLE_T)
+export const r0 = flexionSection(50, [{ b: 20, h: 50, y: 0 }])
+export const rInv = flexionSection(-60, EXEMPLE_T)
+export const ex2 = flexionSection(30, [{ b: 15, h: 40, y: 0 }])
+
+<Page etape="intuition" titre="L'intuition : en haut on écrase, en bas on tire">
+
+Plie une éponge : le haut se resserre, le bas s'ouvre. Une poutre fléchie fait pareil, en tout petit. Les fibres du haut sont **comprimées**, celles du bas **tendues**, et entre les deux une fibre ne change pas de longueur : la **fibre neutre**. Plus une fibre est loin de cette fibre neutre, plus elle est sollicitée.
+
+<SectionsPlanes />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer la contrainte dans chaque fibre d'une poutre fléchie, et trouver la plus sollicitée ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La formule de Navier" sousTitre="σ = M y / I" etape="cours">
+
+<Panneau n={1} titre="Sections planes" icone="plan" couleur="encre">
+Les déformations varient linéairement avec y.
+</Panneau>
+
+<Panneau n={2} titre="Hooke" icone="regle" couleur="acier">
+σ = E ε : les contraintes aussi.
+</Panneau>
+
+<Panneau n={3} titre="Axe neutre" icone="idee" couleur="terre">
+σ = 0 en G.
+</Panneau>
+
+<Panneau n={4} titre="Navier" icone="calcul" couleur="brique">
+σ = M y / I.
+</Panneau>
+
+<Panneau n={5} titre="Fibre extrême" icone="attention" couleur="correction">
+σmax = M/W, côté le plus loin de G.
+</Panneau>
+
+<Panneau n={6} titre="Vérifier" icone="verification" couleur="validation">
+|σ| ≤ σlim en traction et en compression.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la répartition linéaire">
+
+### Des déformations aux contraintes
+
+Avec Navier-Bernoulli, la déformation d'une fibre est proportionnelle à sa distance y à l'axe neutre : $\varepsilon = y/R$, où R est le rayon de courbure. Par Hooke, $\sigma = E\,y/R$ : la contrainte varie **linéairement** dans la hauteur.
+
+### La formule de Navier
+
+En écrivant que la somme des moments des contraintes égale M, on obtient $1/R = M/(EI)$ et :
+
+$$\sigma(y) = \frac{M\,y}{I}$$
+
+Pour un rectangle 20 × 50 cm sous 50 kN·m : ± {nombre(r0.sigmaInf, 2)} MPa aux fibres extrêmes.
+
+<ContraintesFlexion rects={[{ b: 20, h: 50, y: 0 }]} M={50} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la fibre la plus sollicitée">
+
+### Section dissymétrique
+
+Dans un T, G est près de la table : la fibre inférieure est plus loin de G que la fibre supérieure. Sous un moment positif, la **traction** en bas est donc plus forte que la compression en haut. Pour 120 kN·m : {nombre(f0.sigmaSup, 2)} MPa en haut, +{nombre(f0.sigmaInf, 2)} MPa en bas.
+
+<ContraintesFlexion rects={EXEMPLE_T} M={120} />
+
+### Moment négatif
+
+Sur un appui de poutre continue, M est négatif : la traction passe **en haut**. Pour −60 kN·m : {nombre(rInv.sigmaSup, 2)} MPa en haut (traction), {nombre(rInv.sigmaInf, 2)} MPa en bas.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : vérifier en flexion">
+
+### Deux vérifications
+
+On compare la contrainte de compression maximale à la limite en compression et la contrainte de traction maximale à la limite en traction. Pour l'acier ou le bois, ces limites sont voisines ; pour le béton, la traction est très faible (environ un dixième de la compression) : d'où les armatures (L3.3).
+
+<ContraintesFlexion rects={[{ b: 20, h: 50, y: 0 }]} M={-50} />
+
+<Regle type="simplification">
+σ = M y / I suppose un matériau élastique et homogène. Le béton armé fissuré ne l'est pas : on y raisonne sur une section homogénéisée, puis aux états limites ultimes avec des diagrammes non linéaires (L3.3).
+</Regle>
+
+</Page>
+
+<Vue3D titre="La poutre en T fléchie, en perspective" calques={[{ id: 'matiere', libelle: 'Matière' }, { id: 'contraintes', libelle: 'Contraintes' }, { id: 'neutre', libelle: 'Plan neutre' }]}>
+
+Active les calques : la table, large, est comprimée sur toute sa surface ; le bas de la nervure est tendu ; le plan neutre passe par G, près de la table. C'est pourquoi une poutre en T en béton armé a peu de béton tendu inutile.
+
+<PoutreTIso />
+
+</Vue3D>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Vérifier en flexion : moment maximal par les diagrammes ; caractéristiques de la section (G, I, v, v′) ; contraintes aux fibres extrêmes ; comparaison aux limites en compression et en traction." etapes={[{ titre: 'Mmax', texte: 'diagrammes', teinte: 'encre' }, { titre: 'Section', texte: 'G, I, v, v′', teinte: 'acier' }, { titre: 'σsup', texte: '−M v/I', teinte: 'correction' }, { titre: 'σinf', texte: 'M v′/I', teinte: 'brique' }, { titre: 'Comparer', texte: 'aux limites', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Section en T sous 120 kN·m : compression en haut ${nombre(-f0.sigmaSup, 2)} MPa, traction en bas ${nombre(f0.sigmaInf, 2)} MPa.`} titre="contraintes extrêmes de la section en T (MPa)" barres={[{ libelle: 'fibre supérieure (compression)', valeur: -f0.sigmaSup, texte: nombre(-f0.sigmaSup, 2), teinte: 'correction' }, { libelle: 'fibre inférieure (traction)', valeur: f0.sigmaInf, texte: nombre(f0.sigmaInf, 2), teinte: 'encre' }]} />
+
+</Page>
+
+<FicheCalcul calcul="flexionSectionT">
+
+<Cahier titre="Exemple résolu : contraintes dans une poutre en T">
+
+**Énoncé.** La section en T de L2.4.6 (table 60 × 12, nervure 20 × 38 cm) subit un moment de 120 kN·m (données de l'énoncé). Calcule les contraintes aux fibres extrêmes, en supposant le matériau homogène et élastique.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La section">
+<AN k="section" />
+<Note>Pourquoi deux distances ? G n'est pas au milieu de la hauteur.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : Navier">
+
+<Etape n={3} titre="Les deux fibres">
+<AN k="sup" />
+<AN k="inf" />
+<Resultat k="inf" libelle="Traction maximale" />
+<Schema />
+<Note couleur="vert">Contrôle : le rapport des contraintes égale le rapport v′/v.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="mesurer y depuis le bas de la section.">
+y se mesure depuis l'axe neutre (G).
+</Piege>
+
+<Piege erreur="utiliser W = b h²/6 pour un T.">
+Cette formule ne vaut que pour un rectangle ; pour un T, W = I/v.
+</Piege>
+
+<Piege erreur="oublier le côté tendu en moment négatif.">
+Sur appui, la traction est en haut.
+</Piege>
+
+<ContraintesFlexion rects={EXEMPLE_T} M={-60} />
+
+<Piege erreur="mal convertir les unités.">
+M en N·mm, y en mm, I en mm⁴ : σ en MPa.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Pourquoi le béton armé a des aciers en bas.** Le béton résiste bien en compression, très mal en traction. Dans une poutre fléchie, la zone tendue fissure presque tout de suite : on y place des barres d'acier qui reprennent la traction. Inverser les aciers (en haut au lieu d'en bas) est une erreur grave, déjà vue sur des linteaux et des dalles de petits chantiers.
+
+<ContraintesFlexion rects={[{ b: 15, h: 40, y: 0 }]} M={30} />
+
+<Encadre type="attention" titre="Les cales des armatures">
+Les aciers du bas doivent être posés sur des cales (enrobage), pas à même le coffrage, et ne pas « remonter » au bétonnage. Une barre remontée de 3 cm dans une poutre de 40 cm réduit son bras de levier et donc sa résistance.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : flexion simple">
+
+### Navier
+
+σ(y) = M y / I · linéaire · nulle sur l'axe neutre (G)
+
+### Extrêmes
+
+σsup = −M v/I · σinf = M v′/I · σmax = M/W
+
+### Courbure
+
+1/R = M/(EI)
+
+### Signes
+
+M &gt; 0 : haut comprimé, bas tendu · M &lt; 0 : l'inverse
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Rectangle">
+
+Poutre 20 × 50 cm, M = 50 kN·m. σmax ?
+
+<Indice>W = b h²/6.</Indice>
+
+<Corrige>
+σ = **± {grandeur(r0.sigmaInf, 2, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Linteau">
+
+Linteau 15 × 40 cm, M = 30 kN·m. Contraintes extrêmes ?
+
+<Indice>Rectangle.</Indice>
+
+<Corrige>
+**{grandeur(ex2.sigmaSup, 2, 'MPa')}** en haut, **+{grandeur(ex2.sigmaInf, 2, 'MPa')}** en bas.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Moment négatif sur un T">
+
+La section en T subit −60 kN·m sur appui. Contraintes extrêmes ?
+
+<Indice>Mêmes v et v′, signes inversés.</Indice>
+
+<Corrige>
+Haut : **+{grandeur(rInv.sigmaSup, 2, 'MPa')}** (traction) ; bas : **{grandeur(rInv.sigmaInf, 2, 'MPa')}** (compression).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="En flexion, la contrainte est nulle :" choix={['sur l’axe neutre', 'en haut', 'en bas', 'partout']} bonne={0} colonnes={2}>
+Passe par G.
+</QCM>
+
+<QCM n={2} question="La formule de Navier est :" choix={['σ = M y / I', 'σ = N/A', 'σ = V S/(I b)', 'σ = E/ε']} bonne={0} colonnes={2}>
+Flexion simple.
+</QCM>
+
+<QCM n={3} question="La répartition des contraintes de flexion est :" choix={['linéaire', 'parabolique', 'uniforme', 'aléatoire']} bonne={0} colonnes={4}>
+Sections planes + Hooke.
+</QCM>
+
+<QCM n={4} question="Sous un moment positif, les fibres du bas sont :" choix={['tendues', 'comprimées', 'neutres', 'cisaillées seulement']} bonne={0} colonnes={2}>
+Convention du cours.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Section en T sous 120 kN·m : la traction en bas vaut :</>} choix={[grandeur(f0.sigmaInf, 2, 'MPa'), grandeur(-f0.sigmaSup, 2, 'MPa'), '1,20 MPa', '120 MPa']} bonne={0} colonnes={4}>
+M v′/I.
+</QCM>
+
+<QCM n={6} question="La fibre la plus sollicitée est :" choix={['la plus éloignée de G', 'la plus proche de G', 'toujours en haut', 'toujours en bas']} bonne={0} colonnes={2}>
+σ ∝ y.
+</QCM>
+
+<QCM n={7} question="Dans une poutre en béton armé sur deux appuis, les aciers principaux sont :" choix={['en bas', 'en haut', 'au milieu', 'absents']} bonne={0} colonnes={4}>
+Zone tendue.
+</QCM>
+
+<QCM n={8} question="La courbure vaut :" choix={['M/(EI)', 'EI/M', 'M EI', 'M/I']} bonne={0} colonnes={4}>
+Lien avec la déformée (L2.5).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,154 @@
+---
+id: L2.4.P
+titre: "Mini-projet : solive de plancher en bois"
+objectifs:
+  - Établir la charge reprise par une solive à partir des charges du plancher
+  - Calculer le moment, l'effort tranchant, les contraintes et la flèche
+  - Choisir une section commerciale qui satisfait tous les critères
+  - Présenter le résultat sur une note et un croquis coté
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { EXEMPLE_SOLIVE, solive } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { CisaillementRect, ContraintesFlexion, DiagrammesVM, PlancherSolives } from '@/components/schemas/Rdm1'
+import { DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d = EXEMPLE_SOLIVE
+export const s0 = solive(d)
+export const sections = [[6.3, 17.5], [7.5, 20], [7.5, 22.5], [8, 25]]
+export const essais = sections.map(([b, h]) => ({ b, h, r: solive({ ...d, b, h }) }))
+export const choix = essais.find((e) => e.r.taux <= 1 && e.r.rapport >= 300) ?? essais[essais.length - 1]
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Une famille de Bukavu construit l'étage de sa maison avec un **plancher bois** : des solives posées entre deux murs porteurs distants de **4 m**, tous les **50 cm**, recouvertes de planches. Charges retenues (données de l'énoncé) : plancher et revêtement g = 0,6 kN/m², exploitation (habitation) q = 1,5 kN/m² <AVerifier note="A_VERIFIER.md n° 66 : charge d'exploitation des planchers d'habitation (EN 1991-1-1 tableau 6.2, catégorie A, et annexe nationale)" />. Bois local de poids volumique 5 kN/m³, E = 11 000 MPa ; contrainte limite retenue 10 MPa ; flèche limitée à L/300.
+
+<PlancherSolives e={d.e} L={d.L} b={d.b} h={d.h} />
+
+### Ce que tu rends
+
+1. La **descente de charge** sur une solive (kN/m).
+2. Les **diagrammes** V et M et leurs valeurs maximales.
+3. La vérification de **flexion**, de **cisaillement** et de **flèche** pour plusieurs sections commerciales.
+4. Le **choix** argumenté et un croquis coté.
+
+<Regle type="simplification">
+On travaille sans coefficients partiels ni coefficients de durée de charge et d'humidité du bois (kmod, γM de l'EN 1995) : c'est une vérification pédagogique. Le calcul réglementaire est fait en L3.
+</Regle>
+
+</Page>
+
+<Infographie titre="La démarche" sousTitre="Du plancher à la solive" etape="projet">
+
+<Panneau n={1} titre="Charges" icone="calcul" couleur="encre">
+(g + q) × e + poids propre.
+</Panneau>
+
+<Panneau n={2} titre="Efforts" icone="regle" couleur="acier">
+M = pL²/8 ; V = pL/2.
+</Panneau>
+
+<Panneau n={3} titre="Flexion" icone="plan" couleur="terre">
+σ = M/W ≤ 10 MPa.
+</Panneau>
+
+<Panneau n={4} titre="Cisaillement" icone="idee" couleur="brique">
+τ = 1,5 V/A.
+</Panneau>
+
+<Panneau n={5} titre="Flèche" icone="attention" couleur="correction">
+f = 5pL⁴/(384EI) ≤ L/300.
+</Panneau>
+
+<Panneau n={6} titre="Choisir" icone="verification" couleur="validation">
+La plus petite section qui passe tout.
+</Panneau>
+
+</Infographie>
+
+<FicheCalcul calcul="soliveBois">
+
+<Cahier titre="Étape 1 : charges et efforts" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Charge et moment">
+<AN k="p" />
+<AN k="M" />
+<Note>Pourquoi multiplier par e ? Chaque solive porte une bande de plancher de 50 cm de large.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 2 : contraintes et flèche" etape="projet">
+
+<Etape n={3} titre="Flexion et cisaillement">
+<AN k="sigma" />
+<Resultat k="taux" libelle="Taux de travail en flexion" />
+</Etape>
+
+<Etape n={4} titre="Flèche">
+<AN k="f" />
+<Resultat k="rapport" libelle="Flèche relative" />
+<Schema />
+<Note couleur="vert">Contrôle : essaie une section 6,3 × 17,5 cm ; regarde quel critère tombe en premier.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le corrigé">
+
+<DiagrammesVM d={{ L: d.L, xA: 0, xB: d.L, charges: [{ type: 'repartie', nom: 'p', q1: s0.p, q2: s0.p, a: 0, b: d.L }] }} titre="Solive de 4 m" />
+
+Le moment maximal vaut {grandeur(s0.M, 2, 'kN·m')} et l'effort tranchant maximal {grandeur(s0.V, 2, 'kN')}, pour la section de départ 7,5 × 22,5 cm.
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Section (cm)</th><th>σ (MPa)</th><th>taux</th><th>f (mm)</th><th>L/f</th><th>verdict</th></tr></thead>
+    <tbody>{essais.map((e, i) => <tr key={i}><td>{nombre(e.b, 1)} × {nombre(e.h, 1)}</td><td>{nombre(e.r.sigma, 2)}</td><td>{nombre(e.r.taux * 100, 0)} %</td><td>{nombre(e.r.fmm, 1)}</td><td>{nombre(e.r.rapport, 0)}</td><td>{e.r.taux <= 1 && e.r.rapport >= 300 ? 'convient' : 'insuffisant'}</td></tr>)}</tbody>
+  </table>
+</div>
+
+</Page>
+
+<Page etape="projet" titre="Le choix">
+
+**Choix : {nombre(choix.b, 1)} × {nombre(choix.h, 1)} cm.** Contrainte {grandeur(choix.r.sigma, 2, 'MPa')} ({nombre(choix.r.taux * 100, 0)} % de la limite), flèche {grandeur(choix.r.fmm, 1, 'mm')} (L/{nombre(choix.r.rapport, 0)}), cisaillement {grandeur(choix.r.tau, 2, 'MPa')}. C'est la **flèche** qui décide, pas la résistance : typique du bois.
+
+<ContraintesFlexion rects={[{ b: choix.b, h: choix.h, y: 0 }]} M={choix.r.M} />
+
+<CisaillementRect V={choix.r.V} b={choix.b} h={choix.h} />
+
+</Page>
+
+<Page etape="projet" titre="La grille d'auto-évaluation">
+
+<DiagrammeBarres alt={`Flèche relative des sections essayées : ${essais.map((e) => `${nombre(e.b, 1)} × ${nombre(e.h, 1)} cm, L/${nombre(e.r.rapport, 0)}`).join(' ; ')}. Limite L/300.`} titre="L/f des sections essayées" barres={essais.map((e) => ({ libelle: `${nombre(e.b, 1)} × ${nombre(e.h, 1)} cm`, valeur: e.r.rapport, texte: nombre(e.r.rapport, 0), teinte: e.r.rapport >= 300 ? 'validation' : 'correction' }))} repere={{ valeur: 300, texte: 'L/300' }} />
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Charges | Charge surfacique non convertie | (g + q) e | Poids propre et hypothèses citées |
+| Efforts | Moment seul | M et V | Diagrammes tracés |
+| Vérifications | Flexion seule | Flexion, cisaillement, flèche | Comparaison de plusieurs sections |
+| Présentation | Résultat isolé | Note claire | Croquis coté et limites de la méthode |
+
+<Quiz id="L2.4.P">
+
+<QCM n={1} question="Ma note contient-elle les charges, les diagrammes, les trois vérifications, le choix argumenté et un croquis coté ?" choix={['Oui, tout y est', 'Il manque une partie']} bonne={0} colonnes={2}>
+Sinon, complète : le menuisier doit savoir quelle section poser et à quel entraxe.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

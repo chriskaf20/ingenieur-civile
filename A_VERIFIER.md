@@ -68,3 +68,9 @@ Statuts :
 | 58 | Fiabilité : β cible EN 1990 annexe B (RC2 : 3,8 sur 50 ans, 4,7 sur 1 an) ; αR = 0,8, αS = −0,7 (annexe C) | L2.2.9 | `à confirmer` : valeurs de l'EN 1990 et de son annexe nationale |
 | 59 | Coefficients de Strickler usuels : ≈ 25 à 40 (canal en terre), 60 à 80 (béton lisse) | L2.3.2 | `à confirmer` : manuel d'hydraulique de référence (L2.7) |
 | 60 | Méthodes d'intégration temporelle pour le calcul sismique (EN 1998-1 §4.3.3.4.3) et choix du pas de temps | L2.3.6 | `à confirmer` : texte de l'EN 1998-1 et pratique des logiciels |
+| 61 | Modules d'Young usuels : acier 210 000 MPa (EN 1993-1-1 §3.2.6), béton ≈ 30 000 MPa (EN 1992-1-1 tableau 3.1), bois 10 000 à 12 000 MPa (EN 338) | L2.4.1 | `à confirmer` : valeurs selon la classe |
+| 62 | Coefficients de dilatation thermique : béton 10 × 10⁻⁶ /K (EN 1992-1-1 §3.1.3), acier 12 × 10⁻⁶ /K (EN 1993-1-1 §3.2.6) | L2.4.5 | `à confirmer` |
+| 63 | Largeur participante des tables de compression (EN 1992-1-1 §5.3.2.1) | L2.4.6 | `à confirmer` |
+| 64 | Résistance des boulons : EN 1993-1-8 tableau 3.4 (cisaillement, pression diamétrale) et pinces minimales (tableau 3.3) | L2.4.10 | `à confirmer` |
+| 65 | Élancements de prédimensionnement : béton armé L/10 à L/15, bois L/18 à L/20, acier L/20 à L/25 | L2.4.11 | `hypothèse` : règles de l'art |
+| 66 | Charge d'exploitation des planchers d'habitation 1,5 kN/m² (EN 1991-1-1 tableau 6.2, catégorie A) ; contrainte limite 10 MPa et flèche L/300 retenues pour la solive | L2.4.P | `hypothèse` : valeurs de projet pédagogiques, à confirmer avec l'EN 1995-1-1 et l'annexe nationale |

@@ -1,0 +1,314 @@
+---
+id: L2.4.6
+titre: "Caractéristiques des sections : inertie et théorème de Huygens"
+objectifs:
+  - Calculer l'aire et le centre de gravité d'une section composée
+  - Calculer le moment quadratique d'un rectangle et d'un cercle
+  - Appliquer le théorème de Huygens à une section en T ou en I
+  - Calculer les modules de flexion W
+relecture: false
+normes: []
+glossaire:
+  - terme: Moment quadratique
+    definition: Grandeur I = ∫ y² dA qui mesure la résistance d'une section à la flexion autour d'un axe ; en cm⁴.
+  - terme: Théorème de Huygens
+    definition: L'inertie autour d'un axe parallèle à l'axe passant par G vaut I_G + A d².
+  - terme: Module de flexion
+    definition: W = I/v, rapport de l'inertie à la distance de la fibre extrême ; en cm³.
+  - terme: Axe neutre
+    definition: Axe passant par le centre de gravité de la section, où la contrainte de flexion est nulle.
+symboles:
+  - { symbole: 'I', signification: 'moment quadratique', unite: 'cm⁴' }
+  - { symbole: 'yG', signification: 'position du centre de gravité', unite: 'cm' }
+  - { symbole: 'd', signification: 'distance entre axes parallèles', unite: 'cm' }
+  - { symbole: 'W', signification: 'module de flexion', unite: 'cm³' }
+formules:
+  - { nom: 'Rectangle', tex: 'I = \frac{b h^3}{12},\quad W = \frac{b h^2}{6}', domaine: 'Axe central horizontal' }
+  - { nom: 'Cercle', tex: 'I = \frac{\pi D^4}{64}', domaine: 'Diamètre' }
+  - { nom: 'Huygens', tex: 'I_\Delta = I_G + A\,d^2', domaine: 'Axes parallèles' }
+---
+
+import { EXEMPLE_T, sectionComposee } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { SectionComposee } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const sT = sectionComposee(EXEMPLE_T)
+export const chant = sectionComposee([{ b: 7.5, h: 22.5, y: 0 }])
+export const plat = sectionComposee([{ b: 22.5, h: 7.5, y: 0 }])
+export const I = [
+  { b: 10, h: 1.5, y: 0, x: 0 },
+  { b: 0.8, h: 17, y: 1.5, x: 4.6 },
+  { b: 10, h: 1.5, y: 18.5, x: 0 },
+]
+export const sI = sectionComposee(I)
+export const plein = sectionComposee([{ b: 10, h: 20, y: 0 }])
+export const ex3 = sectionComposee([{ b: 25, h: 50, y: 0 }])
+
+<Page etape="intuition" titre="L'intuition : la planche sur chant">
+
+Pose une planche à plat sur deux briques et monte dessus : elle plie beaucoup. Pose-la **sur chant** : elle ne bouge presque pas. Même bois, même section, même aire… mais pas la même **forme** par rapport à la flexion. Ce qui compte, c'est l'éloignement de la matière par rapport à l'axe de flexion. Le moment quadratique I mesure cela.
+
+<DiagrammeBarres alt={`Une solive 7,5 × 22,5 cm : sur chant, I = ${nombre(chant.I, 0)} cm⁴ ; à plat, I = ${nombre(plat.I, 0)} cm⁴, neuf fois moins.`} titre="inertie de la même planche (cm⁴)" barres={[{ libelle: 'sur chant (h = 22,5 cm)', valeur: chant.I, texte: nombre(chant.I, 0), teinte: 'validation' }, { libelle: 'à plat (h = 7,5 cm)', valeur: plat.I, texte: nombre(plat.I, 0), teinte: 'correction' }]} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer la rigidité géométrique d'une section, même de forme composée ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Caractériser une section" sousTitre="A, G, I, W" etape="cours">
+
+<Panneau n={1} titre="Aire" icone="calcul" couleur="encre">
+A : pour la traction et le poids.
+</Panneau>
+
+<Panneau n={2} titre="Centre G" icone="plan" couleur="acier">
+yG = Σ Ai yi / Σ Ai.
+</Panneau>
+
+<Panneau n={3} titre="Inertie" icone="idee" couleur="terre">
+I = ∫ y² dA : la matière loin compte plus.
+</Panneau>
+
+<Panneau n={4} titre="Rectangle" icone="regle" couleur="brique">
+b h³/12 : h au cube.
+</Panneau>
+
+<Panneau n={5} titre="Huygens" icone="verification" couleur="validation">
+I = IG + A d² pour chaque morceau.
+</Panneau>
+
+<Panneau n={6} titre="Module W" icone="attention" couleur="correction">
+W = I/v : sert à σ = M/W.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : centre de gravité et inertie">
+
+### Le centre de gravité
+
+Pour une section découpée en rectangles d'aires $A_i$ et de centres $y_i$ : $y_G = \sum A_i y_i / \sum A_i$ (L1.3). L'axe neutre de flexion passe par G.
+
+### Le moment quadratique
+
+$I = \int y^2\,dA$, où y est la distance à l'axe. Chaque petit élément compte proportionnellement au **carré** de sa distance : la matière éloignée de l'axe est la plus efficace. Formules usuelles autour de l'axe central :
+
+- rectangle : $b h^3/12$ ;
+- cercle plein : $\pi D^4/64$ ;
+- unité : cm⁴ (ou mm⁴ ; 1 cm⁴ = 10⁴ mm⁴).
+
+<SectionComposee rects={[{ b: 7.5, h: 22.5, y: 0 }]} titre="Solive rectangulaire" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : le théorème de Huygens">
+
+### Changer d'axe
+
+Pour un morceau d'inertie propre $I_G$ (autour de son propre centre) situé à la distance d de l'axe neutre de la section :
+
+$$I_\Delta = I_G + A\,d^2$$
+
+### Section composée
+
+On découpe en rectangles, on calcule G, puis pour chaque rectangle $I_{propre} + A_i d_i^2$, et l'on additionne. Pour la section en T de l'exemple : $y_G$ = {grandeur(sT.yG, 2, 'cm')}, I = {grandeur(sT.I, 0, 'cm⁴')}.
+
+<SectionComposee rects={EXEMPLE_T} titre="Section en T" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : modules de flexion et profils">
+
+### Le module W
+
+$W = I/v$, où v est la distance de G à la fibre extrême. Une section dissymétrique a deux modules : $W_{sup} = I/v$ et $W_{inf} = I/v'$. Pour un rectangle : $W = bh^2/6$.
+
+### Pourquoi les profilés en I
+
+En mettant la matière dans des **semelles** loin de l'axe et une âme mince au milieu, on obtient une grande inertie avec peu d'acier. Un I de 20 cm de haut pèse {nombre((sI.A / plein.A) * 100, 0)} % d'un rectangle plein 10 × 20 cm, pour {nombre((sI.I / plein.I) * 100, 0)} % de son inertie.
+
+<SectionComposee rects={I} titre="Profil en I schématique" />
+
+<Regle type="norme">
+Les caractéristiques des profilés du commerce (IPE, HEA…) sont tabulées par les fabricants et dans les catalogues ; on ne les recalcule pas, mais on sait d'où elles viennent.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Calculer I d'une section composée : découper en rectangles ; calculer aires et centres ; trouver G ; calculer pour chaque rectangle I propre et A d² ; additionner, puis calculer v et W." etapes={[{ titre: 'Découper', texte: 'rectangles', teinte: 'encre' }, { titre: 'Ai, yi', texte: 'tableau', teinte: 'acier' }, { titre: 'G', texte: 'Σ Ai yi / Σ Ai', teinte: 'terre' }, { titre: 'Huygens', texte: 'IG + A d²', teinte: 'brique' }, { titre: 'W', texte: 'I/v', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Section en T : contributions à l'inertie. Nervure : propre ${nombre(sT.parts[0]?.Ipropre ?? 0, 0)} et transport ${nombre(sT.parts[0]?.Ad2 ?? 0, 0)} cm⁴ ; table : propre ${nombre(sT.parts[1]?.Ipropre ?? 0, 0)} et transport ${nombre(sT.parts[1]?.Ad2 ?? 0, 0)} cm⁴.`} titre="contributions à I de la section en T (cm⁴)" barres={[{ libelle: 'nervure, I propre', valeur: sT.parts[0]?.Ipropre ?? 0, texte: nombre(sT.parts[0]?.Ipropre ?? 0, 0), teinte: 'acier' }, { libelle: 'nervure, A d²', valeur: sT.parts[0]?.Ad2 ?? 0, texte: nombre(sT.parts[0]?.Ad2 ?? 0, 0), teinte: 'terre' }, { libelle: 'table, I propre', valeur: sT.parts[1]?.Ipropre ?? 0, texte: nombre(sT.parts[1]?.Ipropre ?? 0, 0), teinte: 'acier' }, { libelle: 'table, A d²', valeur: sT.parts[1]?.Ad2 ?? 0, texte: nombre(sT.parts[1]?.Ad2 ?? 0, 0), teinte: 'terre' }]} />
+
+</Page>
+
+<FicheCalcul calcul="inertieSectionT">
+
+<Cahier titre="Exemple résolu : une poutre en T sous dalle">
+
+**Énoncé.** Une poutre en béton forme un T avec la dalle : table de 60 × 12 cm, nervure de 20 × 38 cm (données de l'énoncé). Calcule A, yG et I.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le centre de gravité">
+<AN k="yG" />
+<Note>Pourquoi G est-il haut ? La table, large, concentre beaucoup de matière en haut.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : Huygens">
+
+<Etape n={3} titre="Inertie de chaque morceau">
+<AN k="huygens" />
+<AN k="I" />
+<Resultat k="I" libelle="Inertie" />
+<Schema />
+<Note couleur="vert">Contrôle : les termes A d² pèsent plus que les inerties propres, car la matière est loin de G.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="additionner les inerties propres sans Huygens.">
+Chaque morceau doit être ramené à l'axe neutre de la section entière.
+</Piege>
+
+<Piege erreur="prendre d par rapport au bas de la section.">
+d se mesure depuis G.
+</Piege>
+
+<Piege erreur="inverser b et h.">
+I = b h³/12 avec h dans le sens de la flexion.
+</Piege>
+
+<SectionComposee rects={[{ b: 22.5, h: 7.5, y: 0 }]} titre="Solive à plat" />
+
+<Piege erreur="mélanger cm et mm.">
+1 cm⁴ = 10 000 mm⁴ : une erreur d'unité change I d'un facteur 10⁴.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Poutres en T et dalles.** Quand une poutre est coulée avec la dalle, une largeur de dalle travaille avec elle : la section est un T, bien plus rigide qu'un rectangle seul. L'EC2 fixe la largeur de table à prendre en compte <AVerifier note="A_VERIFIER.md n° 63 : largeur participante des tables de compression, EN 1992-1-1 §5.3.2.1" />.
+
+<SectionComposee rects={EXEMPLE_T} titre="Poutre en T" />
+
+<Encadre type="terrain" titre="Profilés de récupération">
+Sur les chantiers, on réemploie parfois des rails ou des profilés de récupération (anciennes voies ferrées, structures minières). Sans fiche technique, on mesure la section et on calcule I et W soi-même : c'est exactement cette leçon.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : caractéristiques des sections">
+
+### Centre
+
+yG = Σ Ai yi / Σ Ai
+
+### Inerties de base
+
+rectangle b h³/12 · cercle π D⁴/64 · unités cm⁴
+
+### Huygens
+
+I = Σ (IGi + Ai di²), di mesuré depuis G
+
+### Modules
+
+W = I/v · rectangle b h²/6 · section dissymétrique : Wsup et Winf
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Poutre rectangulaire">
+
+Poutre 25 × 50 cm. I et W ?
+
+<Indice>b h³/12 et b h²/6.</Indice>
+
+<Corrige>
+I = **{grandeur(ex3.I, 0, 'cm⁴')}** ; W = **{grandeur(ex3.Winf, 0, 'cm³')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Chant ou plat">
+
+Solive 7,5 × 22,5 cm : rapport des inerties sur chant et à plat ?
+
+<Indice>(22,5/7,5)².</Indice>
+
+<Corrige>
+**{nombre(chant.I / plat.I, 0)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Profil en I">
+
+Semelles 10 × 1,5 cm, âme 0,8 × 17 cm (hauteur 20 cm). I ?
+
+<Indice>Section symétrique : G au milieu.</Indice>
+
+<Corrige>
+I = **{grandeur(sI.I, 0, 'cm⁴')}** ; A = {grandeur(sI.A, 1, 'cm²')}.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'inertie d'un rectangle vaut :" choix={['b h³/12', 'b h²/6', 'b h', 'h³/12']} bonne={0} colonnes={4}>
+Axe central.
+</QCM>
+
+<QCM n={2} question="Doubler la hauteur d'une poutre multiplie I par :" choix={['8', '2', '4', '16']} bonne={0} colonnes={4}>
+h³.
+</QCM>
+
+<QCM n={3} question="Le théorème de Huygens s'écrit :" choix={['I = IG + A d²', 'I = IG − A d', 'I = A d', 'I = IG d²']} bonne={0} colonnes={2}>
+Axes parallèles.
+</QCM>
+
+<QCM n={4} question="L'axe neutre passe par :" choix={['le centre de gravité', 'le bas de la section', 'le haut', 'le bord gauche']} bonne={0} colonnes={2}>
+Flexion simple.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour la section en T, yG vaut :</>} choix={[grandeur(sT.yG, 2, 'cm'), '25,00 cm', '44,00 cm', '19,00 cm']} bonne={0} colonnes={4}>
+Σ Ai yi / Σ Ai.
+</QCM>
+
+<QCM n={6} question="W = I/v sert à calculer :" choix={['σ = M/W', 'la flèche', 'le poids', 'G']} bonne={0} colonnes={2}>
+Contrainte maximale.
+</QCM>
+
+<QCM n={7} question="Un profil en I est efficace parce que :" choix={['la matière est loin de l’axe', 'il est lourd', 'il est carré', 'il est creux au hasard']} bonne={0} colonnes={2}>
+Semelles éloignées.
+</QCM>
+
+<QCM n={8} question="1 cm⁴ vaut :" choix={['10⁴ mm⁴', '10 mm⁴', '100 mm⁴', '10⁶ mm⁴']} bonne={0} colonnes={4}>
+(10 mm)⁴.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,295 @@
+---
+id: L2.4.3
+titre: "Diagrammes N, V, M d'une poutre isostatique"
+objectifs:
+  - Tracer les diagrammes d'effort tranchant et de moment d'une poutre sur deux appuis
+  - Reconnaître les formes types (droite, parabole, saut, cassure)
+  - Repérer la section la plus sollicitée et la valeur du moment maximal
+  - Tracer les diagrammes d'une console
+relecture: false
+normes: []
+glossaire:
+  - terme: Diagramme
+    definition: Courbe qui donne la valeur d'un effort interne en chaque abscisse de la poutre.
+  - terme: Section dangereuse
+    definition: Section où le moment (ou l'effort tranchant) est maximal ; c'est là qu'on vérifie la poutre.
+  - terme: Poutre isostatique
+    definition: Poutre dont les réactions se calculent par la seule statique (deux appuis simples, console).
+symboles:
+  - { symbole: 'V(x)', signification: 'effort tranchant à l''abscisse x', unite: 'kN' }
+  - { symbole: 'M(x)', signification: 'moment fléchissant à l''abscisse x', unite: 'kN·m' }
+  - { symbole: 'Mmax', signification: 'moment maximal', unite: 'kN·m' }
+formules:
+  - { nom: 'Charge uniforme', tex: 'V_{max} = \frac{qL}{2},\quad M_{max} = \frac{qL^2}{8}', domaine: 'Deux appuis' }
+  - { nom: 'Force centrée', tex: 'M_{max} = \frac{PL}{4}', domaine: 'Deux appuis' }
+  - { nom: 'Console', tex: 'M_{enc} = -\frac{qL^2}{2} - P\,L', domaine: 'Encastrement' }
+---
+
+import { diagrammes, EXEMPLE_POUTRE } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { DiagrammesVM } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d0 = diagrammes(EXEMPLE_POUTRE, 600)
+export const U = { L: 5, xA: 0, xB: 5, charges: [{ type: 'repartie', nom: 'q', q1: 12, q2: 12, a: 0, b: 5 }] }
+export const P = { L: 5, xA: 0, xB: 5, charges: [{ type: 'ponctuelle', nom: 'P', F: 40, a: 2.5 }] }
+export const K = { L: 6, xA: 0, xB: 4.5, charges: [{ type: 'repartie', nom: 'q', q1: 10, q2: 10, a: 0, b: 6 }] }
+export const dU = diagrammes(U, 400)
+export const dP = diagrammes(P, 400)
+export const dK = diagrammes(K, 600)
+export const ex3 = diagrammes({ L: 8, xA: 0, xB: 8, charges: [{ type: 'ponctuelle', nom: 'P1', F: 30, a: 2 }, { type: 'ponctuelle', nom: 'P2', F: 30, a: 6 }] }, 800)
+
+<Page etape="intuition" titre="L'intuition : la radiographie d'une poutre">
+
+Calculer M en une section, c'est bien ; savoir **où** il est le plus grand, c'est mieux. En répétant la coupure en tout point, on obtient une courbe : le **diagramme**. Il montre d'un coup d'œil où la poutre travaille le plus, et donc où mettre de la matière (des armatures, une section plus haute).
+
+<DiagrammesVM d={EXEMPLE_POUTRE} titre="Poutre de l'exemple" />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment tracer rapidement les diagrammes V et M, et y lire la section dangereuse ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les formes à reconnaître" sousTitre="Lire un diagramme" etape="cours">
+
+<Panneau n={1} titre="Charge répartie" icone="calcul" couleur="terre">
+V en droite, M en parabole.
+</Panneau>
+
+<Panneau n={2} titre="Force ponctuelle" icone="attention" couleur="correction">
+V saute de P, M fait une cassure.
+</Panneau>
+
+<Panneau n={3} titre="Sans charge" icone="regle" couleur="acier">
+V constant, M en droite.
+</Panneau>
+
+<Panneau n={4} titre="Maximum" icone="idee" couleur="encre">
+Mmax là où V s'annule.
+</Panneau>
+
+<Panneau n={5} titre="Appuis simples" icone="verification" couleur="validation">
+M = 0 aux extrémités.
+</Panneau>
+
+<Panneau n={6} titre="Console" icone="plan" couleur="brique">
+M maximal (négatif) à l'encastrement.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les cas de base">
+
+### Charge uniforme sur deux appuis
+
+V décroît en ligne droite de $+qL/2$ à $-qL/2$ ; M est une parabole, maximale au milieu : $qL^2/8$. Pour 12 kN/m sur 5 m : $M_{max}$ = {grandeur(dU.Mmax, 2, 'kN·m')}.
+
+<DiagrammesVM d={U} titre="Charge uniforme" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : force ponctuelle et combinaison">
+
+### Force centrée
+
+V est constant par morceaux et **saute** de P sous la force ; M est formé de deux droites qui se rejoignent en **pointe** sous la force : $PL/4$. Pour 40 kN sur 5 m : {grandeur(dP.Mmax, 2, 'kN·m')}.
+
+<DiagrammesVM d={P} titre="Force centrée" />
+
+### Plusieurs charges
+
+Les efforts s'**additionnent** (principe de superposition, valable en élasticité linéaire) : le diagramme de la poutre de l'exemple est la somme des deux cas.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : poutre avec porte-à-faux">
+
+### Le porte-à-faux
+
+Quand la poutre dépasse un appui (balcon prolongeant une travée), le moment devient **négatif** au-dessus de l'appui : les fibres **du haut** sont tendues. En béton armé, il faut des armatures en haut à cet endroit.
+
+<DiagrammesVM d={K} titre="Poutre avec porte-à-faux de 1,5 m" />
+
+<Regle type="art">
+Un diagramme se vérifie toujours : M nul aux appuis simples d'extrémité et au bout libre d'une console, sauts de V égaux aux forces ponctuelles et aux réactions, surface sous V cohérente avec M (L2.4.4).
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la méthode de tracé">
+
+<DiagrammeFlux alt="Tracer les diagrammes : réactions ; découper la poutre en tronçons entre charges ponctuelles et appuis ; écrire V et M sur chaque tronçon ; calculer les valeurs aux limites et le maximum ; dessiner et contrôler." etapes={[{ titre: 'Réactions', texte: 'RA, RB', teinte: 'encre' }, { titre: 'Tronçons', texte: 'entre singularités', teinte: 'acier' }, { titre: 'Équations', texte: 'V(x), M(x)', teinte: 'terre' }, { titre: 'Valeurs clés', texte: 'bornes, max', teinte: 'brique' }, { titre: 'Tracer', texte: 'et contrôler', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Moment maximal de trois poutres de 5 m : charge uniforme de 12 kN/m (60 kN au total), ${nombre(dU.Mmax, 1)} kN·m ; force centrée de 40 kN, ${nombre(dP.Mmax, 1)} kN·m.`} titre="moment maximal (kN·m)" barres={[{ libelle: '12 kN/m répartis (60 kN)', valeur: dU.Mmax, texte: nombre(dU.Mmax, 1), teinte: 'terre' }, { libelle: '40 kN au milieu', valeur: dP.Mmax, texte: nombre(dP.Mmax, 1), teinte: 'correction' }]} />
+
+</Page>
+
+<FicheCalcul calcul="diagrammesPoutre">
+
+<Cahier titre="Exemple résolu : poutre de 6 m chargée">
+
+**Énoncé.** Poutre de 6 m sur deux appuis, 10 kN/m sur toute la longueur et 20 kN à 2 m de A (données de l'énoncé). Trace les diagrammes et donne le moment maximal.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Réactions et effort tranchant">
+<AN k="reactions" />
+<AN k="saut" />
+<Note>Pourquoi deux tronçons ? La force ponctuelle crée une discontinuité de V.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le moment maximal">
+
+<Etape n={3} titre="Où V s'annule">
+<AN k="Mmax" />
+<Resultat k="Mmax" libelle="Moment maximal" />
+<Resultat k="xM" libelle="Abscisse" />
+<Schema />
+<Note couleur="vert">Contrôle : sans la force P, Mmax = 10 × 6²/8 = {nombre(10 * 36 / 8, 0)} kN·m au milieu ; la force le rapproche de A et l'augmente.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="chercher Mmax toujours au milieu.">
+Avec des charges dissymétriques, il est là où V s'annule.
+</Piege>
+
+<Piege erreur="tracer M en droite sous une charge répartie.">
+C'est une parabole.
+</Piege>
+
+<Piege erreur="oublier le moment négatif sur un appui de porte-à-faux.">
+Les fibres du haut y sont tendues : armatures hautes indispensables.
+</Piege>
+
+<DiagrammesVM d={K} titre="Porte-à-faux" />
+
+<Piege erreur="oublier les sauts de V aux appuis.">
+V saute de la réaction sur chaque appui.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le ferraillage suit le diagramme.** Dans une poutre en béton armé, les barres du bas sont plus nombreuses là où M est maximal ; les cadres sont plus serrés près des appuis, où V est grand ; les barres du haut apparaissent au-dessus des appuis intermédiaires et des porte-à-faux. Lire un plan de ferraillage, c'est relire les diagrammes.
+
+<DiagrammesVM d={{ L: 8, xA: 0, xB: 8, charges: [{ type: 'ponctuelle', nom: 'P1', F: 30, a: 2 }, { type: 'ponctuelle', nom: 'P2', F: 30, a: 6 }] }} titre="Poutre portant deux poutres secondaires" />
+
+<Encadre type="attention" titre="Balcons coulés après coup">
+Un balcon ajouté sans armatures hautes dans la poutre de rive fissure au droit de l'appui, côté supérieur, là où le diagramme devient négatif. C'est une pathologie fréquente dans les extensions de maisons.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : diagrammes">
+
+### Formes
+
+q répartie : V droite, M parabole · P ponctuelle : saut de V, cassure de M · sans charge : V constant, M droite
+
+### Valeurs types
+
+uniforme : qL/2 et qL²/8 · centrée : P/2 et PL/4 · console : −qL²/2, −PL
+
+### Règles
+
+Mmax où V = 0 · M = 0 aux appuis simples d'extrémité · superposition des cas
+
+### Porte-à-faux
+
+M négatif sur l'appui : fibres hautes tendues
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Charge uniforme">
+
+Poutre de 5 m, 12 kN/m. Vmax et Mmax ?
+
+<Indice>qL/2 et qL²/8.</Indice>
+
+<Corrige>
+Vmax = **{grandeur(dU.Vmax, 1, 'kN')}** ; Mmax = **{grandeur(dU.Mmax, 2, 'kN·m')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Porte-à-faux">
+
+Poutre de 6 m sur appuis à 0 et 4,5 m, 10 kN/m. Moment sur l'appui B et moment maximal en travée ?
+
+<Indice>Sur B : console de 1,5 m.</Indice>
+
+<Corrige>
+Sur B : −10 × 1,5²/2 = **{nombre(-10 * 1.5 * 1.5 / 2, 2)} kN·m** ; en travée : **{grandeur(Math.max(...dK.pts.map((p) => p.M)), 2, 'kN·m')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Deux forces symétriques">
+
+Poutre de 8 m, deux forces de 30 kN à 2 m et 6 m. Diagrammes et Mmax ?
+
+<Indice>Entre les forces, V = 0 : M constant.</Indice>
+
+<Corrige>
+RA = RB = 30 kN ; M constant entre les forces : **{grandeur(ex3.Mmax, 1, 'kN·m')}** (flexion pure).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Sous une charge répartie, le moment est :" choix={['une parabole', 'une droite', 'constant', 'nul']} bonne={0} colonnes={4}>
+Degré 2.
+</QCM>
+
+<QCM n={2} question="Sous une force ponctuelle, V :" choix={['saute', 'est continu', 'est nul', 'est parabolique']} bonne={0} colonnes={4}>
+De la valeur de P.
+</QCM>
+
+<QCM n={3} question="Le moment est maximal là où :" choix={['V s’annule', 'V est maximal', 'il y a un appui', 'q est maximale']} bonne={0} colonnes={2}>
+dM/dx = V.
+</QCM>
+
+<QCM n={4} question="Le moment maximal d'une poutre sous charge uniforme vaut :" choix={['qL²/8', 'qL/2', 'qL²/2', 'PL/4']} bonne={0} colonnes={4}>
+Au milieu.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour la poutre de l'exemple, Mmax vaut :</>} choix={[grandeur(d0.Mmax, 2, 'kN·m'), '45,00 kN·m', '66,67 kN·m', '90,00 kN·m']} bonne={0} colonnes={4}>
+Là où V = 0.
+</QCM>
+
+<QCM n={6} question="Sur l'appui d'un porte-à-faux, le moment est :" choix={['négatif (haut tendu)', 'positif', 'nul', 'infini']} bonne={0} colonnes={2}>
+Armatures hautes.
+</QCM>
+
+<QCM n={7} question="Une force centrée P sur une portée L donne Mmax =" choix={['PL/4', 'PL/8', 'PL/2', 'PL']} bonne={0} colonnes={4}>
+Pointe sous la force.
+</QCM>
+
+<QCM n={8} question="Entre deux forces symétriques, M est :" choix={['constant', 'nul', 'parabolique', 'négatif']} bonne={0} colonnes={4}>
+V = 0 : flexion pure.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

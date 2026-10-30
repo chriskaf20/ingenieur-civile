@@ -1,0 +1,287 @@
+---
+id: L2.4.8
+titre: "Flexion simple : contraintes de cisaillement"
+objectifs:
+  - Expliquer l'origine du cisaillement longitudinal dans une poutre fléchie
+  - Calculer τ = V S / (I b) en une fibre
+  - Calculer le cisaillement maximal d'une section rectangulaire
+  - Situer les zones de la poutre où le cisaillement est critique
+relecture: false
+normes: []
+glossaire:
+  - terme: Cisaillement longitudinal
+    definition: Glissement qui tend à se produire entre les couches horizontales d'une poutre fléchie.
+  - terme: Moment statique
+    definition: S = A′ y′, produit de l'aire située au-delà d'une fibre par la distance de son centre à l'axe neutre ; en cm³.
+  - terme: Formule de Jourawski
+    definition: τ = V S / (I b), contrainte de cisaillement à une hauteur donnée de la section.
+symboles:
+  - { symbole: 'τ', signification: 'contrainte de cisaillement', unite: 'MPa' }
+  - { symbole: 'S', signification: 'moment statique au-dessus de la fibre', unite: 'cm³' }
+  - { symbole: 'b', signification: 'largeur de la section à cette hauteur', unite: 'cm' }
+formules:
+  - { nom: 'Jourawski', tex: '\tau = \frac{V\,S}{I\,b}', domaine: 'Flexion simple' }
+  - { nom: 'Rectangle', tex: '\tau_{max} = \frac{3}{2}\,\frac{V}{A}', domaine: 'Au niveau de l''axe neutre' }
+  - { nom: 'Cercle plein', tex: '\tau_{max} = \frac{4}{3}\,\frac{V}{A}', domaine: 'Au niveau de l''axe neutre' }
+---
+
+import { cisaillementRect, solive, EXEMPLE_SOLIVE } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { CisaillementRect, DiagrammesVM } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const c0 = cisaillementRect(30, 20, 50)
+export const s0 = solive(EXEMPLE_SOLIVE)
+export const ex1 = cisaillementRect(40, 25, 60)
+export const ex3 = cisaillementRect(12, 7.5, 22.5)
+
+<Page etape="intuition" titre="L'intuition : le paquet de feuilles">
+
+Prends un paquet de feuilles de papier et plie-le : les feuilles **glissent** les unes sur les autres, les bords ne restent pas alignés. Colle-les ensemble : le paquet devient bien plus raide. Dans une poutre, la matière « colle » les couches entre elles : elle doit résister à ce glissement. C'est le **cisaillement**, lié à l'effort tranchant.
+
+<CisaillementRect V={30} b={20} h={50} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer le cisaillement dans une poutre fléchie, et où est-il maximal ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Le cisaillement de flexion" sousTitre="Jourawski" etape="cours">
+
+<Panneau n={1} titre="Origine" icone="idee" couleur="encre">
+V varie le long de la poutre : les couches glissent.
+</Panneau>
+
+<Panneau n={2} titre="Formule" icone="calcul" couleur="acier">
+τ = V S/(I b).
+</Panneau>
+
+<Panneau n={3} titre="S" icone="regle" couleur="terre">
+Aire au-dessus de la fibre × distance de son centre à G.
+</Panneau>
+
+<Panneau n={4} titre="Maximum" icone="verification" couleur="validation">
+Sur l'axe neutre ; nul aux fibres extrêmes.
+</Panneau>
+
+<Panneau n={5} titre="Rectangle" icone="plan" couleur="brique">
+1,5 fois la moyenne V/A.
+</Panneau>
+
+<Panneau n={6} titre="Où ?" icone="attention" couleur="correction">
+Près des appuis, là où V est grand.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : d'où vient le cisaillement">
+
+### Équilibre d'une tranche
+
+Entre deux sections voisines, le moment varie de dM = V dx. Les contraintes normales σ = M y/I ne sont donc pas les mêmes des deux côtés. Pour qu'une couche au-dessus d'une fibre soit en équilibre, un effort de **glissement** doit s'exercer le long de cette fibre : c'est le cisaillement longitudinal. Par réciprocité, il existe aussi dans la section, vertical.
+
+### Où est-il grand ?
+
+Là où V est grand : près des **appuis**. Au milieu d'une poutre uniformément chargée, V = 0 : pas de cisaillement.
+
+<DiagrammesVM d={{ L: 4, xA: 0, xB: 4, charges: [{ type: 'repartie', nom: 'q', q1: 15, q2: 15, a: 0, b: 4 }] }} titre="V maximal aux appuis" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la formule de Jourawski">
+
+### La formule
+
+$$\tau(y) = \frac{V\,S(y)}{I\,b(y)}$$
+
+S(y) est le **moment statique** de la partie de section située au-delà de la fibre considérée, par rapport à l'axe neutre ; b(y), la largeur à cette hauteur.
+
+### Le rectangle
+
+Au centre, $S = b h^2/8$ et $I = bh^3/12$, d'où $\tau_{max} = \dfrac{3}{2}\dfrac{V}{A}$. La répartition est **parabolique**, nulle en haut et en bas. Pour 30 kN dans 20 × 50 cm : moyenne {nombre(c0.tauMoyen, 2)} MPa, maximum {nombre(c0.tauMax, 2)} MPa.
+
+<CisaillementRect V={30} b={20} h={50} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : sections en I et en T">
+
+### L'âme travaille
+
+Dans un profil en I, la largeur b est petite dans l'**âme** : le cisaillement y est grand et presque uniforme. On vérifie souvent l'âme avec $\tau \approx V/A_{âme}$. Les semelles reprennent le moment, l'âme reprend l'effort tranchant.
+
+<Regle type="norme">
+En béton armé, le cisaillement est repris par des **armatures transversales** (cadres, étriers) et par des bielles de béton comprimé : la vérification suit l'EC2 §6.2, pas directement Jourawski (L3.3).
+</Regle>
+
+<DiagrammeBarres alt={`Section 20 × 50 cm, V = 30 kN : contrainte moyenne ${nombre(c0.tauMoyen, 2)} MPa, maximale ${nombre(c0.tauMax, 2)} MPa (1,5 fois plus).`} titre="cisaillement dans 20 × 50 cm sous 30 kN (MPa)" barres={[{ libelle: 'moyenne V/A', valeur: c0.tauMoyen, texte: nombre(c0.tauMoyen, 2), teinte: 'acier' }, { libelle: 'maximum (axe neutre)', valeur: c0.tauMax, texte: nombre(c0.tauMax, 2), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Calculer le cisaillement : effort tranchant maximal (près des appuis) ; inertie de la section ; moment statique au niveau étudié ; largeur à ce niveau ; formule de Jourawski ; comparaison à la limite." etapes={[{ titre: 'Vmax', texte: 'appuis', teinte: 'encre' }, { titre: 'I', texte: 'section', teinte: 'acier' }, { titre: 'S', texte: 'A′ y′', teinte: 'terre' }, { titre: 'τ', texte: 'V S/(I b)', teinte: 'brique' }, { titre: 'Vérifier', texte: 'τ ≤ τlim', teinte: 'validation' }]} />
+
+<CisaillementRect V={12} b={7.5} h={22.5} />
+
+</Page>
+
+<FicheCalcul calcul="cisaillementPoutre">
+
+<Cahier titre="Exemple résolu : cisaillement près d'un appui">
+
+**Énoncé.** Une poutre rectangulaire 20 × 50 cm reprend un effort tranchant de 30 kN près de son appui (données de l'énoncé). Calcule le cisaillement moyen et maximal.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Moyenne et maximum">
+<AN k="moyen" />
+<AN k="max" />
+<Resultat k="tauMax" libelle="Cisaillement maximal" />
+<Schema />
+<Note couleur="vert">Contrôle : τmax / τmoy = 1,5 pour tout rectangle, quelle que soit sa taille.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="chercher le cisaillement maximal à mi-portée.">
+Il est près des appuis, là où V est maximal.
+</Piege>
+
+<Piege erreur="prendre la largeur totale pour un I.">
+b est la largeur à la hauteur étudiée : dans l'âme, c'est son épaisseur.
+</Piege>
+
+<Piege erreur="se contenter de V/A.">
+Pour un rectangle, le maximum est 50 % plus grand.
+</Piege>
+
+<CisaillementRect V={40} b={25} h={60} />
+
+<Piege erreur="négliger le cisaillement du bois.">
+Le bois se fend facilement le long du fil : sur une poutre courte et très chargée, c'est le cisaillement qui décide.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Fissures à 45° près des appuis.** Dans une poutre en béton armé trop pauvre en cadres, on voit des fissures **inclinées** près des appuis : c'est l'effort tranchant (combiné à la flexion) qui ouvre le béton en traction diagonale (L2.5.6). C'est une rupture brutale : les cadres ne sont jamais à économiser.
+
+<DiagrammeBarres alt={`Solive bois de l'exemple de L2.4 : cisaillement maximal ${nombre(s0.tau, 3)} MPa sous la charge du plancher.`} titre="cisaillement de la solive de plancher (MPa)" barres={[{ libelle: 'τ = 1,5 V/A', valeur: s0.tau, texte: nombre(s0.tau, 3), teinte: 'terre' }]} />
+
+<Encadre type="attention" titre="Cadres « économisés »">
+Écarter les cadres au-delà du plan, ou les supprimer près des appuis « parce que la poutre est courte », est une économie dangereuse : c'est exactement là qu'ils travaillent le plus.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : cisaillement de flexion">
+
+### Formule
+
+τ = V S/(I b) (Jourawski) · S : moment statique au-delà de la fibre
+
+### Valeurs
+
+rectangle τmax = 1,5 V/A · cercle 4/3 V/A · I : τ ≈ V/A_âme
+
+### Répartition
+
+parabolique, nulle aux fibres extrêmes, maximale sur l'axe neutre
+
+### Où ?
+
+près des appuis (V max) · béton armé : cadres (EC2 §6.2)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Poutre 25 × 60">
+
+V = 40 kN. τmax ?
+
+<Indice>1,5 V/A.</Indice>
+
+<Corrige>
+**{grandeur(ex1.tauMax, 2, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Où τ est-il nul ?">
+
+Dans une poutre sur deux appuis uniformément chargée, où le cisaillement est-il nul ?
+
+<Indice>V = 0.</Indice>
+
+<Corrige>
+À **mi-portée**, et en toute section aux fibres extrêmes.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Une solive">
+
+Solive 7,5 × 22,5 cm, V = 12 kN. τmax ?
+
+<Indice>A = 168,75 cm².</Indice>
+
+<Corrige>
+**{grandeur(ex3.tauMax, 2, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La formule de Jourawski est :" choix={['τ = V S/(I b)', 'σ = M y/I', 'τ = T r/J', 'τ = F/A']} bonne={0} colonnes={2}>
+Cisaillement de flexion.
+</QCM>
+
+<QCM n={2} question="Dans un rectangle, τmax vaut :" choix={['1,5 V/A', 'V/A', '2 V/A', '0,5 V/A']} bonne={0} colonnes={4}>
+Sur l'axe neutre.
+</QCM>
+
+<QCM n={3} question="Le cisaillement est nul :" choix={['aux fibres extrêmes', 'sur l’axe neutre', 'partout', 'au centre']} bonne={0} colonnes={2}>
+S = 0.
+</QCM>
+
+<QCM n={4} question="Il est maximal le long de la poutre :" choix={['près des appuis', 'à mi-portée', 'nulle part', 'uniformément']} bonne={0} colonnes={2}>
+Là où V est maximal.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour 30 kN dans 20 × 50 cm, τmax vaut :</>} choix={[grandeur(c0.tauMax, 2, 'MPa'), grandeur(c0.tauMoyen, 2, 'MPa'), '3,00 MPa', '0,15 MPa']} bonne={0} colonnes={4}>
+1,5 × 0,3.
+</QCM>
+
+<QCM n={6} question="Dans un profil en I, le cisaillement est surtout repris par :" choix={['l’âme', 'les semelles', 'les boulons', 'personne']} bonne={0} colonnes={4}>
+Faible largeur.
+</QCM>
+
+<QCM n={7} question="En béton armé, l'effort tranchant est repris par :" choix={['les cadres et les bielles de béton', 'les seuls aciers longitudinaux', 'l’enrobage', 'le coffrage']} bonne={0} colonnes={2}>
+EC2 §6.2.
+</QCM>
+
+<QCM n={8} question="Les fissures d'effort tranchant sont :" choix={['inclinées près des appuis', 'verticales à mi-portée', 'horizontales', 'absentes']} bonne={0} colonnes={2}>
+Traction diagonale.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

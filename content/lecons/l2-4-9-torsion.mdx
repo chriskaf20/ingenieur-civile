@@ -1,0 +1,308 @@
+---
+id: L2.4.9
+titre: "Torsion des arbres circulaires"
+objectifs:
+  - Définir le couple de torsion et l'angle de torsion
+  - Calculer le moment quadratique polaire d'un arbre plein ou creux
+  - Calculer la contrainte de cisaillement maximale et l'angle de rotation
+  - Comparer l'efficacité d'un arbre creux et d'un arbre plein
+relecture: false
+normes: []
+glossaire:
+  - terme: Torsion
+    definition: Sollicitation par un couple qui fait tourner les sections d'une pièce autour de son axe.
+  - terme: Moment quadratique polaire
+    definition: J = ∫ r² dA ; pour un cercle plein, π D⁴/32.
+  - terme: Module de cisaillement
+    definition: G, raideur du matériau en cisaillement ; G = E / (2(1 + ν)).
+  - terme: Angle de torsion
+    definition: Rotation relative θ entre les deux extrémités d'une pièce tordue.
+symboles:
+  - { symbole: 'T', signification: 'couple de torsion', unite: 'kN·m' }
+  - { symbole: 'J', signification: 'moment quadratique polaire', unite: 'mm⁴' }
+  - { symbole: 'G', signification: 'module de cisaillement', unite: 'MPa' }
+  - { symbole: 'θ', signification: 'angle de torsion', unite: 'rad' }
+formules:
+  - { nom: 'Polaire', tex: 'J = \frac{\pi (D^4 - d^4)}{32}', domaine: 'Arbre circulaire' }
+  - { nom: 'Cisaillement', tex: '\tau(r) = \frac{T\,r}{J},\quad \tau_{max} = \frac{T\,D}{2J}', domaine: 'Élastique' }
+  - { nom: 'Angle', tex: '\theta = \frac{T\,L}{G\,J}', domaine: 'Arbre de longueur L' }
+---
+
+import { EXEMPLE_TORSION, torsion } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { ArbreTorsion } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const t0 = torsion(EXEMPLE_TORSION)
+export const creux = torsion({ ...EXEMPLE_TORSION, D: 56, d: 40 })
+export const aPlein = Math.PI * 50 * 50 / 4
+export const aCreux = Math.PI * (56 * 56 - 40 * 40) / 4
+export const Gacier = 210000 / (2 * 1.3)
+export const ex1 = torsion({ T: 1, D: 40, d: 0, L: 1, G: 81000 })
+
+<Page etape="intuition" titre="L'intuition : tordre une serviette">
+
+Tords une serviette mouillée : elle tourne sur elle-même, les fibres de surface s'enroulent en hélice. Un arbre de moteur, un pieu vissé, une poutre de rive qui porte un balcon d'un seul côté subissent la même chose : la **torsion**. La matière est cisaillée, d'autant plus qu'elle est loin de l'axe.
+
+<ArbreTorsion T={EXEMPLE_TORSION.T} D={EXEMPLE_TORSION.D} tau={t0.tauMax} thetaDeg={t0.thetaDeg} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelle contrainte et quelle rotation un couple de torsion produit-il dans une pièce circulaire ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La torsion en six idées" sousTitre="Arbres circulaires" etape="cours">
+
+<Panneau n={1} titre="Couple" icone="calcul" couleur="encre">
+T en kN·m, autour de l'axe.
+</Panneau>
+
+<Panneau n={2} titre="J" icone="regle" couleur="acier">
+π (D⁴ − d⁴)/32.
+</Panneau>
+
+<Panneau n={3} titre="τ linéaire" icone="idee" couleur="terre">
+Nul au centre, maximal au bord.
+</Panneau>
+
+<Panneau n={4} titre="Angle" icone="plan" couleur="brique">
+θ = T L/(G J).
+</Panneau>
+
+<Panneau n={5} titre="Creux" icone="verification" couleur="validation">
+La matière du centre travaille peu.
+</Panneau>
+
+<Panneau n={6} titre="Bâtiment" icone="attention" couleur="correction">
+Poutres de rive, balcons : torsion de compatibilité.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : contraintes de torsion">
+
+### Hypothèses
+
+Pour un arbre **circulaire**, les sections restent planes et tournent en bloc ; chaque rayon reste droit. Le glissement, donc le cisaillement, croît linéairement avec la distance r à l'axe :
+
+$$\tau(r) = \frac{T\,r}{J},\qquad J = \frac{\pi(D^4 - d^4)}{32}$$
+
+J est le **moment quadratique polaire**. Le maximum est au bord : $\tau_{max} = T\,D/(2J)$.
+
+### Exemple
+
+Arbre plein Ø 50 mm, T = 2 kN·m : J = {nombre(t0.J, 0)} mm⁴, $\tau_{max}$ = {nombre(t0.tauMax, 1)} MPa.
+
+<ArbreTorsion T={2} D={50} tau={t0.tauMax} thetaDeg={t0.thetaDeg} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : l'angle de torsion">
+
+### La rotation
+
+Sur une longueur L, la section d'extrémité tourne de :
+
+$$\theta = \frac{T\,L}{G\,J}$$
+
+G, le module de cisaillement, vaut $E/(2(1+\nu))$ : environ {nombre(Gacier, 0)} MPa pour l'acier (avec ν = 0,3).
+
+### Unités
+
+T en N·mm, L en mm, G en MPa, J en mm⁴ : θ en radians ; × 180/π pour les degrés. Pour l'exemple sur 1,5 m : θ = {nombre(t0.thetaDeg, 2)}°.
+
+<DiagrammeBarres alt={`Arbre plein Ø 50 : angle ${nombre(t0.thetaDeg, 2)}° sur 1,5 m ; arbre creux 56/40 mm : ${nombre(creux.thetaDeg, 2)}°.`} titre="angle de torsion sur 1,5 m (°)" barres={[{ libelle: 'plein Ø 50 mm', valeur: t0.thetaDeg, texte: nombre(t0.thetaDeg, 2), teinte: 'terre' }, { libelle: 'creux 56/40 mm', valeur: creux.thetaDeg, texte: nombre(creux.thetaDeg, 2), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : plein ou creux">
+
+### L'efficacité du tube
+
+Le centre d'un arbre plein est peu sollicité (τ ≈ 0) : on peut l'enlever. Un tube 56/40 mm a {nombre((aCreux / aPlein) * 100, 0)} % de la matière du plein Ø 50, pour une contrainte de {nombre(creux.tauMax, 1)} MPa au lieu de {nombre(t0.tauMax, 1)} MPa. Les tubes sont rois en torsion.
+
+<ArbreTorsion T={2} D={56} d={40} tau={creux.tauMax} thetaDeg={creux.thetaDeg} />
+
+<Regle type="simplification">
+Ces formules ne valent que pour les sections **circulaires** (pleines ou creuses). Une section rectangulaire ou en I se gauchit en torsion : d'autres formules, avec des coefficients tabulés, s'appliquent. Les profilés ouverts (I, U) sont très souples en torsion.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Torsion d'un arbre : couple T (puissance d'un moteur ou excentricité d'une charge) ; moment polaire J ; contrainte maximale au bord ; angle de torsion ; vérifications." etapes={[{ titre: 'Couple T', texte: 'kN·m', teinte: 'encre' }, { titre: 'J', texte: 'π(D⁴ − d⁴)/32', teinte: 'acier' }, { titre: 'τmax', texte: 'T D/(2J)', teinte: 'correction' }, { titre: 'θ', texte: 'T L/(G J)', teinte: 'terre' }, { titre: 'Vérifier', texte: 'τ, θ', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Section : plein Ø 50, ${nombre(aPlein, 0)} mm² ; creux 56/40, ${nombre(aCreux, 0)} mm².`} titre="matière utilisée (mm²)" barres={[{ libelle: 'plein Ø 50', valeur: aPlein, texte: nombre(aPlein, 0), teinte: 'terre' }, { libelle: 'creux 56/40', valeur: aCreux, texte: nombre(aCreux, 0), teinte: 'validation' }]} />
+
+</Page>
+
+<FicheCalcul calcul="torsionArbre">
+
+<Cahier titre="Exemple résolu : l'arbre d'une pompe">
+
+**Énoncé.** L'arbre plein en acier d'une pompe de forage, Ø 50 mm, long de 1,5 m, transmet un couple de 2 kN·m ; G = 81 000 MPa (données de l'énoncé). Calcule τmax et l'angle de torsion.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="J et τ">
+<AN k="J" />
+<AN k="tau" />
+<Note>Pourquoi au bord ? r y est maximal.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'angle">
+
+<Etape n={3} titre="Rotation">
+<AN k="theta" />
+<Resultat k="tau" libelle="Cisaillement maximal" />
+<Resultat k="theta" libelle="Angle de torsion" />
+<Schema />
+<Note couleur="vert">Contrôle : passe en tube (d = 40 mm, D = 56 mm) ; τ et θ baissent alors que la matière diminue.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre J (polaire) et I (flexion).">
+Pour un cercle, J = 2 I : π D⁴/32 contre π D⁴/64.
+</Piege>
+
+<Piege erreur="utiliser E au lieu de G.">
+L'angle de torsion fait intervenir le module de cisaillement G.
+</Piege>
+
+<Piege erreur="appliquer ces formules à un rectangle.">
+Elles ne valent que pour les sections circulaires.
+</Piege>
+
+<ArbreTorsion T={1} D={40} tau={ex1.tauMax} thetaDeg={ex1.thetaDeg} />
+
+<Piege erreur="laisser θ en radians sans le dire.">
+Préciser l'unité ; 1 rad ≈ 57,3°.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Torsion dans les bâtiments.** Une poutre de rive qui porte un balcon d'un seul côté est tordue ; un escalier hélicoïdal aussi. En béton armé, on reprend la torsion avec des cadres **fermés** et des barres longitudinales réparties sur le pourtour (EC2 §6.3).
+
+<ArbreTorsion T={EXEMPLE_TORSION.T} D={EXEMPLE_TORSION.D} tau={t0.tauMax} thetaDeg={t0.thetaDeg} />
+
+<Encadre type="terrain" titre="Forages et pompes">
+Les pompes des forages d'eau des villages, entraînées par un moteur en surface, ont des arbres longs : un angle de torsion excessif fait vibrer la ligne d'arbre. Les tubes creux sont préférés pour leur légèreté et leur raideur.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : torsion">
+
+### Polaire
+
+J = π (D⁴ − d⁴)/32 · cercle plein π D⁴/32 = 2 I
+
+### Contraintes
+
+τ(r) = T r/J · τmax = T D/(2J), au bord
+
+### Angle
+
+θ = T L/(G J) · G = E/(2(1 + ν)) · acier ≈ 81 000 MPa
+
+### Domaine
+
+sections circulaires · tubes efficaces · profils ouverts souples
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Arbre Ø 40">
+
+T = 1 kN·m, Ø 40 mm plein. τmax ?
+
+<Indice>J = π × 40⁴/32.</Indice>
+
+<Corrige>
+**{grandeur(ex1.tauMax, 1, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Module G">
+
+E = 210 000 MPa, ν = 0,3. G ?
+
+<Indice>G = E/(2(1 + ν)).</Indice>
+
+<Corrige>
+**{grandeur(Gacier, 0, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Tube">
+
+Tube 56/40 mm, même couple et longueur que l'exemple. τmax, θ, gain de matière ?
+
+<Indice>J du tube.</Indice>
+
+<Corrige>
+τ = **{grandeur(creux.tauMax, 1, 'MPa')}** ; θ = **{nombre(creux.thetaDeg, 2)}°** ; matière : {nombre((aCreux / aPlein) * 100, 0)} % du plein.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le moment polaire d'un cercle plein vaut :" choix={['π D⁴/32', 'π D⁴/64', 'π D²/4', 'D³/6']} bonne={0} colonnes={4}>
+J = 2 I.
+</QCM>
+
+<QCM n={2} question="En torsion, τ est maximal :" choix={['au bord', 'au centre', 'partout égal', 'nulle part']} bonne={0} colonnes={4}>
+Linéaire en r.
+</QCM>
+
+<QCM n={3} question="L'angle de torsion vaut :" choix={['T L/(G J)', 'T/(G J)', 'G J/(T L)', 'T L/(E I)']} bonne={0} colonnes={2}>
+Avec G.
+</QCM>
+
+<QCM n={4} question="Un tube est efficace en torsion car :" choix={['le centre travaille peu', 'il est lourd', 'il est carré', 'il ne se déforme pas']} bonne={0} colonnes={2}>
+τ ≈ 0 au centre.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Arbre Ø 50 sous 2 kN·m : τmax vaut :</>} choix={[grandeur(t0.tauMax, 1, 'MPa'), '40,7 MPa', '163,0 MPa', '8,1 MPa']} bonne={0} colonnes={4}>
+T D/(2J).
+</QCM>
+
+<QCM n={6} question="G de l'acier vaut environ :" choix={['81 000 MPa', '210 000 MPa', '30 000 MPa', '8 100 MPa']} bonne={0} colonnes={4}>
+E/(2(1 + ν)).
+</QCM>
+
+<QCM n={7} question="Les formules de cette leçon valent pour :" choix={['les sections circulaires', 'toutes les sections', 'les I seulement', 'les rectangles']} bonne={0} colonnes={2}>
+Pas de gauchissement.
+</QCM>
+
+<QCM n={8} question="En béton armé, la torsion se reprend avec :" choix={['des cadres fermés', 'des cadres ouverts', 'rien', 'des goujons']} bonne={0} colonnes={2}>
+EC2 §6.3.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

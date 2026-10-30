@@ -1,0 +1,311 @@
+---
+id: L2.4.5
+titre: "Traction et compression simples, loi de Hooke"
+objectifs:
+  - Calculer la contrainte et l'allongement d'une barre tendue ou comprimée
+  - Vérifier une barre par rapport à une contrainte limite
+  - Dimensionner la section d'un tirant
+  - Calculer la déformation due à une variation de température
+relecture: false
+normes: []
+glossaire:
+  - terme: Tirant
+    definition: Barre qui ne travaille qu'en traction, comme le tirant d'une ferme ou d'un arc.
+  - terme: Coefficient de Poisson
+    definition: Rapport ν entre la contraction transversale et l'allongement longitudinal d'une barre tendue.
+  - terme: Dilatation thermique
+    definition: Allongement d'une pièce dont la température augmente, ε = α ΔT.
+  - terme: Raideur axiale
+    definition: k = E A / L, force nécessaire pour allonger la barre d'une unité de longueur.
+symboles:
+  - { symbole: 'A', signification: 'aire de la section', unite: 'mm²' }
+  - { symbole: 'ΔL', signification: 'allongement', unite: 'mm' }
+  - { symbole: 'α', signification: 'coefficient de dilatation', unite: '1/°C' }
+  - { symbole: 'ν', signification: 'coefficient de Poisson', unite: '—' }
+formules:
+  - { nom: 'Allongement', tex: '\Delta L = \frac{N\,L}{E\,A}', domaine: 'Domaine élastique' }
+  - { nom: 'Section minimale', tex: 'A \geq \frac{N}{\sigma_{lim}}', domaine: 'Dimensionnement' }
+  - { nom: 'Dilatation', tex: '\Delta L = \alpha\,\Delta T\,L,\quad \sigma = E\,\alpha\,\Delta T \text{ si bloquée}', domaine: 'Température' }
+---
+
+import { barre, EXEMPLE_BARRE } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { BarreTraction, DroiteHooke } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const b0 = barre(EXEMPLE_BARRE)
+export const ATirant = (200 * 1000) / 250
+export const dTirant = Math.sqrt((4 * ATirant) / Math.PI)
+export const dilat = 12e-6 * 30 * 20 * 1000
+export const sigBloque = 210000 * 12e-6 * 30
+export const poteau = (800 * 1000) / (250 * 250)
+export const ex3 = barre({ N: -600, L: 3, d: 300, E: 30000 })
+
+<Page etape="intuition" titre="L'intuition : un ressort très raide">
+
+Une barre d'acier tirée se comporte comme un ressort très raide : elle s'allonge un peu, proportionnellement à la force, et reprend sa longueur quand on la relâche. Comprimée, elle se raccourcit de la même façon (tant qu'elle ne flambe pas, L2.5.8). La loi de Hooke permet de prévoir ces petits mouvements, qui comptent dans un pont, une ferme ou un câble.
+
+<BarreTraction N={EXEMPLE_BARRE.N} L={EXEMPLE_BARRE.L} dL={b0.dL} d={EXEMPLE_BARRE.d} sigma={b0.sigma} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment vérifier et dimensionner une pièce tendue ou comprimée, et prévoir son allongement ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Traction et compression" sousTitre="Quatre calculs types" etape="cours">
+
+<Panneau n={1} titre="Contrainte" icone="calcul" couleur="encre">
+σ = N/A, uniforme dans la section.
+</Panneau>
+
+<Panneau n={2} titre="Allongement" icone="regle" couleur="acier">
+ΔL = N L/(E A).
+</Panneau>
+
+<Panneau n={3} titre="Vérifier" icone="verification" couleur="validation">
+σ ≤ σlim.
+</Panneau>
+
+<Panneau n={4} titre="Dimensionner" icone="plan" couleur="terre">
+A ≥ N/σlim.
+</Panneau>
+
+<Panneau n={5} titre="Température" icone="idee" couleur="brique">
+ΔL = α ΔT L ; bloquée : σ = E α ΔT.
+</Panneau>
+
+<Panneau n={6} titre="Compression" icone="attention" couleur="correction">
+Attention au flambement si la pièce est élancée.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : allongement et raideur">
+
+### La formule
+
+En combinant σ = N/A, ε = σ/E et ΔL = ε L :
+
+$$\Delta L = \frac{N\,L}{E\,A}$$
+
+La barre se comporte comme un ressort de raideur $k = EA/L$. Doubler la longueur double l'allongement ; doubler la section le divise par deux.
+
+### Effet transversal
+
+Tirée, une barre s'amincit un peu : la déformation transversale vaut $-\nu\,\varepsilon$, avec ν ≈ 0,3 pour l'acier et 0,2 pour le béton (coefficient de Poisson).
+
+<DroiteHooke point={{ eps: b0.eps, sigma: b0.sigma }} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : vérifier et dimensionner">
+
+### Vérifier
+
+On compare σ à une contrainte limite, fixée par le matériau et par la norme : par exemple $f_y/\gamma_M$ pour l'acier (L3.5), $f_{ck}/\gamma_c$ pour le béton. Dans cette leçon, la contrainte limite est **donnée** dans l'énoncé.
+
+### Dimensionner
+
+$$A \geq \frac{N}{\sigma_{lim}}$$
+
+Un tirant qui doit transmettre 200 kN avec $\sigma_{lim}$ = 250 MPa demande A ≥ {nombre(ATirant, 0)} mm², soit un diamètre d'au moins {nombre(dTirant, 1)} mm : on prend le diamètre commercial supérieur.
+
+<Regle type="simplification">
+Pour un tirant fileté, la section utile est celle du fond de filet, plus petite que celle de la tige : on vérifie là où la section est la plus faible.
+</Regle>
+
+<DiagrammeBarres alt={`Tirant de 200 kN : section nécessaire ${nombre(ATirant, 0)} mm² ; Ø 25 mm offre ${nombre(Math.PI * 625 / 4, 0)} mm², Ø 32 mm ${nombre(Math.PI * 1024 / 4, 0)} mm².`} titre="section du tirant (mm²)" barres={[{ libelle: 'nécessaire', valeur: ATirant, texte: nombre(ATirant, 0), teinte: 'correction' }, { libelle: 'Ø 25 mm', valeur: (Math.PI * 625) / 4, texte: nombre((Math.PI * 625) / 4, 0), teinte: 'terre' }, { libelle: 'Ø 32 mm', valeur: (Math.PI * 1024) / 4, texte: nombre((Math.PI * 1024) / 4, 0), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : la température">
+
+### La dilatation
+
+Une pièce dont la température monte de ΔT s'allonge de $\Delta L = \alpha\,\Delta T\,L$ ; α ≈ 12 × 10⁻⁶ /°C pour l'acier, 10 × 10⁻⁶ /°C pour le béton <AVerifier note="A_VERIFIER.md n° 62 : coefficients de dilatation thermique (EN 1992-1-1 §3.1.3 : 10 × 10⁻⁶ /K ; EN 1993-1-1 §3.2.6 : 12 × 10⁻⁶ /K)" />. Une poutre d'acier de 20 m chauffée de 30 °C s'allonge de {nombre(dilat, 1)} mm.
+
+### Si la dilatation est empêchée
+
+Si la pièce est bloquée entre deux appuis fixes, elle ne peut pas s'allonger : il apparaît une contrainte de compression $\sigma = E\,\alpha\,\Delta T$, ici {nombre(sigBloque, 0)} MPa, indépendante de la longueur. C'est pourquoi on prévoit des **joints de dilatation**.
+
+<DiagrammeBarres alt={`Pièce d'acier chauffée de 30 °C : libre, elle s'allonge de ${nombre(dilat, 1)} mm sur 20 m ; bloquée, elle subit ${nombre(sigBloque, 0)} MPa de compression.`} titre="acier chauffé de 30 °C" barres={[{ libelle: 'libre : allongement sur 20 m (mm)', valeur: dilat, texte: nombre(dilat, 1), teinte: 'acier' }, { libelle: 'bloquée : contrainte (MPa)', valeur: sigBloque, texte: nombre(sigBloque, 0), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : vérifier une barre">
+
+<DiagrammeFlux alt="Vérifier une barre : effort N par la statique ; section A, en tenant compte des trous et filetages ; contrainte σ = N/A ; comparer à la limite ; calculer ΔL ; si compression, vérifier le flambement." etapes={[{ titre: 'N', texte: 'statique', teinte: 'encre' }, { titre: 'A nette', texte: 'trous, filets', teinte: 'acier' }, { titre: 'σ = N/A', texte: 'MPa', teinte: 'terre' }, { titre: 'σ ≤ σlim', texte: 'résistance', teinte: 'validation' }, { titre: 'ΔL, flambement', texte: 'service', teinte: 'brique' }]} />
+
+<BarreTraction N={200} L={6} dL={barre({ N: 200, L: 6, d: 32, E: 210000 }).dL} d={32} sigma={barre({ N: 200, L: 6, d: 32, E: 210000 }).sigma} />
+
+</Page>
+
+<FicheCalcul calcul="tirantTraction">
+
+<Cahier titre="Exemple résolu : le tirant de la ferme">
+
+**Énoncé.** Le tirant d'une ferme de 4 m, en acier Ø 20 mm (E = 210 000 MPa), reprend 120 kN (données de l'énoncé). Calcule σ et ΔL. La contrainte limite retenue pour cet acier est 435 MPa.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="La contrainte">
+<AN k="A" />
+<AN k="sigma" />
+<Note>Pourquoi la contrainte est-elle la même partout ? La force passe par le centre de la section et loin des attaches (Saint-Venant).</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : allongement et vérification">
+
+<Etape n={3} titre="L'allongement">
+<AN k="dL" />
+<Resultat k="sigma" libelle="Contrainte" />
+<Resultat k="dL" libelle="Allongement" />
+<Schema />
+<Note couleur="vert">Contrôle : σ = {nombre(b0.sigma, 0)} MPa &lt; 435 MPa ; la ferme s'ouvre de quelques millimètres sous charge, ce que les appuis doivent permettre.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="utiliser la section brute d'une pièce percée.">
+Au droit d'un trou de boulon, la section nette est plus faible.
+</Piege>
+
+<Piege erreur="oublier les unités dans N L/(E A).">
+N en N, L en mm, E en MPa, A en mm² : ΔL en mm.
+</Piege>
+
+<Piege erreur="négliger la température.">
+Une dalle de toiture exposée au soleil se dilate : sans joint, elle pousse les murs et les fissure.
+</Piege>
+
+<DroiteHooke E={210000} fy={435} />
+
+<Piege erreur="vérifier une pièce comprimée élancée comme une pièce tendue.">
+Elle peut flamber bien avant d'atteindre la contrainte limite.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Poteaux, tirants, câbles.** Un poteau de 25 × 25 cm qui porte 800 kN subit {nombre(poteau, 1)} MPa de compression. Les câbles d'un pont suspendu, les tirants d'un hangar, les suspentes d'un réservoir travaillent en traction : leur allongement règle la géométrie finale de l'ouvrage.
+
+<BarreTraction N={800} L={3} dL={barre({ N: 800, L: 3, d: 282, E: 30000 }).dL} d={282} sigma={barre({ N: 800, L: 3, d: 282, E: 30000 }).sigma} />
+
+<Encadre type="terrain" titre="Toitures en tôle et soleil équatorial">
+Sous le soleil de Kinshasa, une tôle de toiture dépasse facilement 60 °C le jour et redescend à 25 °C la nuit. Elle se dilate et se contracte chaque jour : les fixations doivent permettre ce mouvement, sinon les trous s'ovalisent et la toiture fuit.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : traction et compression">
+
+### Formules
+
+σ = N/A · ΔL = N L/(E A) · k = E A/L
+
+### Vérifier, dimensionner
+
+σ ≤ σlim · A ≥ N/σlim · section nette au droit des trous
+
+### Température (à vérifier)
+
+ΔL = α ΔT L · bloquée : σ = E α ΔT · acier α ≈ 12 × 10⁻⁶ /°C
+
+### Compression
+
+pièce élancée : vérifier le flambement (L2.5.8)
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un poteau">
+
+Poteau en béton de 25 × 25 cm, 800 kN. Contrainte ?
+
+<Indice>A = 62 500 mm².</Indice>
+
+<Corrige>
+σ = **{grandeur(poteau, 1, 'MPa')}** (compression).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Dimensionner un tirant">
+
+N = 200 kN, σlim = 250 MPa. Diamètre minimal ?
+
+<Indice>A ≥ N/σlim, puis Ø = √(4A/π).</Indice>
+
+<Corrige>
+A ≥ {nombre(ATirant, 0)} mm² → Ø ≥ **{nombre(dTirant, 1)} mm** : on prend un diamètre commercial supérieur.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Raccourcissement d'un poteau">
+
+Poteau circulaire en béton Ø 300 mm, 3 m, 600 kN, E = 30 000 MPa. Raccourcissement ?
+
+<Indice>Mêmes formules, N négatif.</Indice>
+
+<Corrige>
+σ = {nombre(ex3.sigma, 2)} MPa ; ΔL = **{grandeur(ex3.dL, 2, 'mm')}** (raccourcissement).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'allongement d'une barre vaut :" choix={['N L/(E A)', 'E A/(N L)', 'N/A', 'E ε']} bonne={0} colonnes={4}>
+Hooke intégré.
+</QCM>
+
+<QCM n={2} question="Doubler la section d'un tirant divise son allongement par :" choix={['2', '4', '1', '√2']} bonne={0} colonnes={4}>
+ΔL ∝ 1/A.
+</QCM>
+
+<QCM n={3} question="Pour dimensionner un tirant, on calcule :" choix={['A ≥ N/σlim', 'A ≥ σlim/N', 'A = N σlim', 'A = E ε']} bonne={0} colonnes={2}>
+Section minimale.
+</QCM>
+
+<QCM n={4} question="Une pièce bloquée et chauffée subit :" choix={['une compression E α ΔT', 'une traction', 'aucune contrainte', 'un cisaillement']} bonne={0} colonnes={2}>
+Dilatation empêchée.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Le tirant de l'exemple s'allonge de :</>} choix={[grandeur(b0.dL, 2, 'mm'), '0,73 mm', '72,8 mm', '4,00 mm']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="Le coefficient de Poisson de l'acier vaut environ :" choix={['0,3', '3', '0,03', '30']} bonne={0} colonnes={4}>
+Contraction latérale.
+</QCM>
+
+<QCM n={7} question="Au droit d'un trou de boulon, on vérifie :" choix={['la section nette', 'la section brute', 'le poids', 'la flèche']} bonne={0} colonnes={2}>
+Section la plus faible.
+</QCM>
+
+<QCM n={8} question="Les joints de dilatation servent à :" choix={['laisser les pièces se dilater', 'décorer', 'renforcer', 'étancher seulement']} bonne={0} colonnes={2}>
+Éviter les contraintes thermiques.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

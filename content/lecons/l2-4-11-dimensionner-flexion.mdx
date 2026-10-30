@@ -1,0 +1,302 @@
+---
+id: L2.4.11
+titre: "Dimensionner une section en flexion"
+objectifs:
+  - Calculer le module de flexion nécessaire à partir du moment maximal
+  - Choisir les dimensions d'une section rectangulaire
+  - Choisir un profilé dans un catalogue
+  - Vérifier ensuite le cisaillement et la flèche
+relecture: false
+normes: []
+glossaire:
+  - terme: Dimensionnement
+    definition: Choix des dimensions d'un élément pour qu'il respecte les critères de résistance et de déformation.
+  - terme: Vérification
+    definition: Contrôle d'un élément de dimensions connues ; c'est l'opération inverse du dimensionnement.
+  - terme: Élancement de poutre
+    definition: Rapport portée / hauteur ; il donne une première idée de la hauteur à prévoir.
+symboles:
+  - { symbole: 'W_nec', signification: 'module de flexion nécessaire', unite: 'cm³' }
+  - { symbole: 'σlim', signification: 'contrainte limite retenue', unite: 'MPa' }
+  - { symbole: 'L/h', signification: 'élancement', unite: '—' }
+formules:
+  - { nom: 'Module nécessaire', tex: 'W \geq \frac{M_{max}}{\sigma_{lim}}', domaine: 'Résistance en flexion' }
+  - { nom: 'Rectangle', tex: 'h \geq \sqrt{\frac{6\,W}{b}}', domaine: 'Largeur b imposée' }
+  - { nom: 'Prédimensionnement', tex: 'h \approx \frac{L}{10} \text{ à } \frac{L}{15}', domaine: 'Règle de l''art (béton armé)' }
+---
+
+import { dimensionnerRect, flexionSection } from '@/lib/calc/rdm1'
+import { grandeur, nombre } from '@/lib/format'
+import { ContraintesFlexion, PlancherSolives } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const d0 = dimensionnerRect(12, 10, 10)
+export const d8 = dimensionnerRect(12, 10, 8)
+export const d15 = dimensionnerRect(12, 10, 15)
+export const ex2 = dimensionnerRect(45, 160, 20)
+export const Wacier = (60 * 1e6) / 235 / 1000
+export const ex3 = dimensionnerRect(8, 11, 7.5)
+
+<Page etape="intuition" titre="L'intuition : partir du résultat voulu">
+
+Jusqu'ici on a **vérifié** des poutres dont on connaissait la section. Au bureau d'études, on fait souvent l'inverse : on connaît la portée et les charges, on cherche la section. On renverse la formule $\sigma = M/W$ : puisque σ ne doit pas dépasser une limite, W doit être au moins $M/\sigma_{lim}$.
+
+<ContraintesFlexion rects={[{ b: 10, h: 28, y: 0 }]} M={12} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment choisir une section qui résiste au moment maximal, puis vérifier qu'elle convient pour le reste ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Dimensionner en flexion" sousTitre="De M à la section" etape="cours">
+
+<Panneau n={1} titre="Mmax" icone="calcul" couleur="encre">
+Diagrammes (L2.4.3).
+</Panneau>
+
+<Panneau n={2} titre="σlim" icone="regle" couleur="acier">
+Donnée par le matériau et la norme.
+</Panneau>
+
+<Panneau n={3} titre="W nécessaire" icone="idee" couleur="terre">
+W ≥ M/σlim.
+</Panneau>
+
+<Panneau n={4} titre="Section" icone="plan" couleur="brique">
+Rectangle : h = √(6W/b) ; profilé : catalogue.
+</Panneau>
+
+<Panneau n={5} titre="Arrondir" icone="verification" couleur="validation">
+Dimensions commerciales supérieures.
+</Panneau>
+
+<Panneau n={6} titre="Vérifier le reste" icone="attention" couleur="correction">
+Poids propre, cisaillement, flèche.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : le module nécessaire">
+
+### La règle
+
+$$W \geq \frac{M_{max}}{\sigma_{lim}}$$
+
+Attention aux unités : M en N·mm, σ en MPa donnent W en mm³ ; on divise par 1 000 pour des cm³. Pour M = 12 kN·m et σlim = 10 MPa (bois) : W ≥ {nombre(d0.W, 0)} cm³.
+
+### Rectangle de largeur imposée
+
+$W = bh^2/6$ donne $h \geq \sqrt{6W/b}$. Une largeur faible exige une grande hauteur ; on reste raisonnable (h ≤ 3 à 4 b pour le bois, pour éviter le déversement).
+
+<DiagrammeBarres alt={`Hauteur nécessaire pour W = ${nombre(d0.W, 0)} cm³ selon la largeur : b = 8 cm, h = ${nombre(d8.h, 1)} cm ; b = 10 cm, h = ${nombre(d0.h, 1)} cm ; b = 15 cm, h = ${nombre(d15.h, 1)} cm.`} titre="hauteur nécessaire (cm)" barres={[{ libelle: 'b = 8 cm', valeur: d8.h, texte: nombre(d8.h, 1), teinte: 'correction' }, { libelle: 'b = 10 cm', valeur: d0.h, texte: nombre(d0.h, 1), teinte: 'terre' }, { libelle: 'b = 15 cm', valeur: d15.h, texte: nombre(d15.h, 1), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : profilés et poids propre">
+
+### Profilés du commerce
+
+Pour l'acier, on cherche dans le catalogue le plus petit profilé dont $W_{el}$ dépasse $W_{nec}$. Pour 60 kN·m avec 235 MPa : $W_{nec}$ = {nombre(Wacier, 0)} cm³.
+
+### Le poids propre
+
+La poutre se porte elle-même : une fois la section choisie, on ajoute son poids à la charge et on vérifie de nouveau. En béton armé, le poids propre est souvent le tiers de la charge totale ; en acier, il est faible.
+
+<Regle type="art">
+Pour démarrer, on prend des règles d'élancement : poutre en béton armé h ≈ L/10 à L/15, solive bois h ≈ L/18 à L/20, poutrelle acier h ≈ L/20 à L/25 <AVerifier note="A_VERIFIER.md n° 65 : élancements de prédimensionnement usuels (règles de l'art, à confirmer par un ouvrage de conception)" />. Le calcul confirme ou corrige.
+</Regle>
+
+<ContraintesFlexion rects={[{ b: 20, h: 45, y: 0 }]} M={45} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : vérifier tout le reste">
+
+### Une section qui résiste n'est pas forcément bonne
+
+Après avoir choisi la section en flexion, on vérifie :
+
+1. le **cisaillement** près des appuis (L2.4.8) ;
+2. la **flèche** (L2.5) : souvent c'est elle qui décide pour le bois et l'acier ;
+3. le **déversement** des poutres hautes et minces, et les appuis (écrasement local).
+
+<DiagrammeFlux alt="Dimensionner puis vérifier : Mmax ; W nécessaire ; choix de la section ; ajout du poids propre ; vérifications de cisaillement, de flèche et de stabilité ; si une vérification échoue, on revient au choix." etapes={[{ titre: 'Mmax', texte: 'charges', teinte: 'encre' }, { titre: 'Wnec', texte: 'M/σlim', teinte: 'acier' }, { titre: 'Section', texte: 'choix', teinte: 'terre' }, { titre: '+ poids propre', texte: 'recalcul', teinte: 'brique' }, { titre: 'τ, f, stabilité', texte: 'vérifier', teinte: 'validation' }]} boucle="si une vérification échoue" />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : choisir une solive">
+
+<PlancherSolives e={0.5} L={4} b={7.5} h={22.5} />
+
+<DiagrammeBarres alt={`Module nécessaire pour M = 8 kN·m et σlim = 11 MPa : ${nombre(ex3.W, 0)} cm³ ; hauteur pour b = 7,5 cm : ${nombre(ex3.h, 1)} cm.`} titre="solive 7,5 cm de large" barres={[{ libelle: 'W nécessaire (cm³)', valeur: ex3.W, texte: nombre(ex3.W, 0), teinte: 'terre' }, { libelle: 'h nécessaire (cm)', valeur: ex3.h, texte: nombre(ex3.h, 1), teinte: 'validation' }]} />
+
+</Page>
+
+<FicheCalcul calcul="dimensionnerSection">
+
+<Cahier titre="Exemple résolu : une panne en bois">
+
+**Énoncé.** Une panne de toiture en bois doit reprendre un moment maximal de 12 kN·m ; on retient une contrainte limite de 10 MPa et une largeur de 10 cm (données de l'énoncé). Quelle hauteur ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Le module nécessaire">
+<AN k="W" />
+<Note>Pourquoi W et non I ? La contrainte maximale ne dépend que de W = I/v.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la hauteur">
+
+<Etape n={3} titre="Hauteur et vérification">
+<AN k="h" />
+<AN k="verif" />
+<Resultat k="hc" libelle="Hauteur retenue" />
+<Schema />
+<Note couleur="vert">Contrôle : il reste à vérifier la flèche et le cisaillement ; si la flèche est trop grande, on augmente h, pas b.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="oublier le poids propre.">
+Il s'ajoute à la charge ; en béton armé, il n'est jamais négligeable.
+</Piege>
+
+<Piege erreur="augmenter la largeur au lieu de la hauteur.">
+W croît avec h², I avec h³ : la hauteur est bien plus efficace.
+</Piege>
+
+<Piege erreur="arrondir à la dimension inférieure.">
+On prend toujours la dimension commerciale **supérieure**.
+</Piege>
+
+<ContraintesFlexion rects={[{ b: 15, h: 22, y: 0 }]} M={12} />
+
+<Piege erreur="s'arrêter à la résistance.">
+Une poutre qui résiste peut fléchir trop ou vibrer.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Sections commerciales.** Les scieries de RDC débitent des bois en sections courantes (par exemple 5 × 15, 7,5 × 22,5, 8 × 23 cm, selon les régions) ; les profilés acier viennent de catalogues européens ou asiatiques. Le calcul donne un minimum ; le choix final dépend de ce qui est **disponible** sur le marché local.
+
+<ContraintesFlexion rects={[{ b: 7.5, h: 22.5, y: 0 }]} M={8} />
+
+<Encadre type="terrain" titre="Bois humide, bois sec">
+Un bois vert (fraîchement scié) est moins résistant et plus déformable qu'un bois sec, et il se déforme en séchant. Les contraintes limites des normes supposent une humidité donnée ; on stocke les bois à l'abri avant de les poser.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : dimensionner en flexion">
+
+### Résistance
+
+W ≥ Mmax/σlim · M en N·mm, σ en MPa → W en mm³
+
+### Rectangle
+
+h ≥ √(6W/b) · préférer augmenter h
+
+### Prédimensionnement (à vérifier)
+
+béton armé L/10 à L/15 · bois L/18 à L/20 · acier L/20 à L/25
+
+### Puis vérifier
+
+poids propre · cisaillement · flèche · stabilité
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Module nécessaire">
+
+M = 12 kN·m, σlim = 10 MPa. W ?
+
+<Indice>12·10⁶/10 mm³.</Indice>
+
+<Corrige>
+**{grandeur(d0.W, 0, 'cm³')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Poutre en acier plein">
+
+M = 45 kN·m, σlim = 160 MPa, b = 20 cm (plat d'acier). h ?
+
+<Indice>Même démarche.</Indice>
+
+<Corrige>
+W = {nombre(ex2.W, 0)} cm³ ; h ≥ **{grandeur(ex2.h, 1, 'cm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Solive">
+
+M = 8 kN·m, σlim = 11 MPa, b = 7,5 cm. Hauteur ? Quelle section commerciale ?
+
+<Indice>Puis arrondir au-dessus.</Indice>
+
+<Corrige>
+h ≥ **{grandeur(ex3.h, 1, 'cm')}** : une section de 7,5 × {nombre(Math.ceil(ex3.h / 2.5) * 2.5, 1)} cm, puis vérifier la flèche.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.4.11">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le module nécessaire vaut :" choix={['M/σlim', 'σlim/M', 'M σlim', 'M/E']} bonne={0} colonnes={4}>
+Inverser σ = M/W.
+</QCM>
+
+<QCM n={2} question="Pour un rectangle de largeur b, h ≥ :" choix={['√(6W/b)', '6W/b', 'W/b', '√(W/b)']} bonne={0} colonnes={4}>
+W = b h²/6.
+</QCM>
+
+<QCM n={3} question="Pour gagner en rigidité, on augmente surtout :" choix={['h', 'b', 'la longueur', 'rien']} bonne={0} colonnes={4}>
+I ∝ h³.
+</QCM>
+
+<QCM n={4} question="Après le choix, on ajoute :" choix={['le poids propre', 'rien', 'une charge sismique toujours', 'le vent seul']} bonne={0} colonnes={2}>
+Puis on revérifie.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour M = 12 kN·m, σlim = 10 MPa, b = 10 cm, h ≥ :</>} choix={[grandeur(d0.h, 1, 'cm'), '12,0 cm', '36,0 cm', '20,0 cm']} bonne={0} colonnes={4}>
+√(6 × 1 200/10).
+</QCM>
+
+<QCM n={6} question="On arrondit la dimension calculée :" choix={['au-dessus', 'au-dessous', 'au plus proche', 'jamais']} bonne={0} colonnes={4}>
+Sécurité.
+</QCM>
+
+<QCM n={7} question="Pour une solive bois, le critère souvent déterminant est :" choix={['la flèche', 'la torsion', 'la compression', 'le poids']} bonne={0} colonnes={2}>
+Bois souple.
+</QCM>
+
+<QCM n={8} question="Une poutre en béton armé de 6 m se prédimensionne vers h ≈ :" choix={['40 à 60 cm', '10 cm', '2 m', '15 cm']} bonne={0} colonnes={4}>
+L/10 à L/15.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
