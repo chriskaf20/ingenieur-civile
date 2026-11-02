@@ -1,0 +1,294 @@
+---
+id: L2.6.12
+titre: "Mortiers : dosages et usages"
+objectifs:
+  - Distinguer mortier de pose, d'enduit et de chape
+  - Choisir un dosage en ciment selon l'usage
+  - Calculer les quantités de ciment et de sable d'un enduit
+  - Réaliser un enduit en plusieurs couches
+relecture: false
+normes:
+  - "EN 998-1 et EN 998-2 : mortiers d'enduit et de montage"
+  - "NF DTU 26.1 : enduits aux mortiers (référence de bonne pratique)"
+glossaire:
+  - terme: Mortier
+    definition: Mélange de liant (ciment, chaux), de sable et d'eau, sans gravier.
+  - terme: Mortier de pose
+    definition: Mortier qui lie les éléments de maçonnerie entre eux.
+  - terme: Enduit
+    definition: Revêtement de mortier appliqué en une ou plusieurs couches sur un mur.
+  - terme: Dosage
+    definition: Masse de ciment par mètre cube de sable (ou de mortier), en kg/m³.
+symboles:
+  - { symbole: 'C', signification: 'dosage en ciment', unite: 'kg/m³' }
+  - { symbole: 'e', signification: 'épaisseur', unite: 'mm' }
+  - { symbole: 'S', signification: 'surface', unite: 'm²' }
+formules:
+  - { nom: 'Volume', tex: 'V = S\,e\,(1 + p)', domaine: 'p : pertes' }
+  - { nom: 'Ciment', tex: 'm_c = V\,C,\quad \text{sacs} = \lceil m_c/50 \rceil', domaine: 'Sacs de 50 kg' }
+---
+
+import { enduit } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { ElementsMaconnerie } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const e0 = enduit(50, 15, 350)
+export const pose = enduit(1, 1000, 300, 0)
+export const ex2 = enduit(120, 20, 350)
+export const ex3 = enduit(35, 50, 400)
+
+<Page etape="intuition" titre="L'intuition : la colle et la peau des murs">
+
+Le mortier, c'est un béton sans gravier. Il sert de **colle** entre les blocs, de **peau** sur les murs, de **sol** sous le carrelage. Chaque usage demande un dosage différent : trop riche en ciment, un enduit se fissure ; trop maigre, il s'effrite. Et comme on en utilise beaucoup, une erreur de quantité coûte vite cher.
+
+<ElementsMaconnerie />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment choisir et doser un mortier, et calculer les quantités pour un chantier ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les mortiers" sousTitre="Un dosage par usage" etape="cours">
+
+<Panneau n={1} titre="Pose" icone="regle" couleur="encre">
+Joints de 1 cm ; ≈ 250 – 350 kg/m³.
+</Panneau>
+
+<Panneau n={2} titre="Gobetis" icone="calcul" couleur="correction">
+Couche d'accroche riche et fluide.
+</Panneau>
+
+<Panneau n={3} titre="Corps d'enduit" icone="plan" couleur="terre">
+10 à 15 mm ; ≈ 300 – 350 kg/m³.
+</Panneau>
+
+<Panneau n={4} titre="Finition" icone="idee" couleur="acier">
+Couche mince, plus maigre.
+</Panneau>
+
+<Panneau n={5} titre="Chape" icone="verification" couleur="validation">
+3 à 5 cm ; ≈ 350 – 400 kg/m³.
+</Panneau>
+
+<Panneau n={6} titre="Quantités" icone="attention" couleur="brique">
+V = S e (1 + pertes).
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les usages">
+
+### Les familles
+
+- **mortier de pose** (montage des blocs) : il doit être assez résistant et surtout bien remplir les joints ;
+- **enduit** extérieur ou intérieur : en trois couches (gobetis, corps d'enduit, finition), du plus riche au plus maigre ;
+- **chape** : couche de mortier dressée sur une dalle, avant le carrelage.
+
+### La règle de l'enduit
+
+Chaque couche doit être **moins riche** en ciment et **moins rigide** que la précédente, sinon elle se décolle ou fissure. Les dosages indiqués sont des ordres de grandeur de pratique <AVerifier note="A_VERIFIER.md n° 79 : dosages usuels des mortiers de pose, d'enduit et de chape (règles de l'art, NF DTU 26.1, EN 998)" />.
+
+<ElementsMaconnerie />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : calculer les quantités">
+
+### Le volume
+
+$V = S\,e\,(1 + p)$, avec p les pertes (≈ 10 %). Pour 50 m² d'enduit de 15 mm : V = {nombre(e0.V, 3)} m³.
+
+### Le ciment et le sable
+
+Ciment = V × dosage = {nombre(e0.ciment, 0)} kg, soit **{e0.sacs} sacs** (on arrondit au sac supérieur). Sable : environ 1,1 m³ de sable sec par m³ de mortier (le ciment remplit en partie les vides du sable), soit {nombre(e0.sable, 2)} m³ <AVerifier note="A_VERIFIER.md n° 80 : rendement du sable en mortier (environ 1,1 m³ de sable sec par m³ de mortier), hypothèse de métré" />.
+
+<DiagrammeBarres alt={`50 m² d'enduit de 15 mm dosé à 350 kg/m³ : ${nombre(e0.V, 3)} m³ de mortier, ${e0.sacs} sacs de ciment, ${nombre(e0.sable, 2)} m³ de sable.`} titre="enduit de 50 m² (quantités)" barres={[{ libelle: 'sacs de ciment', valeur: e0.sacs, texte: String(e0.sacs), teinte: 'beton' }, { libelle: 'sable (m³ × 10)', valeur: e0.sable * 10, texte: nombre(e0.sable, 2), teinte: 'terre' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : réussir un enduit">
+
+### Les étapes
+
+1. support propre, dépoussiéré et **humidifié** ;
+2. **gobetis** projeté, riche et fluide, pour l'accroche ;
+3. **corps d'enduit** dressé à la règle après la prise du gobetis ;
+4. **finition** talochée ou lissée ;
+5. cure : on humidifie l'enduit les premiers jours, surtout au soleil.
+
+<Regle type="art">
+On n'enduit pas un mur en plein soleil de midi : l'enduit sèche trop vite et fissure. On commence par la façade à l'ombre et l'on suit le soleil.
+</Regle>
+
+<DiagrammeFlux alt="Les trois couches d'un enduit : le gobetis, couche d'accroche riche ; le corps d'enduit, qui dresse le mur ; la finition, mince et plus maigre." etapes={[{ titre: 'Support', texte: 'propre, humide', teinte: 'encre' }, { titre: 'Gobetis', texte: 'riche, fluide', teinte: 'correction' }, { titre: 'Corps', texte: '10 à 15 mm', teinte: 'terre' }, { titre: 'Finition', texte: 'maigre', teinte: 'acier' }, { titre: 'Cure', texte: 'humidifier', teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : métré d'un enduit">
+
+<DiagrammeFlux alt="Métré : surface des murs, ouvertures déduites ; épaisseur ; volume avec pertes ; ciment en sacs ; sable en m³." etapes={[{ titre: 'Surface', texte: 'ouvertures déduites', teinte: 'encre' }, { titre: 'Épaisseur', texte: 'e', teinte: 'acier' }, { titre: 'Volume', texte: '+ pertes', teinte: 'terre' }, { titre: 'Ciment', texte: 'sacs', teinte: 'beton' }, { titre: 'Sable', texte: 'm³', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Ciment pour 1 m³ de mortier selon le dosage : 300 kg (6 sacs), 350 kg (7 sacs), 400 kg (8 sacs).`} titre="sacs par m³ de mortier" barres={[300, 350, 400].map((c, i) => ({ libelle: `${c} kg/m³`, valeur: c / 50, texte: nombre(c / 50, 0), teinte: ['terre', 'acier', 'correction'][i] }))} />
+
+</Page>
+
+<FicheCalcul calcul="enduitMortier">
+
+<Cahier titre="Exemple résolu : enduire une façade">
+
+**Énoncé.** Une façade de 50 m² (ouvertures déduites) reçoit un corps d'enduit de 15 mm dosé à 350 kg/m³ ; on compte 10 % de pertes (données de l'énoncé). Combien de sacs de ciment et de sable ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Volume et ciment">
+<AN k="V" />
+<AN k="ciment" />
+<Resultat k="sacs" libelle="Ciment" />
+<Schema />
+<Note couleur="vert">Contrôle : un enduit de 15 mm consomme environ un sac de ciment pour 8 à 9 m² à ce dosage.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="un enduit trop riche en ciment.">
+Il est rigide, se rétracte et fissure en faïençage.
+</Piege>
+
+<Piege erreur="enduire un mur sec en plein soleil.">
+Le support boit l'eau, l'enduit ne durcit pas et se décolle.
+</Piege>
+
+<Piege erreur="oublier les pertes.">
+Gâchées perdues, épaisseurs irrégulières : 10 % au moins.
+</Piege>
+
+<ElementsMaconnerie />
+
+<Piege erreur="gâcher plus que ce qu'on peut poser.">
+Un mortier qui a commencé sa prise ne se « rafraîchit » pas à l'eau.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Commander juste.** Pour un chantier de maison, les enduits représentent souvent plusieurs centaines de sacs de ciment. Un métré propre (surfaces, épaisseurs, dosages) évite les ruptures de stock et les sacs qui s'éventent sous la pluie.
+
+<DiagrammeBarres alt={`Enduit de 120 m² en 20 mm : ${ex2.sacs} sacs ; chape de 35 m² en 5 cm à 400 kg/m³ : ${ex3.sacs} sacs.`} titre="sacs de ciment par ouvrage" barres={[{ libelle: 'enduit 120 m², 20 mm', valeur: ex2.sacs, texte: String(ex2.sacs), teinte: 'terre' }, { libelle: 'chape 35 m², 5 cm', valeur: ex3.sacs, texte: String(ex3.sacs), teinte: 'acier' }]} />
+
+<Encadre type="terrain" titre="Chaux et terre">
+Pour les murs en BTC ou en adobe, un enduit à la chaux (ou à la terre stabilisée) laisse respirer le mur ; un enduit de ciment trop rigide se décolle et piège l'humidité.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : mortiers">
+
+### Usages (ordres de grandeur, à vérifier)
+
+pose ≈ 250 – 350 · enduit ≈ 300 – 350 · chape ≈ 350 – 400 kg/m³
+
+### Enduit
+
+gobetis → corps → finition · chaque couche moins riche
+
+### Quantités
+
+V = S e (1 + p) · ciment = V C · sacs arrondis au-dessus · sable ≈ 1,1 V
+
+### Pratique
+
+support humide · éviter le plein soleil · cure
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Sacs par m³">
+
+Combien de sacs pour 1 m³ de mortier à 300 kg/m³ ?
+
+<Indice>300/50.</Indice>
+
+<Corrige>
+**{nombre(300 / 50, 0)} sacs**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Enduit épais">
+
+120 m², 20 mm, 350 kg/m³, 10 % de pertes. Sacs ?
+
+<Indice>Fiche.</Indice>
+
+<Corrige>
+V = {nombre(ex2.V, 3)} m³ → **{ex2.sacs} sacs**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Chape">
+
+35 m² de chape de 5 cm à 400 kg/m³. Ciment et sable ?
+
+<Indice>e = 50 mm.</Indice>
+
+<Corrige>
+**{ex3.sacs} sacs** et environ **{nombre(ex3.sable, 2)} m³** de sable.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.12">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un mortier contient :" choix={['liant, sable et eau', 'du gravier', 'seulement du ciment', 'du bitume']} bonne={0} colonnes={2}>
+Pas de gravier.
+</QCM>
+
+<QCM n={2} question="La première couche d'un enduit est :" choix={['le gobetis', 'la finition', 'la chape', 'le corps']} bonne={0} colonnes={4}>
+Accroche.
+</QCM>
+
+<QCM n={3} question="Chaque couche d'enduit doit être :" choix={['moins riche que la précédente', 'plus riche', 'identique', 'sans ciment']} bonne={0} colonnes={2}>
+Sinon décollement.
+</QCM>
+
+<QCM n={4} question="On compte des pertes d'environ :" choix={['10 %', '0 %', '50 %', '100 %']} bonne={0} colonnes={4}>
+Métré.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Enduit de 50 m² en 15 mm à 350 kg/m³ : sacs :</>} choix={[String(e0.sacs), '3', '15', '50']} bonne={0} colonnes={4}>
+Arrondi au-dessus.
+</QCM>
+
+<QCM n={6} question="Un enduit trop riche en ciment :" choix={['fissure', 'est plus durable', 'respire mieux', 'est plus souple']} bonne={0} colonnes={2}>
+Retrait.
+</QCM>
+
+<QCM n={7} question="Sur un mur en BTC, on préfère un enduit :" choix={['à la chaux', 'au ciment très dosé', 'bitumineux', 'en plâtre extérieur']} bonne={0} colonnes={2}>
+Il laisse respirer.
+</QCM>
+
+<QCM n={8} question="Avant d'enduire, le support doit être :" choix={['propre et humidifié', 'sec et brûlant', 'graissé', 'peint']} bonne={0} colonnes={2}>
+Accroche.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

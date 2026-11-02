@@ -1,0 +1,291 @@
+---
+id: L2.6.9
+titre: "Béton durci : résistance et classes"
+objectifs:
+  - Décrire l'essai d'écrasement sur cylindre et sur cube
+  - Lire une classe de résistance (C25/30)
+  - Décrire l'évolution de la résistance avec l'âge
+  - Interpréter un résultat d'écrasement et ses causes possibles
+relecture: false
+normes:
+  - "EN 12390-3 : résistance à la compression des éprouvettes"
+  - "EN 1992-1-1 §3.1.2 : évolution de la résistance avec le temps"
+glossaire:
+  - terme: Éprouvette
+    definition: Échantillon de béton moulé (cylindre 16 × 32 cm ou cube de 15 cm) conservé puis écrasé.
+  - terme: Résistance à la compression
+    definition: Force de rupture divisée par la section de l'éprouvette, en MPa.
+  - terme: Maturation
+    definition: Gain de résistance du béton avec le temps, tant qu'il reste humide.
+symboles:
+  - { symbole: 'fc', signification: 'résistance d''une éprouvette', unite: 'MPa' }
+  - { symbole: 'fcm(t)', signification: 'résistance moyenne à l''âge t', unite: 'MPa' }
+  - { symbole: 'βcc(t)', signification: 'coefficient d''âge', unite: '—' }
+formules:
+  - { nom: 'Écrasement', tex: 'f_c = \frac{F}{A}', domaine: 'Cylindre : A = π 160²/4 mm²' }
+  - { nom: 'Âge', tex: 'f_{cm}(t) = \beta_{cc}(t)\,f_{cm},\quad \beta_{cc} = e^{s\left(1 - \sqrt{28/t}\right)}', domaine: 'EC2 §3.1.2, s selon le ciment' }
+---
+
+import { conformiteBeton, EXEMPLE_ESSAIS } from '@/lib/calc/probas'
+import { grandeur, nombre } from '@/lib/format'
+import { FractileBeton, Histogramme } from '@/components/schemas/Probas'
+import { VolumesBeton } from '@/components/schemas/Materiaux2'
+import { EXEMPLE_FORMULATION } from '@/lib/calc/materiaux'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const c0 = conformiteBeton(EXEMPLE_ESSAIS, 25)
+export const Acyl = Math.PI * 160 * 160 / 4
+export const fc1 = 640 * 1000 / Acyl
+export const beta = (t) => Math.exp(0.25 * (1 - Math.sqrt(28 / t)))
+export const ages = [3, 7, 14, 28, 90]
+export const fcube = 870 * 1000 / (150 * 150)
+
+<Page etape="intuition" titre="L'intuition : le béton continue de durcir">
+
+Le béton ne « sèche » pas : il **durcit** parce que le ciment réagit avec l'eau. Cette réaction est rapide les premiers jours, puis ralentit, mais continue des mois s'il reste humide. C'est pourquoi on mesure conventionnellement la résistance à **28 jours**, sur des éprouvettes écrasées dans une presse.
+
+<FractileBeton fcm={c0.moyenne} s={c0.ecartType} fck={25} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesure-t-on la résistance d'un béton durci et comment la lire ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Le béton durci" sousTitre="Écraser, lire, interpréter" etape="cours">
+
+<Panneau n={1} titre="Éprouvettes" icone="plan" couleur="encre">
+Cylindres 16 × 32 ou cubes de 15 cm.
+</Panneau>
+
+<Panneau n={2} titre="Conservation" icone="regle" couleur="acier">
+Dans l'eau à 20 °C jusqu'à l'essai.
+</Panneau>
+
+<Panneau n={3} titre="Écrasement" icone="calcul" couleur="terre">
+fc = F/A, en MPa.
+</Panneau>
+
+<Panneau n={4} titre="Classe" icone="idee" couleur="brique">
+C25/30 : cylindre / cube, fractile 5 %.
+</Panneau>
+
+<Panneau n={5} titre="Âge" icone="verification" couleur="validation">
+7 j ≈ 70 %, 28 j : référence.
+</Panneau>
+
+<Panneau n={6} titre="Résultat faible" icone="attention" couleur="correction">
+Eau, cure, prélèvement, transport ?
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'essai d'écrasement">
+
+### L'éprouvette
+
+On moule des cylindres de 16 cm de diamètre et 32 cm de haut (ou des cubes de 15 cm), on les démoule à 24 h et on les conserve dans l'eau. À l'échéance, on les écrase dans une presse à vitesse de chargement normalisée (EN 12390-3).
+
+### Le calcul
+
+$f_c = F/A$. Un cylindre (A = {nombre(Acyl, 0)} mm²) qui casse à 640 kN donne {nombre(fc1, 1)} MPa ; un cube qui casse à 870 kN donne {nombre(fcube, 1)} MPa.
+
+<Histogramme xs={EXEMPLE_ESSAIS} debut={25} largeur={2} nb={6} limite={25} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : les classes de résistance">
+
+### Lire C25/30
+
+La classe donne la **résistance caractéristique** (fractile 5 %, L2.2.5) sur **cylindre** puis sur **cube** : 25 et 30 MPa. Le cube, plus trapu, donne des valeurs plus élevées.
+
+### Les classes courantes
+
+C16/20 (béton de propreté amélioré, petits ouvrages), C20/25 et C25/30 (bâtiment courant), C30/37 et plus (ouvrages exposés, précontraint). L'EC2 tableau 3.1 donne pour chaque classe fcm = fck + 8 et les autres propriétés (A_VERIFIER n° 61).
+
+<DiagrammeBarres alt="Classes de résistance courantes : C16/20, C20/25, C25/30, C30/37, C35/45 ; fck sur cylindre 16, 20, 25, 30, 35 MPa." titre="fck (cylindre) des classes courantes (MPa)" barres={[16, 20, 25, 30, 35].map((f, i) => ({ libelle: `C${f}/${[20, 25, 30, 37, 45][i]}`, valeur: f, texte: String(f), teinte: ['beton', 'terre', 'encre', 'acier', 'correction'][i] }))} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : l'évolution avec l'âge">
+
+### La loi de l'EC2
+
+$f_{cm}(t) = \beta_{cc}(t)\,f_{cm}$, avec $\beta_{cc}(t) = e^{s(1 - \sqrt{28/t})}$ ; s vaut 0,20 à 0,38 selon la vitesse du ciment (0,25 pour un ciment normal) <AVerifier note="A_VERIFIER.md n° 76 : coefficient s de l'EN 1992-1-1 §3.1.2(6) selon la classe de ciment (CEM R, N, S)" />.
+
+<DiagrammeBarres alt={`Part de la résistance à 28 jours atteinte (s = 0,25) : ${ages.map((t) => `${t} jours, ${nombre(beta(t) * 100, 0)} %`).join(' ; ')}.`} titre="résistance relative selon l'âge (%)" barres={ages.map((t, i) => ({ libelle: `${t} jours`, valeur: beta(t) * 100, texte: nombre(beta(t) * 100, 0), teinte: ['correction', 'terre', 'acier', 'validation', 'encre'][i] }))} repere={{ valeur: 100, texte: '28 j' }} />
+
+<Regle type="art">
+On écrase souvent une éprouvette à 7 jours pour avoir une alerte précoce ; la décision de conformité se prend sur les résultats à 28 jours.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : d'un résultat faible à sa cause">
+
+<DiagrammeFlux alt="Résultat faible : vérifier l'éprouvette (moulage, conservation, transport) ; vérifier le béton livré (eau ajoutée, dosage) ; vérifier l'âge ; si le doute persiste, carotter l'ouvrage et expertiser." etapes={[{ titre: 'Éprouvette', texte: 'moulage, cure', teinte: 'encre' }, { titre: 'Béton livré', texte: 'eau, dosage', teinte: 'correction' }, { titre: 'Âge', texte: '7 ou 28 j', teinte: 'acier' }, { titre: 'Carottes', texte: 'in situ', teinte: 'terre' }, { titre: 'Décider', texte: 'recalcul', teinte: 'validation' }]} />
+
+<VolumesBeton d={EXEMPLE_FORMULATION} />
+
+</Page>
+
+<FicheCalcul calcul="conformiteBeton">
+
+<Cahier titre="Exemple résolu : la série du chantier">
+
+**Énoncé.** Quinze cylindres d'un C25/30 donnent une moyenne de 31,1 MPa, un écart-type de 2,1 MPa et un minimum de 27,9 MPa (données de l'énoncé, L2.2). Le béton est-il conforme ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Critères">
+<AN k="fk5" />
+<AN k="critere1" />
+<AN k="critere2" />
+<Resultat k="conforme" libelle="Décision" />
+<Schema />
+<Note couleur="vert">Contrôle : refais le calcul avec une moyenne de 27 MPa ; la décision change.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="laisser les éprouvettes au soleil.">
+Elles sèchent et donnent une résistance trop faible.
+</Piege>
+
+<Piege erreur="comparer un cube à fck cylindre.">
+Un C25/30 doit donner 30 MPa sur cube (en caractéristique).
+</Piege>
+
+<Piege erreur="conclure sur un résultat à 3 jours.">
+Le béton n'a fait qu'une partie de son durcissement.
+</Piege>
+
+<Histogramme xs={EXEMPLE_ESSAIS} debut={25} largeur={2} nb={6} limite={25} titre="fc" />
+
+<Piege erreur="décoffrer trop tôt une dalle.">
+Elle doit avoir acquis assez de résistance pour porter son poids et les charges de chantier.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Décoffrer au bon moment.** Les délais de décoffrage dépendent de la résistance atteinte, donc du ciment, de la température et de la portée. Par temps chaud, le béton durcit plus vite… à condition d'être bien humide. En cas de doute, on écrase une éprouvette conservée comme l'ouvrage, à côté de lui.
+
+<DiagrammeBarres alt={`Résistance attendue d'un béton de fcm = 33 MPa à 7 jours : environ ${nombre(beta(7) * 33, 0)} MPa ; à 28 jours : 33 MPa.`} titre="fcm attendue (MPa)" barres={[{ libelle: '7 jours', valeur: beta(7) * 33, texte: nombre(beta(7) * 33, 0), teinte: 'terre' }, { libelle: '28 jours', valeur: 33, texte: '33', teinte: 'validation' }]} />
+
+<Encadre type="terrain" titre="Le scléromètre ne remplace pas l'écrasement">
+Le scléromètre (L2.2.7) donne une indication rapide, mais seul l'écrasement d'éprouvettes ou de carottes mesure la résistance. On utilise les deux ensemble.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : béton durci">
+
+### Essai (EN 12390-3)
+
+cylindre 16 × 32 ou cube 15 · conservation dans l'eau · fc = F/A
+
+### Classes
+
+C fck,cyl / fck,cube · fractile 5 % · fcm = fck + 8 (EC2)
+
+### Âge (EC2, à vérifier)
+
+βcc = e^(s(1 − √(28/t))) · 7 j ≈ 70 – 80 % · décision à 28 j
+
+### Résultat faible
+
+éprouvette, eau ajoutée, cure, âge → carottes
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Cylindre">
+
+Un cylindre 16 × 32 casse à 640 kN. fc ?
+
+<Indice>A = π × 160²/4.</Indice>
+
+<Corrige>
+**{grandeur(fc1, 1, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Cube">
+
+Un cube de 15 cm casse à 870 kN. fc ? Classe compatible ?
+
+<Indice>A = 150².</Indice>
+
+<Corrige>
+**{grandeur(fcube, 1, 'MPa')}** sur cube : compatible avec un C30/37 pour ce résultat isolé (à confirmer statistiquement).
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="À 7 jours">
+
+Un béton de fcm = 33 MPa à 28 j : quelle résistance attendre à 7 j (s = 0,25) ?
+
+<Indice>βcc(7).</Indice>
+
+<Corrige>
+βcc = {nombre(beta(7), 3)} → **{grandeur(beta(7) * 33, 1, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.9">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La résistance de référence se mesure à :" choix={['28 jours', '7 jours', '1 jour', '1 an']} bonne={0} colonnes={4}>
+Convention.
+</QCM>
+
+<QCM n={2} question="Dans C25/30, 25 se mesure sur :" choix={['cylindre', 'cube', 'carotte', 'dalle']} bonne={0} colonnes={4}>
+16 × 32.
+</QCM>
+
+<QCM n={3} question="Les éprouvettes se conservent :" choix={['dans l’eau à 20 °C', 'au soleil', 'au four', 'dans le coffrage une semaine']} bonne={0} colonnes={2}>
+EN 12390-2.
+</QCM>
+
+<QCM n={4} question="fc se calcule par :" choix={['F/A', 'F × A', 'A/F', 'F/L']} bonne={0} colonnes={4}>
+Compression.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Un cylindre qui casse à 640 kN donne :</>} choix={[grandeur(fc1, 1, 'MPa'), '64,0 MPa', '6,4 MPa', grandeur(fcube, 1, 'MPa')]} bonne={0} colonnes={4}>
+F/A.
+</QCM>
+
+<QCM n={6} question="À 7 jours, un béton courant a atteint environ :" choix={['70 à 80 % de sa résistance à 28 j', '10 %', '100 %', '150 %']} bonne={0} colonnes={2}>
+βcc.
+</QCM>
+
+<QCM n={7} question="Une éprouvette séchée au soleil donne une résistance :" choix={['trop faible', 'trop forte', 'exacte', 'nulle']} bonne={0} colonnes={4}>
+Cure absente.
+</QCM>
+
+<QCM n={8} question="Pour un doute sur l'ouvrage, on fait :" choix={['des carottes', 'un cône d’Abrams', 'une granulométrie', 'rien']} bonne={0} colonnes={2}>
+Expertise in situ.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

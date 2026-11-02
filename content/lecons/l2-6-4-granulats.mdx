@@ -1,0 +1,297 @@
+---
+id: L2.6.4
+titre: "Granulats : origine, classes, qualités"
+objectifs:
+  - Distinguer granulats roulés et concassés, naturels et artificiels
+  - Désigner un granulat par sa classe d/D
+  - Évaluer la propreté d'un sable (fines, argile)
+  - Juger la forme et la résistance d'un gravier
+relecture: false
+normes:
+  - "EN 12620 : granulats pour béton"
+  - "EN 933-8 : équivalent de sable ; EN 933-4 : coefficient de forme ; EN 1097-2 : Los Angeles"
+glossaire:
+  - terme: Classe granulaire d/D
+    definition: Désignation d'un granulat par ses dimensions inférieure d et supérieure D (en mm), par exemple 4/16.
+  - terme: Granulat roulé
+    definition: Granulat de rivière aux grains arrondis par l'eau.
+  - terme: Granulat concassé
+    definition: Granulat obtenu en concassant de la roche en carrière ; grains anguleux.
+  - terme: Équivalent de sable
+    definition: Essai qui mesure la propreté d'un sable, c'est-à-dire la part d'argile et de fines nuisibles.
+symboles:
+  - { symbole: 'd/D', signification: 'classe granulaire', unite: 'mm' }
+  - { symbole: 'ES', signification: 'équivalent de sable', unite: '—' }
+  - { symbole: 'LA', signification: 'coefficient Los Angeles', unite: '%' }
+formules:
+  - { nom: 'Fines', tex: 'f = \frac{m_{<0{,}063}}{m_{totale}}', domaine: 'Passant à 0,063 mm' }
+  - { nom: 'Équivalent de sable', tex: 'ES = 100\,\frac{h_{sable}}{h_{totale}}', domaine: 'Lecture en éprouvette' }
+---
+
+import { analyseGranulo, EXEMPLE_SABLE } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { GranuloSable, SourcesLocales } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const g0 = analyseGranulo(EXEMPLE_SABLE.retenus, EXEMPLE_SABLE.fond)
+export const sale = [20, 80, 180, 200, 140, 80, 40, 0, 0, 0]
+export const gs = analyseGranulo(sale, 260)
+export const depart = { t0: 20, t1: 80, t2: 180, t3: 200, t4: 140, t5: 80, t6: 40, fond: 260 }
+export const ES = 100 * (8.6 / 12.2)
+
+<Page etape="intuition" titre="L'intuition : le squelette du béton">
+
+Dans un mètre cube de béton, près des trois quarts du volume sont des **granulats** : sable et gravier. Ils forment le squelette ; la pâte de ciment ne fait que les coller. Un bon squelette (grains propres, durs, bien répartis en taille) donne un béton résistant et économique. Un sable plein d'argile ou un gravier friable donnent un béton faible, quoi qu'on fasse avec le ciment.
+
+<SourcesLocales />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment caractériser un granulat, et à quoi reconnaître un bon sable et un bon gravier ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Qualités d'un granulat" sousTitre="Taille, propreté, forme, dureté" etape="cours">
+
+<Panneau n={1} titre="Origine" icone="plan" couleur="terre">
+Rivière (roulé) ou carrière (concassé).
+</Panneau>
+
+<Panneau n={2} titre="Classe d/D" icone="regle" couleur="encre">
+0/4 sable, 4/16 et 16/31,5 graviers.
+</Panneau>
+
+<Panneau n={3} titre="Propreté" icone="attention" couleur="correction">
+Peu de fines et d'argile ; équivalent de sable.
+</Panneau>
+
+<Panneau n={4} titre="Forme" icone="idee" couleur="acier">
+Grains trapus ; éviter plats et aiguilles.
+</Panneau>
+
+<Panneau n={5} titre="Dureté" icone="verification" couleur="validation">
+Los Angeles faible : résiste à l'usure.
+</Panneau>
+
+<Panneau n={6} titre="Granulométrie" icone="calcul" couleur="brique">
+Tous les grains doivent se compléter (L2.6.5).
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : origine et classes">
+
+<DiagrammeComparaison alt="Granulats roulés de rivière : grains arrondis, béton plus maniable, mais souvent pollués d'argile et de débris végétaux. Granulats concassés de carrière : grains anguleux, meilleure adhérence de la pâte, béton plus résistant mais demandant plus d'eau." gauche={{ titre: 'Roulés (rivière)', items: ['grains arrondis', 'béton maniable', 'parfois argileux, à laver', 'disponibles partout'] }} droite={{ titre: 'Concassés (carrière)', items: ['grains anguleux', 'meilleure adhérence', 'plus d’eau nécessaire', 'propres et réguliers'] }} />
+
+### La classe d/D
+
+Un granulat se désigne par ses dimensions extrêmes d et D en mm : sable **0/4**, gravillons **4/10**, **6,3/14**, graviers **10/20**, **16/31,5** <AVerifier note="A_VERIFIER.md n° 71 : désignation d/D et tolérances de l'EN 12620 (série de tamis de base + série 1 ou 2)" />. D, la plus grande dimension, doit être compatible avec l'ouvrage : au plus une fraction de l'épaisseur et de l'espacement des armatures.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la propreté">
+
+### Fines et argile
+
+Les **fines** (passant à 0,063 mm) ne sont pas toutes mauvaises : des fines de roche peuvent même améliorer la compacité. L'**argile**, elle, enrobe les grains, empêche la pâte de coller et gonfle à l'eau : elle est nuisible.
+
+### L'équivalent de sable
+
+On agite le sable dans une solution, on laisse décanter : l'argile reste en suspension au-dessus du sable. $ES = 100\,h_{sable}/h_{totale}$. Un sable propre a un ES élevé ; exemple : 8,6 cm de sable sous 12,2 cm au total → ES = {nombre(ES, 0)}.
+
+<DiagrammeBarres alt={`Fines (passant à 0,063 mm) de deux sables : ${nombre(g0.fines, 1)} % pour le sable lavé, ${nombre(gs.fines, 1)} % pour le sable de berge non lavé.`} titre="fines des deux sables (%)" barres={[{ libelle: 'sable lavé', valeur: g0.fines, texte: nombre(g0.fines, 1), teinte: 'validation' }, { libelle: 'sable de berge non lavé', valeur: gs.fines, texte: nombre(gs.fines, 1), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : forme et dureté">
+
+### La forme
+
+Les grains plats ou en aiguilles se cassent et laissent des vides : on limite leur proportion (coefficient d'aplatissement, de forme).
+
+### La dureté
+
+L'essai **Los Angeles** fait tourner le gravier avec des boulets d'acier : la part réduite en poussière mesure la fragilité. Un granulat pour chaussée doit être beaucoup plus dur qu'un granulat pour béton de bâtiment <AVerifier note="A_VERIFIER.md n° 72 : seuils Los Angeles et équivalent de sable selon l'usage (EN 12620, EN 13242, guides routiers)" />.
+
+<Regle type="art">
+Avant de commander un granulat, on visite la carrière ou la sablière, on prélève, et on fait au minimum une granulométrie, un équivalent de sable et un Los Angeles.
+</Regle>
+
+<GranuloSable retenus={EXEMPLE_SABLE.retenus} fond={EXEMPLE_SABLE.fond} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : accepter un granulat">
+
+<DiagrammeFlux alt="Accepter un granulat : prélever un échantillon représentatif ; faire la granulométrie ; mesurer la propreté (fines, équivalent de sable) ; contrôler forme et dureté ; décider : accepter, laver, corriger ou refuser." etapes={[{ titre: 'Prélever', texte: 'représentatif', teinte: 'terre' }, { titre: 'Granulo', texte: 'd/D, MF', teinte: 'encre' }, { titre: 'Propreté', texte: 'fines, ES', teinte: 'correction' }, { titre: 'Forme, dureté', texte: 'LA', teinte: 'acier' }, { titre: 'Décider', texte: 'laver, corriger', teinte: 'validation' }]} />
+
+<GranuloSable retenus={sale} fond={260} />
+
+</Page>
+
+<FicheCalcul calcul="granulometrieSable" depart={depart}>
+
+<Cahier titre="Exemple résolu : un sable de berge">
+
+**Énoncé.** Un sable prélevé sur une berge donne, sur 1 000 g, les masses retenues indiquées et 260 g passant au fond (données de l'énoncé). Calcule ses fines et son module de finesse ; faut-il le laver ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Fines et refus">
+<AN k="total" />
+<AN k="refus" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : la décision">
+
+<Etape n={3} titre="Module de finesse et décision">
+<AN k="mf" />
+<Resultat k="fines" libelle="Fines" />
+<Schema />
+<Note couleur="vert">Contrôle : avec plus d'un quart de fines, ce sable est à laver (ou à refuser) ; remets 30 g au fond pour voir le sable lavé.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="utiliser un sable argileux sans essai.">
+L'argile ruine l'adhérence et fait chuter la résistance.
+</Piege>
+
+<Piege erreur="choisir un gravier trop gros.">
+D doit passer entre les armatures et dans l'épaisseur.
+</Piege>
+
+<Piege erreur="stocker sable et gravier sur la terre.">
+On ramasse la terre du dessous en reprenant le tas : on stocke sur une aire propre.
+</Piege>
+
+<GranuloSable retenus={sale} fond={260} />
+
+<Piege erreur="prendre du sable de mer non lavé.">
+Ses chlorures corrodent les armatures (L1.5).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le test du bocal.** À défaut de laboratoire, on remplit un bocal à moitié de sable, on ajoute de l'eau, on secoue et on laisse reposer une heure : la couche d'argile au-dessus du sable donne une idée de sa propreté. Ce n'est pas un essai normalisé, mais il évite les pires sables.
+
+<SourcesLocales />
+
+<Encadre type="terrain" titre="Sables de rivière en RDC">
+Les sables du fleuve Congo et de ses affluents sont souvent bons mais fins ; ceux des berges peuvent être chargés d'argile et de matières organiques. Les carrières de grès, de quartzite et de basalte fournissent des graviers concassés de qualité variable : on les teste avant d'en faire un béton de structure.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : granulats">
+
+### Origine
+
+roulés (rivière) : maniables, à laver · concassés (carrière) : anguleux, propres
+
+### Désignation (à vérifier)
+
+d/D : 0/4, 4/10, 10/20, 16/31,5 · D adapté à l'ouvrage
+
+### Qualités
+
+propreté : fines, ES · forme : grains trapus · dureté : Los Angeles
+
+### Pièges
+
+argile, sel marin, débris végétaux, stockage sur la terre
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Désignation">
+
+Que signifie un gravier « 4/16 » ?
+
+<Indice>d et D.</Indice>
+
+<Corrige>
+Grains de **4 à 16 mm** (avec des tolérances).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Équivalent de sable">
+
+Hauteur de sable 8,6 cm, hauteur totale 12,2 cm. ES ?
+
+<Indice>100 h1/h2.</Indice>
+
+<Corrige>
+ES = **{nombre(ES, 0)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Comparer deux sables">
+
+Fines du sable lavé et du sable de berge ?
+
+<Indice>Passant au fond / total.</Indice>
+
+<Corrige>
+**{nombre(g0.fines, 1)} %** contre **{nombre(gs.fines, 1)} %** : le second est à laver.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.4">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Les granulats occupent dans un béton environ :" choix={['70 % du volume', '10 %', '30 %', '95 %']} bonne={0} colonnes={4}>
+Le squelette.
+</QCM>
+
+<QCM n={2} question="Un granulat concassé a des grains :" choix={['anguleux', 'arrondis', 'plats', 'creux']} bonne={0} colonnes={4}>
+Carrière.
+</QCM>
+
+<QCM n={3} question="L'équivalent de sable mesure :" choix={['la propreté', 'la dureté', 'la forme', 'la densité']} bonne={0} colonnes={4}>
+Argile.
+</QCM>
+
+<QCM n={4} question="L'essai Los Angeles mesure :" choix={['la résistance à l’usure et aux chocs', 'la propreté', 'la granulométrie', 'l’absorption']} bonne={0} colonnes={2}>
+Dureté.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Fines du sable de berge :</>} choix={[`${nombre(gs.fines, 1)} %`, `${nombre(g0.fines, 1)} %`, '0,0 %', '50,0 %']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="L'argile dans le sable :" choix={['empêche la pâte de coller', 'améliore le béton', 'n’a aucun effet', 'remplace le ciment']} bonne={0} colonnes={2}>
+Nuisible.
+</QCM>
+
+<QCM n={7} question="Le sable de mer non lavé apporte :" choix={['des chlorures', 'du ciment', 'de la résistance', 'rien']} bonne={0} colonnes={4}>
+Corrosion.
+</QCM>
+
+<QCM n={8} question="La plus grande dimension D est limitée par :" choix={['l’épaisseur et l’espacement des armatures', 'la couleur', 'le ciment', 'la saison']} bonne={0} colonnes={2}>
+Mise en place.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

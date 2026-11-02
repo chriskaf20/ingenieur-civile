@@ -1,0 +1,299 @@
+---
+id: L2.6.5
+titre: "Analyse granulométrique et module de finesse"
+objectifs:
+  - Conduire une analyse granulométrique par tamisage
+  - Calculer les refus et les passants cumulés
+  - Tracer la courbe granulométrique en échelle logarithmique
+  - Calculer et interpréter le module de finesse d'un sable
+relecture: false
+normes:
+  - "EN 933-1 : analyse granulométrique par tamisage ; EN 933-2 : tamis"
+  - "EN 12620 annexe B : module de finesse"
+glossaire:
+  - terme: Refus
+    definition: Masse de granulat retenue sur un tamis.
+  - terme: Passant cumulé
+    definition: Pourcentage de la masse totale qui traverse un tamis.
+  - terme: Courbe granulométrique
+    definition: Courbe des passants cumulés en fonction de l'ouverture des tamis, en échelle logarithmique.
+  - terme: Module de finesse
+    definition: Somme des refus cumulés sur une série de tamis, divisée par 100 ; plus il est grand, plus le sable est grossier.
+symboles:
+  - { symbole: 'Rc', signification: 'refus cumulé', unite: '%' }
+  - { symbole: 'P', signification: 'passant cumulé', unite: '%' }
+  - { symbole: 'MF', signification: 'module de finesse', unite: '—' }
+formules:
+  - { nom: 'Refus cumulé', tex: 'R_c(d) = \frac{\sum_{tamis \ge d} m_i}{m_{totale}}', domaine: 'En %' }
+  - { nom: 'Passant', tex: 'P(d) = 100 - R_c(d)', domaine: 'En %' }
+  - { nom: 'Module de finesse', tex: 'MF = \frac{\sum R_c(0{,}125;\ 0{,}25;\ 0{,}5;\ 1;\ 2;\ 4)}{100}', domaine: 'EN 12620' }
+---
+
+import { analyseGranulo, EXEMPLE_SABLE, TAMIS } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { GranuloSable } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const g0 = analyseGranulo(EXEMPLE_SABLE.retenus, EXEMPLE_SABLE.fond)
+export const fin = analyseGranulo([60, 210, 330, 180, 80, 30, 10, 0, 0, 0], 100)
+export const gros = analyseGranulo([10, 40, 100, 170, 230, 220, 170, 0, 0, 0], 60)
+
+<Page etape="intuition" titre="L'intuition : des grains de toutes les tailles">
+
+Remplis un seau de gros cailloux : il reste des vides. Verse du sable : il s'infiltre entre les cailloux. Verse un peu de ciment : il comble les plus petits vides. Un bon mélange contient des grains de **toutes les tailles**, qui se complètent. L'analyse granulométrique mesure cette répartition.
+
+<GranuloSable retenus={EXEMPLE_SABLE.retenus} fond={EXEMPLE_SABLE.fond} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer la répartition des tailles d'un granulat et la résumer par un nombre ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Tamiser et tracer" sousTitre="De la pesée à la courbe" etape="cours">
+
+<Panneau n={1} titre="Laver, sécher" icone="regle" couleur="encre">
+Enlever et peser les fines.
+</Panneau>
+
+<Panneau n={2} titre="Tamiser" icone="plan" couleur="acier">
+Colonne de tamis, du plus gros au plus fin.
+</Panneau>
+
+<Panneau n={3} titre="Peser" icone="calcul" couleur="terre">
+Refus de chaque tamis.
+</Panneau>
+
+<Panneau n={4} titre="Cumuler" icone="idee" couleur="brique">
+Refus cumulés, passants.
+</Panneau>
+
+<Panneau n={5} titre="Tracer" icone="verification" couleur="validation">
+Passants en fonction de d, échelle log.
+</Panneau>
+
+<Panneau n={6} titre="MF" icone="attention" couleur="correction">
+Sable fin &lt; 2,2 ; grossier &gt; 2,8 environ.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'essai">
+
+### Le tamisage
+
+On lave l'échantillon sur le tamis de 0,063 mm (les fines partent), on le sèche, puis on le passe dans une colonne de tamis normalisés (série EN 933-2 : 0,063 – 0,125 – 0,25 – 0,5 – 1 – 2 – 4 – 8 – 16 – 31,5 mm…). On pèse ce qui reste sur chaque tamis : les **refus**.
+
+### Le tableau
+
+Pour chaque tamis, on cumule les refus des tamis plus gros : **refus cumulé**, en % de la masse totale ; le **passant** cumulé vaut 100 − refus cumulé.
+
+<DiagrammeBarres alt={`Passants cumulés du sable de l'exemple : ${TAMIS.slice(0, 7).map((t, i) => `${nombre(t, 3)} mm : ${nombre(g0.passants[i] ?? 0, 1)} %`).join(' ; ')}.`} titre="passants cumulés du sable (%)" barres={TAMIS.slice(0, 7).map((t, i) => ({ libelle: `${nombre(t, 3)} mm`, valeur: g0.passants[i] ?? 0, texte: nombre(g0.passants[i] ?? 0, 1), teinte: 'terre' }))} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la courbe">
+
+### L'échelle logarithmique
+
+Les tamis vont de 0,063 à plus de 30 mm : en échelle linéaire, tout le sable serait écrasé à gauche. En échelle logarithmique, chaque doublement d'ouverture prend la même place.
+
+### Lire la courbe
+
+- une courbe **étalée** (en S allongé) : grains de toutes tailles, bonne compacité ;
+- une courbe **raide** : granulat uniforme, beaucoup de vides ;
+- un **palier** : une taille manque (granulométrie discontinue).
+
+<GranuloSable retenus={[60, 210, 330, 180, 80, 30, 10, 0, 0, 0]} fond={100} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : le module de finesse">
+
+### La définition
+
+$MF = \frac{1}{100}\sum R_c$ sur les tamis 0,125 – 0,25 – 0,5 – 1 – 2 – 4 mm (EN 12620, annexe B). Plus le sable est grossier, plus les refus sont grands, plus MF est élevé.
+
+### L'interprétation
+
+On considère souvent qu'un sable à béton a un MF d'environ 2,2 à 2,8 : trop fin, il demande beaucoup d'eau ; trop grossier, le béton est raide et ségrège <AVerifier note="A_VERIFIER.md n° 73 : plages usuelles du module de finesse d'un sable à béton (règle de l'art ; l'EN 12620 classe les sables en C, M, F selon MF)" />. On peut corriger un sable en le mélangeant avec un autre.
+
+<DiagrammeBarres alt={`Module de finesse de trois sables : fin ${nombre(fin.mf, 2)}, sable de l'exemple ${nombre(g0.mf, 2)}, grossier ${nombre(gros.mf, 2)}.`} titre="module de finesse" barres={[{ libelle: 'sable fin', valeur: fin.mf, texte: nombre(fin.mf, 2), teinte: 'acier' }, { libelle: 'sable de l’exemple', valeur: g0.mf, texte: nombre(g0.mf, 2), teinte: 'validation' }, { libelle: 'sable grossier', valeur: gros.mf, texte: nombre(gros.mf, 2), teinte: 'brique' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Analyse granulométrique : laver et sécher ; tamiser ; peser chaque refus ; calculer refus et passants cumulés ; tracer la courbe ; calculer le module de finesse ; comparer au fuseau ou à la plage visée." etapes={[{ titre: 'Laver, sécher', texte: 'fines', teinte: 'encre' }, { titre: 'Tamiser', texte: 'colonne', teinte: 'acier' }, { titre: 'Peser', texte: 'refus', teinte: 'terre' }, { titre: 'Cumuler', texte: 'Rc, P', teinte: 'brique' }, { titre: 'Tracer, MF', texte: 'interpréter', teinte: 'validation' }]} />
+
+<GranuloSable retenus={[10, 40, 100, 170, 230, 220, 170, 0, 0, 0]} fond={60} />
+
+</Page>
+
+<FicheCalcul calcul="granulometrieSable">
+
+<Cahier titre="Exemple résolu : le sable du chantier">
+
+**Énoncé.** 1 000 g de sable lavé et séché donnent les refus indiqués sur les tamis de 0,063 à 4 mm et 30 g au fond (données de l'énoncé). Calcule les refus cumulés et le module de finesse.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Cumuler">
+<AN k="total" />
+<AN k="refus" />
+<Note>Pourquoi cumuler depuis les gros tamis ? Un grain retenu à 2 mm a aussi été refusé par tous les tamis plus fins.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le module de finesse">
+
+<Etape n={3} titre="MF">
+<AN k="mf" />
+<Resultat k="mf" libelle="Module de finesse" />
+<Schema />
+<Note couleur="vert">Contrôle : MF entre 2 et 3 pour un sable courant ; déplace 100 g du tamis 1 mm vers 0,25 mm et regarde MF baisser.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="cumuler dans le mauvais sens.">
+On cumule du plus gros au plus fin pour les refus.
+</Piege>
+
+<Piege erreur="tracer en échelle linéaire.">
+Les fines disparaissent : échelle logarithmique obligatoire.
+</Piege>
+
+<Piege erreur="oublier les fines lavées dans le total.">
+La masse totale est celle avant lavage.
+</Piege>
+
+<GranuloSable retenus={EXEMPLE_SABLE.retenus} fond={EXEMPLE_SABLE.fond} />
+
+<Piege erreur="prendre un échantillon non représentatif.">
+On prélève en plusieurs points du tas et on réduit par quartage.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Corriger un sable trop fin.** Les sables de certains cours d'eau sont très fins (MF bas) : le béton demande beaucoup d'eau. On les mélange avec un sable grossier ou du sable de concassage, dans une proportion calculée pour obtenir le MF visé (règle des mélanges).
+
+<DiagrammeBarres alt={`Mélange à parts égales d'un sable fin (MF ${nombre(fin.mf, 2)}) et d'un sable grossier (MF ${nombre(gros.mf, 2)}) : MF du mélange ≈ ${nombre((fin.mf + gros.mf) / 2, 2)}.`} titre="correction d'un sable par mélange (MF)" barres={[{ libelle: 'sable fin', valeur: fin.mf, texte: nombre(fin.mf, 2), teinte: 'acier' }, { libelle: 'mélange 50/50', valeur: (fin.mf + gros.mf) / 2, texte: nombre((fin.mf + gros.mf) / 2, 2), teinte: 'validation' }, { libelle: 'sable grossier', valeur: gros.mf, texte: nombre(gros.mf, 2), teinte: 'brique' }]} />
+
+<Encadre type="terrain" titre="Tamis de fortune">
+Sur un chantier isolé, des tamis de maçon (5 mm, 2 mm) permettent au moins d'éliminer les cailloux du sable et de repérer un sable trop fin. Pour un béton de structure, on fait l'essai complet dans un laboratoire.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : granulométrie">
+
+### Essai
+
+laver (0,063) · sécher · tamiser · peser les refus
+
+### Calculs
+
+Rc cumulés du gros au fin · P = 100 − Rc · courbe en log
+
+### Module de finesse
+
+MF = Σ Rc (0,125 à 4 mm)/100 · sable à béton ≈ 2,2 – 2,8 (à vérifier)
+
+### Lecture
+
+courbe étalée : bonne compacité · raide : uniforme · palier : discontinue
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Passant">
+
+Le refus cumulé à 1 mm vaut 31,2 %. Passant à 1 mm ?
+
+<Indice>100 − Rc.</Indice>
+
+<Corrige>
+**{nombre(100 - 31.2, 1)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Sable fin">
+
+Sable : refus 60, 210, 330, 180, 80, 30, 10 g (0,063 à 4 mm), fond 100 g. MF ?
+
+<Indice>Fiche.</Indice>
+
+<Corrige>
+MF = **{nombre(fin.mf, 2)}** : sable fin.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Mélange">
+
+MF approché d'un mélange 50/50 du sable fin et d'un sable grossier (MF {nombre(gros.mf, 2)}) ?
+
+<Indice>MF se combine linéairement avec les proportions massiques.</Indice>
+
+<Corrige>
+≈ **{nombre((fin.mf + gros.mf) / 2, 2)}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.5">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La courbe granulométrique se trace avec :" choix={['une échelle logarithmique des ouvertures', 'une échelle linéaire', 'les masses brutes', 'la masse volumique']} bonne={0} colonnes={2}>
+Tamis de 0,063 à 31,5 mm.
+</QCM>
+
+<QCM n={2} question="Le passant cumulé vaut :" choix={['100 − refus cumulé', 'le refus du tamis', 'la masse totale', 'le MF']} bonne={0} colonnes={2}>
+Complément.
+</QCM>
+
+<QCM n={3} question="Un MF élevé indique un sable :" choix={['grossier', 'fin', 'argileux', 'humide']} bonne={0} colonnes={4}>
+Refus importants.
+</QCM>
+
+<QCM n={4} question="Une courbe très raide signale un granulat :" choix={['uniforme', 'bien gradué', 'argileux', 'concassé']} bonne={0} colonnes={4}>
+Beaucoup de vides.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>MF du sable de l'exemple :</>} choix={[nombre(g0.mf, 2), nombre(fin.mf, 2), nombre(gros.mf, 2), '1,00']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="Un sable trop fin :" choix={['demande beaucoup d’eau', 'rend le béton plus résistant', 'n’a aucun effet', 'ségrège']} bonne={0} colonnes={2}>
+Grande surface à mouiller.
+</QCM>
+
+<QCM n={7} question="On prélève un échantillon :" choix={['en plusieurs points, puis par quartage', 'en surface du tas seulement', 'au hasard d’une pelle', 'dans la bétonnière']} bonne={0} colonnes={2}>
+Représentatif.
+</QCM>
+
+<QCM n={8} question="Les fines sont séparées :" choix={['par lavage sur le tamis de 0,063 mm', 'au vent', 'à l’aimant', 'au feu']} bonne={0} colonnes={2}>
+EN 933-1.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

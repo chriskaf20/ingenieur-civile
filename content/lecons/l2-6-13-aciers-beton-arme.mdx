@@ -1,0 +1,293 @@
+---
+id: L2.6.13
+titre: "Aciers pour béton armé"
+objectifs:
+  - Identifier une barre à haute adhérence, sa nuance et son diamètre
+  - Calculer la section et la masse linéique d'une barre
+  - Établir les quantités d'acier d'un élément (nomenclature simple)
+  - Stocker, façonner et contrôler les aciers sur chantier
+relecture: false
+normes:
+  - "EN 10080 et EN 1992-1-1 §3.2 et annexe C : aciers pour béton armé (B500, classes de ductilité)"
+glossaire:
+  - terme: Barre HA
+    definition: Barre à haute adhérence, avec des nervures qui l'accrochent au béton.
+  - terme: Nuance B500
+    definition: Acier dont la limite d'élasticité caractéristique est 500 MPa ; A, B ou C indique la ductilité.
+  - terme: Treillis soudé
+    definition: Panneau de fils d'acier croisés et soudés, utilisé dans les dalles et dallages.
+  - terme: Masse linéique
+    definition: Masse d'un mètre de barre, en kg/m.
+symboles:
+  - { symbole: 'Ø', signification: 'diamètre nominal', unite: 'mm' }
+  - { symbole: 'As', signification: 'section d''acier', unite: 'mm² ou cm²' }
+  - { symbole: 'fyk', signification: 'limite d''élasticité caractéristique', unite: 'MPa' }
+formules:
+  - { nom: 'Section', tex: 'A = \frac{\pi \varnothing^2}{4}', domaine: 'Une barre' }
+  - { nom: 'Masse linéique', tex: 'm = A\,\rho = \frac{\pi \varnothing^2}{4}\times 7850\times 10^{-6}\ \text{kg/m}', domaine: 'Ø en mm' }
+---
+
+import { barreHA, DIAMETRES_HA, lotBarres } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { BarresHA } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const l0 = lotBarres(4, 12, 6)
+export const cadres = { n: Math.ceil(6 / 0.2) + 1, L: 2 * (0.2 + 0.4) + 0.16 }
+export const mCadres = cadres.n * cadres.L * barreHA(6).masse
+export const ex2 = lotBarres(6, 16, 1)
+export const ex3 = lotBarres(3, 14, 1)
+
+<Page etape="intuition" titre="L'intuition : l'acier tient la traction">
+
+Le béton résiste bien à la compression, mal à la traction (L2.4.7). On place donc de l'acier là où le béton est tendu : en bas des poutres, en haut sur les appuis, dans les tirants. Pour que les deux travaillent ensemble, l'acier doit **adhérer** au béton : d'où les nervures des barres HA. Et pour commander, couper et contrôler, il faut savoir compter les barres en sections et en kilos.
+
+<BarresHA diametres={[6, 8, 10, 12, 16, 20, 25]} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment identifier, compter et contrôler les aciers d'un ouvrage en béton armé ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les aciers du béton armé" sousTitre="Barres, treillis, quantités" etape="cours">
+
+<Panneau n={1} titre="HA" icone="regle" couleur="encre">
+Nervures : adhérence au béton.
+</Panneau>
+
+<Panneau n={2} titre="B500" icone="calcul" couleur="acier">
+fyk = 500 MPa ; ductilité A, B, C.
+</Panneau>
+
+<Panneau n={3} titre="Diamètres" icone="plan" couleur="terre">
+6 à 32 mm ; section ∝ Ø².
+</Panneau>
+
+<Panneau n={4} titre="Masse" icone="idee" couleur="brique">
+Ø²/162 kg/m environ.
+</Panneau>
+
+<Panneau n={5} titre="Treillis" icone="verification" couleur="validation">
+Dalles, dallages, voiles.
+</Panneau>
+
+<Panneau n={6} titre="Contrôle" icone="attention" couleur="correction">
+Marquage, diamètre réel, pliage, rouille.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : barres et nuances">
+
+### La barre HA
+
+Les barres à haute adhérence portent des nervures en relief et un marquage de laminage qui identifie le producteur et la nuance. La nuance courante est **B500** (fyk = 500 MPa), en classes de ductilité **A** (fils, treillis), **B** (barres courantes) ou **C** (zones sismiques) (A_VERIFIER n° 69).
+
+### Les diamètres
+
+Série courante : 6, 8, 10, 12, 14, 16, 20, 25, 32 mm. La section croît comme le carré du diamètre : une HA 16 a {nombre(barreHA(16).A / barreHA(8).A, 0)} fois la section d'une HA 8.
+
+<DiagrammeBarres alt={`Section des barres : ${DIAMETRES_HA.map((d) => `HA ${d} : ${nombre(barreHA(d).A, 0)} mm²`).join(' ; ')}.`} titre="section des barres HA (mm²)" barres={DIAMETRES_HA.map((d, i) => ({ libelle: `HA ${d}`, valeur: barreHA(d).A, texte: nombre(barreHA(d).A, 0), teinte: i < 3 ? 'acier' : i < 6 ? 'encre' : 'correction' }))} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : section et masse">
+
+### Les formules
+
+$A = \pi Ø^2/4$ ; masse linéique = A × 7 850 kg/m³. Pour une HA 12 : {nombre(barreHA(12).A, 1)} mm² et {nombre(barreHA(12).masse, 3)} kg/m. Une règle mnémotechnique : masse ≈ Ø²/162 kg/m (Ø en mm).
+
+### La nomenclature
+
+On liste chaque type de barre : nombre, diamètre, longueur développée (crochets compris, L1.6), masse. Exemple : 4 HA 12 de 6 m = {nombre(l0.masse, 1)} kg ; {cadres.n} cadres HA 6 de {nombre(cadres.L, 2)} m = {nombre(mCadres, 1)} kg.
+
+<BarresHA diametres={[8, 10, 12, 14, 16]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : façonnage et stockage">
+
+### Façonner
+
+On coupe et on plie à froid, sur un mandrin de diamètre suffisant (il dépend du diamètre de la barre, EC2 §8.3) <AVerifier note="A_VERIFIER.md n° 81 : diamètres minimaux de mandrin de cintrage, EN 1992-1-1 §8.3 tableau 8.1N" /> ; on ne chauffe pas les barres pour les plier ; on ne redresse pas une barre déjà pliée.
+
+### Stocker
+
+Sur des chevrons, hors du sol et de la boue, triées par diamètre et étiquetées. Une rouille superficielle légère n'est pas gênante ; une rouille feuilletée qui réduit le diamètre est refusée.
+
+<Regle type="art">
+Le diamètre se contrôle au pied à coulisse : certaines barres du marché ont un diamètre réel inférieur au nominal. Une HA 12 qui mesure 11 mm a 16 % de section en moins.
+</Regle>
+
+<DiagrammeBarres alt={`Une HA 12 nominale (${nombre(barreHA(12).A, 0)} mm²) contre une barre de 11 mm réels (${nombre(barreHA(11).A, 0)} mm²).`} titre="section réelle d'une « HA 12 » (mm²)" barres={[{ libelle: '12 mm nominal', valeur: barreHA(12).A, texte: nombre(barreHA(12).A, 0), teinte: 'validation' }, { libelle: '11 mm mesuré', valeur: barreHA(11).A, texte: nombre(barreHA(11).A, 0), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : de la note de calcul au chantier">
+
+<DiagrammeFlux alt="Les aciers d'un ouvrage : la note de calcul donne la section nécessaire ; le plan de ferraillage traduit en barres ; la nomenclature compte longueurs et masses ; la commande ; le contrôle à la réception ; le façonnage et la pose avec cales." etapes={[{ titre: 'Section As', texte: 'calcul', teinte: 'encre' }, { titre: 'Plan', texte: 'barres', teinte: 'acier' }, { titre: 'Nomenclature', texte: 'kg', teinte: 'terre' }, { titre: 'Réception', texte: 'contrôle', teinte: 'correction' }, { titre: 'Pose', texte: 'cales', teinte: 'validation' }]} />
+
+<BarresHA diametres={[6, 10, 14, 20, 32]} />
+
+</Page>
+
+<FicheCalcul calcul="armaturesHA">
+
+<Cahier titre="Exemple résolu : les aciers d'une poutre">
+
+**Énoncé.** Une poutre reçoit 4 HA 12 de 6 m en partie inférieure (données de l'énoncé). Section totale et masse ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Section et masse">
+<AN k="unite" />
+<AN k="lot" />
+<Resultat k="A" libelle="Section totale" />
+<Resultat k="masse" libelle="Masse" />
+<Schema />
+<Note couleur="vert">Contrôle : 3 HA 14 donnent presque la même section que 4 HA 12 ; compare.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="remplacer un diamètre par un plus petit « parce qu'il n'y en avait plus ».">
+La section baisse comme le carré du diamètre.
+</Piege>
+
+<Piege erreur="plier à chaud ou sur un rayon trop petit.">
+L'acier perd sa ductilité, peut fissurer.
+</Piege>
+
+<Piege erreur="poser les aciers sans cales.">
+L'enrobage disparaît : corrosion rapide.
+</Piege>
+
+<BarresHA diametres={[10, 12, 14]} />
+
+<Piege erreur="stocker les barres dans la boue.">
+Boue et huile réduisent l'adhérence ; on nettoie avant pose.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le contrôle à la réception.** Pour chaque livraison : bon de livraison et certificat, marquage de laminage, diamètre mesuré sur quelques barres, essai de pliage (L2.6.2). En cas de doute, des essais de traction en laboratoire.
+
+<DiagrammeBarres alt={`Masse de 6 HA 16 sur 1 m : ${nombre(ex2.masse, 2)} kg ; de 3 HA 14 : ${nombre(ex3.masse, 2)} kg.`} titre="masse par mètre de poutre (kg)" barres={[{ libelle: '6 HA 16', valeur: ex2.masse, texte: nombre(ex2.masse, 2), teinte: 'acier' }, { libelle: '3 HA 14', valeur: ex3.masse, texte: nombre(ex3.masse, 2), teinte: 'terre' }]} />
+
+<Encadre type="terrain" titre="Aciers vendus au « fer » ou au kilo">
+Sur les marchés de RDC, les barres se vendent à l'unité (barre de 12 m) ou au kilo. Calculer la masse attendue (Ø²/162 × 12 kg par barre) permet de repérer les barres trop légères, donc trop fines.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : aciers pour béton armé">
+
+### Identification
+
+HA (nervures) · B500 A/B/C · marquage de laminage
+
+### Calculs
+
+A = π Ø²/4 · m = A × 7 850 ≈ Ø²/162 kg/m
+
+### Diamètres
+
+6 – 8 – 10 – 12 – 14 – 16 – 20 – 25 – 32 mm
+
+### Chantier
+
+contrôler Ø réel et pliage · stocker hors sol · cales · ne pas plier à chaud
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Masse d'une barre">
+
+Masse d'une barre HA 10 de 12 m ?
+
+<Indice>m linéique × 12.</Indice>
+
+<Corrige>
+**{grandeur(barreHA(10).masse * 12, 2, 'kg')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Section">
+
+Section de 6 HA 16 ?
+
+<Indice>6 × π × 16²/4.</Indice>
+
+<Corrige>
+**{grandeur(ex2.A, 0, 'mm²')}**, soit {nombre(ex2.A / 100, 2)} cm².
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Équivalence">
+
+On n'a plus de HA 12. Par quoi remplacer 4 HA 12 sans perdre de section ?
+
+<Indice>Comparer 3 HA 14.</Indice>
+
+<Corrige>
+3 HA 14 = **{grandeur(ex3.A, 0, 'mm²')}** contre {grandeur(lotBarres(4, 12, 1).A, 0, 'mm²')} : équivalent (à faire valider par l'ingénieur : espacements et ancrages changent).
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.13">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="« HA » signifie :" choix={['haute adhérence', 'haute acidité', 'haut acier', 'hors armature']} bonne={0} colonnes={2}>
+Nervures.
+</QCM>
+
+<QCM n={2} question="Dans B500B, 500 est :" choix={['fyk en MPa', 'la masse', 'le diamètre', 'la longueur']} bonne={0} colonnes={2}>
+Limite d'élasticité.
+</QCM>
+
+<QCM n={3} question="Doubler le diamètre multiplie la section par :" choix={['4', '2', '8', '1']} bonne={0} colonnes={4}>
+Ø².
+</QCM>
+
+<QCM n={4} question="La masse linéique d'une HA 12 vaut environ :" choix={[`${nombre(barreHA(12).masse, 2)} kg/m`, '12 kg/m', '0,12 kg/m', '7,85 kg/m']} bonne={0} colonnes={4}>
+A × ρ.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>4 HA 12 de 6 m pèsent :</>} choix={[grandeur(l0.masse, 1, 'kg'), '48,0 kg', '6,0 kg', '85,0 kg']} bonne={0} colonnes={4}>
+4 × 6 × masse linéique.
+</QCM>
+
+<QCM n={6} question="En zone sismique, on choisit la ductilité :" choix={['C', 'A', 'peu importe', 'aucune']} bonne={0} colonnes={4}>
+La plus ductile.
+</QCM>
+
+<QCM n={7} question="Une barre déjà pliée :" choix={['ne se redresse pas', 'se redresse à chaud', 'se redresse au marteau', 'se réutilise toujours']} bonne={0} colonnes={2}>
+Perte de ductilité.
+</QCM>
+
+<QCM n={8} question="On contrôle le diamètre réel avec :" choix={['un pied à coulisse', 'un mètre ruban', 'une balance seulement', 'l’œil']} bonne={0} colonnes={2}>
+Barres sous-dimensionnées.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -75,9 +75,9 @@ export function PageObjectifs({ lecon }: { lecon: Lecon }) {
 
       <h2 className="!mt-6">Avant de commencer</h2>
       {prerequis.length ? (
-        <ul className="!mt-2">
+        <ul className={prerequis.length > 10 ? '!mt-2 gap-8 text-[0.95rem] sm:columns-2' : '!mt-2'}>
           {prerequis.map((p) => (
-            <li key={p.id}>
+            <li key={p.id} className="break-inside-avoid">
               {p.slug ? (
                 <Link href={`/lecons/${p.slug}`}>
                   {p.id} · {p.titre}

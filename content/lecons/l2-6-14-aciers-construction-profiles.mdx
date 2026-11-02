@@ -1,0 +1,294 @@
+---
+id: L2.6.14
+titre: "Aciers de construction et profilés"
+objectifs:
+  - Lire la désignation d'une nuance d'acier de construction (S235 à S355)
+  - Reconnaître les profilés laminés courants et leurs usages
+  - Lire une désignation de profilé (IPE 200, HEA 160…)
+  - Calculer l'effort plastique d'un tirant
+relecture: false
+normes:
+  - "EN 10025-2 : aciers de construction non alliés (nuances S235, S275, S355)"
+  - "EN 1993-1-1 §3.2 : propriétés des aciers de construction"
+glossaire:
+  - terme: Nuance
+    definition: Désignation de la qualité d'un acier, par exemple S235 (fy = 235 MPa pour les petites épaisseurs).
+  - terme: Profilé laminé
+    definition: Barre d'acier de section normalisée (I, H, U, L, tube) obtenue par laminage à chaud.
+  - terme: IPE, HEA
+    definition: Familles de profilés en I à ailes étroites (poutres) et en H à ailes larges (poteaux).
+  - terme: Protection anticorrosion
+    definition: Peinture, galvanisation ou enrobage qui protège l'acier de la rouille.
+symboles:
+  - { symbole: 'fy', signification: 'limite d''élasticité', unite: 'MPa' }
+  - { symbole: 'fu', signification: 'résistance à la traction', unite: 'MPa' }
+  - { symbole: 'A', signification: 'aire de la section', unite: 'mm²' }
+formules:
+  - { nom: 'Effort plastique', tex: 'N_{pl} = A\,f_y', domaine: 'Traction, sans coefficient partiel' }
+  - { nom: 'Résistance de calcul', tex: 'N_{pl,Rd} = \frac{A\,f_y}{\gamma_{M0}}', domaine: 'EN 1993-1-1 §6.2.3' }
+---
+
+import { effortNuance, NUANCES } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { Profiles } from '@/components/schemas/Materiaux2'
+import { CourbesMateriaux } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const n0 = effortNuance(1000, 0)
+export const n2 = effortNuance(1000, 2)
+export const corn = effortNuance(691, 1)
+export const ex3 = effortNuance(2850, 2)
+
+<Page etape="intuition" titre="L'intuition : des barres de formes savantes">
+
+Un hangar métallique, un pylône, une passerelle : leurs pièces ont des formes en I, en H, en U, en L. Ce ne sont pas des caprices : chaque forme place la matière là où elle travaille le mieux (L2.4.6). Ces profilés sont fabriqués en acier de **nuances** différentes, plus ou moins résistantes.
+
+<Profiles />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment lire la désignation d'un acier et d'un profilé, et que peut porter une pièce ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Acier de construction" sousTitre="Nuances et profilés" etape="cours">
+
+<Panneau n={1} titre="S235" icone="calcul" couleur="encre">
+fy = 235 MPa : le plus courant.
+</Panneau>
+
+<Panneau n={2} titre="S355" icone="regle" couleur="acier">
+fy = 355 MPa : plus léger à résistance égale.
+</Panneau>
+
+<Panneau n={3} titre="IPE" icone="plan" couleur="terre">
+Poutres, pannes.
+</Panneau>
+
+<Panneau n={4} titre="HEA, HEB" icone="idee" couleur="brique">
+Poteaux, poutres lourdes.
+</Panneau>
+
+<Panneau n={5} titre="L, U, tubes" icone="verification" couleur="validation">
+Treillis, contreventements, chevêtres.
+</Panneau>
+
+<Panneau n={6} titre="Protection" icone="attention" couleur="correction">
+Peinture, galvanisation : la rouille est l'ennemi.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les nuances">
+
+### La désignation
+
+« S » pour acier de construction, suivi de la limite d'élasticité minimale en MPa pour les faibles épaisseurs ; des lettres complètent (JR, J0, J2 : résilience). Pour les épaisseurs fortes, fy diminue un peu <AVerifier note="A_VERIFIER.md n° 82 : valeurs de fy et fu selon l'épaisseur, EN 10025-2 et EN 1993-1-1 tableau 3.1" />.
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Nuance</th><th>fy (MPa)</th><th>fu (MPa)</th></tr></thead>
+    <tbody>{NUANCES.map((n) => <tr key={n.nuance}><td>{n.nuance}</td><td>{n.fy}</td><td>{n.fu}</td></tr>)}</tbody>
+  </table>
+</div>
+
+<CourbesMateriaux />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : les profilés">
+
+### Les familles
+
+- **IPE** : I à ailes étroites, hauteur en mm dans le nom (IPE 200 : 200 mm de haut) ; poutres et pannes ;
+- **HEA / HEB** : H à ailes larges ; poteaux et poutres très chargées ;
+- **UPN** : U ; chevêtres, cadres, longerons ;
+- **cornières** (L 60 × 6…) : treillis, contreventements ;
+- **tubes** ronds, carrés ou rectangulaires : poteaux légers, treillis.
+
+Les caractéristiques (aire, inertie, module, masse) sont données par les catalogues des fabricants : on ne les recalcule pas.
+
+<Profiles />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : que porte une pièce ?">
+
+### En traction
+
+L'effort plastique vaut $N_{pl} = A\,f_y$ ; en calcul, on divise par $\gamma_{M0}$ (EN 1993-1-1 §6.2.3). 1 000 mm² en S235 : {nombre(n0.N, 0)} kN ; en S355 : {nombre(n2.N, 0)} kN.
+
+### En compression et en flexion
+
+On vérifie aussi le flambement (L2.5.8), le déversement des poutres et les assemblages (L2.4.10) : l'acier étant très résistant, ce sont souvent la **stabilité** et les **déformations** qui décident.
+
+<DiagrammeBarres alt={`Effort plastique de 1 000 mm² d'acier : S235 ${nombre(n0.N, 0)} kN, S355 ${nombre(n2.N, 0)} kN.`} titre="effort plastique de 1 000 mm² (kN)" barres={[{ libelle: 'S235', valeur: n0.N, texte: nombre(n0.N, 0), teinte: 'acier' }, { libelle: 'S355', valeur: n2.N, texte: nombre(n2.N, 0), teinte: 'encre' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : choisir un profilé">
+
+<DiagrammeFlux alt="Choisir un profilé : rôle de la pièce (poutre, poteau, diagonale) ; famille ; nuance ; dimension tirée du catalogue après calcul ; protection contre la corrosion ; assemblage." etapes={[{ titre: 'Rôle', texte: 'poutre, poteau', teinte: 'encre' }, { titre: 'Famille', texte: 'IPE, HEA, L', teinte: 'acier' }, { titre: 'Nuance', texte: 'S235, S355', teinte: 'terre' }, { titre: 'Catalogue', texte: 'dimension', teinte: 'brique' }, { titre: 'Protection', texte: 'peinture', teinte: 'validation' }]} />
+
+<Profiles />
+
+</Page>
+
+<FicheCalcul calcul="nuanceAcier">
+
+<Cahier titre="Exemple résolu : une diagonale de pylône">
+
+**Énoncé.** Une cornière de section 1 000 mm² sert de tirant ; nuance S235 (données de l'énoncé). Effort plastique ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Effort">
+<AN k="fy" />
+<AN k="N" />
+<Resultat k="N" libelle="Effort plastique" />
+<Schema />
+<Note couleur="vert">Contrôle : passe en S355 ; l'effort augmente de 51 %, pour la même pièce.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre la hauteur d'un IPE et son poids.">
+IPE 200 : 200 mm de haut ; la masse est dans le catalogue.
+</Piege>
+
+<Piege erreur="oublier la protection anticorrosion.">
+Un acier nu en climat tropical humide rouille vite.
+</Piege>
+
+<Piege erreur="souder n'importe quel acier.">
+Les aciers de récupération de nuance inconnue peuvent mal se souder.
+</Piege>
+
+<CourbesMateriaux />
+
+<Piege erreur="ne vérifier que la traction.">
+Les pièces comprimées flambent ; les poutres peuvent déverser.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Charpentes métalliques en RDC.** Hangars miniers, entrepôts, toitures de marchés : la charpente métallique est rapide à monter. Les profilés sont souvent importés ; les remplacements de dernière minute (un IPE 180 au lieu d'un IPE 200, une nuance inconnue) doivent être validés par le calcul.
+
+<DiagrammeBarres alt={`Cornière L 60 × 6 (691 mm²) en S275 : ${nombre(corn.N, 0)} kN ; profilé de 2 850 mm² en S355 : ${nombre(ex3.N, 0)} kN.`} titre="effort plastique (kN)" barres={[{ libelle: 'L 60 × 6, S275', valeur: corn.N, texte: nombre(corn.N, 0), teinte: 'terre' }, { libelle: '2 850 mm², S355', valeur: ex3.N, texte: nombre(ex3.N, 0), teinte: 'acier' }]} />
+
+<Encadre type="attention" titre="Rouille et zones humides">
+Pieds de poteaux enterrés, chéneaux qui débordent, zones de condensation : ce sont les points où la charpente rouille en premier. On les protège, on les surveille, on les entretient.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : acier de construction">
+
+### Nuances (à vérifier selon l'épaisseur)
+
+S235 · S275 · S355 : fy en MPa
+
+### Profilés
+
+IPE poutres · HEA/HEB poteaux · UPN · cornières · tubes
+
+### Traction
+
+Npl = A fy · calcul : A fy/γM0 (EN 1993-1-1 §6.2.3)
+
+### Pratique
+
+catalogue · protection · stabilité · assemblages
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Lire une nuance">
+
+Que signifie S355 ?
+
+<Indice>S et fy.</Indice>
+
+<Corrige>
+Acier de construction de limite d'élasticité **355 MPa** (faibles épaisseurs).
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Cornière">
+
+Cornière de 691 mm² en S275. Effort plastique ?
+
+<Indice>A fy.</Indice>
+
+<Corrige>
+**{grandeur(corn.N, 0, 'kN')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Gain de nuance">
+
+Profilé de 2 850 mm². Effort plastique en S235 puis en S355 ?
+
+<Indice>Rapport 355/235.</Indice>
+
+<Corrige>
+**{grandeur(effortNuance(2850, 0).N, 0, 'kN')}** puis **{grandeur(ex3.N, 0, 'kN')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.14">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Dans S235, 235 est :" choix={['fy en MPa', 'la masse', 'la hauteur', 'le prix']} bonne={0} colonnes={4}>
+Limite d'élasticité.
+</QCM>
+
+<QCM n={2} question="Un IPE est surtout utilisé comme :" choix={['poutre', 'poteau très chargé', 'boulon', 'tirant rond']} bonne={0} colonnes={2}>
+I à ailes étroites.
+</QCM>
+
+<QCM n={3} question="Pour un poteau, on préfère souvent :" choix={['un HEA ou HEB', 'un IPE', 'une cornière seule', 'un plat']} bonne={0} colonnes={2}>
+Ailes larges.
+</QCM>
+
+<QCM n={4} question="Npl vaut :" choix={['A fy', 'A/fy', 'fy/A', 'A fu²']} bonne={0} colonnes={4}>
+Traction.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>1 000 mm² en S235 : Npl =</>} choix={[grandeur(n0.N, 0, 'kN'), grandeur(n2.N, 0, 'kN'), '23,5 kN', '2 350 kN']} bonne={0} colonnes={4}>
+A fy.
+</QCM>
+
+<QCM n={6} question="IPE 200 désigne un profilé de :" choix={['200 mm de haut', '200 kg/m', '200 mm de large', '200 m de long']} bonne={0} colonnes={2}>
+Hauteur.
+</QCM>
+
+<QCM n={7} question="En climat tropical, une charpente acier doit être :" choix={['protégée contre la corrosion', 'laissée nue', 'huilée seulement', 'enterrée']} bonne={0} colonnes={2}>
+Peinture, galvanisation.
+</QCM>
+
+<QCM n={8} question="Les pièces comprimées en acier sont souvent limitées par :" choix={['le flambement', 'la traction', 'le poids', 'la couleur']} bonne={0} colonnes={2}>
+Stabilité.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

@@ -1,0 +1,308 @@
+---
+id: L2.6.1
+titre: "Propriétés physiques des matériaux"
+objectifs:
+  - Distinguer masse volumique absolue, apparente et en vrac
+  - Calculer la porosité et la compacité d'un matériau
+  - Calculer le coefficient d'absorption d'eau
+  - Relier porosité, durabilité et isolation
+relecture: false
+normes:
+  - "EN 1097-6 : masse volumique et coefficient d'absorption d'eau des granulats"
+  - "EN 772-21 : absorption d'eau des éléments de maçonnerie en terre cuite et silico-calcaires"
+glossaire:
+  - terme: Masse volumique absolue
+    definition: Masse de la seule matière solide divisée par son volume, sans les vides.
+  - terme: Masse volumique apparente
+    definition: Masse divisée par le volume total de l'échantillon, vides compris.
+  - terme: Porosité
+    definition: Part du volume occupée par les vides (pores ouverts et fermés).
+  - terme: Absorption d'eau
+    definition: Masse d'eau absorbée par un matériau immergé, rapportée à sa masse sèche.
+symboles:
+  - { symbole: 'ρabs', signification: 'masse volumique absolue', unite: 'g/cm³ ou kg/m³' }
+  - { symbole: 'ρapp', signification: 'masse volumique apparente', unite: 'g/cm³ ou kg/m³' }
+  - { symbole: 'n', signification: 'porosité', unite: '%' }
+  - { symbole: 'Ab', signification: 'coefficient d''absorption', unite: '%' }
+formules:
+  - { nom: 'Masse volumique apparente', tex: '\rho_{app} = \frac{m_s}{V_{app}}', domaine: 'Échantillon sec' }
+  - { nom: 'Porosité', tex: 'n = 1 - \frac{\rho_{app}}{\rho_{abs}},\quad c = 1 - n', domaine: 'Compacité c' }
+  - { nom: 'Absorption', tex: 'Ab = \frac{m_{sat} - m_s}{m_s}', domaine: 'Après immersion' }
+---
+
+import { EXEMPLE_ECHANTILLON, proprietesPhysiques } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { VolumesEchantillon } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const p0 = proprietesPhysiques(EXEMPLE_ECHANTILLON)
+export const btc = proprietesPhysiques({ ms: 6800, msat: 7650, Vapp: 3700, rhoAbs: 2.65 })
+export const granite = proprietesPhysiques({ ms: 2650, msat: 2660, Vapp: 1000, rhoAbs: 2.68 })
+export const ex1 = proprietesPhysiques({ ms: 1840, msat: 1960, Vapp: 800, rhoAbs: 2.65 })
+
+<Page etape="intuition" titre="L'intuition : l'éponge et le caillou">
+
+Une éponge et un caillou de même taille n'ont pas la même masse : l'éponge est pleine de **vides**. Les matériaux de construction sont tous, plus ou moins, des éponges : une brique, un parpaing, un béton contiennent des pores. Ces vides changent tout : le poids, la résistance, l'isolation, et surtout la façon dont l'eau entre dans le matériau et l'abîme.
+
+<VolumesEchantillon d={EXEMPLE_ECHANTILLON} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer la part de vides d'un matériau, et pourquoi est-ce si important ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Masse, volume, vides" sousTitre="Trois masses volumiques" etape="cours">
+
+<Panneau n={1} titre="Absolue" icone="calcul" couleur="encre">
+Matière seule : 2,6 à 2,7 g/cm³ pour la plupart des roches.
+</Panneau>
+
+<Panneau n={2} titre="Apparente" icone="regle" couleur="acier">
+Vides compris : brique ≈ 1,8, béton ≈ 2,3.
+</Panneau>
+
+<Panneau n={3} titre="En vrac" icone="plan" couleur="terre">
+Granulats en tas : vides entre grains.
+</Panneau>
+
+<Panneau n={4} titre="Porosité" icone="idee" couleur="brique">
+n = 1 − ρapp/ρabs.
+</Panneau>
+
+<Panneau n={5} titre="Absorption" icone="verification" couleur="validation">
+Eau prise par immersion, en % de masse.
+</Panneau>
+
+<Panneau n={6} titre="Conséquences" icone="attention" couleur="correction">
+Durabilité, gel, sels, poids, isolation.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : trois masses volumiques">
+
+### Absolue, apparente, en vrac
+
+- **absolue** $\rho_{abs}$ : masse de la matière solide / volume du solide (sans aucun vide). Pour le quartz et la plupart des roches : 2,6 à 2,7 g/cm³.
+- **apparente** $\rho_{app}$ : masse / volume total de l'élément (pores compris). C'est elle qui donne le poids propre (L1.3).
+- **en vrac** : pour un granulat en tas, le volume inclut aussi les vides **entre** les grains ; elle sert aux métrés de sable et de gravier.
+
+<DiagrammeBarres alt={`Masses volumiques apparentes calculées : brique de l'exemple ${nombre(p0.rhoApp, 2)} g/cm³, BTC ${nombre(btc.rhoApp, 2)} g/cm³, granite ${nombre(granite.rhoApp, 2)} g/cm³.`} titre="masse volumique apparente (g/cm³)" barres={[{ libelle: 'brique cuite', valeur: p0.rhoApp, texte: nombre(p0.rhoApp, 2), teinte: 'brique' }, { libelle: 'BTC', valeur: btc.rhoApp, texte: nombre(btc.rhoApp, 2), teinte: 'terre' }, { libelle: 'granite', valeur: granite.rhoApp, texte: nombre(granite.rhoApp, 2), teinte: 'beton' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : porosité et compacité">
+
+### Les formules
+
+Le volume du solide vaut $V_s = m_s/\rho_{abs}$. La **porosité** est la part du volume total occupée par les vides :
+
+$$n = 1 - \frac{V_s}{V_{app}} = 1 - \frac{\rho_{app}}{\rho_{abs}}$$
+
+La **compacité** c = 1 − n est la part occupée par la matière.
+
+### Pores ouverts et fermés
+
+Les pores **ouverts** communiquent avec l'extérieur : l'eau y entre. Les pores **fermés** sont isolés. Seuls les premiers comptent pour l'absorption.
+
+<VolumesEchantillon d={{ ms: 6800, msat: 7650, Vapp: 3700, rhoAbs: 2.65 }} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : l'absorption d'eau">
+
+### La mesure
+
+On sèche l'échantillon à l'étuve (105 °C) jusqu'à masse constante : $m_s$. On l'immerge 24 h, on essuie la surface : $m_{sat}$. Le coefficient d'absorption vaut :
+
+$$Ab = \frac{m_{sat} - m_s}{m_s}$$
+
+### Pourquoi c'est important
+
+Un matériau qui absorbe beaucoup d'eau est plus sensible à l'humidité, aux sels, aux remontées capillaires ; il « boit » l'eau du mortier ou du béton frais (on humidifie les briques avant pose). Pour les granulats, l'absorption sert à corriger l'eau de gâchage (L2.6.8).
+
+<Regle type="norme">
+Les méthodes d'essai sont normalisées : EN 1097-6 pour les granulats, EN 772-21 pour les éléments de maçonnerie. Les valeurs limites dépendent de l'usage et des spécifications du projet.
+</Regle>
+
+<DiagrammeBarres alt={`Absorption d'eau : brique de l'exemple ${nombre(p0.absorption * 100, 1)} %, BTC ${nombre(btc.absorption * 100, 1)} %, granite ${nombre(granite.absorption * 100, 2)} %.`} titre="absorption d'eau (%)" barres={[{ libelle: 'brique cuite', valeur: p0.absorption * 100, texte: nombre(p0.absorption * 100, 1), teinte: 'brique' }, { libelle: 'BTC', valeur: btc.absorption * 100, texte: nombre(btc.absorption * 100, 1), teinte: 'terre' }, { libelle: 'granite', valeur: granite.absorption * 100, texte: nombre(granite.absorption * 100, 2), teinte: 'beton' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : l'essai au laboratoire">
+
+<DiagrammeFlux alt="Mesurer porosité et absorption : sécher à l'étuve et peser (masse sèche) ; mesurer le volume apparent ; immerger 24 heures et peser saturé ; calculer masse volumique, porosité et absorption." etapes={[{ titre: 'Sécher', texte: '105 °C, ms', teinte: 'correction' }, { titre: 'Volume', texte: 'Vapp', teinte: 'acier' }, { titre: 'Immerger', texte: '24 h, msat', teinte: 'encre' }, { titre: 'Calculer', texte: 'ρ, n, Ab', teinte: 'terre' }, { titre: 'Comparer', texte: 'spécifications', teinte: 'validation' }]} />
+
+<VolumesEchantillon d={{ ms: 2650, msat: 2660, Vapp: 1000, rhoAbs: 2.68 }} />
+
+</Page>
+
+<FicheCalcul calcul="proprietesPhysiques">
+
+<Cahier titre="Exemple résolu : une brique de terre cuite">
+
+**Énoncé.** Une brique sèche pèse 2 150 g ; saturée, 2 430 g ; son volume apparent est 1 220 cm³ ; la masse volumique absolue de l'argile cuite est 2,65 g/cm³ (données de l'énoncé). Calcule ρapp, la porosité et l'absorption.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Masse volumique et porosité">
+<AN k="rho" />
+<AN k="porosite" />
+<Note>Pourquoi passer par le volume du solide ? Il sépare la matière des vides.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : l'absorption">
+
+<Etape n={3} titre="Absorption">
+<AN k="absorption" />
+<Resultat k="porosite" libelle="Porosité" />
+<Resultat k="absorption" libelle="Absorption" />
+<Schema />
+<Note couleur="vert">Contrôle : la porosité ouverte (eau absorbée / volume) est inférieure à la porosité totale.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre masse volumique absolue et apparente.">
+Le poids propre se calcule avec l'apparente ; la formulation du béton avec l'absolue.
+</Piege>
+
+<Piege erreur="peser un échantillon mal séché.">
+L'eau restante fausse la masse sèche et l'absorption.
+</Piege>
+
+<Piege erreur="utiliser la masse volumique en vrac pour un élément massif.">
+Elle inclut les vides entre grains : elle sert aux tas, pas aux pièces.
+</Piege>
+
+<VolumesEchantillon d={EXEMPLE_ECHANTILLON} />
+
+<Piege erreur="poser des briques sèches en plein soleil.">
+Elles aspirent l'eau du mortier, qui ne durcit pas.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le test rapide du chantier.** On pèse une brique sèche, on la plonge 24 h dans un fût d'eau, on la repèse : on obtient une absorption approchée. Des briques artisanales mal cuites absorbent beaucoup et se délitent sous la pluie ; on les réserve aux murs protégés.
+
+<DiagrammeBarres alt={`Briques d'une même fournée : absorption de ${nombre(ex1.absorption * 100, 1)} % pour l'échantillon de l'exercice, ${nombre(p0.absorption * 100, 1)} % pour celui de l'exemple.`} titre="absorption de deux briques (%)" barres={[{ libelle: 'brique A', valeur: ex1.absorption * 100, texte: nombre(ex1.absorption * 100, 1), teinte: 'validation' }, { libelle: 'brique B', valeur: p0.absorption * 100, texte: nombre(p0.absorption * 100, 1), teinte: 'brique' }]} />
+
+<Encadre type="terrain" titre="Briques artisanales de RDC">
+Dans de nombreuses provinces, les briques sont moulées à la main et cuites en meules au bois. La cuisson est inégale : les briques du cœur sont bien cuites, celles de la périphérie beaucoup moins. Trier les briques (son clair au choc, couleur homogène, absorption) améliore beaucoup la durabilité des murs.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : propriétés physiques">
+
+### Masses volumiques
+
+absolue (solide seul) · apparente (pores compris) · en vrac (vides entre grains)
+
+### Vides
+
+n = 1 − ρapp/ρabs · c = 1 − n · pores ouverts / fermés
+
+### Absorption
+
+Ab = (msat − ms)/ms · séchage 105 °C, immersion 24 h
+
+### Usages
+
+poids propre : ρapp · formulation : ρabs · métré des tas : vrac · durabilité : Ab
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Un parpaing plein">
+
+ms = 1 840 g, msat = 1 960 g, Vapp = 800 cm³, ρabs = 2,65 g/cm³. ρapp et absorption ?
+
+<Indice>Mêmes formules.</Indice>
+
+<Corrige>
+ρapp = **{grandeur(ex1.rhoApp, 2, 'g/cm³')}** ; absorption **{nombre(ex1.absorption * 100, 1)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="BTC">
+
+BTC : 6 800 g sec, 7 650 g saturé, 3 700 cm³, ρabs = 2,65. Porosité et absorption ?
+
+<Indice>n = 1 − ρapp/ρabs.</Indice>
+
+<Corrige>
+n = **{nombre(btc.porosite * 100, 1)} %** ; absorption **{nombre(btc.absorption * 100, 1)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Granite">
+
+Granite : 2 650 g, 2 660 g saturé, 1 000 cm³, ρabs = 2,68. Commente.
+
+<Indice>Très peu de vides.</Indice>
+
+<Corrige>
+Porosité **{nombre(granite.porosite * 100, 1)} %**, absorption **{nombre(granite.absorption * 100, 2)} %** : roche très compacte, excellent granulat.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.1">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La masse volumique apparente inclut :" choix={['les pores', 'seulement le solide', 'l’eau absorbée', 'les vides entre grains d’un tas']} bonne={0} colonnes={2}>
+Volume total de l'élément.
+</QCM>
+
+<QCM n={2} question="La porosité vaut :" choix={['1 − ρapp/ρabs', 'ρapp/ρabs', 'msat − ms', 'ρabs − ρapp']} bonne={0} colonnes={2}>
+Part des vides.
+</QCM>
+
+<QCM n={3} question="L'absorption se rapporte à :" choix={['la masse sèche', 'la masse saturée', 'le volume', 'la porosité']} bonne={0} colonnes={2}>
+(msat − ms)/ms.
+</QCM>
+
+<QCM n={4} question="Pour le poids propre d'un mur, on utilise :" choix={['la masse volumique apparente', 'l’absolue', 'la masse en vrac', 'l’absorption']} bonne={0} colonnes={2}>
+Pores compris.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Brique de l'exemple : porosité :</>} choix={[`${nombre(p0.porosite * 100, 1)} %`, `${nombre(p0.absorption * 100, 1)} %`, '2,6 %', '66,5 %']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="On sèche un échantillon à :" choix={['105 °C', '30 °C', '500 °C', '0 °C']} bonne={0} colonnes={4}>
+Étuve.
+</QCM>
+
+<QCM n={7} question="On humidifie les briques avant pose pour :" choix={['qu’elles n’aspirent pas l’eau du mortier', 'les alourdir', 'les colorer', 'rien']} bonne={0} colonnes={2}>
+Absorption.
+</QCM>
+
+<QCM n={8} question="Seuls les pores qui comptent pour l'absorption sont :" choix={['les pores ouverts', 'les pores fermés', 'tous', 'aucun']} bonne={0} colonnes={2}>
+Ils communiquent avec l'extérieur.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

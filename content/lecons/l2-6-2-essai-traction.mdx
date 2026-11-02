@@ -1,0 +1,304 @@
+---
+id: L2.6.2
+titre: "Comportement mécanique : l'essai de traction"
+objectifs:
+  - Décrire l'essai de traction et ses mesures
+  - Lire une courbe contrainte-déformation (domaine élastique, palier, écrouissage, rupture)
+  - Calculer Re, Rm, l'allongement après rupture et la striction
+  - Distinguer un matériau ductile d'un matériau fragile
+relecture: false
+normes:
+  - "EN ISO 6892-1 : essai de traction des matériaux métalliques"
+  - "EN 1992-1-1 §3.2.4 et annexe C : ductilité des aciers d'armature (classes A, B, C)"
+glossaire:
+  - terme: Limite d'élasticité
+    definition: Re, contrainte au-delà de laquelle la déformation devient permanente.
+  - terme: Résistance à la traction
+    definition: Rm, contrainte maximale atteinte pendant l'essai.
+  - terme: Ductilité
+    definition: Capacité d'un matériau à se déformer beaucoup avant de rompre, en prévenant.
+  - terme: Striction
+    definition: Rétrécissement local de l'éprouvette juste avant la rupture d'un métal ductile.
+symboles:
+  - { symbole: 'Re', signification: 'limite d''élasticité', unite: 'MPa' }
+  - { symbole: 'Rm', signification: 'résistance à la traction', unite: 'MPa' }
+  - { symbole: 'A', signification: 'allongement après rupture', unite: '%' }
+  - { symbole: 'Z', signification: 'coefficient de striction', unite: '%' }
+formules:
+  - { nom: 'Contraintes', tex: 'R_e = \frac{F_e}{S_0},\quad R_m = \frac{F_m}{S_0}', domaine: 'S0 section initiale' }
+  - { nom: 'Allongement', tex: 'A = \frac{L_u - L_0}{L_0}', domaine: 'Après rupture' }
+  - { nom: 'Striction', tex: 'Z = \frac{S_0 - S_u}{S_0}', domaine: 'Matériaux ductiles' }
+---
+
+import { essaiTraction, EXEMPLE_TRACTION } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { CourbesMateriaux, EprouvetteTraction } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const t0 = essaiTraction(EXEMPLE_TRACTION)
+export const fragile = essaiTraction({ d0: 12, L0: 60, Fe: 58, Fm: 60, Lu: 61.5, du: 11.9 })
+export const ex1 = essaiTraction({ d0: 10, L0: 50, Fe: 40, Fm: 46, Lu: 60, du: 7 })
+
+<Page etape="intuition" titre="L'intuition : tirer jusqu'à casser">
+
+Pour connaître un matériau, on le maltraite méthodiquement : on prend une barre, on la tire de plus en plus fort dans une machine, et l'on enregistre la force et l'allongement jusqu'à la rupture. La courbe obtenue est la « carte d'identité » mécanique du matériau : elle dit jusqu'où il reste élastique, combien il résiste, et s'il casse en prévenant ou brutalement.
+
+<CourbesMateriaux />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Que nous apprend l'essai de traction, et pourquoi veut-on des aciers ductiles ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="L'essai de traction" sousTitre="Lire la courbe" etape="cours">
+
+<Panneau n={1} titre="Élastique" icone="regle" couleur="encre">
+Droite σ = E ε, retour à zéro.
+</Panneau>
+
+<Panneau n={2} titre="Re" icone="calcul" couleur="acier">
+Début des déformations permanentes.
+</Panneau>
+
+<Panneau n={3} titre="Palier, écrouissage" icone="plan" couleur="terre">
+L'acier s'allonge, puis se durcit.
+</Panneau>
+
+<Panneau n={4} titre="Rm" icone="idee" couleur="brique">
+Contrainte maximale.
+</Panneau>
+
+<Panneau n={5} titre="Rupture" icone="attention" couleur="correction">
+Striction puis rupture : A, Z.
+</Panneau>
+
+<Panneau n={6} titre="Ductile ou fragile" icone="verification" couleur="validation">
+Grand A, Rm/Re &gt; 1 : prévient avant de casser.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'essai et la courbe">
+
+### Le montage
+
+Une éprouvette de section $S_0$ porte deux repères à la distance $L_0$. La machine tire à vitesse lente ; on mesure la force F et l'allongement ΔL. On trace $\sigma = F/S_0$ en fonction de $\varepsilon = \Delta L/L_0$.
+
+### Les domaines de l'acier
+
+1. **élastique** : droite de pente E (L2.4.1) ;
+2. **palier** à $R_e$ : l'acier s'allonge sans que la force augmente ;
+3. **écrouissage** : la force remonte jusqu'à $F_m$ ;
+4. **striction** : la section se rétrécit localement, la force baisse, puis rupture.
+
+<EprouvetteTraction d0={12} du={8.4} L0={60} Lu={70.8} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : les grandeurs mesurées">
+
+### Les formules
+
+$R_e = F_e/S_0$, $R_m = F_m/S_0$, $A = (L_u - L_0)/L_0$, $Z = (S_0 - S_u)/S_0$.
+
+### Exemple
+
+Barre HA 12 : $R_e$ = {nombre(t0.Re, 0)} MPa, $R_m$ = {nombre(t0.Rm, 0)} MPa, A = {nombre(t0.A * 100, 1)} %, Z = {nombre(t0.Z * 100, 0)} %, $R_m/R_e$ = {nombre(t0.rapport, 2)}.
+
+<DiagrammeBarres alt={`Résultats de l'essai : Re ${nombre(t0.Re, 0)} MPa, Rm ${nombre(t0.Rm, 0)} MPa.`} titre="HA 12 : contraintes (MPa)" barres={[{ libelle: 'Re', valeur: t0.Re, texte: nombre(t0.Re, 0), teinte: 'acier' }, { libelle: 'Rm', valeur: t0.Rm, texte: nombre(t0.Rm, 0), teinte: 'correction' }]} />
+
+<Regle type="norme">
+L'EC2 (§3.2.4, annexe C) classe les aciers d'armature en ductilité A, B ou C selon l'allongement sous charge maximale et le rapport $f_t/f_y$ <AVerifier note="A_VERIFIER.md n° 69 : critères de ductilité des aciers d'armature, EN 1992-1-1 annexe C (εuk et k = ft/fy pour les classes A, B, C) et EN 10080" />. En zone sismique, on exige la classe la plus ductile.
+</Regle>
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : ductile ou fragile">
+
+<DiagrammeComparaison alt="Ductile contre fragile : un matériau ductile (acier doux, cuivre) s'allonge beaucoup, présente une striction et prévient avant de casser ; un matériau fragile (fonte, verre, béton en traction) casse brutalement au bout de son domaine élastique, sans déformation visible." gauche={{ titre: 'Fragile', items: ['peu d’allongement', 'rupture brutale', 'béton tendu, fonte, verre', 'pas d’avertissement'] }} droite={{ titre: 'Ductile', items: ['grand allongement A', 'striction visible', 'acier, aluminium', 'fissures et flèches avant ruine'] }} />
+
+### Pourquoi c'est vital
+
+Une structure dont les pièces sont ductiles **prévient** : elle fléchit, fissure, se déforme, avant de s'effondrer, laissant le temps d'évacuer. C'est un principe de base du béton armé (l'acier doit plastifier avant que le béton ne s'écrase) et du génie parasismique.
+
+<DiagrammeBarres alt={`Allongement après rupture : acier ductile ${nombre(t0.A * 100, 1)} %, acier de mauvaise qualité ${nombre(fragile.A * 100, 1)} %.`} titre="allongement après rupture (%)" barres={[{ libelle: 'acier conforme', valeur: t0.A * 100, texte: nombre(t0.A * 100, 1), teinte: 'validation' }, { libelle: 'acier douteux', valeur: fragile.A * 100, texte: nombre(fragile.A * 100, 1), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Essai de traction : préparer l'éprouvette et mesurer d0, L0 ; tirer en enregistrant F et ΔL ; relever Fe et Fm ; mesurer Lu et du après rupture ; calculer Re, Rm, A, Z et comparer aux exigences." etapes={[{ titre: 'Préparer', texte: 'd0, L0', teinte: 'encre' }, { titre: 'Tirer', texte: 'F, ΔL', teinte: 'acier' }, { titre: 'Relever', texte: 'Fe, Fm', teinte: 'terre' }, { titre: 'Après rupture', texte: 'Lu, du', teinte: 'brique' }, { titre: 'Calculer', texte: 'Re, Rm, A, Z', teinte: 'validation' }]} />
+
+<EprouvetteTraction d0={10} du={7} L0={50} Lu={60} />
+
+</Page>
+
+<FicheCalcul calcul="essaiTractionAcier">
+
+<Cahier titre="Exemple résolu : un HA 12 du marché">
+
+**Énoncé.** Un échantillon de HA 12 donne Fe = 58 kN, Fm = 67 kN ; L0 = 60 mm devient Lu = 70,8 mm ; le diamètre à la rupture vaut 8,4 mm (données de l'énoncé). Calcule Re, Rm, A et Z.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Section et contraintes">
+<AN k="S0" />
+<AN k="R" />
+<Note>Pourquoi diviser par S0 et pas par la section réelle ? Par convention : contrainte « nominale ».</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : ductilité">
+
+<Etape n={3} titre="Allongement et striction">
+<AN k="A" />
+<Resultat k="Re" libelle="Limite d'élasticité" />
+<Resultat k="A" libelle="Allongement après rupture" />
+<Schema />
+<Note couleur="vert">Contrôle : Rm &gt; Re ; un rapport Rm/Re proche de 1 signale un acier peu ductile.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="confondre Re et Rm.">
+On calcule avec Re (fy) ; Rm mesure la réserve avant rupture.
+</Piege>
+
+<Piege erreur="mesurer l'allongement hors des repères.">
+A se mesure sur la longueur L0 entre repères.
+</Piege>
+
+<Piege erreur="croire qu'un acier plus résistant est toujours meilleur.">
+Un acier très dur mais peu ductile casse sans prévenir.
+</Piege>
+
+<CourbesMateriaux />
+
+<Piege erreur="plier et redresser des barres à froid.">
+Cela réduit la ductilité ; les barres déjà pliées ne se redressent pas.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Contrôler les aciers.** Des barres vendues comme « HA 500 » peuvent être des aciers de récupération ou de qualité inconnue. Un essai de traction en laboratoire sur quelques barres par lot, et un essai de pliage sur chantier, évitent des structures fragiles.
+
+<EprouvetteTraction d0={12} du={11.9} L0={60} Lu={61.5} />
+
+<Encadre type="attention" titre="Essai de pliage sur chantier">
+On plie une barre à 180° autour d'un mandrin : un bon acier se plie sans fissurer sur l'extérieur du pli. Des fissures signalent un acier fragile : on refuse le lot et on fait des essais de traction.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : essai de traction">
+
+### Grandeurs
+
+Re = Fe/S0 · Rm = Fm/S0 · A = (Lu − L0)/L0 · Z = (S0 − Su)/S0
+
+### Courbe de l'acier
+
+élastique → palier → écrouissage → striction → rupture
+
+### Ductilité (à vérifier)
+
+classes A, B, C (EC2 annexe C) · zone sismique : la plus ductile
+
+### Matériaux
+
+ductiles : acier · fragiles : fonte, verre, béton en traction
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="HA 10">
+
+d0 = 10 mm, Fe = 40 kN, Fm = 46 kN. Re et Rm ?
+
+<Indice>S0 = 78,5 mm².</Indice>
+
+<Corrige>
+Re = **{grandeur(ex1.Re, 0, 'MPa')}** ; Rm = **{grandeur(ex1.Rm, 0, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Allongement">
+
+Même barre : L0 = 50 mm, Lu = 60 mm, du = 7 mm. A et Z ?
+
+<Indice>Formules de l'allongement et de la striction.</Indice>
+
+<Corrige>
+A = **{nombre(ex1.A * 100, 0)} %** ; Z = **{nombre(ex1.Z * 100, 0)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Lot suspect">
+
+Un lot donne Re = {nombre(fragile.Re, 0)} MPa, Rm = {nombre(fragile.Rm, 0)} MPa et A = {nombre(fragile.A * 100, 1)} %. Faut-il l'accepter ?
+
+<Indice>Regarde Rm/Re et A.</Indice>
+
+<Corrige>
+Rm/Re = **{nombre(fragile.rapport, 2)}** et A très faible : acier **peu ductile**, à refuser pour une structure.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.2">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Re est :" choix={['la limite d’élasticité', 'la résistance maximale', 'l’allongement', 'la striction']} bonne={0} colonnes={2}>
+Début des déformations permanentes.
+</QCM>
+
+<QCM n={2} question="Un matériau ductile :" choix={['se déforme beaucoup avant de rompre', 'casse brutalement', 'ne se déforme pas', 'est toujours mou']} bonne={0} colonnes={2}>
+Il prévient.
+</QCM>
+
+<QCM n={3} question="La striction est :" choix={['un rétrécissement local avant rupture', 'une fissure de béton', 'un palier', 'un module']} bonne={0} colonnes={2}>
+Métaux ductiles.
+</QCM>
+
+<QCM n={4} question="A = " choix={['(Lu − L0)/L0', 'Fm/S0', 'S0 − Su', 'Re/Rm']} bonne={0} colonnes={4}>
+Allongement après rupture.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>HA 12 de l'exemple : Re vaut :</>} choix={[grandeur(t0.Re, 0, 'MPa'), grandeur(t0.Rm, 0, 'MPa'), '58 MPa', '400 MPa']} bonne={0} colonnes={4}>
+Fe/S0.
+</QCM>
+
+<QCM n={6} question="Le béton en traction est :" choix={['fragile', 'ductile', 'élastoplastique', 'très résistant']} bonne={0} colonnes={2}>
+D'où les armatures.
+</QCM>
+
+<QCM n={7} question="En zone sismique, on exige des aciers :" choix={['très ductiles', 'très durs et fragiles', 'non testés', 'lisses']} bonne={0} colonnes={2}>
+Dissipation d'énergie.
+</QCM>
+
+<QCM n={8} question="Sur chantier, un essai simple de l'acier est :" choix={['le pliage', 'le cône d’Abrams', 'l’écrasement', 'le tamisage']} bonne={0} colonnes={2}>
+Fissures au pli : refus.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

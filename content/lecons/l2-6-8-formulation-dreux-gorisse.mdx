@@ -1,0 +1,312 @@
+---
+id: L2.6.8
+titre: "Formulation du béton : méthode Dreux-Gorisse"
+objectifs:
+  - Fixer la résistance moyenne à viser à partir de la classe demandée
+  - Calculer le rapport C/E par la formule de Bolomey
+  - Calculer les volumes absolus des constituants d'un mètre cube
+  - Convertir en masses, en sacs et en dosages de chantier
+relecture: false
+normes:
+  - "EN 206 : spécification du béton (classe, consistance, exposition) ; la méthode de formulation est libre"
+glossaire:
+  - terme: Formulation
+    definition: Détermination des quantités de ciment, d'eau, de sable, de gravier et d'adjuvant pour obtenir un béton donné.
+  - terme: Formule de Bolomey
+    definition: "Relation fcm = G σc (C/E − 0,5) entre la résistance du béton, la classe du ciment et le rapport C/E."
+  - terme: Coefficient granulaire
+    definition: G, coefficient (≈ 0,35 à 0,65) qui traduit la qualité et la dimension des granulats dans la formule de Bolomey.
+  - terme: Volume absolu
+    definition: Volume réellement occupé par la matière d'un constituant (masse / masse volumique absolue).
+symboles:
+  - { symbole: 'C', signification: 'dosage en ciment', unite: 'kg/m³' }
+  - { symbole: 'E', signification: 'eau efficace', unite: 'L/m³' }
+  - { symbole: 'σc', signification: 'classe vraie du ciment', unite: 'MPa' }
+  - { symbole: 'G', signification: 'coefficient granulaire', unite: '—' }
+formules:
+  - { nom: 'Bolomey', tex: 'f_{cm} = G\,\sigma_c\left(\frac{C}{E} - 0{,}5\right)', domaine: 'Résistance à 28 j' }
+  - { nom: 'Volumes absolus', tex: '1000 = \frac{C}{\rho_c} + E + V_{air} + \frac{S}{\rho_s} + \frac{G_r}{\rho_g}', domaine: 'Litres pour 1 m³' }
+  - { nom: 'Cible', tex: 'f_{cm} \approx f_{ck} + 1{,}645\,s', domaine: 'L2.2.5' }
+---
+
+import { EXEMPLE_FORMULATION, formulation } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { VolumesBeton } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const f0 = formulation(EXEMPLE_FORMULATION)
+export const cible = 25 + 1.645 * 5
+export const f30 = formulation({ ...EXEMPLE_FORMULATION, fcm: 38, C: 380 })
+export const ex3 = formulation({ ...EXEMPLE_FORMULATION, G: 0.45 })
+export const brouette = 60
+export const parSac = { sable: (f0.sable / f0.sacs), gravier: (f0.gravier / f0.sacs), eau: (f0.E / f0.sacs) }
+
+<Page etape="intuition" titre="L'intuition : une recette de cuisine calculée">
+
+Faire un béton, c'est suivre une recette : tant de ciment, d'eau, de sable, de gravier. Mais une recette « au jugé » (un sac, trois brouettes de sable, cinq de gravier, de l'eau « jusqu'à ce que ça coule ») donne des bétons très variables. La formulation **calcule** la recette à partir de ce qu'on veut obtenir : la résistance, la consistance, la durabilité.
+
+<VolumesBeton d={EXEMPLE_FORMULATION} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment calculer les quantités de chaque constituant pour 1 m³ d'un béton donné ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="La méthode" sousTitre="Du cahier des charges au m³" etape="cours">
+
+<Panneau n={1} titre="Cible" icone="calcul" couleur="encre">
+fcm = fck + marge (L2.2.5).
+</Panneau>
+
+<Panneau n={2} titre="C/E" icone="regle" couleur="acier">
+Bolomey : C/E = fcm/(G σc) + 0,5.
+</Panneau>
+
+<Panneau n={3} titre="Ciment" icone="plan" couleur="terre">
+Dosage selon C/E et ouvrabilité ; minimum d'exposition.
+</Panneau>
+
+<Panneau n={4} titre="Eau" icone="idee" couleur="brique">
+E = C/(C/E), corrigée de l'humidité des granulats.
+</Panneau>
+
+<Panneau n={5} titre="Granulats" icone="verification" couleur="validation">
+Le reste du m³ en volumes absolus, sable / gravier.
+</Panneau>
+
+<Panneau n={6} titre="Essai" icone="attention" couleur="correction">
+Gâchée d'essai, cône, éprouvettes, ajustement.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : la résistance et le rapport C/E">
+
+### La cible
+
+Pour un C25/30 avec un écart-type de production estimé à 5 MPa : $f_{cm} \approx f_{ck} + 1{,}645\,s$ = {nombre(cible, 1)} MPa (L2.2.5).
+
+### Bolomey
+
+Dreux et Gorisse partent de la loi de Bolomey :
+
+$$f_{cm} = G\,\sigma_c\left(\frac{C}{E} - 0{,}5\right)\ \Rightarrow\ \frac{C}{E} = \frac{f_{cm}}{G\,\sigma_c} + 0{,}5$$
+
+σc est la classe **vraie** du ciment (souvent un peu au-dessus de la classe nominale) ; G dépend de la qualité des granulats (≈ 0,45 à 0,55 pour des granulats courants) <AVerifier note="A_VERIFIER.md n° 75 : valeurs du coefficient granulaire G de Dreux (tableau selon la qualité et la dimension des granulats) et classe vraie des ciments" />. Pour fcm = 33 MPa, σc = 45, G = 0,5 : C/E = {nombre(f0.CsurE, 2)}.
+
+<DiagrammeBarres alt={`E/C nécessaire : ${nombre(f0.EsurC, 2)} pour fcm = 33 MPa, ${nombre(f30.EsurC, 2)} pour fcm = 38 MPa.`} titre="rapport E/C selon la résistance visée" barres={[{ libelle: 'fcm = 33 MPa', valeur: f0.EsurC, texte: nombre(f0.EsurC, 2), teinte: 'terre' }, { libelle: 'fcm = 38 MPa', valeur: f30.EsurC, texte: nombre(f30.EsurC, 2), teinte: 'acier' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : ciment, eau et granulats">
+
+### Le ciment et l'eau
+
+Dreux lit le dosage en ciment sur un abaque, en fonction de C/E et de l'affaissement visé. Dans cette leçon, **simplification pédagogique** : on fixe C (ici 350 kg/m³, au moins le minimum de la classe d'exposition, L2.6.10), et l'on en déduit $E = C/(C/E)$ = {nombre(f0.E, 0)} L.
+
+### Les volumes absolus
+
+Un mètre cube, c'est 1 000 L de matière et d'air. On retire le volume absolu du ciment ($C/\rho_c$ = {nombre(f0.Vc, 0)} L), l'eau et l'air : il reste {nombre(f0.Vg, 0)} L de granulats.
+
+### Sable et gravier
+
+Dreux trace une courbe granulaire de référence et en tire la part de sable ; ici on la fixe à 40 % du volume absolu des granulats. Masses : sable {nombre(f0.sable, 0)} kg, gravier {nombre(f0.gravier, 0)} kg.
+
+<VolumesBeton d={EXEMPLE_FORMULATION} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : du laboratoire au chantier">
+
+### Corrections
+
+- l'eau apportée par les granulats humides se **retranche** de l'eau à verser (et les granulats humides pèsent plus lourd) ;
+- les masses se convertissent en volumes de chantier (brouettes, seaux) avec la masse volumique **en vrac** ;
+- on fait une **gâchée d'essai** : cône, éprouvettes, puis ajustement.
+
+<Regle type="simplification">
+La méthode Dreux-Gorisse complète utilise la courbe granulaire de référence et des abaques pour le dosage en ciment et l'eau ; on l'applique en laboratoire. Ce qui compte ici est la logique : résistance → C/E → volumes absolus → masses.
+</Regle>
+
+<DiagrammeBarres alt={`Pour un sac de 50 kg de ciment : environ ${nombre(parSac.sable, 0)} kg de sable, ${nombre(parSac.gravier, 0)} kg de gravier et ${nombre(parSac.eau, 0)} L d'eau.`} titre="dosage par sac de 50 kg (kg, L)" barres={[{ libelle: 'sable (kg)', valeur: parSac.sable, texte: nombre(parSac.sable, 0), teinte: 'terre' }, { libelle: 'gravier (kg)', valeur: parSac.gravier, texte: nombre(parSac.gravier, 0), teinte: 'brique' }, { libelle: 'eau (L)', valeur: parSac.eau, texte: nombre(parSac.eau, 0), teinte: 'encre' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche complète">
+
+<DiagrammeFlux alt="Formuler un béton : fixer classe, consistance et exposition ; calculer fcm ; calculer C/E par Bolomey ; fixer C (abaque ou minimum d'exposition) et E ; répartir les granulats en volumes absolus ; convertir en masses ; gâchée d'essai et ajustement." etapes={[{ titre: 'Cahier des charges', texte: 'C25/30, S3, XC2', teinte: 'encre' }, { titre: 'fcm', texte: 'fck + marge', teinte: 'acier' }, { titre: 'C/E', texte: 'Bolomey', teinte: 'terre' }, { titre: 'Volumes', texte: '1 000 L', teinte: 'brique' }, { titre: 'Essai', texte: 'ajuster', teinte: 'validation' }]} />
+
+<VolumesBeton d={{ ...EXEMPLE_FORMULATION, fcm: 38, C: 380 }} />
+
+</Page>
+
+<FicheCalcul calcul="formulationBeton">
+
+<Cahier titre="Exemple résolu : un C25/30 pour des semelles">
+
+**Énoncé.** On vise fcm = 33 MPa avec un CEM II 42,5 (classe vraie 45 MPa), des granulats courants (G = 0,5), 350 kg/m³ de ciment, 15 L d'air et 40 % de sable dans les granulats ; ρ = 3,1 kg/L pour le ciment et 2,65 kg/L pour les granulats (données de l'énoncé). Calcule 1 m³.
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Rapport C/E et eau">
+<AN k="CE" />
+<AN k="E" />
+<Note>Pourquoi la classe vraie et non 42,5 ? La formule a été calée sur la résistance réelle du ciment.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : les granulats">
+
+<Etape n={3} titre="Volumes et masses">
+<AN k="volumes" />
+<AN k="masses" />
+<Resultat k="sable" libelle="Sable" />
+<Resultat k="gravier" libelle="Gravier" />
+<Schema />
+<Note couleur="vert">Contrôle : la masse d'un m³ de béton est voisine de 2 300 à 2 400 kg.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre fck comme cible.">
+On vise la moyenne fcm, au-dessus de fck.
+</Piege>
+
+<Piege erreur="additionner des masses au lieu de volumes absolus.">
+C'est le volume qui remplit le mètre cube.
+</Piege>
+
+<Piege erreur="oublier l'eau des granulats humides.">
+Le béton réel contient alors trop d'eau.
+</Piege>
+
+<VolumesBeton d={{ ...EXEMPLE_FORMULATION, G: 0.45 }} />
+
+<Piege erreur="doser au seau sans calibrer.">
+Un seau « de sable » humide ne pèse pas comme un seau sec ; on pèse au moins une fois.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**La boîte de dosage.** Sur un chantier sans centrale, on fabrique des caisses en bois dont le volume correspond, en vrac, à la masse de sable et de gravier d'un sac de ciment. On les remplit à ras, on ne dose plus « à la pelle ». C'est simple et cela réduit beaucoup la dispersion (L2.2.5).
+
+<DiagrammeBarres alt={`Composition calculée d'un m³ : ciment 350 kg, eau ${nombre(f0.E, 0)} L, sable ${nombre(f0.sable, 0)} kg, gravier ${nombre(f0.gravier, 0)} kg.`} titre="1 m³ de béton (kg)" barres={[{ libelle: 'ciment', valeur: 350, texte: '350', teinte: 'beton' }, { libelle: 'eau', valeur: f0.E, texte: nombre(f0.E, 0), teinte: 'encre' }, { libelle: 'sable', valeur: f0.sable, texte: nombre(f0.sable, 0), teinte: 'terre' }, { libelle: 'gravier', valeur: f0.gravier, texte: nombre(f0.gravier, 0), teinte: 'brique' }]} />
+
+<Encadre type="terrain" titre="« 1-2-3 » ou « 1-2-4 » ?">
+Les dosages volumiques traditionnels (1 ciment, 2 sable, 3 ou 4 gravier) donnent des bétons très différents selon le sable, l'eau et le tassement des volumes. Ils dépannent pour un béton non structurel ; pour un béton armé, on formule et on contrôle.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : formulation">
+
+### Cible
+
+fcm ≈ fck + 1,645 s
+
+### Bolomey
+
+C/E = fcm/(G σc) + 0,5 · G ≈ 0,45 – 0,55 (à vérifier)
+
+### Volumes absolus
+
+1 000 L = C/ρc + E + air + S/ρs + Gr/ρg
+
+### Chantier
+
+corriger l'eau des granulats · boîtes de dosage · gâchée d'essai
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Cible">
+
+fck = 25 MPa, s = 5 MPa. fcm à viser ?
+
+<Indice>fck + 1,645 s.</Indice>
+
+<Corrige>
+**{grandeur(cible, 1, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Plus résistant">
+
+fcm = 38 MPa, C = 380 kg/m³ (autres données identiques). E et E/C ?
+
+<Indice>Fiche.</Indice>
+
+<Corrige>
+E = **{grandeur(f30.E, 0, 'L')}** ; E/C = **{nombre(f30.EsurC, 2)}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Granulats médiocres">
+
+G = 0,45 au lieu de 0,5. Que devient l'eau pour fcm = 33 MPa et C = 350 kg/m³ ?
+
+<Indice>C/E augmente.</Indice>
+
+<Corrige>
+C/E = {nombre(ex3.CsurE, 2)} → E = **{grandeur(ex3.E, 0, 'L')}** : moins d'eau, donc béton plus raide ; il faudra un plastifiant ou plus de ciment.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.8">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La formule de Bolomey relie fcm à :" choix={['C/E', 'la granulométrie seule', 'l’affaissement', 'la température']} bonne={0} colonnes={2}>
+Et à G σc.
+</QCM>
+
+<QCM n={2} question="Les quantités se calculent en :" choix={['volumes absolus', 'masses additionnées', 'brouettes', 'sacs']} bonne={0} colonnes={2}>
+1 000 L.
+</QCM>
+
+<QCM n={3} question="On vise une résistance :" choix={['moyenne supérieure à fck', 'égale à fck', 'inférieure', 'quelconque']} bonne={0} colonnes={2}>
+Marge statistique.
+</QCM>
+
+<QCM n={4} question="Un sable humide :" choix={['apporte de l’eau à retrancher', 'n’a pas d’effet', 'réduit la résistance seul', 'doit être chauffé']} bonne={0} colonnes={2}>
+Correction d'eau.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Exemple : eau par m³ :</>} choix={[grandeur(f0.E, 0, 'L'), '350 L', '100 L', grandeur(f30.E, 0, 'L')]} bonne={0} colonnes={4}>
+C/(C/E).
+</QCM>
+
+<QCM n={6} question="La masse d'un m³ de béton courant vaut environ :" choix={['2 300 à 2 400 kg', '1 000 kg', '3 500 kg', '500 kg']} bonne={0} colonnes={2}>
+Contrôle.
+</QCM>
+
+<QCM n={7} question="Augmenter fcm à ciment constant demande :" choix={['moins d’eau', 'plus d’eau', 'plus de sable', 'moins de gravier seulement']} bonne={0} colonnes={2}>
+C/E plus grand.
+</QCM>
+
+<QCM n={8} question="Après le calcul, on fait toujours :" choix={['une gâchée d’essai', 'le coulage direct', 'un essai de traction', 'rien']} bonne={0} colonnes={2}>
+Ajustement.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

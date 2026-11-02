@@ -1,0 +1,295 @@
+---
+id: L2.6.15
+titre: "Bois : structure, humidité, classes, essences locales"
+objectifs:
+  - Décrire la structure du bois et ses trois directions
+  - Calculer la teneur en eau et estimer le retrait
+  - Lire une classe de résistance (C24, D30…)
+  - Choisir et protéger un bois local de structure
+relecture: false
+normes:
+  - "EN 338 : classes de résistance du bois de structure"
+  - "EN 1995-1-1 §2.3.1.3 : classes de service (humidité)"
+  - "EN 335 : classes d'emploi (durabilité)"
+glossaire:
+  - terme: Fil du bois
+    definition: Direction des fibres, le long du tronc ; le bois y est le plus résistant et le plus raide.
+  - terme: Teneur en eau
+    definition: H = (masse humide − masse sèche)/masse sèche, en %.
+  - terme: Point de saturation des fibres
+    definition: Humidité (≈ 30 %) au-dessous de laquelle le bois se rétracte en séchant.
+  - terme: Classe de résistance
+    definition: Code de l'EN 338 (C pour résineux, D pour feuillus) suivi de la résistance caractéristique en flexion en MPa.
+symboles:
+  - { symbole: 'H', signification: 'teneur en eau', unite: '%' }
+  - { symbole: 'fm,k', signification: 'résistance caractéristique en flexion', unite: 'MPa' }
+  - { symbole: 'L, R, T', signification: 'directions longitudinale, radiale, tangentielle', unite: '—' }
+formules:
+  - { nom: 'Teneur en eau', tex: 'H = \frac{m_h - m_s}{m_s}', domaine: 'ms : anhydre' }
+  - { nom: 'Retrait', tex: '\Delta b = b\,\alpha\,(H_1 - H_2)', domaine: 'Sous 30 % d''humidité' }
+---
+
+import { humiditeBois, retraitBois } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { TroncBois } from '@/components/schemas/Materiaux2'
+import { PlancherSolives } from '@/components/schemas/Rdm1'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const h0 = humiditeBois(560, 480)
+export const r0 = retraitBois(150, h0.H * 100, 12, 0.2)
+export const vert = retraitBois(200, 60, 12, 0.2)
+export const ex1 = humiditeBois(1250, 1000)
+
+<Page etape="intuition" titre="L'intuition : un matériau vivant">
+
+Le bois est un faisceau de tubes (les fibres) collés ensemble, alignés le long du tronc. Comme un paquet de pailles, il est solide dans le sens des fibres et beaucoup plus faible en travers. Et il « respire » : il prend et rend l'humidité de l'air, en gonflant et en se rétractant. Bien utilisé, c'est un excellent matériau de structure, léger et renouvelable.
+
+<TroncBois />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment caractériser un bois de structure et éviter ses pièges (humidité, retrait, insectes) ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Le bois de structure" sousTitre="Fil, eau, classes" etape="cours">
+
+<Panneau n={1} titre="Fil" icone="regle" couleur="validation">
+Résistant le long des fibres, faible en travers.
+</Panneau>
+
+<Panneau n={2} titre="Humidité" icone="idee" couleur="encre">
+H = (mh − ms)/ms.
+</Panneau>
+
+<Panneau n={3} titre="Retrait" icone="attention" couleur="correction">
+Sous 30 % : le bois se rétracte en séchant.
+</Panneau>
+
+<Panneau n={4} titre="Classes" icone="calcul" couleur="acier">
+C (résineux), D (feuillus) : C24, D30…
+</Panneau>
+
+<Panneau n={5} titre="Durabilité" icone="plan" couleur="terre">
+Termites, champignons : essence et traitement.
+</Panneau>
+
+<Panneau n={6} titre="Service" icone="verification" couleur="validation">
+Au sec, ventilé, hors du sol.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : structure et directions">
+
+### Les trois directions
+
+**L** (le fil, longitudinal), **R** (radial, du cœur vers l'écorce) et **T** (tangentiel, le long des cernes). Le bois est très anisotrope : résistance et module sont bien plus grands selon L ; le retrait est le plus fort selon T.
+
+### Aubier et duramen
+
+Le **duramen** (cœur) est plus durable ; l'**aubier** (périphérie) est plus sensible aux insectes et aux champignons. Les nœuds, les fentes et la pente du fil réduisent la résistance : c'est pourquoi on classe le bois.
+
+<TroncBois />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : l'eau dans le bois">
+
+### Teneur en eau
+
+$H = (m_h - m_s)/m_s$. Un bois fraîchement abattu dépasse souvent 50 % ; un bois sec à l'air en climat tropical humide se stabilise vers 12 à 18 %.
+
+### Retrait
+
+Au-dessous du point de saturation des fibres (≈ 30 %), le bois se rétracte en séchant. Une planche de 150 mm à {nombre(h0.H * 100, 0)} % qui sèche à 12 % perd environ {nombre(r0, 1)} mm de largeur (coefficient de retrait tangentiel pris à 0,2 % par point d'humidité, ordre de grandeur) <AVerifier note="A_VERIFIER.md n° 83 : coefficients de retrait tangentiel et radial des essences tropicales (CIRAD, fiches Tropix) et humidité d'équilibre selon le climat" />.
+
+<DiagrammeBarres alt={`Retrait en séchant jusqu'à 12 % : planche de 150 mm à ${nombre(h0.H * 100, 0)} %, ${nombre(r0, 1)} mm ; madrier de 200 mm vert (60 %), ${nombre(vert, 1)} mm.`} titre="retrait de largeur (mm)" barres={[{ libelle: '150 mm, mi-sec', valeur: r0, texte: nombre(r0, 1), teinte: 'terre' }, { libelle: '200 mm, vert', valeur: vert, texte: nombre(vert, 1), teinte: 'correction' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : classes et durabilité">
+
+### Les classes de résistance
+
+L'EN 338 classe le bois de structure : **C** (résineux, C18 à C50) et **D** (feuillus, D18 à D80), le nombre étant la résistance caractéristique en flexion en MPa. Un bois est classé visuellement ou par machine ; un bois non classé ne s'utilise pas en structure calculée.
+
+### La durabilité
+
+Termites et champignons détruisent les bois tendres et l'aubier. On choisit une essence durable (duramen) ou l'on traite le bois, et surtout on le **protège de l'humidité** : hors du sol, ventilé, à l'abri des fuites (classes d'emploi, EN 335).
+
+<PlancherSolives e={0.5} L={4} b={7.5} h={22.5} />
+
+<Regle type="norme">
+Pour le calcul (EN 1995), les propriétés du bois sont modulées par la classe de service (humidité ambiante) et la durée de la charge (kmod) : un bois humide et chargé en permanence est moins résistant.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : de l'arbre à la poutre">
+
+<DiagrammeFlux alt="Du bois sur pied à la pièce de structure : abattage ; sciage selon le fil ; séchage à l'abri jusqu'à l'humidité de service ; classement ; traitement ; pose hors du sol et ventilée." etapes={[{ titre: 'Abattre', texte: 'essence', teinte: 'terre' }, { titre: 'Scier', texte: 'selon le fil', teinte: 'encre' }, { titre: 'Sécher', texte: 'à l’abri', teinte: 'acier' }, { titre: 'Classer', texte: 'C, D', teinte: 'brique' }, { titre: 'Poser', texte: 'au sec', teinte: 'validation' }]} />
+
+<TroncBois />
+
+</Page>
+
+<FicheCalcul calcul="humiditeBois">
+
+<Cahier titre="Exemple résolu : une planche de coffrage réutilisée en plancher">
+
+**Énoncé.** Une éprouvette de bois pèse 560 g ; séchée à l'étuve, 480 g. La planche fait 150 mm de large et se stabilisera à 12 % en service (données de l'énoncé). Teneur en eau et retrait ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Humidité et retrait">
+<AN k="H" />
+<AN k="retrait" />
+<Resultat k="H" libelle="Teneur en eau" />
+<Resultat k="retrait" libelle="Retrait" />
+<Schema />
+<Note couleur="vert">Contrôle : une planche posée humide laisse des joints ouverts en séchant ; on pose le bois sec.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="poser du bois vert en charpente.">
+Il se rétracte, se tord et fend en séchant ; les assemblages prennent du jeu.
+</Piege>
+
+<Piege erreur="charger le bois en travers du fil.">
+La résistance perpendiculaire au fil est très faible.
+</Piege>
+
+<Piege erreur="enterrer le pied d'un poteau en bois.">
+Humidité et termites le détruisent en quelques années.
+</Piege>
+
+<TroncBois />
+
+<Piege erreur="utiliser de l'aubier non traité.">
+C'est la partie la plus attaquée par les insectes.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Essences locales.** La RDC possède de grandes forêts : iroko, sapelli, sipo, afrormosia, limba, wengé… Leur densité, leur durabilité et leur résistance varient beaucoup. On s'appuie sur les fiches techniques (CIRAD, Tropix) et sur un classement des pièces avant de les mettre en structure.
+
+<DiagrammeBarres alt={`Teneur en eau de deux bois : ${nombre(h0.H * 100, 0)} % pour l'éprouvette de l'exemple, ${nombre(ex1.H * 100, 0)} % pour un bois fraîchement scié.`} titre="teneur en eau (%)" barres={[{ libelle: 'éprouvette', valeur: h0.H * 100, texte: nombre(h0.H * 100, 0), teinte: 'terre' }, { libelle: 'bois vert', valeur: ex1.H * 100, texte: nombre(ex1.H * 100, 0), teinte: 'correction' }]} />
+
+<Encadre type="terrain" titre="Termites">
+Dans toute la RDC, les termites sont la première cause de ruine des charpentes. Barrières physiques (socles en béton, pieds métalliques), bois durables ou traités, inspections régulières : la prévention coûte bien moins cher qu'une toiture effondrée.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : bois">
+
+### Structure
+
+L (fil, résistant) · R · T (retrait max) · duramen durable, aubier vulnérable
+
+### Eau
+
+H = (mh − ms)/ms · saturation des fibres ≈ 30 % · retrait au-dessous
+
+### Classes (EN 338)
+
+C résineux · D feuillus · nombre = fm,k en MPa
+
+### Pratique
+
+bois sec · hors du sol · ventilé · traité ou durable · termites
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Humidité">
+
+mh = 1 250 g, ms = 1 000 g. H ?
+
+<Indice>(mh − ms)/ms.</Indice>
+
+<Corrige>
+**{nombre(ex1.H * 100, 0)} %**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Madrier vert">
+
+Madrier de 200 mm à 60 %, séché à 12 %. Retrait (0,2 %/point) ?
+
+<Indice>Seuls les points sous 30 % comptent.</Indice>
+
+<Corrige>
+(30 − 12) × 0,2 % × 200 = **{grandeur(vert, 1, 'mm')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Lire une classe">
+
+Que signifie D30 ?
+
+<Indice>Lettre et nombre.</Indice>
+
+<Corrige>
+Bois de **feuillu** de résistance caractéristique en flexion **30 MPa**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.15">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le bois est le plus résistant :" choix={['dans le sens du fil', 'en travers', 'en diagonale', 'partout pareil']} bonne={0} colonnes={2}>
+Fibres.
+</QCM>
+
+<QCM n={2} question="Le retrait est maximal dans la direction :" choix={['tangentielle', 'longitudinale', 'radiale', 'aucune']} bonne={0} colonnes={4}>
+Le long des cernes.
+</QCM>
+
+<QCM n={3} question="Le bois se rétracte quand son humidité passe sous environ :" choix={['30 %', '5 %', '60 %', '100 %']} bonne={0} colonnes={4}>
+Saturation des fibres.
+</QCM>
+
+<QCM n={4} question="La partie la plus durable du tronc est :" choix={['le duramen', 'l’aubier', 'l’écorce', 'les nœuds']} bonne={0} colonnes={4}>
+Cœur.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Teneur en eau de l'éprouvette de l'exemple :</>} choix={[`${nombre(h0.H * 100, 0)} %`, '14 %', '30 %', '56 %']} bonne={0} colonnes={4}>
+80/480.
+</QCM>
+
+<QCM n={6} question="C24 désigne :" choix={['un résineux de fm,k = 24 MPa', 'un feuillu', 'un béton', 'une humidité de 24 %']} bonne={0} colonnes={2}>
+EN 338.
+</QCM>
+
+<QCM n={7} question="Un poteau en bois s'implante :" choix={['sur un socle, hors du sol', 'enterré directement', 'dans l’eau', 'sans protection']} bonne={0} colonnes={2}>
+Humidité, termites.
+</QCM>
+
+<QCM n={8} question="Pour une charpente, on pose du bois :" choix={['sec', 'vert', 'mouillé', 'peint seulement']} bonne={0} colonnes={4}>
+Retrait.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

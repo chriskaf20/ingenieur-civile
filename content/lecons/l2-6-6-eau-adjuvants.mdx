@@ -1,0 +1,294 @@
+---
+id: L2.6.6
+titre: "Eau de gâchage et adjuvants"
+objectifs:
+  - Juger la qualité d'une eau de gâchage
+  - Expliquer le rôle de l'eau dans le béton (hydratation et ouvrabilité)
+  - Choisir un adjuvant selon l'effet recherché
+  - Évaluer l'effet d'un plastifiant sur le rapport E/C
+relecture: false
+normes:
+  - "EN 1008 : eau de gâchage pour bétons"
+  - "EN 934-2 : adjuvants pour béton"
+glossaire:
+  - terme: Eau de gâchage
+    definition: Eau ajoutée au mélange ; une partie hydrate le ciment, le reste donne l'ouvrabilité puis s'évapore en laissant des pores.
+  - terme: Plastifiant / superplastifiant
+    definition: Adjuvant qui disperse les grains de ciment et permet de réduire l'eau à ouvrabilité égale.
+  - terme: Retardateur de prise
+    definition: Adjuvant qui retarde le début de prise, utile en climat chaud ou pour les longs transports.
+  - terme: Entraîneur d'air
+    definition: Adjuvant qui crée de minuscules bulles ; utile contre le gel, rarement en climat tropical.
+symboles:
+  - { symbole: 'E/C', signification: 'rapport eau / ciment', unite: '—' }
+  - { symbole: 'E', signification: 'eau efficace', unite: 'L/m³' }
+formules:
+  - { nom: 'Eau d''hydratation', tex: 'E_{hyd} \approx 0{,}25\,C', domaine: 'Ordre de grandeur' }
+  - { nom: 'Réduction d''eau', tex: 'E'' = E\,(1 - r)', domaine: 'r : taux de réduction de l''adjuvant' }
+---
+
+import { EXEMPLE_FORMULATION, formulation } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { VolumesBeton } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const f0 = formulation(EXEMPLE_FORMULATION)
+export const Ehyd = 0.25 * EXEMPLE_FORMULATION.C
+export const Ered = f0.E * (1 - 0.15)
+export const fPlus = { ...EXEMPLE_FORMULATION, fcm: EXEMPLE_FORMULATION.fcm }
+export const CsurEplus = EXEMPLE_FORMULATION.C / Ered
+export const fcmPlus = 0.5 * 45 * (CsurEplus - 0.5)
+export const depart = { fcm: 33, sigmaC: 45, G: 0.5, C: 300, air: 15, pSable: 40, rhoG: 2.65 }
+
+<Page etape="intuition" titre="L'intuition : trop d'eau, c'est des trous">
+
+Sur un chantier, quand le béton est dur à travailler, la tentation est grande d'ajouter un seau d'eau. Le béton devient facile à couler… et beaucoup plus faible. Le ciment n'a besoin que d'un peu d'eau pour durcir ; le reste sert à rendre la pâte fluide, puis s'évapore et laisse des **pores**. Les adjuvants permettent d'avoir un béton fluide **sans** ajouter d'eau.
+
+<VolumesBeton d={EXEMPLE_FORMULATION} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Quelle eau utiliser, et comment les adjuvants améliorent-ils le béton sans l'affaiblir ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Eau et adjuvants" sousTitre="Le bon dosage" etape="cours">
+
+<Panneau n={1} titre="Eau propre" icone="verification" couleur="validation">
+Eau potable : convient sans essai.
+</Panneau>
+
+<Panneau n={2} titre="À éviter" icone="attention" couleur="correction">
+Eau de mer, eau de mine, eau usée, eau boueuse.
+</Panneau>
+
+<Panneau n={3} titre="Deux rôles" icone="idee" couleur="encre">
+Hydrater (≈ 25 % du ciment) et fluidifier.
+</Panneau>
+
+<Panneau n={4} titre="Plastifiants" icone="calcul" couleur="acier">
+Moins d'eau, même ouvrabilité.
+</Panneau>
+
+<Panneau n={5} titre="Retardateurs" icone="plan" couleur="terre">
+Contre la chaleur et les longs trajets.
+</Panneau>
+
+<Panneau n={6} titre="Dosage" icone="regle" couleur="brique">
+En % du poids de ciment, selon la fiche technique.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'eau de gâchage">
+
+### Quelle eau ?
+
+L'eau potable convient sans essai. Les autres eaux (puits, rivière, eau recyclée) doivent être vérifiées selon l'EN 1008 : chlorures, sulfates, sucres, matières organiques, pH <AVerifier note="A_VERIFIER.md n° 35 : critères d'eau de gâchage (EN 1008)" />. L'eau de mer est interdite pour le béton armé (chlorures, corrosion).
+
+### Les deux rôles de l'eau
+
+Pour s'hydrater complètement, le ciment fixe environ 0,25 kg d'eau par kg ; pour 350 kg de ciment, environ {nombre(Ehyd, 0)} L. Le béton de l'exemple en contient {nombre(f0.E, 0)} L : le surplus donne l'**ouvrabilité**, puis crée des pores.
+
+<DiagrammeBarres alt={`Pour 350 kg de ciment : environ ${nombre(Ehyd, 0)} L d'eau fixés par l'hydratation, ${nombre(f0.E, 0)} L d'eau de gâchage au total.`} titre="eau par m³ de béton (L)" barres={[{ libelle: 'eau fixée (≈ 0,25 C)', valeur: Ehyd, texte: nombre(Ehyd, 0), teinte: 'acier' }, { libelle: 'eau de gâchage', valeur: f0.E, texte: nombre(f0.E, 0), teinte: 'encre' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : les familles d'adjuvants">
+
+| Adjuvant | Effet | Usage type |
+|---|---|---|
+| plastifiant (réducteur d'eau) | − 5 à 12 % d'eau | béton courant de qualité |
+| superplastifiant | − 12 à 30 % d'eau | béton fluide, haute résistance |
+| retardateur de prise | prise plus tardive | climat chaud, transport long |
+| accélérateur | prise et durcissement plus rapides | décoffrage rapide, temps froid |
+| hydrofuge de masse | réduit l'absorption | fondations, réservoirs |
+| entraîneur d'air | bulles d'air | gel-dégel (peu utile en RDC) |
+
+Les taux de réduction indiqués sont des ordres de grandeur ; la classification et les exigences sont celles de l'EN 934-2 (A_VERIFIER n° 39).
+
+<VolumesBeton d={{ ...EXEMPLE_FORMULATION, C: 300 }} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : gagner en résistance sans eau">
+
+### Le calcul
+
+Avec un plastifiant qui réduit l'eau de 15 % à ouvrabilité égale, l'eau passe de {nombre(f0.E, 0)} à {nombre(Ered, 0)} L. Le rapport C/E monte à {nombre(CsurEplus, 2)} et, par Bolomey (L2.6.8), la résistance moyenne attendue monte d'environ {nombre(EXEMPLE_FORMULATION.fcm, 0)} à {nombre(fcmPlus, 0)} MPa.
+
+<Regle type="art">
+On ne mélange pas deux adjuvants de marques différentes sans essai, on respecte le dosage de la fiche technique, et on ajoute l'adjuvant dans l'eau de gâchage ou en fin de malaxage selon les instructions.
+</Regle>
+
+<DiagrammeBarres alt={`Effet d'un plastifiant (−15 % d'eau) : fcm attendue ${nombre(EXEMPLE_FORMULATION.fcm, 0)} MPa sans, ${nombre(fcmPlus, 0)} MPa avec, pour le même ciment.`} titre="résistance moyenne attendue (MPa)" barres={[{ libelle: 'sans adjuvant', valeur: EXEMPLE_FORMULATION.fcm, texte: nombre(EXEMPLE_FORMULATION.fcm, 0), teinte: 'terre' }, { libelle: 'avec plastifiant', valeur: fcmPlus, texte: nombre(fcmPlus, 0), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : choisir un adjuvant">
+
+<DiagrammeFlux alt="Choisir un adjuvant : définir l'effet voulu (moins d'eau, prise retardée, décoffrage rapide, étanchéité) ; choisir la famille ; lire la fiche technique (dosage, compatibilité) ; faire une gâchée d'essai ; contrôler affaissement et résistance." etapes={[{ titre: 'Effet voulu', texte: 'eau, prise', teinte: 'encre' }, { titre: 'Famille', texte: 'tableau', teinte: 'acier' }, { titre: 'Fiche technique', texte: 'dosage', teinte: 'terre' }, { titre: 'Gâchée d’essai', texte: 'cône', teinte: 'brique' }, { titre: 'Contrôler', texte: 'résistance', teinte: 'validation' }]} />
+
+<VolumesBeton d={EXEMPLE_FORMULATION} />
+
+</Page>
+
+<FicheCalcul calcul="formulationBeton" depart={depart}>
+
+<Cahier titre="Exemple résolu : économiser du ciment avec un plastifiant">
+
+**Énoncé.** Grâce à un plastifiant, on peut réduire le ciment à 300 kg/m³ en gardant le même E/C que le béton d'origine (fcm visé 33 MPa, σc = 45 MPa, G = 0,5) (données de l'énoncé). Quelles quantités pour 1 m³ ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Eau et granulats">
+<AN k="CE" />
+<AN k="E" />
+<AN k="masses" />
+<Resultat k="E" libelle="Eau" />
+<Schema />
+<Note couleur="vert">Contrôle : E/C est le même qu'avec 350 kg ; la pâte est plus réduite, c'est l'adjuvant qui garde l'ouvrabilité.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="rajouter de l'eau au camion ou à la bétonnière.">
+Chaque litre ajouté baisse la résistance ; on utilise un plastifiant prévu à la formulation.
+</Piege>
+
+<Piege erreur="gâcher à l'eau de mer ou à l'eau de mine.">
+Chlorures et sulfates attaquent le béton et les aciers.
+</Piege>
+
+<Piege erreur="surdoser l'adjuvant.">
+Un retardateur surdosé peut empêcher la prise pendant des jours.
+</Piege>
+
+<VolumesBeton d={{ ...EXEMPLE_FORMULATION, C: 300 }} />
+
+<Piege erreur="oublier l'eau apportée par le sable humide.">
+Un sable mouillé contient déjà plusieurs litres d'eau par sac : on corrige l'eau ajoutée.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le seau d'eau en trop.** C'est l'erreur la plus fréquente des petits chantiers. La bonne réponse à un béton trop ferme est un **plastifiant** (ou une formulation revue), jamais de l'eau supplémentaire.
+
+<DiagrammeBarres alt={`Eau de l'exemple ${nombre(f0.E, 0)} L ; avec un plastifiant −15 % : ${nombre(Ered, 0)} L.`} titre="eau par m³ (L)" barres={[{ libelle: 'sans adjuvant', valeur: f0.E, texte: nombre(f0.E, 0), teinte: 'correction' }, { libelle: 'avec plastifiant', valeur: Ered, texte: nombre(Ered, 0), teinte: 'validation' }]} />
+
+<Encadre type="terrain" titre="Eaux de forage et de mine">
+Dans le Katanga, les eaux de forage ou d'exhaure de mine peuvent être acides ou chargées en sulfates : on les analyse avant de les utiliser. En cas de doute, on transporte de l'eau potable : c'est moins cher qu'un béton qui se dégrade.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : eau et adjuvants">
+
+### Eau (EN 1008, à vérifier)
+
+potable : sans essai · autres : analyse · mer, mine, eaux usées : non
+
+### Rôles de l'eau
+
+hydratation ≈ 0,25 C · le reste : ouvrabilité puis pores
+
+### Adjuvants (EN 934-2)
+
+plastifiant, superplastifiant : moins d'eau · retardateur : chaleur · accélérateur · hydrofuge
+
+### Règles
+
+dosage de la fiche technique · gâchée d'essai · jamais d'eau en plus
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Eau d'hydratation">
+
+Combien d'eau fixe environ 300 kg de ciment ?
+
+<Indice>0,25 C.</Indice>
+
+<Corrige>
+**{nombre(0.25 * 300, 0)} L**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Plastifiant">
+
+Eau de base {nombre(f0.E, 0)} L, réduction 15 %. Nouvelle eau ?
+
+<Indice>E (1 − 0,15).</Indice>
+
+<Corrige>
+**{grandeur(Ered, 0, 'L')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Gain de résistance">
+
+Avec 350 kg de ciment et {nombre(Ered, 0)} L d'eau, quelle fcm attendre (σc = 45, G = 0,5) ?
+
+<Indice>fcm = G σc (C/E − 0,5).</Indice>
+
+<Corrige>
+C/E = {nombre(CsurEplus, 2)} → fcm ≈ **{grandeur(fcmPlus, 0, 'MPa')}**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.6">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="L'eau potable comme eau de gâchage :" choix={['convient sans essai', 'est interdite', 'doit être bouillie', 'affaiblit le béton']} bonne={0} colonnes={2}>
+EN 1008.
+</QCM>
+
+<QCM n={2} question="Un plastifiant permet :" choix={['de réduire l’eau à ouvrabilité égale', 'd’accélérer la prise uniquement', 'de colorer', 'de remplacer le ciment']} bonne={0} colonnes={2}>
+Réducteur d'eau.
+</QCM>
+
+<QCM n={3} question="En climat chaud, on utilise souvent :" choix={['un retardateur de prise', 'un entraîneur d’air', 'un antigel', 'un accélérateur']} bonne={0} colonnes={2}>
+Prise trop rapide.
+</QCM>
+
+<QCM n={4} question="L'eau en excès dans le béton :" choix={['crée des pores et baisse la résistance', 'augmente la résistance', 'n’a pas d’effet', 'protège les aciers']} bonne={0} colonnes={2}>
+Elle s'évapore.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Avec un plastifiant à −15 %, l'eau de l'exemple devient :</>} choix={[grandeur(Ered, 0, 'L'), grandeur(f0.E, 0, 'L'), '100 L', '200 L']} bonne={0} colonnes={4}>
+E (1 − r).
+</QCM>
+
+<QCM n={6} question="L'eau de mer pour un béton armé :" choix={['est interdite', 'convient', 'est conseillée', 'remplace l’adjuvant']} bonne={0} colonnes={2}>
+Chlorures.
+</QCM>
+
+<QCM n={7} question="Un béton trop ferme sur chantier, on :" choix={['utilise le plastifiant prévu', 'ajoute de l’eau', 'ajoute du sable', 'attend qu’il sèche']} bonne={0} colonnes={2}>
+Pas d'eau en plus.
+</QCM>
+
+<QCM n={8} question="Le dosage d'un adjuvant s'exprime en :" choix={['% de la masse de ciment', 'L par m²', 'kg par sac de sable', 'MPa']} bonne={0} colonnes={2}>
+Fiche technique.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

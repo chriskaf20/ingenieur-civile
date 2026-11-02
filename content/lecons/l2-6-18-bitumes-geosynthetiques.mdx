@@ -1,0 +1,293 @@
+---
+id: L2.6.18
+titre: "Bitumes, géosynthétiques et autres matériaux"
+objectifs:
+  - Décrire le bitume et ses formes d'emploi (pur, émulsion, fluidifié)
+  - Expliquer le principe d'un enduit superficiel et en calculer les quantités
+  - Situer les rôles des géosynthétiques (séparation, filtration, renforcement, étanchéité)
+  - Citer les usages du verre et des plastiques dans la construction
+relecture: false
+normes:
+  - "EN 12591 : bitumes routiers ; EN 13808 : émulsions cationiques"
+  - "EN 13249 et suivantes : géotextiles selon l'usage"
+glossaire:
+  - terme: Bitume
+    definition: Liant noir issu du pétrole, visqueux à chaud, solide à froid ; il colle les granulats des chaussées et étanche.
+  - terme: Émulsion de bitume
+    definition: Fines gouttes de bitume dispersées dans l'eau ; s'emploie à froid et « rompt » au contact des granulats.
+  - terme: Enduit superficiel
+    definition: "Revêtement mince de route : couche de liant répandue, puis gravillons répandus et cylindrés."
+  - terme: Géotextile
+    definition: Nappe synthétique perméable qui sépare, filtre, draine ou renforce les sols.
+symboles:
+  - { symbole: 'b', signification: 'dosage en liant', unite: 'kg/m²' }
+  - { symbole: 'g', signification: 'dosage en gravillons', unite: 'L/m²' }
+  - { symbole: 'S', signification: 'surface traitée', unite: 'm²' }
+formules:
+  - { nom: 'Liant', tex: 'm_b = S\,b', domaine: 'kg' }
+  - { nom: 'Gravillons', tex: 'V_g = S\,g', domaine: 'L, puis m³' }
+---
+
+import { enduitSuperficiel } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { CoupeChaussee, VolumesEchantillon } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const e0 = enduitSuperficiel(7000, 1.2, 9)
+export const km = enduitSuperficiel(1000 * 6, 1.1, 8)
+export const ex3 = enduitSuperficiel(3500, 1.4, 10)
+
+<Page etape="intuition" titre="L'intuition : la colle noire des routes">
+
+Une route en terre se transforme en boue sous la pluie et en poussière en saison sèche. Une fine couche de **bitume** et de gravillons suffit à la protéger : l'eau ne pénètre plus, la poussière disparaît. Sous la route, une nappe de **géotextile** empêche la boue du sol de remonter dans les cailloux. Ces matériaux moins connus rendent de grands services.
+
+<CoupeChaussee />
+
+<Encadre type="idee" titre="La question de cette leçon">
+À quoi servent bitumes et géosynthétiques, et comment calculer un enduit superficiel ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Matériaux complémentaires" sousTitre="Lier, étancher, séparer" etape="cours">
+
+<Panneau n={1} titre="Bitume pur" icone="calcul" couleur="encre">
+Chauffé, pour enrobés et enduits ; grade selon le climat.
+</Panneau>
+
+<Panneau n={2} titre="Émulsion" icone="idee" couleur="acier">
+À froid, rompt au contact des granulats.
+</Panneau>
+
+<Panneau n={3} titre="Enduit superficiel" icone="plan" couleur="terre">
+Liant + gravillons + cylindrage.
+</Panneau>
+
+<Panneau n={4} titre="Géotextiles" icone="verification" couleur="validation">
+Séparer, filtrer, drainer, renforcer.
+</Panneau>
+
+<Panneau n={5} titre="Géomembranes" icone="regle" couleur="brique">
+Étanchéité de bassins et de décharges.
+</Panneau>
+
+<Panneau n={6} titre="Verre, plastiques" icone="attention" couleur="correction">
+Vitrages, tuyaux PVC et PEHD, isolants.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les bitumes">
+
+### Le liant
+
+Le bitume est **thermoplastique** : il se ramollit à la chaleur et durcit au froid. On le classe par sa **pénétration** (enfoncement d'une aiguille à 25 °C) : sous climat chaud, on choisit un bitume plus **dur** pour éviter l'orniérage (A_VERIFIER n° 40).
+
+### Les formes d'emploi
+
+- **bitume pur**, chauffé à environ 150 °C : enrobés en centrale, enduits ;
+- **émulsion** (bitume dans l'eau) : emploi à froid, moins d'énergie, adaptée aux petits chantiers ;
+- **bitume fluidifié** (cut-back) : bitume dilué dans un solvant ; de moins en moins utilisé (vapeurs, coût).
+
+<CoupeChaussee />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : l'enduit superficiel">
+
+### Le principe
+
+On répand une couche de liant sur la chaussée préparée, puis aussitôt des **gravillons** propres et calibrés, qu'on cylindre pour les enfoncer dans le liant. Un enduit **bicouche** répète l'opération avec des gravillons plus fins.
+
+### Les quantités
+
+Liant : $m_b = S\,b$ ; gravillons : $V_g = S\,g$. Pour 7 000 m² (1 km de route de 7 m), 1,2 kg/m² de liant et 9 L/m² de gravillons : {nombre(e0.liantT, 1)} t de liant et {nombre(e0.gravM3, 0)} m³ de gravillons. Les dosages se fixent selon la taille des gravillons et l'état de la route <AVerifier note="A_VERIFIER.md n° 87 : dosages usuels des enduits superficiels (liant en kg/m² et gravillons en L/m² selon la classe granulaire) d'après les guides techniques (SETRA, CEBTP)" />.
+
+<DiagrammeBarres alt={`Enduit monocouche sur 7 000 m² : ${nombre(e0.liantT, 1)} t de liant, ${nombre(e0.gravM3, 0)} m³ de gravillons, soit ${e0.camions} camions de 10 m³.`} titre="enduit sur 7 000 m²" barres={[{ libelle: 'liant (t)', valeur: e0.liantT, texte: nombre(e0.liantT, 1), teinte: 'encre' }, { libelle: 'gravillons (m³ ÷ 10)', valeur: e0.gravM3 / 10, texte: nombre(e0.gravM3, 0), teinte: 'terre' }, { libelle: 'camions de 10 m³', valeur: e0.camions, texte: String(e0.camions), teinte: 'acier' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : géosynthétiques, verre et plastiques">
+
+### Les géosynthétiques
+
+- **géotextile** de séparation : entre un sol argileux et une couche de cailloux, il empêche les fines de remonter ;
+- **filtre et drain** : autour des drains, il laisse passer l'eau et retient le sol ;
+- **géogrille** de renforcement : talus raidis, remblais sur sols mous ;
+- **géomembrane** : étanchéité des bassins, réservoirs, décharges.
+
+### Verre et plastiques
+
+Le **verre** sert aux vitrages (attention à la chaleur solaire) ; les **plastiques** fournissent tuyaux (PVC pour l'assainissement, PEHD pour l'eau potable), gaines, isolants. Ils craignent les UV : on les enterre ou on les protège.
+
+<DiagrammeComparaison alt="Géotextile et géomembrane : le géotextile est perméable (séparer, filtrer, drainer, renforcer) ; la géomembrane est étanche (bassins, décharges, réservoirs)." gauche={{ titre: 'Géotextile (perméable)', items: ['séparation sol / cailloux', 'filtre autour des drains', 'renforcement', 'laisse passer l’eau'] }} droite={{ titre: 'Géomembrane (étanche)', items: ['bassins, lagunes', 'décharges', 'réservoirs en terre', 'arrête l’eau'] }} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : réaliser un enduit">
+
+<DiagrammeFlux alt="Réaliser un enduit superficiel : préparer et compacter la chaussée, la balayer ; répandre le liant au dosage prévu ; répandre aussitôt les gravillons ; cylindrer ; balayer les rejets et ouvrir à une circulation lente." etapes={[{ titre: 'Préparer', texte: 'compacter, balayer', teinte: 'terre' }, { titre: 'Liant', texte: 'b kg/m²', teinte: 'encre' }, { titre: 'Gravillons', texte: 'g L/m²', teinte: 'acier' }, { titre: 'Cylindrer', texte: 'enfoncer', teinte: 'brique' }, { titre: 'Ouvrir', texte: 'circulation lente', teinte: 'validation' }]} />
+
+<VolumesEchantillon d={{ ms: 2650, msat: 2660, Vapp: 1000, rhoAbs: 2.68 }} />
+
+</Page>
+
+<FicheCalcul calcul="enduitSuperficiel">
+
+<Cahier titre="Exemple résolu : un kilomètre de route">
+
+**Énoncé.** On revêt 1 km de route de 7 m de large par un enduit monocouche : 1,2 kg/m² de liant et 9 L/m² de gravillons (données de l'énoncé). Quantités et nombre de camions de 10 m³ ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Liant et gravillons">
+<AN k="liant" />
+<AN k="grav" />
+<Resultat k="liant" libelle="Liant" />
+<Resultat k="grav" libelle="Gravillons" />
+<Schema />
+<Note couleur="vert">Contrôle : 1,2 kg/m², c'est à peu près l'épaisseur d'un millimètre de bitume : l'enduit est mince, c'est la chaussée en dessous qui porte.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="répandre le liant sur une chaussée poussiéreuse ou mouillée.">
+Les gravillons n'adhèrent pas et s'arrachent.
+</Piege>
+
+<Piege erreur="surdoser le liant.">
+Le bitume remonte et la route devient glissante (ressuage).
+</Piege>
+
+<Piege erreur="poser un enduit sur une chaussée mal drainée.">
+L'eau sous l'enduit détruit la couche de base : le revêtement casse.
+</Piege>
+
+<CoupeChaussee />
+
+<Piege erreur="laisser des tuyaux PVC au soleil.">
+Les UV les rendent cassants : on les stocke à l'ombre.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Enduits et entretien.** Un enduit superficiel bien fait dure plusieurs années ; il doit être entretenu (colmatage des nids-de-poule, réenduisage) et surtout son drainage doit fonctionner. C'est une solution économique pour revêtir des routes de trafic modéré.
+
+<DiagrammeBarres alt={`Quantités pour 1 km de route de 6 m à 1,1 kg/m² et 8 L/m² : ${nombre(km.liantT, 1)} t de liant et ${nombre(km.gravM3, 0)} m³ de gravillons.`} titre="1 km de route de 6 m" barres={[{ libelle: 'liant (t)', valeur: km.liantT, texte: nombre(km.liantT, 1), teinte: 'encre' }, { libelle: 'gravillons (m³ ÷ 10)', valeur: km.gravM3 / 10, texte: nombre(km.gravM3, 0), teinte: 'terre' }]} />
+
+<Encadre type="terrain" titre="Géotextiles sur sols mous">
+Sur les sols argileux et mous des vallées, un géotextile de séparation sous la couche de forme économise beaucoup de matériau : il empêche les cailloux de « disparaître » dans la boue.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : bitumes et géosynthétiques">
+
+### Bitumes
+
+pur (chaud) · émulsion (froid) · fluidifié (solvant) · climat chaud : grade dur (à vérifier)
+
+### Enduit superficiel (dosages à vérifier)
+
+liant S b · gravillons S g · cylindrer · drainage indispensable
+
+### Géosynthétiques
+
+géotextile : séparer, filtrer, drainer, renforcer · géomembrane : étancher
+
+### Autres
+
+verre (vitrages) · PVC, PEHD (réseaux) · protéger des UV
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Liant">
+
+3 500 m² à 1,4 kg/m². Masse de liant ?
+
+<Indice>S b.</Indice>
+
+<Corrige>
+**{grandeur(ex3.liantT, 1, 't')}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Gravillons">
+
+Même chantier, 10 L/m². Volume et nombre de camions de 10 m³ ?
+
+<Indice>S g.</Indice>
+
+<Corrige>
+**{grandeur(ex3.gravM3, 0, 'm³')}**, soit **{ex3.camions} camions**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Choisir un géosynthétique">
+
+Que poser sous la couche de forme d'une piste traversant un marais argileux ? Et au fond d'un bassin de lagunage ?
+
+<Indice>Perméable ou étanche ?</Indice>
+
+<Corrige>
+Sous la piste : un **géotextile de séparation** (perméable) ; au fond du bassin : une **géomembrane** (étanche), protégée par un géotextile.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.18">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le bitume est :" choix={['thermoplastique', 'hydraulique comme le ciment', 'métallique', 'une roche']} bonne={0} colonnes={2}>
+Mou à chaud, dur à froid.
+</QCM>
+
+<QCM n={2} question="Une émulsion de bitume s'emploie :" choix={['à froid', 'à 300 °C', 'seulement en usine', 'sous l’eau']} bonne={0} colonnes={2}>
+Bitume dispersé dans l'eau.
+</QCM>
+
+<QCM n={3} question="Un géotextile de séparation :" choix={['empêche les fines de remonter dans les cailloux', 'est étanche', 'remplace le bitume', 'arme le béton']} bonne={0} colonnes={2}>
+Perméable.
+</QCM>
+
+<QCM n={4} question="Pour étancher un bassin, on pose :" choix={['une géomembrane', 'un géotextile seul', 'du gravier', 'du bambou']} bonne={0} colonnes={2}>
+Étanche.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Liant pour 7 000 m² à 1,2 kg/m² :</>} choix={[grandeur(e0.liantT, 1, 't'), '84,0 t', '0,8 t', '1,2 t']} bonne={0} colonnes={4}>
+S b.
+</QCM>
+
+<QCM n={6} question="Sous climat chaud, on choisit un bitume :" choix={['plus dur', 'plus mou', 'quelconque', 'dilué']} bonne={0} colonnes={4}>
+Orniérage.
+</QCM>
+
+<QCM n={7} question="Un enduit superficiel tient si :" choix={['la chaussée dessous est drainée et portante', 'le bitume est épais de 5 cm', 'il pleut pendant la pose', 'les gravillons sont sales']} bonne={0} colonnes={2}>
+C'est la base qui porte.
+</QCM>
+
+<QCM n={8} question="Les tuyaux PVC se stockent :" choix={['à l’abri du soleil', 'en plein soleil', 'dans l’eau', 'peu importe']} bonne={0} colonnes={2}>
+UV.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

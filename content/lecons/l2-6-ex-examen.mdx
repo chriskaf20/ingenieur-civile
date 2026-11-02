@@ -1,0 +1,127 @@
+---
+id: L2.6.EX
+titre: "Examen du module L2.6 : matériaux de construction"
+objectifs:
+  - Caractériser un matériau (propriétés physiques, essai de traction)
+  - Analyser des granulats et formuler un béton
+  - Choisir les exigences de durabilité et de mise en œuvre
+  - Quantifier mortiers, aciers, bois, maçonnerie et enduits routiers
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { analyseGranulo, barreHA, classeAffaissement, controleExposition, effortNuance, elementsParM2, enduit, enduitSuperficiel, essaiTraction, evaporation, EXEMPLE_FORMULATION, EXEMPLE_SABLE, formulation, humiditeBois, proprietesPhysiques } from '@/lib/calc/materiaux'
+import { SEUIL_TEXTE } from '@/lib/progression/types'
+import { grandeur, nombre } from '@/lib/format'
+
+export const q1 = proprietesPhysiques({ ms: 2400, msat: 2520, Vapp: 1000, rhoAbs: 2.65 })
+export const q2 = essaiTraction({ d0: 16, L0: 80, Fe: 105, Fm: 120, Lu: 94, du: 11 })
+export const q5 = analyseGranulo(EXEMPLE_SABLE.retenus, EXEMPLE_SABLE.fond)
+export const q5b = analyseGranulo([60, 210, 330, 180, 80, 30, 10, 0, 0, 0], 100)
+export const q6 = classeAffaissement(300 - 180)
+export const q7 = formulation({ ...EXEMPLE_FORMULATION, fcm: 30 })
+export const q8 = controleExposition(3, 330, 181.5)
+export const q9 = evaporation(32, 32, 0.4, 20)
+export const q10 = enduit(80, 15, 350)
+export const q11 = barreHA(16).masse * 12
+export const q12 = effortNuance(1500, 2)
+export const q13 = humiditeBois(690, 600)
+export const q14 = Math.ceil(30 * elementsParM2({ nom: 'parpaing', L: 40, H: 20, joint: 1 }) * 1.05)
+export const q14b = Math.round(30 * elementsParM2({ nom: 'parpaing', L: 40, H: 20, joint: 1 }))
+export const q15 = enduitSuperficiel(5000, 1.2, 9)
+
+<Page etape="examen" titre="Les consignes">
+
+- **Durée** : 2 h.
+- **Seuil de validation** : {SEUIL_TEXTE} de bonnes réponses. Tu peux repasser l'examen.
+- **Autorisé** : une calculatrice, une feuille de brouillon.
+- **Interdit** : le cours, tes fiches, Internet.
+- Écris la formule avant de calculer ; vérifie les unités (g, kg, L, m³, MPa).
+- Les explications renvoient à la leçon concernée.
+
+<Encadre type="retenir">
+En cas d'échec, refais les exercices des leçons citées, puis repasse l'examen dans trois jours.
+</Encadre>
+
+</Page>
+
+<Quiz id="L2.6.EX">
+
+<Page etape="examen" titre="Les questions (1/3)">
+
+<QCM n={1} question="Échantillon : 2 400 g sec, 2 520 g saturé. Absorption :" choix={[`${nombre(q1.absorption * 100, 1)} %`, `${nombre(q1.porosite * 100, 1)} %`, '12,0 %', '0,5 %']} bonne={0} colonnes={4}>
+(msat − ms)/ms (L2.6.1).
+</QCM>
+
+<QCM n={2} question="Barre Ø 16, force à la limite d'élasticité 105 kN. Re :" choix={[grandeur(q2.Re, 0, 'MPa'), grandeur(q2.Rm, 0, 'MPa'), '105 MPa', '1 050 MPa']} bonne={0} colonnes={4}>
+Fe/S0 (L2.6.2).
+</QCM>
+
+<QCM n={3} question="Un matériau ductile :" choix={['s’allonge beaucoup avant de rompre', 'casse sans prévenir', 'ne se déforme pas', 'est toujours mou']} bonne={0} colonnes={2}>
+L2.6.2.
+</QCM>
+
+<QCM n={4} question="Dans « CEM II/A-L 42,5 R », 42,5 désigne :" choix={['la classe de résistance du ciment (MPa à 28 j)', 'la masse du sac', 'la résistance du béton', 'le taux d’ajout']} bonne={0} colonnes={2}>
+L2.6.3.
+</QCM>
+
+<QCM n={5} question="Module de finesse du sable de l'exemple du cours :" choix={[nombre(q5.mf, 2), nombre(q5b.mf, 2), '28,16', '0,28']} bonne={0} colonnes={4}>
+Σ refus cumulés / 100 (L2.6.5).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (2/3)">
+
+<QCM n={6} question="Le béton démoulé mesure 180 mm de haut. Classe :" choix={[q6, 'S1', 'S5', 'S2']} bonne={0} colonnes={4}>
+a = 300 − 180 (L2.6.7).
+</QCM>
+
+<QCM n={7} question="fcm = 30 MPa, σc = 45, G = 0,5, C = 350 kg/m³. Eau :" choix={[grandeur(q7.E, 0, 'L'), '350 L', '120 L', '250 L']} bonne={0} colonnes={4}>
+Bolomey (L2.6.8).
+</QCM>
+
+<QCM n={8} question="Béton à 330 kg de ciment et E/C 0,55 en façade XC4 :" choix={[q8.okEC && q8.okC ? 'conforme' : 'non conforme', q8.okEC && q8.okC ? 'non conforme' : 'conforme', 'sans objet', 'conforme si on ajoute de l’eau']} bonne={0} colonnes={2}>
+E/C max 0,50 (L2.6.10).
+</QCM>
+
+<QCM n={9} question="Béton et air à 32 °C, HR 40 %, vent 20 km/h. Évaporation :" choix={[grandeur(q9, 2, 'kg/m²/h'), '0,13 kg/m²/h', '12,73 kg/m²/h', '0,05 kg/m²/h']} bonne={0} colonnes={4}>
+Formule d'Uno (L2.6.11).
+</QCM>
+
+<QCM n={10} question="80 m² d'enduit de 15 mm à 350 kg/m³, 10 % de pertes. Sacs :" choix={[String(q10.sacs), '7', '24', '46']} bonne={0} colonnes={4}>
+V × C / 50 (L2.6.12).
+</QCM>
+
+</Page>
+
+<Page etape="examen" titre="Les questions (3/3)">
+
+<QCM n={11} question="Masse d'une barre HA 16 de 12 m :" choix={[grandeur(q11, 2, 'kg'), '12,00 kg', grandeur(barreHA(16).masse, 2, 'kg'), '24,13 kg']} bonne={0} colonnes={4}>
+π Ø²/4 × 7 850 × 12 (L2.6.13).
+</QCM>
+
+<QCM n={12} question="Tirant de 1 500 mm² en S355. Effort plastique :" choix={[grandeur(q12.N, 1, 'kN'), grandeur(effortNuance(1500, 0).N, 1, 'kN'), '355,0 kN', '1 500,0 kN']} bonne={0} colonnes={4}>
+A fy (L2.6.14).
+</QCM>
+
+<QCM n={13} question="Bois : 690 g humide, 600 g anhydre. Teneur en eau :" choix={[`${nombre(q13.H * 100, 0)} %`, '13 %', '90 %', '30 %']} bonne={0} colonnes={4}>
+(mh − ms)/ms (L2.6.15).
+</QCM>
+
+<QCM n={14} question="30 m² de mur en parpaings 40 × 20 (joints 1 cm), 5 % de casse. Commande :" choix={[String(q14), String(q14b), '300', '600']} bonne={0} colonnes={4}>
+10 000/(41 × 21) par m² (L2.6.16).
+</QCM>
+
+<QCM n={15} question="Enduit superficiel sur 5 000 m² à 1,2 kg/m². Liant :" choix={[grandeur(q15.liantT, 1, 't'), '60,0 t', '0,6 t', '45,0 t']} bonne={0} colonnes={4}>
+S b (L2.6.18).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

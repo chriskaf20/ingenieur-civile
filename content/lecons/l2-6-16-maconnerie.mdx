@@ -1,0 +1,301 @@
+---
+id: L2.6.16
+titre: "Maçonnerie : parpaings, briques cuites, BTC"
+objectifs:
+  - Décrire les principaux éléments de maçonnerie disponibles en RDC
+  - Comparer parpaings, briques cuites et blocs de terre comprimée
+  - Calculer le nombre d'éléments et le mortier d'un mur
+  - Organiser un mur porteur avec ses chaînages
+relecture: false
+normes:
+  - "EN 771-1, -3 : éléments de maçonnerie en terre cuite et en béton de granulats"
+  - "EN 1996-1-1 : calcul des ouvrages en maçonnerie"
+glossaire:
+  - terme: Parpaing
+    definition: Bloc de béton, souvent creux, moulé et vibré ; le plus courant dans les villes.
+  - terme: Brique cuite
+    definition: Élément en argile moulé puis cuit au four ou en meule.
+  - terme: BTC
+    definition: Bloc de terre comprimée, souvent stabilisé avec un peu de ciment ou de chaux, pressé à la presse manuelle ou mécanique.
+  - terme: Chaînage
+    definition: Ceinture en béton armé qui relie les murs horizontalement et verticalement et tient l'ensemble.
+symboles:
+  - { symbole: 'L, H', signification: 'longueur et hauteur de l''élément', unite: 'cm' }
+  - { symbole: 'j', signification: 'épaisseur de joint', unite: 'cm' }
+  - { symbole: 'n', signification: 'nombre d''éléments par m²', unite: '1/m²' }
+formules:
+  - { nom: 'Éléments par m²', tex: 'n = \frac{10\,000}{(L + j)(H + j)}', domaine: 'L, H, j en cm' }
+  - { nom: 'Commande', tex: 'N = S\,n\,(1 + p)', domaine: 'p : casse (≈ 5 %)' }
+---
+
+import { ELEMENTS, elementsParM2 } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { ElementsMaconnerie, VolumesEchantillon } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const nP = elementsParM2(ELEMENTS[0])
+export const nB = elementsParM2(ELEMENTS[1])
+export const nT = elementsParM2(ELEMENTS[2])
+export const murS = 40
+export const cmdP = Math.ceil(murS * nP * 1.05)
+export const cmdB = Math.ceil(murS * nB * 1.05)
+export const cmdT = Math.ceil(murS * nT * 1.05)
+
+<Page etape="intuition" titre="L'intuition : empiler pour porter">
+
+Un mur, c'est un empilement d'éléments collés par du mortier. Il porte son poids, celui des planchers et de la toiture, et protège de la pluie et de la chaleur. En RDC, on construit surtout en **parpaings** de béton dans les villes, en **briques cuites** dans de nombreuses provinces, et de plus en plus en **BTC**, blocs de terre comprimée fabriqués sur place.
+
+<ElementsMaconnerie />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment choisir un élément de maçonnerie, compter les quantités et monter un mur qui tienne ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Trois familles d'éléments" sousTitre="Choisir selon l'usage et le lieu" etape="cours">
+
+<Panneau n={1} titre="Parpaing" icone="calcul" couleur="acier">
+Béton vibré, creux ou plein ; rapide à poser.
+</Panneau>
+
+<Panneau n={2} titre="Brique cuite" icone="regle" couleur="brique">
+Argile cuite ; durable si bien cuite.
+</Panneau>
+
+<Panneau n={3} titre="BTC" icone="plan" couleur="terre">
+Terre locale pressée, stabilisée ; peu d'énergie.
+</Panneau>
+
+<Panneau n={4} titre="Mortier" icone="idee" couleur="acier">
+Joints d'environ 1 cm, pleins.
+</Panneau>
+
+<Panneau n={5} titre="Chaînages" icone="attention" couleur="correction">
+Béton armé autour des murs et des ouvertures.
+</Panneau>
+
+<Panneau n={6} titre="Quantités" icone="verification" couleur="validation">
+10 000 / ((L + j)(H + j)) par m².
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les éléments">
+
+### Le parpaing
+
+Bloc de béton de sable et de gravillons, moulé et vibré, le plus souvent creux (40 × 20 × 15 ou 20 cm). Sa résistance dépend beaucoup du dosage en ciment et de la vibration : les blocs artisanaux sont très inégaux.
+
+### La brique cuite
+
+Argile moulée puis cuite. Bien cuite, elle est durable et résiste à la pluie ; mal cuite, elle absorbe beaucoup d'eau et se délite (L2.6.1).
+
+### Le BTC
+
+Terre (latérite ou terre argilo-sableuse) tamisée, mélangée à un peu de ciment ou de chaux, pressée dans une presse, puis curée humide. Il valorise la terre du site et consomme peu d'énergie, mais exige une terre adaptée et une protection contre la pluie battante <AVerifier note="A_VERIFIER.md n° 85 : résistances et absorption usuelles des parpaings, briques cuites et BTC, et taux de stabilisation des BTC (EN 771, XP P13-901, guides CRAterre)" />.
+
+<ElementsMaconnerie />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : compter les éléments">
+
+### La formule
+
+Chaque élément occupe, joint compris, une surface (L + j)(H + j). Par m² de mur :
+
+$$n = \frac{10\,000}{(L + j)(H + j)}$$
+
+(L, H, j en cm). On commande 5 % de plus pour la casse.
+
+<DiagrammeBarres alt={`Éléments par m² de mur : parpaing 40 × 20, ${nombre(nP, 1)} ; brique cuite 22 × 6,5, ${nombre(nB, 1)} ; BTC 29,5 × 9, ${nombre(nT, 1)}.`} titre="éléments par m² de mur" barres={[{ libelle: 'parpaing 40 × 20', valeur: nP, texte: nombre(nP, 1), teinte: 'beton' }, { libelle: 'brique cuite 22 × 6,5', valeur: nB, texte: nombre(nB, 1), teinte: 'brique' }, { libelle: 'BTC 29,5 × 9', valeur: nT, texte: nombre(nT, 1), teinte: 'terre' }]} />
+
+### Le mortier
+
+On compte aussi le mortier de pose (L2.6.12) : les petits éléments demandent plus de joints, donc plus de mortier et plus de temps de pose.
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : un mur qui tient">
+
+### Les règles de montage
+
+- joints **croisés** (décalés d'un demi-élément) et **pleins** ;
+- éléments humidifiés s'ils sont absorbants (briques, BTC) ;
+- murs **chaînés** : chaînage horizontal en tête de mur et au niveau des planchers, chaînages verticaux aux angles et aux intersections, linteaux au-dessus des ouvertures.
+
+<Regle type="art">
+Les chaînages sont la ceinture de sécurité du bâtiment : ils empêchent les murs de s'écarter et tiennent l'ensemble lors d'un séisme ou d'un tassement. Leur ferraillage relève du calcul et des règles parasismiques (EN 1998, zones à risque de l'est de la RDC).
+</Regle>
+
+<DiagrammeComparaison alt="Mur mal construit contre mur bien construit : joints alignés et vides, éléments secs, aucun chaînage, contre joints croisés et pleins, éléments humidifiés, chaînages horizontaux et verticaux, linteaux." gauche={{ titre: 'Mur fragile', items: ['joints alignés et vides', 'éléments posés secs', 'pas de chaînage', 'ouvertures sans linteau'] }} droite={{ titre: 'Mur solide', items: ['joints croisés et pleins', 'éléments humidifiés', 'chaînages horizontaux et verticaux', 'linteaux en béton armé'] }} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : comparer les trois familles">
+
+<DiagrammeFlux alt="Choisir un élément : ce qui est disponible localement ; la résistance exigée (mur porteur ou de remplissage) ; l'exposition à la pluie ; le coût posé ; le confort thermique." etapes={[{ titre: 'Disponible', texte: 'sur place ?', teinte: 'terre' }, { titre: 'Porteur ?', texte: 'résistance', teinte: 'encre' }, { titre: 'Pluie', texte: 'protection', teinte: 'acier' }, { titre: 'Coût posé', texte: 'élément + mortier', teinte: 'brique' }, { titre: 'Confort', texte: 'chaleur', teinte: 'validation' }]} />
+
+<VolumesEchantillon d={{ ms: 6800, msat: 7650, Vapp: 3700, rhoAbs: 2.65 }} />
+
+</Page>
+
+<FicheCalcul calcul="maconnerieMur">
+
+<Cahier titre="Exemple résolu : un mur de 40 m² en parpaings">
+
+**Énoncé.** On monte 40 m² de mur (ouvertures déduites) en parpaings creux 40 × 20 × 15 cm, avec des joints de 1 cm (données de l'énoncé). Combien de parpaings commander ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Par m², puis total">
+<AN k="n" />
+<AN k="total" />
+<Resultat k="total" libelle="Commande" />
+<Schema />
+<Note couleur="vert">Contrôle : un parpaing de 40 × 20 couvre environ 0,086 m² avec son joint : environ 12 par m². Choisis les BTC : la quantité triple.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="monter sans chaînages.">
+Les murs se séparent aux angles et s'effondrent en cas de séisme ou de tassement.
+</Piege>
+
+<Piege erreur="poser des briques ou des BTC secs.">
+Ils boivent l'eau du mortier, qui ne colle plus.
+</Piege>
+
+<Piege erreur="acheter des parpaings sans contrôle.">
+Des blocs sous-dosés s'effritent au toucher ; on en écrase quelques-uns ou on choisit un fabricant contrôlé.
+</Piege>
+
+<ElementsMaconnerie />
+
+<Piege erreur="laisser des BTC non protégés sous la pluie.">
+Un bon débord de toiture et un soubassement en béton ou en pierre les protègent.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Blocs du marché et blocs de chantier.** Dans les grandes villes, les parpaings sont souvent fabriqués dans de petites unités, avec un dosage et une vibration très variables. On peut aussi fabriquer ses blocs sur le chantier avec une vibro-presse et un dosage contrôlé, et les curer à l'ombre plusieurs jours avant la pose.
+
+<DiagrammeBarres alt={`Commande pour 40 m² de mur avec 5 % de casse : ${cmdP} parpaings, ${cmdB} briques cuites ou ${cmdT} BTC.`} titre="commande pour 40 m² de mur" barres={[{ libelle: 'parpaings', valeur: cmdP, texte: String(cmdP), teinte: 'beton' }, { libelle: 'BTC', valeur: cmdT, texte: String(cmdT), teinte: 'terre' }, { libelle: 'briques cuites', valeur: cmdB, texte: String(cmdB), teinte: 'brique' }]} />
+
+<Encadre type="terrain" titre="Le BTC, un matériau d'avenir">
+Le BTC permet de construire avec la terre du site, sans cuisson au bois (donc sans déboisement). Il demande une terre testée (granulométrie, plasticité), une stabilisation dosée, une presse et une cure humide. Bien fait, il donne des murs durables et confortables sous le climat chaud.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : maçonnerie">
+
+### Éléments
+
+parpaing (béton vibré) · brique cuite (argile cuite) · BTC (terre comprimée stabilisée)
+
+### Quantités
+
+n = 10 000/((L + j)(H + j)) par m² · + 5 % de casse · mortier de pose en plus
+
+### Montage
+
+joints croisés et pleins · éléments humidifiés · chaînages et linteaux
+
+### Contrôle (à vérifier)
+
+résistance et absorption des éléments · protection des BTC contre la pluie
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Parpaings par m²">
+
+Parpaing 40 × 20, joints de 1 cm. Combien par m² ?
+
+<Indice>10 000/(41 × 21).</Indice>
+
+<Corrige>
+**{nombre(nP, 2)}** parpaings par m².
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Briques">
+
+40 m² en briques cuites 22 × 6,5 cm, joints de 1,2 cm, 5 % de casse. Combien ?
+
+<Indice>Fiche.</Indice>
+
+<Corrige>
+**{cmdB} briques**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Comparer">
+
+Pour 40 m², combien de BTC 29,5 × 9 cm ? Pourquoi la pose est-elle plus longue qu'en parpaings ?
+
+<Indice>Nombre d'éléments et de joints.</Indice>
+
+<Corrige>
+**{cmdT} BTC** contre {cmdP} parpaings : près de trois fois plus d'éléments et de joints à poser.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.16">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Un BTC est :" choix={['un bloc de terre comprimée', 'une brique cuite', 'un bloc de béton', 'une tuile']} bonne={0} colonnes={2}>
+Terre pressée, stabilisée.
+</QCM>
+
+<QCM n={2} question="Les joints de maçonnerie doivent être :" choix={['croisés et pleins', 'alignés', 'vides', 'de 5 cm']} bonne={0} colonnes={2}>
+Règle de l'art.
+</QCM>
+
+<QCM n={3} question="Les chaînages servent à :" choix={['tenir les murs ensemble', 'décorer', 'isoler', 'drainer']} bonne={0} colonnes={2}>
+Ceinture.
+</QCM>
+
+<QCM n={4} question="Avant pose, une brique cuite très absorbante est :" choix={['humidifiée', 'chauffée', 'peinte', 'séchée au soleil']} bonne={0} colonnes={2}>
+Elle boirait le mortier.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Parpaings 40 × 20 par m² (joints 1 cm) :</>} choix={[nombre(nP, 1), '12,5', nombre(nT, 1), '25,0']} bonne={0} colonnes={4}>
+10 000/861.
+</QCM>
+
+<QCM n={6} question="On commande en plus pour la casse environ :" choix={['5 %', '0 %', '50 %', '100 %']} bonne={0} colonnes={4}>
+Métré.
+</QCM>
+
+<QCM n={7} question="Un BTC exposé à la pluie se protège par :" choix={['un débord de toiture et un soubassement', 'rien', 'un arrosage', 'un enduit au ciment très dosé seulement']} bonne={0} colonnes={2}>
+Conception.
+</QCM>
+
+<QCM n={8} question="Au-dessus d'une ouverture, on place :" choix={['un linteau', 'rien', 'un joint vide', 'une brique crue']} bonne={0} colonnes={2}>
+Il porte le mur au-dessus.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

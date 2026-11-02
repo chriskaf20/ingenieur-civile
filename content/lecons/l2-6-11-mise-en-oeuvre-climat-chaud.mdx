@@ -1,0 +1,290 @@
+---
+id: L2.6.11
+titre: "Mise en œuvre et cure en climat chaud"
+objectifs:
+  - Organiser malaxage, transport et coulage par temps chaud
+  - Vibrer correctement un béton
+  - Estimer le risque d'évaporation et de fissuration plastique
+  - Choisir et organiser une cure adaptée au climat tropical
+relecture: false
+normes:
+  - "EN 13670 §8 : exécution des ouvrages en béton, mise en place et cure"
+  - "ACI 305R : bétonnage par temps chaud (référence de bonne pratique)"
+glossaire:
+  - terme: Fissuration plastique
+    definition: Fissures superficielles qui apparaissent quelques heures après le coulage, quand l'eau de surface s'évapore plus vite qu'elle ne remonte.
+  - terme: Vibration
+    definition: Mise en place du béton par une aiguille vibrante qui chasse l'air et fait couler le béton autour des armatures.
+  - terme: Cure
+    definition: Ensemble des mesures qui gardent le béton humide et à température modérée pendant ses premiers jours.
+  - terme: Reprise de bétonnage
+    definition: Joint entre deux coulages successifs ; elle se prépare pour assurer l'adhérence.
+symboles:
+  - { symbole: 'E', signification: 'taux d''évaporation', unite: 'kg/m²/h' }
+  - { symbole: 'Tc, Ta', signification: 'températures du béton et de l''air', unite: '°C' }
+  - { symbole: 'HR', signification: 'humidité relative', unite: '%' }
+  - { symbole: 'V', signification: 'vitesse du vent', unite: 'km/h' }
+formules:
+  - { nom: 'Évaporation (Uno, ACI 305R)', tex: 'E = 5\left[(T_c + 18)^{2,5} - HR\,(T_a + 18)^{2,5}\right](V + 4)\times 10^{-6}', domaine: 'kg/m²/h' }
+---
+
+import { evaporation } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { EvaporationClimat } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeCycle } from '@/components/drawing/Diagrammes'
+
+export const midi = evaporation(34, 34, 0.45, 20)
+export const matin = evaporation(26, 24, 0.8, 5)
+export const ombre = evaporation(30, 30, 0.6, 5)
+
+<Page etape="intuition" titre="L'intuition : le béton a soif">
+
+Un béton coulé à midi, en plein soleil et au vent, perd son eau de surface en quelques heures. La peau sèche, se rétracte et se fissure en réseau ; dessous, le ciment n'a plus assez d'eau pour durcir. Résultat : une surface poudreuse, fissurée, perméable, qui protège mal les aciers. Sous les tropiques, la **cure** n'est pas une option.
+
+<EvaporationClimat Tc={34} Ta={34} r={0.45} V={20} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mettre en œuvre et protéger un béton sous un climat chaud ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Bétonner par temps chaud" sousTitre="Du malaxage à la cure" etape="cours">
+
+<Panneau n={1} titre="Préparer" icone="plan" couleur="encre">
+Granulats à l'ombre, eau fraîche, coffrages humidifiés.
+</Panneau>
+
+<Panneau n={2} titre="Couler tôt" icone="idee" couleur="acier">
+Matin ou fin d'après-midi.
+</Panneau>
+
+<Panneau n={3} titre="Vite" icone="attention" couleur="correction">
+Transport court, retardateur si besoin.
+</Panneau>
+
+<Panneau n={4} titre="Vibrer" icone="regle" couleur="terre">
+Aiguille verticale, couches de 30 à 50 cm.
+</Panneau>
+
+<Panneau n={5} titre="Protéger" icone="verification" couleur="validation">
+Bâches, toile humide, produit de cure.
+</Panneau>
+
+<Panneau n={6} titre="Durer" icone="calcul" couleur="brique">
+Cure de 7 jours au moins, davantage au soleil.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : malaxage, transport, coulage">
+
+### Préparer le béton
+
+Stocker granulats et ciment à l'ombre, arroser les tas de gravier, utiliser l'eau la plus fraîche possible : la température du béton frais baisse de plusieurs degrés. Humidifier les coffrages et le sol support pour qu'ils ne boivent pas l'eau du béton.
+
+### Couler
+
+Le béton chaud prend plus vite : on réduit le temps entre malaxage et mise en place, on utilise un retardateur si le transport est long (L2.6.6), on bétonne tôt le matin ou en fin de journée, et on ne verse pas le béton de plus de 1,5 m de haut (ségrégation).
+
+<DiagrammeBarres alt={`Évaporation estimée : coulage à midi au soleil et au vent ${nombre(midi, 2)} kg/m²/h ; à l'ombre ${nombre(ombre, 2)} kg/m²/h ; tôt le matin ${nombre(matin, 2)} kg/m²/h.`} titre="évaporation selon l'heure et la protection (kg/m²/h)" barres={[{ libelle: 'midi, soleil, vent', valeur: midi, texte: nombre(midi, 2), teinte: 'correction' }, { libelle: 'à l’ombre, peu de vent', valeur: ombre, texte: nombre(ombre, 2), teinte: 'terre' }, { libelle: 'tôt le matin', valeur: matin, texte: nombre(matin, 2), teinte: 'validation' }]} repere={{ valeur: 1, texte: '≈ 1' }} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la vibration">
+
+### Pourquoi vibrer
+
+Le béton frais contient de l'air piégé (5 à 20 %). La vibration le fluidifie un instant : l'air remonte, le béton enrobe les armatures et remplit les angles. Un béton mal vibré a des **nids de cailloux** et une résistance réduite.
+
+### Comment
+
+Aiguille plongée **verticalement**, rapidement, retirée lentement ; points espacés d'environ 8 à 10 fois le diamètre de l'aiguille ; couches de 30 à 50 cm, l'aiguille pénétrant dans la couche précédente. On arrête quand la surface devient brillante et que les bulles ne sortent plus. On ne vibre pas les armatures et on ne sert pas de l'aiguille pour faire avancer le béton.
+
+<DiagrammeCycle alt="Le cycle de la vibration d'une couche : plonger l'aiguille verticalement ; attendre que les bulles cessent de remonter ; retirer lentement ; déplacer au point suivant ; passer à la couche suivante." etapes={[{ titre: 'Plonger', texte: 'verticalement', teinte: 'encre' }, { titre: 'Attendre', texte: 'plus de bulles', teinte: 'acier' }, { titre: 'Retirer', texte: 'lentement', teinte: 'terre' }, { titre: 'Déplacer', texte: '8 à 10 Ø', teinte: 'validation' }]} centre="une couche" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : évaporation et cure">
+
+### Évaluer le risque
+
+L'abaque de l'ACI 305R, mis en formule par Uno, estime l'évaporation à partir des températures, de l'humidité et du vent. Au-delà d'environ 1 kg/m²/h, la fissuration plastique est probable ; on prend des mesures dès 0,5 <AVerifier note="A_VERIFIER.md n° 78 : seuils d'évaporation (ACI 305R) et durées minimales de cure selon l'EN 13670 tableau 4 (classes de cure)" />.
+
+### Les méthodes de cure
+
+- arrosage régulier ou **toile de jute** maintenue humide ;
+- **film plastique** posé sur la surface, bords lestés ;
+- **produit de cure** pulvérisé dès la fin du talochage ;
+- coffrages laissés en place et humidifiés.
+
+<EvaporationClimat Tc={30} Ta={32} r={0.5} V={16} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la journée de bétonnage">
+
+<DiagrammeFlux alt="Une journée de bétonnage en climat chaud : la veille, préparer et humidifier ; à l'aube, malaxer et couler ; vibrer par couches ; talocher et protéger aussitôt ; maintenir la cure sept jours ou plus." etapes={[{ titre: 'Veille', texte: 'préparer, mouiller', teinte: 'encre' }, { titre: 'Aube', texte: 'malaxer, couler', teinte: 'acier' }, { titre: 'Vibrer', texte: 'par couches', teinte: 'terre' }, { titre: 'Protéger', texte: 'aussitôt', teinte: 'correction' }, { titre: 'Cure', texte: '≥ 7 jours', teinte: 'validation' }]} />
+
+<EvaporationClimat Tc={26} Ta={24} r={0.8} V={5} />
+
+</Page>
+
+<FicheCalcul calcul="evaporationBeton">
+
+<Cahier titre="Exemple résolu : un dallage à Kinshasa en saison sèche">
+
+**Énoncé.** On coule un dallage vers 11 h : béton à 30 °C, air à 32 °C, humidité 50 %, vent 16 km/h (données de l'énoncé). Le risque de fissuration plastique est-il élevé ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Évaporation">
+<AN k="formule" />
+<AN k="lecture" />
+<Resultat k="E" libelle="Évaporation" />
+<Schema />
+<Note couleur="vert">Contrôle : passe à 6 h du matin (béton 26 °C, air 24 °C, humidité 80 %, vent 5 km/h) et compare.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="arroser le béton frais au jet.">
+On délave la surface ; on brumise ou on pose une toile humide.
+</Piege>
+
+<Piege erreur="vibrer trop longtemps.">
+Le béton ségrège : la laitance monte, le gravier descend.
+</Piege>
+
+<Piege erreur="arrêter la cure après une journée.">
+La peau du béton a besoin de plusieurs jours d'humidité.
+</Piege>
+
+<EvaporationClimat Tc={34} Ta={34} r={0.45} V={20} />
+
+<Piege erreur="laisser un film plastique s'envoler.">
+On leste les bords, sinon le vent dessèche la surface en dessous.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Les bonnes pratiques simples.** Bétonner dès 6 h, terminer avant 11 h ; couvrir les dallages avec des sacs de ciment vides mouillés ou de la toile de jute, arrosés trois fois par jour pendant une semaine ; garder les coffrages des poteaux en place et les arroser. Ces gestes ne coûtent presque rien et doublent la durée de vie des ouvrages.
+
+<DiagrammeBarres alt={`Évaporation tôt le matin ${nombre(matin, 2)} kg/m²/h contre ${nombre(midi, 2)} à midi : environ ${nombre(midi / matin, 0)} fois moins.`} titre="matin contre midi (kg/m²/h)" barres={[{ libelle: '6 h', valeur: matin, texte: nombre(matin, 2), teinte: 'validation' }, { libelle: '12 h', valeur: midi, texte: nombre(midi, 2), teinte: 'correction' }]} />
+
+<Encadre type="terrain" titre="Saison des pluies">
+Sous une averse tropicale, un béton frais non protégé est délavé en surface. On prévoit des bâches avant de couler, et l'on arrête le bétonnage si l'orage arrive, en préparant une reprise propre.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : climat chaud">
+
+### Avant
+
+granulats à l'ombre · eau fraîche · coffrages et sol humides · retardateur si transport long
+
+### Pendant
+
+couler tôt · vibrer par couches de 30 à 50 cm · ne pas ajouter d'eau
+
+### Évaporation (à vérifier)
+
+E = 5[(Tc+18)^2,5 − HR(Ta+18)^2,5](V+4)·10⁻⁶ · &gt; 1 kg/m²/h : danger
+
+### Cure
+
+toile humide, film, produit de cure · 7 jours au moins
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="À l'aube">
+
+Tc = 26, Ta = 24 °C, HR 80 %, vent 5 km/h. Évaporation ?
+
+<Indice>Formule d'Uno.</Indice>
+
+<Corrige>
+**{grandeur(matin, 2, 'kg/m²/h')}** : risque faible.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Midi en saison sèche">
+
+Tc = Ta = 34 °C, HR 45 %, vent 20 km/h. Évaporation et mesures ?
+
+<Indice>Comparer à 1 kg/m²/h.</Indice>
+
+<Corrige>
+**{grandeur(midi, 2, 'kg/m²/h')}** : risque élevé ; décaler le coulage, brise-vent, cure immédiate.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Organiser une cure">
+
+Propose une cure pour une dalle de 80 m² coulée en saison sèche, sans eau courante.
+
+<Indice>Économiser l'eau.</Indice>
+
+<Corrige>
+Produit de cure pulvérisé dès le talochage, ou film plastique lesté ; toile de jute humidifiée matin et soir avec un fût ; **au moins 7 jours**.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.11">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La fissuration plastique vient :" choix={['d’une évaporation trop rapide de l’eau de surface', 'd’un excès de ciment', 'du gel', 'des armatures']} bonne={0} colonnes={2}>
+Premières heures.
+</QCM>
+
+<QCM n={2} question="Par temps chaud, on bétonne de préférence :" choix={['tôt le matin', 'à midi', 'en plein soleil', 'n’importe quand']} bonne={0} colonnes={4}>
+Moins d'évaporation.
+</QCM>
+
+<QCM n={3} question="L'aiguille vibrante se plonge :" choix={['verticalement', 'à plat', 'sur les armatures', 'en biais pour pousser le béton']} bonne={0} colonnes={2}>
+Points réguliers.
+</QCM>
+
+<QCM n={4} question="La cure dure au moins :" choix={['7 jours', '1 heure', '1 jour', '28 jours obligatoirement']} bonne={0} colonnes={4}>
+Plus au soleil.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Coulage à midi de l'exercice : évaporation :</>} choix={[grandeur(midi, 2, 'kg/m²/h'), grandeur(matin, 2, 'kg/m²/h'), '0,01 kg/m²/h', '10,00 kg/m²/h']} bonne={0} colonnes={4}>
+Fiche.
+</QCM>
+
+<QCM n={6} question="Arroser un béton frais au jet :" choix={['délave la surface', 'est conseillé', 'accélère la prise', 'remplace la vibration']} bonne={0} colonnes={2}>
+Brumiser plutôt.
+</QCM>
+
+<QCM n={7} question="Un produit de cure se pulvérise :" choix={['dès la fin du talochage', 'après 7 jours', 'avant le coulage', 'jamais']} bonne={0} colonnes={2}>
+Film protecteur.
+</QCM>
+
+<QCM n={8} question="Le vent :" choix={['augmente l’évaporation', 'la réduit', 'n’a pas d’effet', 'refroidit le ciment sans effet sur l’eau']} bonne={0} colonnes={2}>
+Terme (V + 4).
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

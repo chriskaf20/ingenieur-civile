@@ -1,0 +1,168 @@
+---
+id: L2.6.P
+titre: "Mini-projet : formuler un C25/30 avec des matériaux locaux"
+objectifs:
+  - Caractériser et corriger les granulats disponibles sur place
+  - Fixer la résistance moyenne à viser selon la régularité du chantier
+  - Formuler 1 m³ de béton et le traduire en dosage par sac
+  - Vérifier la durabilité et organiser le contrôle du béton
+relecture: false
+normes: []
+glossaire: []
+symboles: []
+formules: []
+---
+
+import { analyseGranulo, controleExposition, formulation } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { ConeAbrams, GranuloSable, SourcesLocales, VolumesBeton } from '@/components/schemas/Materiaux2'
+import { FractileBeton } from '@/components/schemas/Probas'
+import { DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const sFin = [60, 210, 330, 180, 80, 30, 10, 0, 0, 0]
+export const sConc = [20, 40, 80, 120, 200, 260, 220, 0, 0, 0]
+export const gFin = analyseGranulo(sFin, 100)
+export const gConc = analyseGranulo(sConc, 60)
+export const x = (2.5 - gConc.mf) / (gFin.mf - gConc.mf)
+export const s = 5
+export const fcm = 25 + 1.645 * s
+export const donnees = { fcm: Math.round(fcm * 10) / 10, sigmaC: 45, G: 0.45, C: 350, air: 15, pSable: 40, rhoC: 3.1, rhoG: 2.6 }
+export const f = formulation(donnees)
+export const depart = { fcm: donnees.fcm, sigmaC: 45, G: 0.45, C: 350, air: 15, pSable: 40, rhoG: 2.6 }
+export const expo = controleExposition(1, donnees.C, f.E)
+export const parSac = { sable: f.sable / f.sacs, gravier: f.gravier / f.sacs, eau: f.E / f.sacs }
+export const departExpo = { classe: 1, C: 350, E: Math.round(f.E) }
+
+<Page etape="projet" titre="L'énoncé et les livrables">
+
+Une école de six classes se construit à Kikwit (Kwilu). Les semelles et les poteaux sont en **C25/30**, consistance **S3**, fondations en classe d'exposition **XC2**. Le béton est fabriqué à la bétonnière ; on estime l'écart-type de production à {nombre(s, 0)} MPa (données de l'énoncé). Matériaux disponibles :
+
+- ciment **CEM II 42,5** local (classe vraie retenue : 45 MPa) ;
+- **sable de rivière** fin (analyse ci-dessous) et **sable de concassage** de grès ;
+- **gravier concassé** de grès 4/20, de qualité moyenne (G = 0,45), masse volumique absolue 2,6 kg/L.
+
+<SourcesLocales />
+
+### Ce que tu rends
+
+1. Les courbes granulométriques, les modules de finesse et la **correction** du sable.
+2. La **résistance moyenne** à viser.
+3. La **formulation** de 1 m³ et le **dosage par sac** de 50 kg.
+4. La vérification de la **durabilité** (XC2) et le **plan de contrôle** du béton.
+
+</Page>
+
+<Page etape="projet" titre="Étape 1 : les sables">
+
+<GranuloSable retenus={sFin} fond={100} />
+
+Le sable de rivière a un module de finesse de **{nombre(gFin.mf, 2)}** (fin) et {nombre(gFin.fines, 1)} % de fines ; le sable de concassage, **{nombre(gConc.mf, 2)}** (grossier). Pour viser MF ≈ 2,5, on mélange environ **{nombre(x * 100, 0)} %** de sable de rivière et {nombre((1 - x) * 100, 0)} % de sable de concassage.
+
+<GranuloSable retenus={sConc} fond={60} />
+
+</Page>
+
+<Page etape="projet" titre="Étape 2 : la cible et la régularité">
+
+Avec s = {nombre(s, 0)} MPa, la résistance moyenne à viser vaut fcm = 25 + 1,645 × {nombre(s, 0)} = **{grandeur(fcm, 1, 'MPa')}** (L2.2.5). Une production plus régulière (centrale, boîtes de dosage) permettrait de viser plus bas.
+
+<FractileBeton fcm={fcm} s={s} fck={25} />
+
+<DiagrammeBarres alt={`Moyenne à viser pour un C25/30 : ${nombre(25 + 1.645 * 3, 1)} MPa si s = 3 MPa ; ${nombre(fcm, 1)} MPa si s = 5 MPa ; ${nombre(25 + 1.645 * 7, 1)} MPa si s = 7 MPa.`} titre="fcm à viser selon la régularité (MPa)" barres={[3, 5, 7].map((sv, i) => ({ libelle: `s = ${sv} MPa`, valeur: 25 + 1.645 * sv, texte: nombre(25 + 1.645 * sv, 1), teinte: ['validation', 'terre', 'correction'][i] }))} repere={{ valeur: 25, texte: 'fck' }} />
+
+</Page>
+
+<FicheCalcul calcul="formulationBeton" depart={depart}>
+
+<Cahier titre="Étape 3 : la formulation de 1 m³" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="C/E et eau">
+<AN k="CE" />
+<AN k="E" />
+<Note>Pourquoi G = 0,45 ? Le grès concassé est de qualité moyenne : le béton atteindra moins de résistance qu'avec un granulat dur.</Note>
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Étape 3 (suite) : les granulats" etape="projet">
+
+<Etape n={3} titre="Volumes et masses">
+<AN k="volumes" />
+<AN k="masses" />
+<Resultat k="sable" libelle="Sable (mélange)" />
+<Resultat k="gravier" libelle="Gravier" />
+<Schema />
+<Note couleur="vert">Contrôle : l'eau calculée est faible pour un S3 ; il faudra un plastifiant pour atteindre la consistance sans ajouter d'eau.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<FicheCalcul calcul="expositionBeton" depart={departExpo}>
+
+<Cahier titre="Étape 4 : la durabilité en XC2" etape="projet">
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Contrôle">
+<AN k="exigences" />
+<AN k="controle" />
+<Resultat k="verdict" libelle="Verdict" />
+<Schema />
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="projet" titre="Le corrigé : la fiche de gâchée">
+
+<VolumesBeton d={donnees} />
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Constituant</th><th>pour 1 m³</th><th>par sac de 50 kg</th></tr></thead>
+    <tbody>
+      <tr><td>ciment CEM II 42,5</td><td>{nombre(donnees.C, 0)} kg ({nombre(f.sacs, 0)} sacs)</td><td>50 kg</td></tr>
+      <tr><td>sable (dont {nombre(x * 100, 0)} % de rivière)</td><td>{nombre(f.sable, 0)} kg</td><td>{nombre(parSac.sable, 0)} kg</td></tr>
+      <tr><td>gravier 4/20</td><td>{nombre(f.gravier, 0)} kg</td><td>{nombre(parSac.gravier, 0)} kg</td></tr>
+      <tr><td>eau efficace</td><td>{nombre(f.E, 0)} L</td><td>{nombre(parSac.eau, 1)} L</td></tr>
+    </tbody>
+  </table>
+</div>
+
+E/C = {nombre(f.EsurC, 2)} : {expo.okEC && expo.okC ? 'conforme' : 'non conforme'} pour XC2 (E/C ≤ {nombre(expo.EC, 2)}, ciment ≥ {expo.Cmin} kg/m³). L'eau apportée par le sable humide se **retranche** de l'eau versée ; un plastifiant donne la consistance S3.
+
+</Page>
+
+<Page etape="projet" titre="Le plan de contrôle et la grille">
+
+<ConeAbrams affaissement={120} />
+
+**Contrôle :** gâchée d'essai ; cône d'Abrams à chaque gâchée importante (S3 : 100 à 150 mm) ; éprouvettes à 7 et 28 jours ; décision de conformité selon les critères de l'EN 206 (L2.2.5) ; ajustement de la formule après les premiers résultats.
+
+| Critère | Insuffisant | Correct | Très bien |
+|---|---|---|---|
+| Granulats | Pas d'essai | Granulométrie et MF | Correction du sable calculée |
+| Cible | fcm = fck | fcm = fck + 1,645 s | Effet de la régularité discuté |
+| Formulation | Dosage au jugé | Volumes absolus | Dosage par sac et correction d'eau |
+| Contrôle | Aucun | Cône et éprouvettes | Plan complet et critères de conformité |
+
+<Quiz id="L2.6.P">
+
+<QCM n={1} question="Mon dossier contient-il l'analyse des sables, la cible, la formulation, le dosage par sac, la vérification XC2 et le plan de contrôle ?" choix={['Oui, tout y est', 'Il manque une partie']} bonne={0} colonnes={2}>
+Sinon, complète : le chef de chantier doit pouvoir gâcher sans calculatrice.
+</QCM>
+
+<ScoreQuiz />
+
+</Quiz>
+
+</Page>

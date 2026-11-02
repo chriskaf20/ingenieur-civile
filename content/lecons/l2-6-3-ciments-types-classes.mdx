@@ -1,0 +1,290 @@
+---
+id: L2.6.3
+titre: "Ciments : types et classes"
+objectifs:
+  - Lire la désignation normalisée d'un ciment
+  - Distinguer les cinq types CEM I à CEM V et leurs constituants
+  - Choisir une classe de résistance et une vitesse de durcissement
+  - Choisir un ciment adapté à l'ouvrage et au milieu
+relecture: false
+normes:
+  - "EN 197-1 : composition, spécifications et critères de conformité des ciments courants"
+glossaire:
+  - terme: Clinker
+    definition: Produit de la cuisson à environ 1 450 °C d'un mélange de calcaire et d'argile ; constituant principal du ciment (L1.5).
+  - terme: Ajouts
+    definition: Constituants mélangés au clinker (calcaire, laitier, cendres volantes, pouzzolane) qui modifient les propriétés du ciment.
+  - terme: Classe de résistance
+    definition: "Résistance minimale à 28 jours d'un mortier normalisé : 32,5, 42,5 ou 52,5 MPa."
+  - terme: Chaleur d'hydratation
+    definition: Chaleur dégagée par le ciment qui durcit ; forte pour un CEM I, plus faible pour les ciments à ajouts.
+symboles:
+  - { symbole: 'CEM', signification: 'ciment courant selon l''EN 197-1', unite: '—' }
+  - { symbole: 'R, N', signification: 'durcissement initial rapide ou normal', unite: '—' }
+formules:
+  - { nom: 'Désignation', tex: '\text{CEM II/A-L 42,5 R}', domaine: 'type / teneur en ajouts - nature, classe, vitesse' }
+  - { nom: 'Dosage', tex: '\text{sacs/m}^3 = \frac{C}{50}', domaine: 'Sacs de 50 kg' }
+---
+
+import { EXEMPLE_FORMULATION, formulation } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { SacCiment, VolumesBeton } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const f425 = formulation(EXEMPLE_FORMULATION)
+export const f325 = formulation({ ...EXEMPLE_FORMULATION, sigmaC: 37 })
+export const depart = { fcm: 33, sigmaC: 37, G: 0.5, C: 350, air: 15, pSable: 40, rhoG: 2.65 }
+
+<Page etape="intuition" titre="L'intuition : la colle du béton">
+
+Le ciment est la **colle** du béton : mélangé à l'eau, il forme une pâte qui enrobe sable et gravier puis durcit en quelques heures et continue de gagner en résistance pendant des semaines (L1.5). Mais tous les sacs ne se valent pas : certains durcissent vite, d'autres chauffent moins, d'autres résistent mieux aux eaux agressives. L'inscription sur le sac dit lequel on a entre les mains.
+
+<SacCiment />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment lire un sac de ciment et choisir le bon ciment pour un ouvrage ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les ciments courants" sousTitre="EN 197-1" etape="cours">
+
+<Panneau n={1} titre="CEM I" icone="calcul" couleur="encre">
+Portland : ≥ 95 % de clinker ; durcissement rapide, chaleur forte.
+</Panneau>
+
+<Panneau n={2} titre="CEM II" icone="regle" couleur="acier">
+Portland composé : calcaire (L, LL), pouzzolane (P), cendres (V)… Le plus courant.
+</Panneau>
+
+<Panneau n={3} titre="CEM III" icone="idee" couleur="terre">
+Au laitier de haut fourneau : chaleur faible, bonne tenue chimique.
+</Panneau>
+
+<Panneau n={4} titre="CEM IV, V" icone="plan" couleur="brique">
+Pouzzolanique, composé : ouvrages massifs, milieux agressifs.
+</Panneau>
+
+<Panneau n={5} titre="Classes" icone="verification" couleur="validation">
+32,5 – 42,5 – 52,5 MPa ; N ou R.
+</Panneau>
+
+<Panneau n={6} titre="SR" icone="attention" couleur="correction">
+Résistant aux sulfates : sols et eaux agressifs.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les cinq types">
+
+### La composition
+
+Tous les ciments courants contiennent du **clinker** et un peu de **gypse** (régulateur de prise). Ils diffèrent par la nature et la quantité des **ajouts** <AVerifier note="A_VERIFIER.md n° 70 : proportions de clinker et d'ajouts des 27 ciments courants (EN 197-1 tableau 1) et ciments SR (EN 197-1 §6)" /> :
+
+- **CEM I** : presque uniquement du clinker ;
+- **CEM II** : clinker + jusqu'à 35 % environ d'un ajout (calcaire L, pouzzolane P, cendres volantes V, laitier S…) ; lettres A (peu d'ajouts) ou B (plus) ;
+- **CEM III** : beaucoup de laitier de haut fourneau ;
+- **CEM IV** : pouzzolanique ; **CEM V** : composé (laitier + pouzzolane).
+
+<SacCiment type="CEM I" classe="52,5" prise="N" />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : classes et vitesse">
+
+### La classe de résistance
+
+32,5, 42,5 ou 52,5 : résistance minimale (en MPa) à 28 jours d'un **mortier normalisé** (pas du béton !). La lettre **R** signale un durcissement initial rapide (décoffrage plus tôt), **N** un durcissement normal.
+
+### Effet sur la formulation
+
+Un ciment plus résistant permet, pour la même résistance du béton, un rapport E/C plus élevé, donc moins de ciment ou plus d'ouvrabilité (L2.6.8). Avec une classe vraie de 45 MPa, E/C = {nombre(f425.EsurC, 2)} ; avec 37 MPa, E/C = {nombre(f325.EsurC, 2)}.
+
+<DiagrammeBarres alt={`Rapport E/C admissible pour fcm = 33 MPa : ${nombre(f425.EsurC, 2)} avec un ciment de classe vraie 45 MPa, ${nombre(f325.EsurC, 2)} avec 37 MPa.`} titre="E/C admissible pour un même béton" barres={[{ libelle: 'ciment 42,5 (σc ≈ 45)', valeur: f425.EsurC, texte: nombre(f425.EsurC, 2), teinte: 'validation' }, { libelle: 'ciment 32,5 (σc ≈ 37)', valeur: f325.EsurC, texte: nombre(f325.EsurC, 2), teinte: 'terre' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : choisir son ciment">
+
+| Ouvrage ou milieu | Ciment conseillé (règle de l'art) |
+|---|---|
+| béton armé courant, maçonnerie | CEM II 32,5 ou 42,5 |
+| décoffrage rapide, préfabrication | CEM I ou CEM II 42,5 R / 52,5 |
+| ouvrage massif (radier épais, culée) | CEM III ou CEM V (chaleur faible) |
+| sol sulfaté, eau acide de mine | ciment SR, CEM III |
+| enduits, mortiers de pose | CEM II 32,5 |
+
+<Regle type="art">
+Le choix final dépend aussi de la disponibilité : sur un chantier isolé, on fait avec le ciment qu'on peut acheminer, et on adapte la formulation (dosage, cure) en conséquence.
+</Regle>
+
+<VolumesBeton d={EXEMPLE_FORMULATION} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : choisir">
+
+<DiagrammeFlux alt="Choisir un ciment : identifier l'ouvrage (courant, massif, préfabriqué) ; identifier le milieu (sec, humide, agressif) ; choisir le type ; choisir la classe et la vitesse ; vérifier la disponibilité et la date de fabrication." etapes={[{ titre: 'Ouvrage', texte: 'courant, massif', teinte: 'encre' }, { titre: 'Milieu', texte: 'sec, agressif', teinte: 'correction' }, { titre: 'Type', texte: 'CEM I à V, SR', teinte: 'acier' }, { titre: 'Classe', texte: '32,5 à 52,5, N/R', teinte: 'terre' }, { titre: 'Disponible ?', texte: 'date, stock', teinte: 'validation' }]} />
+
+<SacCiment type="CEM III/A" classe="42,5" prise="N" />
+
+</Page>
+
+<FicheCalcul calcul="formulationBeton" depart={depart}>
+
+<Cahier titre="Exemple résolu : changer de classe de ciment">
+
+**Énoncé.** On voulait un béton de fcm = 33 MPa avec un CEM II 42,5 (classe vraie 45 MPa) ; le fournisseur ne livre que du 32,5 (classe vraie 37 MPa). Avec 350 kg/m³, que devient l'eau admissible (données de l'énoncé) ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Rapport C/E">
+<AN k="CE" />
+<AN k="E" />
+<Resultat k="EC" libelle="E/C admissible" />
+<Schema />
+<Note couleur="vert">Contrôle : avec un ciment moins résistant, il faut moins d'eau pour la même résistance (ou plus de ciment). Remets σc = 45 pour comparer.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="croire que 42,5 est la résistance du béton.">
+C'est celle d'un mortier normalisé ; le béton dépend aussi de l'eau et des granulats.
+</Piege>
+
+<Piege erreur="utiliser un ciment éventé.">
+Un sac stocké à l'humidité forme des grumeaux : il a commencé à s'hydrater et perd sa résistance.
+</Piege>
+
+<Piege erreur="couler un radier épais au CEM I 52,5 R en saison chaude.">
+La chaleur d'hydratation fissure le béton au refroidissement.
+</Piege>
+
+<SacCiment type="CEM I" classe="52,5" prise="R" />
+
+<Piege erreur="ignorer l'agressivité du sol.">
+En zone minière (eaux sulfatées, acides), un ciment courant se dégrade ; il faut un ciment adapté (L2.6.10).
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Le stockage des sacs.** Sur palettes, à l'abri de la pluie, sans contact avec le sol ni les murs, en piles de dix sacs au plus, et « premier entré, premier sorti ». On vérifie la date de fabrication : au-delà de quelques mois, la résistance baisse.
+
+<DiagrammeBarres alt={`Pour 350 kg/m³ de ciment, il faut ${nombre(f425.sacs, 0)} sacs de 50 kg par mètre cube de béton.`} titre="sacs de 50 kg par m³" barres={[{ libelle: '350 kg/m³', valeur: f425.sacs, texte: nombre(f425.sacs, 0), teinte: 'beton' }]} />
+
+<Encadre type="terrain" titre="Ciments disponibles en RDC">
+On trouve en RDC des ciments produits localement (Bas-Congo, Katanga, Kasaï…) et des ciments importés, en général des CEM II 32,5 ou 42,5. Les ciments résistants aux sulfates sont plus rares : pour les fondations en zone minière, on les commande à l'avance.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : ciments">
+
+### Désignation (EN 197-1)
+
+CEM type / A ou B - ajout · classe 32,5 – 42,5 – 52,5 · N ou R
+
+### Types
+
+I Portland · II composé (L, P, V, S) · III laitier · IV pouzzolanique · V composé · SR sulfates
+
+### Choix
+
+courant : CEM II · massif : III, V · rapide : I, R · agressif : SR, III
+
+### Stockage
+
+au sec, sur palettes, 10 sacs par pile, dates contrôlées
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Lire un sac">
+
+Que signifie « CEM II/B-P 32,5 N » ?
+
+<Indice>Type, teneur, ajout, classe, vitesse.</Indice>
+
+<Corrige>
+Ciment Portland **composé**, teneur **B** en **pouzzolane**, classe **32,5 MPa**, durcissement **normal**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Radier massif">
+
+Quel ciment pour un radier de 1,2 m d'épaisseur coulé en saison sèche ?
+
+<Indice>Chaleur d'hydratation.</Indice>
+
+<Corrige>
+Un ciment à **faible chaleur** (CEM III ou CEM V), coulage en fin de journée, cure humide prolongée.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Changer de ciment">
+
+Avec 350 kg/m³, E/C admissible pour fcm = 33 MPa avec σc = 45, puis 37 MPa ?
+
+<Indice>Bolomey.</Indice>
+
+<Corrige>
+**{nombre(f425.EsurC, 2)}** puis **{nombre(f325.EsurC, 2)}** : eau {nombre(f425.E, 0)} L puis {nombre(f325.E, 0)} L.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.3">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le constituant principal du ciment est :" choix={['le clinker', 'le sable', 'la chaux', 'le plâtre']} bonne={0} colonnes={4}>
+Cuisson à 1 450 °C.
+</QCM>
+
+<QCM n={2} question="« 42,5 » sur un sac désigne :" choix={['la résistance minimale d’un mortier normalisé à 28 j', 'la masse du sac', 'la résistance du béton', 'le pH']} bonne={0} colonnes={2}>
+Classe de résistance.
+</QCM>
+
+<QCM n={3} question="La lettre R signifie :" choix={['durcissement initial rapide', 'résistant', 'recyclé', 'retardé']} bonne={0} colonnes={2}>
+Décoffrage plus tôt.
+</QCM>
+
+<QCM n={4} question="Pour un ouvrage massif, on préfère un ciment :" choix={['à faible chaleur d’hydratation', 'CEM I 52,5 R', 'quelconque', 'sans gypse']} bonne={0} colonnes={2}>
+Éviter la fissuration thermique.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="Le ciment le plus courant en bâtiment est le :" choix={['CEM II', 'CEM V', 'CEM IV', 'ciment alumineux']} bonne={0} colonnes={4}>
+Portland composé.
+</QCM>
+
+<QCM n={6} question="Un sac avec des grumeaux durs :" choix={['a pris l’humidité et perdu de la résistance', 'est meilleur', 'est normal', 'est un 52,5']} bonne={0} colonnes={2}>
+Ciment éventé.
+</QCM>
+
+<QCM n={7} question="Les ciments SR sont destinés :" choix={['aux milieux sulfatés', 'aux enduits', 'à la préfabrication', 'aux dallages intérieurs']} bonne={0} colonnes={2}>
+Résistance aux sulfates.
+</QCM>
+
+<QCM n={8} question="350 kg/m³ correspondent à :" choix={['7 sacs de 50 kg', '3,5 sacs', '35 sacs', '10 sacs']} bonne={0} colonnes={4}>
+350/50.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

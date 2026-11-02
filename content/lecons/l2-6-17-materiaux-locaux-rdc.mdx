@@ -1,0 +1,301 @@
+---
+id: L2.6.17
+titre: "Matériaux locaux en RDC"
+objectifs:
+  - Évaluer un sable de rivière et décider s'il faut le laver ou le corriger
+  - Décrire la latérite et ses usages en route et en maçonnerie
+  - Choisir un granulat de carrière selon la roche
+  - Situer les usages possibles et les limites du bambou
+relecture: false
+normes:
+  - "EN 12620 (granulats pour béton) et EN 13242 (granulats pour chaussées) : cadre des essais"
+glossaire:
+  - terme: Latérite
+    definition: Sol rouge des régions tropicales, riche en oxydes de fer et d'aluminium, souvent en gravillons ; très utilisée en route.
+  - terme: Indice de plasticité
+    definition: Écart entre les limites de liquidité et de plasticité d'un sol ; il mesure sa sensibilité à l'eau.
+  - terme: Granulat de concassage
+    definition: Granulat obtenu en concassant de la roche (grès, quartzite, basalte, calcaire).
+  - terme: Bambou
+    definition: Graminée géante à tiges creuses, légère et résistante en traction, utilisée en échafaudage, coffrage et charpente légère.
+symboles:
+  - { symbole: 'MF', signification: 'module de finesse', unite: '—' }
+  - { symbole: 'IP', signification: 'indice de plasticité', unite: '%' }
+  - { symbole: 'CBR', signification: 'indice portant californien', unite: '%' }
+formules:
+  - { nom: 'Mélange de sables', tex: 'MF_m = x\,MF_1 + (1 - x)\,MF_2', domaine: 'x : proportion massique' }
+  - { nom: 'Fines', tex: 'f = \frac{m_{<0{,}063}}{m_{totale}}', domaine: 'Propreté' }
+---
+
+import { analyseGranulo, EXEMPLE_SABLE } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { CoupeChaussee, GranuloSable, SourcesLocales } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres, DiagrammeComparaison } from '@/components/drawing/Diagrammes'
+
+export const fin = [60, 210, 330, 180, 80, 30, 10, 0, 0, 0]
+export const gFin = analyseGranulo(fin, 100)
+export const conc = [20, 40, 80, 120, 200, 260, 220, 0, 0, 0]
+export const gConc = analyseGranulo(conc, 60)
+export const xMel = (2.5 - gConc.mf) / (gFin.mf - gConc.mf)
+export const depart = { t0: 60, t1: 210, t2: 330, t3: 180, t4: 80, t5: 30, t6: 10, fond: 100 }
+
+<Page etape="intuition" titre="L'intuition : construire avec ce qu'on a">
+
+Transporter du sable, du gravier ou des blocs sur des centaines de kilomètres de pistes coûte souvent plus cher que le matériau lui-même. Construire en RDC, c'est donc d'abord savoir **utiliser les matériaux locaux** : sables des rivières, latérite, roches des carrières, bois et bambou. Ils sont souvent bons… à condition de les tester et de les utiliser à leur juste place.
+
+<SourcesLocales />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment évaluer et bien utiliser les matériaux disponibles sur place ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les ressources locales" sousTitre="Tester avant d'utiliser" etape="cours">
+
+<Panneau n={1} titre="Sable de rivière" icone="regle" couleur="terre">
+Souvent fin : à corriger ; parfois argileux : à laver.
+</Panneau>
+
+<Panneau n={2} titre="Latérite" icone="plan" couleur="brique">
+Routes, remblais, BTC : selon la plasticité.
+</Panneau>
+
+<Panneau n={3} titre="Carrières" icone="calcul" couleur="acier">
+Grès, quartzite, basalte, calcaire : dureté variable.
+</Panneau>
+
+<Panneau n={4} titre="Bambou" icone="idee" couleur="validation">
+Léger, résistant en traction ; à traiter.
+</Panneau>
+
+<Panneau n={5} titre="Essais" icone="verification" couleur="acier">
+Granulométrie, propreté, plasticité, Los Angeles.
+</Panneau>
+
+<Panneau n={6} titre="Limites" icone="attention" couleur="correction">
+Pas de bambou en armature de béton de structure.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les sables de rivière">
+
+### Fins et parfois sales
+
+Beaucoup de sables de grands cours d'eau sont **fins** (module de finesse bas) : ils demandent beaucoup d'eau et donnent un béton moins résistant à dosage égal. Les sables de berge peuvent contenir de l'argile et des débris végétaux.
+
+### Corriger par mélange
+
+On mélange le sable fin avec un sable de concassage plus grossier. Le module de finesse se combine à peu près linéairement : pour viser MF = 2,5 avec un sable fin (MF {nombre(gFin.mf, 2)}) et un sable de concassage (MF {nombre(gConc.mf, 2)}), on prend environ {nombre(xMel * 100, 0)} % de sable fin.
+
+<GranuloSable retenus={fin} fond={100} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : la latérite">
+
+### Un matériau tropical
+
+La latérite naît de l'altération des roches sous climat chaud et humide : elle est riche en fer et en aluminium, souvent sous forme de **gravillons**. C'est le matériau de base des routes en terre et des couches de chaussée en Afrique centrale.
+
+### Ce qu'il faut mesurer
+
+La granulométrie, la **plasticité** (limites d'Atterberg, M1.1) et la **portance** (essai CBR, après compactage Proctor). Une latérite trop argileuse devient boueuse sous la pluie ; une latérite graveleuse et peu plastique fait une excellente couche de base <AVerifier note="A_VERIFIER.md n° 86 : spécifications des graveleux latéritiques en couches de chaussée (CBR, indice de plasticité, fines) selon les guides routiers tropicaux (CEBTP, Office des routes)" />. Bien choisie et stabilisée, elle sert aussi à fabriquer des BTC.
+
+<CoupeChaussee />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : carrières et bambou">
+
+### Les roches de carrière
+
+Grès, quartzites, basaltes, calcaires (par exemple dans le Kongo-Central) donnent des graviers concassés. Leur qualité varie : un grès tendre s'use vite sous la circulation, un basalte sain est très dur. L'essai Los Angeles et l'examen de la roche (altération, fissures) guident le choix (L2.6.4).
+
+### Le bambou
+
+Léger, à croissance rapide, résistant en traction, le bambou convient aux échafaudages, coffrages, cloisons et charpentes légères, à condition d'être **traité** (insectes, champignons) et assemblé correctement.
+
+<DiagrammeComparaison alt="Bambou : usages adaptés (échafaudage, coffrage, charpente légère, cloisons) contre usages déconseillés (armature de béton de structure, poteaux enterrés non traités, pièces porteuses non calculées)." gauche={{ titre: 'À éviter', items: ['armature de béton de structure', 'poteau enterré non traité', 'pièce porteuse non calculée', 'bambou vert non séché'] }} droite={{ titre: 'Usages adaptés', items: ['échafaudage', 'coffrage, étaiement léger', 'charpente légère traitée', 'cloisons, clôtures'] }} />
+
+<Regle type="simplification">
+Le bambou comme armature du béton a fait l'objet d'expériences, mais son adhérence, ses variations dimensionnelles et sa durabilité dans le béton sont mauvaises : il n'est pas admis comme armature de structure par les normes de béton armé.
+</Regle>
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : de la ressource au chantier">
+
+<DiagrammeFlux alt="Valoriser un matériau local : repérer la ressource ; prélever et tester ; classer l'usage possible ; corriger (lavage, mélange, stabilisation) ; contrôler pendant le chantier." etapes={[{ titre: 'Repérer', texte: 'gisement', teinte: 'terre' }, { titre: 'Tester', texte: 'laboratoire', teinte: 'encre' }, { titre: 'Classer', texte: 'béton, route, BTC', teinte: 'acier' }, { titre: 'Corriger', texte: 'laver, mélanger', teinte: 'brique' }, { titre: 'Contrôler', texte: 'en continu', teinte: 'validation' }]} />
+
+<GranuloSable retenus={conc} fond={60} />
+
+</Page>
+
+<FicheCalcul calcul="granulometrieSable" depart={depart}>
+
+<Cahier titre="Exemple résolu : le sable fin du fleuve">
+
+**Énoncé.** Un sable du fleuve donne, sur 1 000 g, les refus indiqués et 100 g au fond (données de l'énoncé). Calcule ses fines et son module de finesse ; est-il utilisable tel quel pour un béton ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Analyse">
+<AN k="total" />
+<AN k="refus" />
+</Etape>
+
+</Cahier>
+
+<Cahier titre="Exemple résolu (suite) : le module de finesse">
+
+<Etape n={3} titre="Le module de finesse">
+<AN k="mf" />
+<Resultat k="mf" libelle="Module de finesse" />
+<Schema />
+<Note couleur="vert">Contrôle : un MF aussi bas signale un sable fin, à corriger par un sable plus grossier ; compare au sable de concassage (MF {nombre(gConc.mf, 2)}).</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="utiliser n'importe quelle latérite en couche de base.">
+Une latérite plastique devient de la boue sous la pluie : on teste plasticité et portance.
+</Piege>
+
+<Piege erreur="prendre du sable de berge sans le laver.">
+Argile et débris végétaux affaiblissent le béton.
+</Piege>
+
+<Piege erreur="armer un béton avec du bambou.">
+Adhérence et durabilité insuffisantes : jamais en structure.
+</Piege>
+
+<CoupeChaussee />
+
+<Piege erreur="choisir une carrière sur sa seule proximité.">
+Une roche altérée donne des graviers friables : on fait un Los Angeles.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Un mini-laboratoire de chantier.** Quelques tamis, une balance, un bocal pour la propreté, un cône d'Abrams, des moules d'éprouvettes : avec ce matériel simple, on contrôle déjà beaucoup les matériaux locaux. Les essais plus poussés (Proctor, CBR, Los Angeles) se font au laboratoire des travaux publics le plus proche.
+
+<DiagrammeBarres alt={`Correction d'un sable fin (MF ${nombre(gFin.mf, 2)}) par un sable de concassage (MF ${nombre(gConc.mf, 2)}) : environ ${nombre(xMel * 100, 0)} % de sable fin pour viser MF 2,5.`} titre="module de finesse" barres={[{ libelle: 'sable du fleuve', valeur: gFin.mf, texte: nombre(gFin.mf, 2), teinte: 'acier' }, { libelle: 'mélange visé', valeur: 2.5, texte: '2,50', teinte: 'validation' }, { libelle: 'sable de concassage', valeur: gConc.mf, texte: nombre(gConc.mf, 2), teinte: 'beton' }]} />
+
+<Encadre type="terrain" titre="Routes en terre">
+Une grande partie du réseau routier de la RDC est en terre ou en latérite. Le choix du matériau, le compactage et surtout le **drainage** (fossés, bombement) décident de sa tenue en saison des pluies (L3).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : matériaux locaux">
+
+### Sables
+
+souvent fins : corriger par mélange · berges : laver · MFm ≈ x MF1 + (1 − x) MF2
+
+### Latérite (à vérifier)
+
+routes, remblais, BTC · granulométrie, plasticité, CBR
+
+### Carrières
+
+grès, quartzite, basalte, calcaire · Los Angeles
+
+### Bambou
+
+échafaudage, coffrage, charpente légère traitée · jamais en armature de structure
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Module de finesse">
+
+MF du sable du fleuve de l'exemple ?
+
+<Indice>Fiche.</Indice>
+
+<Corrige>
+**{nombre(gFin.mf, 2)}** : sable fin.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Mélange">
+
+Quelle proportion de sable fin pour obtenir MF = 2,5 avec le sable de concassage ?
+
+<Indice>x = (2,5 − MF2)/(MF1 − MF2).</Indice>
+
+<Corrige>
+x ≈ **{nombre(xMel * 100, 0)} %** de sable fin.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Bambou">
+
+Un voisin propose de remplacer les aciers d'une dalle par du bambou. Que réponds-tu ?
+
+<Indice>Adhérence, durabilité, normes.</Indice>
+
+<Corrige>
+**Non** : adhérence faible, gonflement et pourrissement dans le béton, aucune base normative ; le bambou reste pour l'échafaudage et le coffrage.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.17">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="La latérite est surtout utilisée :" choix={['en routes et remblais', 'en armature', 'en vitrage', 'en isolation']} bonne={0} colonnes={2}>
+Couches de chaussée.
+</QCM>
+
+<QCM n={2} question="Un sable très fin :" choix={['demande beaucoup d’eau', 'rend le béton plus résistant', 'ne pose aucun problème', 'remplace le ciment']} bonne={0} colonnes={2}>
+Grande surface.
+</QCM>
+
+<QCM n={3} question="La plasticité d'une latérite mesure :" choix={['sa sensibilité à l’eau', 'sa couleur', 'sa dureté', 'son prix']} bonne={0} colonnes={2}>
+Limites d'Atterberg.
+</QCM>
+
+<QCM n={4} question="Le bambou convient :" choix={['aux échafaudages et coffrages', 'aux armatures de poutres', 'aux fondations enterrées', 'aux réservoirs']} bonne={0} colonnes={2}>
+Usages légers.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Pour MF = 2,5, proportion de sable fin :</>} choix={[`${nombre(xMel * 100, 0)} %`, '100 %', '0 %', '25 %']} bonne={0} colonnes={4}>
+Règle des mélanges.
+</QCM>
+
+<QCM n={6} question="Pour juger un granulat de carrière, on fait :" choix={['un Los Angeles', 'un cône d’Abrams', 'un essai de traction', 'un pliage']} bonne={0} colonnes={2}>
+Dureté.
+</QCM>
+
+<QCM n={7} question="La tenue d'une route en terre dépend surtout :" choix={['du matériau, du compactage et du drainage', 'de la couleur', 'du ciment', 'du bitume seulement']} bonne={0} colonnes={2}>
+Eau.
+</QCM>
+
+<QCM n={8} question="Un sable de berge argileux :" choix={['se lave avant usage', 'se met tel quel', 'se chauffe', 'remplace le gravier']} bonne={0} colonnes={2}>
+Propreté.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

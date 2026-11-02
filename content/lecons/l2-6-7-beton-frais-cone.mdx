@@ -1,0 +1,297 @@
+---
+id: L2.6.7
+titre: "Béton frais : ouvrabilité et cône d'Abrams"
+objectifs:
+  - Définir l'ouvrabilité d'un béton frais
+  - Réaliser et interpréter l'essai d'affaissement au cône d'Abrams
+  - Classer un béton de S1 à S5
+  - Choisir une consistance adaptée à l'ouvrage et au mode de mise en place
+relecture: false
+normes:
+  - "EN 12350-2 : essai d'affaissement"
+  - "EN 206 §4.2.1 et tableau 3 : classes de consistance (affaissement)"
+glossaire:
+  - terme: Ouvrabilité
+    definition: Facilité avec laquelle un béton frais se met en place, remplit les coffrages et enrobe les armatures.
+  - terme: Affaissement
+    definition: Diminution de hauteur d'un cône de béton frais démoulé ; il mesure la consistance.
+  - terme: Ségrégation
+    definition: Séparation des constituants (gravier au fond, laitance en surface) d'un béton trop fluide ou mal manipulé.
+  - terme: Ressuage
+    definition: Remontée d'eau à la surface du béton frais.
+symboles:
+  - { symbole: 'a', signification: 'affaissement', unite: 'mm' }
+  - { symbole: 'S1 à S5', signification: 'classes de consistance', unite: '—' }
+formules:
+  - { nom: 'Affaissement', tex: 'a = 300 - h_{béton}', domaine: 'Cône de 300 mm' }
+---
+
+import { CLASSES_AFFAISSEMENT, classeAffaissement } from '@/lib/calc/materiaux'
+import { grandeur, nombre } from '@/lib/format'
+import { ConeAbrams } from '@/components/schemas/Materiaux2'
+import { Vue3D } from '@/components/gabarits/Vue3D'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const ex1 = classeAffaissement(300 - 215)
+export const ex2 = classeAffaissement(170)
+
+<Page etape="intuition" titre="L'intuition : ni trop sec, ni trop mouillé">
+
+Un béton trop sec ne remplit pas le coffrage : il reste des nids de cailloux autour des armatures. Un béton trop mouillé coule bien mais il est faible et se sépare. Entre les deux, il faut la **bonne consistance** pour l'ouvrage. Le cône d'Abrams, un simple entonnoir métallique, permet de la mesurer en deux minutes sur le chantier.
+
+<ConeAbrams affaissement={80} />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment mesurer et choisir la consistance d'un béton frais ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="L'essai d'affaissement" sousTitre="Deux minutes, un mètre ruban" etape="cours">
+
+<Panneau n={1} titre="Humidifier" icone="regle" couleur="encre">
+Cône et plaque humides, posés de niveau.
+</Panneau>
+
+<Panneau n={2} titre="Remplir" icone="plan" couleur="acier">
+Trois couches, 25 coups de tige chacune.
+</Panneau>
+
+<Panneau n={3} titre="Araser" icone="calcul" couleur="terre">
+Niveler au bord supérieur.
+</Panneau>
+
+<Panneau n={4} titre="Démouler" icone="idee" couleur="brique">
+Soulever verticalement en 5 à 10 s.
+</Panneau>
+
+<Panneau n={5} titre="Mesurer" icone="verification" couleur="validation">
+Différence de hauteur, en mm.
+</Panneau>
+
+<Panneau n={6} titre="Classer" icone="attention" couleur="correction">
+S1 à S5 selon l'EN 206.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : l'ouvrabilité">
+
+### Ce qui la gouverne
+
+- la quantité d'**eau** (et les adjuvants, L2.6.6) ;
+- la **finesse** du sable et la forme des granulats ;
+- la quantité de **pâte** (ciment + eau + fines) ;
+- la température et le temps écoulé depuis le malaxage : le béton se raidit.
+
+### Les défauts du béton frais
+
+Trop fluide : **ségrégation** (le gravier tombe) et **ressuage** (l'eau remonte). Trop sec : **nids de cailloux**, armatures mal enrobées.
+
+<ConeAbrams affaissement={30} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : l'essai normalisé">
+
+### Le mode opératoire (EN 12350-2)
+
+Le cône mesure 300 mm de haut (diamètres 200 et 100 mm). On le remplit en trois couches, chacune piquée 25 fois avec une tige ; on arase ; on soulève le moule verticalement ; on mesure l'affaissement au millimètre près.
+
+### Validité
+
+Si le cône s'effondre ou se cisaille de travers, on recommence ; deux échecs successifs signalent un béton inadapté à cet essai (trop fluide : on utilise l'étalement).
+
+<DiagrammeBarres alt={`Classes d'affaissement de l'EN 206 : ${CLASSES_AFFAISSEMENT.map((c) => `${c.classe} de ${c.min} à ${Number.isFinite(c.max) ? c.max : '…'} mm`).join(' ; ')}.`} titre="classes d'affaissement (borne basse, mm)" barres={CLASSES_AFFAISSEMENT.map((c, i) => ({ libelle: c.classe, valeur: c.min, texte: Number.isFinite(c.max) ? `${c.min} – ${c.max}` : `≥ ${c.min}`, teinte: ['beton', 'terre', 'acier', 'encre', 'correction'][i] }))} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : choisir sa classe">
+
+| Ouvrage, mise en place | Classe conseillée (règle de l'art) |
+|---|---|
+| béton de propreté, pistes, vibration énergique | S1 |
+| dallages, voiles et poutres vibrés | S2 – S3 |
+| poteaux fortement ferraillés, pompage | S3 – S4 |
+| béton sans vibration, éléments très ferraillés | S4 – S5 (avec superplastifiant) |
+
+Les bornes des classes sont normatives (EN 206, tableau 3) <AVerifier note="A_VERIFIER.md n° 74 : bornes des classes S1 à S5 (EN 206 tableau 3) et tolérances sur la valeur cible (tableau 23)" /> ; le choix de la classe est une règle de l'art.
+
+<ConeAbrams affaissement={170} />
+
+</Page>
+
+<Vue3D titre="Le cône d'Abrams en perspective" calques={[{ id: 'cone', libelle: 'Cône et béton' }]}>
+
+Observe le moule, le béton démoulé et la règle posée sur le moule retourné à côté : l'affaissement est la distance entre le dessous de la règle et le sommet du béton.
+
+<ConeAbrams affaissement={120} />
+
+</Vue3D>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Contrôle de consistance sur chantier : prélever à la livraison ; faire l'essai dans les règles ; mesurer et classer ; comparer à la classe commandée ; accepter ou refuser le camion, sans ajouter d'eau." etapes={[{ titre: 'Prélever', texte: 'à la livraison', teinte: 'terre' }, { titre: 'Essai', texte: '3 couches × 25', teinte: 'encre' }, { titre: 'Mesurer', texte: 'mm', teinte: 'acier' }, { titre: 'Classer', texte: 'S1 à S5', teinte: 'brique' }, { titre: 'Décider', texte: 'sans eau en plus', teinte: 'validation' }]} />
+
+<ConeAbrams affaissement={80} />
+
+</Page>
+
+<FicheCalcul calcul="affaissementBeton">
+
+<Cahier titre="Exemple résolu : contrôle d'un camion">
+
+**Énoncé.** Le béton commandé est S2. Après démoulage, le sommet du cône est à 220 mm du sol : affaissement 80 mm (données de l'énoncé). Le béton est-il conforme ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Mesurer et classer">
+<AN k="mesure" />
+<AN k="classe" />
+<Resultat k="classe" libelle="Classe mesurée" />
+<Schema />
+<Note couleur="vert">Contrôle : 80 mm est bien dans 50 – 90 mm. Essaie 95 mm : hors des deux classes voisines, on vérifie les tolérances de l'EN 206.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="remplir le cône en une seule fois.">
+Trois couches piquées, sinon des vides faussent la mesure.
+</Piege>
+
+<Piege erreur="soulever le cône en le tournant.">
+On le soulève verticalement, sans secousse.
+</Piege>
+
+<Piege erreur="corriger un béton trop sec avec de l'eau.">
+On refuse ou on ajuste avec un plastifiant prévu.
+</Piege>
+
+<ConeAbrams affaissement={230} />
+
+<Piege erreur="mesurer longtemps après le malaxage.">
+Le béton se raidit : on mesure à la livraison.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Un cône par chantier.** Un cône d'Abrams, une tige et une plaque coûtent peu et règlent beaucoup de disputes entre l'entreprise et le fournisseur. On fait l'essai sur chaque camion, ou au moins à chaque changement de gâchée, et on note le résultat avec le prélèvement des éprouvettes (L2.2.5).
+
+<DiagrammeBarres alt="Affaissements mesurés sur trois gâchées d'une journée : 75, 85 et 140 mm ; la troisième, hors classe S2, signale de l'eau ajoutée." titre="affaissements mesurés (mm)" barres={[{ libelle: 'gâchée 1', valeur: 75, texte: '75', teinte: 'validation' }, { libelle: 'gâchée 2', valeur: 85, texte: '85', teinte: 'validation' }, { libelle: 'gâchée 3', valeur: 140, texte: '140', teinte: 'correction' }]} repere={{ valeur: 90, texte: 'S2 max' }} />
+
+<Encadre type="terrain" titre="Chaleur et transport">
+Sous le soleil de midi, un béton peut perdre 30 à 50 mm d'affaissement pendant un transport d'une heure. On bétonne tôt le matin, on protège les camions et, si besoin, on utilise un retardateur (L2.6.6, L2.6.11).
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : béton frais">
+
+### Ouvrabilité
+
+eau, adjuvants, sable, pâte, température, temps
+
+### Essai (EN 12350-2)
+
+cône 300 mm · 3 couches × 25 coups · démoulage vertical · mesure en mm
+
+### Classes (à vérifier)
+
+S1 10–40 · S2 50–90 · S3 100–150 · S4 160–210 · S5 ≥ 220
+
+### Défauts
+
+trop fluide : ségrégation, ressuage · trop sec : nids de cailloux
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Classer">
+
+Le béton démoulé mesure 215 mm de haut. Classe ?
+
+<Indice>a = 300 − 215.</Indice>
+
+<Corrige>
+a = 85 mm : **{ex1}**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Poteau très ferraillé">
+
+Quelle classe pour un poteau très ferraillé, coulé à la benne ?
+
+<Indice>Il faut que le béton passe entre les barres.</Indice>
+
+<Corrige>
+**S3 à S4** (par exemple 170 mm : {ex2}), avec un plastifiant plutôt que de l'eau.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Gâchée suspecte">
+
+Commandé S2, mesuré 140 mm. Que s'est-il probablement passé, que faire ?
+
+<Indice>Hors classe, trop fluide.</Indice>
+
+<Corrige>
+Eau ajoutée en route ou dosage faux : on **refuse** le camion (ou on le réserve à un usage non structurel), et on prélève des éprouvettes si un doute subsiste.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.7">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="Le cône d'Abrams mesure :" choix={['la consistance', 'la résistance', 'la porosité', 'le ciment']} bonne={0} colonnes={4}>
+Affaissement.
+</QCM>
+
+<QCM n={2} question="Le cône est rempli en :" choix={['3 couches piquées 25 fois', '1 couche', '10 couches', '2 couches vibrées']} bonne={0} colonnes={2}>
+EN 12350-2.
+</QCM>
+
+<QCM n={3} question="Un affaissement de 70 mm correspond à la classe :" choix={['S2', 'S1', 'S3', 'S4']} bonne={0} colonnes={4}>
+50 – 90 mm.
+</QCM>
+
+<QCM n={4} question="Un béton trop fluide risque :" choix={['la ségrégation', 'les nids de cailloux', 'la prise trop rapide', 'le gel']} bonne={0} colonnes={2}>
+Le gravier descend.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question="La hauteur du cône est :" choix={['300 mm', '200 mm', '100 mm', '500 mm']} bonne={0} colonnes={4}>
+Normalisée.
+</QCM>
+
+<QCM n={6} question="Pour un béton de propreté vibré énergiquement :" choix={['S1', 'S4', 'S5', 'peu importe']} bonne={0} colonnes={4}>
+Consistance ferme.
+</QCM>
+
+<QCM n={7} question="Un camion livré hors classe (trop fluide) :" choix={['se refuse', 'se corrige à l’eau', 'se coule quand même en poteau', 'se laisse reposer']} bonne={0} colonnes={2}>
+Contrôle.
+</QCM>
+
+<QCM n={8} question="Sous la chaleur, l'affaissement :" choix={['diminue avec le temps', 'augmente', 'ne change pas', 'devient négatif']} bonne={0} colonnes={2}>
+Le béton se raidit.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>

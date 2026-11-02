@@ -76,3 +76,22 @@ Statuts :
 | 66 | Charge d'exploitation des planchers d'habitation 1,5 kN/m² (EN 1991-1-1 tableau 6.2, catégorie A) ; contrainte limite 10 MPa et flèche L/300 retenues pour la solive | L2.4.P | `hypothèse` : valeurs de projet pédagogiques, à confirmer avec l'EN 1995-1-1 et l'annexe nationale |
 | 67 | Flambement : courbes et facteurs d'imperfection EN 1993-1-1 §6.3.1 ; élancement limite EN 1992-1-1 §5.8.3.1 ; méthode bois EN 1995-1-1 §6.3.2 | L2.5.8 | `à confirmer` |
 | 68 | Balcons : charge d'exploitation (EN 1991-1-1 tableaux 6.1 et 6.2) et charge sur garde-corps (§6.4) ; E = 11 000 MPa (béton fissuré), σlim = 12 MPa et flèche L/150 retenus pour l'avant-projet | L2.5.P | `hypothèse` : valeurs pédagogiques d'avant-projet |
+| 69 | Ductilité des aciers d'armature : classes A, B, C (EN 1992-1-1 annexe C : εuk et k = ft/fy ; EN 10080) | L2.6.2, L2.6.13 | `à confirmer` |
+| 70 | Composition des 27 ciments courants (EN 197-1 tableau 1 : teneurs en clinker et en ajouts) et ciments résistant aux sulfates SR (EN 197-1 §6) | L2.6.3 | `à confirmer` |
+| 71 | Désignation des granulats d/D et tolérances de l'EN 12620 (série de base + série 1 ou 2) | L2.6.4 | `à confirmer` |
+| 72 | Seuils Los Angeles et équivalent de sable selon l'usage (EN 12620, EN 13242, guides routiers) | L2.6.4 | `à confirmer` |
+| 73 | Plage usuelle du module de finesse d'un sable à béton (≈ 2,2 à 2,8) ; classes C, M, F de l'EN 12620 | L2.6.5 | `à confirmer` : règle de l'art |
+| 74 | Classes d'affaissement S1 à S5 (EN 206 tableau 3 : 10–40, 50–90, 100–150, 160–210, ≥ 220 mm) et tolérances sur la valeur cible | L2.6.7 | `à confirmer` |
+| 75 | Formulation : coefficient granulaire G de Dreux (≈ 0,45 à 0,55 pour des granulats courants), classe vraie du ciment (45 MPa retenue pour un 42,5) | L2.6.8, L2.6.P | `hypothèse` : valeurs de projet à confirmer par des gâchées d'essai |
+| 76 | Coefficient s de l'évolution de la résistance avec l'âge (EN 1992-1-1 §3.1.2(6) : 0,20, 0,25 ou 0,38 selon la classe de ciment) | L2.6.9 | `à confirmer` |
+| 77 | Valeurs limites de composition par classe d'exposition (EN 206 annexe F : fck min, E/C max, ciment min) et annexe nationale NF EN 206/CN | L2.6.10, L2.6.P | `à confirmer` |
+| 78 | Évaporation du béton frais : seuils de risque (≈ 0,5 et 1 kg/m²/h, ACI 305R) et durées minimales de cure (EN 13670 §8.5, classes de cure) | L2.6.11 | `à confirmer` |
+| 79 | Dosages usuels des mortiers : pose ≈ 250 – 350, enduit ≈ 300 – 350, chape ≈ 350 – 400 kg/m³ | L2.6.12 | `hypothèse` : règles de l'art (NF DTU 26.1, EN 998) |
+| 80 | Rendement du sable en mortier : ≈ 1,1 m³ de sable sec par m³ de mortier ; pertes de 10 % | L2.6.12 | `hypothèse` : valeur de métré |
+| 81 | Diamètres minimaux des mandrins de cintrage des armatures (EN 1992-1-1 §8.3, tableau 8.1N) | L2.6.13 | `à confirmer` |
+| 82 | Limites d'élasticité et résistances des nuances S235, S275, S355 selon l'épaisseur (EN 10025-2 ; EN 1993-1-1 tableau 3.1) | L2.6.14 | `à confirmer` |
+| 83 | Retrait du bois : coefficient tangentiel ≈ 0,2 % par point d'humidité sous 30 % ; humidité d'équilibre en climat tropical (12 à 18 %) | L2.6.15 | `hypothèse` : à confirmer par essence (CIRAD, Tropix) |
+| 84 | Enrobage minimal de durabilité cmin,dur selon la classe d'exposition et la classe structurale (EN 1992-1-1 §4.4.1.2, tableaux 4.3N et 4.4N) | L2.6.10 | `à confirmer` |
+| 85 | Résistances et absorption usuelles des parpaings, briques cuites et BTC ; taux de stabilisation des BTC (EN 771, XP P13-901, guides CRAterre) | L2.6.16 | `à confirmer` |
+| 86 | Spécifications des graveleux latéritiques en couches de chaussée (CBR, indice de plasticité, fines) selon les guides routiers tropicaux (CEBTP, Office des routes) | L2.6.17 | `à confirmer` |
+| 87 | Dosages des enduits superficiels (liant en kg/m², gravillons en L/m² selon la classe granulaire) : 1,2 kg/m² et 9 L/m² retenus dans les exemples | L2.6.18 | `hypothèse` : à confirmer avec les guides techniques (SETRA, CEBTP) |

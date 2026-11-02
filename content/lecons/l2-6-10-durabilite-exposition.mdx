@@ -1,0 +1,295 @@
+---
+id: L2.6.10
+titre: "Durabilité : classes d'exposition"
+objectifs:
+  - Identifier les agressions que subit un béton selon son milieu
+  - Choisir la classe d'exposition d'un élément d'ouvrage
+  - Lire les exigences associées (classe minimale, E/C maximal, ciment minimal)
+  - Relier exposition, enrobage et durée de vie
+relecture: false
+normes:
+  - "EN 206 §4.1 et annexe F : classes d'exposition et valeurs limites recommandées"
+  - "EN 1992-1-1 §4.4.1 : enrobage selon la classe d'exposition"
+glossaire:
+  - terme: Classe d'exposition
+    definition: Code (XC, XS, XD, XA, XF…) qui décrit les actions de l'environnement sur le béton.
+  - terme: Carbonatation
+    definition: Réaction du CO₂ de l'air avec la chaux du béton, qui fait baisser le pH et permet la corrosion des armatures (L1.5).
+  - terme: Attaque chimique
+    definition: Dégradation par des sulfates, des acides ou d'autres agents du sol ou de l'eau (classes XA).
+  - terme: Enrobage
+    definition: Épaisseur de béton entre la surface et l'armature la plus proche ; elle protège l'acier.
+symboles:
+  - { symbole: 'XC1…XC4', signification: 'corrosion par carbonatation', unite: '—' }
+  - { symbole: 'XS, XD', signification: 'corrosion par chlorures (mer, autres)', unite: '—' }
+  - { symbole: 'XA1…XA3', signification: 'attaque chimique', unite: '—' }
+  - { symbole: 'cnom', signification: 'enrobage nominal', unite: 'mm' }
+formules:
+  - { nom: 'Exigences', tex: '\frac{E}{C} \le \left(\frac{E}{C}\right)_{max},\quad C \ge C_{min},\quad f_{ck} \ge f_{ck,min}', domaine: 'EN 206 annexe F' }
+  - { nom: 'Carbonatation', tex: 'x = K\sqrt{t}', domaine: 'Profondeur carbonatée (L1.5)' }
+---
+
+import { controleExposition, EXEMPLE_FORMULATION, EXPOSITION, formulation } from '@/lib/calc/materiaux'
+import { dureeCarbonatation } from '@/lib/calc/chimie'
+import { grandeur, nombre } from '@/lib/format'
+import { ClassesExposition, VolumesBeton } from '@/components/schemas/Materiaux2'
+import { DiagrammeFlux, DiagrammeBarres } from '@/components/drawing/Diagrammes'
+
+export const f0 = formulation(EXEMPLE_FORMULATION)
+export const x0 = controleExposition(3, EXEMPLE_FORMULATION.C, f0.E)
+export const x1 = controleExposition(1, EXEMPLE_FORMULATION.C, f0.E)
+export const t25 = dureeCarbonatation(25, 4)
+export const t40 = dureeCarbonatation(40, 4)
+export const ex3 = controleExposition(6, 320, 165)
+
+<Page etape="intuition" titre="L'intuition : le béton s'use comme une dent">
+
+Un béton peut être très résistant le jour de sa réception et se dégrader en vingt ans : les armatures rouillent, le béton éclate, les fondations se désagrègent dans un sol agressif. La résistance ne suffit pas : il faut que le béton **dure** dans son milieu. L'EN 206 classe les milieux en **classes d'exposition** et fixe, pour chacune, les exigences minimales.
+
+<ClassesExposition />
+
+<Encadre type="idee" titre="La question de cette leçon">
+Comment choisir la classe d'exposition d'un élément et vérifier que le béton y résistera ?
+</Encadre>
+
+</Page>
+
+<Infographie titre="Les classes d'exposition" sousTitre="EN 206" etape="cours">
+
+<Panneau n={1} titre="X0" icone="verification" couleur="validation">
+Aucun risque : béton non armé au sec.
+</Panneau>
+
+<Panneau n={2} titre="XC" icone="idee" couleur="encre">
+Carbonatation : XC1 sec à XC4 alterné.
+</Panneau>
+
+<Panneau n={3} titre="XS, XD" icone="attention" couleur="correction">
+Chlorures : mer, sels.
+</Panneau>
+
+<Panneau n={4} titre="XA" icone="plan" couleur="brique">
+Attaque chimique : sols, eaux, mines.
+</Panneau>
+
+<Panneau n={5} titre="Exigences" icone="calcul" couleur="acier">
+fck min, E/C max, ciment min.
+</Panneau>
+
+<Panneau n={6} titre="Enrobage" icone="regle" couleur="terre">
+Plus d'agressivité, plus d'enrobage.
+</Panneau>
+
+</Infographie>
+
+<Page etape="cours" titre="Le cours (1/3) : les agressions">
+
+### Carbonatation (XC)
+
+Le CO₂ de l'air pénètre et fait baisser le pH ; quand il atteint les armatures, elles rouillent (L1.5). Le risque est maximal quand le béton est alternativement mouillé et sec (**XC4**). La profondeur carbonatée croît comme √t : avec K = 4 mm/√an, 25 mm sont atteints en {nombre(t25, 0)} ans, 40 mm en {nombre(t40, 0)} ans.
+
+### Chlorures (XS, XD) et attaques chimiques (XA)
+
+L'air marin et les sels attaquent les aciers ; les sulfates, les acides et les eaux pures attaquent la pâte de ciment elle-même.
+
+<DiagrammeBarres alt={`Temps pour carbonater l'enrobage avec K = 4 mm/√an : ${nombre(t25, 0)} ans pour 25 mm, ${nombre(t40, 0)} ans pour 40 mm.`} titre="durée avant d'atteindre les aciers (ans)" barres={[{ libelle: 'enrobage 25 mm', valeur: t25, texte: nombre(t25, 0), teinte: 'correction' }, { libelle: 'enrobage 40 mm', valeur: t40, texte: nombre(t40, 0), teinte: 'validation' }]} />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (2/3) : les exigences de l'EN 206">
+
+<div className="tableau">
+  <table>
+    <thead><tr><th>Classe</th><th>Milieu</th><th>fck min</th><th>E/C max</th><th>C min (kg/m³)</th></tr></thead>
+    <tbody>{EXPOSITION.map((x) => <tr key={x.classe}><td>{x.classe}</td><td>{x.milieu}</td><td>{x.fck}</td><td>{nombre(x.EC, 2)}</td><td>{x.Cmin}</td></tr>)}</tbody>
+  </table>
+</div>
+
+Valeurs **recommandées** de l'annexe F de l'EN 206 ; l'annexe nationale du pays peut les modifier <AVerifier note="A_VERIFIER.md n° 77 : valeurs limites de composition de l'EN 206 annexe F (classes XC, XS, XA) et de l'annexe nationale NF EN 206/CN" />.
+
+<ClassesExposition />
+
+</Page>
+
+<Page etape="cours" titre="Le cours (3/3) : composition, enrobage et cure">
+
+### Trois leviers
+
+1. une **composition** compacte : E/C faible, ciment suffisant, ciment adapté (SR en milieu sulfaté) ;
+2. un **enrobage** suffisant, respecté au chantier (cales !) : l'EC2 §4.4.1 le fixe selon la classe d'exposition et la durée d'utilisation <AVerifier note="A_VERIFIER.md n° 84 : enrobage minimal de durabilité cmin,dur selon la classe d'exposition et la classe structurale, EN 1992-1-1 §4.4.1.2 tableaux 4.3N et 4.4N" /> ;
+3. une **cure** soignée (L2.6.11) : la peau du béton, celle qui protège les aciers, est la plus sensible au séchage.
+
+<Regle type="norme">
+Un élément peut relever de plusieurs classes (par exemple XC2 et XA1 pour une semelle en sol agressif) : on retient pour chaque exigence la plus sévère.
+</Regle>
+
+<VolumesBeton d={EXEMPLE_FORMULATION} />
+
+</Page>
+
+<Page etape="schemas" titre="Le schéma : la démarche">
+
+<DiagrammeFlux alt="Choisir l'exposition : repérer chaque élément (intérieur, façade, fondation) ; identifier le milieu (humidité, mer, sol, eau) ; choisir les classes ; retenir les exigences les plus sévères ; vérifier la formulation et l'enrobage." etapes={[{ titre: 'Élément', texte: 'où ?', teinte: 'encre' }, { titre: 'Milieu', texte: 'eau, sol, air', teinte: 'terre' }, { titre: 'Classes', texte: 'XC, XS, XA', teinte: 'acier' }, { titre: 'Exigences', texte: 'la plus sévère', teinte: 'correction' }, { titre: 'Vérifier', texte: 'E/C, C, enrobage', teinte: 'validation' }]} />
+
+<DiagrammeBarres alt={`Béton de l'exemple (350 kg, ${nombre(f0.E, 0)} L, E/C ${nombre(f0.EsurC, 2)}) : conforme en XC2 (E/C max 0,60), non conforme en XC4 (E/C max 0,50).`} titre="E/C du béton face aux limites" barres={[{ libelle: 'E/C du béton', valeur: f0.EsurC, texte: nombre(f0.EsurC, 2), teinte: 'encre' }, { libelle: 'limite XC2', valeur: x1.EC, texte: nombre(x1.EC, 2), teinte: 'validation' }, { libelle: 'limite XC4', valeur: x0.EC, texte: nombre(x0.EC, 2), teinte: 'correction' }]} />
+
+</Page>
+
+<FicheCalcul calcul="expositionBeton">
+
+<Cahier titre="Exemple résolu : un balcon de façade">
+
+**Énoncé.** Le béton de L2.6.8 (350 kg/m³, {nombre(f0.E, 0)} L d'eau) est prévu pour des balcons exposés à la pluie et au soleil (XC4) (données de l'énoncé). Convient-il ?
+
+<Etape n={1} titre="Les données">
+<Entrees />
+</Etape>
+
+<Etape n={2} titre="Exigences et contrôle">
+<AN k="exigences" />
+<AN k="controle" />
+<Resultat k="verdict" libelle="Verdict" />
+<Schema />
+<Note couleur="vert">Contrôle : baisse l'eau à 170 L (plastifiant) ou monte le ciment ; le béton devient conforme.</Note>
+</Etape>
+
+</Cahier>
+
+</FicheCalcul>
+
+<Page etape="erreurs" titre="Les erreurs fréquentes">
+
+<Piege erreur="prendre XC1 pour tout le bâtiment.">
+Fondations, façades, balcons et réservoirs ont des classes plus sévères.
+</Piege>
+
+<Piege erreur="compenser un mauvais E/C par plus de résistance.">
+La durabilité dépend surtout de la compacité de la peau et de l'enrobage.
+</Piege>
+
+<Piege erreur="oublier les cales d'enrobage.">
+Un enrobage de 10 mm au lieu de 30 mm divise par neuf le temps de carbonatation.
+</Piege>
+
+<ClassesExposition />
+
+<Piege erreur="ignorer l'eau de la nappe.">
+Une nappe acide ou sulfatée impose une classe XA et un ciment adapté.
+</Piege>
+
+</Page>
+
+<Page etape="terrain" titre="Sur le terrain">
+
+**Zones minières et nappes agressives.** Autour des sites miniers du Katanga, les eaux et les sols peuvent contenir des sulfates ou être acides. On analyse l'eau et le sol (sulfates, pH, CO₂ agressif) avant de concevoir les fondations, et l'on choisit la classe XA correspondante.
+
+<DiagrammeBarres alt={`Béton de fondation de l'exercice (320 kg, 165 L) en XA3 : E/C ${nombre(ex3.EsurC, 2)} pour une limite de ${nombre(ex3.EC, 2)}, ciment ${ex3.okC ? 'suffisant' : 'insuffisant'} (minimum ${ex3.Cmin} kg).`} titre="fondation en XA3" barres={[{ libelle: 'E/C', valeur: ex3.EsurC, texte: nombre(ex3.EsurC, 2), teinte: ex3.okEC ? 'validation' : 'correction' }, { libelle: 'E/C max', valeur: ex3.EC, texte: nombre(ex3.EC, 2), teinte: 'acier' }]} />
+
+<Encadre type="terrain" titre="Climat tropical">
+Sous climat tropical humide, la carbonatation est souvent plus lente qu'en climat tempéré sec, mais la corrosion, une fois amorcée, est rapide (chaleur, humidité). Les bords de mer (Moanda, Banana) relèvent des classes XS.
+</Encadre>
+
+</Page>
+
+<FicheMemo titre="Fiche mémo : durabilité">
+
+### Classes
+
+X0 · XC1–XC4 carbonatation · XS, XD chlorures · XA1–XA3 chimique
+
+### Exigences (EN 206 annexe F, à vérifier)
+
+fck min · E/C max · C min · retenir la plus sévère
+
+### Leviers
+
+compacité (E/C bas) · ciment adapté · enrobage respecté · cure
+
+### Carbonatation
+
+x = K √t · enrobage doublé → durée × 4
+
+</FicheMemo>
+
+<Page etape="exercices" titre="Les exercices">
+
+<Exercice n={1} niveau="facile" titre="Choisir la classe">
+
+Classe d'une dalle intérieure de séjour, sèche ?
+
+<Indice>Carbonatation, faible humidité.</Indice>
+
+<Corrige>
+**XC1**.
+</Corrige>
+</Exercice>
+
+<Exercice n={2} niveau="moyen" titre="Enrobage">
+
+K = 4 mm/√an. Temps pour carbonater 25 et 40 mm ?
+
+<Indice>t = (x/K)².</Indice>
+
+<Corrige>
+**{nombre(t25, 0)} ans** et **{nombre(t40, 0)} ans**.
+</Corrige>
+</Exercice>
+
+<Exercice n={3} niveau="difficile" titre="Fondation en sol très agressif">
+
+320 kg/m³ de ciment, 165 L d'eau, classe XA3. Conforme ?
+
+<Indice>Tableau de l'EN 206.</Indice>
+
+<Corrige>
+E/C = {nombre(ex3.EsurC, 2)} {ex3.okEC ? '≤' : '>'} {nombre(ex3.EC, 2)} ; C = 320 {ex3.okC ? '≥' : '<'} {ex3.Cmin} : **{ex3.okEC && ex3.okC ? 'conforme' : 'non conforme'}** ; il faut aussi un ciment SR.
+</Corrige>
+</Exercice>
+
+</Page>
+
+<Quiz id="L2.6.10">
+
+<Page etape="quiz" titre="Le quiz (1/2)">
+
+<QCM n={1} question="XC désigne le risque de :" choix={['corrosion par carbonatation', 'gel', 'attaque acide', 'usure']} bonne={0} colonnes={2}>
+CO₂.
+</QCM>
+
+<QCM n={2} question="Une façade alternativement mouillée et sèche est en :" choix={['XC4', 'XC1', 'X0', 'XA3']} bonne={0} colonnes={4}>
+Le plus défavorable des XC.
+</QCM>
+
+<QCM n={3} question="Les classes XA concernent :" choix={['les attaques chimiques', 'la mer', 'le gel', 'l’abrasion']} bonne={0} colonnes={2}>
+Sols et eaux agressifs.
+</QCM>
+
+<QCM n={4} question="Un élément relevant de deux classes :" choix={['respecte l’exigence la plus sévère', 'choisit la plus facile', 'fait la moyenne', 'ignore la seconde']} bonne={0} colonnes={2}>
+Règle de l'EN 206.
+</QCM>
+
+</Page>
+
+<Page etape="quiz" titre="Le quiz (2/2)">
+
+<QCM n={5} question={<>Le béton de l'exemple en XC4 est :</>} choix={[x0.okEC && x0.okC ? 'conforme' : 'non conforme', x0.okEC && x0.okC ? 'non conforme' : 'conforme', 'sans objet', 'conforme en XA3']} bonne={0} colonnes={2}>
+E/C trop élevé.
+</QCM>
+
+<QCM n={6} question="Doubler l'enrobage multiplie la durée avant corrosion par environ :" choix={['4', '2', '8', '1']} bonne={0} colonnes={4}>
+x = K √t.
+</QCM>
+
+<QCM n={7} question="En milieu sulfaté, on utilise :" choix={['un ciment SR', 'plus d’eau', 'un sable de mer', 'un accélérateur']} bonne={0} colonnes={2}>
+Résistant aux sulfates.
+</QCM>
+
+<QCM n={8} question="La durabilité dépend surtout :" choix={['de la compacité et de l’enrobage', 'de la couleur', 'de la résistance seule', 'du coffrage']} bonne={0} colonnes={2}>
+Peau du béton.
+</QCM>
+
+<ScoreQuiz />
+
+</Page>
+
+</Quiz>
